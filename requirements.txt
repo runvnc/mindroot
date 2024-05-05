@@ -1,5 +1,5 @@
 nanoid
-acclerate
+accelerate
 diffusers
 ollama
 torch
