@@ -17,6 +17,6 @@ def sdxl_text_to_image(model_id, prompt, negative_prompt, count=1, save_to="imgs
 if __name__ == "__main__":
     prompt = sys.argv[1]
     negative_prompt = sys.argv[2]
-    sdxl_text_to_image("models/model.safetensors", prompt, negative_prompt, count=2, cfg=30)
+    sdxl_text_to_image("models/model.safetensors", prompt, negative_prompt, count=4, cfg=30)
 
 

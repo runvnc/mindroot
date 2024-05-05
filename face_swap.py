@@ -7,7 +7,7 @@ def face_swap(input_image_path, target_image_path, skip_nsfw=False):
             target_path=target_image_path,
             provider=DeviceProvider.GPU,
             detector_score=0.65,
-            mask_blur=0.68,
+            mask_blur=0.2,
             skip_nsfw=skip_nsfw,
             landmarker_score=0.5
         )
