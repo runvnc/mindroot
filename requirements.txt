@@ -1,3 +1,5 @@
+nanoid
+acclerate
 diffusers
 ollama
 torch

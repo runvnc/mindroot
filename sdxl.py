@@ -14,7 +14,7 @@ def sdxl_text_to_image(prompt, model_id, save_to=random_img_fname(), w=1024, h=1
 
     image.save(save_to)
 
-if __name__ = "main":
+if __name__ == "main":
     prompt = "a beautiful sunset over a tranquil beach, vibrant colors, detailed, artstation, 4k"
     sdxl_text_to_image(prompt,stabilityai/"stable-diffusion-xl-base-1.0")
 
