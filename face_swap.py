@@ -7,13 +7,13 @@ def face_swap(input_image_path, target_image_path, skip_nsfw=False):
             target_path=target_image_path,
             provider=DeviceProvider.GPU,
             detector_score=0.65,
-            mask_blur=0.2,
+            mask_blur=0.68,
             skip_nsfw=skip_nsfw,
-            landmarker_score=0.25
+            landmarker_score=0.5
         )
 
     print(result)
 
 if __name__ == "__main__":
-    face_swap("imgs/input.jpg", "imgs/target.png", skip_nsfw=True)
+    face_swap("imgs/input.png", "imgs/target.png", skip_nsfw=True)
 
