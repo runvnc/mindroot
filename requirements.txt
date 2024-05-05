@@ -1,3 +1,4 @@
+facefusionlib
 nanoid
 accelerate
 diffusers
