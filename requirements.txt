@@ -1,0 +1,4 @@
+diffusers
+ollama
+torch
+transformers
