@@ -1,4 +1,5 @@
 import torch
+import sys
 from diffusers import StableDiffusionXLPipeline
 from nanoid import generate
 
@@ -14,7 +15,7 @@ def sdxl_text_to_image(prompt, model_id, count=1, save_to="imgs/" + random_img_f
         image.save("imgs/"+random_img_fname())
 
 if __name__ == "__main__":
-    prompt = "a beach at sunset"
+    prompt = sys.argv[1]
     sdxl_text_to_image(prompt,"models/model.safetensors", count=2)
 
 
