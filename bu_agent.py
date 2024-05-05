@@ -26,18 +26,12 @@ async def parse_cmd_stream(stream, cmd_callback=None):
                     if not stack:
                         # Found a complete command object
                         try:
-                            if buffer.startswith('[ '):
-                                buffer = buffer[2:]
-                            if buffer.endswith(','):
-                                buffer = buffer[:-1]
-
                             cmd_obj = json.loads(buffer)
                             cmd_name = next(iter(cmd_obj))
                             cmd_args = cmd_obj[cmd_name]
                             await cmd_callback(cmd_name, cmd_args)
                             buffer = ""
-                        except json.JSONDecodeError as e:
-                            print("error parsing", e)
+                        except json.JSONDecodeError:
                             # Handle parsing error
                             pass
             escape_next = False
@@ -117,6 +111,7 @@ You can output the same command multiple times.
     messages = [ {"role": "user", "content": sys},
                  { "role": "user", "content": "Please write a short poem about the moon." }]
     
+    print(messages)
     asyncio.run(chat_commands("phi3", messages=messages, 
                               cmd_callback=do_print))
 
