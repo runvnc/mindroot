@@ -2,3 +2,4 @@ diffusers
 ollama
 torch
 transformers
+asyncio
