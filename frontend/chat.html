@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="public/neon.css">
+  <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+  <title>Chat Interface</title>
+</head>
+<body class="bg-gray-900 text-secondary">
+  <div class="container mx-auto px-4 py-theme">
+    <h1 class="text-4xl font-bold mb-theme text-center">Chat Interface</h1>
+    <div id="chat-container" class="bg-box rounded-theme shadow-lg p-theme" hx-sse="connect:/chat/events" hx-trigger="sse:new_message">
+      <!-- Chat messages will be dynamically added here -->
+    </div>
+    <div class="flex mt-theme">
+      <input id="message-input" type="text" name="message" class="flex-grow bg-gray-800 rounded-l-theme px-theme py-2 text-secondary text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Type your message...">
+      <button id="send-button" hx-include="[name='message']" class="bg-primary hover:bg-blue-600 rounded-r-theme px-theme py-2 text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary" hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend">Send</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('send-button').addEventListener('click', function() {
+      var input = document.getElementById('message-input');
+      input.value = '';
+    });
+
+    var chatContainer = document.getElementById('chat-container');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    htmx.on('htmx:afterSwap', function(event) {
+      if (event.target.id === 'chat-container') {
+        event.target.scrollTop = event.target.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
