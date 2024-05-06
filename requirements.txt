@@ -6,3 +6,4 @@ ollama
 torch
 transformers
 asyncio
+requests
