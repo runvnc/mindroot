@@ -1,3 +1,6 @@
+facefusionlib
+nanoid
+accelerate
 diffusers
 ollama
 torch
