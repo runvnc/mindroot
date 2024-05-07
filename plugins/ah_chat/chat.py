@@ -69,6 +69,6 @@ async def send_message(request: Request):
 
 @router.get("/", response_class=HTMLResponse)
 async def get_chat_html():
-    with open("chat.html", "r") as file:
+    with open("static/chat.html", "r") as file:
         chat_html = file.read()
     return chat_html
