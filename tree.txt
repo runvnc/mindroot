@@ -1,0 +1,42 @@
+.
+├── ahp.py
+├── backup
+├── docs
+│   ├── htmx2.txt
+│   ├── htmx_info.txt
+│   └── requirements.txt
+├── __init__.py
+├── install.sh
+├── plugins
+│   ├── ah-agent
+│   │   └── agent.py
+│   ├── ah-chat
+│   │   ├── chatlog.py
+│   │   ├── chat.py
+│   │   ├── __init__.py
+│   │   └── use_ollama.py
+│   ├── ah_chat
+│   │   └── __init__.py
+│   ├── ah-faceswap
+│   │   └── face_swap.py
+│   ├── ah-ollama
+│   ├── ah-sdxl
+│   │   └── sdxl.py
+│   └── __init__.py
+├── registry
+│   ├── ahp.db
+│   ├── authentication.py
+│   ├── database.py
+│   ├── main.py
+│   └── requirements.txt
+├── server.py
+├── static
+│   ├── chat.html
+│   ├── design.html
+│   ├── light.css
+│   └── neon.css
+├── tailwind.config.js
+├── tree.txt
+└── xtest
+
+12 directories, 27 files

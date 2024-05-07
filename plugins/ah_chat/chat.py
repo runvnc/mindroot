@@ -1,19 +1,19 @@
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 import asyncio
 
-app = FastAPI()
-app.mount("/public", StaticFiles(directory="public"), name="public")
+router = APIRouter()
+
 
 class Message(BaseModel):
     message: str
 
 sse_clients = set()
 
-@app.get("/chat/events")
+@router.get("/chat/events")
 async def chat_events(request: Request):
     async def event_generator():
         queue = asyncio.Queue()
@@ -33,7 +33,7 @@ async def send_event_to_clients(event: str, data: dict):
         print("sending to sse client!")
         await queue.put({"event": event, "data": data})
 
-@app.post("/chat/send")
+@router.post("/chat/send")
 async def send_message(request: Request):
     form_data = await request.form()
     message = form_data.get("message")
@@ -67,7 +67,7 @@ async def send_message(request: Request):
 
     return {"status": "ok"}
 
-@app.get("/", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_chat_html():
     with open("chat.html", "r") as file:
         chat_html = file.read()
