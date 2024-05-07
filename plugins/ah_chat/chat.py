@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
+from ..ah_agent import agent
 import asyncio
 
 router = APIRouter()
@@ -37,7 +38,7 @@ async def send_event_to_clients(event: str, data: dict):
 async def send_message(request: Request):
     form_data = await request.form()
     message = form_data.get("message")
-
+    print(form_data)
     message_html = f'''
         <div class="flex items-start mb-2">
             <img src="var(--user-avatar)" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
@@ -49,10 +50,7 @@ async def send_message(request: Request):
 
     await send_event_to_clients("new_message", {"html": message_html})
 
-    # Simulating assistant's response after 1 second
-    async def send_assistant_response():
-        await asyncio.sleep(1)
-        assistant_message = "I am an AI assistant. How can I help you today?"
+    async def send_assistant_response(cmd, assistant_message):
         assistant_message_html = f'''
             <div class="flex items-start mb-2">
                 <img src="var(--assistant-avatar)" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
@@ -63,7 +61,9 @@ async def send_message(request: Request):
         '''
         await send_event_to_clients("new_message", {"html": assistant_message_html})
 
-    asyncio.create_task(send_assistant_response())
+    messages = [ { "role": "user", "content": message}]
+    print("First messages: ", messages)
+    await agent.chat_commands("phi3", messages=messages, cmd_callback=send_assistant_response)
 
     return {"status": "ok"}
 

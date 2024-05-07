@@ -16,17 +16,18 @@
         id="chat-container" class="bg-box rounded-theme shadow-lg p-theme">
       <!-- Chat messages will be dynamically added here -->
     </div>
-    <div class="flex mt-theme">
+    <form hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend" class="flex mt-theme">
       <input id="message-input" type="text" name="message" class="flex-grow bg-gray-800 rounded-l-theme px-theme py-2 text-secondary text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Type your message...">
-      <button id="send-button" hx-include="[name='message']" class="bg-primary hover:bg-blue-600 rounded-r-theme px-theme py-2 text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary" hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend">Send</button>
-    </div>
+      <button id="send-button" class="bg-primary hover:bg-blue-600 rounded-r-theme px-theme py-2 text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-primary" >
+          Send</button>
+    </form>
   </div>
 
   <script>
-    document.getElementById('send-button').addEventListener('click', function() {
+    /* document.getElementById('send-button').addEventListener('click', function() {
       var input = document.getElementById('message-input');
       input.value = '';
-    });
+    }); */
 
     var chatContainer = document.getElementById('chat-container');
     chatContainer.scrollTop = chatContainer.scrollHeight;

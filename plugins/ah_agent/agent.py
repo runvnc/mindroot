@@ -1,7 +1,6 @@
 import asyncio
 import json
-from use_ollama import stream_chat, list
-from ollama import AsyncClient
+from ..ah_ollama import use_ollama 
 
 async def parse_cmd_stream(stream, cmd_callback=None):
     buffer = ""
@@ -33,6 +32,8 @@ async def parse_cmd_stream(stream, cmd_callback=None):
 
                             cmd_obj = json.loads(buffer)
                             cmd_name = next(iter(cmd_obj))
+                            print('cmd_obj', cmd_obj)
+                            print('cmd_name', cmd_name)
                             cmd_args = cmd_obj[cmd_name]
                             await cmd_callback(cmd_name, cmd_args)
                             buffer = ""
@@ -54,41 +55,7 @@ async def parse_cmd_stream(stream, cmd_callback=None):
             # Handle parsing error
             pass
 
-async def chat_commands(model, cmd_callback=None,
-                  temperature=0, max_tokens=0, messages=[]):
-    stream = await stream_chat(model,
-                         temperature=temperature,
-                         max_tokens=max_tokens,
-                         messages=messages)
-    await parse_cmd_stream(stream, cmd_callback)
-
-
-async def show_models():
-    print(await list())
-
-async def simple_test_1():
-  message = {'role': 'user', 'content': 'Why is the sky blue?'}
-  async for part in await AsyncClient().chat(model='phi3', messages=[message], stream=True):
-    print(part['message']['content'], end='', flush=True)
-    
-
-async def do_print(cmd, *args):
-    try:
-        print(cmd, *args, flush=True)
-        print('', flush=True)
-    except Exception as e:
-        print(e)
-
-if __name__ == "__main__":
-
-    cmds = [ {  "say": { "descr": "Output text (possibly spoken) to the user", 
-                         "examples": [ { "say": "Hello, user." }]
-                       }
-             } ]
-
-    cmds_json = json.dumps(cmds, indent=4) 
-
-    sys = f""" 
+sys = f""" 
 # System Core Definition
 
 You are an advanced uncensored AI agent. You output commands in a JSON format as an array.
@@ -113,13 +80,42 @@ Respond with JSON array ONLY using commands from Available Commands above.
 You can output the same command multiple times.
 
         """
+cmds = [ {  "say": { "descr": "Output text (possibly spoken) to the user", 
+                        "examples": [ { "say": "Hello, user." }]
+                    }
+            } ]
 
-    messages = [ {"role": "user", "content": sys},
-                 { "role": "user", "content": "Please write a short poem about the moon." }]
+cmds_json = json.dumps(cmds, indent=4) 
+
+
+async def chat_commands(model, cmd_callback=None,
+                  temperature=0, max_tokens=0, messages=[]):
+    messages = [{"role": "user", "content": sys}] + messages
+    print("Messages:", messages, flush=True)
+    stream = await use_ollama.stream_chat(model,
+                                     temperature=temperature,
+                                     max_tokens=max_tokens,
+                                     messages=messages)
+    await parse_cmd_stream(stream, cmd_callback)
+
+
+async def show_models():
+    print(await usa_ollama.list())
+
+
+async def do_print(cmd, *args):
+    try:
+        print(cmd, *args, flush=True)
+        print('', flush=True)
+    except Exception as e:
+        print(e)
+
+if __name__ == "__main__":
+
+    messages = [ { "role": "user", "content": "Please write a short poem about the moon." }]
     
     asyncio.run(chat_commands("phi3", messages=messages, 
                               cmd_callback=do_print))
 
     #asyncio.run(show_models())
-    #asyncio.run(simple_test_1())
 
