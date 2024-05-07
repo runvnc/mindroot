@@ -12,6 +12,10 @@ async def parse_cmd_stream(stream, cmd_callback=None):
         chunk = part['message']['content']
         #print(chunk, flush=True, end='')
         buffer += chunk
+        print('----------------------------------')
+        print(buffer)
+        print('----------------------------------')
+
         for char in chunk:
             if char == '"' and not escape_next:
                 in_string = not in_string
