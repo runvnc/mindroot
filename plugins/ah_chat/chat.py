@@ -48,7 +48,7 @@ async def send_message(request: Request):
         </div>
     '''
 
-    await send_event_to_clients("new_message", {"html": message_html})
+    await send_event_to_clients("new_message", message_html)
 
     async def send_assistant_response(cmd, assistant_message):
         assistant_message_html = f'''
@@ -59,7 +59,7 @@ async def send_message(request: Request):
                 </div>
             </div>
         '''
-        await send_event_to_clients("new_message", {"html": assistant_message_html})
+        await send_event_to_clients("new_message", assistant_message_html)
 
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
