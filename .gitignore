@@ -1,4 +1,6 @@
 __pycache__/*
+tree.txt
+backup
 imgs/*
 models/*
 .venv
