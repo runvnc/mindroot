@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from ..ah_agent import agent
+from ..ah_sd import sd
 import asyncio
 
 router = APIRouter()
@@ -65,6 +66,8 @@ async def send_message(request: Request):
 
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
+    agent.handle_command('say', send_assistant_response)
+    agent.handle_command('image', sd.text_to_image)
     await agent.chat_commands("phi3", messages=messages, cmd_callback=send_assistant_response)
 
     return {"status": "ok"}

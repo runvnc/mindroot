@@ -2,7 +2,20 @@ import asyncio
 import json
 from ..ah_ollama import use_ollama 
 
-async def parse_cmd_stream(stream, cmd_callback=None):
+
+cmd_handler = {}
+
+async def handle_cmd(cmd_name, callback):
+    cmd_handler[cmd_name] = callback
+
+async def handle_cmds(cmd_name, cmd_args):
+    print(f"Command: {cmd_name}")
+    print(f"Arguments: {cmd_args}")
+    print('----------------------------------')
+    if cmd_name in cmd_handler:
+        await cmd_handler[cmd_name](cmd_args)
+
+async def parse_cmd_stream(stream, cmd_callback=handle_cmds):
     buffer = ""
     stack = []
     in_string = False
@@ -33,7 +46,8 @@ async def parse_cmd_stream(stream, cmd_callback=None):
                                 buffer = buffer[2:]
                             if buffer.endswith(','):
                                 buffer = buffer[:-1]
-
+                            if buffer.endswith(']'):
+                                buffer = buffer[:-1]
                             cmd_obj = json.loads(buffer)
                             cmd_name = next(iter(cmd_obj))
                             print('cmd_obj', cmd_obj)
@@ -71,7 +85,9 @@ You never output commentary outside of the command format.
 # Available commands 
 
 "say" -- one sentence per command (multiple say commands allowed in output array)
-
+"image" -- Stable Diffusion image generation
+    
+ 
 parameters: text: (string) (single string, not an array)
 
 # Example Interaction
@@ -80,6 +96,11 @@ User: Hello there.
 
 Assistant: [ {{"say": "Hello user, this is the first line."}},
              {{"say": "This is the second thing I wanted to say -- how are you?"}} ]
+
+User: Please generate an image of a cat.
+
+Assistant: [ {{"image": "a photo of a friendly housecat" } ]
+ 
 
 # Notice
 
