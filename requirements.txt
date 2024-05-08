@@ -4,6 +4,7 @@ accelerate
 diffusers
 ollama
 torch
+tokenizers==0.15.2
 transformers
 asyncio
 requests

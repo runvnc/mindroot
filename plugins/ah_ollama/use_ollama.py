@@ -16,3 +16,7 @@ async def stream_chat(model, messages=[], num_ctx=2048, temperature=0.0, max_tok
 async def list():
     client = AsyncClient()
     return await client.list()
+
+async def unload(model):
+    client = AsyncClient()
+    return await client.generate(model=model, keep_alive=0)

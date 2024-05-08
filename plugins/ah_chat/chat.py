@@ -53,7 +53,7 @@ async def send_message(request: Request):
 
     await send_event_to_clients("new_message", message_html)
 
-    async def send_assistant_response(cmd, assistant_message):
+    async def send_assistant_response(assistant_message):
         assistant_message_html = f'''
             <div class="flex items-start mb-2">
                 <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
@@ -66,9 +66,9 @@ async def send_message(request: Request):
 
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
-    agent.handle_command('say', send_assistant_response)
-    agent.handle_command('image', sd.text_to_image)
-    await agent.chat_commands("phi3", messages=messages, cmd_callback=send_assistant_response)
+    await agent.handle_cmd('say', send_assistant_response)
+    await agent.handle_cmd('image', sd.sd_text_to_image)
+    await agent.chat_commands("phi3", messages=messages)
 
     return {"status": "ok"}
 
