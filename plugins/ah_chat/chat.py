@@ -35,6 +35,11 @@ async def send_event_to_clients(event: str, data: dict):
         print("sending to sse client!")
         await queue.put({"event": event, "data": data})
 
+
+async def return_image(prompt):
+    result = await sd.simple_image(prompt)
+    await send_event_to_clients("new_message", result)
+
 @router.post("/chat/send")
 async def send_message(request: Request):
     form_data = await request.form()
@@ -67,7 +72,7 @@ async def send_message(request: Request):
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
     await agent.handle_cmd('say', send_assistant_response)
-    await agent.handle_cmd('image', sd.sd_text_to_image)
+    await agent.handle_cmd('image', return_image)
     await agent.chat_commands("phi3", messages=messages)
 
     return {"status": "ok"}
