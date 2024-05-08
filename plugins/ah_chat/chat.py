@@ -37,13 +37,15 @@ async def send_event_to_clients(event: str, data: dict):
 @router.post("/chat/send")
 async def send_message(request: Request):
     form_data = await request.form()
+    user_avatar = 'static/user.png'
+    assistant_avatar = 'static/assistant.png'
     message = form_data.get("message")
     print(form_data)
     message_html = f'''
         <div class="flex items-start mb-2">
-            <img src="var(--user-avatar)" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
-            <div class="bg-gray-800 rounded-theme p-theme">
-                <p class="text-secondary text-base">User: {message}</p>
+            <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
+            <div class="text-white">
+                <p class="text-secondary text-base">{message}</p>
             </div>
         </div>
     '''
@@ -53,9 +55,9 @@ async def send_message(request: Request):
     async def send_assistant_response(cmd, assistant_message):
         assistant_message_html = f'''
             <div class="flex items-start mb-2">
-                <img src="var(--assistant-avatar)" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
-                <div class="bg-primary rounded-theme p-theme">
-                    <p class="text-white text-base">Assistant: {assistant_message}</p>
+                <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
+                <div class="bg-primary">
+                    <p class="text-white text-yellow text-base">{assistant_message}</p>
                 </div>
             </div>
         '''

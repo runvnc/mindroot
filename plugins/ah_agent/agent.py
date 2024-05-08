@@ -38,6 +38,8 @@ async def parse_cmd_stream(stream, cmd_callback=None):
                             cmd_name = next(iter(cmd_obj))
                             print('cmd_obj', cmd_obj)
                             print('cmd_name', cmd_name)
+                            if isinstance(cmd_obj, list):
+                                cmd_obj = cmd_obj[0]
                             cmd_args = cmd_obj[cmd_name]
                             await cmd_callback(cmd_name, cmd_args)
                             buffer = ""

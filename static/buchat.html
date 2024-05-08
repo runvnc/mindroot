@@ -9,15 +9,15 @@
   <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
   <title>AgentHost v0.1</title>
 </head>
-<body class="bg-black m-2 p-2">
-  <div class="container mx-auto px-4 neon-effect rounded-md">
+<body class="bg-black dark">
+  <div class="container mx-auto px-4 shadow-lg rounded-lg border-4 border-green-500">
     <div hx-ext="sse" sse-connect="/chat/events" hx-swap="beforeend" sse-swap="new_message"
-        id="chat-container" class="bg-box">
+        id="chat-container" class="bg-box shadow-lg p-theme">
       <!-- Chat messages will be dynamically added here -->
     </div>
-    <form hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend" class="flex m-2 p-2">
+    <form hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend" class="flex">
       <input id="message-input" type="text" name="message" class="flex-grow dark bg-black focus:bg-black active:bg-black hover:bg-black py-2 text-secondary text-white focus:outline-none" placeholder="Type your message...">
-      <button id="send-button" class="bg-primary hover:bg-black border border-green-500 active:bg-black p-2 m-2 text-green-500 font-semibold focus:ring-2 focus:ring-primary" >
+      <button id="send-button" class="bg-primary hover:bg-black active:bg-black rounded-r-theme px-theme py-2 text-green-500 font-semibold focus:outline-none focus:ring-2 focus:ring-primary" >
           Send</button>
     </form>
   </div>

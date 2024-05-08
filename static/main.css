@@ -7,6 +7,8 @@
   /* Neon green glow */
   --border-radius: 20px;
   /* Slightly increased rounded borders */
+  --assistant-avatar: url('static/assistant.png');
+  --user-avatar: url('static/user.png');
 }
 
 .rounded-theme {
@@ -23,7 +25,7 @@ body.dark {
 
 .neon-effect {
   border: 2px solid var(--color-primary);
-  box-shadow: var(--shadow-neon-bloom), 0 0 10px rgba(0, 255, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
   /* Enhanced neon green inner glow */
 }
 
