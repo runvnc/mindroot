@@ -15,7 +15,7 @@ def face_swap(input_ref_dir, target_image_path, skip_nsfw=False):
             landmarker_score=0.5
         )
 
-    print(result)
+    return result
 
 if __name__ == "__main__":
     face_swap("imgs/input.png", "imgs/target.png", skip_nsfw=True)

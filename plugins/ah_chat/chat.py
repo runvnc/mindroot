@@ -5,9 +5,16 @@ from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from ..ah_agent import agent
 from ..ah_sd import sd
+from ..ah_faceswap import face_swap
 import asyncio
+import os
 
 router = APIRouter()
+
+if os.environ.get('AH_DEFAULT_LLM_MODEL'):
+    current_model = os.environ.get('AH_DEFAULT_LLM_MODEL')
+else:
+    current_model = 'phi3'
 
 
 class Message(BaseModel):
@@ -39,6 +46,12 @@ async def send_event_to_clients(event: str, data: dict):
 async def return_image(prompt):
     result = await sd.simple_image(prompt)
     await send_event_to_clients("new_message", result)
+
+async def face_swapped_image(prompt):
+    img = await sd.simple_image(prompt)
+    new_img = face_swap.face_swap(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True) 
+    await send_event_to_clients("new_message", new_img)
+
 
 @router.post("/chat/send")
 async def send_message(request: Request):
@@ -72,8 +85,18 @@ async def send_message(request: Request):
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
     await agent.handle_cmd('say', send_assistant_response)
-    await agent.handle_cmd('image', return_image)
-    await agent.chat_commands("phi3", messages=messages)
+    await agent.handle_cmd('image', face_swapped_image)
+
+    try:
+        await agent.chat_commands(current_model, messages=messages)
+    except Exception as e:
+        print("Found an error in agent output, retrying")
+        messages.append({"role": "assistant", "content": str(e)})
+        messages.append({"role": "user", "content": "Invalid command or output format."})
+        print()
+        print()
+        print(messages)
+        await agent.chat_commands(current_model, messages=messages) 
 
     return {"status": "ok"}
 

@@ -7,7 +7,7 @@ async def stream_chat(model, messages=[], num_ctx=2048, temperature=0.0, max_tok
     try:
         return await client.chat(model=model,
                                  messages=messages,
-                                 options=Options(temperature=temperature),
+                                 options=Options(temperature=temperature, num_predict=max_tokens),
                                  stream=True
                         )
     except ollama.ResponseError as e:

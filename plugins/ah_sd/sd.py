@@ -6,7 +6,7 @@ from nanoid import generate
 import os
 
 if os.environ.get('AH_DEFAULT_SD_MODEL'):
-    current_model = os.environ.get('AH_DEFAULT_SD_MODEL')
+    current_model = 'models/' + os.environ.get('AH_DEFAULT_SD_MODEL')
     local_model = True
 else:
     current_model = 'manpreets7/dreamshaper-3.2'
@@ -27,7 +27,7 @@ async def sdxl_text_to_image(prompt, negative_prompt='', model_id=None, from_hug
         model_id = current_model
  
     if from_huggingface is None:
-        from_huggingface = local_model
+        from_huggingface = not local_model
 
     if not from_huggingface:
         pipeline = StableDiffusionXLPipeline.from_single_file(model_id, torch_dtype=torch.float16)
@@ -35,7 +35,8 @@ async def sdxl_text_to_image(prompt, negative_prompt='', model_id=None, from_hug
         pipeline = StableDiffusionXLPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
  
     pipeline = pipeline.to("cuda")
-    pipeline.safety_checker = lambda images, **kwargs: (images, [False])
+    if not local_model:
+        pipeline.safety_checker = lambda images, **kwargs: (images, [False])
 
     for n in range(1, count+1):
         image = pipeline(prompt=prompt, negative_prompt=negative_prompt,
@@ -50,17 +51,19 @@ async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggi
         model_id = current_model
 
     if from_huggingface is None:
-        from_huggingface = local_model
-
+        from_huggingface = not local_model
 
     if not from_huggingface:
         pipeline = StableDiffusionPipeline.from_single_file(model_id, torch_dtype=torch.float16)
     else:
         pipeline = StableDiffusionPipeline.from_pretrained(model_id,torch_dtype=torch.float16 )
     pipeline = pipeline.to("cuda")
-    pipeline.safety_checker = lambda images, **kwargs: (images, [False])
+
+    if not local_model:
+        pipeline.safety_checker = lambda images, **kwargs: (images, [False])
 
     for n in range(1, count+1):
+        print("GENERATING IMAGE WITH MODEL: " + model_id)
         image = pipeline(prompt=prompt, negative_prompt=negative_prompt, 
                          num_inference_steps=steps, guidance_scale=cfg).images[0]
         fname = "imgs/"+random_img_fname() 
