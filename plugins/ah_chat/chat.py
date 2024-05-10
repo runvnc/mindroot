@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
+from .chatlog import ChatLog
 from ..ah_agent import agent
 from ..ah_sd import sd
 from ..ah_swapface import face_swap
@@ -10,6 +11,7 @@ import asyncio
 import os
 
 router = APIRouter()
+chat_log = ChatLog()
 
 if os.environ.get('AH_DEFAULT_LLM'):
     current_model = os.environ.get('AH_DEFAULT_LLM')
@@ -22,8 +24,9 @@ class Message(BaseModel):
 
 sse_clients = set()
 
-@router.get("/chat/id:/events")
+@router.get("/chat/{log_id}/events")
 async def chat_events(request: Request):
+    chat_log.load_log(log_id)
     async def event_generator():
         queue = asyncio.Queue()
         sse_clients.add(queue)
@@ -54,8 +57,9 @@ async def face_swapped_image(prompt):
     await send_event_to_clients("new_message", new_img)
 
 
-@router.post("/chat/id:/send")
+@router.post("/chat/{log_id}/send")
 async def send_message(request: Request):
+    chat_log.load_log(log_id)
     form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = 'static/assistant.png'
@@ -71,6 +75,7 @@ async def send_message(request: Request):
     '''
 
     await send_event_to_clients("new_message", message_html)
+    chat_log.add_message({"role": "user", "content": message})
 
     async def send_assistant_response(assistant_message):
         assistant_message_html = f'''
@@ -82,6 +87,7 @@ async def send_message(request: Request):
             </div>
         '''
         await send_event_to_clients("new_message", assistant_message_html)
+        chat_log.add_message({"role": "assistant", "content": assistant_message})
 
     messages = [ { "role": "user", "content": message}]
     print("First messages: ", messages)
