@@ -23,10 +23,12 @@
   </div>
 
   <script>
-    /* document.getElementById('send-button').addEventListener('click', function() {
-      var input = document.getElementById('message-input');
-      input.value = '';
-    }); */
+    document.getElementById('send-button').addEventListener('click', function() {
+      setTimeout( () => {
+        var input = document.getElementById('message-input');
+        input.value = '';
+      }, 30)
+    });
 
     var chatContainer = document.getElementById('chat-container');
     chatContainer.scrollTop = chatContainer.scrollHeight;

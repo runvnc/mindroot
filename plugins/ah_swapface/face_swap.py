@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Set, Union
 import os
-
+import nanoid
 import cv2
 import insightface
 import numpy as np
@@ -10,8 +10,8 @@ import onnxruntime
 import torch
 from insightface.model_zoo.inswapper import INSwapper
 from PIL import Image
-from utils import pil2tensor, tensor2pil
-from download import download_and_extract
+from .utils import pil2tensor, tensor2pil
+from .download import download_and_extract
 
 swapper = None
 
@@ -107,9 +107,10 @@ class FaceSwap:
 
 def __init__():
     global swapper
+    print("initializing face swap")
     swapper = FaceSwap()
 
-def swap_face(src_dir, target_img_filepath):
+def do_swap_face(src_dir, target_img_filepath):
     target_img = Image.open(target_img_filepath)
     src_images = []
     
@@ -122,13 +123,22 @@ def swap_face(src_dir, target_img_filepath):
     if len(src_images) > 0:
         swapped_img = swapper.swap_face(src_images[0], target_img)
         
-        output_filename = "swapped_result.jpg"
-        output_path = os.path.join(src_dir, output_filename)
-        swapped_img.save(output_path)
+        output_fname = "imgs/" + nanoid.generate() + ".png"
+        swapped_img.save(output_fname)
+        return output_fname
     else:
         print("No source images found in the directory.")
 
+def swap_face(input_ref_dir, target_image_path, skip_nsfw=False, wrap_html=False): 
+    fname = do_swap_face(input_ref_dir, target_image_path)
+    if wrap_html:
+        return f'<img src="{fname}" />'
+    else:
+        return fname
+
+__init__()
+
 if __name__ == "__main__":
-    __init__()
-    swap_face("imgs/faceref/g", "imgs/target.png")
+    fname = do_swap_face("imgs/faceref/g", "imgs/target.png")
+    print(fname)
 

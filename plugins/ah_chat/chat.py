@@ -5,7 +5,7 @@ from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from ..ah_agent import agent
 from ..ah_sd import sd
-from ..ah_faceswap import face_swap
+from ..ah_swapface import face_swap
 import asyncio
 import os
 
@@ -42,7 +42,6 @@ async def send_event_to_clients(event: str, data: dict):
         print("sending to sse client!")
         await queue.put({"event": event, "data": data})
 
-
 async def return_image(prompt):
     result = await sd.simple_image(prompt)
     await send_event_to_clients("new_message", result)
@@ -50,7 +49,7 @@ async def return_image(prompt):
 async def face_swapped_image(prompt):
     img = await sd.simple_image(prompt, wrap=False)
     print("completed image out, about to swap. img = ", img, "face ref dir =", os.environ.get("AH_FACE_REF_DIR"))
-    new_img = face_swap.face_swap(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True, wrap_html=True)
+    new_img = face_swap.swap_face(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True, wrap_html=True)
     print("new_img:", new_img)
     await send_event_to_clients("new_message", new_img)
 
