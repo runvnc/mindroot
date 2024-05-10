@@ -22,7 +22,7 @@ class Message(BaseModel):
 
 sse_clients = set()
 
-@router.get("/chat/events")
+@router.get("/chat/id:/events")
 async def chat_events(request: Request):
     async def event_generator():
         queue = asyncio.Queue()
@@ -54,7 +54,7 @@ async def face_swapped_image(prompt):
     await send_event_to_clients("new_message", new_img)
 
 
-@router.post("/chat/send")
+@router.post("/chat/id:/send")
 async def send_message(request: Request):
     form_data = await request.form()
     user_avatar = 'static/user.png'
