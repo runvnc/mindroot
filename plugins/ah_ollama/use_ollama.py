@@ -5,6 +5,7 @@ from ollama import AsyncClient, Options
 async def stream_chat(model, messages=[], num_ctx=2048, temperature=0.0, max_tokens=100):
     client = AsyncClient()
     try:
+        print("GENERATING TEXT WITH MODEL:", model)
         return await client.chat(model=model,
                                  messages=messages,
                                  options=Options(temperature=temperature, num_predict=max_tokens),

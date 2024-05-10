@@ -70,9 +70,12 @@ async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggi
         image.save(fname)
         return fname
 
-async def simple_image(prompt):
+async def simple_image(prompt, wrap=True):
     fname = await sd_text_to_image(prompt)
-    return f"""<img src="{fname}" />"""
+    if not wrap:
+        return fname
+    else:
+        return f"""<img src="{fname}" />"""
 
 if __name__ == "__main__":
     prompt = sys.argv[1]

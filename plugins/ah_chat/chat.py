@@ -11,8 +11,8 @@ import os
 
 router = APIRouter()
 
-if os.environ.get('AH_DEFAULT_LLM_MODEL'):
-    current_model = os.environ.get('AH_DEFAULT_LLM_MODEL')
+if os.environ.get('AH_DEFAULT_LLM'):
+    current_model = os.environ.get('AH_DEFAULT_LLM')
 else:
     current_model = 'phi3'
 
@@ -48,8 +48,10 @@ async def return_image(prompt):
     await send_event_to_clients("new_message", result)
 
 async def face_swapped_image(prompt):
-    img = await sd.simple_image(prompt)
-    new_img = face_swap.face_swap(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True) 
+    img = await sd.simple_image(prompt, wrap=False)
+    print("completed image out, about to swap. img = ", img, "face ref dir =", os.environ.get("AH_FACE_REF_DIR"))
+    new_img = face_swap.face_swap(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True, wrap_html=True)
+    print("new_img:", new_img)
     await send_event_to_clients("new_message", new_img)
 
 
@@ -90,13 +92,14 @@ async def send_message(request: Request):
     try:
         await agent.chat_commands(current_model, messages=messages)
     except Exception as e:
-        print("Found an error in agent output, retrying")
-        messages.append({"role": "assistant", "content": str(e)})
-        messages.append({"role": "user", "content": "Invalid command or output format."})
-        print()
-        print()
-        print(messages)
-        await agent.chat_commands(current_model, messages=messages) 
+        print("Found an error in agent output: ")
+        print(e)
+        #messages.append({"role": "assistant", "content": str(e)})
+        #messages.append({"role": "user", "content": "Invalid command or output format."})
+        #print()
+        #print()
+        #print(messages)
+        #await agent.chat_commands(current_model, messages=messages) 
 
     return {"status": "ok"}
 
