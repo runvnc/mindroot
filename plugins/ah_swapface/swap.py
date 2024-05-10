@@ -79,22 +79,20 @@ class FaceSwap:
         if self.swap_model is not None:
             cv_source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
             cv_target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
-            source_face = self.get_face_single(
-                self.face_analyser, cv_source_img, face_index=0
-            )
+            source_face = self.get_face_single(cv_source_img, face_index=0)
             if source_face is not None:
                 result = cv_target_img
 
                 for face_num in faces_index:
                     target_face = self.get_face_single(
-                        self.face_analyser, cv_target_img, face_index=face_num
+                        cv_target_img, face_index=face_num
                     )
                     if target_face is not None:
-                        sys.stdout = NullWriter()
+                        #sys.stdout = NullWriter()
                         result = self.swap_model.get(
                             result, target_face, source_face
                         )
-                        sys.stdout = sys.__stdout__
+                        #sys.stdout = sys.__stdout__
                     else:
                         print(f"No target face found for {face_num}")
 
