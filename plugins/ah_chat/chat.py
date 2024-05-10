@@ -9,6 +9,7 @@ from ..ah_sd import sd
 from ..ah_swapface import face_swap
 import asyncio
 import os
+import json
 import nanoid
 
 router = APIRouter()

@@ -96,6 +96,7 @@ async def parse_cmd_stream(stream, cmd_callback=handle_cmds):
                             buffer = ""
                         except json.JSONDecodeError as e:
                             print("error parsing", e)
+                            print(buffer)
                             pass
 
             escape_next = False
