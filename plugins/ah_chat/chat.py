@@ -9,9 +9,9 @@ from ..ah_sd import sd
 from ..ah_swapface import face_swap
 import asyncio
 import os
+import nanoid
 
 router = APIRouter()
-chat_log = ChatLog()
 
 if os.environ.get('AH_DEFAULT_LLM'):
     current_model = os.environ.get('AH_DEFAULT_LLM')
@@ -25,8 +25,11 @@ class Message(BaseModel):
 sse_clients = set()
 
 @router.get("/chat/{log_id}/events")
-async def chat_events(request: Request):
+async def chat_events(log_id: str):
+    print("chat_log = ", log_id)
+    chat_log = ChatLog()
     chat_log.load_log(log_id)
+
     async def event_generator():
         queue = asyncio.Queue()
         sse_clients.add(queue)
@@ -58,13 +61,16 @@ async def face_swapped_image(prompt):
 
 
 @router.post("/chat/{log_id}/send")
-async def send_message(request: Request):
+async def send_message(log_id: str, request: Request):
+    print("log_id = ", log_id)
+    chat_log = ChatLog()
     chat_log.load_log(log_id)
     form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = 'static/assistant.png'
     message = form_data.get("message")
     print(form_data)
+
     message_html = f'''
         <div class="flex items-start mb-2">
             <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
@@ -87,15 +93,15 @@ async def send_message(request: Request):
             </div>
         '''
         await send_event_to_clients("new_message", assistant_message_html)
-        chat_log.add_message({"role": "assistant", "content": assistant_message})
+        json_cmd = { "say": assistant_message }
+        chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
-    messages = [ { "role": "user", "content": message}]
-    print("First messages: ", messages)
     await agent.handle_cmd('say', send_assistant_response)
     await agent.handle_cmd('image', face_swapped_image)
 
     try:
-        await agent.chat_commands(current_model, messages=messages)
+        print("mesages")
+        await agent.chat_commands(current_model, messages=chat_log.get_recent())
     except Exception as e:
         print("Found an error in agent output: ")
         print(e)
@@ -112,4 +118,5 @@ async def send_message(request: Request):
 async def get_chat_html():
     with open("static/chat.html", "r") as file:
         chat_html = file.read()
+        chat_html = chat_html.replace("{{CHAT_ID}}", nanoid.generate())
     return chat_html

@@ -19,19 +19,21 @@ class ChatLog:
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
 
-    def get_recent(self, max_tokens: int) -> List[Dict[str, str]]:
+    def get_recent(self, max_tokens: int = 4096) -> List[Dict[str, str]]:
         recent_messages = []
         total_length = 0
+        print('returning all messages', self.messages)
+        return self.messages
 
-        for message in self.messages:
-            message_length = self._calculate_message_length(message)
-            if total_length + message_length <= max_tokens:
-                recent_messages.append(message)
-                total_length += message_length
-            else:
-                break
-
-        return recent_messages
+        #for message in self.messages:
+        #    message_length = self._calculate_message_length(message)
+        #    if total_length + message_length <= max_tokens:
+        #        recent_messages.append(message)
+        #        total_length += message_length
+        #    else:
+        #        break
+        # 
+        #return recent_messages
 
     def _save_log(self) -> None:
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')

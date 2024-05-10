@@ -8,3 +8,5 @@ models/*
 xtest
 
 .aider*
+
+chatlog*.json

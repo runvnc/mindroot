@@ -51,9 +51,9 @@ async def parse_cmd_stream(stream, cmd_callback=handle_cmds):
         chunk = part['message']['content']
         #print(chunk, flush=True, end='')
         buffer += chunk
-        print('----------------------------------')
-        print(buffer)
-        print('----------------------------------')
+        #print('----------------------------------')
+        #print(buffer)
+        #print('----------------------------------')
 
         for char in chunk:
             if char == '"' and not escape_next:
@@ -80,18 +80,18 @@ async def parse_cmd_stream(stream, cmd_callback=handle_cmds):
                                 buffer = buffer[1:]
                             if buffer.endswith('},'):
                                 buffer = buffer[:-1]
-                            print('################################')
-                            print('||'+buffer+'||')
+                            #print('################################')
+                            #print('||'+buffer+'||')
                             cmd_obj = json.loads(buffer)
                             cmd_name = next(iter(cmd_obj))
-                            print('cmd_obj', cmd_obj)
-                            print('cmd_name', cmd_name)
+                            #print('cmd_obj', cmd_obj)
+                            #print('cmd_name', cmd_name)
                             if isinstance(cmd_obj, list):
                                 print('detected command list')
                                 cmd_obj = cmd_obj[0]
                                 cmd_name = next(iter(cmd_obj)) 
                             cmd_args = cmd_obj[cmd_name]
-                            print("final cmd_args:", cmd_args)
+                            #print("final cmd_args:", cmd_args)
                             await cmd_callback(cmd_name, cmd_args)
                             buffer = ""
                         except json.JSONDecodeError as e:
