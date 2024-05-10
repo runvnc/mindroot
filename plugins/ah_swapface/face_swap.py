@@ -51,7 +51,7 @@ class FaceSwap:
         face = self.face_analyser.get(img_data)
 
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
-            print.debug("No face detected, trying again with smaller image")
+            print("No face detected, trying again with smaller image")
             det_size_half = (det_size[0] // 2, det_size[1] // 2)
             return self.get_face_single(
                 img_data,
