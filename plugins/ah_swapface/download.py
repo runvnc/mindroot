@@ -27,7 +27,7 @@ def download_and_extract(url, extract_dir):
 
         print(f"TAR file downloaded from {url} and extracted to {extract_dir} successfully.")
     else:
-        file_name = os.path.join(extract_dir, os.path.basename(url))
+        file_name = os.path.join(extract_dir, os.path.basename(url).split('?')[0])
         with open(file_name, 'wb') as file:
             file.write(response.content)
 
