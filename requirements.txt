@@ -1,4 +1,6 @@
 facefusionlib
+insightface
+onnxruntime
 nanoid
 accelerate
 diffusers
