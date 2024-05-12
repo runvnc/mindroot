@@ -8,5 +8,7 @@ models/*
 xtest
 
 .aider*
-
+personas/local/*
+personas/shared/*
+data/*
 chatlog*.json

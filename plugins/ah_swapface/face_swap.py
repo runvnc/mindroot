@@ -139,6 +139,6 @@ def swap_face(input_ref_dir, target_image_path, skip_nsfw=False, wrap_html=False
 __init__()
 
 if __name__ == "__main__":
-    fname = do_swap_face("imgs/faceref/g", "imgs/target.png")
+    fname = do_swap_face("imgs/faceref/g", "imgs/target2.png")
     print(fname)
 

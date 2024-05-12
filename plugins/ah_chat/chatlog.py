@@ -7,7 +7,7 @@ class ChatLog:
         self.log_id = 0
         self.messages = []
         self.context_length = context_length
-        self.log_dir = os.environ.get('CHATLOG_DIR', '.')
+        self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
 
     def _calculate_message_length(self, message: Dict[str, str]) -> int:
         return len(json.dumps(message)) // 3
