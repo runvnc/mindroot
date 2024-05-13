@@ -4,9 +4,11 @@ from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from .chatlog import ChatLog
-from ..ah_agent import agent
+from ..ah_agent import Agent
 from ..ah_sd import sd
 from ..ah_swapface import face_swap
+from ..ah_persona import mod as persona
+from ../commands import command
 import asyncio
 import os
 import json
@@ -43,7 +45,20 @@ async def chat_events(log_id: str):
 
     return EventSourceResponse(event_generator())
 
+@command("say", is_local=True):
 async def send_event_to_clients(event: str, data: dict):
+    """
+    Say something to the user or chat room.
+    One sentence per command. If you want to say multiple sentences, use multiple commands.
+
+    # Example
+    
+    [
+        { "say": "Hello, user." },
+        { "say": "How can I help you today?" }
+    ]
+
+    """
     print("Try to send event: ", event, data)
     for queue in sse_clients:
         print("sending to sse client!")
@@ -60,17 +75,23 @@ async def face_swapped_image(prompt):
     print("new_img:", new_img)
     await send_event_to_clients("new_message", new_img)
 
+@router.put("/chat/{log_id}/{persona_name}"):
+    chat_log = ChatLog(persona_name)
+    chat_log.save_log(log_id)
 
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, request: Request):
     print("log_id = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
+    persona = persona.get_persona_data(chat_log.persona)
     form_data = await request.form()
     user_avatar = 'static/user.png'
-    assistant_avatar = 'static/assistant.png'
+    assistant_avatar = 'static/{persona_name}/avatar.png'
+
     message = form_data.get("message")
     print(form_data)
+    agent = Agent(persona)
 
     message_html = f'''
         <div class="flex items-start mb-2">
@@ -97,8 +118,8 @@ async def send_message(log_id: str, request: Request):
         json_cmd = { "say": assistant_message }
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
-    await agent.handle_cmd('say', send_assistant_response)
-    await agent.handle_cmd('image', face_swapped_image)
+    await agent.set_cmd_handler('say', send_assistant_response)
+    await agent.set_cmd_handler('image', face_swapped_image)
 
     try:
         print("mesages")
@@ -106,12 +127,6 @@ async def send_message(log_id: str, request: Request):
     except Exception as e:
         print("Found an error in agent output: ")
         print(e)
-        #messages.append({"role": "assistant", "content": str(e)})
-        #messages.append({"role": "user", "content": "Invalid command or output format."})
-        #print()
-        #print()
-        #print(messages)
-        #await agent.chat_commands(current_model, messages=messages) 
 
     return {"status": "ok"}
 

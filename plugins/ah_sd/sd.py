@@ -5,6 +5,9 @@ from diffusers import StableDiffusionXLPipeline, StableDiffusionPipeline
 from nanoid import generate
 import os
 
+from ..commands import command
+
+
 if os.environ.get('AH_DEFAULT_SD_MODEL'):
     current_model = 'models/' + os.environ.get('AH_DEFAULT_SD_MODEL')
     local_model = True
@@ -70,7 +73,19 @@ async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggi
         image.save(fname)
         return fname
 
+
+@command('image', is_local=True)
 async def simple_image(prompt, wrap=True):
+    """Generate an image from a prompt
+
+    # Example:
+
+    [
+      { "image": "A cute tabby cat in the forest"},
+      { "image": "A happy golden retriever in the park"}
+    ]
+
+    """
     fname = await sd_text_to_image(prompt)
     if not wrap:
         return fname

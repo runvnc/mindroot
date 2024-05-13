@@ -3,7 +3,6 @@ class CommandManager:
         self.commands = {}
 
     def register_command(self, name, implementation, docstring, is_local=False):
-    def register_command(self, name, implementation, docstring):
         if name in self.commands:
             raise ValueError(f"Command '{name}' is already registered.")
         if name in self.commands and is_local in self.commands[name]:
@@ -32,13 +31,25 @@ class CommandManager:
         implementation = command_info['implementation']
         return implementation(*args, **kwargs)
 
-    def get_docstring(self, name):
+    def get_docstring(self, name, prefer_local=False)
         if name not in self.commands:
             raise ValueError(f"Command '{name}' not found.")
-        # Prefer global command docstring if available
-        docstring = self.commands[name].get(False, {}).get('docstring') or \
-                    self.commands[name].get(True, {}).get('docstring')
+
+        docstring = None
+        if prefer_local:
+            docstring = self.commands[name].get(True, {}).get('docstring')
+        if not docstring:
+            docstring = self.commands[name].get(False, {}).get('docstring')
         return docstring
+
+    def get_commands(self):
+        return list(self.commands.keys())
+
+    def get_docstrings(self):
+        return {name: self.get_docstring(name) for name in self.commands.keys()}
+
+    def get_some_docstrings(self, names, prefer_local=False):
+        return {name: self.get_docstring(name, prefer_local=prefer_local) for name in names}
 
     def is_local_command(self, name):
         if name not in self.commands:
