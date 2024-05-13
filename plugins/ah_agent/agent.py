@@ -49,7 +49,7 @@ class Agent:
             await use_ollama.unload('llama3')
             await asyncio.sleep(1)
 
-        command_manager.execute(cmd_name, cmd_args)
+        await command_manager.execute(cmd_name, cmd_args)
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
@@ -135,6 +135,6 @@ class Agent:
                                         max_tokens=max_tokens,
                                         messages=messages)
 
-        await self.parse_cmd_stream(stream, cmd_callback)
+        await self.parse_cmd_stream(stream)
 
 

@@ -45,20 +45,8 @@ async def chat_events(log_id: str):
 
     return EventSourceResponse(event_generator())
 
-@command("say", is_local=True)
 async def send_event_to_clients(event: str, data: dict):
-    """
-    Say something to the user or chat room.
-    One sentence per command. If you want to say multiple sentences, use multiple commands.
 
-    # Example
-    
-    [
-        { "say": "Hello, user." },
-        { "say": "How can I help you today?" }
-    ]
-
-    """
     print("Try to send event: ", event, data)
     for queue in sse_clients:
         print("sending to sse client!")
@@ -108,7 +96,20 @@ async def send_message(log_id: str, request: Request):
     await send_event_to_clients("new_message", message_html)
     chat_log.add_message({"role": "user", "content": message})
 
+    @command("say", is_local=True)
     async def send_assistant_response(assistant_message):
+        """
+        Say something to the user or chat room.
+        One sentence per command. If you want to say multiple sentences, use multiple commands.
+
+        # Example
+        
+        [
+            { "say": "Hello, user." },
+            { "say": "How can I help you today?" }
+        ]
+
+        """
         assistant_message_html = f'''
             <div class="flex items-start mb-2">
                 <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">

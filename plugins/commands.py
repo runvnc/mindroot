@@ -4,9 +4,11 @@ class CommandManager:
 
     def register_command(self, name, implementation, docstring, is_local=False):
         if name in self.commands:
-            raise ValueError(f"Command '{name}' is already registered.")
+            print(f"Command '{name}' is already registered.")
+            #raise ValueError(f"Command '{name}' is already registered.")
         if name in self.commands and is_local in self.commands[name]:
-            raise ValueError(f"Command '{name}' with is_local={is_local} is already registered.")
+            print(f"Command '{name}' with is_local={is_local} is already registered.")
+            #raise ValueError(f"Command '{name}' with is_local={is_local} is already registered.")
         if name not in self.commands:
             self.commands[name] = {}
         self.commands[name][is_local] = {
@@ -15,7 +17,9 @@ class CommandManager:
             'is_local': is_local
         }
 
-    def execute(self, name, prefer_local=False, *args, **kwargs):
+    async def execute(self, name, *args, **kwargs):
+        print(f"execute! name= {name}, args={args}, kwargs={kwargs}")
+        prefer_local = True
         if name not in self.commands:
             raise ValueError(f"Command '{name}' not found.")
         local_command_info = self.commands[name].get(True)
@@ -29,7 +33,7 @@ class CommandManager:
             command_info = local_command_info  # Fallback to local if global is not available
 
         implementation = command_info['implementation']
-        return implementation(*args, **kwargs)
+        return await implementation(*args, **kwargs)
 
     def get_docstring(self, name, prefer_local=False):
         if name not in self.commands:
