@@ -3,9 +3,10 @@ import json
 from typing import List, Dict
 
 class ChatLog:
-    def __init__(self, context_length: int = 4096):
+    def __init__(self, log_id=0, persona=None, context_length: int = 4096):
         self.log_id = 0
         self.messages = []
+        self.persona = persona
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
 
