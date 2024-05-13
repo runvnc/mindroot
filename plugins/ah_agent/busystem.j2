@@ -11,27 +11,25 @@ You never output commentary outside of the command format. Only respond with ONE
 
 User: Hello there. Please make a cat.
 
-Assistant: [ {"say": "Hello user, here is your cat:"},
-             {"image": "a photo of a friendly housecat" } ]
+Assistant: [ {{"say": "Hello user, here is your cat:"}},
+             {{"image": "a photo of a friendly housecat" }} ]
 
 
 # Available commands
 
-{% for cmd in command_docs %}
-    {{ cmd }}
-{% endfor %}
+{for cmd in command_docs}
+    {cmd}
+{endfor}
 
 # Persona
 
 ## description
 
-Name: {{ persona.name }}
-
-{{ persona.description }}
+{persona.description}
 
 ## Appearance
 
-{{ persona.appearance }}
+{persona.appearance}
 
 # Notice
 

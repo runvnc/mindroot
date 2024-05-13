@@ -2,7 +2,9 @@ def get_persona_data(persona_name):
     import os
     import json
     import sys
-    # get the path to the persona
+
+    print("persona name is", persona_name, file=sys.stderr)
+
     persona_path = os.path.join('personas', 'local', persona_name)
     if not os.path.exists(persona_path):
         persona_path = os.path.join('personas', 'shared', persona_name)

@@ -4,7 +4,7 @@ from typing import List, Dict
 
 class ChatLog:
     def __init__(self, log_id=0, persona=None, context_length: int = 4096):
-        self.log_id = 0
+        self.log_id = log_id
         self.messages = []
         self.persona = persona
         self.context_length = context_length
@@ -21,7 +21,7 @@ class ChatLog:
 
     def add_message(self, message: Dict[str, str]) -> None:
         self.messages.append(message)
-        self._save_log()
+        self.save_log()
 
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
@@ -42,7 +42,7 @@ class ChatLog:
         # 
         #return recent_messages
 
-    def _save_log(self) -> None:
+    def save_log(self) -> None:
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
         with open(log_file, 'w') as f:
             json.dump(self._get_log_data(), f, indent=2)

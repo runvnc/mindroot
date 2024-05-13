@@ -16,13 +16,16 @@ class Agent:
         else:
             self.model = model
 
+        self.persona = persona
+
         if sys_core_template is None:
-            with open("system.j2", "r") as f:
+            system_template_path = os.path.join(os.path.dirname(__file__), "system.j2")
+            with open(system_template_path, "r") as f:
                 self.sys_core_template = f.read()
         else:
             self.sys_core_template = sys_core_template
 
-        self.sys_template = Template(markdown_template)
+        self.sys_template = Template(self.sys_core_template)
  
         self.cmd_handler = {}
 
@@ -114,8 +117,11 @@ class Agent:
 
 
     def render_system_msg(self):
-        self.command_docs = command_manager.get_docstrings()
-        self.system_message = self.sys_template.render(self)
+        data = {
+            "command_docs": command_manager.get_docstrings(),
+            "persona": self.persona
+        }
+        self.system_message = self.sys_template.render(data)
         return self.system_message
 
     async def chat_commands(self, model, cmd_callback=handle_cmds,

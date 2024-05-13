@@ -31,7 +31,7 @@ class CommandManager:
         implementation = command_info['implementation']
         return implementation(*args, **kwargs)
 
-    def get_docstring(self, name, prefer_local=False)
+    def get_docstring(self, name, prefer_local=False):
         if name not in self.commands:
             raise ValueError(f"Command '{name}' not found.")
 
