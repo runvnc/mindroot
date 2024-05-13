@@ -3,10 +3,11 @@ import json
 from ..ah_ollama import use_ollama 
 import os
 from jinja2 import Template
+from ..commands import command_manager
 
 class Agent:
 
-    __init__(self, model=None, sys_core_template=None, persona=None, commands=[]):
+    def __init__(self, model=None, sys_core_template=None, persona=None, commands=[]):
         if model is None:
             if os.environ.get('AH_DEFAULT_LLM_MODEL'):
                 self.model = os.environ.get('AH_DEFAULT_LLM_MODEL')
@@ -15,11 +16,11 @@ class Agent:
         else:
             self.model = model
 
-        if sys_core is None:
+        if sys_core_template is None:
             with open("system.j2", "r") as f:
                 self.sys_core_template = f.read()
-            else:
-                self.sys_core_template = sys_core_template
+        else:
+            self.sys_core_template = sys_core_template
 
         self.sys_template = Template(markdown_template)
  
@@ -45,11 +46,7 @@ class Agent:
             await use_ollama.unload('llama3')
             await asyncio.sleep(1)
 
-        if cmd_name in self.cmd_handler:
-            await cmd_handler[cmd_name](cmd_args)
-        else:
-            print(f"No handler for command {cmd_name}") 
-            raise Exception(f"No handler for command {cmd_name}")
+        command_manager.execute(cmd_name, cmd_args)
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
@@ -117,7 +114,8 @@ class Agent:
 
 
     def render_system_msg(self):
-       self.system_message = self.sys_template.render(self)
+        self.command_docs = command_manager.get_docstrings()
+        self.system_message = self.sys_template.render(self)
         return self.system_message
 
     async def chat_commands(self, model, cmd_callback=handle_cmds,
