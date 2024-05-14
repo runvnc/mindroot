@@ -68,6 +68,14 @@ async def init_chat(log_id: str, persona_name: str):
     chat_log = ChatLog(persona=persona_name)
     chat_log.save_log(log_id)
 
+class ChatContext:                                                                                                                                          
+    def __init__(self, send_event_func):                                                                                                                    
+         self.send_event_func = send_event_func                                                                                                              
+                                                                                                                                                             
+    async def insert_image(self, image_url):                                                                                                                
+        await self.send_event_func("new_message", f"<img src='{image_url}' />")                                                                             
+    
+
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, request: Request):
     print("log_id = ", log_id)
@@ -79,10 +87,7 @@ async def send_message(log_id: str, request: Request):
     assistant_avatar = 'static/{persona_name}/avatar.png'
 
     message = form_data.get("message")
-    print(form_data)
-    print('111')
     agent_ = agent.Agent(persona=persona_)
-    print('222')
 
     message_html = f'''
         <div class="flex items-start mb-2">
@@ -97,7 +102,7 @@ async def send_message(log_id: str, request: Request):
     chat_log.add_message({"role": "user", "content": message})
 
     @command("say", is_local=True)
-    async def send_assistant_response(assistant_message):
+    async def send_assistant_response(assistant_message, context=None):
         """
         Say something to the user or chat room.
         One sentence per command. If you want to say multiple sentences, use multiple commands.
@@ -120,14 +125,14 @@ async def send_message(log_id: str, request: Request):
         '''
         await send_event_to_clients("new_message", assistant_message_html)
         json_cmd = { "say": assistant_message }
+
+
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
-    #await agent.set_cmd_handler('say', send_assistant_response)
-    #await agent.set_cmd_handler('image', face_swapped_image)
-
     try:
-        print("mesages")
-        await agent_.chat_commands(current_model, messages=chat_log.get_recent())
+        context = ChatContext(send_event_to_clients)
+
+        await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
         print('ok')
     except Exception as e:
         print("Found an error in agent output: ")

@@ -11,11 +11,13 @@ class CommandManager:
             #raise ValueError(f"Command '{name}' with is_local={is_local} is already registered.")
         if name not in self.commands:
             self.commands[name] = {}
+
         self.commands[name][is_local] = {
             'implementation': implementation,
             'docstring': docstring,
             'is_local': is_local
         }
+        print("registered command: ", name, is_local, implementation, docstring)
 
     async def execute(self, name, *args, **kwargs):
         print(f"execute! name= {name}, args={args}, kwargs={kwargs}")
@@ -41,16 +43,16 @@ class CommandManager:
 
         docstring = None
         if prefer_local:
-            docstring = self.commands[name].get(True, {}).get('docstring')
+            docstring = self.commands[name][True]['docstring']
         if not docstring:
-            docstring = self.commands[name].get(False, {}).get('docstring')
+            docstring = self.commands[name][False]['docstring']
         return docstring
 
     def get_commands(self):
         return list(self.commands.keys())
 
-    def get_docstrings(self):
-        return {name: self.get_docstring(name) for name in self.commands.keys()}
+    def get_docstrings(self, prefer_local=True):
+        return [self.get_docstring(name, prefer_local=prefer_local) for name in self.commands.keys()]
 
     def get_some_docstrings(self, names, prefer_local=False):
         return {name: self.get_docstring(name, prefer_local=prefer_local) for name in names}

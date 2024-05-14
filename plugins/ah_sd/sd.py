@@ -75,8 +75,8 @@ async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggi
 
 
 @command('image', is_local=True)
-async def simple_image(prompt, wrap=True):
-    """Generate an image from a prompt
+async def simple_image(prompt, context=None):
+    """image: Generate an image from a prompt
 
     # Example:
 
@@ -85,12 +85,17 @@ async def simple_image(prompt, wrap=True):
       { "image": "A happy golden retriever in the park"}
     ]
 
+    # Example:
+
+    [
+      { "image": "A christmas gift wrapped in a red bow."}
+    ]
+
     """
     fname = await sd_text_to_image(prompt)
-    if not wrap:
-        return fname
-    else:
-        return f"""<img src="{fname}" />"""
+    print("image output to file", fname)
+    print("context = ", context)
+    await context.insert_image(fname)
 
 if __name__ == "__main__":
     prompt = sys.argv[1]
