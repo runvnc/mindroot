@@ -1,3 +1,6 @@
+import json
+import importlib
+
 class ServiceContext:
     def __init__(self):
         self._services = {}
@@ -18,16 +21,12 @@ def service(name):
         return func
     return decorator
 
-# Define a service function
-@service('my_service_func')
-def my_service_func(param1, param2):
-    return f"Service called with {param1} and {param2}"
-
-# Swap out the service function
-@service('my_service_func')
-def my_new_service_func(param1, param2):
-    return f"New service called with {param1} and {param2}"
+# Load active service from config
+with open('config.json') as config_file:
+    config = json.load(config_file)
+    active_service = config['active_service']
+    importlib.import_module(f'plugins.{active_service}')
 
 # Example usage
 if __name__ == "__main__":
-    print(context.my_service_func("hello", 10))  # Output: New service called with hello and 10
+    print(context.my_service_func("hello", 10))  # Output will depend on the active service
