@@ -1,3 +1,5 @@
+import inspect
+
 class CommandManager:
     def __init__(self):
         self.commands = {}
@@ -70,7 +72,8 @@ def command(*, is_local=False):
     def decorator(func):
         docstring = func.__doc__
         name = func.__name__
-        args = func.__code__.co_varnames
+        signature = inspect.signature(func)
+        args = [param.name for param in signature.parameters.values()]
         command_manager.register_command(name, func, args, docstring, is_local)
         return func
     return decorator
