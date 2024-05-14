@@ -2,7 +2,7 @@ class CommandManager:
     def __init__(self):
         self.commands = {}
 
-    def register_command(self, name, implementation, docstring, is_local=False):
+    def register_command(self, name, implementation, args, docstring, is_local=False):
         if name in self.commands:
             print(f"Command '{name}' is already registered.")
             #raise ValueError(f"Command '{name}' is already registered.")
@@ -66,10 +66,12 @@ class CommandManager:
 # Singleton pattern for easy access globally
 command_manager = CommandManager()
 
-def command(name, *, is_local=False):
+def command(*, is_local=False):
     def decorator(func):
         docstring = func.__doc__
-        command_manager.register_command(name, func, docstring, is_local)
+        name = func.__name__
+        args = func.__code__.co_varnames
+        command_manager.register_command(name, func, args, docstring, is_local)
         return func
     return decorator
 
