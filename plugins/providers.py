@@ -67,15 +67,15 @@ class ProviderManager:
         return True in self.functions[name]
 
     def __getattr__(self, name):
-        if name in self.__dict__ or name in self.__class__.__dict__:
-            return super().__getattr__(name)
+        #if name in self.__dict__ or name in self.__class__.__dict__:
+        #    return super().__getattr__(name)
         
         def method(*args, **kwargs):
             print(f'Called method: {name}')
             print(f'Arguments: {args}')
             print(f'Keyword arguments: {kwargs}')
             self.execute(name, *args, **kwargs)
-        
+
         return method
 
     def handle_specific_method(self, *args, **kwargs):

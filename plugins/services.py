@@ -1,5 +1,5 @@
 import inspect
-from providers import ProviderManager
+from .providers import ProviderManager
 
 service_manager = ProviderManager()
 

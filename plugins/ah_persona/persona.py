@@ -1,4 +1,4 @@
-import command from ..commands
+from ..commands import command
 
 def get_persona_data(persona_name):
     import os
@@ -30,7 +30,7 @@ def get_persona_data(persona_name):
 
 
 @command()
-def pic_of_me(prompt, context=None):
+async def pic_of_me(prompt, context=None):
     persona = context.persona
     img = await context.image(prompt + ',' + persona.appearance)
     swapped = await context.face_swap(img, persona.face_ref_image_path)
