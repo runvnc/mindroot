@@ -7,7 +7,6 @@ import os
 
 from ..commands import command
 
-
 if os.environ.get('AH_DEFAULT_SD_MODEL'):
     current_model = 'models/' + os.environ.get('AH_DEFAULT_SD_MODEL')
     local_model = True
@@ -74,8 +73,8 @@ async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggi
         return fname
 
 
-@command('image', is_local=True)
-async def simple_image(prompt, context=None):
+@command(is_local=True)
+async def image(prompt, context=None):
     """image: Generate an image from a prompt
 
     # Example:

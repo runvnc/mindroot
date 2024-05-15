@@ -9,6 +9,7 @@ from ..ah_sd import sd
 from ..ah_swapface import face_swap
 from ..ah_persona import persona
 from ..commands import command, command_manager
+from ..commands import command, command_manager
 import asyncio
 import os
 import json
@@ -45,8 +46,8 @@ async def chat_events(log_id: str):
 
     return EventSourceResponse(event_generator())
 
+@service(is_local=True)
 async def send_event_to_clients(event: str, data: dict):
-
     print("Try to send event: ", event, data)
     for queue in sse_clients:
         print("sending to sse client!")
@@ -68,10 +69,18 @@ async def init_chat(log_id: str, persona_name: str):
     chat_log = ChatLog(persona=persona_name)
     chat_log.save_log(log_id)
 
-class ChatContext:                                                                                                                                          
-    def __init__(self, send_event_func):                                                                                                                    
-         self.send_event_func = send_event_func                                                                                                              
-                                                                                                                                                             
+class ChatContext:
+    def __init__(self, command_manager, service_manager):
+        self._commands = command_manager.commands
+        self._services = service_manager.services
+
+    def __getattr__(self, name):
+        if name in self._services:
+            return self._services[name]
+        if name in self._commands:
+            return self._commands[name]
+        raise AttributeError(f"'ServiceContext' object has no attribute '{name}'")
+        
     async def insert_image(self, image_url):                                                                                                                
         await self.send_event_func("new_message", f"<img src='{image_url}' />")                                                                             
     
@@ -101,8 +110,8 @@ async def send_message(log_id: str, request: Request):
     await send_event_to_clients("new_message", message_html)
     chat_log.add_message({"role": "user", "content": message})
 
-    @command("say", is_local=True)
-    async def send_assistant_response(assistant_message, context=None):
+    @command(is_local=True)
+    async def say(assistant_message, context=None):
         """
         Say something to the user or chat room.
         One sentence per command. If you want to say multiple sentences, use multiple commands.

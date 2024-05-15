@@ -1,3 +1,5 @@
+import command from ..commands
+
 def get_persona_data(persona_name):
     import os
     import json
@@ -25,3 +27,12 @@ def get_persona_data(persona_name):
         persona_data['face_ref_image_path'] = persona_data['avatar_image_path']
 
     return persona_data
+
+
+@command()
+def pic_of_me(prompt, context=None):
+    persona = context.persona
+    img = await context.image(prompt + ',' + persona.appearance)
+    swapped = await context.face_swap(img, persona.face_ref_image_path)
+    await context.insert_image(swapped)
+
