@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+import traceback
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
@@ -8,8 +9,8 @@ from ..ah_agent import agent
 from ..ah_sd import sd
 from ..ah_swapface import face_swap
 from ..ah_persona import persona
-from ..commands import command
-from ..services import service
+from ..commands import command, command_manager
+from ..services import service, service_manager
 import asyncio
 import os
 import json
@@ -20,7 +21,7 @@ router = APIRouter()
 if os.environ.get('AH_DEFAULT_LLM'):
     current_model = os.environ.get('AH_DEFAULT_LLM')
 else:
-    current_model = 'phi3'
+    current_model = 'llama3'
 
 
 class Message(BaseModel):
@@ -47,7 +48,7 @@ async def chat_events(log_id: str):
     return EventSourceResponse(event_generator())
 
 @service(is_local=True)
-async def agent_output(event: str, data: dict):
+async def agent_output(event: str, data: dict, context=None):
     print("Try to send event: ", event, data)
     for queue in sse_clients:
         print("sending to sse client!")
@@ -71,6 +72,8 @@ async def init_chat(log_id: str, persona_name: str):
 
 class ChatContext:
     def __init__(self, command_manager, service_manager):
+        self.command_manager = command_manager
+        self.service_manager = service_manager
         self._commands = command_manager.functions
         self._services = service_manager.functions
 
@@ -79,16 +82,16 @@ class ChatContext:
             return super().__getattr__(name)
 
         if name in self._services:
-            kwargs["context"] = self
+            self.service_manager.context = self
             return getattr(self.service_manager, name)
 
-        if name in self._services:
-            kwargs["context"] = self
+        if name in self._commands:
+            self.command_manager.context = self
             return getattr(self.command_manager, name)
 
 
 @service(is_local=True)
-async def insert_image(self, image_url, context=None):                                                                                                                
+async def insert_image(image_url, context=None):                                                                                                                
     await context.agent_output("new_message", f"<img src='{image_url}' />")                                                                             
 
 @router.post("/chat/{log_id}/send")
@@ -96,10 +99,10 @@ async def send_message(log_id: str, request: Request):
     print("log_id = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
-    persona_ = persona.get_persona_data(chat_log.persona)
+    persona_ = await persona.get_persona_data(chat_log.persona)
     form_data = await request.form()
     user_avatar = 'static/user.png'
-    assistant_avatar = 'static/{persona_name}/avatar.png'
+    assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
 
     message = form_data.get("message")
     agent_ = agent.Agent(persona=persona_)
@@ -144,13 +147,15 @@ async def send_message(log_id: str, request: Request):
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
     try:
-        context = ChatContext()
+        context = ChatContext(command_manager, service_manager)
+        context.persona = persona_
 
         await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
         print('ok')
     except Exception as e:
         print("Found an error in agent output: ")
         print(e)
+        print(traceback.format_exc())
 
     return {"status": "ok"}
 

@@ -1,6 +1,6 @@
 from ..commands import command
 
-def get_persona_data(persona_name):
+async def get_persona_data(persona_name):
     import os
     import json
     import sys
@@ -31,8 +31,20 @@ def get_persona_data(persona_name):
 
 @command()
 async def pic_of_me(prompt, context=None):
+    """pic_of_me(prompt)
+
+    Generate a picture of the persona given a detailed description of what they are doing.
+    Always use this instead of 'image' when creating an image of the persona!
+
+    Example:
+
+    { "pic_of_me": "wearing a blue hat and a red shirt, playing guitar." }
+
+    """
     persona = context.persona
-    img = await context.image(prompt + ',' + persona.appearance)
-    swapped = await context.face_swap(img, persona.face_ref_image_path)
+    print("persona:", persona)
+    img = await context.image(prompt + ',' + persona['appearance'])
+    swapped = await context.face_swap(img, persona['face_ref_image_path'])
     await context.insert_image(swapped)
+
 

@@ -43,12 +43,13 @@ class Agent:
     async def handle_cmds(self, cmd_name, cmd_args, context=None):
         print(f"Command: {cmd_name}")
         print(f"Arguments: {cmd_args}")
+        print("Context:", context)
         print('----------------------------------')
         if cmd_name != 'say':
             print("Unloading llm")
             await use_ollama.unload(self.model)
             await asyncio.sleep(1)
-
+        command_manager.context = context
         await command_manager.execute(cmd_name, cmd_args, context=context)
 
     def remove_braces(self, buffer):

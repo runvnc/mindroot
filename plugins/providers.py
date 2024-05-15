@@ -36,7 +36,8 @@ class ProviderManager:
             function_info = global_function_info
         else:
             function_info = local_function_info  # Fallback to local if global is not available
-
+        if not 'context' in kwargs:
+            kwargs['context'] = self.context
         implementation = function_info['implementation']
         return await implementation(*args, **kwargs)
 
@@ -46,7 +47,8 @@ class ProviderManager:
 
         docstring = None
         if prefer_local:
-            docstring = self.functions[name][True]['docstring']
+            if True in self.functions[name]:
+                docstring = self.functions[name][True]['docstring']
         if not docstring:
             docstring = self.functions[name][False]['docstring']
         return docstring
@@ -70,11 +72,11 @@ class ProviderManager:
         #if name in self.__dict__ or name in self.__class__.__dict__:
         #    return super().__getattr__(name)
         
-        def method(*args, **kwargs):
+        async def method(*args, **kwargs):
             print(f'Called method: {name}')
             print(f'Arguments: {args}')
             print(f'Keyword arguments: {kwargs}')
-            self.execute(name, *args, **kwargs)
+            await self.execute(name, *args, **kwargs)
 
         return method
 
