@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static", follow_symlinks=True)
+app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name="static" )
 app.mount("/imgs", StaticFiles(directory="imgs"), name="imgs")
 
 # Include the router from chat.py
