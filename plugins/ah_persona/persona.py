@@ -1,4 +1,5 @@
 from ..commands import command
+import os
 
 async def get_persona_data(persona_name):
     import os
@@ -43,9 +44,10 @@ async def pic_of_me(prompt, context=None):
     """
     persona = context.persona
     print("persona:", persona)
-    img = await context.sd_text_to_image(prompt + ',' + persona['appearance'])
+    img = await context.sd_text_to_image(prompt + ', solo, ' + persona['appearance'], '2girl, 2boy')
     print("img = ", img)
-    swapped = await context.swap_face(persona['face_ref_image_path'], img)
+    img_dir = os.path.dirname(persona['face_ref_image_path'])
+    swapped = await context.swap_face(img_dir, img)
     await context.insert_image(swapped)
 
 

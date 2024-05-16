@@ -111,7 +111,7 @@ def __init__():
     print("initializing face swap")
     swapper = FaceSwap()
 
-def do_swap_face(src_dir, target_img_filepath):
+async def do_swap_face(src_dir, target_img_filepath):
     target_img = Image.open(target_img_filepath)
     src_images = []
     
@@ -131,13 +131,10 @@ def do_swap_face(src_dir, target_img_filepath):
         print("No source images found in the directory.")
 
 @service(is_local=True)
-def swap_face(input_ref_dir, target_image_path, context=None, skip_nsfw=False, wrap_html=False): 
-    fname = do_swap_face(input_ref_dir, target_image_path)
+async def swap_face(input_ref_dir, target_image_path, context=None, skip_nsfw=False, wrap_html=False): 
+    fname = await do_swap_face(input_ref_dir, target_image_path)
     return fname
 
 __init__()
 
-if __name__ == "__main__":
-    fname = do_swap_face("imgs/faceref/g", "imgs/target2.png")
-    print(fname)
 
