@@ -59,7 +59,7 @@ class ProviderManager:
     def get_docstrings(self, prefer_local=True):
         return [self.get_docstring(name, prefer_local=prefer_local) for name in self.functions.keys()]
 
-    def get_some_docstrings(self, names, prefer_local=False):
+    def get_some_docstrings(self, names, prefer_local=True):
         return [self.get_docstring(name, prefer_local=prefer_local) for name in names]
 
     def is_local_function(self, name):
