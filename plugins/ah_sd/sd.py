@@ -6,6 +6,7 @@ from nanoid import generate
 import os
 
 from ..commands import command
+from ..services import service
 
 if os.environ.get('AH_DEFAULT_SD_MODEL'):
     current_model = 'models/' + os.environ.get('AH_DEFAULT_SD_MODEL')
@@ -47,7 +48,8 @@ async def sdxl_text_to_image(prompt, negative_prompt='', model_id=None, from_hug
         image.save(fname)
         return fname
 
-async def sd_text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None, count=1,
+@service(is_local=True)
+async def sd_text_to_image(prompt, negative_prompt='', context=None, model_id=None, from_huggingface=None, count=1,
                            save_to="imgs/" + random_img_fname(), w=512, h=512, steps=20, cfg=8):
     if model_id is None:
         model_id = current_model

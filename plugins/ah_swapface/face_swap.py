@@ -12,6 +12,7 @@ from insightface.model_zoo.inswapper import INSwapper
 from PIL import Image
 from .utils import pil2tensor, tensor2pil
 from .download import download_and_extract
+from ..services import service
 
 swapper = None
 
@@ -129,12 +130,10 @@ def do_swap_face(src_dir, target_img_filepath):
     else:
         print("No source images found in the directory.")
 
-def swap_face(input_ref_dir, target_image_path, skip_nsfw=False, wrap_html=False): 
+@service(is_local=True)
+def swap_face(input_ref_dir, target_image_path, context=None, skip_nsfw=False, wrap_html=False): 
     fname = do_swap_face(input_ref_dir, target_image_path)
-    if wrap_html:
-        return f'<img src="{fname}" />'
-    else:
-        return fname
+    return fname
 
 __init__()
 

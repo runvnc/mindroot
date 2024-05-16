@@ -43,8 +43,9 @@ async def pic_of_me(prompt, context=None):
     """
     persona = context.persona
     print("persona:", persona)
-    img = await context.image(prompt + ',' + persona['appearance'])
-    swapped = await context.face_swap(img, persona['face_ref_image_path'])
+    img = await context.sd_text_to_image(prompt + ',' + persona['appearance'])
+    print("img = ", img)
+    swapped = await context.swap_face(persona['face_ref_image_path'], img)
     await context.insert_image(swapped)
 
 

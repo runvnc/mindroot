@@ -76,7 +76,7 @@ class ProviderManager:
             print(f'Called method: {name}')
             print(f'Arguments: {args}')
             print(f'Keyword arguments: {kwargs}')
-            await self.execute(name, *args, **kwargs)
+            return await self.execute(name, *args, **kwargs)
 
         return method
 
