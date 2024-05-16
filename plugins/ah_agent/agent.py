@@ -37,18 +37,21 @@ class Agent:
         print("recorded handler for ", cmd_name)
 
     async def unload_llm_if_needed(self):
-        await use_ollama.unload(self.model)
-        await asyncio.sleep(1)
+        print("not unloading llm")
+        #await use_ollama.unload(self.model)
+        #await asyncio.sleep(1)
 
-    async def handle_cmds(self, cmd_name, cmd_args, context=None):
+    async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
         print(f"Command: {cmd_name}")
         print(f"Arguments: {cmd_args}")
         print("Context:", context)
         print('----------------------------------')
         if cmd_name != 'say':
             print("Unloading llm")
-            await use_ollama.unload(self.model)
-            await asyncio.sleep(1)
+            #await use_ollama.unload(self.model)
+            #await asyncio.sleep(0.3)
+            context.chat_log.add_message({"role": "assistant", "content": json_cmd})
+
         command_manager.context = context
         await command_manager.execute(cmd_name, cmd_args, context=context)
 
@@ -89,6 +92,7 @@ class Agent:
                         stack.pop()
                         if not stack and buffer is not None and buffer != "":
                             try:
+                                buffer = buffer.replace("}\n", "},\n")
                                 buffer = self.remove_braces(buffer)
                                 cmd_obj = json.loads(buffer)
                                 cmd_name = next(iter(cmd_obj))
@@ -97,7 +101,7 @@ class Agent:
                                     cmd_obj = cmd_obj[0]
                                     cmd_name = next(iter(cmd_obj)) 
                                 cmd_args = cmd_obj[cmd_name]
-                                await self.handle_cmds(cmd_name, cmd_args, context=context)
+                                await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
                                 buffer = ""
                             except json.JSONDecodeError as e:
                                 print("error parsing ||", e, " ||")
@@ -112,7 +116,7 @@ class Agent:
                 for cmd_obj in cmds:
                     cmd_name = next(iter(cmd_obj))
                     cmd_args = cmd_obj[cmd_name]
-                    await self.handle_cmds(cmd_name, cmd_args, context=context)
+                    await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
             except json.JSONDecodeError:
                 print("error parsing")
 
@@ -121,7 +125,7 @@ class Agent:
         print("docstrings:")
         print(command_manager.get_some_docstrings(self.persona["commands"]))
         data = {
-            "command_docs": command_manager.get_docstrings(),
+            "command_docs": command_manager.get_some_docstrings(self.persona["commands"]),
             "persona": self.persona
         }
         self.system_message = self.sys_template.render(data)

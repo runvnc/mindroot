@@ -11,6 +11,7 @@ from ..ah_swapface import face_swap
 from ..ah_persona import persona
 from ..commands import command, command_manager
 from ..services import service, service_manager
+from ..hooks import hook, hook_manager
 import asyncio
 import os
 import json
@@ -34,6 +35,8 @@ async def chat_events(log_id: str):
     print("chat_log = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
+
+    asyncio.create_task(hook_manager.warmup())
 
     async def event_generator():
         queue = asyncio.Queue()
@@ -94,6 +97,7 @@ class ChatContext:
 async def insert_image(image_url, context=None):                                                                                                                
     await context.agent_output("new_message", f"<img src='{image_url}' />")                                                                             
 
+
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, request: Request):
     print("log_id = ", log_id)
@@ -148,6 +152,7 @@ async def send_message(log_id: str, request: Request):
 
     try:
         context = ChatContext(command_manager, service_manager)
+        context.chat_log = chat_log
         context.persona = persona_
 
         await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())

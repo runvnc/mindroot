@@ -124,3 +124,15 @@ class HookManager:
 
     def get_docstrings(self):
         return {name: self.get_docstring(name) for name in self.hooks.keys()}
+
+    def __getattr__(self, name):
+ 
+        async def method(*args, **kwargs):
+            print(f'Running hooks: {name}')
+            print(f'Arguments: {args}')
+            print(f'Keyword arguments: {kwargs}')
+            return await self.execute_hooks(name, *args, **kwargs)
+
+        return method
+
+

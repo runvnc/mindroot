@@ -13,5 +13,7 @@ def load_plugins(plugin_file):
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
+
+
 load_plugins('plugins.json')
 
