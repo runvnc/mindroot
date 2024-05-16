@@ -60,7 +60,7 @@ class ProviderManager:
         return [self.get_docstring(name, prefer_local=prefer_local) for name in self.functions.keys()]
 
     def get_some_docstrings(self, names, prefer_local=False):
-        return {name: self.get_docstring(name, prefer_local=prefer_local) for name in names}
+        return [self.get_docstring(name, prefer_local=prefer_local) for name in names]
 
     def is_local_function(self, name):
         if name not in self.functions:

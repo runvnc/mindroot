@@ -119,7 +119,7 @@ class Agent:
 
     def render_system_msg(self):
         print("docstrings:")
-        print(command_manager.get_docstrings())
+        print(command_manager.get_some_docstrings(self.persona["commands"]))
         data = {
             "command_docs": command_manager.get_docstrings(),
             "persona": self.persona
