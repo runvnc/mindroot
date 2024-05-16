@@ -85,3 +85,42 @@ class ProviderManager:
         return "Handled specific_method"
 
 
+import inspect
+
+class HookManager:
+    def __init__(self):
+        self.hooks = {}
+
+    def register_hook(self, name, implementation, signature, docstring):
+        if name not in self.hooks:
+            self.hooks[name] = []
+            print('registering hook:', name, signature)
+
+        self.hooks[name].append({
+            'implementation': implementation,
+            'docstring': docstring
+        })
+        print("registered hook: ", name, implementation, docstring)
+
+    async def execute_hooks(self, name, *args, **kwargs):
+        print(f"execute hooks! name= {name}, args={args}, kwargs={kwargs}")
+        if name not in self.hooks:
+            raise ValueError(f"hook '{name}' not found.")
+        
+        results = []
+        for hook_info in self.hooks[name]:
+            implementation = hook_info['implementation']
+            result = await implementation(*args, **kwargs)
+            results.append(result)
+        return results
+
+    def get_docstring(self, name):
+        if name not in self.hooks:
+            raise ValueError(f"hook '{name}' not found.")
+        return [hook_info['docstring'] for hook_info in self.hooks[name]]
+
+    def get_hooks(self):
+        return list(self.hooks.keys())
+
+    def get_docstrings(self):
+        return {name: self.get_docstring(name) for name in self.hooks.keys()}
