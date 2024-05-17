@@ -7,7 +7,7 @@ from ..commands import command_manager
 
 class Agent:
 
-    def __init__(self, model=None, sys_core_template=None, persona=None, commands=[]):
+    def __init__(self, model=None, sys_core_template=None, persona=None, clear_model=False, commands=[]):
         if model is None:
             if os.environ.get('AH_DEFAULT_LLM'):
                 self.model = os.environ.get('AH_DEFAULT_LLM')
@@ -28,6 +28,9 @@ class Agent:
         self.sys_template = Template(self.sys_core_template)
  
         self.cmd_handler = {}
+        
+        if clear_model:
+            asyncio.create_task(use_ollama.unload(self.model))
 
     def use_model(self, model_id, local=True):
         self.current_model = model_id

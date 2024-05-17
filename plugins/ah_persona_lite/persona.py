@@ -42,12 +42,12 @@ async def pic_of_me(prompt, context=None):
 
     Example:
 
-    { "pic_of_me": "[details from Appearance section of Persona definition] wearing a blue hat and a red shirt, playing guitar." }
+    { "pic_of_me": "wearing a blue hat and a red shirt, playing guitar." }
 
     """
     persona = context.persona
     print("persona:", persona)
-    img = await context.text_to_image(prompt + ', solo, ', 'split-view, diptych, side-by-side, 2girl, 2boy')
+    img = await context.text_to_image(prompt + persona['appearance'] + ', solo, ', 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     swapped = await context.swap_face(img_dir, img)

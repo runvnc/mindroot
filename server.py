@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from plugins import plugins
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name="static" )

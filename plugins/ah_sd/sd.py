@@ -48,14 +48,16 @@ async def warmup(context=None):
     if from_huggingface is None:
         from_huggingface = not local_model
 
-    print("Initializing stable diffusion pipeline...")
-
     if use_sdxl:
+        print("Initializing stable diffusion XL pipeline...")
+
         if not from_huggingface:
             pipeline = StableDiffusionXLPipeline.from_single_file(model_id, torch_dtype=torch.float16)
         else:
             pipeline = StableDiffusionXLPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
     else:
+        print("Initializing stable diffusion pipeline...")
+
         if not from_huggingface:
             pipeline = StableDiffusionPipeline.from_single_file(model_id, torch_dtype=torch.float16)
         else:

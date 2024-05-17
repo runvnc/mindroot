@@ -6,9 +6,6 @@ from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from .chatlog import ChatLog
 from ..ah_agent import agent
-from ..ah_sd import sd
-from ..ah_swapface import face_swap
-from ..ah_persona import persona
 from ..commands import command, command_manager
 from ..services import service, service_manager
 from ..hooks import hook, hook_manager
@@ -35,7 +32,8 @@ async def chat_events(log_id: str):
     print("chat_log = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
-
+    agent_ = agent.Agent(persona=chat_log.persona, clear_model=True)
+    await asyncio.sleep(0.65)
     asyncio.create_task(hook_manager.warmup())
 
     async def event_generator():
@@ -57,21 +55,12 @@ async def agent_output(event: str, data: dict, context=None):
         print("sending to sse client!")
         await queue.put({"event": event, "data": data})
 
-async def return_image(prompt):
-    result = await sd.simple_image(prompt)
-    await agent_output("new_message", result)
-
-async def face_swapped_image(prompt):
-    img = await sd.simple_image(prompt, wrap=False)
-    print("completed image out, about to swap. img = ", img, "face ref dir =", os.environ.get("AH_FACE_REF_DIR"))
-    new_img = face_swap.swap_face(os.environ.get('AH_FACE_REF_DIR'), img, skip_nsfw=True, wrap_html=True)
-    print("new_img:", new_img)
-    await agent_output("new_message", new_img)
 
 @router.put("/chat/{log_id}/{persona_name}")
 async def init_chat(log_id: str, persona_name: str):
     chat_log = ChatLog(persona=persona_name)
     chat_log.save_log(log_id)
+    persona_ = await service_manager.get_persona_data(persona_name)
 
 class ChatContext:
     def __init__(self, command_manager, service_manager):
@@ -107,7 +96,9 @@ async def send_message(log_id: str, request: Request):
     form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-
+    user_name = form_data.get("user_name")
+    if user_name is None:
+        user_name = os.environ.get("AH_USER_NAME")
     message = form_data.get("message")
     agent_ = agent.Agent(persona=persona_)
 
@@ -121,7 +112,8 @@ async def send_message(log_id: str, request: Request):
     '''
 
     await agent_output("new_message", message_html)
-    chat_log.add_message({"role": "user", "content": message})
+    chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
+
 
     @command(is_local=True)
     async def say(assistant_message, context=None):
