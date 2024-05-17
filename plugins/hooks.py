@@ -11,3 +11,5 @@ def hook():
         hook_manager.register_hook(name, func, signature, docstring)
         return func
     return decorator
+
+print("hook should be defined?")

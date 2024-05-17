@@ -1,6 +1,5 @@
 import asyncio
 import json
-from ..ah_ollama import use_ollama 
 import os
 from jinja2 import Template
 from ..commands import command_manager
@@ -29,8 +28,8 @@ class Agent:
  
         self.cmd_handler = {}
         
-        if clear_model:
-            asyncio.create_task(use_ollama.unload(self.model))
+        #if clear_model:
+        #    asyncio.create_task(use_ollama.unload(self.model))
 
     def use_model(self, model_id, local=True):
         self.current_model = model_id
@@ -140,7 +139,7 @@ class Agent:
         messages = [{"role": "system", "content": self.render_system_msg()}] + messages
         print("Messages:", messages, flush=True)
 
-        stream = await use_ollama.stream_chat(model,
+        stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
                                         messages=messages)

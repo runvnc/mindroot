@@ -80,10 +80,6 @@ class ProviderManager:
 
         return method
 
-    def handle_specific_method(self, *args, **kwargs):
-        # Specific method handler
-        return "Handled specific_method"
-
 
 import inspect
 

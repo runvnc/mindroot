@@ -1,8 +1,9 @@
 import asyncio
 from ollama import AsyncClient, Options
+from ..services import service
 
-
-async def stream_chat(model, messages=[], num_ctx=2048, temperature=0.0, max_tokens=100, num_gpu_layers=12):
+@service()
+async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=100, num_gpu_layers=12):
     client = AsyncClient()
     try:
         print("GENERATING TEXT WITH MODEL:", model)

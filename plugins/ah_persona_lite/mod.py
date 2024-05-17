@@ -1,8 +1,10 @@
 from ..commands import command
+from ..services import service
+
 import os
 
-@service(context=None)
-async def get_persona_data(persona_name):
+@service()
+async def get_persona_data(persona_name, context=None):
     import os
     import json
     import sys

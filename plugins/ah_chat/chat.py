@@ -92,7 +92,7 @@ async def send_message(log_id: str, request: Request):
     print("log_id = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
-    persona_ = await persona.get_persona_data(chat_log.persona)
+    persona_ = await service_manager.get_persona_data(chat_log.persona)
     form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
