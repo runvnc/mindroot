@@ -30,6 +30,7 @@ tqdm
 yapf
 lpips
 
+fastapi
 gdown
 
 pluggy
