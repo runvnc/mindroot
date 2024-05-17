@@ -1,6 +1,25 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+import os
+from pathlib import Path
 from plugins import plugins
+
+def create_directories():
+    directories = [
+        "imgs",
+        "data/chat",
+        "models",
+        "models/face",
+        "models/llm",
+        "static/personas",
+        "personas",
+        "personas/local",
+        "personas/shared",
+    ]
+    for directory in directories:
+        Path(directory).mkdir(parents=True, exist_ok=True)
+
+create_directories()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name="static" )
