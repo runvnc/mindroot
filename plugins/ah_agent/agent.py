@@ -77,6 +77,9 @@ class Agent:
         stack = []
         in_string = False
         escape_next = False
+        cmd_name_detected = False
+        cmd_name = ""
+        cmd_args = ""
 
         async for part in stream:
             chunk = part['message']['content']
@@ -85,6 +88,12 @@ class Agent:
             for char in chunk:
                 if char == '"' and not escape_next:
                     in_string = not in_string
+                    if not in_string and cmd_name_detected:
+                        # Remove the trailing quotation mark and any trailing comma
+                        parsed_chunk = buffer[:-1].rstrip(',')
+                        await context.partial_command(cmd_name, parsed_chunk)
+                        cmd_name_detected = False
+                        buffer = ""
                 elif char == '\\' and in_string:
                     escape_next = True
                 elif char == '{' and not in_string:
@@ -97,6 +106,7 @@ class Agent:
                                 buffer = buffer.replace("}\n", "},\n")
                                 buffer = self.remove_braces(buffer)
                                 cmd_obj = json.loads(buffer)
+                                cmd_name_detected = True
                                 cmd_name = next(iter(cmd_obj))
                                 if isinstance(cmd_obj, list):
                                     print('detected command list')
