@@ -81,7 +81,7 @@ class Agent:
         async for part in stream:
             chunk = part['message']['content']
             buffer += chunk
-
+            await context.chat_chunk(chunk, buffer)
             for char in chunk:
                 if char == '"' and not escape_next:
                     in_string = not in_string
