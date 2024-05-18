@@ -57,17 +57,21 @@ async def agent_output(event: str, data: dict, context=None):
 
 
 @service(is_local=True)
-async def partial_command(command: str, chunk: str, so_far: str, context=None):
-    print("*** partial_command service call ***")
-    print(command, chunk, so_far)
+async def chat_chunk(chunk: str, so_far: str, context=None):
+    print("*** chat_chunk service call ***")
     persona_ = context.persona
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-    output = ''
-    if not context.response_started:
-        output = f'''
-            <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2 inline-block">'''
+    output = f'''
+        <div class="flex items-start mb-2">
+            <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
+            <div class="bg-primary">
+                <p class="text-yellow agent-response">
+                {so_far}
+                </p>
+            </div>
+        </div>
+                '''
     context.response_started = True
-    output += f"<span>{chunk}</span>"
     await context.agent_output("new_message", output)
 
 
@@ -153,7 +157,7 @@ async def send_message(log_id: str, request: Request):
                 </div>
             </div>
         '''
-        #await context.agent_output("new_message", assistant_message_html)
+        await context.agent_output("new_message", assistant_message_html)
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})

@@ -3,12 +3,6 @@ import json
 import os
 from jinja2 import Template
 from ..commands import command_manager
-import partial_json_parser
-
-def find_new_substring(s1, s2):
-    if s1 in s2:
-        return s2.replace(s1, '', 1)
-    return s2
 
 class Agent:
 
@@ -83,44 +77,50 @@ class Agent:
         stack = []
         in_string = False
         escape_next = False
-        last_partial_args = None
 
         async for part in stream:
             chunk = part['message']['content']
             buffer += chunk
-            try:
-                buffer = buffer.replace("}\n", "},\n")
-                buffer = self.remove_braces(buffer)
-                cmd_obj = json.loads(buffer)
-                cmd_name = next(iter(cmd_obj))
-                if isinstance(cmd_obj, list):
-                    print('detected command list')
-                    cmd_obj = cmd_obj[0]
-                    cmd_name = next(iter(cmd_obj)) 
-                cmd_args = cmd_obj[cmd_name]
-                await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
-                buffer = ""
-                last_partial_args = None
-            except json.JSONDecodeError as e:
-                print("error parsing ||", e, " ||")
-                print(buffer)
+            await context.chat_chunk(chunk, buffer)
+            for char in chunk:
+                if char == '"' and not escape_next:
+                    in_string = not in_string
+                elif char == '\\' and in_string:
+                    escape_next = True
+                elif char == '{' and not in_string:
+                    stack.append(char)
+                elif char == '}' and not in_string:
+                    if stack and stack[-1] == '{':
+                        stack.pop()
+                        if not stack and buffer is not None and buffer != "":
+                            try:
+                                buffer = buffer.replace("}\n", "},\n")
+                                buffer = self.remove_braces(buffer)
+                                cmd_obj = json.loads(buffer)
+                                cmd_name = next(iter(cmd_obj))
+                                if isinstance(cmd_obj, list):
+                                    print('detected command list')
+                                    cmd_obj = cmd_obj[0]
+                                    cmd_name = next(iter(cmd_obj)) 
+                                cmd_args = cmd_obj[cmd_name]
+                                await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
+                                buffer = ""
+                            except json.JSONDecodeError as e:
+                                print("error parsing ||", e, " ||")
+                                print(buffer)
+                                pass
 
-                try:
-                    partial = partial_json_parser.loads(buffer)
-                    print("partial command found:", partial)
-                    partial_command = next(iter(partial))
-                    if partial_command is not None:
-                        partial_args = partial[partial_command]
-                        if isinstance(partial_args, str) and last_partial_args is not None:
-                            diff_str = find_new_substring(last_partial_args, partial_args)
-                        else:
-                            diff_str = partial_args
-                        print("sending partial command diff")
-                        await context.partial_command(partial_command, diff_str, partial_args)
-                        last_partial_args = partial_args
-                except Exception as e:
-                    print("error parsing partial command:", e)
-                    pass
+                escape_next = False
+
+        if buffer:
+            try:
+                cmds = json.loads(buffer)
+                for cmd_obj in cmds:
+                    cmd_name = next(iter(cmd_obj))
+                    cmd_args = cmd_obj[cmd_name]
+                    await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
+            except json.JSONDecodeError:
+                print("error parsing")
 
 
     def render_system_msg(self):
