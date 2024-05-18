@@ -119,12 +119,10 @@ async def send_message(log_id: str, request: Request):
     agent_ = agent.Agent(persona=persona_)
 
     message_html = f'''
-        <div class="flex items-start mb-2">
-            <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
-            <div class="text-white">
-                <p class="text-secondary text-base">{message}</p>
+            <div class="ml-6 w-2/3">
+                <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full">
+                <span class="text-secondary text-base">{message}</span>
             </div>
-        </div>
     '''
 
     await agent_output("new_message", message_html)
