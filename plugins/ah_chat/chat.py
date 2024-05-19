@@ -59,15 +59,23 @@ async def agent_output(event: str, data: dict, context=None):
 @service(is_local=True)
 async def partial_command(command: str, chunk: str, so_far: str, context=None):
     print("*** partial_command service call ***")
-    print(command, chunk, so_far)
     persona_ = context.persona
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-    output = ''
     if not context.response_started:
         output = f'''
-            <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2 inline-block">'''
-    context.response_started = True
-    output += f"<span>{chunk}</span>"
+            <div class="flex items-start mb-2">
+                <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
+                <div class="bg-primary">
+                    <p class="text-yellow agent-response streamto">
+                    {so_far}
+                    </p>
+                </div>
+            </div>
+                    '''
+        context.response_started = True
+    else:
+        output = f"<span>{chunk}</span>"
+
     await context.agent_output("new_message", output)
 
 
@@ -119,10 +127,16 @@ async def send_message(log_id: str, request: Request):
     agent_ = agent.Agent(persona=persona_)
 
     message_html = f'''
-            <div class="ml-6 w-2/3">
-                <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full">
-                <span class="text-secondary text-base">{message}</span>
+       <div>
+        <div class="flex items-start mb-2">
+            <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
+            <div class="text-white">
+                <p class="text-secondary text-base">{message}</p>
             </div>
+        </div>
+       </div>
+       <div class="streamto">
+       </div>
     '''
 
     await agent_output("new_message", message_html)
@@ -151,7 +165,7 @@ async def send_message(log_id: str, request: Request):
                 </div>
             </div>
         '''
-        #await context.agent_output("new_message", assistant_message_html)
+        await context.agent_output("new_message", assistant_message_html)
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})

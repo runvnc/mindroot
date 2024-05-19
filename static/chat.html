@@ -3,41 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="static/main.css" rel="stylesheet">
-  <script src="https://unpkg.com/htmx.org@1.7.0"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
   <title>AgentHost v0.1</title>
+
+  <style>
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+  text: white;
+  background-color: black;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+input, button, textarea, select {
+  font: inherit;
+}
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+#root, #__next {
+  isolation: isolate;
+}
+ 
+.chat-group * {
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.chat-group {
+/* neon green with bloom effect: */
+  background-color: #00ff00;
+  box-shadow: 0 0 1rem 0.5rem #00ff00;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1rem;
+}
+
+  </style>
 </head>
-<body class="bg-black m-2 p-2">
-  <div class="container mx-auto p-4 m-4 neon-effect rounded-md shadow-lg shadow-green-500">
-      <div hx-ext="sse" sse-connect="/chat/{{CHAT_ID}}/events" hx-swap="beforeend" sse-swap="new_message"
-        id="chat-container" class="bg-box text-white">
-        <!-- Chat messages will be dynamically added here -->
+<body>
+  <div id="chat-group">
+      <div id="chat">
+        <!-- messages -->
       </div>
-      <form hx-post="/chat/{{CHAT_ID}}/send" hx-target="#chat-container" hx-swap="beforeend" class="flex m-2 p-2">
-      <input id="message-input" type="text" name="message" class="flex-grow dark bg-black focus:bg-black active:bg-black hover:bg-black py-2 text-secondary text-white focus:outline-none" placeholder="Type your message...">
-      <button id="send-button" class="bg-primary hover:bg-green-600 hover:text-black border border-green-950 active:bg-black p-2 m-2 text-green-500 font-semibold focus:ring-2 focus:ring-primary" >
-          Send</button>
+      <form method="post" target="/chat/{{CHAT_ID}}/send" id="chat-form">
+      <textarea id="user-in" type="text" name="message" placeholder="Type your message...">
+      <button id="send">Send</button>
     </form>
   </div>
 
+  <template id="ai-msg">
+      <div class="msg ai">
+        <img src="static/ai.png" alt="AI" width="50" height="50">
+        <div class="streamto"></div>
+      </div>
+  </template>
+
   <script>
-    document.getElementById('send-button').addEventListener('click', function() {
-      setTimeout( () => {
-        var input = document.getElementById('message-input');
-        input.value = '';
-      }, 30)
+    const getEl = (id) => document.getElementById(id)
+    const selectEl = (selector) => document.querySelector(selector)
+      
+    getEl('send').addEventListener('click', () => {
+      setTimeout( () => { getEl('user-in').value = '' }, 30)
     });
 
-    var chatContainer = document.getElementById('chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    events = new EventSource('/chat/{{CHAT_ID}}/events')
 
-    htmx.on('htmx:afterSwap', function(event) {
-      if (event.target.id === 'chat-container') {
-        event.target.scrollTop = event.target.scrollHeight;
+    const scrollChat = () => {
+      getEl('chat').scrollTop = getEl('chat').scrollHeight
+    }
+
+    var mdRender = new marked.Renderer()
+    mdRender.code = (code, lang) => {
+      if (lang == 'math') {
+          return katex.renderToString(code, { throwOnError: false })
+      } else {
+          return `<pre><code>${code}</code></pre>`;
       }
+    }
+
+    events.on('add_chat', (ev) => {
+      let el = selectEl('.streamto').pop()
+      el.dataset.md = el.dataset.md ? el.dataset.md + ev.data : ev.data
+      el.innerHTML = marked(el.dataset.md, { renderer: mdRender })
+      scrollChat()
     });
+
   </script>
 </body>
 </html>
