@@ -34,4 +34,5 @@ fastapi
 gdown
 partial_json_parser
 pluggy
+runpod
 

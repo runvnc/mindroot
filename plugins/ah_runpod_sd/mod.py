@@ -54,14 +54,15 @@ async def main(input, endpoint_id):
 
 if __name__ == "__main__":
     input = {
-        "prompt": "a beautiful young blonde woman",
-        "num_inference_steps": 25,
+        "prompt": "a sunset",
+        "negative_prompt": "weird, ugly",
+        "num_inference_steps": 13,
         "refiner_inference_steps": 50,
-        "width": 1024,
-        "height": 1024,
+        "width": 896,
+        "height": 1152,
         "guidance_scale": 7.5,
         "strength": 0.3,
         "seed": None,
         "num_images": 1
     }
-    asyncio.run(main(input, "ojvia3qfvo2ovo"))
+    asyncio.run(main(input, "b6kn2n72y7aooe"))
