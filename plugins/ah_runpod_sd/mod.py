@@ -27,13 +27,10 @@ async def main(input, endpoint_id):
                 from PIL import Image
                 import io
                 image_data = output['image_url']
-
-                # Extract base64 part from Data URL
                 if image_data.startswith('data:image/png;base64,'):
                     image_data = image_data[len('data:image/png;base64,'):]
                 elif image_data.startswith('data:image/jpeg;base64,'):
                     image_data = image_data[len('data:image/jpeg;base64,'):]
-                
 
                 image_bytes = base64.b64decode(image_data)
 
