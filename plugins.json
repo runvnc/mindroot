@@ -1,7 +1,8 @@
 [
   { "name": "ah_persona", "enabled": false },
   { "name": "ah_persona_lite", "enabled": true },
-  { "name": "ah_sd", "enabled": true},
+  { "name": "ah_sd", "enabled": false},
+  { "name": "ah_runpod_sd", "enabled": true},
   { "name": "ah_swapface", "enabled": true},
   { "name": "ah_ollama", "enabled": true}
 ]
