@@ -21,11 +21,11 @@ async def main(input, endpoint_id):
             print(f"Current job status: {status}")
             if status == "COMPLETED":
                 output = await job.output()
-                # convert from base64 encoded DataURL to image binary and save png
-                #
+                # Convert from base64 encoded DataURL to image binary and save png
                 import base64
                 from PIL import Image
                 import io
+
                 image_data = output['image_url']
                 if image_data.startswith('data:image/png;base64,'):
                     image_data = image_data[len('data:image/png;base64,'):]
@@ -35,10 +35,10 @@ async def main(input, endpoint_id):
                 image_bytes = base64.b64decode(image_data)
 
                 # Convert bytes to a PIL Image
-                image = Image.open(io.BytesIO(image_bytes))
+                image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
                 # Save the image to a file
-                image.save('output.png', 'PNG')
+                image.save('output.png', format='PNG')
                 
 
                 print("Job output:", output)
