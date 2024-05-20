@@ -26,7 +26,9 @@ async def get_models(provider=None, model_id=None, local=True, uncensored=False,
             
             for provider_model in provider_entry['models']:
                 if provider_model['name'] == model['name']:
-                    filtered_models.append(model)
+                    model_with_meta = model.copy()
+                    model_with_meta.update(provider_model['meta'])
+                    filtered_models.append(model_with_meta)
                     break
     
     return filtered_models
