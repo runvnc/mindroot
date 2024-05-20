@@ -4,7 +4,9 @@ import os
 import runpod
 from runpod import AsyncioEndpoint, AsyncioJob
 from nanoid import generate
-import ..registry 
+from ..registry import *
+from ..services import service
+from ..commands import command
 
 # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # For Windows users.
 
@@ -14,7 +16,7 @@ def random_img_fname():
     return generate() + ".png"
 
 def get_endpoint(model_id):
-    models = registry.get_models(provider='ah', type='sd')
+    models = get_models(provider='AH Runpod', type='sd')
     return models[model_id]['meta']['endpoint_id']
 
 
@@ -55,14 +57,11 @@ async def send_job(input, endpoint_id):
 @service(is_local=False)
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
                         count=1, context=None, save_to="imgs/" + random_img_fname(), w=896, h=1152, steps=20, cfg=8):
-    uncensored = False
-    if context is not None and 'uncensored' in context:
-        uncensored = context['uncensored']
-
-    models = registry.get_models(type='sd', provider='AH Runpod', model_id=model_id, uncensored=uncensored)
+    print("text_to_image. trying to get model")
+    models = await get_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
     model = models[0]
-
-    endpoint_id = model['meta']['endpoint_id']
+    print("model is", model)
+    endpoint_id = model['endpoint_id']
 
     input = {
         "prompt": prompt,
@@ -77,8 +76,8 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
         "num_images": 1
     }
 
-    async for n in range(1, count+1):
-        image = send_job(input, endpoint_id)
+    for n in range(1, count+1):
+        image = await send_job(input, endpoint_id)
         fname = "imgs/"+random_img_fname()
         image.save(fname)
         return fname

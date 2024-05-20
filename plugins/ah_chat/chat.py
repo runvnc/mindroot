@@ -92,6 +92,9 @@ class ChatContext:
         self._commands = command_manager.functions
         self._services = service_manager.functions
         self.response_started = False
+        self.uncensored = False
+        if os.environ.get("AH_UNCENSORED"):
+            self.uncensored = True
 
     def __getattr__(self, name):
         if name in self.__dict__ or name in self.__class__.__dict__:

@@ -101,8 +101,9 @@ class HookManager:
     async def execute_hooks(self, name, *args, **kwargs):
         print(f"execute hooks! name= {name}, args={args}, kwargs={kwargs}")
         if name not in self.hooks:
-            raise ValueError(f"hook '{name}' not found.")
-        
+            print(f"hook '{name}' not found.")
+            return []
+
         results = []
         for hook_info in self.hooks[name]:
             implementation = hook_info['implementation']
