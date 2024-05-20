@@ -10,9 +10,9 @@ from runpod import AsyncioEndpoint, AsyncioJob
 runpod.api_key = os.getenv("RUNPOD_API_KEY")
 
 
-async def main(input):
+async def main(input, endpoint_id):
     async with aiohttp.ClientSession() as session:
-        endpoint = AsyncioEndpoint("YOUR_ENDPOINT_ID", session)
+        endpoint = AsyncioEndpoint(endpoint_id, session)
         job: AsyncioJob = await endpoint.run(input)
 
         # Polling job status
@@ -26,9 +26,11 @@ async def main(input):
                 import base64
                 from PIL import Image
                 import io
+                image_data = output['image_url']
 
-                # Extract the image data from the output
-                image_data = output['image'][0].split(',')[1]  # Assuming the first image in the list
+                # TODO here we have a data URL, need to convert to raw base64 before base64 decode
+                
+
                 image_bytes = base64.b64decode(image_data)
 
                 # Convert bytes to a PIL Image
@@ -58,7 +60,7 @@ if __name__ == "__main__":
         "height": 1024,
         "guidance_scale": 7.5,
         "strength": 0.3,
-        "seed": null,
+        "seed": None,
         "num_images": 1
-    }                                           } 
-    asyncio.run(main(input))
+    }
+    asyncio.run(main(input, "ojvia3qfvo2ovo"))
