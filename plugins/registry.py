@@ -1,32 +1,7 @@
 import asyncio
-
-
-# models.json
-[
-  {
-    "type": "sd",
-    "subtype": "SDXL",
-    "name": "mklan-x-real",
-    "uncensored": true,
-    "description": "SDXL-Hyper, Very NSFW, strong prompt adherance.",
-  }
-]
-
-# providers.json 
-[
-  "name": "AH Runpod",
-  "local": false,
-  "plugin": "ah_runpod_sd",
-  "models": [ 
-      "name": "mklan-x-real",
-      "meta": { "endpoint_id": "b6kn2n72y7aooe" }
-    }
-  ]
-]
-
 import json
 
-async def get_models(provider=None, local=True, uncensored=False, type=None):
+async def get_models(provider=None, model_id=None, local=True, uncensored=False, type=None):
     with open('data/models.json', 'r') as models_file:
         models = json.load(models_file)
     
@@ -40,7 +15,9 @@ async def get_models(provider=None, local=True, uncensored=False, type=None):
             continue
         if uncensored and not model['uncensored']:
             continue
-        
+        if model_id is not None and model['name'] != model_id:
+            continue
+
         for provider_entry in providers:
             if provider and provider_entry['name'] != provider:
                 continue
