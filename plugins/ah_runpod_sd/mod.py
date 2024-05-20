@@ -23,7 +23,19 @@ async def main(input):
                 output = await job.output()
                 # convert from base64 encoded DataURL to image binary and save png
                 #
-                # TODO
+                import base64
+                from PIL import Image
+                import io
+
+                # Extract the image data from the output
+                image_data = output['image'][0].split(',')[1]  # Assuming the first image in the list
+                image_bytes = base64.b64decode(image_data)
+
+                # Convert bytes to a PIL Image
+                image = Image.open(io.BytesIO(image_bytes))
+
+                # Save the image to a file
+                image.save('output.png', 'PNG')
                 
 
                 print("Job output:", output)
@@ -50,4 +62,3 @@ if __name__ == "__main__":
         "num_images": 1
     }                                           } 
     asyncio.run(main(input))
-
