@@ -3,14 +3,18 @@ import aiohttp
 import os
 import runpod
 from runpod import AsyncioEndpoint, AsyncioJob
-
+from nanoid import generate
+    
 # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # For Windows users.
 
 
 runpod.api_key = os.getenv("RUNPOD_API_KEY")
 
+def random_img_fname():
+    return generate() + ".png"
 
-async def main(input, endpoint_id):
+
+async def send_job(input, endpoint_id):
     async with aiohttp.ClientSession() as session:
         endpoint = AsyncioEndpoint(endpoint_id, session)
         job: AsyncioJob = await endpoint.run(input)
@@ -40,8 +44,6 @@ async def main(input, endpoint_id):
                 # Save the image to a file
                 image.save('output.png', format='PNG')
                 
-
-                print("Job output:", output)
                 break  # Exit the loop once the job is completed.
             elif status in ["FAILED"]:
                 print("Job failed or encountered an error.")
@@ -50,6 +52,48 @@ async def main(input, endpoint_id):
             else:
                 print("Job in queue or processing. Waiting 3 seconds...")
                 await asyncio.sleep(3)  # Wait for 3 seconds before polling again
+
+@service(is_local=True)
+async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
+                        count=1, context=None, save_to="imgs/" + random_img_fname(), w=1024, h=1024, steps=20, cfg=8):
+    if pipeline is None:
+        await warmup()
+
+    if model_id is not None and  model_id != current_model:
+        use_model(model_id, from_huggingface is None)
+        await warmup()
+
+    for n in range(1, count+1):
+        image = pipeline(prompt=prompt, negative_prompt=negative_prompt,
+                         num_inference_steps=steps, guidance_scale=cfg).images[0]
+        fname = "imgs/"+random_img_fname()
+        image.save(fname)
+        return fname
+
+
+@command(is_local=True)
+async def image(prompt, context=None):
+    """image: Generate an image from a prompt
+
+    # Example:
+
+    [
+      { "image": "A cute tabby cat in the forest"},
+      { "image": "A happy golden retriever in the park"}
+    ]
+
+    # Example:
+
+    [
+      { "image": "A christmas gift wrapped in a red bow."}
+    ]
+
+    """
+    fname = await context.text_to_image(prompt)
+    print("image output to file", fname)
+    print("context = ", context)
+    await context.insert_image(fname)
+
 
 
 if __name__ == "__main__":
