@@ -9,7 +9,8 @@ async def write(fname, text, context=None):
     { "write": ["file1.txt", "This is the text to write to the file."] }
 
     """
-    if 'current_dir ' in context.data:
+    print("Write file, context is:", context, 'context.data is:', context.data)
+    if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'w') as f:
         f.write(text)
