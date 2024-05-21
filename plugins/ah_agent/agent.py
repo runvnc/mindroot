@@ -55,13 +55,13 @@ class Agent:
         print("Context:", context)
         print('----------------------------------')
         if cmd_name != 'say':
-            print("Unloading llm")
+            #print("Unloading llm")
             #await use_ollama.unload(self.model)
             #await asyncio.sleep(0.3)
             context.chat_log.add_message({"role": "assistant", "content": json_cmd})
 
         command_manager.context = context
-        await command_manager.execute(cmd_name, cmd_args, context=context)
+        return await command_manager.execute(cmd_name, cmd_args, context=context)
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
@@ -99,7 +99,9 @@ class Agent:
                     cmd_obj = cmd_obj[0]
                     cmd_name = next(iter(cmd_obj)) 
                 cmd_args = cmd_obj[cmd_name]
-                await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
+                result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
+                results.append({"cmd": cmd_name, "result": result})
+                print('results=',results)
                 buffer = ""
                 last_partial_args = None
             except json.JSONDecodeError as e:
@@ -117,8 +119,7 @@ class Agent:
                         else:
                             diff_str = partial_args
                         print("sending partial command diff")
-                        result = await context.partial_command(partial_command, diff_str, partial_args)
-                        results.append({"cmd": partial_command, "result": result})
+                        await context.partial_command(partial_command, diff_str, partial_args)
                         last_partial_args = partial_args
                 except Exception as e:
                     print("error parsing partial command:", e)

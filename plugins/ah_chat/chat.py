@@ -175,19 +175,26 @@ async def send_message(log_id: str, request: Request):
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+    context = ChatContext(command_manager, service_manager)
+    context.chat_log = chat_log
+    context.persona = persona_
 
-    try:
-        context = ChatContext(command_manager, service_manager)
-        context.chat_log = chat_log
-        context.persona = persona_
-
-        results = await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
-        chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(results, indent=4)})
-        print('ok')
-    except Exception as e:
-        print("Found an error in agent output: ")
-        print(e)
-        print(traceback.format_exc())
+    continue_processing = True
+    while continue_processing:
+        continue_processing = False
+        try:
+            results = await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
+            out_results = []
+            for result in results:
+                if result['result'] is not None:
+                    out_results.append(result)
+                    continue_processing = True
+            if continue_processing:
+                chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+        except Exception as e:
+            print("Found an error in agent output: ")
+            print(e)
+            print(traceback.format_exc())
 
     return {"status": "ok"}
 

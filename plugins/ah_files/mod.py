@@ -4,7 +4,11 @@ import os
 
 @command(is_local=True)
 async def write(fname, text, context=None):
-    """Write text to a file. Will overwrite the file if it exists."""
+    """Write text to a file. Will overwrite the file if it exists.
+    Example:
+    { "write": ["file1.txt", "This is the text to write to the file."] }
+
+    """
     if 'current_dir ' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'w') as f:
@@ -42,6 +46,8 @@ async def replace_between_inclusive(fname, start, end, text, context=None):
 @command()
 async def dir(directory='', context=None):
     """List files in directory.
+    Parameter: directory - The directory to list files in. If empty, lists files in the current directory.
+
     Example:
     
     { "dir": "subdir1" }
