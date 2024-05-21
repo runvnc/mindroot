@@ -90,6 +90,7 @@ class Agent:
             chunk = part['message']['content']
             buffer += chunk
             try:
+                original_buffer = buffer
                 buffer = buffer.replace("}\n", "},\n")
                 buffer = self.remove_braces(buffer)
                 cmd_obj = json.loads(buffer)
@@ -107,7 +108,7 @@ class Agent:
             except json.JSONDecodeError as e:
                 print("error parsing ||", e, " ||")
                 print(buffer)
-
+                buffer = original_buffer
                 try:
                     partial = partial_json_parser.loads(buffer)
                     print("partial command found:", partial)

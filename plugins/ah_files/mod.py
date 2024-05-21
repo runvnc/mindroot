@@ -6,7 +6,7 @@ import os
 async def write(fname, text, context=None):
     """Write text to a file. Will overwrite the file if it exists.
     Example:
-    { "write": ["file1.txt", "This is the text to write to the file."] }
+    { "write": "file1.txt", "This is the text to write to the file." }
 
     """
     if 'current_dir ' in context.data:
@@ -17,7 +17,10 @@ async def write(fname, text, context=None):
 
 @command(is_local=True)
 async def read(fname, context=None):
-    """Read text from a file."""
+    """Read text from a file.
+    Example:
+    { "read": "file1.txt" }
+    """
     if 'current_dir ' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'r') as f:
@@ -27,7 +30,17 @@ async def read(fname, context=None):
 
 @command(is_local=True)
 async def replace_between_inclusive(fname, start, end, text, context=None):
-    """Replace text between two strings in a file, including the start and end strings."""
+    """Replace text between two strings in a file, including the start and end strings.
+    Parameters:
+    fname - The file to replace text in.
+    start - The start string.
+    end - The end string.
+    text - The text to replace between the start and end strings including the new start and end.
+
+    Example:
+    { "replace_between_inclusive": ["file1.txt", "start of it", "end", "start of it\nnew text\nend"] }
+
+    """
     if 'current_dir ' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'r') as f:
