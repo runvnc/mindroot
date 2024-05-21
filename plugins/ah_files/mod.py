@@ -22,20 +22,19 @@ def read(fname, context=None):
 
 @command()
 def replace_between_inclusive(fname, start, end, text, context=None):
-    """Replace text between two strings in a file."""
+    """Replace text between two strings in a file, including the start and end strings."""
     if 'current_dir ' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'r') as f:
-        lines = f.readlines()
-    with open(fname, 'w') as f:
-        for line in lines:
-            if start in line:
-                f.write(line)
-                f.write(text)
-            elif end in line:
-                f.write(line)
-                break
-            else:
-                f.write(line)
+        content = f.read()
+    start_index = content.find(start)
+    end_index = content.find(end, start_index)
+    if start_index != -1 and end_index != -1:
+        end_index += len(end)  # Include the end string in the replacement
+        new_content = content[:start_index] + start + text + end + content[end_index:]
+        with open(fname, 'w') as f:
+            f.write(new_content)
         print(f'Replaced text between {start} and {end} in {fname}')
+    else:
+        print(f'Could not find the start or end text in {fname}')
 
