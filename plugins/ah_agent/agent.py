@@ -61,7 +61,13 @@ class Agent:
             context.chat_log.add_message({"role": "assistant", "content": json_cmd})
 
         command_manager.context = context
-        return await command_manager.execute(cmd_name, cmd_args, context=context)
+        # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
+        if isinstance(cmd_args, list):
+            return await command_manager.execute(cmd_name, *cmd_args, context=context)
+        elif isinstance(cmd_args, dict):
+            return await command_manager.execute(cmd_name, **cmd_args, context=context)
+        else:
+            return await command_manager.execute(cmd_name, cmd_args, context=context)
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
