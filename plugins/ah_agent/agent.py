@@ -80,6 +80,7 @@ class Agent:
 
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
+        results = []
         stack = []
         in_string = False
         escape_next = False
@@ -116,12 +117,14 @@ class Agent:
                         else:
                             diff_str = partial_args
                         print("sending partial command diff")
-                        await context.partial_command(partial_command, diff_str, partial_args)
+                        result = await context.partial_command(partial_command, diff_str, partial_args)
+                        results.append({"cmd": partial_command, "result": result})
                         last_partial_args = partial_args
                 except Exception as e:
                     print("error parsing partial command:", e)
                     pass
 
+        return results
 
     def render_system_msg(self):
         print("docstrings:")
@@ -144,6 +147,6 @@ class Agent:
                                         max_tokens=max_tokens,
                                         messages=messages)
 
-        await self.parse_cmd_stream(stream, context)
+        return await self.parse_cmd_stream(stream, context)
 
 

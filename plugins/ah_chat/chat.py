@@ -181,7 +181,8 @@ async def send_message(log_id: str, request: Request):
         context.chat_log = chat_log
         context.persona = persona_
 
-        await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
+        results = await agent_.chat_commands(current_model, context=context, messages=chat_log.get_recent())
+        chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(results, indent=4)})
         print('ok')
     except Exception as e:
         print("Found an error in agent output: ")
