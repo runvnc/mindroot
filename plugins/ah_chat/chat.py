@@ -93,6 +93,8 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
+        self.data['current_dir'] = 'data/users/default'
+
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
 
