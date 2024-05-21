@@ -1,7 +1,7 @@
 from ..services import service
-from ../commands import command
+from ..commands import command
 
-@command()
+@command(is_local=True)
 def write(fname, text, context=None):
     """Write text to a file. Will overwrite the file if it exists."""
     if 'current_dir ' in context.data:
@@ -10,7 +10,7 @@ def write(fname, text, context=None):
         f.write(text)
         print(f'Wrote text to {fname}')
 
-@command()
+@command(is_local=True)
 def read(fname, context=None):
     """Read text from a file."""
     if 'current_dir ' in context.data:
@@ -20,7 +20,7 @@ def read(fname, context=None):
         print(f'Read text from {fname}: {text}')
         return text
 
-@command()
+@command(is_local=True)
 def replace_between_inclusive(fname, start, end, text, context=None):
     """Replace text between two strings in a file, including the start and end strings."""
     if 'current_dir ' in context.data:
@@ -37,4 +37,13 @@ def replace_between_inclusive(fname, start, end, text, context=None):
         print(f'Replaced text between {start} and {end} in {fname}')
     else:
         print(f'Could not find the start or end text in {fname}')
+
+@command()
+def dir(directory, context=None):
+    """List files in directory."""
+    if 'current_dir' in context.data:
+        directory = context.data['current_dir'] + '/' + directory
+    files = os.listdir(directory)
+    print(f'Files in {directory}: {files}')
+    return files
 
