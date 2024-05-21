@@ -62,7 +62,7 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
     model = models[0]
     print("model is", model)
     endpoint_id = model['endpoint_id']
-
+    
     input = {
         "prompt": prompt,
         "negative_prompt": negative_prompt,
@@ -75,6 +75,24 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
         "seed": None,
         "num_images": 1
     }
+    # anything defined under model['defaults'] is applied to input
+    if 'defaults' in model:
+        # convert property names: steps -> num_inference_steps, cfg->guidance_scale
+        if 'steps' in model['defaults']:
+            input['num_inference_steps'] = model['defaults']['steps']
+        if 'cfg' in model['defaults']:
+            input['guidance_scale'] = model['defaults']['cfg']
+
+        if 'seed' in model['defaults']:
+            input['seed'] = model['defaults']['seed']
+        if 'prompt' in model['defaults']:
+            input['prompt'] += ',' + model['defaults']['prompt']
+        if 'negative_prompt' in model['defaults']:
+            input['negative_prompt'] += ',' + model['defaults']['negative_prompt']
+        if 'width' in model['defaults']:
+            input['width'] = model['defaults']['width']
+        if 'height' in model['defaults']:
+            input['height'] = model['defaults']['height']
 
     for n in range(1, count+1):
         image = await send_job(input, endpoint_id)
