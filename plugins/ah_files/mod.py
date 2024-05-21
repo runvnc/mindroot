@@ -39,8 +39,17 @@ def replace_between_inclusive(fname, start, end, text, context=None):
         print(f'Could not find the start or end text in {fname}')
 
 @command()
-def dir(directory, context=None):
-    """List files in directory."""
+def dir(directory='', context=None):
+    """List files in directory.
+    Example:
+    
+    { "dir": "subdir1" }
+
+    Other Example (current dir)
+
+    { "dir": "" }
+
+    """
     if 'current_dir' in context.data:
         directory = context.data['current_dir'] + '/' + directory
     files = os.listdir(directory)
