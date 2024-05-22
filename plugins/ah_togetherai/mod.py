@@ -9,6 +9,7 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
         model = "cognitivecomputations/dolphin-2.5-mixtral-8x7b"
 
         async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+        original_stream = await async_client.chat.completions.create(
         stream = await async_client.chat.completions.create(
                 model=model,  #"meta-llama/Llama-3-70b-chat-hf",
                 messages=messages,
@@ -16,7 +17,11 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
                 max_tokens=max_tokens,
                 stream=True
         )
-        return stream
+        async def content_stream(original_stream):
+            async for chunk in original_stream:
+                yield chunk.choices[0].delta.content or ""
+
+        return content_stream(original_stream)
 
     except Exception as e:
         print('together.ai error:', e)
