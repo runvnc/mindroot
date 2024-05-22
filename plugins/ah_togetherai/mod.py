@@ -10,7 +10,6 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
 
         async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
         original_stream = await async_client.chat.completions.create(
-        stream = await async_client.chat.completions.create(
                 model=model,  #"meta-llama/Llama-3-70b-chat-hf",
                 messages=messages,
                 temperature=temperature,

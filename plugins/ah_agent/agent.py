@@ -74,6 +74,8 @@ class Agent:
             buffer = buffer[:-1]
         if buffer.startswith('[ '):
             buffer = buffer[2:]
+        if buffer.startswith(' ['):
+            buffer = buffer[2:]
         if buffer.endswith(','):
             buffer = buffer[:-1]
         if buffer.endswith(']'):
@@ -93,38 +95,58 @@ class Agent:
         last_partial_args = None
 
         async for part in stream:
-            chunk = part['message']['content']
+            #chunk = part['message']['content']
+            chunk = part
             buffer += chunk
             try:
                 original_buffer = buffer
-                buffer = buffer.replace("}\n", "},\n")
-                buffer = self.remove_braces(buffer)
-                cmd_obj = json.loads(buffer)
-                cmd_name = next(iter(cmd_obj))
-                if isinstance(cmd_obj, list):
-                    print('detected command list')
-                    cmd_obj = cmd_obj[0]
-                    cmd_name = next(iter(cmd_obj)) 
-                cmd_args = cmd_obj[cmd_name]
-                result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
-                results.append({"cmd": cmd_name, "result": result})
-                print('results=',results)
-                buffer = ""
-                last_partial_args = None
+                # split by newline
+                # process line by line
+                # if line is a complete json object, process it
+
+                lines = buffer.split("\n")
+                try_parse = ''
+                for line in lines:
+                    line = self.remove_braces(line)
+                    original_buffer = buffer
+                    if line == "":
+                        continue
+                    try_parse = line
+                    cmd_obj = json.loads(line)
+                    cmd_name = next(iter(cmd_obj))
+                    if isinstance(cmd_obj, list):
+                        print('detected command list')
+                        cmd_obj = cmd_obj[0]
+                        cmd_name = next(iter(cmd_obj)) 
+                    cmd_args = cmd_obj[cmd_name]
+                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
+                    results.append({"cmd": cmd_name, "result": result})
+                    print('results=',results)
+                    buffer = ""
+                    last_partial_args = None
+
             except json.JSONDecodeError as e:
-                print("error parsing ||", e, " ||")
-                print(buffer)
+                print("error parsing", e, f"||{try_parse}||")
                 buffer = original_buffer
                 try:
                     partial = partial_json_parser.loads(buffer)
                     print("partial command found:", partial)
+                    if isinstance(partial, list):
+                        partial = partial[0]
+ 
                     partial_command = next(iter(partial))
+                    print(2)
                     if partial_command is not None:
+                        print(3, "partial=", partial, "partial_command=", partial_command)
                         partial_args = partial[partial_command]
+                        print(4)
                         if isinstance(partial_args, str) and last_partial_args is not None:
+                            print(5)
                             diff_str = find_new_substring(last_partial_args, partial_args)
+                            print(6)
                         else:
                             diff_str = partial_args
+                            print(7)
                         print("sending partial command diff")
                         await context.partial_command(partial_command, diff_str, partial_args)
                         last_partial_args = partial_args
@@ -155,6 +177,9 @@ class Agent:
                                         max_tokens=max_tokens,
                                         messages=messages)
 
-        return await self.parse_cmd_stream(stream, context)
+        ret = await self.parse_cmd_stream(stream, context)
+        print("system message was:")
+        print(self.render_system_msg())
+        return ret
 
 

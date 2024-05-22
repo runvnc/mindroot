@@ -39,9 +39,12 @@ async def pic_of_me(prompt, context=None):
     Generate a picture of the persona given a detailed description of what they 
     they look like and what are doing. You will (usually) want to include
     the full text from the Appearance section of the Persona.
+    The description should be very detailed and specific, and should include
+    the persona's appearance such as what they are wearing, their expression, what they are doing.
+    Also include details about the background or scene where they are as well as the pose they are in. 
     Always use this instead of 'image' when creating an image of the persona!
 
-    Example:
+    Example (use even more details if possible):
 
     { "pic_of_me": "[details from Appearance section of Persona definition] wearing a blue hat and a red shirt, playing guitar." }
 

@@ -56,7 +56,7 @@ async def send_job(input, endpoint_id):
 
 @service(is_local=False)
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
-                        count=1, context=None, save_to="imgs/" + random_img_fname(), w=896, h=1152, steps=20, cfg=8):
+                        count=1, context=None, save_to="imgs/" + random_img_fname(), w=1024, h=1024, steps=20, cfg=8):
     print("text_to_image. trying to get model")
     models = await get_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
     model = models[0]
