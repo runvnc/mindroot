@@ -43,16 +43,19 @@ async def pic_of_me(prompt, context=None):
     The description should be very detailed and specific, and should include
     the persona's appearance such as what they are wearing, their expression, what they are doing.
     Also include details about the background or scene where they are as well as the pose they are in. 
+    Remember that the image generator does not know what Persona looks like at all, so you must provide
+    all details in every prompt.
     Always use this instead of 'image' when creating an image of the persona!
 
-    Example (use even more details if possible):
+    Example (use even more details if possible, and fill in brackets with real information)
+    (do not actually include brackets):
 
-    { "pic_of_me": "a photo [from camera position] of [details from Appearance section of Persona definition] wearing a blue hat and a red shirt, playing guitar." }
+    { "pic_of_me": "a photo from []camera position] of [details from Appearance section of Persona definition] [what they are doing, pose, etc.]." }
 
     """
     persona = context.persona
     print("persona:", persona)
-    img = await context.text_to_image(prompt + ', solo, ', 'split-view, diptych, side-by-side, 2girl, 2boy')
+    img = await context.text_to_image(prompt + ', solo, score_9, score_8_up', 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     swapped = await context.swap_face(img_dir, img)

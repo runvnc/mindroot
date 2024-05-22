@@ -95,6 +95,7 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
             input['height'] = model['defaults']['height']
 
     for n in range(1, count+1):
+        print(input)
         image = await send_job(input, endpoint_id)
         fname = "imgs/"+random_img_fname()
         image.save(fname)
