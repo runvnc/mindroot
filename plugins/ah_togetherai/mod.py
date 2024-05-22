@@ -16,12 +16,14 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
                 max_tokens=max_tokens,
                 stream=True
         )
-        # we need to transform the stream into another stream
-        # extracting the context from the stream
-        # new code here
-        for chunk in stream:
-            chunk.choices[0].delta.content or ""
-            #print(chunk.choices[0].delta.content or "", end="", flush=True)
+        async def context_stream(stream):
+            async for chunk in stream:
+                content = chunk.choices[0].delta.content or ""
+                yield content
+
+        # Usage example:
+        # async for context in context_stream(stream):
+        #     print(context, end="", flush=True)
 
     except Exception as e:
         print('together.ai error:', e)
