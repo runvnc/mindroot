@@ -37,7 +37,8 @@ async def pic_of_me(prompt, context=None):
     """pic_of_me(prompt)
 
     Generate a picture of the persona given a detailed description of what they 
-    they look like and what are doing. You will (usually) want to include
+    they look like and what are doing. Use your knowledge of Stable Diffusion,
+    including common keywords appropriate for the picture. You will (usually) want to include
     the full text from the Appearance section of the Persona.
     The description should be very detailed and specific, and should include
     the persona's appearance such as what they are wearing, their expression, what they are doing.
@@ -46,7 +47,7 @@ async def pic_of_me(prompt, context=None):
 
     Example (use even more details if possible):
 
-    { "pic_of_me": "[details from Appearance section of Persona definition] wearing a blue hat and a red shirt, playing guitar." }
+    { "pic_of_me": "a photo [from camera position] of [details from Appearance section of Persona definition] wearing a blue hat and a red shirt, playing guitar." }
 
     """
     persona = context.persona
