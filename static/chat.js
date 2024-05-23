@@ -8,6 +8,8 @@ class Chat extends LitElement {
 
     constructor() {
       super()
+      this.messages = []
+      console.log('Chat app created')
      }
 
       _handleMessageSent(event) {
@@ -15,14 +17,15 @@ class Chat extends LitElement {
         this.addMessage(content, sender)
       }
 
-      _addMessage(event, content, sender) {
+      _addMessage(event) {
         console.log({event, content, sender})
+        const { content, sender } = event.detail
         this.messages = [...this.messages, { content, sender }]
       }
 
       render() {
         return html`
-          <div class="chat-container border p-4 h-full flex flex-col">
+          <div class="chat-container bg-black text-white border p-4 h-full flex flex-col">
             <div class="chat-log flex-1 overflow-y-auto flex flex-col">
               ${this.messages.map(({ content, sender }) => html`
                 <chat-message sender="${sender}">
@@ -36,10 +39,5 @@ class Chat extends LitElement {
       }
     }
 
-    element('chat-component', Chat)
-  </script>
- 
-  <chat-component></chat-component>
-</body>
-</html>
+customElements.define('chat-app', Chat)
 
