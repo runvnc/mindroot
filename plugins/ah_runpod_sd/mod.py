@@ -52,13 +52,13 @@ async def send_job(input, endpoint_id):
                 await asyncio.sleep(1)
 
 
-@hook(is_local=False)
+@hook()
 async def add_instructions(context=None):
     model = await context.select_image_model(context)
     if 'tips' in model:
         return model['tips']
 
-@service(is_local=False):
+@service(is_local=False)
 async def select_image_model(context=None, model_id=None, local=False, uncensored=False):
     models = await get_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
     return models[0]

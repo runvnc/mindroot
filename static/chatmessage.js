@@ -1,4 +1,6 @@
-import {LitElement, html} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
+//import {LitElement, html} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
+import {LitElement, html} from 'lit-core.min.js'
+
 
 class ChatMessage extends Base {
   static properties = {
