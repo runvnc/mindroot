@@ -37,3 +37,4 @@ async def get_models(provider=None, model_id=None, local=True, uncensored=False,
     if len(filtered_models) == 0:
         print('No models found matching the criteria.', f"model_id: {model_id}", f"local: {local}", f"uncensored: {uncensored}", f"type: {type}")
     return filtered_models
+

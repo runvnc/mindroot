@@ -7,6 +7,7 @@ from nanoid import generate
 from ..registry import *
 from ..services import service
 from ..commands import command
+from ..hooks import hook
 
 # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # For Windows users.
 
@@ -14,10 +15,6 @@ runpod.api_key = os.getenv("RUNPOD_API_KEY")
 
 def random_img_fname():
     return generate() + ".png"
-
-def get_endpoint(model_id):
-    models = get_models(provider='AH Runpod', type='sd')
-    return models[model_id]['meta']['endpoint_id']
 
 
 async def send_job(input, endpoint_id):
@@ -53,6 +50,18 @@ async def send_job(input, endpoint_id):
             else:
                 print("Job in queue or processing..")
                 await asyncio.sleep(1)
+
+
+@hook(is_local=False)
+async def add_instructions(context=None):
+    model = await context.select_image_model(context)
+    if 'tips' in model:
+        return model['tips']
+
+@service(is_local=False):
+async def select_image_model(context=None, model_id=None, local=False, uncensored=False):
+    models = await get_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
+    return models[0]
 
 @service(is_local=False)
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,

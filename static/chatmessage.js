@@ -1,26 +1,27 @@
-import {LitElement, html} from 'lit';
-    class ChatMessage extends Base {
-      static properties = {
-        sender: {type: String}
-      }
+import {LitElement, html} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
 
-      constructor() {
-        super()
-        this.sender = 'user'
-      }
+class ChatMessage extends Base {
+  static properties = {
+    sender: {type: String}
+  }
 
-      render() {
-        let cls = ''
-        if (this.sender == 'user') cls = 'bg-blue-200', 'text-left'
-        else cls = 'bg-yellow-200', 'text-right'
+  constructor() {
+    super()
+    this.sender = 'user'
+  }
 
-        return html`
-        <div class="message p-2 my-1 rounded ${cls}">
-          <slot></slot>
-        </div>
-      `
-    }
+  render() {
+    let cls = ''
+    if (this.sender == 'user') cls = 'bg-blue-200', 'text-left'
+    else cls = 'bg-yellow-200', 'text-right'
 
-    element('chat-message', ChatMessage)
+    return html`
+    <div class="message p-2 my-1 rounded ${cls}">
+      <slot></slot>
+    </div>
+  `
+}
+
+element('chat-message', ChatMessage)
 
 

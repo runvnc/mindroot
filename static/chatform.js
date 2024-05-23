@@ -1,35 +1,52 @@
-    class ChatForm extends LitElement {
-      connected() {
-        console.log('connected')
-      }
+import { LitElement, html } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
 
-      _send(event) {
-        console.log('send')
 
-        return false
-        //const input = this.sel('.message-input')
-        //const sender = this.sel('.sender-select').value
-        //this.dispatch('message-sent', 
-        //              { content: input.value, sender: sender })
-        //input.value = ''
-      }
+class ChatForm extends LitElement {
+  static properties = {
+    sender: { type: String },
+    message: { type: String }
+  }
 
-      _messageChanged(event) {
-        console.log('message changed')
-        this.message = event.target.value
-      }
+  constructor() {
+    super()
+    this.sender = 'user'
+    this.message = ''
+  }
 
-      render() {
-        return html`
-          <div class="chat-entry flex py-2">
-          <input type="text" class="message-input mr-2" @change={this._messageChanged} placeholder="Type a message..." required>
-          <select class="sender-select mr-2">
-            <option value="user">User</option>
-            <option value="ai">AI</option>
-          </select>
-          <button type="button" @click=${this.send} class="mr-2">Send</button>
-          </div>
-        `
+
+  _send(event) {
+    console.log('send')
+    const event = new Event('addmessage', {
+      detail: {
+        message: this.message,
+        sender: this.sender
+      },
+      bubbles: true, 
+      composed: true
+    }) 
+  }
+
+  _senderChanged(event) {
+    console.log('sender changed')
+    this.sender = event.target.value
+  }
+
+  _messageChanged(event) {
+    console.log('message changed')
+    this.message = event.target.value
+  }
+
+  render() {
+    return html`
+      <div class="chat-entry flex py-2">
+      <input type="text" class="message-input mr-2" @change={this._messageChanged} placeholder="Type a message..." required>
+      <select @change={this._senderChanged} class="sender-select mr-2">
+        <option value="user">User</option>
+        <option value="ai">AI</option>
+      </select>
+      <button type="button" @click=${this.send} class="mr-2">Send</button>
+      </div>
+    `
     } 
 
     customElements.define('chat-form', ChatForm)

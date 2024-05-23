@@ -12,7 +12,7 @@ def find_new_substring(s1, s2):
 
 class Agent:
 
-    def __init__(self, model=None, sys_core_template=None, persona=None, clear_model=False, commands=[]):
+    def __init__(self, model=None, sys_core_template=None, persona=None, clear_model=False, commands=[], context=None):
         if model is None:
             if os.environ.get('AH_DEFAULT_LLM'):
                 self.model = os.environ.get('AH_DEFAULT_LLM')
@@ -33,7 +33,8 @@ class Agent:
         self.sys_template = Template(self.sys_core_template)
  
         self.cmd_handler = {}
-        
+        self.context = context
+
         #if clear_model:
         #    asyncio.create_task(use_ollama.unload(self.model))
 
@@ -164,14 +165,19 @@ class Agent:
             "persona": self.persona
         }
         self.system_message = self.sys_template.render(data)
+        additional_instructions = hook_manager.add_instructions(self.context)
+        for instruction in additional_instructions:
+            self.system_message += instruction + "\n\n"
+
         return self.system_message
 
     async def chat_commands(self, model, context,
                             temperature=0, max_tokens=512, messages=[]):
 
+        self.context = context
         messages = [{"role": "system", "content": self.render_system_msg()}] + messages
         print("Messages:", messages, flush=True)
-
+        
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
