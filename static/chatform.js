@@ -14,12 +14,11 @@ class ChatForm extends LitElement {
     console.log('chatform constructor')
   }
 
-
   _send(event) {
     console.log('send')
     const ev_ = new CustomEvent('addmessage', {
       detail: {
-        message: this.messageEl.value,
+        content: this.messageEl.value,
         sender: this.senderEl.value
       },
       bubbles: true, 

@@ -18,9 +18,9 @@ class Chat extends LitElement {
       }
 
       _addMessage(event) {
-        console.log({event, content, sender})
         const { content, sender } = event.detail
         this.messages = [...this.messages, { content, sender }]
+        console.log(this.messages)
       }
 
       render() {
