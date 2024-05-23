@@ -114,7 +114,8 @@ def __init__():
 async def do_swap_face(src_dir, target_img_filepath):
     target_img = Image.open(target_img_filepath)
     src_images = []
-    
+
+    print(f"looking for source face ref in {src_dir}")
     for filename in os.listdir(src_dir):
         if filename.endswith(".jpg") or filename.endswith(".png"):
             src_img_path = os.path.join(src_dir, filename)

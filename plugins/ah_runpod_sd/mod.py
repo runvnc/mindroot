@@ -120,6 +120,7 @@ async def image(prompt, context=None):
     ]
 
     """
+    print(prompt)
     fname = await context.text_to_image(prompt)
     print("image output to file", fname)
     print("context = ", context)
