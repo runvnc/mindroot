@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 import traceback
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
@@ -118,18 +118,18 @@ async def insert_image(image_url, context=None):
 
 
 @router.post("/chat/{log_id}/send")
-async def send_message(log_id: str, request: Request):
+async def send_message(log_id: str, message_data: Message):
     print("log_id = ", log_id)
     chat_log = ChatLog()
     chat_log.load_log(log_id)
     persona_ = await service_manager.get_persona_data(chat_log.persona)
-    form_data = await request.form()
+    # form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-    user_name = form_data.get("user_name")
+    user_name = message_data.user_name
     if user_name is None:
         user_name = os.environ.get("AH_USER_NAME")
-    message = form_data.get("message")
+    message = message_data.message
     agent_ = agent.Agent(persona=persona_)
 
     message_html = f'''
