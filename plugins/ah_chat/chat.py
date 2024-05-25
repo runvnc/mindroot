@@ -53,30 +53,15 @@ async def agent_output(event: str, data: dict, context=None):
     print("Try to send event: ", event, data)
     for queue in sse_clients:
         print("sending to sse client!")
-        await queue.put({"event": event, "data": data})
+        await queue.put({"event": event, "data": json.dumps(data)})
 
 
 @service(is_local=True)
 async def partial_command(command: str, chunk: str, so_far: str, context=None):
     print("*** partial_command service call ***")
     persona_ = context.persona
-    assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-    if not context.response_started:
-        output = f'''
-            <div class="flex items-start mb-2">
-                <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
-                <div class="bg-primary">
-                    <p class="text-yellow agent-response streamto">
-                    {so_far}
-                    </p>
-                </div>
-            </div>
-                    '''
-        context.response_started = True
-    else:
-        output = f"<span>{chunk}</span>"
 
-    await context.agent_output("new_message", output)
+    await context.agent_output("partial_command", { command, chunk, so_far, persona })
 
 
 @router.put("/chat/{log_id}/{persona_name}")
@@ -113,8 +98,8 @@ class ChatContext:
 
 
 @service(is_local=True)
-async def insert_image(image_url, context=None):                                                                                                                
-    await context.agent_output("new_message", f"<img src='{image_url}' />")                                                                             
+async def insert_image(image_url, context=None):
+    await context.agent_output("image", {"url": image_url})
 
 
 @router.post("/chat/{log_id}/send")
@@ -126,28 +111,11 @@ async def send_message(log_id: str, message_data: Message):
     # form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
-    user_name = message_data.user_name
-    if user_name is None:
-        user_name = os.environ.get("AH_USER_NAME")
+    user_name = os.environ.get("AH_USER_NAME")
     message = message_data.message
     agent_ = agent.Agent(persona=persona_)
 
-    message_html = f'''
-       <div>
-        <div class="flex items-start mb-2">
-            <img src="{user_avatar}" alt="User Avatar" class="w-8 h-8 rounded-full mr-2">
-            <div class="text-white">
-                <p class="text-secondary text-base">{message}</p>
-            </div>
-        </div>
-       </div>
-       <div class="streamto">
-       </div>
-    '''
-
-    await agent_output("new_message", message_html)
     chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
-
 
     @command(is_local=True)
     async def say(assistant_message, context=None):
@@ -163,15 +131,7 @@ async def send_message(log_id: str, message_data: Message):
         ]
 
         """
-        assistant_message_html = f'''
-            <div class="flex items-start mb-2">
-                <img src="{assistant_avatar}" alt="Assistant Avatar" class="w-8 h-8 rounded-full mr-2">
-                <div class="bg-primary">
-                    <p class="text-white text-yellow text-base">{assistant_message}</p>
-                </div>
-            </div>
-        '''
-        await context.agent_output("new_message", assistant_message_html)
+        await context.agent_output("new_message", {"content": assistant_message})
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})

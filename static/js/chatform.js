@@ -1,11 +1,19 @@
-import { LitElement, html } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
+import { LitElement, html,css  } from '/static/js/lit-core.min.js'
+import {BaseEl} from './base.js'
 
-
-class ChatForm extends LitElement {
+class ChatForm extends BaseEl {
   static properties = {
     sender: { type: String },
     message: { type: String }
   }
+  
+  static styles = [
+    css`
+    .message-input {
+      border: 4px solid red;
+    }
+
+  `]
 
   constructor() {
     super()
@@ -33,20 +41,11 @@ class ChatForm extends LitElement {
     this.messageEl = this.shadowRoot.getElementById('inp_message')
   }
 
-  _senderChanged(event) {
-    console.log('sender changed')
-    this.sender = event.target.value
-  }
-
-  _messageChanged(event) {
-    console.log('message changed')
-    this.message = event.target.value
-  }
-
   render() {
     return html`
       <div class="chat-entry flex py-2">
-      <input type="text" id="inp_message" class="message-input mr-2" @input=${this._messageChanged} placeholder="Type a message..." required>
+      <textarea type="text" id="inp_message" class="message-input" @input=${this._messageChanged} placeholder="Type a message..." required>
+      </textarea>
       <select @select=${this._senderChanged} id="sel_sender" class="sender-select mr-2">
         <option value="user">User</option>
         <option value="ai">AI</option>

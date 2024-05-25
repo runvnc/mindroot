@@ -54,7 +54,7 @@ async def send_job(input, endpoint_id):
 
 @hook()
 async def add_instructions(context=None):
-    model = await context.select_image_model(context)
+    model = await context.select_image_model()
     if 'tips' in model:
         return model['tips']
 

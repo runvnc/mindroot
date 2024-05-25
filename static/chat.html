@@ -3,51 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="static/main.css" rel="stylesheet">
-  <script src="https://unpkg.com/htmx.org@1.7.0"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-  <title>AgentHost v0.1</title>
+  <title>Chat Component Example with Tailwind CSS</title>
+  <link rel="stylesheet" href="/static/css/reset.css">
+  <link rel="stylesheet" href="/static/css/main.css"> 
+  <script type="module" src="/static/js/chatmessage.js" ></script>
+  <script type="module" src="/static/js/chatform.js"></script>
+  <script type="module" src="/static/js/chat.js"></script>
 </head>
-<body class="bg-black m-2 p-2">
-  <div class="container mx-auto p-4 m-4 neon-effect rounded-md shadow-lg shadow-green-500">
-      <div hx-ext="sse" sse-connect="/chat/{{CHAT_ID}}/events" hx-swap="beforeend" sse-swap="new_message"
-        id="chat-container" class="bg-box text-white">
-        <!-- Chat messages will be dynamically added here -->
-      </div>
-      <form hx-post="/chat/{{CHAT_ID}}/send" hx-target="#chat-container" hx-swap="beforeend" class="flex m-2 p-2">
-      <input id="message-input" type="text" name="message" class="flex-grow dark bg-black focus:bg-black active:bg-black hover:bg-black py-2 text-secondary text-white focus:outline-none" placeholder="Type your message...">
-      <button id="send-button" class="bg-primary hover:bg-green-600 hover:text-black border border-green-950 active:bg-black p-2 m-2 text-green-500 font-semibold focus:ring-2 focus:ring-primary" >
-          Send</button>
-    </form>
-  </div>
+<body>
 
-  <script>
-    document.getElementById('send-button').addEventListener('click', function() {
-      setTimeout( () => {
-        var input = document.getElementById('message-input');
-        input.value = '';
-      }, 30)
-    });
-
-    var chatContainer = document.getElementById('chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-
-    htmx.on('htmx:afterSwap', function(event) {
-      if (event.target.id === 'chat-container') {
-        event.target.scrollTop = event.target.scrollHeight;
-      }
-    });
-
-    document.body.addEventListener('htmx:sseMessage', function (evt) {
-      console.log('sseMessage')
-      console.log({evt})
-      if (evt.detail.elt.id == 'chat-container') {
-        console.log(1)
-        const els = document.querySelectorAll('.streamto');
-        evt.detail.target = els[els.length - 1];
-      }
-    });
-  </script>
+    <chat-ai sessionid="{{CHAT_ID}}"></chat-ai>
 </body>
 </html>
+

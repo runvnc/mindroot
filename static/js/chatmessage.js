@@ -1,20 +1,13 @@
-import {LitElement, html, css} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js'
-//import {LitElement, html} from 'lit-core.min.js';
+import {LitElement, html, css} from './lit-core.min.js';
+import {BaseEl} from './base.js'
 
-
-export class ChatMessage extends LitElement {
+export class ChatMessage extends BaseEl {
   static properties = {
     sender: {type: String}
   }
 
-  static styles = css`
-
-    :host {
-      display: block;
-      background-color: black;
-      color: white;
-    }
-
+  static styles = [
+    css`
     .user {
       text-align: left;
       color: blue;
@@ -26,6 +19,7 @@ export class ChatMessage extends LitElement {
     }
 
   `
+  ]
 
   constructor() {
     super()

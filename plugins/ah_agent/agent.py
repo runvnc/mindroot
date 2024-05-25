@@ -3,6 +3,7 @@ import json
 import os
 from jinja2 import Template
 from ..commands import command_manager
+from ..hooks import hook_manager
 import partial_json_parser
 
 def find_new_substring(s1, s2):
@@ -64,6 +65,8 @@ class Agent:
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
         if isinstance(cmd_args, list):
+            #filter out empty strings
+            cmd_args = [x for x in cmd_args if x != '']
             return await command_manager.execute(cmd_name, *cmd_args, context=context)
         elif isinstance(cmd_args, dict):
             return await command_manager.execute(cmd_name, **cmd_args, context=context)
@@ -157,7 +160,7 @@ class Agent:
 
         return results
 
-    def render_system_msg(self):
+    async def render_system_msg(self):
         print("docstrings:")
         print(command_manager.get_some_docstrings(self.persona["commands"]))
         data = {
@@ -165,7 +168,7 @@ class Agent:
             "persona": self.persona
         }
         self.system_message = self.sys_template.render(data)
-        additional_instructions = hook_manager.add_instructions(self.context)
+        additional_instructions = await hook_manager.add_instructions(self.context)
         for instruction in additional_instructions:
             self.system_message += instruction + "\n\n"
 
@@ -175,7 +178,7 @@ class Agent:
                             temperature=0, max_tokens=512, messages=[]):
 
         self.context = context
-        messages = [{"role": "system", "content": self.render_system_msg()}] + messages
+        messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         print("Messages:", messages, flush=True)
         
         stream = await context.stream_chat(model,

@@ -38,7 +38,7 @@ async def pic_of_me(prompt, context=None):
     """pic_of_me(prompt)
 
     Generate a picture of the persona given a detailed description of what they 
-    they look like and what are doing. You will (usually) want to include
+    they look like and what are doing, where they are, etc.. You will (usually) want to include
     the full text from the Appearance section of the Persona.
     The description should be very detailed and specific, and should include
     the persona's appearance such as what they are wearing, their expression, what they are doing.
@@ -47,12 +47,12 @@ async def pic_of_me(prompt, context=None):
 
     Example:
 
-    { "pic_of_me": "wearing a blue hat and a red cotton t-shirt, playing guitar, laughing, in a coffee shop with warm lighting." }
+    { "pic_of_me": "[where they are, what they are doing, details of appearance, details of scene, etc. etc.]" }
 
     """
     persona = context.persona
     print("persona:", persona)
-    img = await context.text_to_image(prompt + persona['appearance'] + ', solo, ', 'split-view, diptych, side-by-side, 2girl, 2boy')
+    img = await context.text_to_image(prompt + ', ' + persona['appearance'], 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     swapped = await context.swap_face(img_dir, img)

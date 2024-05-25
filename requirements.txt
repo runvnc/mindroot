@@ -36,3 +36,5 @@ partial_json_parser
 pluggy
 runpod
 together
+
+mimetypes

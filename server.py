@@ -21,8 +21,12 @@ def create_directories():
 
 create_directories()
 
+import mimetypes
+mimetypes.add_type("application/javascript", ".js", True)
+
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name="static" )
+
 app.mount("/imgs", StaticFiles(directory="imgs"), name="imgs")
 
 # Include the router from chat.py
