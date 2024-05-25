@@ -8,6 +8,7 @@ export class BaseEl extends LitElement {
   static async loadSharedStyles() {
     if (!BaseEl.sharedStylesLoaded) {
       BaseEl.sharedStyles = await loadStyles('/static/css/main.css');
+      console.log('loaded styles')
       BaseEl.sharedStylesLoaded = true;
     }
   }
@@ -21,6 +22,7 @@ export class BaseEl extends LitElement {
             BaseEl.sharedStyles
           ];
         this.requestUpdate();
+        console.log('updated?')
       } catch (e) {
         console.error('Error loading styles: ' + JSON.stringify(e, null, 4) + ' \n\n' + this.constructor.name);
       }
