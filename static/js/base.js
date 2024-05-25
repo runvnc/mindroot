@@ -1,6 +1,6 @@
 import { LitElement, html, css } from './lit-core.min.js'
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
-import { createContext } from 'lit/directives/context.js';
+import { createContext } 'from https://cdn.jsdelivr.net/npm/@lit/context@1.1.1/+esm'
 
 export const ThemeContext = createContext();
 
