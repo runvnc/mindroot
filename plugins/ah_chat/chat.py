@@ -61,7 +61,8 @@ async def partial_command(command: str, chunk: str, so_far: str, context=None):
     print("*** partial_command service call ***")
     persona_ = context.persona
 
-    await context.agent_output("partial_command", { command, chunk, so_far, persona })
+    await context.agent_output("partial_command", { "command": command, "chunk": chunk,
+                                                    "so_far": so_far, "persona": persona_ })
 
 
 @router.put("/chat/{log_id}/{persona_name}")

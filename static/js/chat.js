@@ -33,6 +33,7 @@ class Chat extends BaseEl {
       this.sse = new EventSource(`/chat/${this.sessionid}/events`)
       this.sse.addEventListener('new_message', this._aiMessage.bind(this))
       this.sse.addEventListener('image', this._imageMsg.bind(this))
+      this.sse.addEventListener('partial_command', this._partialCmd.bind(this))
     }
 
     _addMessage(event) {
@@ -50,6 +51,19 @@ class Chat extends BaseEl {
         })
       }
     }
+
+    _partialCmd(event) {
+      console.log('Event received') 
+      console.log(event)
+      const data = JSON.parse(event.data)
+      if (this.messages[this.messages.length-1].sender != 'ai') {
+        this.messages = [...this.messages, { content: '', sender: 'ai' }]
+      }
+
+      this.messages[this.messages.length-1].content = data.command + ': ' + data.so_far
+      this.requestUpdate()
+    }
+
 
     _aiMessage(event) {
       console.log('Event received') 
