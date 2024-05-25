@@ -1,32 +1,13 @@
-import { LitElement } from './lit-core.min.js';
-import { loadStyles } from './load-styles.js';
+import { LitElement, html, css } from './lit-core.min.js'
+import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
 
 export class BaseEl extends LitElement {
-  static sharedStylesLoaded = false;
-  static sharedStyles = new CSSStyleSheet();
-
-  static async loadSharedStyles() {
-    if (!BaseEl.sharedStylesLoaded) {
-      BaseEl.sharedStyles = await loadStyles('/static/css/main.css');
-      console.log('loaded styles')
-      BaseEl.sharedStylesLoaded = true;
-    }
+  static properties = {
+    theme: { type: String }
   }
 
   constructor() {
-    super();
-      BaseEl.loadSharedStyles().then(() => {
-        try {
-          this.constructor.styles = [
-            ...this.constructor.styles,
-            BaseEl.sharedStyles
-          ];
-        this.requestUpdate();
-        console.log('updated?')
-      } catch (e) {
-        console.error('Error loading styles: ' + JSON.stringify(e, null, 4) + ' \n\n' + this.constructor.name);
-      }
-    });
+    super();    
   }
 
   /**
@@ -52,5 +33,12 @@ export class BaseEl extends LitElement {
       composed
     }));
   }
+
+  _render() {
+    return html `
+      <link rel="stylesheet" href="/static/css/${this.theme}.css">
+      ` + this.render();
+  }
+
 }
 

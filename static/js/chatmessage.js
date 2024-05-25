@@ -6,20 +6,7 @@ export class ChatMessage extends BaseEl {
     sender: {type: String}
   }
 
-  static styles = [
-    css`
-    .user {
-      text-align: left;
-      color: blue;
-    }
-
-    .ai {
-      text-align: right;
-      color: yellow; 
-    }
-
-  `
-  ]
+  static styles = [ css`` ]
 
   constructor() {
     super()

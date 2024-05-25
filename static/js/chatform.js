@@ -9,11 +9,13 @@ class ChatForm extends BaseEl {
   
   static styles = [
     css`
-    .message-input {
-      background-color: #030303;
-      color: #f0f0f0;
+    :host {
+      display: block;
     }
 
+    .x {
+       background-color: red;
+     }
   `]
 
   constructor() {
