@@ -135,4 +135,7 @@ async def image(prompt, context=None):
     print("context = ", context)
     await context.insert_image(fname)
 
-
+if __name__ == "__main__":
+    print("Testing image generation")
+    asyncio.run(text_to_image("A cute tabby cat in the forest", count=1))
+    print("Done testing image generation")

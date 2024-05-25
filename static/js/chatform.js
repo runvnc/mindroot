@@ -10,7 +10,8 @@ class ChatForm extends BaseEl {
   static styles = [
     css`
     .message-input {
-      border: 4px solid red;
+      background-color: #030303;
+      color: #f0f0f0;
     }
 
   `]
@@ -24,15 +25,11 @@ class ChatForm extends BaseEl {
 
   _send(event) {
     console.log('send')
-    const ev_ = new CustomEvent('addmessage', {
-      detail: {
+    const ev_ = {
         content: this.messageEl.value,
         sender: this.senderEl.value
-      },
-      bubbles: true, 
-      composed: true
-    })
-    this.dispatchEvent(ev_)
+    }
+    this.dispatch('addmessage', ev_)
   }
 
   firstUpdated() {
@@ -44,8 +41,7 @@ class ChatForm extends BaseEl {
   render() {
     return html`
       <div class="chat-entry flex py-2">
-      <textarea type="text" id="inp_message" class="message-input" @input=${this._messageChanged} placeholder="Type a message..." required>
-      </textarea>
+      <textarea type="text" id="inp_message" class="message-input" @input=${this._messageChanged} required></textarea>
       <select @select=${this._senderChanged} id="sel_sender" class="sender-select mr-2">
         <option value="user">User</option>
         <option value="ai">AI</option>
