@@ -14,7 +14,7 @@ export class ChatMessage extends BaseEl {
   }
 
 
-  render() {
+  _render() {
     return html`
     <div class="message p-2 my-1 rounded ${this.sender}">
       <slot></slot>

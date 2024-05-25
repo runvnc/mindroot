@@ -4,8 +4,7 @@ html, body, input, * {
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-
-input::placeholder, textarea:placeholder {
+input::placeholder, textarea::placeholder {
   background-color: #030303;
   color: #f0f0f0;
 }
@@ -20,14 +19,13 @@ input::placeholder, textarea:placeholder {
   text-align: right;
 }
 
-.message-input {
+textarea {
   background-color: #030303;
   color: #f0f0f0;
   width: 90%;
-  /* Adjust the rows attribute in the HTML to set the initial size */
   min-height: 1em;
   max-height: 500px; /* Maximum height before scrolling */
-  border: none;
+  border: 2px solid red;
   overflow-y: auto; /* Allows the textarea to expand as the user types */
   scrollbar-width: none;
   padding: 10px;

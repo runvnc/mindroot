@@ -82,19 +82,18 @@ class Chat extends BaseEl {
     }
 
 
-    render() {
+    _render() {
       return html`
         <div class="chat-container">
-        <div class="chat-container"> <!-- Removed theme attribute -->
           SessionID: ${this.sessionid}
           <div class="chat-log">
             ${this.messages.map(({ content, sender }) => html`
-              <chat-message sender="${sender}"> <!-- Removed theme attribute -->
+              <chat-message sender="${sender}">
                 ${unsafeHTML(content)}
               </chat-message>
             `)}
           </div>
-          <chat-form @addmessage="${this._addMessage}"></chat-form> <!-- Removed theme attribute -->
+          <chat-form @addmessage="${this._addMessage}"></chat-form>
         </div>
       `
     }

@@ -23,6 +23,7 @@ class ChatForm extends BaseEl {
     this.sender = 'user'
     this.message = ''
     console.log('chatform constructor')
+    console.log('theme = ', this.theme)
   }
 
 
@@ -41,7 +42,7 @@ class ChatForm extends BaseEl {
     this.messageEl = this.shadowRoot.getElementById('inp_message')
   }
 
-  render() {
+ _render() {
     return html`
       <div class="chat-entry flex py-2">
       <textarea type="text" id="inp_message" class="message-input" @input=${this._messageChanged} required></textarea>
