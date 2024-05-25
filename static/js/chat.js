@@ -10,12 +10,13 @@ class Chat extends BaseEl {
   
     static styles = [
     css`
-    .chat-container {
-       /* neon-green border with bloom effect */ 
-      border: 2px solid #0f0;
-      border-radius: 5px;
-      box-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 40px #0f0, 0 0 80px #0f0;
-    }
+      :host {
+        display: block;
+      }
+
+      .test {
+        color: red;
+      }
    `
   ]
 
