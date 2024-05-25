@@ -36,9 +36,10 @@ export class BaseEl extends LitElement {
   }
 
   render() {
-    return html `
+    return html`
       <link rel="stylesheet" href="/static/css/${this.theme}.css">
-      ` + this._render();
+      ${this._render()}
+    `;
   }
 
 }
