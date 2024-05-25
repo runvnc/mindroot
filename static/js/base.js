@@ -1,26 +1,14 @@
 import { LitElement, html, css } from './lit-core.min.js'
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
-import { createContext } 'from https://cdn.jsdelivr.net/npm/@lit/context@1.1.1/+esm'
-
-export const ThemeContext = createContext();
 
 export class BaseEl extends LitElement {
   static properties = {
     theme: { type: String }
   }
 
-  // Consume context to get the theme
-  static get context() {
-    return [[ThemeContext]];
-  }
-
   constructor() {
     super();
-    this.theme = 'default'; // Set a default theme if none is provided
-  }
-
-  /**
-    super();    
+    this.theme = window.theme ? window.theme : 'default'
   }
 
   /**
@@ -47,15 +35,10 @@ export class BaseEl extends LitElement {
     }));
   }
 
-  // Override to provide context to descendants
-  provideContext() {
-    return [[ThemeContext, this.theme]];
-  }
-
-  _render() {
+  render() {
     return html `
       <link rel="stylesheet" href="/static/css/${this.theme}.css">
-      ` + this.render();
+      ` + this._render();
   }
 
 }
