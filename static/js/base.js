@@ -1,5 +1,8 @@
 import { LitElement, html, css } from './lit-core.min.js'
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
+import { createContext } from 'lit/directives/context.js';
+
+export const ThemeContext = createContext();
 
 export class BaseEl extends LitElement {
   static properties = {
@@ -7,6 +10,11 @@ export class BaseEl extends LitElement {
   }
 
   constructor() {
+    super();
+    this.theme = 'default'; // Set a default theme if none is provided
+  }
+
+  /**
     super();    
   }
 
@@ -32,6 +40,11 @@ export class BaseEl extends LitElement {
       bubbles,
       composed
     }));
+  }
+
+  // Override to provide context to descendants
+  provideContext() {
+    return [[ThemeContext, this.theme]];
   }
 
   _render() {

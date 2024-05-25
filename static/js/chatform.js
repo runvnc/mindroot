@@ -23,6 +23,12 @@ class ChatForm extends BaseEl {
     this.sender = 'user'
     this.message = ''
     console.log('chatform constructor')
+    this.theme = ''; // Initialize theme
+  }
+
+  // Consume context to get the theme
+  static get context() {
+    return [[ThemeContext]];
   }
 
   _send(event) {
