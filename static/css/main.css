@@ -9,3 +9,37 @@ input::placeholder, textarea:placeholder {
   background-color: #030303;
   color: #f0f0f0;
 }
+
+.user {
+  background-color: #333;
+  border-radius: 30px;
+  text-align: left;
+}
+
+.ai {
+  text-align: right;
+}
+
+.message-input {
+  background-color: #030303;
+  color: #f0f0f0;
+  width: 90%;
+  /* textarea should be one line high by default but automatically expand */ 
+  height: 1em;
+  border: none;
+  overflow: hidden;
+  scrollbar-width: none;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+button {
+/* style buttons with contemporary look and dark theme */ 
+  background-color: #333;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+}
+
+
