@@ -9,6 +9,11 @@ export class BaseEl extends LitElement {
     theme: { type: String }
   }
 
+  // Consume context to get the theme
+  static get context() {
+    return [[ThemeContext]];
+  }
+
   constructor() {
     super();
     this.theme = 'default'; // Set a default theme if none is provided

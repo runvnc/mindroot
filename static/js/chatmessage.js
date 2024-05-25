@@ -11,13 +11,8 @@ export class ChatMessage extends BaseEl {
   constructor() {
     super()
     this.sender = 'user'
-    this.theme = ''; // Initialize theme
   }
 
-  // Consume context to get the theme
-  static get context() {
-    return [[ThemeContext]];
-  }
 
   render() {
     return html`
