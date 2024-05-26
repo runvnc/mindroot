@@ -51,22 +51,26 @@ class Chat extends BaseEl {
       console.log(event)
       const data = JSON.parse(event.data)
       if (this.messages[this.messages.length-1].sender != 'ai') {
+        console.log('adding message')
         this.messages = [...this.messages, { content: '', sender: 'ai',
                                             persona: data.persona }]
       }
 
-      this.messages[this.messages.length-1].content = data.command + ': ' + data.so_far
+     if (data.command == 'say') {
+        this.messages[this.messages.length-1].content += `<span>${data.chunk}</span>`
+     } else { 
+        this.messages[this.messages.length-1].content = data.command + ': ' + data.so_far
+     }
       this.requestUpdate()
     }
-
 
     _aiMessage(event) {
       console.log('Event received') 
       console.log(event)
       const data = JSON.parse(event.data)
       console.log('aimessage', data)
-      this.messages = [...this.messages, { content: data.content,
-                                           persona: data.persona, sender: 'ai' }]
+      /* this.messages = [...this.messages, { content: data.content,
+                                           persona: data.persona, sender: 'ai' }] */
     }
 
     _imageMsg(event) {
