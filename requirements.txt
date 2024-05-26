@@ -37,4 +37,7 @@ pluggy
 runpod
 together
 
+openai
+
 mimetypes
+
