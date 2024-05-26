@@ -22,8 +22,13 @@ async def read(fname, context=None):
     Example:
     { "read": "file1.txt" }
     """
-    if 'current_dir ' in context.data:
+    if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
+    else:
+        print('No current_dir in context.data')
+        print('context.data=', context.data)
+
+    print('context=', context, 'fname=', fname)
     with open(fname, 'r') as f:
         text = f.read()
         print(f'Read text from {fname}: {text}')
@@ -42,7 +47,7 @@ async def replace_inclusive(fname, start, end, text, context=None):
     { "replace_inclusive": { "fname": "file1.txt", "starts_with": "start of it",
       "ends_with": "end of it\nnew text\nend" } }
     """
-    if 'current_dir ' in context.data:
+    if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'r') as f:
         content = f.read()
