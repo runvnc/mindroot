@@ -36,7 +36,7 @@ async def read(fname, context=None):
 
 @command(is_local=True)
 async def replace(fname=None, starts_with=None, ends_with=None, text=None, context=None):
-    """Replace text between two strings in a file, including the start and end strings.
+    """Replace text between two strings in a file.
 
     Parameters:
 
@@ -49,7 +49,7 @@ async def replace(fname=None, starts_with=None, ends_with=None, text=None, conte
 
     Example:
 
-    { "replace_inclusive": { "fname": "somefile.ext", "starts_with": "start of it",
+    { "replace": { "fname": "somefile.ext", "starts_with": "start of it",
       "ends_with": "end of it", "text": "new text\nend of it" } }
     """
     if 'current_dir' in context.data:
