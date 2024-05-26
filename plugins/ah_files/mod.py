@@ -35,22 +35,29 @@ async def read(fname, context=None):
         return text
 
 @command(is_local=True)
-async def replace(fname=None, starts_with=None, ends_with=None, text=None, context=None):
-    """Replace text between two strings in a file.
+async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=None, context=None):
+    """Replace text between two strings in a file including start and end strings.
 
     Parameters:
 
     fname - The file to replace text in.
     starts_with - The JSON-encoded/safe start string.
     ends_with - The JSON-encoded/safe end string.
-    text - The JSON-encoded/safe text to replace between the start and end strings.
+    text - The JSON-encoded/safe text to replace existing content with, including start and end strings.
 
     Important: remember that since this is JSON, strings must be properly escaped, such as double quotes, etc.
 
     Example:
 
-    { "replace": { "fname": "somefile.ext", "starts_with": "start of it",
-      "ends_with": "end of it", "text": "new text\nend of it" } }
+    { "replace_inclusive": { "fname": "somefile.ext", "starts_with": "start of it",
+      "ends_with": "end of it", "text": "start of it\nnew text\nend of it" } }
+
+
+    Example:
+    
+    { "replace_inclusive": { "fname": "example.py", "starts_with": "def hello():\n", 
+      "ends_with": "\n    return 'hi'", "text": "def hello():\n    print('hi in console')\n    return 'hello'"}}
+
     """
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
@@ -63,7 +70,7 @@ async def replace(fname=None, starts_with=None, ends_with=None, text=None, conte
         new_content = content[:start_index] + starts_with + text + ends_with + content[end_index:]
         with open(fname, 'w') as f:
             f.write(new_content)
-        print(f'Replaced text between {start} and {end} in {fname}')
+        print(f'Replaced text between {starts_with} and {ends_with} in {fname}')
     else:
         print(f'Could not find the start or end text in {fname}')
 
