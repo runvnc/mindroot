@@ -9,13 +9,6 @@ class ChatForm extends BaseEl {
   
   static styles = [
     css`
-    :host {
-      display: block;
-    }
-
-    .x {
-       background-color: red;
-     }
   `]
 
   constructor() {
@@ -26,30 +19,26 @@ class ChatForm extends BaseEl {
     console.log('theme = ', this.theme)
   }
 
-
   _send(event) {
     console.log('send')
     const ev_ = {
         content: this.messageEl.value,
-        sender: this.senderEl.value
+        sender: 'user'
     }
     this.dispatch('addmessage', ev_)
+    this.messageEl.value = ''
   }
 
   firstUpdated() {
-    console.log('chatform firstUpdated')
-    this.senderEl = this.shadowRoot.getElementById('sel_sender')
     this.messageEl = this.shadowRoot.getElementById('inp_message')
   }
 
  _render() {
     return html`
       <div class="chat-entry flex py-2">
-      <textarea type="text" id="inp_message" class="message-input" @input=${this._messageChanged} required></textarea>
-      <select @select=${this._senderChanged} id="sel_sender" class="sender-select mr-2">
-        <option value="user">User</option>
-        <option value="ai">AI</option>
-      </select>
+      <textarea type="text" id="inp_message" class="message-input"
+        @keydown=${(e) => {if (e.keyCode === 13) this._send()}} 
+        @input=${this._messageChanged} required></textarea>
       <button type="button" @click=${this._send} class="mr-2">Send</button>
       </div>
     `

@@ -25,7 +25,6 @@ textarea {
   width: 90%;
   min-height: 1em;
   max-height: 500px; /* Maximum height before scrolling */
-  border: 2px solid red;
   overflow-y: auto; /* Allows the textarea to expand as the user types */
   scrollbar-width: none;
   padding: 10px;
