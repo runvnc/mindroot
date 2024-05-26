@@ -69,8 +69,8 @@ class Chat extends BaseEl {
       console.log(event)
       const data = JSON.parse(event.data)
       console.log('aimessage', data)
-      /* this.messages = [...this.messages, { content: data.content,
-                                           persona: data.persona, sender: 'ai' }] */
+      this.messages = [...this.messages, { content: data.content,
+                                           persona: data.persona, sender: 'ai' }]
     }
 
     _imageMsg(event) {

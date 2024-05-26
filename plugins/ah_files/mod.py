@@ -67,7 +67,7 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
     end_index = content.find(ends_with, start_index)
     if start_index != -1 and end_index != -1:
         end_index += len(ends_with)  # Include the end string in the replacement
-        new_content = content[:start_index] + starts_with + text + ends_with + content[end_index:]
+        new_content = content[:start_index] + text + content[end_index:]
         with open(fname, 'w') as f:
             f.write(new_content)
         print(f'Replaced text between {starts_with} and {ends_with} in {fname}')

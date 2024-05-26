@@ -149,7 +149,7 @@ class Agent:
                             diff_str = find_new_substring(last_partial_args, partial_args)
                             print(6)
                         else:
-                            diff_str = partial_args
+                            diff_str = json.dumps(partial_args)
                             print(7)
                         print("sending partial command diff")
                         await context.partial_command(partial_command, diff_str, partial_args)
