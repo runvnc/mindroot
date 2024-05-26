@@ -17,26 +17,48 @@ input::placeholder, textarea::placeholder {
 }
 
 chat-message {
-  background-color: #333;
-  border-radius: 30px;
   max-width: 69%;
-  box-sizing: border-box;
   padding: 10px 20px;
   margin: 10px 0;
+  display: inline-block;
+  background-color: transparent;
+}
+
+.outer-msg {
+  display: flex;
+  flex-direction: row;
+}
+
+img.avatar {
+  height: 64px;
   display: inline-block;
 }
 
 .message {
+  padding: 10px 10px;
   margin: 0;
   background-color:  transparent;
 }
 
 .user {
   align-self: flex-start;
+
 }
+
+.msg-user {
+  background-color: #333;
+  border-radius: 30px; 
+  box-sizing: border-box;
+}
+
 
 .ai {
   align-self: flex-end;
+}
+
+.msg-ai {
+  background-color: #080808;
+  border: 1px solid #181818;
 }
 
 .spacer {

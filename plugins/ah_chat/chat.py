@@ -62,7 +62,7 @@ async def partial_command(command: str, chunk: str, so_far: str, context=None):
     persona_ = context.persona
 
     await context.agent_output("partial_command", { "command": command, "chunk": chunk,
-                                                    "so_far": so_far, "persona": persona_ })
+                                                    "so_far": so_far, "persona": persona_['name'] })
 
 
 @router.put("/chat/{log_id}/{persona_name}")
@@ -79,6 +79,7 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
+        
         self.data = {}
         self.data['current_dir'] = 'data/users/default'
 
@@ -132,7 +133,8 @@ async def send_message(log_id: str, message_data: Message):
         ]
 
         """
-        await context.agent_output("new_message", {"content": assistant_message})
+        await context.agent_output("new_message", {"content": assistant_message,
+                                                "persona": persona_['name'] })
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})

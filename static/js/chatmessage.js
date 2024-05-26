@@ -3,7 +3,8 @@ import {BaseEl} from './base.js'
 
 export class ChatMessage extends BaseEl {
   static properties = {
-    sender: {type: String}
+    sender: {type: String},
+    persona: {type: String}
   }
 
   static styles = [ css`
@@ -12,13 +13,17 @@ export class ChatMessage extends BaseEl {
   constructor() {
     super()
     this.sender = 'user'
+    this.persona = ''
   }
 
 
   _render() {
     return html`
-    <div class="message ${this.sender}">
-      <slot></slot>
+    <div class="outer-msg">
+      <img class="avatar" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
+      <div class="message msg-${this.sender}">
+        <slot></slot>
+      </div>
     </div>
     <div class="spacer"></div>
   `

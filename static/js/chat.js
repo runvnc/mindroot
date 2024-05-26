@@ -51,7 +51,8 @@ class Chat extends BaseEl {
       console.log(event)
       const data = JSON.parse(event.data)
       if (this.messages[this.messages.length-1].sender != 'ai') {
-        this.messages = [...this.messages, { content: '', sender: 'ai' }]
+        this.messages = [...this.messages, { content: '', sender: 'ai',
+                                            persona: data.persona }]
       }
 
       this.messages[this.messages.length-1].content = data.command + ': ' + data.so_far
@@ -63,7 +64,9 @@ class Chat extends BaseEl {
       console.log('Event received') 
       console.log(event)
       const data = JSON.parse(event.data)
-      this.messages = [...this.messages, { content: data.content, sender: 'ai' }]
+      console.log('aimessage', data)
+      this.messages = [...this.messages, { content: data.content,
+                                           persona: data.persona, sender: 'ai' }]
     }
 
     _imageMsg(event) {
@@ -80,8 +83,8 @@ class Chat extends BaseEl {
         <div class="chat-container">
           SessionID: ${this.sessionid}
           <div class="chat-log">
-            ${this.messages.map(({ content, sender }) => html`
-              <chat-message sender="${sender}" class="${sender}">
+            ${this.messages.map(({ content, sender, persona }) => html`
+              <chat-message sender="${sender}" class="${sender}" persona="${persona}">
                 ${unsafeHTML(content)}
               </chat-message>
             `)}
