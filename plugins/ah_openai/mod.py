@@ -18,10 +18,10 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
         )
 
         async def content_stream(original_stream):
-            for message in stream['choices'][0]:
-                yield message.delta.content or ""
+            async for chunk in original_stream:
+                yield chunk.choices[0].delta.content or ""
 
-        return content_stream(original_stream)
+        return content_stream(stream)
 
     except Exception as e:
         print('openai error:', e)
