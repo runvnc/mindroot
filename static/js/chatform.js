@@ -23,7 +23,8 @@ class ChatForm extends BaseEl {
     console.log('send')
     const ev_ = {
         content: this.messageEl.value,
-        sender: 'user'
+        sender: 'user',
+        persona: 'user'
     }
     this.dispatch('addmessage', ev_)
     this.messageEl.value = ''
