@@ -35,15 +35,15 @@ async def read(fname, context=None):
         return text
 
 @command(is_local=True)
-async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=None, context=None):
+async def replace(fname=None, starts_with=None, ends_with=None, text=None, context=None):
     """Replace text between two strings in a file, including the start and end strings.
 
     Parameters:
 
     fname - The file to replace text in.
-    start - The JSON-encoded/safe start string.
-    end - The JSON-encoded/safe end string.
-    text - The JSON-encoded/safe text to replace between the start and end strings including the new start and end.
+    starts_with - The JSON-encoded/safe start string.
+    ends_with - The JSON-encoded/safe end string.
+    text - The JSON-encoded/safe text to replace between the start and end strings.
 
     Important: remember that since this is JSON, strings must be properly escaped, such as double quotes, etc.
 
@@ -56,11 +56,11 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
         fname = context.data['current_dir'] + '/' + fname
     with open(fname, 'r') as f:
         content = f.read()
-    start_index = content.find(start)
-    end_index = content.find(end, start_index)
+    start_index = content.find(starts_with)
+    end_index = content.find(ends_with, start_index)
     if start_index != -1 and end_index != -1:
-        end_index += len(end)  # Include the end string in the replacement
-        new_content = content[:start_index] + start + text + end + content[end_index:]
+        end_index += len(ends_with)  # Include the end string in the replacement
+        new_content = content[:start_index] + starts_with + text + ends_with + content[end_index:]
         with open(fname, 'w') as f:
             f.write(new_content)
         print(f'Replaced text between {start} and {end} in {fname}')
