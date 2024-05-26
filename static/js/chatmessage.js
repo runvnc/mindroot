@@ -13,7 +13,7 @@ export class ChatMessage extends BaseEl {
   constructor() {
     super()
     this.sender = 'user'
-    this.persona = ''
+    this.persona = 'user'
   }
 
 
