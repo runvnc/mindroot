@@ -31,7 +31,7 @@ class Chat extends BaseEl {
     }
 
     _addMessage(event) {
-      const { content, sender } = event.detail
+      const { content, sender, persona } = event.detail
       this.messages = [...this.messages, { content, sender, persona }]
 
       console.log(this.messages)
