@@ -1,6 +1,5 @@
-import asyncio
+import openai
 from ..services import service
-from together import AsyncTogether
 import os
 
 @service(is_local=False)
@@ -8,17 +7,16 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
     try:
         #model = "cognitivecomputations/dolphin-2.5-mixtral-8x7b"
         model = "meta-llama/Llama-3-70b-chat-hf"
-        async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
-        original_stream = await async_client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream=True
+        openai.api_key = os.environ.get("OPENAI_API_KEY")
+        original_stream = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
         )
         async def content_stream(original_stream):
-            async for chunk in original_stream:
-                yield chunk.choices[0].delta.content or ""
+            for message in original_stream['choices'][0]['message']['content']:
+                yield message['content']
 
         return content_stream(original_stream)
 
