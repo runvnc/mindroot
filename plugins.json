@@ -1,6 +1,6 @@
 [
-  { "name": "ah_togetherai", "enabled": false},
-  { "name": "ah_openai", "enabled": true },
+  { "name": "ah_togetherai", "enabled": true},
+  { "name": "ah_openai", "enabled": false },
   { "name": "ah_persona", "enabled": true },
   { "name": "ah_persona_lite", "enabled": false },
   { "name": "ah_sd", "enabled": false},
