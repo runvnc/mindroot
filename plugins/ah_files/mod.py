@@ -35,17 +35,22 @@ async def read(fname, context=None):
         return text
 
 @command(is_local=True)
-async def replace_inclusive(fname, start, end, text, context=None):
+async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=None, context=None):
     """Replace text between two strings in a file, including the start and end strings.
+
     Parameters:
+
     fname - The file to replace text in.
-    start - The start string.
-    end - The end string.
-    text - The text to replace between the start and end strings including the new start and end.
+    start - The JSON-encoded/safe start string.
+    end - The JSON-encoded/safe end string.
+    text - The JSON-encoded/safe text to replace between the start and end strings including the new start and end.
+
+    Important: remember that since this is JSON, strings must be properly escaped, such as double quotes, etc.
 
     Example:
-    { "replace_inclusive": { "fname": "file1.txt", "starts_with": "start of it",
-      "ends_with": "end of it\nnew text\nend" } }
+
+    { "replace_inclusive": { "fname": "somefile.ext", "starts_with": "start of it",
+      "ends_with": "end of it", "text": "new text\nend of it" } }
     """
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname

@@ -102,9 +102,6 @@ async def warmup(context=None):
 
     pipeline = pipeline.to("cuda")
 
-    pipeline.enable_sequential_cpu_offload() # my graphics card VRAM is very lowd
-
-
     if not local_model:
         pipeline.safety_checker = lambda images, **kwargs: (images, [False])
 
