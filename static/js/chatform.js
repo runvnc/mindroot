@@ -31,12 +31,13 @@ class ChatForm extends BaseEl {
 
   firstUpdated() {
     this.messageEl = this.shadowRoot.getElementById('inp_message')
+    this.messageEl.value = ''
   }
 
  _render() {
     return html`
       <div class="chat-entry flex py-2">
-      <textarea type="text" id="inp_message" class="message-input"
+      <textarea rows="3" columns="80" id="inp_message" class="message-input"
         @keydown=${(e) => {if (e.keyCode === 13) this._send()}} 
         @input=${this._messageChanged} required></textarea>
       <button type="button" @click=${this._send} class="mr-2">Send</button>

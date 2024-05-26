@@ -6,7 +6,8 @@ export class ChatMessage extends BaseEl {
     sender: {type: String}
   }
 
-  static styles = [ css`` ]
+  static styles = [ css`
+  ` ]
 
   constructor() {
     super()
@@ -19,6 +20,7 @@ export class ChatMessage extends BaseEl {
     <div class="message ${this.sender}">
       <slot></slot>
     </div>
+    <div class="spacer"></div>
   `
   }
 }

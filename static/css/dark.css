@@ -9,14 +9,40 @@ input::placeholder, textarea::placeholder {
   color: #f0f0f0;
 }
 
-.user {
+.chat-log {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+chat-message {
   background-color: #333;
   border-radius: 30px;
-  text-align: left;
+  max-width: 69%;
+  box-sizing: border-box;
+  padding: 10px 20px;
+  margin: 10px 0;
+  display: inline-block;
+}
+
+.message {
+  margin: 0;
+  background-color:  transparent;
+}
+
+.user {
+  align-self: flex-start;
 }
 
 .ai {
-  text-align: right;
+  align-self: flex-end;
+}
+
+.spacer {
+  height: 0.5em;
+  display: block;
+  background-color: transparent;
 }
 
 textarea {

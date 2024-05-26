@@ -10,13 +10,6 @@ class Chat extends BaseEl {
   
     static styles = [
     css`
-      :host {
-        display: block;
-      }
-
-      .test {
-        color: red;
-      }
    `
   ]
 
@@ -88,7 +81,7 @@ class Chat extends BaseEl {
           SessionID: ${this.sessionid}
           <div class="chat-log">
             ${this.messages.map(({ content, sender }) => html`
-              <chat-message sender="${sender}">
+              <chat-message sender="${sender}" class="${sender}">
                 ${unsafeHTML(content)}
               </chat-message>
             `)}
