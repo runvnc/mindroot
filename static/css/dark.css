@@ -10,6 +10,11 @@ input, * {
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
+p {
+  padding: 2px 2px;
+  margin: 2px 2px;
+}
+
 input::placeholder, textarea::placeholder {
   background-color: #030303;
   color: #f0f0f0;
@@ -24,8 +29,8 @@ input::placeholder, textarea::placeholder {
 
 chat-message {
   max-width: 69%;
-  padding: 10px 20px;
-  margin: 10px 0;
+  padding: 5px 10px;
+  margin: 5px 0;
   display: inline-block;
   background-color: transparent;
 }
@@ -41,7 +46,7 @@ img.avatar {
 }
 
 .message {
-  padding: 10px 10px;
+  padding: 5px 5px;
   margin: 0;
   background-color:  transparent;
 }
