@@ -1,6 +1,7 @@
 from ..services import service
 from ..commands import command
 import os
+import json
 
 @command(is_local=False)
 async def think(thought_process, context=None):
