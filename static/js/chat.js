@@ -1,5 +1,6 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js'
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 import {BaseEl} from './base.js'
 
 class Chat extends BaseEl {
@@ -32,9 +33,8 @@ class Chat extends BaseEl {
 
     _addMessage(event) {
       const { content, sender, persona } = event.detail
-      this.messages = [...this.messages, { content, sender, persona }]
+      this.messages = [...this.messages, { content: marked(content), sender, persona }]
 
-      console.log(this.messages)
       if (sender === 'user') {
         fetch(`/chat/${this.sessionid}/send`, {
           method: 'POST',
@@ -59,7 +59,7 @@ class Chat extends BaseEl {
      if (data.command == 'say') {
         this.messages[this.messages.length-1].content += `<span>${data.chunk}</span>`
      } else { 
-        this.messages[this.messages.length-1].content = data.command + ': ' + data.so_far
+        this.messages[this.messages.length-1].content = data.command + ': ' + marked(data.so_far)
      }
       this.requestUpdate()
     }
@@ -69,7 +69,7 @@ class Chat extends BaseEl {
       console.log(event)
       const data = JSON.parse(event.data)
       console.log('aimessage', data)
-      this.messages = [...this.messages, { content: data.content,
+       this.messages = [...this.messages, { content: data.content,
                                            persona: data.persona, sender: 'ai' }]
     }
 

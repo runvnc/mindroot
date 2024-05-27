@@ -161,6 +161,32 @@ async def send_message(log_id: str, message_data: Message):
 
     return {"status": "ok"}
 
+
+@command(is_local=True)
+async def markdown(assistant_message, context=None):
+    """
+    Output some markdown text to the user or chat room.
+    Use this for any somewhat longer text that the user can readand
+    and doesn't necessarily need to be spoken out loud.
+
+    You can write as much text/sentences etc. as you need.
+    Just make sure everything is properly encoded as this is a JSON 
+    command (such as escaping double quotes etc.)
+
+# Example
+
+    [
+        { "markdown": "## Section 1\n\n- item 1\n- item 2" },
+    ]
+
+    """
+    await context.agent_output("new_message", {"content": assistant_message,
+                                            "persona": persona_['name'] })
+    json_cmd = { "say": assistant_message }
+
+    chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+
+
 @router.get("/{persona_name}", response_class=HTMLResponse)
 async def get_chat_html(persona_name: str):
     log_id = nanoid.generate()

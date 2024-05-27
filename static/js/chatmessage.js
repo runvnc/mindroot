@@ -1,5 +1,6 @@
 import {LitElement, html, css} from './lit-core.min.js';
 import {BaseEl} from './base.js'
+import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
 
 export class ChatMessage extends BaseEl {
   static properties = {
@@ -23,6 +24,7 @@ export class ChatMessage extends BaseEl {
       <img class="avatar" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>
+          ${unsafeHTML(this.innerHTML)}
       </div>
     </div>
     <div class="spacer"></div>
