@@ -24,7 +24,6 @@ export class ChatMessage extends BaseEl {
       <img class="avatar" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>
-          ${unsafeHTML(this.innerHTML)}
       </div>
     </div>
     <div class="spacer"></div>

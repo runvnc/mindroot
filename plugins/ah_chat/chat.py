@@ -163,26 +163,41 @@ async def send_message(log_id: str, message_data: Message):
 
 
 @command(is_local=True)
-async def markdown(assistant_message, context=None):
+async def json_encoded_md(json_encoded_markdown_text, context=None):
     """
     Output some markdown text to the user or chat room.
-    Use this for any somewhat longer text that the user can readand
+    Use this for any somewhat longer text that the user can read and
     and doesn't necessarily need to be spoken out loud.
 
     You can write as much text/sentences etc. as you need.
-    Just make sure everything is properly encoded as this is a JSON 
-    command (such as escaping double quotes etc.)
+
+    IMPORTANT: make sure everything is properly encoded as this is a JSON 
+    command (such as escaping double quotes, escaping newlines, etc.)
+
+    Parameters:
+
+    json_encoded_markdown_text - String.  MUST BE PROPERLY JSON-encoded string.
 
 # Example
 
     [
-        { "markdown": "## Section 1\n\n- item 1\n- item 2" },
+        { "json_encoded_md": "## Section 1\n\n- item 1\n- item 2" }
     ]
 
+# Example
+
+    [
+        { "json_encoded_md": "Here is a list:\n\n- item 1\n- item 2\n- line 3" }
+    ]
+
+
+NOTICE THAT THE PARAMETER IS A JSON-ENCODED STRING WITH NO NEWLINES AND ONLY
+PROPERLY ESCAPED TEXT.
+
     """
-    await context.agent_output("new_message", {"content": assistant_message,
+    await context.agent_output("new_message", {"content": json_encoded_markdown_text,
                                             "persona": persona_['name'] })
-    json_cmd = { "say": assistant_message }
+    json_cmd = { "json_encoded_md": assistant_message }
 
     chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
