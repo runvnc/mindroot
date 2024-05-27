@@ -16,6 +16,6 @@ async def think(thought_process, context=None):
     #await context.agent_output("thought", {"content": assistant_message,
     #                                           "persona": persona_['name'] })
     json_cmd = { "think": thought_process }
-    chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+    context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
   
 
