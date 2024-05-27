@@ -181,13 +181,13 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
 # Example
 
     [
-        { "json_encoded_md": "## Section 1\n\n- item 1\n- item 2" }
+        { "json_encoded_md": "## Section 1\\n\\n- item 1\\n- item 2" }
     ]
 
 # Example
 
     [
-        { "json_encoded_md": "Here is a list:\n\n- item 1\n- item 2\n- line 3" }
+        { "json_encoded_md": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }
     ]
 
 

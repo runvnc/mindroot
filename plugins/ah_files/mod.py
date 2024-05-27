@@ -50,13 +50,13 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
     Example:
 
     { "replace_inclusive": { "fname": "somefile.ext", "starts_with": "start of it",
-      "ends_with": "end of it", "text": "start of it\nnew text\nend of it" } }
+      "ends_with": "end of it", "text": "start of it\\nnew text\\nend of it" } }
 
 
     Example:
     
-    { "replace_inclusive": { "fname": "example.py", "starts_with": "def hello():\n", 
-      "ends_with": "\n    return 'hi'", "text": "def hello():\n    print('hi in console')\n    return 'hello'"}}
+    { "replace_inclusive": { "fname": "example.py", "starts_with": "def hello():\\n", 
+      "ends_with": "\\n    return 'hi'", "text": "def hello():\\n    print('hi in console')\\n    return 'hello'"}}
 
     """
     if 'current_dir' in context.data:
