@@ -92,8 +92,11 @@ async def dir(directory='', context=None):
     { "dir": "" }
 
     """
-    if 'current_dir' in context.data:
-        directory = context.data['current_dir'] + '/' + directory
+    if directory.starts_with('/') or directory.starts_with('./') or directory.starts_with('../'):
+        directory = directory + ''
+    else:
+        if 'current_dir' in context.data:
+            directory = context.data['current_dir'] + '/' + directory
     files = os.listdir(directory)
     print(f'Files in {directory}: {files}')
     return files
