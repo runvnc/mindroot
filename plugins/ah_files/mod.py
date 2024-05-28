@@ -156,7 +156,7 @@ async def cd(directory, context=None):
     """
     if 'current_dir' not in context.data:
         context.data['current_dir'] = os.getcwd()
-    if directory.starts_with('/'):
+    if directory.startswith('/'):
         new_dir = directory
     else:
         new_dir = os.path.realpath(os.path.join(context.data['current_dir'], directory))
