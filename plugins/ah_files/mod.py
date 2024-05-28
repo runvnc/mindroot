@@ -135,3 +135,26 @@ async def show_backups(context=None):
     backup_files = [os.path.basename(backup) for backup in backups]
     print(f"Backup files: {backup_files}")
     return backup_files
+@command(is_local=True)
+async def cd(directory, context=None):
+    """Change the current working directory.
+
+    Parameter: directory - The directory to change to. This can be a relative or absolute path.
+
+    Example:
+
+    { "cd": "subdir1" }
+
+    Other Example (parent dir)
+
+    { "cd": ".." }
+
+    """
+    if 'current_dir' not in context.data:
+        context.data['current_dir'] = os.getcwd()
+    new_dir = os.path.realpath(os.path.join(context.data['current_dir'], directory))
+    if os.path.isdir(new_dir):
+        context.data['current_dir'] = new_dir
+        print(f'Changed current directory to {new_dir}')
+    else:
+        print(f'Directory {new_dir} does not exist.')
