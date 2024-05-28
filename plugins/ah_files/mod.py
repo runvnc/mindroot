@@ -1,4 +1,4 @@
-from ..services import service
+from .backup_file import backup_file
 from ..commands import command
 import os
 
@@ -12,6 +12,7 @@ async def write(fname, text, context=None):
     print("Write file, context is:", context, 'context.data is:', context.data)
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
+    backup_file(fname)
     with open(fname, 'w') as f:
         f.write(text)
         print(f'Wrote text to {fname}')
@@ -61,6 +62,7 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
     """
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
+    backup_file(fname)
     with open(fname, 'r') as f:
         content = f.read()
     start_index = content.find(starts_with)
