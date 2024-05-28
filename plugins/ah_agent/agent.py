@@ -94,6 +94,7 @@ class Agent:
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
+        last_partial_command = None
         last_partial_args = None
 
         async for part in stream:
@@ -133,13 +134,15 @@ class Agent:
                         partial_command = next(iter(partial))
                         if partial_command is not None:
                             partial_args = partial[partial_command]
-                            if isinstance(partial_args, str) and last_partial_args is not None:
-                                diff_str = find_new_substring(last_partial_args, partial_args)
-                            else:
-                                diff_str = json.dumps(partial_args)
-                            await context.partial_command(partial_command, diff_str, partial_args)
-                            last_partial_args = partial_args
-                            buffer_changed = True
+                            if partial_command != last_partial_command or partial_args != last_partial_args:
+                                if isinstance(partial_args, str) and last_partial_args is not None:
+                                    diff_str = find_new_substring(last_partial_args, partial_args)
+                                else:
+                                    diff_str = json.dumps(partial_args)
+                                await context.partial_command(partial_command, diff_str, partial_args)
+                                last_partial_command = partial_command
+                                last_partial_args = partial_args
+                                buffer_changed = True
                     except Exception as e:
                         print("error parsing partial command:", e)
                         break
