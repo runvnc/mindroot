@@ -92,7 +92,7 @@ async def dir(directory='', context=None):
     { "dir": "" }
 
     """
-    if directory.starts_with('/') or directory.starts_with('./') or directory.starts_with('../'):
+    if directory.startswith('/') or directory.startswith('./') or directory.startswith('../'):
         directory = directory + ''
     else:
         if 'current_dir' in context.data:
