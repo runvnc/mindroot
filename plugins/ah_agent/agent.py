@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
@@ -93,70 +94,57 @@ class Agent:
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
-        stack = []
-        in_string = False
-        escape_next = False
         last_partial_args = None
 
         async for part in stream:
-            #chunk = part['message']['content']
             chunk = part
             buffer += chunk
-            try:
-                original_buffer = buffer
-                # split by newline
-                # process line by line
-                # if line is a complete json object, process it
 
-                lines = buffer.split("\n")
-                try_parse = ''
-                for line in lines:
-                    line = self.remove_braces(line)
-                    original_buffer = buffer
-                    if line == "":
-                        continue
-                    try_parse = line
-                    cmd_obj = json.loads(line)
+            while True:
+                try:
+                    # Use a regular expression to find the first complete JSON object in the buffer
+                    match = re.search(r'\{.*?\}', buffer)
+                    if not match:
+                        break
+
+                    # Extract the JSON object
+                    json_str = match.group(0)
+                    cmd_obj = json.loads(json_str)
                     cmd_name = next(iter(cmd_obj))
                     if isinstance(cmd_obj, list):
-                        print('detected command list')
                         cmd_obj = cmd_obj[0]
-                        cmd_name = next(iter(cmd_obj)) 
+                        cmd_name = next(iter(cmd_obj))
                     cmd_args = cmd_obj[cmd_name]
-                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=buffer, context=context)
-                    results.append({"cmd": cmd_name, "result": result})
-                    print('results=',results)
-                    buffer = ""
-                    last_partial_args = None
 
-            except json.JSONDecodeError as e:
-                print("error parsing", e, f"||{try_parse}||")
-                buffer = original_buffer
-                try:
-                    partial = partial_json_parser.loads(buffer)
-                    print("partial command found:", partial)
-                    if isinstance(partial, list):
-                        partial = partial[0]
- 
-                    partial_command = next(iter(partial))
-                    print(2)
-                    if partial_command is not None:
-                        print(3, "partial=", partial, "partial_command=", partial_command)
-                        partial_args = partial[partial_command]
-                        print(4)
-                        if isinstance(partial_args, str) and last_partial_args is not None:
-                            print(5)
-                            diff_str = find_new_substring(last_partial_args, partial_args)
-                            print(6)
-                        else:
-                            diff_str = json.dumps(partial_args)
-                            print(7)
-                        print("sending partial command diff")
-                        await context.partial_command(partial_command, diff_str, partial_args)
-                        last_partial_args = partial_args
-                except Exception as e:
-                    print("error parsing partial command:", e)
-                    pass
+                    # Handle the command
+                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
+                    results.append({"cmd": cmd_name, "result": result})
+
+                    # Remove the processed JSON object from the buffer
+                    buffer = buffer[match.end():]
+
+                    # Clean up leading or trailing commas
+                    buffer = buffer.lstrip(',').rstrip(',')
+
+                except json.JSONDecodeError as e:
+                    print("error parsing", e, f"||{buffer}||")
+                    try:
+                        partial = partial_json_parser.loads(buffer)
+                        if isinstance(partial, list):
+                            partial = partial[0]
+
+                        partial_command = next(iter(partial))
+                        if partial_command is not None:
+                            partial_args = partial[partial_command]
+                            if isinstance(partial_args, str) and last_partial_args is not None:
+                                diff_str = find_new_substring(last_partial_args, partial_args)
+                            else:
+                                diff_str = json.dumps(partial_args)
+                            await context.partial_command(partial_command, diff_str, partial_args)
+                            last_partial_args = partial_args
+                    except Exception as e:
+                        print("error parsing partial command:", e)
+                        break
 
         return results
 
@@ -190,5 +178,3 @@ class Agent:
         print("system message was:")
         print(self.render_system_msg())
         return ret
-
-
