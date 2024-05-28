@@ -1,8 +1,6 @@
-from .backup_file import backup_file
+from ..services import service
 from ..commands import command
 import os
-from .backup_file import restore_file
-import glob
 
 @command(is_local=True)
 async def write(fname, text, context=None):
@@ -14,7 +12,6 @@ async def write(fname, text, context=None):
     print("Write file, context is:", context, 'context.data is:', context.data)
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
-    backup_file(fname)
     with open(fname, 'w') as f:
         f.write(text)
         print(f'Wrote text to {fname}')
@@ -64,7 +61,6 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
     """
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
-    backup_file(fname)
     with open(fname, 'r') as f:
         content = f.read()
     start_index = content.find(starts_with)
@@ -98,40 +94,3 @@ async def dir(directory='', context=None):
     print(f'Files in {directory}: {files}')
     return files
 
-@command(is_local=True)
-async def restore(fname, timestamp=None, context=None):
-    """Restore a file from its backup. If no timestamp is specified, restore the latest backup.
-    Parameters:
-
-    fname - The file to restore.
-    timestamp - The specific timestamp of the backup to restore. If omitted, the latest backup will be used.
-
-    Example:
-
-    { "restore": { "fname": "file1.txt", "timestamp": "12_24_11_00_00" } }
-
-    Example (latest backup):
-
-    { "restore": { "fname": "file1.txt" } }
-
-    """
-    if 'current_dir' in context.data:
-        fname = context.data['current_dir'] + '/' + fname
-    restore_file(fname, timestamp)
-    print(f'Restored {fname} from backup.')
-
-
-@command(is_local=True)
-async def show_backups(context=None):
-    """List all backup files in the .backup directory.
-    Example:
-    { "show_backups": {} }
-    """
-    backup_dir = '.backup'
-    if not os.path.exists(backup_dir):
-        print(f"The backup directory {backup_dir} does not exist.")
-        return []
-    backups = glob.glob(os.path.join(backup_dir, '*'))
-    backup_files = [os.path.basename(backup) for backup in backups]
-    print(f"Backup files: {backup_files}")
-    return backup_files
