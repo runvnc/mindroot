@@ -2,6 +2,7 @@ from .backup_file import backup_file
 from ..commands import command
 import os
 from .backup_file import restore_file
+import glob
 
 @command(is_local=True)
 async def write(fname, text, context=None):
@@ -118,3 +119,17 @@ async def restore(fname, timestamp=None, context=None):
         fname = context.data['current_dir'] + '/' + fname
     restore_file(fname, timestamp)
     print(f'Restored {fname} from backup.')
+@command(is_local=True)
+async def show_backups(context=None):
+    """List all backup files in the .backup directory.
+    Example:
+    { "show_backups": {} }
+    """
+    backup_dir = '.backup'
+    if not os.path.exists(backup_dir):
+        print(f"The backup directory {backup_dir} does not exist.")
+        return []
+    backups = glob.glob(os.path.join(backup_dir, '*'))
+    backup_files = [os.path.basename(backup) for backup in backups]
+    print(f"Backup files: {backup_files}")
+    return backup_files
