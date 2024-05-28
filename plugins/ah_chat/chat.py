@@ -199,7 +199,7 @@ PROPERLY ESCAPED TEXT.
                                             "persona": context.persona['name'] })
     json_cmd = { "json_encoded_md": json_encoded_markdown_text }
 
-    chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+    context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
 
 @router.get("/{persona_name}", response_class=HTMLResponse)
