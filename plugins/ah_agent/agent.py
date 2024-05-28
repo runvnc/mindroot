@@ -99,8 +99,10 @@ class Agent:
         async for part in stream:
             chunk = part
             buffer += chunk
+            buffer_changed = True
 
-            while buffer:
+            while buffer and buffer_changed:
+                buffer_changed = False
                 # Check for full JSON command
                 match = re.search(r'\{.*?\}', buffer)
                 if match:
@@ -119,6 +121,7 @@ class Agent:
                     # Remove the processed JSON object from the buffer
                     buffer = buffer[match.end():]
                     buffer = buffer.lstrip(',').rstrip(',')
+                    buffer_changed = True
 
                 else:
                     # Attempt to parse partial JSON command
@@ -136,6 +139,7 @@ class Agent:
                                 diff_str = json.dumps(partial_args)
                             await context.partial_command(partial_command, diff_str, partial_args)
                             last_partial_args = partial_args
+                            buffer_changed = True
                     except Exception as e:
                         print("error parsing partial command:", e)
                         break
