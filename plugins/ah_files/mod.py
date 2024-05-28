@@ -1,6 +1,7 @@
 from .backup_file import backup_file
 from ..commands import command
 import os
+from .backup_file import restore_file
 
 @command(is_local=True)
 async def write(fname, text, context=None):
@@ -96,3 +97,24 @@ async def dir(directory='', context=None):
     print(f'Files in {directory}: {files}')
     return files
 
+@command(is_local=True)
+async def restore(fname, timestamp=None, context=None):
+    """Restore a file from its backup. If no timestamp is specified, restore the latest backup.
+    Parameters:
+
+    fname - The file to restore.
+    timestamp - The specific timestamp of the backup to restore. If omitted, the latest backup will be used.
+
+    Example:
+
+    { "restore": { "fname": "file1.txt", "timestamp": "12_24_11_00_00" } }
+
+    Example (latest backup):
+
+    { "restore": { "fname": "file1.txt" } }
+
+    """
+    if 'current_dir' in context.data:
+        fname = context.data['current_dir'] + '/' + fname
+    restore_file(fname, timestamp)
+    print(f'Restored {fname} from backup.')
