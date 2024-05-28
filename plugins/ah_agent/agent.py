@@ -100,14 +100,10 @@ class Agent:
             chunk = part
             buffer += chunk
 
-            while True:
-                try:
-                    # Use a regular expression to find the first complete JSON object in the buffer
-                    match = re.search(r'\{.*?\}', buffer)
-                    if not match:
-                        break
-
-                    # Extract the JSON object
+            while buffer:
+                # Check for full JSON command
+                match = re.search(r'\{.*?\}', buffer)
+                if match:
                     json_str = match.group(0)
                     cmd_obj = json.loads(json_str)
                     cmd_name = next(iter(cmd_obj))
@@ -116,18 +112,16 @@ class Agent:
                         cmd_name = next(iter(cmd_obj))
                     cmd_args = cmd_obj[cmd_name]
 
-                    # Handle the command
+                    # Handle the full command
                     result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
                     results.append({"cmd": cmd_name, "result": result})
 
                     # Remove the processed JSON object from the buffer
                     buffer = buffer[match.end():]
-
-                    # Clean up leading or trailing commas
                     buffer = buffer.lstrip(',').rstrip(',')
 
-                except json.JSONDecodeError as e:
-                    print("error parsing", e, f"||{buffer}||")
+                else:
+                    # Attempt to parse partial JSON command
                     try:
                         partial = partial_json_parser.loads(buffer)
                         if isinstance(partial, list):
