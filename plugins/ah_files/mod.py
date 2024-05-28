@@ -156,7 +156,7 @@ async def cd(directory, context=None):
     if directory.starts_with('/'):
         new_dir = directory
     else:
-    new_dir = os.path.realpath(os.path.join(context.data['current_dir'], directory))
+        new_dir = os.path.realpath(os.path.join(context.data['current_dir'], directory))
     if os.path.isdir(new_dir):
         context.data['current_dir'] = new_dir
         print(f'Changed current directory to {new_dir}')
