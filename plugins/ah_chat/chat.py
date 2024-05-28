@@ -196,8 +196,8 @@ PROPERLY ESCAPED TEXT.
 
     """
     await context.agent_output("new_message", {"content": json_encoded_markdown_text,
-                                            "persona": context.persona_['name'] })
-    json_cmd = { "json_encoded_md": assistant_message }
+                                            "persona": context.persona['name'] })
+    json_cmd = { "json_encoded_md": json_encoded_markdown_text }
 
     chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
