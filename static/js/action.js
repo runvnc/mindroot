@@ -36,9 +36,9 @@ class ActionComponent extends BaseEl {
     if (result != '()') {
       let lines = result.split("\n");
       if (lines.length == 1) {
-        res = `<div class="fn_result"><pre><code class="font-mono whitespace-pre-wrap" >${result}</code></pre></div>`;
+        res = html`<div class="fn_result"><pre><code class="font-mono whitespace-pre-wrap" >${result}</code></pre></div>`;
       } else {
-        res = `
+        res = html`
         <details class="block fn_result">
           <summary>${lines[0]} ...</summary>
           <pre><code class="font-mono whitespace-pre-wrap" >${result}</code></pre>
@@ -46,7 +46,7 @@ class ActionComponent extends BaseEl {
       }
     }
 
-    let html = ` 
+    return html` 
     <div></div>
     <div>
       <div class="av"></div>
@@ -56,7 +56,6 @@ class ActionComponent extends BaseEl {
       </div>
     </div>
     `;
-    return html;
   }
 }
 
