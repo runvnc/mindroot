@@ -60,7 +60,7 @@ class Chat extends BaseEl {
     if (data.command == 'say') {
       this.messages[this.messages.length - 1].content += `<span>${data.chunk}</span>`;
     } else {
-      this.messages[this.messages.length - 1].content = html`
+      this.messages[this.messages.length - 1].content = `
         <action-component funcName="${data.command}" .params="${data.params}"
                           result="${data.so_far}">
         </action-component>`;
