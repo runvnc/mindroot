@@ -46,6 +46,7 @@ class Chat extends BaseEl {
         body: JSON.stringify({ message: content })
       });
     }
+    this.msgSoFar = ''
   }
 
   _partialCmd(event) {
@@ -60,7 +61,8 @@ class Chat extends BaseEl {
     }
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      this.messages[this.messages.length - 1].content += `<span>${data.chunk}</span>`;
+      this.msgSoFar += data.chunk
+      this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
     } else {
       this.messages[this.messages.length - 1].content = `
         <action-component funcName="${data.command}" .params="${data.params}"
