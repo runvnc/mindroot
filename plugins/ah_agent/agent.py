@@ -91,11 +91,35 @@ class Agent:
             buffer = buffer[:-1]
         return buffer 
 
+    async def parse_single_cmd(self, cmd_str, context):
+        try:
+            cmd_obj = json.loads(json_str)
+            cmd_name = next(iter(cmd_obj))
+            if isinstance(cmd_obj, list):
+                cmd_obj = cmd_obj[0]
+                cmd_name = next(iter(cmd_obj))
+            cmd_args = cmd_obj[cmd_name]
+
+            # Handle the full command
+            result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
+            cmd = {"cmd": cmd_name, "result": result}
+            # Remove the processed JSON object from the buffer
+            buffer = buffer[match.end():]
+            buffer = buffer.lstrip(',').rstrip(',')
+            return cmd
+        except Exception as e:
+            print("Error processing command.")
+            print(e)
+            return None
+
+
+
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
         last_partial_command = None
         last_partial_args = None
+        parse_error = ''
 
         async for part in stream:
             chunk = part
@@ -109,12 +133,16 @@ class Agent:
                 if match:
                     try:
                         json_str = match.group(0)
+                        parse_error= ''
                         ok = json.loads(json_str)
-                    except:
+                    except ee:
                         match = False
+                        parse_error = ee
                 if match:
                     json_str = match.group(0)
-                    
+                    result = await self.parse_single_cmd(json_str, context)
+                    if result:
+                        results.append(result)
                     try:
                         cmd_obj = json.loads(json_str)
                         cmd_name = next(iter(cmd_obj))
@@ -161,7 +189,8 @@ class Agent:
             if len(buffer) > 0: 
                 print("Remaining buffer:")
                 print(buffer)
-        
+                print("Parse error?:")
+                print(parse_error)
 
 
         return results
