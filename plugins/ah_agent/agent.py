@@ -68,13 +68,13 @@ class Agent:
         if isinstance(cmd_args, list):
             #filter out empty strings
             cmd_args = [x for x in cmd_args if x != '']
-            await context.running_command(cmd_name, *cmd_args, context=context)
+            await context.running_command(cmd_name, '', *cmd_args )
             return await command_manager.execute(cmd_name, *cmd_args, context=context)
         elif isinstance(cmd_args, dict):
-            await context.running_command(cmd_name, **cmd_args, context=context)
+            await context.running_command(cmd_name, '', **cmd_args)
             return await command_manager.execute(cmd_name, **cmd_args, context=context)
         else:
-            await context.running_command(cmd_name, cmd_args, context=context)
+            await context.running_command(cmd_name, '', cmd_args)
             return await command_manager.execute(cmd_name, cmd_args, context=context)
 
     def remove_braces(self, buffer):

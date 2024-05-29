@@ -59,7 +59,7 @@ class Chat extends BaseEl {
       this.startNewMsg = false
     }
 
-    if (data.command == 'say' || data.command == 'json_encoded_md' {
+    if (data.command == 'say' || data.command == 'json_encoded_md') {
       this.messages[this.messages.length - 1].content += `<span>${data.chunk}</span>`;
     } else {
       this.messages[this.messages.length - 1].content = `
