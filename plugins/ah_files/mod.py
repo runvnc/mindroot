@@ -14,7 +14,13 @@ async def write(fname, text, context=None):
     print("Write file, context is:", context, 'context.data is:', context.data)
     if 'current_dir' in context.data:
         fname = context.data['current_dir'] + '/' + fname
-    backup_file(fname)
+    
+    dirname = os.path.dirname(fname)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    if os.path.isfile(fname):
+        backup_file(fname)
     with open(fname, 'w') as f:
         f.write(text)
         print(f'Wrote text to {fname}')

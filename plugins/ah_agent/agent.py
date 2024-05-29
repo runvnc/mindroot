@@ -107,7 +107,14 @@ class Agent:
                 # Check for full JSON command
                 match = re.search(r'\{.*?\}', buffer)
                 if match:
+                    try:
+                        json_str = match.group(0)
+                        ok = json.loads(json_str)
+                    except:
+                        match = False
+                if match:
                     json_str = match.group(0)
+                    
                     try:
                         cmd_obj = json.loads(json_str)
                         cmd_name = next(iter(cmd_obj))
@@ -124,10 +131,9 @@ class Agent:
                         buffer = buffer[match.end():]
                         buffer = buffer.lstrip(',').rstrip(',')
                         buffer_changed = True
-                    except json.JSONDecodeError:
-                        print("Invalid JSON detected, skipping this part of the buffer.")
-                        buffer = buffer[match.end():]
-                        buffer_changed = True
+                    except Exception as e:
+                        print("Error processing command.")
+                        print(e)
 
                 else:
                     # Attempt to parse partial JSON command
