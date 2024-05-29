@@ -108,21 +108,26 @@ class Agent:
                 match = re.search(r'\{.*?\}', buffer)
                 if match:
                     json_str = match.group(0)
-                    cmd_obj = json.loads(json_str)
-                    cmd_name = next(iter(cmd_obj))
-                    if isinstance(cmd_obj, list):
-                        cmd_obj = cmd_obj[0]
+                    try:
+                        cmd_obj = json.loads(json_str)
                         cmd_name = next(iter(cmd_obj))
-                    cmd_args = cmd_obj[cmd_name]
+                        if isinstance(cmd_obj, list):
+                            cmd_obj = cmd_obj[0]
+                            cmd_name = next(iter(cmd_obj))
+                        cmd_args = cmd_obj[cmd_name]
 
-                    # Handle the full command
-                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
-                    results.append({"cmd": cmd_name, "result": result})
+                        # Handle the full command
+                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
+                        results.append({"cmd": cmd_name, "result": result})
 
-                    # Remove the processed JSON object from the buffer
-                    buffer = buffer[match.end():]
-                    buffer = buffer.lstrip(',').rstrip(',')
-                    buffer_changed = True
+                        # Remove the processed JSON object from the buffer
+                        buffer = buffer[match.end():]
+                        buffer = buffer.lstrip(',').rstrip(',')
+                        buffer_changed = True
+                    except json.JSONDecodeError:
+                        print("Invalid JSON detected, skipping this part of the buffer.")
+                        buffer = buffer[match.end():]
+                        buffer_changed = True
 
                 else:
                     # Attempt to parse partial JSON command
