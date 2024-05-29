@@ -24,7 +24,8 @@ class ActionComponent extends BaseEl {
     this.result = '';
   }
 
-  showFunctionCall(funcName, params, result) {
+  _render() {
+    const {funcName, params, result} = this;
     let paramshtml = '';
     for (var key in params) {
       paramshtml += `<span class="param_name">${key}</span> `;
@@ -56,10 +57,6 @@ class ActionComponent extends BaseEl {
     </div>
     `;
     return html;
-  }
-
-  render() {
-    return html`${unsafeHTML(this.showFunctionCall(this.funcName, this.params, this.result))}`;
   }
 }
 

@@ -51,6 +51,7 @@ class Chat extends BaseEl {
     console.log('Event received');
     console.log(event);
     const data = JSON.parse(event.data);
+    console.log("data:", data)
     if (this.messages[this.messages.length - 1].sender != 'ai') {
       console.log('adding message');
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
@@ -59,7 +60,10 @@ class Chat extends BaseEl {
     if (data.command == 'say') {
       this.messages[this.messages.length - 1].content += `<span>${data.chunk}</span>`;
     } else {
-      this.messages[this.messages.length - 1].content = html`<action-component funcName="${data.command}" .params="${data.params}" result="${data.so_far}"></action-component>`;
+      this.messages[this.messages.length - 1].content = html`
+        <action-component funcName="${data.command}" .params="${data.params}"
+                          result="${data.so_far}">
+        </action-component>`;
     }
     this.requestUpdate();
   }
