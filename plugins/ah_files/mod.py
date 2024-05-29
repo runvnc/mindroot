@@ -13,7 +13,11 @@ async def write(fname, text, context=None):
     """
     print("Write file, context is:", context, 'context.data is:', context.data)
     if 'current_dir' in context.data:
-        fname = context.data['current_dir'] + '/' + fname
+        if fname.startswith('/') or fname.startswith('./') or fname.startswith('../'):
+            fname = fname + ''
+        else:
+            if 'current_dir' in context.data:
+                fname = context.data['current_dir'] + '/' + fname
     
     dirname = os.path.dirname(fname)
     if not os.path.exists(dirname):
@@ -32,7 +36,11 @@ async def read(fname, context=None):
     { "read": "file1.txt" }
     """
     if 'current_dir' in context.data:
-        fname = context.data['current_dir'] + '/' + fname
+        if fname.startswith('/') or fname.startswith('./') or fname.startswith('../'):
+            fname = fname + ''
+        else:
+            if 'current_dir' in context.data:
+                fname = context.data['current_dir'] + '/' + fname
     else:
         print('No current_dir in context.data')
         print('context.data=', context.data)
