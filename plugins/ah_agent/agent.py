@@ -158,6 +158,12 @@ class Agent:
                         print("error parsing partial command:", e)
                         break
 
+            if len(buffer) > 0: 
+                print("Remaining buffer:")
+                print(buffer)
+        
+
+
         return results
 
     async def render_system_msg(self):
@@ -188,5 +194,5 @@ class Agent:
 
         ret = await self.parse_cmd_stream(stream, context)
         print("system message was:")
-        print(self.render_system_msg())
+        print(await self.render_system_msg())
         return ret
