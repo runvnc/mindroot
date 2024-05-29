@@ -30,6 +30,7 @@ class Chat extends BaseEl {
     this.sse.addEventListener('new_message', this._aiMessage.bind(this));
     this.sse.addEventListener('image', this._imageMsg.bind(this));
     this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
+    this.sse.addEventListener('running_command', this._runningCmd.bind(this));
   }
 
   _addMessage(event) {
@@ -52,12 +53,13 @@ class Chat extends BaseEl {
     console.log(event);
     const data = JSON.parse(event.data);
     console.log("data:", data)
-    if (this.messages[this.messages.length - 1].sender != 'ai') {
+    if (this.messages[this.messages.length - 1].sender != 'ai' || this.startNewMsg) {
       console.log('adding message');
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
+      this.startNewMsg = false
     }
 
-    if (data.command == 'say') {
+    if (data.command == 'say' || data.command == 'json_encoded_md' {
       this.messages[this.messages.length - 1].content += `<span>${data.chunk}</span>`;
     } else {
       this.messages[this.messages.length - 1].content = `
@@ -67,6 +69,14 @@ class Chat extends BaseEl {
     }
     this.requestUpdate();
   }
+
+  _runningCmd(event) {
+    //this._partialCmd(event)
+    this.startNewMsg = true
+    console.log('Completed command Event received');
+    console.log(event);
+  }
+
 
   _aiMessage(event) {
     console.log('Event received');

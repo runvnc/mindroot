@@ -64,6 +64,15 @@ async def partial_command(command: str, chunk: str, so_far: str, context=None):
     await context.agent_output("partial_command", { "command": command, "chunk": chunk,
                                                     "so_far": so_far, "persona": persona_['name'] })
 
+@service(is_local=True)
+async def running_command(command: str, chunk: str, so_far: str, context=None):
+    print("*** running_command service call ***")
+    persona_ = context.persona
+
+    await context.agent_output("running_command", { "command": command, "chunk": chunk,
+                                                    "so_far": so_far, "persona": persona_['name'] })
+
+
 
 @router.put("/chat/{log_id}/{persona_name}")
 async def init_chat(log_id: str, persona_name: str):
@@ -189,10 +198,6 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
     [
         { "json_encoded_md": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }
     ]
-
-
-NOTICE THAT THE PARAMETER IS A JSON-ENCODED STRING WITH NO NEWLINES AND ONLY
-PROPERLY ESCAPED TEXT.
 
     """
     await context.agent_output("new_message", {"content": json_encoded_markdown_text,
