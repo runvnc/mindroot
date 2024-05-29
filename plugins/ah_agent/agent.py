@@ -91,7 +91,7 @@ class Agent:
             buffer = buffer[:-1]
         return buffer 
 
-    async def parse_single_cmd(self, cmd_str, context):
+    async def parse_single_cmd(self, cmd_str, context, buffer):
         try:
             cmd_obj = json.loads(json_str)
             cmd_name = next(iter(cmd_obj))
@@ -106,12 +106,11 @@ class Agent:
             # Remove the processed JSON object from the buffer
             buffer = buffer[match.end():]
             buffer = buffer.lstrip(',').rstrip(',')
-            return cmd
+            return cmd, buffer
         except Exception as e:
             print("Error processing command.")
             print(e)
-            return None
-
+            return None, buffer
 
 
     async def parse_cmd_stream(self, stream, context):
@@ -140,29 +139,9 @@ class Agent:
                         parse_error = ee
                 if match:
                     json_str = match.group(0)
-                    result = await self.parse_single_cmd(json_str, context)
+                    result, buffer = await self.parse_single_cmd(json_str, context, buffer)
                     if result:
                         results.append(result)
-                    try:
-                        cmd_obj = json.loads(json_str)
-                        cmd_name = next(iter(cmd_obj))
-                        if isinstance(cmd_obj, list):
-                            cmd_obj = cmd_obj[0]
-                            cmd_name = next(iter(cmd_obj))
-                        cmd_args = cmd_obj[cmd_name]
-
-                        # Handle the full command
-                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
-                        results.append({"cmd": cmd_name, "result": result})
-
-                        # Remove the processed JSON object from the buffer
-                        buffer = buffer[match.end():]
-                        buffer = buffer.lstrip(',').rstrip(',')
-                        buffer_changed = True
-                    except Exception as e:
-                        print("Error processing command.")
-                        print(e)
-
                 else:
                     # Attempt to parse partial JSON command
                     try:
