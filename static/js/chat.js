@@ -27,7 +27,7 @@ class Chat extends BaseEl {
     console.log('First updated');
     console.log('sessionid: ', this.sessionid);
     this.sse = new EventSource(`/chat/${this.sessionid}/events`);
-    this.sse.addEventListener('new_message', this._aiMessage.bind(this));
+    // this.sse.addEventListener('new_message', this._aiMessage.bind(this));
     this.sse.addEventListener('image', this._imageMsg.bind(this));
     this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
@@ -35,7 +35,7 @@ class Chat extends BaseEl {
 
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
-    this.messages = [...this.messages, { content: marked(content), sender, persona }];
+    this.messages = [...this.messages, { content: marked("\n" + content), sender, persona }];
 
     if (sender === 'user') {
       fetch(`/chat/${this.sessionid}/send`, {
@@ -61,7 +61,7 @@ class Chat extends BaseEl {
     }
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      this.msgSoFar += data.chunk
+      this.msgSoFar = data.so_far // data.chunk
       this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
     } else {
       this.messages[this.messages.length - 1].content = `
