@@ -135,7 +135,7 @@ class Agent:
                         json_str = match.group(0)
                         parse_error= ''
                         ok = json.loads(json_str)
-                    except ee:
+                    except Exception as ee:
                         match = False
                         parse_error = ee
                 if match:
@@ -169,7 +169,7 @@ class Agent:
             if len(buffer) > 0: 
                 print("Remaining buffer:")
                 print(buffer)
-                result, buffer = await self.parse_single_cmd(buffer, context, None)
+                result, buffer = await self.parse_single_cmd(buffer, context, buffer)
                 if result:
                     results.append(result)
  
@@ -194,7 +194,7 @@ class Agent:
         return self.system_message
 
     async def chat_commands(self, model, context,
-                            temperature=0, max_tokens=512, messages=[]):
+                            temperature=0, max_tokens=1024, messages=[]):
 
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
