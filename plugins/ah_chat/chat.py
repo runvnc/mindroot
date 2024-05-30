@@ -33,7 +33,7 @@ async def chat_events(log_id: str):
     context = ChatContext(command_manager, service_manager)
     context.load_context(log_id)
     agent_ = agent.Agent(persona=context.persona, clear_model=True)
-    await asyncio.sleep(0.65)
+    await asyncio.sleep(0.15)
     asyncio.create_task(hook_manager.warmup())
 
     async def event_generator():
