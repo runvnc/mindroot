@@ -186,7 +186,7 @@ class Agent:
                 print(buffer)
                 result_, buffer = await self.parse_single_cmd(buffer, context, buffer)
                 if result_:
-                    for result in result_
+                    for result in result_:
                         results.append(result)
  
                 print("Parse error?:")
