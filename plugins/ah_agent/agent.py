@@ -222,6 +222,7 @@ class Agent:
                                         messages=messages)
 
         ret = await self.parse_cmd_stream(stream, context)
-        print("system message was:")
-        print(await self.render_system_msg())
+        #print("system message was:")
+        #print(await self.render_system_msg())
         return ret
+

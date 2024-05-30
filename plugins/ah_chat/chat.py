@@ -61,7 +61,7 @@ async def partial_command(command: str, chunk: str, so_far: str, context=None):
     print("*** partial_command service call ***")
     persona_ = context.persona
     await context.agent_output("partial_command", { "command": command, "chunk": chunk,
-                                                    "so_far": so_far, "persona": persona_ })
+                                                    "so_far": so_far, "persona": persona_['name'] })
     print('ok 5')
 
 @service(is_local=True)
@@ -70,7 +70,7 @@ async def running_command(command: str, chunk: str, so_far: str, context=None):
     persona_ = context.persona
 
     await context.agent_output("running_command", { "command": command, "chunk": chunk,
-                                                    "so_far": so_far, "persona": persona_ })
+                                                    "so_far": so_far, "persona": persona_['name'] })
 
 
 
@@ -242,7 +242,8 @@ async def get_chat_html(persona_name: str):
     log_id = nanoid.generate()
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
-    context.persona = persona_name
+    persona_ = await service_manager.get_persona_data(persona_name)
+    context.persona = persona_
     context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
     context.save_context()
 
