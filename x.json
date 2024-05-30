@@ -1,0 +1,5 @@
+[
+{ "write": ["router.js", "const express = require('express');\nconst router = express.Router();\n\n// Enable a plugin\nrouter.post('/enable', (req, res) => {\n    const pluginName = req.body.pluginName;\n    // Logic to enable the plugin\n    res.send(`Plugin ${pluginName} enabled.`);\n});\n\n// Disable a plugin\nrouter.post('/disable', (req, res) => {\n    const pluginName = req.body.pluginName;\n    // Logic to disable the plugin\n    res.send(`Plugin ${pluginName} disabled.`);\n});\n\nmodule.exports = router;"] },
+
+    { "replace_inclusive": { "fname": "server.js", "starts_with": "// Routers\n", "ends_with": "// End Routers", "text": "// Routers\nconst pluginRouter = require('./router');\napp.use('/plugins', pluginRouter);\n// End Routers" } }
+]

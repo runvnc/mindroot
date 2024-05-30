@@ -110,10 +110,14 @@ class Agent:
             if match is not None:
                 buffer = buffer[match.end():]
                 buffer = buffer.lstrip(',').rstrip(',')
-            return cmd, buffer
+            return [cmd], buffer
         except Exception as e:
             print("Error processing command.")
             print(e)
+
+            json_str = '[' + json_str + ']'
+            
+
             return None, buffer
 
 
@@ -143,9 +147,10 @@ class Agent:
                         parse_error = ee
                 if match:
                     json_str = match.group(0)
-                    result, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
-                    if result:
-                        results.append(result)
+                    result_, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
+                    if result_:
+                        for result in result_:
+                            results.append(result)
                 else:
                     # Attempt to parse partial JSON command
                     try:
@@ -179,9 +184,10 @@ class Agent:
             if len(buffer) > 0: 
                 print("Remaining buffer:")
                 print(buffer)
-                result, buffer = await self.parse_single_cmd(buffer, context, buffer)
-                if result:
-                    results.append(result)
+                result_, buffer = await self.parse_single_cmd(buffer, context, buffer)
+                if result_:
+                    for result in result_
+                        results.append(result)
  
                 print("Parse error?:")
                 print(parse_error)
