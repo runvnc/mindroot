@@ -18,5 +18,5 @@ def load_ah(plugin_file):
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
 
-load_ah('ah.json')
+load_ah('plugins.json')
 
