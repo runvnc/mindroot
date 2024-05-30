@@ -105,7 +105,8 @@ class ChatContext:
         context_file = os.path.join(self.data['current_dir'], f'context_{self.log_id}.json')
         context_data = {
             'data': self.data,
-            'chat_log': self.chat_log._get_log_data()
+            'chat_log': self.chat_log._get_log_data(),
+            'persona': self.persona
         }
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
@@ -120,7 +121,7 @@ class ChatContext:
                 self.chat_log = ChatLog(log_id=log_id)
                 self.chat_log.persona = context_data['chat_log'].get('persona')
                 self.chat_log.messages = context_data['chat_log'].get('messages', [])
-        else:
+            self.persona = context_data.get('persona')
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
 
