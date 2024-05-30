@@ -150,13 +150,12 @@ async def send_message(log_id: str, message_data: Message):
     print("log_id = ", log_id)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(log_id)
-    persona_ = await service_manager.get_persona_data(context.persona)
     # form_data = await request.form()
     user_avatar = 'static/user.png'
-    assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
+    assistant_avatar = f"static/personas/{context.persona['name']}/avatar.png"
     user_name = os.environ.get("AH_USER_NAME")
     message = message_data.message
-    agent_ = agent.Agent(persona=persona_)
+    agent_ = agent.Agent(persona=context.persona)
     print('loaded context. data is: ', context.data)
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
@@ -175,7 +174,7 @@ async def send_message(log_id: str, message_data: Message):
 
         """
         await context.agent_output("new_message", {"content": assistant_message,
-                                                "persona": persona_['name'] })
+                                   "persona": context.persona['name'] })
         json_cmd = { "say": assistant_message }
 
         context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
