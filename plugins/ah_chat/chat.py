@@ -30,9 +30,9 @@ sse_clients = set()
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
     print("chat_log = ", log_id)
-    chat_log = ChatLog()
-    chat_log.load_log(log_id)
-    agent_ = agent.Agent(persona=chat_log.persona, clear_model=True)
+    context = ChatContext(command_manager, service_manager)
+    context.load_context(log_id)
+    agent_ = agent.Agent(persona=context.persona, clear_model=True)
     await asyncio.sleep(0.65)
     asyncio.create_task(hook_manager.warmup())
 
@@ -76,8 +76,10 @@ async def running_command(command: str, chunk: str, so_far: str, context=None):
 
 @router.put("/chat/{log_id}/{persona_name}")
 async def init_chat(log_id: str, persona_name: str):
-    chat_log = ChatLog(persona=persona_name)
-    chat_log.save_log(log_id)
+    context = ChatContext(command_manager, service_manager)
+    context.persona = await service_manager.get_persona_data(persona_name)
+    context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
+    context.save_context()
     persona_ = await service_manager.get_persona_data(persona_name)
 
 class ChatContext:
@@ -90,9 +92,35 @@ class ChatContext:
         self.uncensored = False
         
         self.data = {}
+        self.log_id = None
         self.data['current_dir'] = 'data/users/default'
 
         if os.environ.get("AH_UNCENSORED"):
+            self.uncensored = True
+
+    def save_context(self):
+        if not self.log_id:
+            raise ValueError("log_id is not set for the context.")
+        context_file = os.path.join(self.data['current_dir'], f'context_{self.log_id}.json')
+        context_data = {
+            'data': self.data,
+            'chat_log': self.chat_log._get_log_data()
+        }
+        with open(context_file, 'w') as f:
+            json.dump(context_data, f, indent=2)
+
+    def load_context(self, log_id):
+        self.log_id = log_id
+        context_file = os.path.join(self.data['current_dir'], f'context_{log_id}.json')
+        if os.path.exists(context_file):
+            with open(context_file, 'r') as f:
+                context_data = json.load(f)
+                self.data = context_data.get('data', {})
+                self.chat_log = ChatLog(log_id=log_id)
+                self.chat_log.persona = context_data['chat_log'].get('persona')
+                self.chat_log.messages = context_data['chat_log'].get('messages', [])
+        else:
+            self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
 
     def __getattr__(self, name):
@@ -116,9 +144,9 @@ async def insert_image(image_url, context=None):
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, message_data: Message):
     print("log_id = ", log_id)
-    chat_log = ChatLog()
-    chat_log.load_log(log_id)
-    persona_ = await service_manager.get_persona_data(chat_log.persona)
+    context = ChatContext(command_manager, service_manager)
+    context.load_context(log_id)
+    persona_ = await service_manager.get_persona_data(context.persona)
     # form_data = await request.form()
     user_avatar = 'static/user.png'
     assistant_avatar = f"static/personas/{persona_['name']}/avatar.png"
@@ -147,9 +175,7 @@ async def send_message(log_id: str, message_data: Message):
         json_cmd = { "say": assistant_message }
 
         chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
-    context = ChatContext(command_manager, service_manager)
-    context.chat_log = chat_log
-    context.persona = persona_
+    context.save_context()
 
     continue_processing = True
     while continue_processing:
@@ -210,8 +236,10 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
 @router.get("/{persona_name}", response_class=HTMLResponse)
 async def get_chat_html(persona_name: str):
     log_id = nanoid.generate()
-    chat_log = ChatLog(log_id=log_id, persona=persona_name)
-    chat_log.save_log()
+    context = ChatContext(command_manager, service_manager)
+    context.persona = persona_name
+    context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
+    context.save_context()
 
     with open("static/chat.html", "r") as file:
         chat_html = file.read()
