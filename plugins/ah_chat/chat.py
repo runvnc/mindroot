@@ -156,7 +156,7 @@ async def send_message(log_id: str, message_data: Message):
     message = message_data.message
     agent_ = agent.Agent(persona=persona_)
 
-    chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
+    context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
     @command(is_local=True)
     async def say(assistant_message, context=None):
@@ -176,7 +176,7 @@ async def send_message(log_id: str, message_data: Message):
                                                 "persona": persona_['name'] })
         json_cmd = { "say": assistant_message }
 
-        chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+        context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
     context.save_context()
 
     continue_processing = True
@@ -190,7 +190,7 @@ async def send_message(log_id: str, message_data: Message):
                     out_results.append(result)
                     continue_processing = True
             if continue_processing:
-                chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
         except Exception as e:
             print("Found an error in agent output: ")
             print(e)
