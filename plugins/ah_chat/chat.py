@@ -31,7 +31,7 @@ sse_clients = set()
 async def chat_events(log_id: str):
     print("chat_log = ", log_id)
     context = ChatContext(command_manager, service_manager)
-    context.load_context(log_id)
+    await context.load_context(log_id)
     agent_ = agent.Agent(persona=context.persona, clear_model=True)
     await asyncio.sleep(0.15)
     asyncio.create_task(hook_manager.warmup())
@@ -112,7 +112,7 @@ class ChatContext:
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)        
 
-    def load_context(self, log_id):
+    async def load_context(self, log_id):
         self.log_id = log_id
         context_file = f'data/context/context_{log_id}.json'
         if os.path.exists(context_file):
@@ -149,7 +149,7 @@ async def insert_image(image_url, context=None):
 async def send_message(log_id: str, message_data: Message):
     print("log_id = ", log_id)
     context = ChatContext(command_manager, service_manager)
-    context.load_context(log_id)
+    await context.load_context(log_id)
     persona_ = await service_manager.get_persona_data(context.persona)
     # form_data = await request.form()
     user_avatar = 'static/user.png'
