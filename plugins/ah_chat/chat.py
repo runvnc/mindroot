@@ -77,8 +77,9 @@ async def running_command(command: str, chunk: str, so_far: str, context=None):
 @router.put("/chat/{log_id}/{persona_name}")
 async def init_chat(log_id: str, persona_name: str):
     context = ChatContext(command_manager, service_manager)
-    context.log_id = log_id
+    context.log_id = log_id    
     context.persona = await service_manager.get_persona_data(persona_name)
+
     context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
     context.save_context()
     persona_ = await service_manager.get_persona_data(persona_name)
@@ -106,10 +107,10 @@ class ChatContext:
         context_data = {
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),
-            'persona': self.persona
+            'persona_name': self.persona['name']
         }
         with open(context_file, 'w') as f:
-            json.dump(context_data, f, indent=2)
+            json.dump(context_data, f, indent=2)        
 
     def load_context(self, log_id):
         self.log_id = log_id
@@ -119,9 +120,8 @@ class ChatContext:
                 context_data = json.load(f)
                 self.data = context_data.get('data', {})
                 self.chat_log = ChatLog(log_id=log_id)
-                self.chat_log.persona = context_data['chat_log'].get('persona')
-                self.chat_log.messages = context_data['chat_log'].get('messages', [])
-            self.persona = context_data.get('persona')
+            self.persona_name = context_data.get('persona_name')  
+            self.persona = await service_manager.get_persona_data(self.persona_name)
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
         else:

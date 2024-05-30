@@ -9,6 +9,7 @@ class ChatLog:
         self.persona = persona
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
+        self.load_log()
 
     def _get_log_data(self) -> Dict[str, any]:
         return {
@@ -47,7 +48,9 @@ class ChatLog:
         with open(log_file, 'w') as f:
             json.dump(self._get_log_data(), f, indent=2)
 
-    def load_log(self, log_id: int) -> None:
+    def load_log(self, log_id = None) -> None:
+        if log_id is None:
+            log_id = self.log_id
         self.log_id = log_id
         log_file = os.path.join(self.log_dir, f'chatlog_{log_id}.json')
         if os.path.exists(log_file):
