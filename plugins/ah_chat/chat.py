@@ -70,7 +70,7 @@ async def running_command(command: str, chunk: str, so_far: str, context=None):
     persona_ = context.persona
 
     await context.agent_output("running_command", { "command": command, "chunk": chunk,
-                                                    "so_far": so_far, "persona": persona_['name'] })
+                                                    "so_far": so_far, "persona": persona_ })
 
 
 
@@ -102,7 +102,7 @@ class ChatContext:
     def save_context(self):
         if not self.log_id:
             raise ValueError("log_id is not set for the context.")
-        context_file = os.path.join(self.data['current_dir'], f'context_{self.log_id}.json')
+        context_file = f'data/context/context_{self.log_id}.json'
         context_data = {
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),
@@ -113,7 +113,7 @@ class ChatContext:
 
     def load_context(self, log_id):
         self.log_id = log_id
-        context_file = os.path.join(self.data['current_dir'], f'context_{log_id}.json')
+        context_file = f'data/context/context_{log_id}.json'
         if os.path.exists(context_file):
             with open(context_file, 'r') as f:
                 context_data = json.load(f)
@@ -124,6 +124,8 @@ class ChatContext:
             self.persona = context_data.get('persona')
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
+        else:
+            print("Context file not found for id:", log_id)
 
     def __getattr__(self, name):
         if name in self.__dict__ or name in self.__class__.__dict__:
@@ -155,7 +157,7 @@ async def send_message(log_id: str, message_data: Message):
     user_name = os.environ.get("AH_USER_NAME")
     message = message_data.message
     agent_ = agent.Agent(persona=persona_)
-
+    print('loaded context. data is: ', context.data)
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
     @command(is_local=True)

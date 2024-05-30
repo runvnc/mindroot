@@ -46,6 +46,7 @@ async def read(fname, context=None):
         print('context.data=', context.data)
 
     print('context=', context, 'fname=', fname)
+    print('context.data = ', context.data)
     with open(fname, 'r') as f:
         text = f.read()
         print(f'Read text from {fname}: {text}')
@@ -176,6 +177,7 @@ async def cd(directory, context=None):
         new_dir = os.path.realpath(os.path.join(context.data['current_dir'], directory))
     if os.path.isdir(new_dir):
         context.data['current_dir'] = new_dir
+        context.save_context()
         print(f'Changed current directory to {new_dir}')
     else:
         print(f'Directory {new_dir} does not exist.')
