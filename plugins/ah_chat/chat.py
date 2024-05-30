@@ -77,6 +77,7 @@ async def running_command(command: str, chunk: str, so_far: str, context=None):
 @router.put("/chat/{log_id}/{persona_name}")
 async def init_chat(log_id: str, persona_name: str):
     context = ChatContext(command_manager, service_manager)
+    context.log_id = log_id
     context.persona = await service_manager.get_persona_data(persona_name)
     context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
     context.save_context()
@@ -237,6 +238,7 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
 async def get_chat_html(persona_name: str):
     log_id = nanoid.generate()
     context = ChatContext(command_manager, service_manager)
+    context.log_id = log_id
     context.persona = persona_name
     context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
     context.save_context()
