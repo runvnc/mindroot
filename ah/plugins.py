@@ -1,22 +1,22 @@
 import importlib
 import json
 
-import plugins.hooks
-import plugins.commands
-import plugins.services
+import ah.hooks
+import ah.commands
+import ah.services
 
-def load_plugins(plugin_file):
+def load_ah(plugin_file):
     with open(plugin_file, 'r') as file:
-        plugins = json.load(file)
-        for plugin in plugins:
+        ah = json.load(file)
+        for plugin in ah:
             if plugin.get('enabled'):
                 plugin_name = plugin['name']
                 try:
-                    importlib.import_module(f"plugins.{plugin_name}.mod")
+                    importlib.import_module(f"ah.{plugin_name}.mod")
                     print(f"Loaded plugin: {plugin_name}")
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
 
-load_plugins('plugins.json')
+load_ah('ah.json')
 

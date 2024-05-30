@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
 from pathlib import Path
-from plugins import plugins
+from ah import plugins
 
 def create_directories():
     directories = [
