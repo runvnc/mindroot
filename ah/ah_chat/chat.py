@@ -70,7 +70,7 @@ async def running_command(command: str, context=None):
     print("*** running_command service call ***")
     persona_ = context.persona
     print("ok")
-    await context.agent_output("running_command", { "command": command, persona": persona_['name'] })
+    await context.agent_output("running_command", { "command": command, "persona": persona_['name'] })
 
 
 @router.put("/chat/{log_id}/{persona_name}")
