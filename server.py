@@ -34,3 +34,11 @@ from ah.ah_chat.chat import router as chat_router
 app.include_router(chat_router)
 
 # Other server setup code can go here
+
+# Include the router from plugin_router.py
+from plugin_router import router as plugin_router
+app.include_router(plugin_router)
+
+# Include the router from plugin_router.py
+from plugin_router import router as plugin_router
+app.include_router(plugin_router)
