@@ -1,5 +1,4 @@
 import inspect
-from .chatcontext import ChatContext
 
 class ProviderManager:
     def __init__(self):
@@ -41,7 +40,7 @@ class ProviderManager:
         print('-------------------------------------------------------------------------------------')
         found_context = False
         for arg in args:
-            if isinstance(arg, ChatContext):
+            if arg.__class__.__name__ == 'ChatContext'
                 found_context = True
                 break
         if not found_context and not ('context' in kwargs):
