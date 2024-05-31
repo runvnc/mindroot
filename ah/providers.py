@@ -1,4 +1,5 @@
 import inspect
+from .chatcontext import ChatContext
 
 class ProviderManager:
     def __init__(self):
@@ -37,9 +38,19 @@ class ProviderManager:
         else:
             function_info = local_function_info  # Fallback to local if global is not available
         
-        if not 'context' in kwargs:
+        print('-------------------------------------------------------------------------------------')
+        found_context = False
+        for arg in args:
+            if isinstance(arg, ChatContext):
+                found_context = True
+                break
+        if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
         implementation = function_info['implementation']
+        print(f"Executing function '{name}'")
+        print(args)
+        print(kwargs)
+
         try:
             result = await implementation(*args, **kwargs)
         except Exception as e:
