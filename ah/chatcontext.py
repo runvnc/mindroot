@@ -2,7 +2,7 @@ from .services import service_manager
 from .commands import command_manager
 import os
 import json
-
+from .chatlog import ChatLog
 
 class ChatContext:
     def __init__(self, command_manager, service_manager):

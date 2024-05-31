@@ -188,6 +188,9 @@ async def get_chat_html(persona_name: str):
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
     persona_ = await service_manager.get_persona_data(persona_name)
+    if persona_ is None:
+        return JSONResponse({"error": f"Persona {persona_name} not found."}, status_code=404)
+
     context.persona = persona_
     context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
     context.save_context()

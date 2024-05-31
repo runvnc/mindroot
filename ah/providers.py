@@ -36,10 +36,18 @@ class ProviderManager:
             function_info = global_function_info
         else:
             function_info = local_function_info  # Fallback to local if global is not available
+        
         if not 'context' in kwargs:
             kwargs['context'] = self.context
         implementation = function_info['implementation']
-        return await implementation(*args, **kwargs)
+        try:
+            result = await implementation(*args, **kwargs)
+        except Exception as e:
+            print(f"Error executing function '{name}': {e}")
+            print("args = ", args)
+            print ("kwargs = ", kwargs)
+            raise e
+        return result
 
     def get_docstring(self, name, prefer_local=False):
         if name not in self.functions:
