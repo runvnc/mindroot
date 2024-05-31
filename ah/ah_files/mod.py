@@ -78,7 +78,12 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
 
     """
     if 'current_dir' in context.data:
-        fname = context.data['current_dir'] + '/' + fname
+        if fname.startswith('/') or fname.startswith('./') or fname.startswith('../'):
+            fname = fname + ''
+        else:
+            if 'current_dir' in context.data:
+                fname = context.data['current_dir'] + '/' + fname
+ 
     backup_file(fname)
     with open(fname, 'r') as f:
         content = f.read()

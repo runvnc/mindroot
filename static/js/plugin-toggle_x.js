@@ -1,6 +1,5 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { BaseEl } from './base.js';
-import './toggle-switch.js';
 
 class PluginToggle extends BaseEl {
   static properties = {
@@ -27,7 +26,7 @@ class PluginToggle extends BaseEl {
   }
 
   handleToggle(event, plugin) {
-    plugin.enabled = event.detail.checked;
+    plugin.enabled = event.target.checked;
     this.requestUpdate();
   }
 
@@ -58,7 +57,7 @@ class PluginToggle extends BaseEl {
         ${this.plugins.map(plugin => html`
           <div class="plugin-item">
             <label>
-              <toggle-switch .checked=${plugin.enabled} @toggle-change=${(e) => this.handleToggle(e, plugin)}></toggle-switch>
+              <input type="checkbox" .checked=${plugin.enabled} @change=${(e) => this.handleToggle(e, plugin)}>
               ${plugin.name}
             </label>
           </div>
