@@ -65,17 +65,26 @@ class Agent:
 
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
-        if isinstance(cmd_args, list):
-            #filter out empty strings
-            cmd_args = [x for x in cmd_args if x != '']
-            await context.running_command(cmd_name, '', *cmd_args )
-            return await command_manager.execute(cmd_name, *cmd_args)
-        elif isinstance(cmd_args, dict):
-            await context.running_command(cmd_name, '', **cmd_args)
-            return await command_manager.execute(cmd_name, **cmd_args)
-        else:
-            await context.running_command(cmd_name, '', cmd_args)
-            return await command_manager.execute(cmd_name, cmd_args)
+        try:
+            if isinstance(cmd_args, list):
+                #filter out empty strings
+                cmd_args = [x for x in cmd_args if x != '']
+                await context.running_command(cmd_name, '', *cmd_args )
+                return await command_manager.execute(cmd_name, *cmd_args)
+            elif isinstance(cmd_args, dict):
+                await context.running_command(cmd_name, '', **cmd_args)
+                return await command_manager.execute(cmd_name, **cmd_args)
+            else:
+                await context.running_command(cmd_name, '', cmd_args)
+                return await command_manager.execute(cmd_name, cmd_args)
+
+            except Exception as e:
+                print("Error in handle_cmds.")
+                print(e)
+                print("Command:", cmd_name)
+                print("Arguments:", cmd_args)
+
+                return None
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
