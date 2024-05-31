@@ -27,8 +27,9 @@ class ChatContext:
         context_data = {
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),
-            'persona_name': self.persona['name']
         }
+        if 'name' in self.persona:
+            context_data['persona_name'] = self.persona['name']
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)        
 
