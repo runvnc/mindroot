@@ -78,13 +78,13 @@ class Agent:
                 await context.running_command(cmd_name, '', cmd_args)
                 return await command_manager.execute(cmd_name, cmd_args)
 
-            except Exception as e:
-                print("Error in handle_cmds.")
-                print(e)
-                print("Command:", cmd_name)
-                print("Arguments:", cmd_args)
+        except Exception as e:
+            print("Error in handle_cmds.")
+            print(e)
+            print("Command:", cmd_name)
+            print("Arguments:", cmd_args)
 
-                return None
+            return None
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
