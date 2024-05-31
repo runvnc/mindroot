@@ -52,8 +52,7 @@ img.avatar {
 }
 
 .user {
-  align-self: flex-start;
-
+  align-self: flex-end;
 }
 
 .msg-user {
@@ -62,9 +61,8 @@ img.avatar {
   box-sizing: border-box;
 }
 
-
 .ai {
-  align-self: flex-end;
+  align-self: flex-start;
 }
 
 .msg-ai {
@@ -110,8 +108,16 @@ button {
  /* text-wrap: wrap !important; */
 }
 
+.one_line_result {
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+}
+
 .action { border: 2px solid blue; border-radius: 5px; }
 
 code {
-  max-width: 65%
+  max-width: 85%
 }

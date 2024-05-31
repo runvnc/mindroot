@@ -31,20 +31,20 @@ class ActionComponent extends BaseEl {
     let res = '';
     if (result != '()') {
       let lines = result.split("\n");
-      if (false && lines.length == 1) {
-        res = html`<div class="fn_result">${result}</div>`;
+      if (lines.length == 1) {
+        res = html`<div class="one_line_result">${result}</div>`;
       } else {
         res = html`
         <details class="block fn_result">
           <summary>${lines[0]} ...</summary>
-          <pre><code>${result}</code></pre>
+          <div>${result}</div>
         </details>`;
       }
     }
 
     return html` 
     <div></div>
-    <div>
+    <div style="position: relative; max-width: 800px;">
       <div class="av"></div>
       <div class="action" >
         ⚡  <span class="fn_name">${funcName}</span> ${paramshtml}
