@@ -1,12 +1,42 @@
 [
-  { "name": "ah_togetherai", "enabled": false},
-  { "name": "ah_openai", "enabled": true },
-  { "name": "ah_persona", "enabled": false },
-  { "name": "ah_persona_lite", "enabled": true },
-  { "name": "ah_sd", "enabled": true},
-  { "name": "ah_runpod_sd", "enabled": false},
-  { "name": "ah_swapface", "enabled": true},
-  { "name": "ah_ollama", "enabled": false},
-  { "name": "ah_think", "enabled": true},
-  { "name": "ah_files", "enabled": true}
+  {
+    "name": "ah_togetherai",
+    "enabled": true
+  },
+  {
+    "name": "ah_openai",
+    "enabled": false
+  },
+  {
+    "name": "ah_persona",
+    "enabled": false
+  },
+  {
+    "name": "ah_persona_lite",
+    "enabled": true
+  },
+  {
+    "name": "ah_sd",
+    "enabled": true
+  },
+  {
+    "name": "ah_runpod_sd",
+    "enabled": false
+  },
+  {
+    "name": "ah_swapface",
+    "enabled": true
+  },
+  {
+    "name": "ah_ollama",
+    "enabled": false
+  },
+  {
+    "name": "ah_think",
+    "enabled": true
+  },
+  {
+    "name": "ah_files",
+    "enabled": false
+  }
 ]

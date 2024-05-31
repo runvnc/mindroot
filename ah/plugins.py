@@ -5,7 +5,7 @@ import ah.hooks
 import ah.commands
 import ah.services
 
-def load_ah(plugin_file):
+def load_plugins(plugin_file):
     with open(plugin_file, 'r') as file:
         ah = json.load(file)
         for plugin in ah:
@@ -18,5 +18,5 @@ def load_ah(plugin_file):
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
 
-load_ah('plugins.json')
+load_plugins('plugins.json')
 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import json
+from ah import plugins
 
 router = APIRouter()
 
@@ -19,6 +20,8 @@ def update_plugins(request: PluginUpdateRequest):
 
         with open('plugins.json', 'w') as file:
             json.dump(plugins_data, file, indent=2)
+
+        plugins.load_plugins('plugins.json')
 
         return {"message": "Plugins updated successfully"}
     except Exception as e:
