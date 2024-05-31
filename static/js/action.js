@@ -10,10 +10,6 @@ class ActionComponent extends BaseEl {
 
   static styles = [
     css`
-      .param_name { font-weight: bold; }
-      .param_value { color: blue; }
-      .fn_result { margin-top: 10px; }
-      .action { border: 2px solid blue; padding: 10px; margin: 10px; border-radius: 5px; background-color: gray; }
     `
   ];
 
@@ -36,12 +32,12 @@ class ActionComponent extends BaseEl {
     if (result != '()') {
       let lines = result.split("\n");
       if (lines.length == 1) {
-        res = html`<div class="fn_result"><pre><code class="font-mono whitespace-pre-wrap" >${result}</code></pre></div>`;
+        res = html`<div class="fn_result"><pre><code class="code_result">${result}</code></pre></div>`;
       } else {
         res = html`
         <details class="block fn_result">
           <summary>${lines[0]} ...</summary>
-          <pre><code class="font-mono whitespace-pre-wrap" >${result}</code></pre>
+          <pre><code>${result}</code></pre>
         </details>`;
       }
     }
@@ -50,7 +46,7 @@ class ActionComponent extends BaseEl {
     <div></div>
     <div>
       <div class="av"></div>
-      <div class="action block border-2 border-blue-500 p-4 m-2 rounded-lg bg-gray-800" >
+      <div class="action" >
         ⚡  <span class="fn_name">${funcName}</span> ${paramshtml}
         ${res}
       </div>

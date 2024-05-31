@@ -37,6 +37,6 @@
   },
   {
     "name": "ah_files",
-    "enabled": false
+    "enabled": true
   }
 ]

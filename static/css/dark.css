@@ -11,7 +11,7 @@ input, * {
 }
 
 p {
-  padding: 2px 2px;
+  padding: 2px 10px;
   margin: 2px 2px;
 }
 
@@ -29,7 +29,7 @@ input::placeholder, textarea::placeholder {
 
 chat-message {
   max-width: 69%;
-  padding: 5px 10px;
+  padding: 8px 8px;
   margin: 5px 0;
   display: inline-block;
   background-color: transparent;
@@ -41,7 +41,7 @@ chat-message {
 }
 
 img.avatar {
-  height: 64px;
+  height: 48px;
   display: inline-block;
 }
 
@@ -70,6 +70,7 @@ img.avatar {
 .msg-ai {
   background-color: #080808;
   border: 1px solid #181818;
+  border-radius: 30px;
 }
 
 .spacer {
@@ -99,4 +100,19 @@ button {
   margin: 10px;
 }
 
+.param_name { font-weight: bold; }
+.param_value { color: blue; }
 
+.fn_result, .code-result { 
+  white-space: normal;
+  word-break: break-all;
+  font-family: monospace;
+  text-wrap: wrap;
+}
+
+
+.action { border: 2px solid blue; border-radius: 5px; }
+
+code {
+  max-width: 65%
+}
