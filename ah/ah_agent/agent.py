@@ -70,17 +70,17 @@ class Agent:
                 #filter out empty strings
                 cmd_args = [x for x in cmd_args if x != '']
                 print(11)
-                await context.running_command(cmd_name, '', *cmd_args )
+                await context.running_command(cmd_name)
                 print(22)
                 return await command_manager.execute(cmd_name, *cmd_args)
             elif isinstance(cmd_args, dict):
                 print(33)
-                await context.running_command(cmd_name, '', **cmd_args)
+                await context.running_command(cmd_name)
                 print(44)
                 return await command_manager.execute(cmd_name, **cmd_args)
             else:
                 print(55)
-                await context.running_command(cmd_name, '', cmd_args)
+                await context.running_command(cmd_name)
                 print(66)
                 return await command_manager.execute(cmd_name, cmd_args)
 

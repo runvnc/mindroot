@@ -1,4 +1,5 @@
 import inspect
+import traceback
 
 class ProviderManager:
     def __init__(self):
@@ -40,22 +41,34 @@ class ProviderManager:
         print('-------------------------------------------------------------------------------------')
         found_context = False
         for arg in args:
-            if arg.__class__.__name__ == 'ChatContext'
+            print('arg class name:', arg.__class__.__name__)
+            if arg.__class__.__name__ == 'ChatContext':
                 found_context = True
+                print('Found context in args')
                 break
+        
         if not found_context and not ('context' in kwargs):
+            print('Context not found in args or kwargs, adding')
             kwargs['context'] = self.context
         implementation = function_info['implementation']
         print(f"Executing function '{name}'")
+        print("****************************************** Implementation is:", implementation)
+        print("signature is:", inspect.signature(implementation))
+        print("self is:", self)
+        print("args = ")
         print(args)
+        print("kwargs = ")
         print(kwargs)
 
         try:
+            print(100)
             result = await implementation(*args, **kwargs)
+            print(200)
         except Exception as e:
             print(f"Error executing function '{name}': {e}")
             print("args = ", args)
             print ("kwargs = ", kwargs)
+            traceback.print_exc()
             raise e
         return result
 
