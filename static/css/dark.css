@@ -104,12 +104,11 @@ button {
 .param_value { color: blue; }
 
 .fn_result, .code-result { 
-  white-space: normal;
-  word-break: break-all;
-  font-family: monospace;
-  text-wrap: wrap;
+  white-space: normal !important;
+  word-break: break-word !important;
+  font-family: monospace !important;
+ /* text-wrap: wrap !important; */
 }
-
 
 .action { border: 2px solid blue; border-radius: 5px; }
 

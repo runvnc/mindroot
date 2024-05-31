@@ -31,8 +31,8 @@ class ActionComponent extends BaseEl {
     let res = '';
     if (result != '()') {
       let lines = result.split("\n");
-      if (lines.length == 1) {
-        res = html`<div class="fn_result"><pre><code class="code_result">${result}</code></pre></div>`;
+      if (false && lines.length == 1) {
+        res = html`<div class="fn_result">${result}</div>`;
       } else {
         res = html`
         <details class="block fn_result">
