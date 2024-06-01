@@ -64,8 +64,10 @@ class Chat extends BaseEl {
       this.msgSoFar = data.params // data.chunk
       this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
     } else {
+      console.log('data.params', data.params)
+
       this.messages[this.messages.length - 1].content = `
-        <action-component funcName="${data.command}" .params="${data.params}"
+        <action-component funcName="${data.command}" params="${data.params}"
                           result="">
         </action-component>`;
     }

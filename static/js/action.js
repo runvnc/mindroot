@@ -4,7 +4,7 @@ import {BaseEl} from './base.js';
 class ActionComponent extends BaseEl {
   static properties = {
     funcName: { type: String },
-    params: { type: Object },
+    params: { type: String },
     result: { type: String }
   }
 
@@ -16,7 +16,7 @@ class ActionComponent extends BaseEl {
   constructor() {
     super();
     this.funcName = '';
-    this.params = {};
+    //this.params = {};
     this.result = '';
   }
 
@@ -25,6 +25,11 @@ class ActionComponent extends BaseEl {
     let paramshtml = '';
     console.log('type of params is', typeof(params))
     console.log({funcName, params, result})
+    try {
+      params = JSON.parse(params)
+    } catch (e) {
+      //console.log('error parsing params', e)
+    }
     if (typeof(params) == 'array') {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${item}), </span> `;
