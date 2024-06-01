@@ -108,7 +108,7 @@ button:hover {
 }
 
 .param_name { font-weight: bold; }
-.param_value { color: blue; }
+.param_value { color: teal; }
 
 .fn_result, .code-result { 
   white-space: normal !important;

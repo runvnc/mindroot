@@ -87,6 +87,9 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
     backup_file(fname)
     with open(fname, 'r') as f:
         content = f.read()
+    print(f"read from file at {fname}")
+    print("file contents:")
+    print(content)
     start_index = content.find(starts_with)
     end_index = content.find(ends_with, start_index)
     if start_index != -1 and end_index != -1:
@@ -96,7 +99,10 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
             f.write(new_content)
         print(f'Replaced text between {starts_with} and {ends_with} in {fname}')
     else:
-        print(f'Could not find the start or end text in {fname}')
+        if start_index == -1:
+            raise Exception("Could not find starts_with")
+        if end_index == -1:
+            raise Exception("Could not find ends_with")
 
 @command()
 async def dir(directory='', context=None):
