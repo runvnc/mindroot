@@ -61,12 +61,12 @@ class Chat extends BaseEl {
     }
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      this.msgSoFar = data.so_far // data.chunk
+      this.msgSoFar = data.params // data.chunk
       this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
     } else {
       this.messages[this.messages.length - 1].content = `
         <action-component funcName="${data.command}" .params="${data.params}"
-                          result="${data.so_far}">
+                          result="">
         </action-component>`;
     }
     this.requestUpdate();

@@ -23,11 +23,13 @@ class ActionComponent extends BaseEl {
   _render() {
     const {funcName, params, result} = this;
     let paramshtml = '';
-    if (typeof(params) == 'Array') {
+    console.log('type of params is', typeof(params))
+    console.log({funcName, params, result})
+    if (typeof(params) == 'array') {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${item}), </span> `;
       }
-    } else if (typeof(params) == 'Object') {
+    } else if (typeof(params) == 'object') {
       for (var key in params) {
         paramshtml += `<span class="param_name">${key}:</span> `;
         paramshtml += `<span class="param_value">${params[key]}</span>  `;
