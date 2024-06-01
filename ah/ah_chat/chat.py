@@ -125,7 +125,9 @@ async def send_message(log_id: str, message_data: Message):
     context.save_context()
 
     continue_processing = True
-    while continue_processing:
+    iterations = 0
+    while continue_processing and iterations < 6:
+        iterations += 1
         continue_processing = False
         try:
             results = await agent_.chat_commands(current_model, context=context, messages=context.chat_log.get_recent())
@@ -135,6 +137,7 @@ async def send_message(log_id: str, message_data: Message):
                     out_results.append(result)
                     continue_processing = True
             if continue_processing:
+                print("Processing iteration: ", iterations, "adding message")
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
         except Exception as e:
             print("Found an error in agent output: ")

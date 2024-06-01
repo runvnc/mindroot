@@ -90,7 +90,7 @@ class Agent:
             print("Command:", cmd_name)
             print("Arguments:", cmd_args)
 
-            return None
+            return {"error": str(e)}
 
     def remove_braces(self, buffer):
         if buffer.endswith("\n"):
@@ -132,8 +132,8 @@ class Agent:
 
             json_str = '[' + json_str + ']'
             
-
-            return None, buffer
+            cmd = {"cmd": cmd_name, "result": {"error": str(e)}}
+            return [cmd], buffer
 
 
     async def parse_cmd_stream(self, stream, context):
