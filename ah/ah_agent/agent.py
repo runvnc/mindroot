@@ -110,6 +110,7 @@ class Agent:
         return buffer 
 
     async def parse_single_cmd(self, json_str, context, buffer, match=None):
+        cmd_name = '?'
         try:
             cmd_obj = json.loads(json_str)
             cmd_name = next(iter(cmd_obj))
