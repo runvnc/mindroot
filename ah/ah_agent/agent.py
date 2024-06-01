@@ -177,17 +177,15 @@ class Agent:
                         if partial_command is not None:
                             if isinstance(partial, list):
                                 partial = partial[0]
-                            print("partial=", partial, "partial_command =", partial_command)
+                            #print("partial=", partial, "partial_command =", partial_command)
                             partial_args = partial[partial_command]
-                            print('ok 1')
+                            #print('ok 1')
                             if partial_command != last_partial_command or partial_args != last_partial_args:
                                 if isinstance(partial_args, str) and last_partial_args is not None:
                                     diff_str = find_new_substring(last_partial_args, partial_args)
                                 else:
                                     diff_str = json.dumps(partial_args)
-                                print('ok2')
                                 await context.partial_command(partial_command, diff_str, partial_args)
-                                print('ok 3')
                                 last_partial_command = partial_command
                                 last_partial_args = partial_args
                                 buffer_changed = True

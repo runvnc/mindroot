@@ -59,11 +59,9 @@ async def agent_output(event: str, data: dict, context=None):
 
 @service(is_local=True)
 async def partial_command(command: str, chunk: str, so_far: str, context=None):
-    print("*** partial_command service call ***")
     persona_ = context.persona
     await context.agent_output("partial_command", { "command": command, "chunk": chunk,
                                                     "so_far": so_far, "persona": persona_['name'] })
-    print('ok 5')
 
 @service(is_local=True)
 async def running_command(command: str, context=None):

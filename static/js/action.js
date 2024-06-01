@@ -23,9 +23,17 @@ class ActionComponent extends BaseEl {
   _render() {
     const {funcName, params, result} = this;
     let paramshtml = '';
-    for (var key in params) {
-      paramshtml += `<span class="param_name">${key}</span> `;
-      paramshtml += `<span class="param_value">${params[key]}</span>  `;
+    if (typeof(params) == 'Array') {
+      for (let item of params) {
+        paramshtml += `<span class="param_value">(${item}), </span> `;
+      }
+    } else if (typeof(params) == 'Object') {
+      for (var key in params) {
+        paramshtml += `<span class="param_name">${key}:</span> `;
+        paramshtml += `<span class="param_value">${params[key]}</span>  `;
+      }
+    } else {
+      paramshtml += `<span class="param_value">[${params}]</span> `;
     }
 
     let res = '';
@@ -48,7 +56,7 @@ class ActionComponent extends BaseEl {
       <div class="av"></div>
       <div class="action" >
         ⚡  <span class="fn_name">${funcName}</span> ${paramshtml}
-        ${res}
+        result: ${res}
       </div>
     </div>
     `;

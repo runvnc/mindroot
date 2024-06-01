@@ -24,7 +24,7 @@ class ProviderManager:
         print("registered function: ", name, is_local, implementation, docstring)
 
     async def execute(self, name, *args, **kwargs):
-        print(f"execute! name= {name}, args={args}, kwargs={kwargs}")
+        #print(f"execute! name= {name}, args={args}, kwargs={kwargs}")
         prefer_local = True
         if name not in self.functions:
             raise ValueError(f"function '{name}' not found.")
@@ -41,24 +41,21 @@ class ProviderManager:
         print('-------------------------------------------------------------------------------------')
         found_context = False
         for arg in args:
-            print('arg class name:', arg.__class__.__name__)
             if arg.__class__.__name__ == 'ChatContext':
                 found_context = True
-                print('Found context in args')
                 break
         
         if not found_context and not ('context' in kwargs):
-            print('Context not found in args or kwargs, adding')
             kwargs['context'] = self.context
         implementation = function_info['implementation']
-        print(f"Executing function '{name}'")
-        print("****************************************** Implementation is:", implementation)
-        print("signature is:", inspect.signature(implementation))
-        print("self is:", self)
-        print("args = ")
-        print(args)
-        print("kwargs = ")
-        print(kwargs)
+        #print(f"Executing function '{name}'")
+        #print("****************************************** Implementation is:", implementation)
+        #print("signature is:", inspect.signature(implementation))
+        #print("self is:", self)
+        #print("args = ")
+        #print(args)
+        #print("kwargs = ")
+        #print(kwargs)
 
         try:
             print(100)
@@ -104,9 +101,9 @@ class ProviderManager:
         #    return super().__getattr__(name)
         
         async def method(*args, **kwargs):
-            print(f'Called method: {name}')
-            print(f'Arguments: {args}')
-            print(f'Keyword arguments: {kwargs}')
+            #print(f'Called method: {name}')
+            #print(f'Arguments: {args}')
+            #print(f'Keyword arguments: {kwargs}')
             return await self.execute(name, *args, **kwargs)
 
         return method
