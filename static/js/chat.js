@@ -3,7 +3,7 @@ import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 import { BaseEl } from './base.js';
 import './action.js';
-import {escapeJsonForHtml, unescapeHtmlForJson} from './property-escape.js'
+import {escapeJsonForHtml} from './property-escape.js'
 
 
 class Chat extends BaseEl {
@@ -75,7 +75,7 @@ class Chat extends BaseEl {
       const paramStr = JSON.stringify(data.params)
       const escaped = escapeJsonForHtml(paramStr)
       this.messages[this.messages.length - 1].content = `
-        <action-component funcName="${data.command}" params='${escaped}' 
+        <action-component funcName="${data.command}" params="${escaped}" 
                           result="">
         </action-component>`;
     }

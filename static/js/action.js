@@ -73,7 +73,9 @@ class ActionComponent extends BaseEl {
         res = html`<div class="markdown-content">${unsafeHTML(marked(content, {breaks: true}))}</div>`;
       } else {
         console.log("Displaying code")
-        res = html`<pre><code class="hljs">${unsafeHTML(hljs.highlightAuto(content).value)}</code></pre>`;
+        const hih = hljs.highlightAuto(content).value;
+        console.log(hih)
+        res = html`<pre><code>${unsafeHTML(hih)}</code></pre>`;
       }
     }
 

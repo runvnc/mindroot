@@ -37,6 +37,7 @@ export class BaseEl extends LitElement {
 
   render() {
     return html`
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/default.min.css">
       <link rel="stylesheet" href="/static/css/${this.theme}.css">
       ${this._render()}
     `;

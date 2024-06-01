@@ -1,13 +1,15 @@
 export function escapeJsonForHtml(json) {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(json));
-  return div.innerHTML;
+  return json.replace(/"/g, '&quot;')
+  //const div = document.createElement('div');
+  //div.appendChild(document.createTextNode(json));
+  //return div.innerHTML;
 }
 
 export function unescapeHtmlForJson(escapedHtml) {
-  const div = document.createElement('div');
-  div.innerHTML = escapedHtml;
-  return div.textContent || div.innerText;
+  return escapedHtml.replace(/&quot;/g, '"')
+  //const div = document.createElement('div');
+  //div.innerHTML = escapedHtml;
+  //return div.textContent || div.innerText;
 }
 
 

@@ -1,5 +1,5 @@
 html, body {
-  background-color: #030303;
+  background-color: #050510;
   color: #f0f0f0;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
 }
@@ -16,7 +16,7 @@ p {
 }
 
 input::placeholder, textarea::placeholder {
-  background-color: #030303;
+  background-color: #050510;
   color: #f0f0f0;
 }
 
@@ -66,7 +66,7 @@ img.avatar {
 }
 
 .msg-ai {
-  background-color: #080808;
+  /* background-color: #080808; */
   border: 1px solid #181818;
   border-radius: 30px;
 }
@@ -78,7 +78,7 @@ img.avatar {
 }
 
 textarea {
-  background-color: #030303;
+  background-color: #050510;
   color: #f0f0f0;
   width: 90%;
   min-height: 1em;
