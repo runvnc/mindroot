@@ -133,8 +133,7 @@ class Agent:
 
             json_str = '[' + json_str + ']'
             
-            cmd = {"cmd": cmd_name, "result": {"error": str(e)}}
-            return [cmd], buffer
+            return None, buffer
 
 
     async def parse_cmd_stream(self, stream, context):
