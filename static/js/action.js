@@ -1,6 +1,7 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
 import {BaseEl} from './base.js';
+import {escapeJsonForHtml, unescapeHtmlForJson} from './property-escape.js'
 
 class ActionComponent extends BaseEl {
   static properties = {
@@ -22,16 +23,17 @@ class ActionComponent extends BaseEl {
   }
 
   _render() {
-    const {funcName, params, result} = this;
+    let {funcName, params, result} = this;
     let paramshtml = '';
     console.log('type of params is', typeof(params))
     console.log({funcName, params, result})
+    params = unescapeHtmlForJson(params)
     try {
       params = JSON.parse(params)
     } catch (e) {
-      //console.log('error parsing params', e)
+      console.log('error parsing params', e)
     }
-    if (typeof(params) == 'array') {
+    if (Array.isArray(params)) {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${item}), </span> `;
       }

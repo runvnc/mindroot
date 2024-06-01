@@ -3,6 +3,8 @@ import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 import { BaseEl } from './base.js';
 import './action.js';
+import {escapeJsonForHtml, unescapeHtmlForJson} from './property-escape.js'
+
 
 class Chat extends BaseEl {
   static properties = {
@@ -65,9 +67,15 @@ class Chat extends BaseEl {
       this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
     } else {
       console.log('data.params', data.params)
-
+      if (typeof(data.params) == 'array') {
+        data.params = {"val": data.params}
+      } else if (typeof(data.params) == 'string') {
+        data.params = {"val": data.params}
+      }
+      const paramStr = JSON.stringify(data.params)
+      const escaped = escapeJsonForHtml(paramStr)
       this.messages[this.messages.length - 1].content = `
-        <action-component funcName="${data.command}" params="${data.params}"
+        <action-component funcName="${data.command}" params='${escaped}' 
                           result="">
         </action-component>`;
     }
