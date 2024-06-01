@@ -1,4 +1,5 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
+import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
 import {BaseEl} from './base.js';
 
 class ActionComponent extends BaseEl {
@@ -44,7 +45,7 @@ class ActionComponent extends BaseEl {
     }
 
     let res = '';
-    if (result != '()') {
+    if (result != '()' && result != '' && result != undefined) {
       let lines = result.split("\n");
       if (lines.length == 1) {
         res = html`<div class="one_line_result">${result}</div>`;
@@ -62,8 +63,8 @@ class ActionComponent extends BaseEl {
     <div style="position: relative; max-width: 800px;">
       <div class="av"></div>
       <div class="action" >
-        ⚡  <span class="fn_name">${funcName}</span> ${paramshtml}
-        result: ${res}
+        ⚡  <span class="fn_name">${funcName}</span> ${unsafeHTML(paramshtml)}
+        ${res}
       </div>
     </div>
     `;
