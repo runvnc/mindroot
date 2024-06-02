@@ -1,5 +1,4 @@
-from ..services import service
-from ..commands import command
+from ..hooks import hook
 import os
 import json
 
