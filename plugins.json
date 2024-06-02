@@ -1,11 +1,11 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_openai",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_persona",
@@ -15,13 +15,17 @@
     "name": "ah_persona_lite",
     "enabled": true
   },
-  {
-    "name": "ah_sd",
+  { 
+    "name": "ah_img_tags",
     "enabled": true
   },
   {
-    "name": "ah_runpod_sd",
+    "name": "ah_sd",
     "enabled": false
+  },
+  {
+    "name": "ah_runpod_sd",
+    "enabled": true
   },
   {
     "name": "ah_swapface",

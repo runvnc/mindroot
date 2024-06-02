@@ -7,7 +7,8 @@ import os
 async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=100, num_gpu_layers=12):
     try:
         #model = "cognitivecomputations/dolphin-2.5-mixtral-8x7b"
-        model = "meta-llama/Llama-3-70b-chat-hf"
+        #model = "meta-llama/Llama-3-70b-chat-hf"
+        model = "mistralai/Mixtral-8x22B-Instruct-v0.1"
         async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
         original_stream = await async_client.chat.completions.create(
                 model=model,
