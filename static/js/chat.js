@@ -59,7 +59,8 @@ class Chat extends BaseEl {
         body: JSON.stringify({ message: content })
       });
     }
-    this.msgSoFar = ''
+    this.msgSoFar = '';
+    this._scrollToBottom();
   }
 
   _partialCmd(event) {

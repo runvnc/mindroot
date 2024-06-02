@@ -22,11 +22,18 @@ input::placeholder, textarea::placeholder {
   color: #f0f0f0;
 }
 
+
+.send_msg {
+  display: inline-block;
+}
+
 .chat-log {
   width: 80%;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  height: 65vh;
+  overflow-y: auto;
 }
 
 chat-message {
@@ -103,6 +110,83 @@ button {
 
 button:hover {
   background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
 }
 
 button:hover {

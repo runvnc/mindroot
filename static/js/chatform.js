@@ -41,7 +41,11 @@ class ChatForm extends BaseEl {
       <textarea rows="3" columns="80" id="inp_message" class="message-input"
         @keydown=${(e) => {if (e.keyCode === 13) this._send()}} 
         @input=${this._messageChanged} required></textarea>
-      <button type="button" @click=${this._send} class="mr-2">Send</button>
+      <button type="button" @click=${this._send} class="send_msg"><!-- send msg (airplane) icon here -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M11.354 8.354a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.708.708L10.293 8l-6.647 6.646a.5.5 0 0 0 .708.708l7-7a.5.5 0 0 0 0-.708z"/>
+          </svg>    
+        </button>
       </div>
     `
     }
