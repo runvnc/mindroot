@@ -17,12 +17,19 @@
   <script type="module" src="/static/js/action.js"></script>
   <script type="module" src="/static/js/chat.js"></script>
   <script type="module" src="/static/js/plugin-toggle.js"></script>
+  <script type="module" src="/static/js/persona-editor.js"></script>
+
 </head>
 <body>
     <script>window.theme = 'default';
             console.log("Init.")
     </script>
     <plugin-toggle></plugin-toggle>
+
+    <details>
+      <summary>Persona Editor</summary>
+      <persona-editor scope="local" name="Tanya"></persona-editor>
+    </details>
 
     <chat-ai sessionid="{{CHAT_ID}}"></chat-ai>
 
