@@ -36,6 +36,10 @@ app.include_router(plugin_router)
 from ah.ah_chat.chat import router as chat_router
 app.include_router(chat_router)
 
+from persona_router import router as persona_router
+app.include_router(persona_router)
+
+
 # Other server setup code can go here
 
 

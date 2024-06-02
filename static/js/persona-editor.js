@@ -1,7 +1,7 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { BaseEl } from './base.js';
 
-class PersonaEditor extends LitElement {
+class PersonaEditor extends BaseEl {
   static properties = {
     persona: { type: Object },
     scope: { type: String },
