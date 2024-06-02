@@ -21,15 +21,6 @@ class PersonaEditor extends BaseEl {
       flex-direction: column;
       font-weight: bold;
     }
-    input, textarea {
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-    }
   `;
 
   constructor() {
@@ -71,29 +62,29 @@ class PersonaEditor extends BaseEl {
       <form @submit=${this.handleSubmit}>
         <label>
           Name:
-          <input type="text" name="name" .value=${this.persona.name || ''} @input=${this.handleInputChange} />
+          <input class="text_inp" type="text" name="name" .value=${this.persona.name || ''} @input=${this.handleInputChange} />
         </label>
         <label>
           Description:
-          <textarea name="description" .value=${this.persona.description || ''} @input=${this.handleInputChange}></textarea>
+          <textarea class="text_lg" name="description" .value=${this.persona.description || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
           Behavior:
-          <textarea name="behavior" .value=${this.persona.behavior || ''} @input=${this.handleInputChange}></textarea>
+          <textarea class="text_lg"  name="behavior" .value=${this.persona.behavior || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
           Speech Patterns:
-          <textarea name="speech_patterns" .value=${this.persona.speech_patterns || ''} @input=${this.handleInputChange}></textarea>
+          <textarea class="text_lg"  name="speech_patterns" .value=${this.persona.speech_patterns || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
           Appearance:
-          <textarea name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
+          <textarea  class="text_lg" name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
           Commands:
-          <textarea name="commands" .value=${this.persona.commands || ''} @input=${this.handleInputChange}></textarea>
+          <textarea  class="text_lg" name="commands" .value=${this.persona.commands || ''} @input=${this.handleInputChange}></textarea>
         </label>
-        <button type="submit">Save</button>
+        <button  class="btn" type="submit">Save</button>
       </form>
     `;
   }

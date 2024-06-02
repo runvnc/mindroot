@@ -86,9 +86,9 @@ img.avatar {
   background-color: transparent;
 }
 
-textarea {
-  background-color: #050510;
-  color: #f0f0f0;
+textarea, .text_lg {
+  background-color: #050510 !important;
+  color: #f0f0f0 !important;
   width: 90%;
   min-height: 1em;
   max-height: 500px; /* Maximum height before scrolling */
@@ -98,7 +98,16 @@ textarea {
   border-radius: 15px;
 }
 
-button {
+input, .text_inp {
+  background-color: #050510;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+button, .btn {
 /* style buttons with contemporary look and dark theme */ 
   background-color: #333;
   color: #f0f0f0;
