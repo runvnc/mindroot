@@ -2,7 +2,23 @@ import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
 import {BaseEl} from './base.js';
 import {escapeJsonForHtml, unescapeHtmlForJson} from './property-escape.js'
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+import { Marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
+import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
+
+
+console.log('markedHighlight', markedHighlight)
+
+const marked = new Marked(
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang, info) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    }
+  })
+)
+
 
 class ActionComponent extends BaseEl {
   static properties = {
@@ -35,6 +51,9 @@ class ActionComponent extends BaseEl {
     let paramshtml = '';
     console.log('type of params is', typeof(params))
     console.log({funcName, params, result})
+    if (params.val) {
+      params = params.val
+    }
     if (Array.isArray(params)) {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${item}), </span> `;
@@ -69,8 +88,8 @@ class ActionComponent extends BaseEl {
       console.log("Displaying file")
       if (filename.endsWith('.md')) {
         console.log("Displaying markdown")
-        console.log(marked(content))
-        res = html`<div class="markdown-content">${unsafeHTML(marked(content, {breaks: true}))}</div>`;
+        console.log(marked.parse(content))
+        res = html`<div class="markdown-content">${unsafeHTML(marked.parse(content, {breaks: true}))}</div>`;
       } else {
         console.log("Displaying code")
         const hih = hljs.highlightAuto(content).value;

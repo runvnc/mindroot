@@ -1,10 +1,21 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+import { Marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 import { BaseEl } from './base.js';
 import './action.js';
 import {escapeJsonForHtml} from './property-escape.js'
+import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
 
+
+const marked = new Marked(
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang, info) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    }
+  })
+)
 
 class Chat extends BaseEl {
   static properties = {
@@ -37,7 +48,7 @@ class Chat extends BaseEl {
 
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
-    this.messages = [...this.messages, { content: marked("\n" + content), sender, persona }];
+    this.messages = [...this.messages, { content: marked.parse("\n" + content), sender, persona }];
 
     if (sender === 'user') {
       fetch(`/chat/${this.sessionid}/send`, {
@@ -64,7 +75,7 @@ class Chat extends BaseEl {
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       this.msgSoFar = data.params // data.chunk
-      this.messages[this.messages.length - 1].content = marked(this.msgSoFar);
+      this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar);
     } else {
       console.log('data.params', data.params)
       if (typeof(data.params) == 'array') {
@@ -74,6 +85,7 @@ class Chat extends BaseEl {
       }
       const paramStr = JSON.stringify(data.params)
       const escaped = escapeJsonForHtml(paramStr)
+
       this.messages[this.messages.length - 1].content = `
         <action-component funcName="${data.command}" params="${escaped}" 
                           result="">
