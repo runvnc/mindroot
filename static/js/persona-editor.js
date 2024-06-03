@@ -71,9 +71,11 @@ class PersonaEditor extends BaseEl {
     const method = this.newPersona ? 'POST' : 'PUT';
     const url = this.newPersona ? `/personas/${this.scope}` : `/personas/${this.scope}/${this.name}`;
     const formData = new FormData();
-    for (const key in this.persona) {
-      formData.append(key, this.persona[key]);
-    }
+    //for (const key in this.persona) {
+    //  formData.append(key, this.persona[key]);
+    //}
+    console.log('persona=', JSON.stringify(this.persona));
+    formData.append('persona', this.persona)
     const faceref = this.shadowRoot.querySelector('input[name="faceref"]').files[0];
     const avatar = this.shadowRoot.querySelector('input[name="avatar"]').files[0];
     if (faceref) formData.append('faceref', faceref);

@@ -28,8 +28,13 @@ def list_personas(scope: str):
     return [{'name': name} for name in personas]
 
 @router.post('/personas/{scope}')
-def create_persona(scope: str, persona: dict = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
     try:
+        print("In create_persona")
+        print("scope is ",scope)
+        print("name is ",name)
+        print("persona is ",persona)
+
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
         persona_name = persona.get('name')
@@ -64,8 +69,14 @@ def create_persona(scope: str, persona: dict = Form(...), faceref: UploadFile = 
 
                 
 @router.put('/personas/{scope}/{name}')
-def update_persona(scope: str, name:str, persona: dict = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+def update_persona(scope: str, name:str, persona: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+     
     try:
+        print("In update_persona")
+        print("scope is ",scope)
+        print("name is ",name)
+        print("persona is ",persona)
+        
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
         persona_path = BASE_DIR / scope / name / 'persona.json'
