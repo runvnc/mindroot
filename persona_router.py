@@ -32,7 +32,6 @@ def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = F
     try:
         print("In create_persona")
         print("scope is ",scope)
-        print("name is ",name)
         persona = json.loads(persona)
 
         print("persona is ",persona)
