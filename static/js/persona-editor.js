@@ -75,7 +75,7 @@ class PersonaEditor extends BaseEl {
     //  formData.append(key, this.persona[key]);
     //}
     console.log('persona=', JSON.stringify(this.persona));
-    formData.append('persona', this.persona)
+    formData.append('persona', JSON.stringify(this.persona))
     const faceref = this.shadowRoot.querySelector('input[name="faceref"]').files[0];
     const avatar = this.shadowRoot.querySelector('input[name="avatar"]').files[0];
     if (faceref) formData.append('faceref', faceref);
