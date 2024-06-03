@@ -119,6 +119,11 @@ class Chat extends BaseEl {
     this.messages = [...this.messages, { content: html, sender: 'ai' }];
   }
 
+  _scrollToBottom() {
+    const chatLog = this.shadowRoot.querySelector('.chat-log');
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
   _render() {
     return html`
       <div class="chat-container">
