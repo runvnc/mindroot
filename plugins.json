@@ -1,11 +1,11 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_openai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_persona",
@@ -15,7 +15,7 @@
     "name": "ah_persona_lite",
     "enabled": true
   },
-  { 
+  {
     "name": "ah_img_tags",
     "enabled": true
   },

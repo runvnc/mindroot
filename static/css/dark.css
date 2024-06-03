@@ -90,7 +90,7 @@ textarea, .text_lg {
   background-color: #050510 !important;
   color: #f0f0f0 !important;
   width: 90%;
-  min-height: 1em;
+  min-height: 4em;
   max-height: 500px; /* Maximum height before scrolling */
   overflow-y: auto; /* Allows the textarea to expand as the user types */
   scrollbar-width: none;
@@ -127,6 +127,84 @@ button:hover {
 * {
   scrollbar-width: thin;
   scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
 }
 
 /* Chrome, Edge, and Safari */
@@ -224,4 +302,24 @@ button:hover {
 
 code {
   max-width: 85%
+}
+
+form.persona {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 90%;
+  margin: auto;
+}
+
+.persona label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.persona button {
+  width: 50%;
+  max-width: 200px;
 }
