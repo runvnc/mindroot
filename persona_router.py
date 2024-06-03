@@ -59,20 +59,40 @@ def create_persona(scope: str, persona: dict = Form(...), faceref: UploadFile = 
         return {'status': 'success'}
 
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail='Internal server error')
+        print("Error in create_persona")
+        raise HTTPException(status_code=500, detail='Internal server error ' + str(e))
 
                 
 @router.put('/personas/{scope}/{name}')
-def update_persona(scope: str, name: str, persona: dict):
-    if scope not in ['local', 'shared']:
-        raise HTTPException(status_code=400, detail='Invalid scope')
-    persona_path = BASE_DIR / scope / name / 'persona.json'
-    if not persona_path.exists():
-        raise HTTPException(status_code=404, detail='Persona not found')
-    if 'moderated' not in persona:
-        persona['moderated'] = False
-    with open(persona_path, 'w') as f:
-        json.dump(persona, f, indent=2)
-    return {'status': 'success'}
+def update_persona(scope: str, name:str, persona: dict = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+    try:
+        if scope not in ['local', 'shared']:
+            raise HTTPException(status_code=400, detail='Invalid scope')
+        persona_path = BASE_DIR / scope / name / 'persona.json'
+        if not persona_path.exists():
+            raise HTTPException(status_code=404, detail='Persona not found')
+        if 'moderated' not in persona:
+            persona['moderated'] = False
+        if faceref:
+            print("Trying to save faceref")
+            faceref_path = persona_path.parent / 'faceref.png'
+            print("faceref path is ",faceref_path)
+            with open(faceref_path, 'wb') as f:
+                print("opened file for writing")
+                f.write(faceref.file.read())
+            persona['faceref'] = str(faceref_path)
+        if avatar:
+            print("Trying to save avatar")
+            avatar_path = persona_path.parent / 'avatar.png'
+            with open(avatar_path, 'wb') as f:
+                print("opened file for writing")
+                f.write(avatar.file.read())
+            persona['avatar'] = str(avatar_path)
+ 
+        with open(persona_path, 'w') as f:
+            json.dump(persona, f, indent=2)
+        return {'status': 'success'}
+    except Exception as e:
+        print("Error in update_persona")
+        raise HTTPException(status_code=500, detail='Internal server error '+ str(e))
 
