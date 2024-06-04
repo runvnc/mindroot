@@ -180,6 +180,21 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
 
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
+@router.get("/admin", response_class=HTMLResponse)
+async def get_admin_html():
+    log_id = nanoid.generate()
+    context = ChatContext(command_manager, service_manager)
+    context.log_id = log_id
+    #persona_ = await service_manager.get_persona_data(persona_name)
+
+    context.persona = {} #persona_
+    context.chat_log = ChatLog(log_id=log_id, persona='admin')
+    context.save_context()
+
+    with open("static/admin.html", "r") as file:
+        admin_html = file.read()
+        admin_html = chat_html.replace("{{CHAT_ID}}", log_id)
+    return admin_html
 
 @router.get("/{persona_name}", response_class=HTMLResponse)
 async def get_chat_html(persona_name: str):
@@ -211,7 +226,7 @@ async def get_admin_html():
     context.save_context()
 
     with open("static/admin.html", "r") as file:
-        chat_html = file.read()
-        chat_html = chat_html.replace("{{CHAT_ID}}", log_id)
-    return chat_html
+        admin_html = file.read()
+        admin_html = chat_html.replace("{{CHAT_ID}}", log_id)
+    return admin_html
 
