@@ -199,3 +199,19 @@ async def get_chat_html(persona_name: str):
         chat_html = chat_html.replace("{{CHAT_ID}}", log_id)
     return chat_html
 
+@router.get("/admin", response_class=HTMLResponse)
+async def get_admin_html():
+    log_id = nanoid.generate()
+    context = ChatContext(command_manager, service_manager)
+    context.log_id = log_id
+    #persona_ = await service_manager.get_persona_data(persona_name)
+
+    context.persona = {} #persona_
+    context.chat_log = ChatLog(log_id=log_id, persona='admin')
+    context.save_context()
+
+    with open("static/admin.html", "r") as file:
+        chat_html = file.read()
+        chat_html = chat_html.replace("{{CHAT_ID}}", log_id)
+    return chat_html
+

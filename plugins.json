@@ -21,11 +21,11 @@
   },
   {
     "name": "ah_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",
