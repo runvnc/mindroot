@@ -60,7 +60,9 @@ class Chat extends BaseEl {
       });
     }
     this.msgSoFar = '';
-    this._scrollToBottom();
+    setTimeout(() => {
+      this._scrollToBottom();
+    }, 100)
   }
 
   _partialCmd(event) {
@@ -93,6 +95,7 @@ class Chat extends BaseEl {
         </action-component>`;
     }
     this.requestUpdate();
+    this._scrollToBottom()
   }
 
   _runningCmd(event) {
@@ -120,8 +123,11 @@ class Chat extends BaseEl {
   }
 
   _scrollToBottom() {
-    const chatLog = this.shadowRoot.querySelector('.chat-log');
-    chatLog.scrollTop = chatLog.scrollHeight;
+    //const chatLog = this.shadowRoot.querySelector('.chat-log');
+    const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
+    const lastEl = lastMessageEls[lastMessageEls.length-1]
+    lastEl.scrollIntoView(false)
+    //chatLog.scrollTop = chatLog.scrollHeight;
   }
 
   _render() {

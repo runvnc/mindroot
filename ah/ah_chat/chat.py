@@ -193,7 +193,7 @@ async def get_admin_html():
 
     with open("static/admin.html", "r") as file:
         admin_html = file.read()
-        admin_html = chat_html.replace("{{CHAT_ID}}", log_id)
+        admin_html = admin_html.replace("{{CHAT_ID}}", log_id)
     return admin_html
 
 @router.get("/{persona_name}", response_class=HTMLResponse)
