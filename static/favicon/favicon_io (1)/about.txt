@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Major Mono Display
+- Font Author: Copyright 2018 The Major Mono Project Authors (https://github.com/googlefonts/majormono)
+- Font Source: https://fonts.gstatic.com/s/majormonodisplay/v16/RWmVoLyb5fEqtsfBX9PDZIGr2tFubRhLCn2QIndPww.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
