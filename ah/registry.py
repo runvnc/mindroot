@@ -1,7 +1,9 @@
 import asyncio
 import json
 
-async def get_models(provider=None, model_id=None, local=True, uncensored=False, type=None):
+
+async def select_models(provider=None, model_id=None, local=True, uncensored=False, service_or_command_name=None, flags=[]):
+    type = service_or_command_name
     with open('data/models.json', 'r') as models_file:
         models = json.load(models_file)
     
@@ -32,6 +34,7 @@ async def get_models(provider=None, model_id=None, local=True, uncensored=False,
                     print(6)
                     model_with_meta = model.copy()
                     model_with_meta.update(provider_model['meta'])
+                    model['provider'] = provider_entry
                     filtered_models.append(model_with_meta)
                     break
     if len(filtered_models) == 0:
