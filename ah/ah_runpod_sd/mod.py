@@ -60,14 +60,14 @@ async def add_instructions(context=None):
 
 @service(is_local=False)
 async def select_image_model(context=None, model_id=None, local=False, uncensored=False):
-    models = await select_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
+    models = await select_models(service_or_command='image', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
     return models[0]
 
 @service(is_local=False)
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
                         count=1, context=None, save_to="imgs/" + random_img_fname(), w=1024, h=1024, steps=20, cfg=8):
     print("text_to_image. trying to get model")
-    models = await select_models(type='sd', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
+    models = await select_models(service_or_command='text_to_image', provider='AH Runpod', local=False, model_id=model_id, uncensored=context.uncensored)
     model = models[0]
     print("model is", model)
     endpoint_id = model['endpoint_id']
