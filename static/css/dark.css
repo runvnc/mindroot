@@ -168,6 +168,201 @@ select option, .dropdown option {
   color: #f0f0f0;
 }
 
+/* Custom file input styles */
+.custom-file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 150px;
+  height: 30px;
+  overflow: hidden;
+  background-color: #333;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 5px 10px;
+  margin: 10px 0;
+  transition: background-color 0.3s ease;
+  vertical-align: middle;
+}
+
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Custom file input styles */
+.custom-file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 200px;
+  height: 40px;
+  overflow: hidden;
+  background-color: #333;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
   width: 8px;

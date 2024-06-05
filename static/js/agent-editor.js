@@ -79,7 +79,18 @@ class AgentEditor extends BaseEl {
   handleInputChange(event) {
     const { name, value, type, checked } = event.target;
     const inputValue = type === 'checkbox' ? checked : value;
-    this.agent = { ...this.agent, [name]: inputValue };
+    if (name === 'commands') {
+      if (!Array.isArray(this.agent.commands)) {
+        this.agent.commands = [];
+      }
+      if (checked) {
+        this.agent.commands.push(value);
+      } else {
+        this.agent.commands = this.agent.commands.filter(command => command !== value);
+      }
+    } else {
+      this.agent = { ...this.agent, [name]: inputValue };
+    }
   }
 
   async handleSubmit(event) {
@@ -126,43 +137,47 @@ class AgentEditor extends BaseEl {
         <button @click=${this.handleNewAgent}>New Agent</button>
       </div>
       <form @submit=${this.handleSubmit} class="agent">
+  <div>
+    <label>
+      Name:
+      <input class="text_inp" type="text" name="name" .value=${this.agent.name || ''} @input=${this.handleInputChange} />
+    </label>
+  </div>
+  <div>
+    <label>
+      Persona:
+      <select name="persona" .value=${this.agent.persona || ''} @input=${this.handleInputChange}>
+        <option value="">Select a persona</option>
+        ${this.personas.map(persona => html`<option value="${persona.name}">${persona.name}</option>`) }
+      </select>
+    </label>
+  </div>
+  <div>
+    <label>
+      Instructions:
+      <textarea class="text_lg" name="instructions" .value=${this.agent.instructions || ''} @input=${this.handleInputChange}></textarea>
+    </label>
+  </div>
+  <div>
+    <label>
+      Uncensored:
+      <toggle-switch .checked=${this.agent.uncensored || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'uncensored', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
+    </label>
+  </div>
+  <div>
+    <label>
+      Commands:
+      ${this.commands.map(command => html`
         <label>
-          Name:
-          <input class="text_inp" type="text" name="name" .value=${this.agent.name || ''} @input=${this.handleInputChange} />
+          <input type="checkbox" name="commands" value="${command}" .checked=${this.agent.commands && this.agent.commands.includes(command)} @change=${this.handleInputChange} /> ${command}
         </label>
-        <label>
-          Persona:
-          <select name="persona" .value=${this.agent.persona || ''} @input=${this.handleInputChange}>
-            <option value="">Select a persona</option>
-            ${this.personas.map(persona => html`<option value="${persona.name}">${persona.name}</option>`) }
-          </select>
-        </label>
-        <label>
-          Instructions:
-          <textarea class="text_lg" name="instructions" .value=${this.agent.instructions || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
-          Uncensored:
-          <toggle-switch .checked=${this.agent.uncensored || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'uncensored', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
-        </label>
-        <label>
-          Commands:
-          ${this.commands.map(command => html`
-            <label>
-              <input type="checkbox" name="commands" value="${command}" .checked=${this.agent.commands && this.agent.commands.includes(command)} @change=${this.handleInputChange} /> ${command}
-            </label>
-          `)}
-        </label>
-        <label>
-          Face Reference Image:
-          <input class="text_inp" type="file" name="faceref" @change=${this.handleFileChange} />
-        </label>
-        <label>
-          Avatar Image:
-          <input class="text_inp" type="file" name="avatar" @change=${this.handleFileChange} />
-        </label>
-        <button class="btn" type="submit">Save</button>
-      </form>
+      `)}
+    </label>
+  </div>
+  
+  
+  <button class="btn" type="submit">Save</button>
+</form>
     `;
   }
 }
