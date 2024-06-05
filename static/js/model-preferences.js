@@ -5,16 +5,22 @@ class ModelPreferences extends BaseEl {
   static properties = {
     settings: { type: Array },
     commands: { type: Array },
-    flags: { type: Array }
+    flags: { type: Array },
+    models: { type: Array },
+    providers: { type: Array }
   };
 
   constructor() {
     super();
     this.settings = [];
     this.commands = [];
-    this.flags = ['local', 'uncensored']; // Example flags, can be extended
+    this.flags = ['local', 'uncensored'];
+    this.models = [];
+    this.providers = [];
     this.fetchSettings();
     this.fetchCommands();
+    this.fetchModels();
+    this.fetchProviders();
   }
 
   async fetchSettings() {
@@ -26,6 +32,16 @@ class ModelPreferences extends BaseEl {
     const response = await fetch('/commands');
     const data = await response.json();
     this.commands = data.commands;
+  }
+
+  async fetchModels() {
+    const response = await fetch('/models');
+    this.models = await response.json();
+  }
+
+  async fetchProviders() {
+    const response = await fetch('/providers');
+    this.providers = await response.json();
   }
 
   handleInputChange(event) {
@@ -95,13 +111,21 @@ class ModelPreferences extends BaseEl {
           <div>
             <label>
               Provider:
-              <input type="text" name="provider" @input=${this.handleInputChange} />
+              <select name="provider" @change=${this.handleInputChange}>
+                ${this.providers.map(provider => html`
+                  <option value="${provider.name}">${provider.name}</option>
+                `)}
+              </select>
             </label>
           </div>
           <div>
             <label>
               Model:
-              <input type="text" name="model" @input=${this.handleInputChange} />
+              <select name="model" @change=${this.handleInputChange}>
+                ${this.models.map(model => html`
+                  <option value="${model.name}">${model.name}</option>
+                `)}
+              </select>
             </label>
           </div>
           <button type="submit">Save</button>

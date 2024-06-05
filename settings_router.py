@@ -6,6 +6,8 @@ import os
 router = APIRouter()
 
 SETTINGS_FILE_PATH = 'data/preferred_models.json'
+MODELS_FILE_PATH = 'data/models.json'
+PROVIDERS_FILE_PATH = 'data/providers.json'
 
 # Helper function to read settings file
 def read_settings() -> List[Dict]:
@@ -18,6 +20,20 @@ def read_settings() -> List[Dict]:
 def write_settings(settings: List[Dict]):
     with open(SETTINGS_FILE_PATH, 'w') as settings_file:
         json.dump(settings, settings_file, indent=4)
+
+# Helper function to read models file
+def read_models() -> List[Dict]:
+    if not os.path.exists(MODELS_FILE_PATH):
+        return []
+    with open(MODELS_FILE_PATH, 'r') as models_file:
+        return json.load(models_file)
+
+# Helper function to read providers file
+def read_providers() -> List[Dict]:
+    if not os.path.exists(PROVIDERS_FILE_PATH):
+        return []
+    with open(PROVIDERS_FILE_PATH, 'r') as providers_file:
+        return json.load(providers_file)
 
 @router.get('/settings', response_model=List[Dict])
 async def get_settings():
@@ -47,3 +63,11 @@ async def delete_setting(setting_id: int):
     deleted_setting = settings.pop(setting_id)
     write_settings(settings)
     return deleted_setting
+
+@router.get('/models', response_model=List[Dict])
+async def get_models():
+    return read_models()
+
+@router.get('/providers', response_model=List[Dict])
+async def get_providers():
+    return read_providers()
