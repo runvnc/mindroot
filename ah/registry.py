@@ -2,8 +2,8 @@ import asyncio
 import json
 
 
-async def select_models(provider=None, model_id=None, local=True, uncensored=False, service_or_command_name=None, flags=[]):
-    type = service_or_command_name
+async def select_models(provider=None, model_id=None, local=True, uncensored=False, service_or_command=None, flags=[]):
+    type = service_or_command
     with open('data/models.json', 'r') as models_file:
         models = json.load(models_file)
     

@@ -52,11 +52,12 @@ async def send_job(input, endpoint_id):
                 await asyncio.sleep(1)
 
 
-@hook()
-async def add_instructions(context=None):
-    model = await context.select_image_model()
-    if 'tips' in model:
-        return model['tips']
+#@hook()
+#async def add_instructions(context=None):
+#    return ''
+#    model = await context.select_image_model()
+#    if 'tips' in model:
+#        return model['tips']
 
 @service(is_local=False)
 async def select_image_model(context=None, model_id=None, local=False, uncensored=False):
