@@ -28,6 +28,8 @@ async def write(fname, text, context=None):
     with open(fname, 'w') as f:
         f.write(text)
         print(f'Wrote text to {fname}')
+    return True
+
 
 @command(is_local=True)
 async def read(fname, context=None):
@@ -103,6 +105,8 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
             raise Exception("Could not find starts_with")
         if end_index == -1:
             raise Exception("Could not find ends_with")
+
+    return True
 
 @command()
 async def dir(directory='', context=None):
@@ -192,4 +196,4 @@ async def cd(directory, context=None):
         print(f'Changed current directory to {new_dir}')
     else:
         print(f'Directory {new_dir} does not exist.')
-
+    return True

@@ -25,5 +25,5 @@ async def think(thought_process, context=None):
     #                                           "persona": persona_['name'] })
     json_cmd = { "think": thought_process }
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
-  
+    return '...'  
 

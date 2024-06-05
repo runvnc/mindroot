@@ -163,9 +163,9 @@ class Agent:
                 if match:
                     json_str = match.group(0)
                     result_, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
-                    if result_:
-                        for result in result_:
-                            results.append(result)
+                    #if result_:
+                    for result in result_:
+                        results.append(result)
                 else:
                     # Attempt to parse partial JSON command
                     try:
