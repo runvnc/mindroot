@@ -1,7 +1,7 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { BaseEl } from './base.js';
 
-class SettingsEditor extends BaseEl {
+class ModelPreferences extends BaseEl {
   static properties = {
     settings: { type: Array },
     commands: { type: Array },
@@ -120,4 +120,4 @@ class SettingsEditor extends BaseEl {
   }
 }
 
-customElements.define('settings-editor', SettingsEditor);
+customElements.define('model-preferences', ModelPreferences);
