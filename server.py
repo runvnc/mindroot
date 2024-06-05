@@ -42,6 +42,9 @@ app.include_router(persona_router)
 from agent_router import router as agent_router
 app.include_router(agent_router)
 
+from command_router import router as command_router
+app.include_router(command_router)
+
 
 # Other server setup code can go here
 
