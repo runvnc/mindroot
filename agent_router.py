@@ -5,7 +5,11 @@ import json
 router = APIRouter()
 
 BASE_DIR = Path('data/agents')
-BASE_DIR.mkdir(parents=True, exist_ok=True)
+local_dir = BASE_DIR / "local"
+shared_dir = BASE_DIR / "shared"
+local_dir.mkdir(parents=True, exist_ok=True)
+shared_dir.mkdir(parents=True, exist_ok=True)
+
 
 @router.get('/agents/{scope}/{name}')
 def read_agent(scope: str, name: str):
