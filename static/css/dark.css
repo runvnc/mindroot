@@ -634,7 +634,7 @@ button:hover {
   max-width: 100%;
 }
 
-.action { border: 2px solid teal; border-radius: 5px; }
+/* .action { border: 2px solid teal; border-radius: 5px; } */
 
 code {
   max-width: 85%
