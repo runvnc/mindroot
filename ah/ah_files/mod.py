@@ -4,7 +4,7 @@ import os
 from .backup_file import restore_file
 import glob
 
-@command(is_local=True)
+@command()
 async def write(fname, text, context=None):
     """Write text to a file. Will overwrite the file if it exists.
     Example:
@@ -31,7 +31,7 @@ async def write(fname, text, context=None):
     return True
 
 
-@command(is_local=True)
+@command()
 async def read(fname, context=None):
     """Read text from a file.
     Example:
@@ -54,7 +54,7 @@ async def read(fname, context=None):
         print(f'Read text from {fname}: {text}')
         return text
 
-@command(is_local=True)
+@command()
 async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=None, context=None):
     """Replace text between two strings in a file including start and end strings.
 
@@ -131,7 +131,7 @@ async def dir(directory='', context=None):
     print(f'Files in {directory}: {files}')
     return files
 
-@command(is_local=True)
+@command()
 async def restore(fname, timestamp=None, context=None):
     """Restore a file from its backup. If no timestamp is specified, restore the latest backup.
     Parameters:
@@ -154,7 +154,7 @@ async def restore(fname, timestamp=None, context=None):
     print(f'Restored {fname} from backup.')
 
 
-@command(is_local=True)
+@command()
 async def show_backups(context=None):
     """List all backup files in the .backup directory.
     Example:
@@ -169,7 +169,7 @@ async def show_backups(context=None):
     print(f"Backup files: {backup_files}")
     return backup_files
 
-@command(is_local=True)
+@command()
 async def cd(directory, context=None):
     """Change the current working directory.
 
