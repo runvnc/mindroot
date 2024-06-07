@@ -15,6 +15,13 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
 
     try:
         with open(settings_file_path, 'r') as settings_file:
+            pass
+    except FileNotFoundError:
+        with open(settings_file_path, 'w') as settings_file:
+            json.dump([], settings_file)
+
+    try:
+        with open(settings_file_path, 'r') as settings_file:
             settings = json.load(settings_file)
     except Exception as e:
         logging.error(f'Error reading settings file: {e}')
