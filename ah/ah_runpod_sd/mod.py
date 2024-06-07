@@ -112,7 +112,7 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
         return fname
 
 
-@command(is_local=False)
+@command()
 async def image(prompt, context=None):
     """image: Generate an image from a prompt
 

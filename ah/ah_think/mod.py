@@ -3,7 +3,7 @@ from ..commands import command
 import os
 import json
 
-@command(is_local=False)
+@command()
 async def think(thought_process, context=None):
     """Think about the next thing to do or say systematically before additional commands or replies.
 
