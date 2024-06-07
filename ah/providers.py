@@ -104,7 +104,7 @@ class HookManager:
         return list(self.hooks.keys())
 
     def get_docstrings(self):
-        return {name: self.get_docstring(name) for name in the hooks.keys()}
+        return {name: self.get_docstring(name) for name in self.hooks.keys()}
 
     def __getattr__(self, name):
         async def method(*args, **kwargs):
