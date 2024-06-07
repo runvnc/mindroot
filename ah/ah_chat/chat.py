@@ -49,7 +49,7 @@ async def chat_events(log_id: str):
 
     return EventSourceResponse(event_generator())
 
-@service(is_local=True)
+@service()
 async def agent_output(event: str, data: dict, context=None):
     print("Try to send event: ", event, data)
     for queue in sse_clients:
@@ -57,13 +57,13 @@ async def agent_output(event: str, data: dict, context=None):
         await queue.put({"event": event, "data": json.dumps(data)})
 
 
-@service(is_local=True)
+@service()
 async def partial_command(command: str, chunk: str, params, context=None):
     persona_ = context.persona
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
                                                     "persona": persona_['name'] })
 
-@service(is_local=True)
+@service()
 async def running_command(command: str, context=None):
     print("*** running_command service call ***")
     persona_ = context.persona
@@ -82,7 +82,7 @@ async def init_chat(log_id: str, persona_name: str):
     persona_ = await service_manager.get_persona_data(persona_name)
 
 
-@service(is_local=True)
+@service()
 async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
@@ -101,7 +101,7 @@ async def send_message(log_id: str, message_data: Message):
     print('loaded context. data is: ', context.data)
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
-    @command(is_local=True)
+    @command()
     async def say(assistant_message, context=None):
         """
         Say something to the user or chat room.
@@ -145,7 +145,7 @@ async def send_message(log_id: str, message_data: Message):
     return {"status": "ok"}
 
 
-@command(is_local=True)
+@command()
 async def json_encoded_md(json_encoded_markdown_text, context=None):
     """
     Output some markdown text to the user or chat room.
