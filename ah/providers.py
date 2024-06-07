@@ -48,6 +48,7 @@ class ProviderManager:
             kwargs['context'] = self.context
 
         try:
+            print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
             result = await implementation(*args, **kwargs)
         except Exception as e:
             raise e

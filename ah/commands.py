@@ -4,7 +4,7 @@ from .providers import ProviderManager
 
 command_manager = ProviderManager()
 
-def command(*, is_local=False):
+def command(*, flags=[]):
     def decorator(func):
         docstring = func.__doc__
         name = func.__name__
@@ -15,7 +15,7 @@ def command(*, is_local=False):
 
         module_name = os.path.basename(os.path.dirname(module.__file__))
  
-        command_manager.register_function(name, module_name, func, signature, docstring, is_local)
+        command_manager.register_function(name, module_name, func, signature, docstring, flags)
         return func
     return decorator
 
