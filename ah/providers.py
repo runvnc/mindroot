@@ -64,8 +64,12 @@ class ProviderManager:
     def get_docstrings(self):
         return {name: self.get_docstring(name) for name in self.functions.keys()}
 
+    def get_some_docstrings(self, names):
+        return {name: self.get_docstring(name) for name in names}
+
     def __getattr__(self, name):
         async def method(*args, **kwargs):
+            print(f"method: {name} called")
             return await self.execute(name, *args, **kwargs)
 
         return method
