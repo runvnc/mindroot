@@ -131,7 +131,7 @@ async def do_swap_face(src_dir, target_img_filepath):
     else:
         print("No source images found in the directory.")
 
-@service(is_local=True)
+@service()
 async def swap_face(input_ref_dir, target_image_path, context=None, skip_nsfw=False, wrap_html=False): 
     fname = await do_swap_face(input_ref_dir, target_image_path)
     return fname
