@@ -5,6 +5,7 @@ class ModelPreferences extends BaseEl {
   static properties = {
     settings: { type: Array },
     commands: { type: Array },
+    services: { type: Array },
     flags: { type: Array },
     models: { type: Array },
     providers: { type: Array }
@@ -14,11 +15,13 @@ class ModelPreferences extends BaseEl {
     super();
     this.settings = [];
     this.commands = [];
+    this.services = [];
     this.flags = ['local', 'uncensored'];
     this.models = [];
     this.providers = [];
     this.fetchSettings();
     this.fetchCommands();
+    this.fetchServices();
     this.fetchModels();
     this.fetchProviders();
   }
@@ -30,8 +33,12 @@ class ModelPreferences extends BaseEl {
 
   async fetchCommands() {
     const response = await fetch('/commands');
-    const data = await response.json();
-    this.commands = data.commands;
+    this.commands = await response.json();
+  }
+
+  async fetchServices() {
+    const response = await fetch('/services');
+    this.services = await response.json();
   }
 
   async fetchModels() {
@@ -85,7 +92,14 @@ class ModelPreferences extends BaseEl {
           <div>
             <label>
               Service/Command Name:
-              <input type="text" name="service_or_command_name" @input=${this.handleInputChange} />
+              <select name="service_or_command_name" @change=${this.handleInputChange}>
+                ${this.commands.map(command => html`
+                  <option value="${command}">${command}</option>
+                `)}
+                ${this.services.map(service => html`
+                  <option value="${service}">${service}</option>
+                `)}
+              </select>
             </label>
           </div>
           <div>

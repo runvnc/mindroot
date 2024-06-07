@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Dict
 import json
 import os
+from ..ah.commands import command_manager
+from ..ah.services import service_manager
 
 router = APIRouter()
 
@@ -71,3 +73,11 @@ async def get_models():
 @router.get('/providers', response_model=List[Dict])
 async def get_providers():
     return read_providers()
+
+@router.get('/commands', response_model=List[str])
+async def get_commands():
+    return command_manager.get_functions()
+
+@router.get('/services', response_model=List[str])
+async def get_services():
+    return service_manager.get_functions()
