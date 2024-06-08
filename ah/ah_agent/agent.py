@@ -239,7 +239,7 @@ class Agent:
         print(command_manager.get_some_docstrings(self.agent["commands"]))
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
-            "agent": self.agent
+            "agent": self.agent,
             "persona": self.agent.persona
         }
         self.system_message = self.sys_template.render(data)
