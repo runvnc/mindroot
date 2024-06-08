@@ -7,7 +7,7 @@ from ..commands import command_manager
 from ..hooks import hook_manager
 from ..services import service 
 import partial_json_parser
-
+from ..services import service_manager
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -29,7 +29,7 @@ async def get_agent_data(agent_name, context=None):
     with open(agent_file, 'r') as f:
         agent_data = json.load(f)
 
-    agent_data["persona"] = context.get_persona_data(agent_data["persona"])
+    agent_data["persona"] = service_manager.get_persona_data(agent_data["persona"])
     return agent_data
 
 

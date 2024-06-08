@@ -42,7 +42,7 @@ class ChatContext:
                 self.data = context_data.get('data', {})
                 self.chat_log = ChatLog(log_id=log_id)
             self.agent_name = context_data.get('agent_name')  
-            self.agent = await service_manager.get_agent_data(self.agent_name)
+            self.agent = await service_manager.get_agent_data(self.agent_name, self)
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
         else:
