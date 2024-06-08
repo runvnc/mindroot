@@ -5,14 +5,10 @@ from .backup_file import restore_file
 import glob
 
 @command()
-async def write(fname, text, context=None):
+async def write(fname="", text="", context=None):
     """Write text to a file. Will overwrite the file if it exists.
     Example:
-    { "write": ["file1.txt", "This is the text to write to the file."] }
-
-    Parameters: array; 
-      [0]: filename
-      [1]: text to write to file
+    { "write": { "fname": "file1.txt", "text": "This is the text to write to the file." } }
 
     """
     print("Write file, context is:", context, 'context.data is:', context.data)
