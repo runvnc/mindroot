@@ -3,7 +3,7 @@ from ..services import service
 from together import AsyncTogether
 import os
 
-@service(is_local=False)
+@service()
 async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=100, num_gpu_layers=12):
     try:
         #model = "cognitivecomputations/dolphin-2.5-mixtral-8x7b"
