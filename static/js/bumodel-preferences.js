@@ -87,7 +87,7 @@ class ModelPreferences extends BaseEl {
                     ${flagData.flag}:
                     <select name="${serviceData.service}_${flagData.flag}" @change=${this.handleInputChange}>
                       ${flagData.models.map(model => html`
-                        <option value="${model.model}">${model.provider} - ${model.model}</option>
+                        <option value="${model.name}">${model.name}</option>
                       `)}
                     </select>
                   </label>
