@@ -29,7 +29,7 @@ async def get_agent_data(agent_name, context=None):
     with open(agent_file, 'r') as f:
         agent_data = json.load(f)
 
-    agent_data["persona"] = service_manager.get_persona_data(agent_data["persona"])
+    agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
     return agent_data
 
 
