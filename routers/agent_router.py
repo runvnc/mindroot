@@ -58,7 +58,7 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
         agent_path = BASE_DIR / scope / name / 'agent.json'
         if not agent_path.exists():
             raise HTTPException(status_code=404, detail='Agent not found')
-       with open(agent_path, 'w') as f:
+        with open(agent_path, 'w') as f:
             json.dump(agent, f, indent=2)
         return {'status': 'success'}
     except Exception as e:
