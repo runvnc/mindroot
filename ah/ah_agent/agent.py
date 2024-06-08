@@ -5,7 +5,33 @@ import re
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
+from ..services import service 
 import partial_json_parser
+
+
+@service()
+async def get_agent_data(agent_name, context=None):
+    import os
+    import json
+    import sys
+
+    print("agent name is", agent_name, file=sys.stderr)
+
+    agent_path = os.path.join('data/agents', 'local', agent_name)
+
+    if not os.path.exists(agent_path):
+        agent_path = os.path.join('data/agents', 'shared', agent_name)
+        if not os.path.exists(agent_path):
+            return {}
+    agent_file = os.path.join(agent_path, 'agent.json')
+    if not os.path.exists(agent_file):
+        return {}
+    with open(agent_file, 'r') as f:
+        agent_data = json.load(f)
+
+    agent_data["persona"] = context.get_persona_data(agent_data["persona_name"])
+    return agent_data
+
 
 def find_new_substring(s1, s2):
     if s1 in s2:
@@ -14,7 +40,7 @@ def find_new_substring(s1, s2):
 
 class Agent:
 
-    def __init__(self, model=None, sys_core_template=None, persona=None, clear_model=False, commands=[], context=None):
+    def __init__(self, model=None, sys_core_template=None, agent=None, clear_model=False, commands=[], context=None):
         if model is None:
             if os.environ.get('AH_DEFAULT_LLM'):
                 self.model = os.environ.get('AH_DEFAULT_LLM')
@@ -23,7 +49,7 @@ class Agent:
         else:
             self.model = model
 
-        self.persona = persona
+        self.agent = agent
 
         if sys_core_template is None:
             system_template_path = os.path.join(os.path.dirname(__file__), "system.j2")
@@ -210,10 +236,11 @@ class Agent:
 
     async def render_system_msg(self):
         print("docstrings:")
-        print(command_manager.get_some_docstrings(self.persona["commands"]))
+        print(command_manager.get_some_docstrings(self.agent["commands"]))
         data = {
-            "command_docs": command_manager.get_some_docstrings(self.persona["commands"]),
-            "persona": self.persona
+            "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
+            "agent": self.agent
+            "persona": self.agent.persona
         }
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)
@@ -221,6 +248,9 @@ class Agent:
             self.system_message += instruction + "\n\n"
 
         return self.system_message
+
+
+
 
     async def chat_commands(self, model, context,
                             temperature=0, max_tokens=4000, messages=[]):

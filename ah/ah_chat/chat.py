@@ -33,7 +33,7 @@ async def chat_events(log_id: str):
     print("chat_log = ", log_id)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(log_id)
-    agent_ = agent.Agent(persona=context.persona, clear_model=True)
+    agent_ = agent.Agent(agent=context.agent, clear_model=True)
     await asyncio.sleep(0.15)
     asyncio.create_task(hook_manager.warmup())
 
@@ -59,27 +59,27 @@ async def agent_output(event: str, data: dict, context=None):
 
 @service()
 async def partial_command(command: str, chunk: str, params, context=None):
-    persona_ = context.persona
+    agent_ = context.agent
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
-                                                    "persona": persona_['name'] })
+                                                    "agent": agent_['name'] })
 
 @service()
 async def running_command(command: str, context=None):
     print("*** running_command service call ***")
-    persona_ = context.persona
+    agent_ = context.agent
     print("ok")
-    await context.agent_output("running_command", { "command": command, "persona": persona_['name'] })
+    await context.agent_output("running_command", { "command": command, "agent": agent_['name'] })
 
 
-@router.put("/chat/{log_id}/{persona_name}")
-async def init_chat(log_id: str, persona_name: str):
+@router.put("/chat/{log_id}/{agent_name}")
+async def init_chat(log_id: str, agent_name: str):
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id    
-    context.persona = await service_manager.get_persona_data(persona_name)
+    context.agent = await service_manager.get_agent_data(agent_name)
 
-    context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
+    context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
     context.save_context()
-    persona_ = await service_manager.get_persona_data(persona_name)
+    agent_ = await service_manager.get_agent_data(agent_name)
 
 
 @service()
@@ -94,10 +94,10 @@ async def send_message(log_id: str, message_data: Message):
     await context.load_context(log_id)
     # form_data = await request.form()
     user_avatar = 'static/user.png'
-    assistant_avatar = f"static/personas/{context.persona['name']}/avatar.png"
+    assistant_avatar = f"static/agents/{context.agent['name']}/avatar.png"
     user_name = os.environ.get("AH_USER_NAME")
     message = message_data.message
-    agent_ = agent.Agent(persona=context.persona)
+    agent_ = agent.Agent(agent=context.agent)
     print('loaded context. data is: ', context.data)
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
@@ -116,7 +116,7 @@ async def send_message(log_id: str, message_data: Message):
 
         """
         await context.agent_output("new_message", {"content": assistant_message,
-                                   "persona": context.persona['name'] })
+                                   "agent": context.agent['name'] })
         json_cmd = { "say": assistant_message }
 
         context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
@@ -175,7 +175,7 @@ async def json_encoded_md(json_encoded_markdown_text, context=None):
 
     """
     await context.agent_output("new_message", {"content": json_encoded_markdown_text,
-                                            "persona": context.persona['name'] })
+                                            "agent": context.agent['name'] })
     json_cmd = { "json_encoded_md": json_encoded_markdown_text }
 
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
@@ -185,10 +185,10 @@ async def get_admin_html():
     log_id = nanoid.generate()
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
-    #persona_ = await service_manager.get_persona_data(persona_name)
+    #agent_ = await service_manager.get_agent_data(agent_name)
 
-    context.persona = {} #persona_
-    context.chat_log = ChatLog(log_id=log_id, persona='admin')
+    context.agent = {} #agent_
+    context.chat_log = ChatLog(log_id=log_id, agent='admin')
     context.save_context()
 
     with open("static/admin.html", "r") as file:
@@ -196,17 +196,17 @@ async def get_admin_html():
         admin_html = admin_html.replace("{{CHAT_ID}}", log_id)
     return admin_html
 
-@router.get("/{persona_name}", response_class=HTMLResponse)
-async def get_chat_html(persona_name: str):
+@router.get("/{agent_name}", response_class=HTMLResponse)
+async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
-    persona_ = await service_manager.get_persona_data(persona_name)
-    if persona_ is None:
-        return JSONResponse({"error": f"Persona {persona_name} not found."}, status_code=404)
+    agent_ = await service_manager.get_agent_data(agent_name)
+    if agent_ is None:
+        return JSONResponse({"error": f"agent {agent_name} not found."}, status_code=404)
 
-    context.persona = persona_
-    context.chat_log = ChatLog(log_id=log_id, persona=persona_name)
+    context.agent = agent_
+    context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
     context.save_context()
 
     with open("static/chat.html", "r") as file:
@@ -219,10 +219,10 @@ async def get_admin_html():
     log_id = nanoid.generate()
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
-    #persona_ = await service_manager.get_persona_data(persona_name)
+    #agent_ = await service_manager.get_agent_data(agent_name)
 
-    context.persona = {} #persona_
-    context.chat_log = ChatLog(log_id=log_id, persona='admin')
+    context.agent = {} #agent_
+    context.chat_log = ChatLog(log_id=log_id, agent='admin')
     context.save_context()
 
     with open("static/admin.html", "r") as file:

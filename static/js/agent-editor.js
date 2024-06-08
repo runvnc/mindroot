@@ -99,10 +99,6 @@ class AgentEditor extends BaseEl {
     const url = this.newAgent ? `/agents/${this.scope}` : `/agents/${this.scope}/${this.name}`;
     const formData = new FormData();
     formData.append('agent', JSON.stringify(this.agent));
-    const faceref = this.shadowRoot.querySelector('input[name="faceref"]').files[0];
-    const avatar = this.shadowRoot.querySelector('input[name="avatar"]').files[0];
-    if (faceref) formData.append('faceref', faceref);
-    if (avatar) formData.append('avatar', avatar);
     const response = await fetch(url, {
       method,
       body: formData

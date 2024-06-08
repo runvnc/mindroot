@@ -106,7 +106,7 @@ async def warmup(context=None):
         pipeline.safety_checker = lambda images, **kwargs: (images, [False])
 
 
-@service(is_local=True)
+@service()
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
                         count=1, context=None, save_to="imgs/" + random_img_fname(), w=1024, h=1024, steps=20, cfg=8):
     if pipeline is None:
@@ -127,7 +127,7 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
         return fname
 
 
-@command(is_local=True)
+@command()
 async def image(prompt, context=None):
     """image: Generate an image from a prompt
 

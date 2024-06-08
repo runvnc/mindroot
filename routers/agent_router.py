@@ -31,7 +31,7 @@ def list_agents(scope: str):
     return [{'name': name} for name in agents]
 
 @router.post('/agents/{scope}')
-def create_agent(scope: str, agent: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+def create_agent(scope: str, agent: str = Form(...)):
     try:
         agent = json.loads(agent)
         if scope not in ['local', 'shared']:
@@ -43,16 +43,6 @@ def create_agent(scope: str, agent: str = Form(...), faceref: UploadFile = File(
         if agent_path.exists():
             raise HTTPException(status_code=400, detail='Agent already exists')
         agent_path.parent.mkdir(parents=True, exist_ok=True)
-        if faceref:
-            faceref_path = agent_path.parent / 'faceref.png'
-            with open(faceref_path, 'wb') as f:
-                f.write(faceref.file.read())
-            agent['faceref'] = str(faceref_path)
-        if avatar:
-            avatar_path = agent_path.parent / 'avatar.png'
-            with open(avatar_path, 'wb') as f:
-                f.write(avatar.file.read())
-            agent['avatar'] = str(avatar_path)
         with open(agent_path, 'w') as f:
             json.dump(agent, f, indent=2)
         return {'status': 'success'}
@@ -60,7 +50,7 @@ def create_agent(scope: str, agent: str = Form(...), faceref: UploadFile = File(
         raise HTTPException(status_code=500, detail='Internal server error ' + str(e))
 
 @router.put('/agents/{scope}/{name}')
-def update_agent(scope: str, name: str, agent: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
+def update_agent(scope: str, name: str, agent: str = Form(...)):
     try:
         agent = json.loads(agent)
         if scope not in ['local', 'shared']:
@@ -68,17 +58,7 @@ def update_agent(scope: str, name: str, agent: str = Form(...), faceref: UploadF
         agent_path = BASE_DIR / scope / name / 'agent.json'
         if not agent_path.exists():
             raise HTTPException(status_code=404, detail='Agent not found')
-        if faceref:
-            faceref_path = agent_path.parent / 'faceref.png'
-            with open(faceref_path, 'wb') as f:
-                f.write(faceref.file.read())
-            agent['faceref'] = str(faceref_path)
-        if avatar:
-            avatar_path = agent_path.parent / 'avatar.png'
-            with open(avatar_path, 'wb') as f:
-                f.write(avatar.file.read())
-            agent['avatar'] = str(avatar_path)
-        with open(agent_path, 'w') as f:
+       with open(agent_path, 'w') as f:
             json.dump(agent, f, indent=2)
         return {'status': 'success'}
     except Exception as e:
