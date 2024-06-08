@@ -3,17 +3,17 @@ import json
 from typing import List, Dict
 
 class ChatLog:
-    def __init__(self, log_id=0, persona=None, context_length: int = 4096):
+    def __init__(self, log_id=0, agent=None, context_length: int = 4096):
         self.log_id = log_id
         self.messages = []
-        self.persona = persona
+        self.agent = agent
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
         self.load_log()
 
     def _get_log_data(self) -> Dict[str, any]:
         return {
-            'persona': self.persona,
+            'agent': self.agent,
             'messages': self.messages
         }
 
@@ -56,7 +56,7 @@ class ChatLog:
         if os.path.exists(log_file):
             with open(log_file, 'r') as f:
                 log_data = json.load(f)
-                self.persona = log_data.get('persona')
+                self.agent = log_data.get('agent')
                 self.messages = log_data.get('messages', [])
         else:
             self.messages = []
