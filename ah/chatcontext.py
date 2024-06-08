@@ -28,8 +28,8 @@ class ChatContext:
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),
         }
-        if 'name' in self.persona:
-            context_data['persona_name'] = self.persona['name']
+        if 'name' in self.agent:
+            context_data['agent_name'] = self.agent['name']
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)        
 
@@ -41,8 +41,8 @@ class ChatContext:
                 context_data = json.load(f)
                 self.data = context_data.get('data', {})
                 self.chat_log = ChatLog(log_id=log_id)
-            self.persona_name = context_data.get('persona_name')  
-            self.persona = await service_manager.get_persona_data(self.persona_name)
+            self.agent_name = context_data.get('agent_name')  
+            self.agent = await service_manager.get_agent_data(self.agent_name)
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
         else:
