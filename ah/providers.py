@@ -18,6 +18,7 @@ class ProviderManager:
             'flags': flags,
             'provider': provider
         })
+        print("registered function: ", name, provider, implementation, signature, docstring, flags)
 
     async def execute(self, name, *args, **kwargs):
         if name not in self.functions:
