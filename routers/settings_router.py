@@ -4,7 +4,7 @@ import json
 import os
 from ah.commands import command_manager
 from ah.services import service_manager
-from organize_models import organize_for_display
+from ah.organize_models import organize_for_display
 
 router = APIRouter()
 
@@ -42,6 +42,8 @@ def read_providers() -> List[Dict]:
 # Helper function to read equivalent flags file
 def read_equivalent_flags() -> List[List[str]]:
     if not os.path.exists(EQUIVALENT_FLAGS_FILE_PATH):
+        print("No equivalent flags file found")
+        print("Looked in " + EQUIVALENT_FLAGS_FILE_PATH)
         return []
     with open(EQUIVALENT_FLAGS_FILE_PATH, 'r') as equivalent_flags_file:
         return json.load(equivalent_flags_file)

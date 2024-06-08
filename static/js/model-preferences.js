@@ -27,8 +27,15 @@ class ModelPreferences extends BaseEl {
     this.fetchModels();
     this.fetchProviders();
     this.fetchEquivalentFlags();
-    console.log("Done fetching data")
-    console.log(this)
+    setTimeout( () => {
+      console.log("Done fetching data")
+      console.log({settings: this.settings,
+                  equivalentFlags: this.equivalentFlags,
+                  models: this.models,
+                  providers: this.providers,
+                  services: this.services })
+      this.requestUpdate();
+    },500)
   }
 
   async fetchSettings() {
