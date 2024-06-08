@@ -97,3 +97,8 @@ async def get_organized_models():
     providers = read_providers()
     equivalent_flags = read_equivalent_flags()
     return organize_for_display(models, providers, equivalent_flags)
+
+@router.get('/equivalent_flags', response_model=List[List[str]])
+async def get_equivalent_flags():
+    return read_equivalent_flags()
+
