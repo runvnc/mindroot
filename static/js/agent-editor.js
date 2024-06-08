@@ -167,7 +167,7 @@ class AgentEditor extends BaseEl {
   <div>
     <label>
       Commands:
-      ${this.commands.map(command => html`
+      ${this.commands && this.commands.map(command => html`
         <label>
           <input type="checkbox" name="commands" value="${command}" .checked=${this.agent.commands && this.agent.commands.includes(command)} @change=${this.handleInputChange} /> ${command}
         </label>

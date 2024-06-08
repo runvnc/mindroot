@@ -2,14 +2,16 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Dict
 import json
 import os
-from ..ah.commands import command_manager
-from ..ah.services import service_manager
+from ah.commands import command_manager
+from ah.services import service_manager
+from organize_models import organize_for_display
 
 router = APIRouter()
 
 SETTINGS_FILE_PATH = 'data/preferred_models.json'
 MODELS_FILE_PATH = 'data/models.json'
 PROVIDERS_FILE_PATH = 'data/providers.json'
+EQUIVALENT_FLAGS_FILE_PATH = 'data/equivalent_flags.json'
 
 # Helper function to read settings file
 def read_settings() -> List[Dict]:
@@ -36,6 +38,13 @@ def read_providers() -> List[Dict]:
         return []
     with open(PROVIDERS_FILE_PATH, 'r') as providers_file:
         return json.load(providers_file)
+
+# Helper function to read equivalent flags file
+def read_equivalent_flags() -> List[List[str]]:
+    if not os.path.exists(EQUIVALENT_FLAGS_FILE_PATH):
+        return []
+    with open(EQUIVALENT_FLAGS_FILE_PATH, 'r') as equivalent_flags_file:
+        return json.load(equivalent_flags_file)
 
 @router.get('/settings', response_model=List[Dict])
 async def get_settings():
@@ -81,3 +90,10 @@ async def get_commands():
 @router.get('/services', response_model=List[str])
 async def get_services():
     return service_manager.get_functions()
+
+@router.get('/organized_models', response_model=List[Dict])
+async def get_organized_models():
+    models = read_models()
+    providers = read_providers()
+    equivalent_flags = read_equivalent_flags()
+    return organize_for_display(models, providers, equivalent_flags)

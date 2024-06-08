@@ -10,6 +10,10 @@ async def write(fname, text, context=None):
     Example:
     { "write": ["file1.txt", "This is the text to write to the file."] }
 
+    Parameters: array; 
+      [0]: filename
+      [1]: text to write to file
+
     """
     print("Write file, context is:", context, 'context.data is:', context.data)
     if 'current_dir' in context.data:
