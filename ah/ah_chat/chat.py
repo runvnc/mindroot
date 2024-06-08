@@ -61,14 +61,14 @@ async def agent_output(event: str, data: dict, context=None):
 async def partial_command(command: str, chunk: str, params, context=None):
     agent_ = context.agent
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
-                                                    "agent": agent_['name'] })
+                                                    "persona": agent_['persona']['name'] })
 
 @service()
 async def running_command(command: str, context=None):
     print("*** running_command service call ***")
     agent_ = context.agent
     print("ok")
-    await context.agent_output("running_command", { "command": command, "agent": agent_['name'] })
+    await context.agent_output("running_command", { "command": command, "persona": agent_['persona']['name'] })
 
 
 @router.put("/chat/{log_id}/{agent_name}")
