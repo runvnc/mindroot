@@ -50,7 +50,7 @@ async def pic_of_me(prompt, context=None):
     { "pic_of_me": "[where they are, what they are doing, details of appearance, details of scene, etc. etc.]" }
 
     """
-    persona = context.persona
+    persona = context.agent['persona']
     print("persona:", persona)
     img = await context.text_to_image(prompt + ', ' + persona['appearance'], 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)

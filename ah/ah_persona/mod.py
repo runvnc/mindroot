@@ -53,7 +53,7 @@ async def pic_of_me(prompt, context=None):
     { "pic_of_me": "a photo from []camera position] of [details from Appearance section of Persona definition] [what they are doing, pose, etc.]." }
 
     """
-    persona = context.persona
+    persona = context.agent['persona']
     print("persona:", persona)
     img = await context.text_to_image(prompt + ', solo, score_9, score_8_up', 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
