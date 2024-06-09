@@ -8,13 +8,11 @@ from ..hooks import hook_manager
 from ..services import service 
 import partial_json_parser
 from ..services import service_manager
+import sys
+
 
 @service()
 async def get_agent_data(agent_name, context=None):
-    import os
-    import json
-    import sys
-
     print("agent name is", agent_name, file=sys.stderr)
 
     agent_path = os.path.join('data/agents', 'local', agent_name)
@@ -30,6 +28,8 @@ async def get_agent_data(agent_name, context=None):
         agent_data = json.load(f)
 
     agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
+    agent_data["flags"] = agent_data["flags"] + agent_data["persona"]["flags"]
+    agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
     return agent_data
 
 
