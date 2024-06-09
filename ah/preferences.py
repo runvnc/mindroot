@@ -31,6 +31,7 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
 
     for setting in settings:
         print("setting: ", setting)
+        
         if setting['service_or_command_name'] != service_or_command_name:
             continue
 

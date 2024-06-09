@@ -24,6 +24,8 @@ class ProviderManager:
     async def execute(self, name, *args, **kwargs):
         if name not in self.functions:
             raise ValueError(f"function '{name}' not found.")
+        preferred_models = None
+        preferred_provider = None
 
         found_context = False
         context = None
@@ -46,10 +48,12 @@ class ProviderManager:
             
             context.data['model'] = preferred_models[0]
 
-        preferred_provider = preferred_models[0]['provider'] if preferred_models else None
-       
+        if preferred_models is not None:
+            preferred_provider = preferred_models[0]['provider']
+
         print('name = ', name, 'preferred models = ', preferred_models)
         function_info = None
+
         if preferred_provider:
             for func_info in self.functions[name]:
                 if func_info['provider'] == preferred_provider:
