@@ -37,12 +37,14 @@ class ProviderManager:
             kwargs['context'] = self.context
             context = self.context
 
-        preferred_models = await find_preferred_models(name, context.flags)
+        print("context is ", context)
+        if context.__class__.__name__ == 'ChatContext':
+            preferred_models = await find_preferred_models(name, context.flags)
 
-        if preferred_models is None:
-            preferred_models = await matching_models(name, context.flags)
-        
-        context.data['model'] = preferred_models[0]
+            if preferred_models is None:
+                preferred_models = await matching_models(name, context.flags)
+            
+            context.data['model'] = preferred_models[0]
 
         preferred_provider = preferred_models[0]['provider'] if preferred_models else None
        
