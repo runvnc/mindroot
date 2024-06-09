@@ -54,7 +54,7 @@ class ProviderManager:
             print('b1')
             try:
                 if preferred_models is not None:
-                    kwargs['context']['model'] = preferred_models[0]
+                    kwargs['context'].data['model'] = preferred_models[0]
             except Exception as e:
                 print('Error setting model in context', e)
 
