@@ -12,7 +12,8 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
-        
+        self.flags = []
+
         self.data = {}
         self.log_id = None
         self.data['current_dir'] = 'data/users/default'
@@ -43,6 +44,7 @@ class ChatContext:
                 self.chat_log = ChatLog(log_id=log_id)
             self.agent_name = context_data.get('agent_name')  
             self.agent = await service_manager.get_agent_data(self.agent_name, self)
+            self.flags = self.agent.get('flags', [])
             self.chat_log = ChatLog(log_id=log_id)
             self.uncensored = True
         else:

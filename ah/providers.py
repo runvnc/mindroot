@@ -4,6 +4,7 @@ import json
 import logging
 from typing import List, Dict, Optional
 from .preferences import find_preferred_models
+from .organize_models import matching_models
 
 class ProviderManager:
     def __init__(self):
@@ -24,8 +25,27 @@ class ProviderManager:
         if name not in self.functions:
             raise ValueError(f"function '{name}' not found.")
 
-        # Check for preferred models
-        preferred_models = await find_preferred_models(name, kwargs.get('flags', []))
+        found_context = False
+        context = None
+        for arg in args:
+            if arg.__class__.__name__ == 'ChatContext':
+                found_context = True
+                context = arg
+                break
+
+        if not found_context and not ('context' in kwargs):
+            kwargs['context'] = self.context
+            context = self.context
+            except Exception as e:
+                print('Error setting model in context', e)
+
+        preferred_models = await find_preferred_models(name, context.flags)
+
+        if preferred_models is None:
+            preferred_models = await matching_models(name, context.flags)
+        
+        context.data['model'] = preferred_models[0]
+
         preferred_provider = preferred_models[0]['provider'] if preferred_models else None
        
         print('name = ', name, 'preferred models = ', preferred_models)
