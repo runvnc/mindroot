@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # Load JSON data from files
 def load_json(file_path: str) -> List[Dict]:

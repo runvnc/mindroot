@@ -36,8 +36,6 @@ class ProviderManager:
         if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
             context = self.context
-            except Exception as e:
-                print('Error setting model in context', e)
 
         preferred_models = await find_preferred_models(name, context.flags)
 
