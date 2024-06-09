@@ -46,3 +46,4 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
 
     logging.info(f'Matching models found: {matching_models}')
     return matching_models
+

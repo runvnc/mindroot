@@ -27,7 +27,7 @@ class ProviderManager:
         # Check for preferred models
         preferred_models = await find_preferred_models(name, kwargs.get('flags', []))
         preferred_provider = preferred_models[0]['provider'] if preferred_models else None
-
+        
         function_info = None
         if preferred_provider:
             for func_info in self.functions[name]:
@@ -47,6 +47,8 @@ class ProviderManager:
 
         if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
+
+        kwargs['context']['model'] = preferred_models[0] if preferred_models else None
 
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")

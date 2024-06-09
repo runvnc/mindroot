@@ -81,5 +81,7 @@ if __name__ == "__main__":
     print("Testing image generation")
     prompt = sys.argv[1] if len(sys.argv) > 1 else "A cute tabby cat in the forest"
     negative_prompt = sys.argv[2] if len(sys.argv) > 2 else "scary"
-    asyncio.run(text_to_image(prompt, negative_prompt=negative_prompt, cfg=8, steps=28, count=8))
+    asyncio.run(text_to_image(prompt, negative_prompt=negative_prompt, cfg=13.5, steps=30, count=8))
+
+
     print("Done testing image generation")
