@@ -27,7 +27,8 @@ class ProviderManager:
         # Check for preferred models
         preferred_models = await find_preferred_models(name, kwargs.get('flags', []))
         preferred_provider = preferred_models[0]['provider'] if preferred_models else None
-        
+       
+        print('name = ', name, 'preferred models = ', preferred_models)
         function_info = None
         if preferred_provider:
             for func_info in self.functions[name]:
@@ -43,12 +44,19 @@ class ProviderManager:
         for arg in args:
             if arg.__class__.__name__ == 'ChatContext':
                 found_context = True
+                print('a1')
+                if preferred_models is not None:
+                    arg.data['model'] = preferred_models[0] if preferred_models else None
                 break
 
         if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
-
-        kwargs['context']['model'] = preferred_models[0] if preferred_models else None
+            print('b1')
+            try:
+                if preferred_models is not None:
+                    kwargs['context']['model'] = preferred_models[0]
+            except Exception as e:
+                print('Error setting model in context', e)
 
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
