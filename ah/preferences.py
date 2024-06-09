@@ -30,6 +30,7 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
     matching_models = []
 
     for setting in settings:
+        print("setting: ", setting)
         if setting['service_or_command_name'] != service_or_command_name:
             continue
 
@@ -46,4 +47,6 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
 
     logging.info(f'Matching models found: {matching_models}')
     return matching_models
+
+
 

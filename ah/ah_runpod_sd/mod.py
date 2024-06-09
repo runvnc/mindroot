@@ -70,50 +70,52 @@ async def select_image_model(context=None, model_id=None, local=False, uncensore
 async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingface=None,
                         count=1, context=None, save_to="imgs/" + random_img_fname(), w=1024, h=1024, steps=20, cfg=8):
     print("text_to_image. trying to get model")
+    try: 
+        model = context.data['model']
 
-    model = context['model']
+        print("model is", model)
+        endpoint_id = model['endpoint_id']
+        
+        input = {
+            "prompt": prompt,
+            "negative_prompt": negative_prompt,
+            "num_inference_steps": steps,
+            "refiner_inference_steps": 0,
+            "width": w,
+            "height": h,
+            "guidance_scale": cfg,
+            "strength": 0.3,
+            "seed": None,
+            "num_images": 1
+        }
+        # anything defined under model['defaults'] is applied to input
+        if 'defaults' in model:
+            # convert property names: steps -> num_inference_steps, cfg->guidance_scale
+            if 'steps' in model['defaults']:
+                input['num_inference_steps'] = model['defaults']['steps']
+            if 'cfg' in model['defaults']:
+                input['guidance_scale'] = model['defaults']['cfg']
 
-    print("model is", model)
-    endpoint_id = model['endpoint_id']
-    
-    input = {
-        "prompt": prompt,
-        "negative_prompt": negative_prompt,
-        "num_inference_steps": steps,
-        "refiner_inference_steps": 0,
-        "width": w,
-        "height": h,
-        "guidance_scale": cfg,
-        "strength": 0.3,
-        "seed": None,
-        "num_images": 1
-    }
-    # anything defined under model['defaults'] is applied to input
-    if 'defaults' in model:
-        # convert property names: steps -> num_inference_steps, cfg->guidance_scale
-        if 'steps' in model['defaults']:
-            input['num_inference_steps'] = model['defaults']['steps']
-        if 'cfg' in model['defaults']:
-            input['guidance_scale'] = model['defaults']['cfg']
+            if 'seed' in model['defaults']:
+                input['seed'] = model['defaults']['seed']
+            if 'prompt' in model['defaults']:
+                input['prompt'] += ',' + model['defaults']['prompt']
+            if 'negative_prompt' in model['defaults']:
+                input['negative_prompt'] += ',' + model['defaults']['negative_prompt']
+            if 'width' in model['defaults']:
+                input['width'] = model['defaults']['width']
+            if 'height' in model['defaults']:
+                input['height'] = model['defaults']['height']
 
-        if 'seed' in model['defaults']:
-            input['seed'] = model['defaults']['seed']
-        if 'prompt' in model['defaults']:
-            input['prompt'] += ',' + model['defaults']['prompt']
-        if 'negative_prompt' in model['defaults']:
-            input['negative_prompt'] += ',' + model['defaults']['negative_prompt']
-        if 'width' in model['defaults']:
-            input['width'] = model['defaults']['width']
-        if 'height' in model['defaults']:
-            input['height'] = model['defaults']['height']
-
-    for n in range(1, count+1):
-        print(input)
-        image = await send_job(input, endpoint_id)
-        fname = "imgs/"+random_img_fname()
-        image.save(fname)
-        return fname
-
+        for n in range(1, count+1):
+            print(input)
+            image = await send_job(input, endpoint_id)
+            fname = "imgs/"+random_img_fname()
+            image.save(fname)
+            return fname
+    except Exception as e:
+        print("Error in text_to_image", e)
+        return None
 
 @command()
 async def image(prompt, context=None):

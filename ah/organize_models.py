@@ -58,6 +58,31 @@ def organize_for_display(models: List[Dict], providers: List[Dict], equivalent_f
 
     return organized_data
 
+async def load_organized():
+    models = load_json('data/models.json')
+    providers = load_json('data/providers.json')
+    equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
+    return organize_for_display(models, providers, equivalent_flags)
+
+async def matching_models(service_or_command_name: str, flags: List[str]) -> Optional[List[Dict]]:
+    if not isinstance(service_or_command_name, str) or not service_or_command_name:
+        logging.error('Invalid service_or_command_name')
+        return None
+    if not isinstance(flags, list) or not all(isinstance(flag, str) for flag in flags):
+        logging.error('Invalid flags')
+        return None
+
+    organized_data = await load_organized()
+    # find all models that match the given service_or_command_name and equivalent_flags
+    matching_models = []
+    for service in organized_data:
+        if service['service'] == service_or_command_name:
+            for flag in service['flags']:
+                if flag['flag'] in flags:
+                    matching_models.extend(flag['models'])
+    return matching_models
+
+
 if __name__ == '__main__':
     models = load_json('data/models.json')
     providers = load_json('data/providers.json')
