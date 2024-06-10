@@ -9,7 +9,7 @@ from ..services import service
 import partial_json_parser
 from ..services import service_manager
 import sys
-
+from ..check_args import *
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -144,6 +144,9 @@ class Agent:
                 cmd_obj = cmd_obj[0]
                 cmd_name = next(iter(cmd_obj))
             cmd_args = cmd_obj[cmd_name]
+
+            if check_empty_args(cmd_args):
+                return None, buffer
 
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)

@@ -5,6 +5,7 @@ import logging
 from typing import List, Dict, Optional
 from .preferences import find_preferred_models
 from .organize_models import matching_models
+from .check_args import *
 
 class ProviderManager:
     def __init__(self):
@@ -21,7 +22,13 @@ class ProviderManager:
         })
         print("registered function: ", name, provider, implementation, signature, docstring, flags)
 
+    
     async def execute(self, name, *args, **kwargs):
+        print(f"execute: {name} called")
+
+        if check_empty_args(args, kwargs):
+            raise ValueError(f"function '{name}' called with empty arguments.")
+
         if name not in self.functions:
             raise ValueError(f"function '{name}' not found.")
         preferred_models = None
@@ -34,6 +41,7 @@ class ProviderManager:
                 found_context = True
                 context = arg
                 break
+        
 
         if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
@@ -67,6 +75,7 @@ class ProviderManager:
             function_info = self.functions[name][0]  # Fallback to the first function with the given name
 
         implementation = function_info['implementation']
+
 
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
