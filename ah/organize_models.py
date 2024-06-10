@@ -72,12 +72,16 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
         logging.error('Invalid flags')
         return None
 
+    print('matching_models, flags is = ', flags, 'service_or_command_name = ', service_or_command_name)
+    if len(flags) == 0:
+        flags = ['no_flags']
     organized_data = await load_organized()
     # find all models that match the given service_or_command_name and equivalent_flags
     matching_models = []
     for service in organized_data:
         if service['service'] == service_or_command_name:
             for flag in service['flags']:
+                print('flag = ', flag)
                 if flag['flag'] in flags:
                     for entry in flag['models']:
                         result = {}  

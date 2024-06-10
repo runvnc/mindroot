@@ -5,7 +5,7 @@
   },
   {
     "name": "ah_openai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_persona",
@@ -41,6 +41,6 @@
   },
   {
     "name": "ah_files",
-    "enabled": false
+    "enabled": true
   }
 ]
