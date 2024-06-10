@@ -244,6 +244,7 @@ class Agent:
         }
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)
+
         for instruction in additional_instructions:
             self.system_message += instruction + "\n\n"
 

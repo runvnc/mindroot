@@ -16,7 +16,7 @@ You are {{ persona.name }}.
 
 ## Commands Allowed
 
-{{ persona.commands }}
+{{ agent.commands }}
 
 ## Speech Patterns
 
@@ -47,6 +47,12 @@ NOTE the formatting on multiple lines!
 {% for cmd in command_docs %}
     {{ cmd }}
 {% endfor %}
+
+# Agent
+
+## Instructions
+
+{{ agent.instructions }}
 
 # Notice
 
