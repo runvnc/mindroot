@@ -180,6 +180,8 @@ class Agent:
             buffer += chunk
             buffer_changed = True
 
+            print(f"start of part processing.\n part: ||{part}|| current buffer:\n||{buffer}||")
+
             while buffer and buffer_changed:
                 buffer_changed = False
                 # Check for full JSON command
@@ -194,12 +196,13 @@ class Agent:
                         parse_error = ee
                 if match:
                     json_str = match.group(0)
+                    print(f"matched regex, buffer is ||{buffer}||")
                     result_, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
                     if result_ is not None:
                         for result in result_:
                             results.append(result)
                     else:
-                        continue
+                        break
                 else:
                     # Attempt to parse partial JSON command
                     try:
@@ -227,7 +230,7 @@ class Agent:
                         print("error parsing partial command:", e)
                         print("buffer = ", buffer)
                         break
-
+                    
             if len(buffer) > 0: 
                 print("Remaining buffer:")
                 print(buffer)
@@ -238,6 +241,9 @@ class Agent:
  
                 print("Parse error?:")
                 print(parse_error)
+
+            print("--- processed stream part --- ")
+
 
 
         return results

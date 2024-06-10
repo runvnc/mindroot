@@ -45,7 +45,7 @@ NOTE the formatting on multiple lines!
 # Available commands
 
 {% for cmd in command_docs %}
-    {{ cmd }}
+    {{ cmd }}: {{ command_docs[cmd] }}
 {% endfor %}
 
 # Agent
