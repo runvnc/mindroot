@@ -80,7 +80,10 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
             for flag in service['flags']:
                 if flag['flag'] in flags:
                     for entry in flag['models']:
-                        matching_models.append(entry['model'])
+                        result = {}  
+                        result.update(entry)
+                        result['provider'] = entry['provider']
+                        matching_models.append(result)
     return matching_models
 
 
