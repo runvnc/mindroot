@@ -55,6 +55,8 @@ class AgentEditor extends BaseEl {
     if (!this.newAgent && this.name) {
       const response = await fetch(`/agents/${this.scope}/${this.name}`);
       this.agent = await response.json();
+      this.agent.uncensored = this.agent.flags.includes('uncensored')
+      console.log('agent', this.agent)
     } else {
       this.agent = {};
     }
@@ -99,6 +101,10 @@ class AgentEditor extends BaseEl {
     const url = this.newAgent ? `/agents/${this.scope}` : `/agents/${this.scope}/${this.name}`;
     const formData = new FormData();
     formData.append('agent', JSON.stringify(this.agent));
+    this.agent.flags = [] 
+    if (this.agent.uncensored) { 
+      this.agent.flags.push('uncensored')
+    }
     const response = await fetch(url, {
       method,
       body: formData
