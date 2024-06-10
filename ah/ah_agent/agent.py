@@ -145,6 +145,11 @@ class Agent:
                 cmd_name = next(iter(cmd_obj))
             cmd_args = cmd_obj[cmd_name]
 
+            # make sure that cmd_name is in self.agent["commands"]
+            if cmd_name not in self.agent["commands"]:
+                print("Command not found in agent commands. cmd_name=", cmd_name)
+                return None, buffer
+
             if check_empty_args(cmd_args):
                 print("Empty args, cmd_name=", cmd_name)
                 return None, buffer
