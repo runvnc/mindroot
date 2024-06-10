@@ -46,10 +46,13 @@ class ProviderManager:
             if preferred_models is None:
                 preferred_models = await matching_models(name, context.flags)
             
-            context.data['model'] = preferred_models[0]
+            if preferred_models is not None:
+                if len(preferred_models) > 0:
+                    context.data['model'] = preferred_models[0]
 
         if preferred_models is not None:
-            preferred_provider = preferred_models[0]['provider']
+            if len(preferred_models) > 0:
+                preferred_provider = preferred_models[0]['provider']
 
         print('name = ', name, 'preferred models = ', preferred_models)
         function_info = None
@@ -63,24 +66,6 @@ class ProviderManager:
             function_info = self.functions[name][0]  # Fallback to the first function with the given name
 
         implementation = function_info['implementation']
-
-        found_context = False
-        for arg in args:
-            if arg.__class__.__name__ == 'ChatContext':
-                found_context = True
-                print('a1')
-                if preferred_models is not None:
-                    arg.data['model'] = preferred_models[0] if preferred_models else None
-                break
-
-        if not found_context and not ('context' in kwargs):
-            kwargs['context'] = self.context
-            print('b1')
-            try:
-                if preferred_models is not None:
-                    kwargs['context'].data['model'] = preferred_models[0]
-            except Exception as e:
-                print('Error setting model in context', e)
 
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
