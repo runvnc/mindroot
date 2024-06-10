@@ -39,14 +39,12 @@ class ModelPreferences extends BaseEl {
   async handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const settings = {};
+    const settings = [];
 
     formData.forEach((value, key) => {
-      const [service, flag] = key.split('_');
-      if (!settings[service]) {
-        settings[service] = {};
-      }
-      settings[service][flag] = value;
+      const [service, flag] = key.split("_._")
+      setting = { "service_or_command_name": service, "flag": flag, "model": value }
+      settings.push(setting)
     });
 
     const response = await fetch('/settings', {
@@ -85,7 +83,7 @@ class ModelPreferences extends BaseEl {
                 <div>
                   <label>
                     ${flagData.flag}:
-                    <select name="${serviceData.service}_${flagData.flag}" @change=${this.handleInputChange}>
+                    <select name="${serviceData.service}_._${flagData.flag}" @change=${this.handleInputChange}>
                       ${flagData.models.map(model => html`
                         <option value="${model.model}">${model.provider} - ${model.model}</option>
                       `)}

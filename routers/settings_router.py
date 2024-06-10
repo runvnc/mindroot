@@ -53,9 +53,7 @@ async def get_settings():
     return read_settings()
 
 @router.post('/settings', response_model=Dict)
-async def add_setting(setting: Dict):
-    settings = read_settings()
-    settings.append(setting)
+async def save_settings(settings: list):
     write_settings(settings)
     return setting
 
