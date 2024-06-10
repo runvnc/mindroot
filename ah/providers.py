@@ -44,6 +44,7 @@ class ProviderManager:
             preferred_models = await find_preferred_models(name, context.flags)
 
             if preferred_models is None:
+                print("Did not find preferred, loading all matching based on flags")
                 preferred_models = await matching_models(name, context.flags)
             
             if preferred_models is not None:
