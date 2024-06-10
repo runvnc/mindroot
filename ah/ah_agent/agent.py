@@ -198,6 +198,8 @@ class Agent:
                     if result_ is not None:
                         for result in result_:
                             results.append(result)
+                    else:
+                        continue
                 else:
                     # Attempt to parse partial JSON command
                     try:
