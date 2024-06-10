@@ -26,7 +26,7 @@ class ProviderManager:
     async def execute(self, name, *args, **kwargs):
         print(f"execute: {name} called")
 
-        if check_empty_args(args, kwargs):
+        if check_empty_args(args, kwargs=kwargs):
             raise ValueError(f"function '{name}' called with empty arguments.")
 
         if name not in self.functions:
