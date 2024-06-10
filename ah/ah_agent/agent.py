@@ -146,7 +146,10 @@ class Agent:
             cmd_args = cmd_obj[cmd_name]
 
             if check_empty_args(cmd_args):
+                print("Empty args, cmd_name=", cmd_name)
                 return None, buffer
+            else:
+                print("Non-empty args, cmd_name=", cmd_name, "args=", cmd_args)
 
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
@@ -192,9 +195,9 @@ class Agent:
                 if match:
                     json_str = match.group(0)
                     result_, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
-                    #if result_:
-                    for result in result_:
-                        results.append(result)
+                    if result_ is not None:
+                        for result in result_:
+                            results.append(result)
                 else:
                     # Attempt to parse partial JSON command
                     try:
