@@ -84,11 +84,12 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
                         models = entry['provider']['models']
                         print('models = ', models)
                         available_models = [model for model in models if model['available']]
-                        result.update(available_models[0])
-                        if 'meta' in result:
-                            result.update(result['meta'])
+                        if len(available_models) > 0:
+                            result.update(available_models[0])
+                            if 'meta' in result:
+                                result.update(result['meta'])
 
-                        matching_models.append(result)
+                            matching_models.append(result)
     return matching_models
 
 
