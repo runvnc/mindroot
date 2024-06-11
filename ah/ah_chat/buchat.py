@@ -28,7 +28,6 @@ class Message(BaseModel):
 
 sse_clients = set()
 
-
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
     print("chat_log = ", log_id)
@@ -40,29 +39,23 @@ async def chat_events(log_id: str):
 
     async def event_generator():
         queue = asyncio.Queue()
-        if log_id not in sse_clients:
-            sse_clients[log_id] = set()
-        sse_clients[log_id].add(queue)
+        sse_clients.add(queue)
         try:
             while True:
                 data = await queue.get()
                 yield data
         except asyncio.CancelledError:
-            sse_clients[log_id].remove(queue)
-            if not sse_clients[log_id]:
-                del sse_clients[log_id]
+            sse_clients.remove(queue)
 
     return EventSourceResponse(event_generator())
 
-
 @service()
 async def agent_output(event: str, data: dict, context=None):
-    log_id = context.log_id
     print("Try to send event: ", event, data)
-    if log_id in sse_clients:
-        for queue in sse_clients[log_id]:
-            print("sending to sse client!")
-            await queue.put({"event": event, "data": json.dumps(data)})
+    for queue in sse_clients:
+        print("sending to sse client!")
+        await queue.put({"event": event, "data": json.dumps(data)})
+
 
 @service()
 async def partial_command(command: str, chunk: str, params, context=None):
