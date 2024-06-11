@@ -14,6 +14,8 @@ import asyncio
 import os
 import json
 import nanoid
+from termcolor import colored
+
 
 router = APIRouter()
 
@@ -26,7 +28,7 @@ else:
 class Message(BaseModel):
     message: str
 
-sse_clients = set()
+sse_clients = {}
 
 
 @router.get("/chat/{log_id}/events")
@@ -216,7 +218,9 @@ async def get_chat_html(agent_name: str):
     context = ChatContext(command_manager, service_manager)
     context.log_id = log_id
     agent_ = await service_manager.get_agent_data(agent_name)
-    if agent_ is None:
+    print(colored(agent_, 'red'))
+
+    if agent_ is None or agent_ == {}:
         return JSONResponse({"error": f"agent {agent_name} not found."}, status_code=404)
 
     context.agent = agent_
