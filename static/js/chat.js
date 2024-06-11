@@ -103,13 +103,16 @@ class Chat extends BaseEl {
   _runningCmd(event) {
     //this._partialCmd(event)
     this.startNewMsg = true
-    console.log('Completed command Event received');
+    console.log('Running command');
     this.messages[this.messages.length - 1].spinning = true
     console.log(event);
   }
 
   _cmdResult(event) {
-    this.messages[this.messages.length - 1].spinning = false
+    console.log("command result", event)
+    for (let msg of this.messages) {
+      msg.spinning = false
+    }
   }
 
   _aiMessage(event) {

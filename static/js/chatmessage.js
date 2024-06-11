@@ -16,6 +16,7 @@ export class ChatMessage extends BaseEl {
     super()
     this.sender = 'user'
     this.persona = 'user'
+    this.spinning = 'false'
   }
 
   _render() {
@@ -26,7 +27,7 @@ export class ChatMessage extends BaseEl {
         <slot></slot>
       </div>
     </div>
-    <div class="spinner ${this.spinning ? 'show' : ''}"></div>
+    <div class="spinner ${this.spinning=='true' ? 'show' : ''}"></div>
     <div class="spacer"></div>
   `
   }

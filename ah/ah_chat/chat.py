@@ -72,7 +72,7 @@ async def running_command(command: str, context=None):
 
 @service()
 async def command_result(command: str, result, context=None):
-    print("*** command_complete service call ***")
+    print("*** command_result service call ***")
     agent_ = context.agent
     print("ok")
     await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'] })

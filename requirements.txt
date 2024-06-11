@@ -41,4 +41,5 @@ openai
 
 mimetypes
 python-multipart
+termcolor
 

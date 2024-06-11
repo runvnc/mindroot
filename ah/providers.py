@@ -6,6 +6,10 @@ from typing import List, Dict, Optional
 from .preferences import find_preferred_models
 from .organize_models import matching_models
 from .check_args import *
+import sys
+# import module for colored terminal text etc. 
+from termcolor import colored
+
 
 class ProviderManager:
     def __init__(self):
@@ -72,13 +76,18 @@ class ProviderManager:
                     function_info = func_info
                     break
         if not function_info:
-            function_info = self.functions[name][0]  # Fallback to the first function with the given name
+            function_info = self.functions[name][0]
 
         implementation = function_info['implementation']
 
-
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
+            if name == 'stream_chat':
+                print("stream chat called")
+                print(colored(f"model in context: {context.data['model']}", "cyan"))
+                print(colored(f"provider: {function_info['provider']}", "green"))
+                sys.exit(0)
+                
             result = await implementation(*args, **kwargs)
         except Exception as e:
             raise e
