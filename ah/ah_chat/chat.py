@@ -75,7 +75,7 @@ async def command_result(command: str, result, context=None):
     print("*** command_complete service call ***")
     agent_ = context.agent
     print("ok")
-    await context.agent_output("command_result", { "command": command, result, "persona": agent_['persona']['name'] })
+    await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'] })
 
 
 @router.put("/chat/{log_id}/{agent_name}")
