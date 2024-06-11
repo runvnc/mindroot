@@ -82,11 +82,11 @@ class ProviderManager:
 
         try:
             print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
-            if name == 'stream_chat':
-                print("stream chat called")
+            try: 
                 print(colored(f"model in context: {context.data['model']}", "cyan"))
                 print(colored(f"provider: {function_info['provider']}", "green"))
-                sys.exit(0)
+            except:
+                pass
                 
             result = await implementation(*args, **kwargs)
         except Exception as e:
