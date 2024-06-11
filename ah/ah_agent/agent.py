@@ -28,7 +28,7 @@ async def get_agent_data(agent_name, context=None):
         agent_data = json.load(f)
 
     agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
-    agent_data["flags"] = agent_data["flags"] + agent_data["persona"]["flags"]
+    agent_data["flags"] = agent_data["flags"] 
     agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
     return agent_data
 
