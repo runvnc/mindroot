@@ -44,11 +44,12 @@ class Chat extends BaseEl {
     this.sse.addEventListener('image', this._imageMsg.bind(this));
     this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
+    this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
   }
 
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
-    this.messages = [...this.messages, { content: marked.parse("\n" + content), sender, persona }];
+    this.messages = [...this.messages, { content: marked.parse("\n" + content), spinning:false, sender, persona }];
 
     if (sender === 'user') {
       fetch(`/chat/${this.sessionid}/send`, {
@@ -75,6 +76,7 @@ class Chat extends BaseEl {
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
       this.startNewMsg = false
     }
+    this.messages[this.messages.length - 1].spinning = false
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       this.msgSoFar = data.params // data.chunk
@@ -102,9 +104,13 @@ class Chat extends BaseEl {
     //this._partialCmd(event)
     this.startNewMsg = true
     console.log('Completed command Event received');
+    this.messages[this.messages.length - 1].spinning = true
     console.log(event);
   }
 
+  _cmdResult(event) {
+    this.messages[this.messages.length - 1].spinning = false
+  }
 
   _aiMessage(event) {
     console.log('Event received');
@@ -135,8 +141,8 @@ class Chat extends BaseEl {
       <div class="chat-container">
         SessionID: ${this.sessionid}
         <div class="chat-log">
-          ${this.messages.map(({ content, sender, persona }) => html`
-            <chat-message sender="${sender}" class="${sender}" persona="${persona}">
+          ${this.messages.map(({ content, sender, persona, spinning }) => html`
+            <chat-message sender="${sender}" class="${sender}" persona="${persona}" spinning="${spinning}">
               ${unsafeHTML(content)}
             </chat-message>
           `)}

@@ -158,6 +158,8 @@ class Agent:
 
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
+            await context.command_result(cmd_name, result)
+  
             cmd = {"cmd": cmd_name, "result": result}
             # Remove the processed JSON object from the buffer
             if match is not None:

@@ -5,7 +5,8 @@ import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js
 export class ChatMessage extends BaseEl {
   static properties = {
     sender: {type: String},
-    persona: {type: String}
+    persona: {type: String},
+    spinning : {type: Boolean}
   }
 
   static styles = [ css`
@@ -17,7 +18,6 @@ export class ChatMessage extends BaseEl {
     this.persona = 'user'
   }
 
-
   _render() {
     return html`
     <div class="outer-msg">
@@ -26,6 +26,7 @@ export class ChatMessage extends BaseEl {
         <slot></slot>
       </div>
     </div>
+    <div class="spinner ${this.spinning ? 'show' : ''}"></div>
     <div class="spacer"></div>
   `
   }
