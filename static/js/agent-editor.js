@@ -43,7 +43,7 @@ class AgentEditor extends BaseEl {
   async fetchCommands() {
     const response = await fetch(`/commands`);
     const data = await response.json();
-    this.commands = data.commands;
+    this.commands = data;
   }
 
   async fetchAgents() {

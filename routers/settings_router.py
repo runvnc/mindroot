@@ -85,7 +85,10 @@ async def get_providers():
 
 @router.get('/commands', response_model=List[str])
 async def get_commands():
-    return command_manager.get_functions()
+    print("retrieving commands")
+    funcs = command_manager.get_functions()
+    print(funcs)
+    return funcs
 
 @router.get('/services', response_model=List[str])
 async def get_services():
