@@ -6,7 +6,7 @@ export class ChatMessage extends BaseEl {
   static properties = {
     sender: {type: String},
     persona: {type: String},
-    spinning : {type: Boolean}
+    spinning : {type: String}
   }
 
   static styles = [ css`
@@ -16,18 +16,19 @@ export class ChatMessage extends BaseEl {
     super()
     this.sender = 'user'
     this.persona = 'user'
-    this.spinning = 'false'
+    this.spinning = 'no'
   }
 
   _render() {
     return html`
     <div class="outer-msg">
+      <h2>${'spinning: ' + this.spinning}</h2>
       <img class="avatar" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>
       </div>
     </div>
-    <div class="spinner ${this.spinning=='true' ? 'show' : ''}"></div>
+    <div class="spinner ${this.spinning=='yes' ? 'show' : ''}">${this.spinning}</div>
     <div class="spacer"></div>
   `
   }

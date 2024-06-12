@@ -49,7 +49,7 @@ class Chat extends BaseEl {
 
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
-    this.messages = [...this.messages, { content: marked.parse("\n" + content), spinning:false, sender, persona }];
+    this.messages = [...this.messages, { content: marked.parse("\n" + content), spinning:'no', sender, persona }];
 
     if (sender === 'user') {
       fetch(`/chat/${this.sessionid}/send`, {
@@ -76,7 +76,7 @@ class Chat extends BaseEl {
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
       this.startNewMsg = false
     }
-    this.messages[this.messages.length - 1].spinning = false
+    //this.messages[this.messages.length - 1].spinning = 'no'
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       this.msgSoFar = data.params // data.chunk
@@ -101,18 +101,21 @@ class Chat extends BaseEl {
   }
 
   _runningCmd(event) {
-    //this._partialCmd(event)
     this.startNewMsg = true
     console.log('Running command');
-    this.messages[this.messages.length - 1].spinning = true
+    this.messages[this.messages.length - 1].spinning = 'yes'
+    console.log('Spinner set to true:', this.messages[this.messages.length - 1]);
     console.log(event);
+    this.requestUpdate();
   }
 
   _cmdResult(event) {
     console.log("command result", event)
     for (let msg of this.messages) {
-      msg.spinning = false
+      msg.spinning = 'no'
+      console.log('Spinner set to false:', msg);
     }
+    this.requestUpdate();
   }
 
   _aiMessage(event) {
@@ -120,7 +123,7 @@ class Chat extends BaseEl {
     console.log(event);
     const data = JSON.parse(event.data);
     console.log('aimessage', data);
-    this.messages = [...this.messages, { content: data.content, persona: data.persona, sender: 'ai' }];
+    this.messages = [...this.messages, { content: data.content, spinning: 'no', persona: data.persona, sender: 'ai' }];
   }
 
   _imageMsg(event) {
@@ -128,7 +131,7 @@ class Chat extends BaseEl {
     console.log(event);
     const data = JSON.parse(event.data);
     const html = `<img src="${data.url}" alt="image">`;
-    this.messages = [...this.messages, { content: html, sender: 'ai' }];
+    this.messages = [...this.messages, { content: html, sender: 'ai', spinning: 'no' }]
   }
 
   _scrollToBottom() {

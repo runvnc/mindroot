@@ -32,8 +32,8 @@ app.mount("/imgs", StaticFiles(directory="imgs"), name="imgs")
 from routers.settings_router import router as settings_router
 app.include_router(settings_router)
 
-from routers.command_router import router as command_router
-app.include_router(command_router)
+#from routers.command_router import router as command_router
+#app.include_router(command_router)
 
 from routers.plugin_router import router as plugin_router
 app.include_router(plugin_router)

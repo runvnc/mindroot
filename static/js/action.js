@@ -84,15 +84,15 @@ class ActionComponent extends BaseEl {
     }
 
     if (funcName === 'write') {
-      const [filename, content] = params;
+      const {fname, text} = params;
       console.log("Displaying file")
       if (filename.endsWith('.md')) {
         console.log("Displaying markdown")
-        console.log(marked.parse(content))
-        res = html`<div class="markdown-content">${unsafeHTML(marked.parse(content, {breaks: true}))}</div>`;
+        console.log(marked.parse(text))
+        res = html`<div class="markdown-content">${unsafeHTML(marked.parse(text, {breaks: true}))}</div>`;
       } else {
         console.log("Displaying code")
-        const hih = hljs.highlightAuto(content).value;
+        const hih = hljs.highlightAuto(text).value;
         console.log(hih)
         res = html`<pre><code>${unsafeHTML(hih)}</code></pre>`;
       }

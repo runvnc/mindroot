@@ -83,13 +83,13 @@ async def get_models():
 async def get_providers():
     return read_providers()
 
-#@router.get('/commands', response_model=List[str])
-#async def get_commands():
-#    return command_manager.get_functions()
+@router.get('/commands', response_model=List[str])
+async def get_commands():
+    return command_manager.get_functions()
 
-#@router.get('/services', response_model=List[str])
-#async def get_services():
-#    return service_manager.get_functions()
+@router.get('/services', response_model=List[str])
+async def get_services():
+    return service_manager.get_functions()
 
 @router.get('/organized_models', response_model=List[Dict])
 async def get_organized_models():
