@@ -3,7 +3,7 @@ import subprocess
 import fnmatch
 #from ..commands import command
 from gitignore_parser import parse_gitignore
-
+from collections import OrderedDict
 
 #@command()
 async def execute_command(cmd, context=None):
@@ -61,7 +61,12 @@ async def tree(directory='', context=None):
         for root, dirs, files in os.walk(dir_path):
             dirs[:] = [d for d in dirs if not matches(os.path.join(root, d))]
             files = [f for f in files if not matches(os.path.join(root, f))]
-            tree_structure.append((root, dirs, files))
+            node = OrderedDict()
+            node['root'] = root
+            node['dirs'] = dirs
+            node['files'] = files
+            tree_structure.append(node)
+
         return tree_structure
 
     tree_structure = list_dir(directory)
