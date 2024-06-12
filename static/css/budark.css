@@ -25,13 +25,14 @@ input::placeholder, textarea::placeholder {
   color: #f0f0f0;
 }
 
+
 .send_msg {
   display: inline-block;
 }
 
 .chat-container {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   height: 100vh;
 }
 

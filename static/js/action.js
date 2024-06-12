@@ -86,7 +86,7 @@ class ActionComponent extends BaseEl {
     if (funcName === 'write') {
       const {fname, text} = params;
       console.log("Displaying file")
-      if (filename.endsWith('.md')) {
+      if (fname.endsWith('.md')) {
         console.log("Displaying markdown")
         console.log(marked.parse(text))
         res = html`<div class="markdown-content">${unsafeHTML(marked.parse(text, {breaks: true}))}</div>`;
