@@ -9,15 +9,15 @@
   },
   {
     "name": "ah_persona",
-    "enabled": false
-  },
-  {
-    "name": "ah_persona_lite",
     "enabled": true
   },
   {
-    "name": "ah_img_tags",
+    "name": "ah_persona_lite",
     "enabled": false
+  },
+  {
+    "name": "ah_img_tags",
+    "enabled": true
   },
   {
     "name": "ah_sd",

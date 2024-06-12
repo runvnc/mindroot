@@ -29,6 +29,7 @@ def organize_for_display(models: List[Dict], providers: List[Dict], equivalent_f
                         equivalent_flag = flag_mapping.get(flag, flag)
                         if equivalent_flag not in service_dict[service]:
                             service_dict[service][equivalent_flag] = []
+                        
                         service_dict[service][equivalent_flag].append({
                             'provider': provider,
                             'model': model_info,
@@ -42,7 +43,7 @@ def organize_for_display(models: List[Dict], providers: List[Dict], equivalent_f
                             service_dict[service]['no_flags'] = []
                         service_dict[service]['no_flags'].append({
                             'provider': provider,
-                            'model': model,
+                            'model': model_info,
                             'type': model_info['type'],
                             'subtype': model_info['subtype'],
                             'available': model['available']
@@ -91,9 +92,9 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
                         if len(available_models) > 0:
                             result.update(available_models[0])
                             result['provider'] = entry['provider']['plugin']
+                            result.update(entry['model'])
                             if 'meta' in result:
                                 result.update(result['meta'])
-
 
                             matching_models.append(result)
     return matching_models

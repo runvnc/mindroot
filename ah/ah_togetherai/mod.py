@@ -10,6 +10,7 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
         model = "meta-llama/Llama-3-70b-chat-hf"
         #model = "mistralai/Mixtral-8x22B-Instruct-v0.1"
         #model = "Qwen/Qwen1.5-110B-Chat"
+        #model = "Qwen/Qwen2-72B-Instruct"
         async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
         original_stream = await async_client.chat.completions.create(
                 model=model,
