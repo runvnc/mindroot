@@ -23,9 +23,12 @@
   <link rel="manifest" href="/static/site.webmanifest">
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-log"></div>
-    <chat-form></chat-form>
-  </div>
+    <script>window.theme = 'default';
+            console.log("Init.")
+    </script>
+    <chat-ai sessionid="{{CHAT_ID}}"></chat-ai>
+
+    <style>
+   </style>
 </body>
 </html>

@@ -3,6 +3,9 @@ html, body {
   color: #f0f0f0;
   padding: 5px 5px;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 input, * {
@@ -27,12 +30,23 @@ input::placeholder, textarea::placeholder {
   display: inline-block;
 }
 
-.chat-log {
-  width: 80%;
+.chat-container {
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  height: 65vh;
+  height: 100vh;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+}
+
+chat-form {
+  flex-shrink: 0;
+}
+
+.chat-log {
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -96,6 +110,7 @@ textarea, .text_lg {
   scrollbar-width: none;
   padding: 10px;
   border-radius: 15px;
+  flex-shrink: 0;
 }
 
 input, .text_inp {
@@ -665,13 +680,15 @@ form.persona {
   100% { transform: rotate(360deg); }
 }
 
-.spinner   {
+.spinner {
   width: 40px;
-  height: 20px;
-  border-radius: 1px;
-  border-top: 1px solid #f0f0f0;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 .spinner.show { display: inline-block; } .spinner:not(.show) { display: none; }
+
 
