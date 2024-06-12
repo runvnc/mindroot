@@ -1,11 +1,11 @@
 import os
 import subprocess
 import fnmatch
-#from ..commands import command
+from ..commands import command
 from gitignore_parser import parse_gitignore
 from collections import OrderedDict
 
-#@command()
+@command()
 async def execute_command(cmd, context=None):
     """Execute a system command and return the output.
     Example:
@@ -23,7 +23,7 @@ async def execute_command(cmd, context=None):
     except subprocess.CalledProcessError as e:
         return f"Command '{cmd}' failed with error: {e}"
 
-#@command()
+@command()
 async def mkdir(directory, context=None):
     """Create a new directory.
     Example:
