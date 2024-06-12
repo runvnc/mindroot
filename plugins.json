@@ -42,5 +42,9 @@
   {
     "name": "ah_files",
     "enabled": true
+  },
+    {
+    "name": "ah_shell",
+    "enabled": true
   }
 ]
