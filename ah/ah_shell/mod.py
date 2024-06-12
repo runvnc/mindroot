@@ -37,7 +37,7 @@ async def mkdir(directory, context=None):
     except Exception as e:
         return f"Failed to create directory '{directory}': {e}"
 
-#@command()
+@command()
 async def tree(directory='', context=None):
     """List directory structure excluding patterns from .gitignore.
     Example:
