@@ -22,13 +22,12 @@ export class ChatMessage extends BaseEl {
   _render() {
     return html`
     <div class="outer-msg">
-      <h2>${'spinning: ' + this.spinning}</h2>
       <img class="avatar" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>
       </div>
     </div>
-    <div class="spinner ${this.spinning=='yes' ? 'show' : ''}">${this.spinning}</div>
+    <div class="spinner ${this.spinning=='yes' ? 'show' : ''}"></div>
     <div class="spacer"></div>
   `
   }
