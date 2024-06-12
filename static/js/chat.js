@@ -144,8 +144,8 @@ class Chat extends BaseEl {
 
   _render() {
     return html`
-      <div class="chat-container">
-        SessionID: ${this.sessionid}
+      <!-- <div class="chat-container">
+        SessionID: ${this.sessionid} -->
         <div class="chat-log">
           ${this.messages.map(({ content, sender, persona, spinning }) => html`
             <chat-message sender="${sender}" class="${sender}" persona="${persona}" spinning="${spinning}">
@@ -154,7 +154,7 @@ class Chat extends BaseEl {
           `)}
         </div>
         <chat-form @addmessage="${this._addMessage}"></chat-form>
-      </div>
+    <!--  </div> -->
     `;
   }
 }

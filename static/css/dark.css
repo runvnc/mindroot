@@ -37,10 +37,14 @@ input::placeholder, textarea::placeholder {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  height: 75vh;
 }
 
 chat-form {
   flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  height: 4em;
 }
 
 chat-message {
@@ -104,6 +108,7 @@ textarea, .text_lg {
   padding: 10px;
   border-radius: 15px;
   flex-shrink: 0;
+  height: 4em;
 }
 
 input, .text_inp {
