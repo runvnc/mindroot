@@ -18,6 +18,11 @@ class ProviderManager:
     def register_function(self, name, provider, implementation, signature, docstring, flags):
         if name not in self.functions:
             self.functions[name] = []
+
+        if provider in [func_info['provider'] for func_info in self.functions[name]]:
+            print(f"provider {provider} already registered for function {name}")
+            return
+
         self.functions[name].append({
             'implementation': implementation,
             'docstring': docstring,

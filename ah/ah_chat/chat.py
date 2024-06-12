@@ -140,7 +140,7 @@ async def send_message(log_id: str, message_data: Message):
 
     continue_processing = True
     iterations = 0
-    while continue_processing and iterations < 6:
+    while continue_processing and iterations < 3:
         iterations += 1
         continue_processing = False
         try:
