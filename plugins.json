@@ -9,11 +9,11 @@
   },
   {
     "name": "ah_persona",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_persona_lite",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_img_tags",
