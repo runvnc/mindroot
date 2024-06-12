@@ -42,4 +42,4 @@ openai
 mimetypes
 python-multipart
 termcolor
-
+gitignore_parser

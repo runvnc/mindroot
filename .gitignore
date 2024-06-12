@@ -12,3 +12,6 @@ personas/local/*
 personas/shared/*
 data/*
 chatlog*.json
+node_modules
+imgs
+.git

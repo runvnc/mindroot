@@ -1,9 +1,11 @@
 import os
 import subprocess
 import fnmatch
-from ..commands import command
+#from ..commands import command
+from gitignore_parser import parse_gitignore
 
-@command()
+
+#@command()
 async def execute_command(cmd, context=None):
     """Execute a system command and return the output.
     Example:
@@ -21,7 +23,7 @@ async def execute_command(cmd, context=None):
     except subprocess.CalledProcessError as e:
         return f"Command '{cmd}' failed with error: {e}"
 
-@command()
+#@command()
 async def mkdir(directory, context=None):
     """Create a new directory.
     Example:
@@ -35,7 +37,7 @@ async def mkdir(directory, context=None):
     except Exception as e:
         return f"Failed to create directory '{directory}': {e}"
 
-@command()
+#@command()
 async def tree(directory='', context=None):
     """List directory structure excluding patterns from .gitignore.
     Example:
@@ -44,19 +46,21 @@ async def tree(directory='', context=None):
     if 'current_dir' in context.data:
         directory = os.path.join(context.data['current_dir'], directory)
     gitignore_path = os.path.join(directory, '.gitignore')
-    exclude_patterns = parse_gitignore(gitignore_path)
+    matches = parse_gitignore(gitignore_path)
 
-    def is_excluded(path):
-        for pattern in exclude_patterns:
-            if fnmatch.fnmatch(path, pattern):
-                return True
-        return False
+    def exclude(path):
+        ignore = [ '.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__' ]
+        if path.startswith('.'):
+            return True
+        if any(fnmatch.fnmatch(path, pattern) for pattern in ignore):
+            return True
+        return matches(path)
 
     def list_dir(dir_path):
         tree_structure = []
         for root, dirs, files in os.walk(dir_path):
-            dirs[:] = [d for d in dirs if not is_excluded(os.path.join(root, d))]
-            files = [f for f in files if not is_excluded(os.path.join(root, f))]
+            dirs[:] = [d for d in dirs if not matches(os.path.join(root, d))]
+            files = [f for f in files if not matches(os.path.join(root, f))]
             tree_structure.append((root, dirs, files))
         return tree_structure
 
@@ -64,9 +68,23 @@ async def tree(directory='', context=None):
     return tree_structure
 
 
-def parse_gitignore(gitignore_path):
-    if not os.path.exists(gitignore_path):
-        return []
-    with open(gitignore_path, 'r') as f:
-        patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-    return patterns
+class TestContext:
+    def __init__(self, data):
+        self.data = data
+
+if __name__ == '__main__':
+    import asyncio
+    from pprint import pprint
+    async def main():
+        cmd = 'ls -la'
+        context = TestContext({'current_dir': '/files/ah'})
+
+        result = await execute_command(cmd, context=context)
+        print(result)
+        directory = 'new_folder'
+        result = await mkdir(directory, context=context)
+        print(result)
+        directory = ''
+        result = await tree(directory, context=context)
+        pprint(result)
+    asyncio.run(main())
