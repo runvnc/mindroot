@@ -100,11 +100,12 @@ class AgentEditor extends BaseEl {
     const method = this.newAgent ? 'POST' : 'PUT';
     const url = this.newAgent ? `/agents/${this.scope}` : `/agents/${this.scope}/${this.name}`;
     const formData = new FormData();
-    formData.append('agent', JSON.stringify(this.agent));
     this.agent.flags = [] 
     if (this.agent.uncensored) { 
       this.agent.flags.push('uncensored')
     }
+
+    formData.append('agent', JSON.stringify(this.agent));
     const response = await fetch(url, {
       method,
       body: formData
