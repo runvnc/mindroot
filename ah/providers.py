@@ -79,18 +79,20 @@ class ProviderManager:
             print('preferred models = ', preferred_models)
         function_info = None
 
-        if not need_model and not preferred_provider:
+        if not need_model and (preferred_provider is None):
             preferred_provider = self.functions[name][0]['provider']
 
         print(colored(f"need_model: {need_model}, preferred_provider: {preferred_provider}", "green"))
 
-        if preferred_provider:
+        if preferred_provider is not None:
+            print(f"Trying to find function info with preferred provider {preferred_provider}")
             for func_info in self.functions[name]:
+                print("func_info provider", func_info['provider'])
                 if func_info['provider'] == preferred_provider:
                     function_info = func_info
                     break
 
-        if not function_info:
+        if function_info is None:
             raise ValueError(f"function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         implementation = function_info['implementation']
