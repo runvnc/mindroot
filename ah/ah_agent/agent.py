@@ -197,8 +197,10 @@ class Agent:
                     try:
                         json_str = match.group(0)
                         parse_error= ''
+                        print("Trying to load first matched group as json:\n",json_str)
                         ok = json.loads(json_str)
                     except Exception as ee:
+                        print("could not parse group as json")
                         match = False
                         parse_error = ee
                 if match:
