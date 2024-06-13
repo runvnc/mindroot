@@ -75,14 +75,14 @@ class ProviderManager:
                 preferred_provider = preferred_models[0]['provider']
 
         print('name = ', name)
-        if needs_model:
+        if need_model:
             print('preferred models = ', preferred_models)
         function_info = None
 
         if not need_model and not preferred_provider:
             preferred_provider = self.functions[name][0]['provider']
 
-        print(colored(f"needs_model: {needs_model}, preferred_provider: {preferred_provider}", "green"))
+        print(colored(f"need_model: {need_model}, preferred_provider: {preferred_provider}", "green"))
 
         if preferred_provider:
             for func_info in self.functions[name]:
