@@ -92,6 +92,7 @@ class AgentEditor extends BaseEl {
       }
     } else {
       this.agent = { ...this.agent, [name]: inputValue };
+      console.log("agent updated:", {inputValue, name, newAgent: this.agent})
     }
   }
 
@@ -104,7 +105,6 @@ class AgentEditor extends BaseEl {
     if (this.agent.uncensored) { 
       this.agent.flags.push('uncensored')
     }
-
     formData.append('agent', JSON.stringify(this.agent));
     const response = await fetch(url, {
       method,
@@ -164,7 +164,15 @@ class AgentEditor extends BaseEl {
   <div>
     <label>
       Uncensored:
-      <toggle-switch .checked=${this.agent.uncensored || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'uncensored', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
+      <toggle-switch .checked=${this.agent.uncensored || false} 
+                     @toggle-change=${(e) => {
+                       console.log(e);
+                       this.handleInputChange({ 
+                         target: { name: 'uncensored', 
+                           checked: e.detail.checked, 
+                           type: 'checkbox' } 
+                        })
+                      }}></toggle-switch>
     </label>
   </div>
   <div>

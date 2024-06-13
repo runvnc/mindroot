@@ -1,7 +1,7 @@
 import { LitElement, html, css } from '/static/js/lit-core.min.js';
 import { BaseEl } from './base.js';
 
-class ToggleSwitch extends LitElement {
+class ToggleSwitch extends BaseEl {
   static properties = {
     checked: { type: Boolean }
   };
@@ -64,7 +64,8 @@ class ToggleSwitch extends LitElement {
 
   _handleChange(event) {
     this.checked = event.target.checked;
-    this.dispatchEvent(new CustomEvent('toggle-change', { detail: { checked: this.checked } }));
+    console.log("check is", this.checked)
+    this.dispatch('toggle-change', { checked: this.checked });
   }
 }
 
