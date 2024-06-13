@@ -56,7 +56,7 @@ class ProviderManager:
             context = self.context
 
         print("context is ", context)
-        need_model = uses_models(name)
+        need_model = await uses_models(name)
 
         if context.__class__.__name__ == 'ChatContext':
             preferred_models = await find_preferred_models(name, context.flags)
