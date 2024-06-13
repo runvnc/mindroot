@@ -17,11 +17,11 @@
   },
   {
     "name": "ah_img_tags",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_runpod_sd",
@@ -43,7 +43,7 @@
     "name": "ah_files",
     "enabled": true
   },
-    {
+  {
     "name": "ah_shell",
     "enabled": true
   }
