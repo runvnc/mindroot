@@ -76,7 +76,7 @@ class ProviderManager:
 
         print('name = ', name)
         if needs_model:
-            'preferred models = ', preferred_models)
+            print('preferred models = ', preferred_models)
         function_info = None
 
         if not need_model and not preferred_provider:
