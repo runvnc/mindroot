@@ -649,7 +649,8 @@ button:hover {
 /* .action { border: 2px solid teal; border-radius: 5px; } */
 
 code {
-  max-width: 85%
+  max-width: 85%;
+  font-family: monospace;
 }
 
 form.persona {

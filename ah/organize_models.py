@@ -65,6 +65,16 @@ async def load_organized():
     equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
     return organize_for_display(models, providers, equivalent_flags)
 
+async def uses_models(service_or_command_name: str) -> : bool
+    if not isinstance(service_or_command_name, str) or not service_or_command_name:
+        logging.error('Invalid service_or_command_name')
+        raise ValueError('Invalid service_or_command_name')
+    organized_data = await load_organized()
+    for service in organized_data:
+        if service['service'] == service_or_command_name:
+            return True
+    return False
+
 async def matching_models(service_or_command_name: str, flags: List[str]) -> Optional[List[Dict]]:
     if not isinstance(service_or_command_name, str) or not service_or_command_name:
         logging.error('Invalid service_or_command_name')

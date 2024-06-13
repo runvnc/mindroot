@@ -4,10 +4,9 @@ import json
 import logging
 from typing import List, Dict, Optional
 from .preferences import find_preferred_models
-from .organize_models import matching_models
+from .organize_models import uses_models, matching_models
 from .check_args import *
 import sys
-# import module for colored terminal text etc. 
 from termcolor import colored
 
 
@@ -57,10 +56,13 @@ class ProviderManager:
             context = self.context
 
         print("context is ", context)
+        need_model = uses_models(name)
+
         if context.__class__.__name__ == 'ChatContext':
             preferred_models = await find_preferred_models(name, context.flags)
+            context.data['model'] = None
 
-            if preferred_models is None:
+            if need_model and preferred_models is None:
                 print("Did not find preferred, loading all matching based on flags")
                 preferred_models = await matching_models(name, context.flags)
             
@@ -72,16 +74,24 @@ class ProviderManager:
             if len(preferred_models) > 0:
                 preferred_provider = preferred_models[0]['provider']
 
-        print('name = ', name, 'preferred models = ', preferred_models)
+        print('name = ', name)
+        if needs_model:
+            'preferred models = ', preferred_models)
         function_info = None
+
+        if not need_model and not preferred_provider:
+            preferred_provider = self.functions[name][0]['provider']
+
+        print(colored(f"needs_model: {needs_model}, preferred_provider: {preferred_provider}", "green"))
 
         if preferred_provider:
             for func_info in self.functions[name]:
                 if func_info['provider'] == preferred_provider:
                     function_info = func_info
                     break
+
         if not function_info:
-            function_info = self.functions[name][0]
+            raise ValueError(f"function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         implementation = function_info['implementation']
 
