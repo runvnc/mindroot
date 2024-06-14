@@ -170,7 +170,7 @@ async def send_message(log_id: str, message_data: Message):
             results = await agent_.chat_commands(current_model, context=context, messages=context.chat_log.get_recent())
             out_results = []
             for result in results:
-                if result['result'] is not None:
+                if result['result'] is not None and (result['result'] != 'stop'):
                     out_results.append(result)
                     continue_processing = True
             if continue_processing:
