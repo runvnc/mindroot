@@ -17,6 +17,14 @@ const marked = new Marked(
   })
 )
 
+// Global object to store command handlers
+const commandHandlers = {};
+
+// Function to register command handlers
+window.registerCommandHandler = function(command, handler) {
+  commandHandlers[command] = handler;
+}
+
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
@@ -111,6 +119,11 @@ class Chat extends BaseEl {
 
   _cmdResult(event) {
     console.log("command result", event)
+    const data = JSON.parse(event.data);
+    const handler = commandHandlers[data.command];
+    if (handler) {
+      handler(data);
+    }
     for (let msg of this.messages) {
       msg.spinning = 'no'
       console.log('Spinner set to false:', msg);
