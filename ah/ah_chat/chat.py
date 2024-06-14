@@ -118,17 +118,35 @@ async def send_message(log_id: str, message_data: Message):
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
     @command()
-    async def say(assistant_message, context=None):
+    async def say(text="", done=true, context=None):
         """
         Say something to the user or chat room.
         One sentence per command. If you want to say multiple sentences, use multiple commands.
 
-        # Example
+        Parameters:
+        text - String. The text to say.
+        done - Boolean. If true, the system will stop and wait for the user to reply.
+                        If false, the system will reply with "continue", expecting more commands.
+
+        ## Example 1
         
         [
-            { "say": "Hello, user." },
-            { "say": "How can I help you today?" }
+            { "say": { "text": "Hello, user.", "done": true },
+            { "say": { "text": "How can I help you today?", "done": true }
         ]
+
+        (The system waits for the user reply)
+        
+        ## Example 2
+        [
+            { "say": { "text": "Sure, I can run that command", "done": false }
+        ]
+
+        (The system replies with "continue" and expects more commands)
+
+        [  { "some_command": {"arg1": "[some param]"  }  }]
+
+        (The system now waits for the user reply)
 
         """
         await context.agent_output("new_message", {"content": assistant_message,
@@ -136,6 +154,11 @@ async def send_message(log_id: str, message_data: Message):
         json_cmd = { "say": assistant_message }
 
         context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+        if done:
+            return "stop"
+        else:
+            return "continue"
+            
     context.save_context()
 
     continue_processing = True
