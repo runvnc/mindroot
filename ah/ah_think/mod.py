@@ -4,7 +4,7 @@ import os
 import json
 
 @command()
-async def think(thoughts="", done=false, context=None):
+async def think(thoughts="", done=False, context=None):
     """Think about the next thing to do or say systematically before additional commands or replies.
 
     Parameters:

@@ -118,7 +118,7 @@ async def send_message(log_id: str, message_data: Message):
     context.chat_log.add_message({"role": "user", "content": f"({user_name}): {message}"})
 
     @command()
-    async def say(text="", done=true, context=None):
+    async def say(text="", done=True, context=None):
         """
         Say something to the user or chat room.
         One sentence per command. If you want to say multiple sentences, use multiple commands.
