@@ -215,6 +215,8 @@ class Agent:
 
                     buffer = ""
                     result_ = None
+                    if not isinstance(json_obj, list):
+                        json_obj = [json_obj]
                     for cmd in json_obj:
                         print(f"Processing command: {cmd}")
                         if isinstance(cmd, str):
