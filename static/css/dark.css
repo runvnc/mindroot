@@ -629,7 +629,7 @@ button:hover {
 }
 
 .param_name { font-weight: bold; }
-.param_value { color: teal; }
+.param_value { color: yellow; }
 
 .fn_result, .code-result { 
   white-space: normal !important;

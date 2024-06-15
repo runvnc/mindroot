@@ -67,9 +67,10 @@ class ActionComponent extends BaseEl {
     } else {
       paramshtml += `<span class="param_value">[${params}]</span> `;
     }
-    if (paramshtml.length > 50) {
+    if (false && paramshtml.length > 50) {
       paramshtml = paramshtml.slice(0, 50) + '...'
     }
+    console.log('paramshtml', paramshtml)
     let res = '';
     if (result != '()' && result != '' && result != undefined) {
       let lines = result.split("\n");
