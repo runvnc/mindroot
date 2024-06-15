@@ -5,7 +5,7 @@
   },
   {
     "name": "ah_openai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_persona",
@@ -17,7 +17,7 @@
   },
   {
     "name": "ah_img_tags",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_sd",

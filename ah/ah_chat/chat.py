@@ -186,7 +186,7 @@ async def send_message(log_id: str, message_data: Message):
 
 
 @command()
-async def json_encoded_md(json_encoded_markdown_text, context=None):
+async def json_encoded_md(json_encoded_markdown_text="", context=None):
     """
     Output some markdown text to the user or chat room.
     Use this for any somewhat longer text that the user can read and
