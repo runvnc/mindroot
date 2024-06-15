@@ -209,10 +209,17 @@ class Agent:
                     if isinstance(json_obj, str):
                         print("not processing string, incomplete command")
                         break
+                    else:
+                        print("json_obj is not a string")
+                        print(json_obj)
+
                     buffer = ""
 
                     for cmd in json_obj:
                         print(f"Processing command: {cmd}")
+                        if isinstance(cmd, str):
+                            print("2 - not processing string, incomplete command")
+                            break
                         result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
                         if result_ is not None:
                             for result in result_:
