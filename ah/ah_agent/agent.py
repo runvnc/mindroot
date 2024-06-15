@@ -214,7 +214,7 @@ class Agent:
                         print(json_obj)
 
                     buffer = ""
-
+                    result_ = None
                     for cmd in json_obj:
                         print(f"Processing command: {cmd}")
                         if isinstance(cmd, str):
