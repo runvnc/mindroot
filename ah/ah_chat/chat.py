@@ -186,7 +186,7 @@ async def send_message(log_id: str, message_data: Message):
 
 
 @command()
-async def json_encoded_md(json_encoded_markdown_text="", context=None):
+async def json_encoded_md(markdown="", context=None):
     """
     Output some markdown text to the user or chat room.
     Use this for any somewhat longer text that the user can read and
@@ -204,19 +204,19 @@ async def json_encoded_md(json_encoded_markdown_text="", context=None):
 # Example
 
     [
-        { "json_encoded_md": "## Section 1\\n\\n- item 1\\n- item 2" }
+        { "json_encoded_md": { "markdown": "## Section 1\\n\\n- item 1\\n- item 2" } }
     ]
 
 # Example
 
     [
-        { "json_encoded_md": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }
+        { "json_encoded_md": { "markdown": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }} 
     ]
 
     """
-    await context.agent_output("new_message", {"content": json_encoded_markdown_text,
+    await context.agent_output("new_message", {"content": markdown,
                                             "agent": context.agent['name'] })
-    json_cmd = { "json_encoded_md": json_encoded_markdown_text }
+    json_cmd = { "json_encoded_md": markdown }
 
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
