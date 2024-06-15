@@ -87,7 +87,11 @@ class Chat extends BaseEl {
     //this.messages[this.messages.length - 1].spinning = 'no'
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      this.msgSoFar = data.params.text // data.chunk
+      if (data.params.text) {
+        this.msgSoFar = data.params.text
+      } else {
+        this.msgSoFar = data.params
+      }
       this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar);
     } else {
       console.log('data.params', data.params)
