@@ -87,13 +87,15 @@ class Chat extends BaseEl {
     //this.messages[this.messages.length - 1].spinning = 'no'
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      this.msgSoFar = data.params // data.chunk
+      this.msgSoFar = data.params.text // data.chunk
       this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar);
     } else {
       console.log('data.params', data.params)
       if (typeof(data.params) == 'array') {
         data.params = {"val": data.params}
       } else if (typeof(data.params) == 'string') {
+        data.params = {"val": data.params}
+      } else if (typeof(data.params) == 'object') {
         data.params = {"val": data.params}
       }
       const paramStr = JSON.stringify(data.params)

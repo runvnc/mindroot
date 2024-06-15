@@ -235,19 +235,21 @@ class Agent:
             if len(buffer) > 0: 
                 print("Remaining buffer:")
                 print(buffer)
-                json_obj = json.loads(buffer)
-                for cmd in json_obj:
-                    print(f"Processing remaining command: {cmd}")
-                    result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
-                    if result_ is not None:
+                try:
+                    json_obj = json.loads(buffer)
+                    for cmd in json_obj:
+                        print(f"Processing remaining command: {cmd}")
+                        result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
+                        if result_ is not None:
+                            for result in result_:
+                                results.append(result)
+                    if result_:
                         for result in result_:
                             results.append(result)
-                if result_:
-                    for result in result_:
-                        results.append(result)
- 
-                print("Parse error?:")
-                print(parse_error)
+
+                except Exception as e:
+                    print("Parse error?:")
+                    print(parse_error)
 
             print("--- processed stream part --- ")
 
