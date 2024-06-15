@@ -89,6 +89,8 @@ class Chat extends BaseEl {
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       if (data.params.text) {
         this.msgSoFar = data.params.text
+      } else if (data.params.markdown) {
+        this.msgSoFar = data.params.markdown
       } else {
         this.msgSoFar = data.params
       }
