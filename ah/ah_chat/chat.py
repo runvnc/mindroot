@@ -152,7 +152,7 @@ async def send_message(log_id: str, message_data: Message):
         print("say command called, text = ", text, "done = ", done)
         await context.agent_output("new_message", {"content": text,
                                    "agent": context.agent['name'] })
-        json_cmd = { "say": text }
+        json_cmd = { "say": {"text": text } }
 
         context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
         if done:
@@ -216,7 +216,7 @@ async def json_encoded_md(markdown="", context=None):
     """
     await context.agent_output("new_message", {"content": markdown,
                                             "agent": context.agent['name'] })
-    json_cmd = { "json_encoded_md": markdown }
+    json_cmd = { "json_encoded_md": { "markdown": markdown } }
 
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
