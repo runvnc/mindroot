@@ -140,26 +140,36 @@ class Agent:
     async def parse_single_cmd(self, json_str, context, buffer, match=None):
         cmd_name = '?'
         try:
+            print("json_str: ", json_str)
             cmd_obj = json.loads(json_str)
+            print(2)
+            print("cmd_obj: ",)
             cmd_name = next(iter(cmd_obj))
+            print("cmd_name: ", cmd_name)
+            print(3)
             if isinstance(cmd_obj, list):
+                print(4)
                 cmd_obj = cmd_obj[0]
+                print(5)
                 cmd_name = next(iter(cmd_obj))
-            cmd_args = cmd_obj[cmd_name]
+            print(6)
 
+            cmd_args = cmd_obj[cmd_name]
+            print(7)
             # make sure that cmd_name is in self.agent["commands"]
             if cmd_name not in self.agent["commands"]:
                 print("Command not found in agent commands. cmd_name=", cmd_name)
                 return None, buffer
-
+            print(8)
             if check_empty_args(cmd_args):
                 print("Empty args, cmd_name=", cmd_name)
                 return None, buffer
             else:
                 print("Non-empty args, cmd_name=", cmd_name, "args=", cmd_args)
-
+            print(9)
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
+            print(10)
             await context.command_result(cmd_name, result)
   
             cmd = {"cmd": cmd_name, "result": result}
@@ -196,7 +206,11 @@ class Agent:
                 try:
                     # Attempt to parse the buffer as a full JSON object
                     json_obj = json.loads(buffer)
+                    if isinstance(json_obj, str):
+                        print("not processing string, incomplete command")
+                        break
                     buffer = ""
+
                     for cmd in json_obj:
                         print(f"Processing command: {cmd}")
                         result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)

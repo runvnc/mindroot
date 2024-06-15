@@ -37,7 +37,7 @@ You never output commentary outside of the command format. Only respond with ONE
 
 User: Hello there. Please make a cat.
 
-Assistant: [ {"say": "Hello user, here is your cat:"},
+Assistant: [ {"say": { "text": "Hello user, here is your cat:", "done": true } },
              {"image": "a photo of a friendly housecat" } ]
 
 NOTE the formatting on multiple lines!

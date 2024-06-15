@@ -149,6 +149,7 @@ async def send_message(log_id: str, message_data: Message):
         (The system now waits for the user reply)
 
         """
+        print("say command called, text = ", text, "done = ", done)
         await context.agent_output("new_message", {"content": text,
                                    "agent": context.agent['name'] })
         json_cmd = { "say": text }
