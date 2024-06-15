@@ -2,6 +2,8 @@ import asyncio
 import json
 import os
 import re
+import json
+from json import JSONDecodeError
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
@@ -191,29 +193,16 @@ class Agent:
 
             while buffer and buffer_changed:
                 buffer_changed = False
-                # Check for full JSON command
-                match = re.search(r'\{.*?\}', buffer)
-                if match:
-                    try:
-                        json_str = match.group(0)
-                        parse_error= ''
-                        print("Trying to load first matched group as json:\n",json_str)
-                        ok = json.loads(json_str)
-                    except Exception as ee:
-                        print("could not parse group as json")
-                        match = False
-                        parse_error = ee
-                if match:
-                    json_str = match.group(0)
-                    print(f"matched regex, buffer is ||{buffer}||")
-                    result_, buffer = await self.parse_single_cmd(json_str, context, buffer, match)
+                try:
+                    # Attempt to parse the buffer as a full JSON object
+                    json_obj = json.loads(buffer)
+                    buffer = ""
+                    result_, buffer = await self.parse_single_cmd(json.dumps(json_obj), context, buffer)
                     if result_ is not None:
                         for result in result_:
                             results.append(result)
-                    else:
-                        break
-                else:
-                    # Attempt to parse partial JSON command
+                except JSONDecodeError as e:
+                    # Handle partial JSON objects
                     try:
                         partial = partial_json_parser.loads(buffer)
                         if isinstance(partial, list):
@@ -223,9 +212,7 @@ class Agent:
                         if partial_command is not None:
                             if isinstance(partial, list):
                                 partial = partial[0]
-                            #print("partial=", partial, "partial_command =", partial_command)
                             partial_args = partial[partial_command]
-                            #print('ok 1')
                             if partial_command != last_partial_command or partial_args != last_partial_args:
                                 if isinstance(partial_args, str) and last_partial_args is not None:
                                     diff_str = find_new_substring(last_partial_args, partial_args)
