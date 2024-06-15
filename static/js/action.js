@@ -59,6 +59,7 @@ class ActionComponent extends BaseEl {
         paramshtml += `<span class="param_value">(${item}), </span> `;
       }
     } else if (typeof(params) == 'object') {
+      console.log('in action.js params is:',params)
       for (var key in params) {
         paramshtml += `<span class="param_name">${key}:</span> `;
         paramshtml += `<span class="param_value">${params[key]}</span>  `;
@@ -72,7 +73,7 @@ class ActionComponent extends BaseEl {
     let res = '';
     if (result != '()' && result != '' && result != undefined) {
       let lines = result.split("\n");
-      if (lines.length == 1) {
+      if (false && lines.length == 1) {
         res = html`<div class="one_line_result">${result}</div>`;
       } else {
         res = html`
