@@ -38,10 +38,6 @@ app.include_router(settings_router)
 from routers.plugin_router import router as plugin_router
 app.include_router(plugin_router)
 
-# Include the router from chat.py
-from ah.ah_chat.chat import router as chat_router
-app.include_router(chat_router)
-
 from routers.persona_router import router as persona_router
 app.include_router(persona_router)
 
