@@ -1,6 +1,7 @@
 import importlib
 import json
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from ah.server import app
 import os
 
@@ -22,6 +23,10 @@ def load_plugins(plugin_file, app):
                         router_module = importlib.import_module(f"ah.{plugin_name}.router")
                         app.include_router(router_module.router)
                         print(f"Included router for plugin: {plugin_name}")
+                    static_path = f"ah/{plugin_name}/static"
+                    if os.path.exists(static_path):
+                        app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"{plugin_name}_static")
+                        print(f"Mounted static files for plugin: {plugin_name}")
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
