@@ -118,23 +118,24 @@ async def text_to_image(prompt, negative_prompt='', model_id=None, from_huggingf
         return None
 
 @command()
-async def image(prompt, context=None):
+async def image(description="", context=None):
     """image: Generate an image from a prompt
 
     # Example:
 
     [
-      { "image": "A cute tabby cat in the forest"},
-      { "image": "A happy golden retriever in the park"}
+      { "image": {"description": "A cute tabby cat in the forest"} },
+      { "image": {"description": "A happy golden retriever in the park"} }
     ]
 
     # Example:
 
     [
-      { "image": "A christmas gift wrapped in a red bow."}
+      { "image": {"description": "A christmas gift wrapped in a red bow."} }
     ]
 
     """
+    prompt = description
     print(prompt)
     fname = await context.text_to_image(prompt)
     print("image output to file", fname)

@@ -18,8 +18,8 @@ def load(plugin_file, app = None):
     else:
         if app_instance is not None:
             app = app_instance
-    else:
-        raise Exception("No FastAPI app instance provided or found in plugin loader")
+        else:
+            raise Exception("No FastAPI app instance provided or found in plugin loader")
 
     with open(plugin_file, 'r') as file:
         ah = json.load(file)

@@ -34,8 +34,8 @@ async def get_persona_data(persona_name, context=None):
 
 
 @command()
-async def pic_of_me(prompt, context=None):
-    """pic_of_me(prompt)
+async def pic_of_me(prompt="", context=None):
+    """pic_of_me
 
     Generate a picture of the persona given a detailed description of what they 
     they look like and what are doing, where they are, etc.. You will (usually) want to include
@@ -47,7 +47,7 @@ async def pic_of_me(prompt, context=None):
 
     Example:
 
-    { "pic_of_me": "[where they are, what they are doing, details of appearance, details of scene, etc. etc.]" }
+    { "pic_of_me": { "prompt": "[where they are, what they are doing, details of appearance, details of scene, etc. etc.]" } }
 
     """
     persona = context.agent['persona']
