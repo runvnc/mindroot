@@ -127,17 +127,28 @@ async def send_message(log_id: str, message_data: Message):
         text - String. The text to say.
         done - Boolean. If true, the system will stop and wait for the user to reply.
                         If false, the system will reply with "continue", expecting more commands.
+        
+        IMPORTANT: if you have additional commands to run, return "done": false!
+                   otherwise the user will have to ask you to just continue.
 
         ## Example 1
-        
+       
+       (in this example we issue multiple 'say' commands, but are finished with commands after that,
+        so use "done": true )
+
         [
             { "say": { "text": "Hello, user.", "done": true },
             { "say": { "text": "How can I help you today?", "done": true }
         ]
 
         (The system waits for the user reply)
-        
+       
+
         ## Example 2
+
+        (In this example we want to acknowledge a request, but then issue another command,
+         so we use "done": false )
+
         [
             { "say": { "text": "Sure, I can run that command", "done": false }
         ]
@@ -219,6 +230,7 @@ async def json_encoded_md(markdown="", context=None):
     json_cmd = { "json_encoded_md": { "markdown": markdown } }
 
     context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+
 
 @router.get("/admin", response_class=HTMLResponse)
 async def get_admin_html():

@@ -2,14 +2,13 @@ import importlib
 import json
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from ah.server import app
 import os
 
 import ah.hooks
 import ah.commands
 import ah.services
 
-def load_plugins(plugin_file, app):
+def load(plugin_file, app):
     with open(plugin_file, 'r') as file:
         ah = json.load(file)
         for plugin in ah:
@@ -31,4 +30,3 @@ def load_plugins(plugin_file, app):
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
 
-load_plugins('plugins.json', app)

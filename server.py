@@ -49,6 +49,9 @@ from routers.agent_router import router as agent_router
 app.include_router(agent_router)
 
 
+plugins.load('plugins.json', app)
+
+
 # Other server setup code can go here
 
 
