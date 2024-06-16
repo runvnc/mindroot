@@ -4,6 +4,14 @@ from jinja2 import Environment, FileSystemLoader
 # Create a Jinja2 environment
 env = Environment(loader=FileSystemLoader('.'))
 
+# New helper function to find parent templates in plugins
+def find_parent_template(page_name, plugins):
+    for plugin in plugins:
+        template_path = os.path.join(plugin, 'templates', f'{page_name}.jinja2')
+        if os.path.exists(template_path):
+            return template_path
+    return None
+
 # Function to load templates from plugins
 def load_plugin_templates(page_name, plugins):
     templates = []
@@ -16,6 +24,11 @@ def load_plugin_templates(page_name, plugins):
         if os.path.exists(template_path2):
             with open(template_path2) as f:
                 templates.append({'type': 'override', 'template': env.from_string(f.read())})
+        # Check for parent template in plugin's templates subdirectory
+        parent_template_path = find_parent_template(page_name, plugins)
+        if parent_template_path:
+            with open(parent_template_path) as f:
+                templates.append({'type': 'parent', 'template': env.from_string(f.read())})
     return templates
 
 # Function to collect content from child templates
@@ -32,8 +45,12 @@ def collect_content(template, blocks, template_type):
 
 # Function to render the combined template
 def render_combined_template(page_name, plugins, context):
-    # Load the parent template
-    parent_template = env.get_template(f'templates/{page_name}.jinja2')
+    # Find parent template in plugins
+    parent_template_path = find_parent_template(page_name, plugins)
+    if parent_template_path:
+        parent_template = env.get_template(parent_template_path)
+    else:
+        parent_template = env.get_template(f'templates/{page_name}.jinja2')
 
     # Load child templates from plugins
     child_templates = load_plugin_templates(page_name, plugins)
