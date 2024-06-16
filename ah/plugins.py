@@ -8,7 +8,19 @@ import ah.hooks
 import ah.commands
 import ah.services
 
-def load(plugin_file, app):
+app_instance = None
+
+def load(plugin_file, app = None):
+    global app_instance
+
+    if app is not None:
+        app_instance = app
+    else:
+        if app_instance is not None:
+            app = app_instance
+    else:
+        raise Exception("No FastAPI app instance provided or found in plugin loader")
+
     with open(plugin_file, 'r') as file:
         ah = json.load(file)
         for plugin in ah:
