@@ -9,7 +9,10 @@ async def find_parent_template(page_name, plugins):
     for plugin in plugins:
         template_path = os.path.join(plugin, 'templates', f'{page_name}.jinja2')
         if os.path.exists(template_path):
+            print(f'Found parent template in plugin: {template_path}')
             return template_path
+        else:
+            print(f'No parent template found in plugin: {plugin}, template path was {template_path}')
     return None
 
 # Function to load templates from plugins
