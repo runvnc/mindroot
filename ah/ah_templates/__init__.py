@@ -84,6 +84,8 @@ async def render_combined_template(page_name, plugins, context):
     print("combined_template_str", combined_template_str)
     print("combined_child_template", combined_child_template)
     print("parent_template", parent_template)
+    print("all_content", all_content)
+
 
     # Render the combined child template with the parent template
     rendered_html = combined_child_template.render(layout_template=parent_template)
