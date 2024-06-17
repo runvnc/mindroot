@@ -10,9 +10,9 @@ import ah.services
 
 app_instance = None
 
-def list_enabled():
+def list_enabled(plugin_file = 'plugins.json')
     list = []
-    with open(plugin_file='plugins.json', 'r') as file:
+    with open(plugin_file, 'r') as file:
         ah = json.load(file)
         for plugin in ah:
             if plugin.get('enabled'):
