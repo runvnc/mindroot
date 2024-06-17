@@ -8,6 +8,10 @@
     "enabled": true
   },
   {
+    "name": "ah_chat",
+    "enabled": true
+  },
+  {
     "name": "ah_persona",
     "enabled": false
   },

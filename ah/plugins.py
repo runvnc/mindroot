@@ -10,7 +10,21 @@ import ah.services
 
 app_instance = None
 
-def load(plugin_file, app = None):
+def list_enabled():
+    list = []
+    with open(plugin_file='plugins.json', 'r') as file:
+        ah = json.load(file)
+        for plugin in ah:
+            if plugin.get('enabled'):
+                print(f"{plugin['name']} is enabled")
+                list.append(plugin['name'])
+            else:
+                print(f"{plugin['name']} is disabled")
+
+    return list
+
+
+def load(plugin_file = 'plugins.json', app = None):
     global app_instance
 
     if app is not None:

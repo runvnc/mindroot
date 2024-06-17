@@ -10,6 +10,8 @@ from ..commands import command, command_manager
 from ..services import service, service_manager
 from ..hooks import hook, hook_manager
 from ..chatcontext import ChatContext
+from ..ah_templates import render_combined_template
+from ..plugins import list_enabled
 import asyncio
 import os
 import json
@@ -242,7 +244,10 @@ async def get_admin_html():
     context.agent = {} #agent_
     context.chat_log = ChatLog(log_id=log_id, agent='admin')
     context.save_context()
-
+    
+    plugins = list_enabled()
+    render_combined_template('admin', plugins, context):
+ 
     with open("static/admin.html", "r") as file:
         admin_html = file.read()
         admin_html = admin_html.replace("{{CHAT_ID}}", log_id)
