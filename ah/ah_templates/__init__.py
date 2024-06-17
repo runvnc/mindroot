@@ -7,7 +7,7 @@ env = Environment(loader=FileSystemLoader('.'))
 # New helper function to find parent templates in plugins
 async def find_parent_template(page_name, plugins):
     for plugin in plugins:
-        template_path = os.path.join(plugin, 'templates', f'{page_name}.jinja2')
+        template_path = os.path.join('ah', plugin, 'templates', f'{page_name}.jinja2')
         if os.path.exists(template_path):
             print(f'Found parent template in plugin: {template_path}')
             return template_path
