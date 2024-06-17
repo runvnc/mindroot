@@ -81,13 +81,18 @@ async def render_combined_template(page_name, plugins, context):
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
     combined_child_template = env.from_string(combined_template_str)
+    print("combined_template_str", combined_template_str)
+    print("combined_child_template", combined_child_template)
+    print("parent_template", parent_template)
 
     # Render the combined child template with the parent template
-    rendered_html = combined_child_template.render(
-        layout_template=parent_template,
-        **{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
-        **{f'combined_{block}_override': content['override'] for block, content in all_content.items() if content['override']},
-        **context
-    )
+    rendered_html = combined_child_template.render(layout_template=parent_template)
+ 
+    #rendered_html = combined_child_template.render(
+    #layout_template=parent_template,
+    #**{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
+    #**{f'combined_{block}_override': content['override'] for block, content in all_content.items() if content['override']},
+    #**context
+    #)
 
     return rendered_html
