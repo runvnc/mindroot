@@ -246,7 +246,7 @@ async def get_admin_html():
     context.save_context()
     
     plugins = list_enabled()
-    html = await render_combined_template('admin', plugins, context):
+    html = await render_combined_template('admin', plugins, context)
  
     #with open("static/admin.html", "r") as file:
     #    admin_html = file.read()

@@ -5,7 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 env = Environment(loader=FileSystemLoader('.'))
 
 # New helper function to find parent templates in plugins
-def find_parent_template(page_name, plugins):
+async def find_parent_template(page_name, plugins):
     for plugin in plugins:
         template_path = os.path.join(plugin, 'templates', f'{page_name}.jinja2')
         if os.path.exists(template_path):
@@ -13,7 +13,7 @@ def find_parent_template(page_name, plugins):
     return None
 
 # Function to load templates from plugins
-def load_plugin_templates(page_name, plugins):
+async def load_plugin_templates(page_name, plugins):
     templates = []
     for plugin in plugins:
         template_path = os.path.join(plugin, 'inject', f'{page_name}.jinja2')
@@ -32,7 +32,7 @@ def load_plugin_templates(page_name, plugins):
     return templates
 
 # Function to collect content from child templates
-def collect_content(template, blocks, template_type):
+async def collect_content(template, blocks, template_type):
     content = {block: {'inject': [], 'override': None} for block in blocks}
     for block in blocks:
         if block in template.blocks:
@@ -44,16 +44,16 @@ def collect_content(template, blocks, template_type):
     return content
 
 # Function to render the combined template
-def render_combined_template(page_name, plugins, context):
+async def render_combined_template(page_name, plugins, context):
     # Find parent template in plugins
-    parent_template_path = find_parent_template(page_name, plugins)
+    parent_template_path = await find_parent_template(page_name, plugins)
     if parent_template_path:
         parent_template = env.get_template(parent_template_path)
     else:
         parent_template = env.get_template(f'templates/{page_name}.jinja2')
 
     # Load child templates from plugins
-    child_templates = load_plugin_templates(page_name, plugins)
+    child_templates = await load_plugin_templates(page_name, plugins)
 
     # Get the blocks defined in the parent template
     parent_blocks = parent_template.blocks.keys()
@@ -62,7 +62,7 @@ def render_combined_template(page_name, plugins, context):
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
 
     for child_template_info in child_templates:
-        child_content = collect_content(child_template_info['template'], parent_blocks, child_template_info['type'])
+        child_content = await collect_content(child_template_info['template'], parent_blocks, child_template_info['type'])
         for block, content in child_content.items():
             if content['override']:
                 all_content[block]['override'] = content['override']
