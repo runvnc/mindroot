@@ -28,7 +28,7 @@ async def load_plugin_templates(page_name, plugins):
             with open(template_path2) as f:
                 templates.append({'type': 'override', 'template': env.from_string(f.read())})
         # Check for parent template in plugin's templates subdirectory
-        parent_template_path = find_parent_template(page_name, plugins)
+        parent_template_path = await find_parent_template(page_name, plugins)
         if parent_template_path:
             with open(parent_template_path) as f:
                 templates.append({'type': 'parent', 'template': env.from_string(f.read())})
