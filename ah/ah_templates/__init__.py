@@ -34,12 +34,11 @@ async def load_plugin_templates(page_name, plugins):
     return templates
 
 # Function to collect content from child templates
-async def collect_content(template, blocks, template_type, context):
+async def collect_content(template, blocks, template_type, data):
     content = {block: {'inject': [], 'override': None} for block in blocks}
     for block in blocks:
         if block in template.blocks:
-            #block_content = ''.join(template.blocks[block](template.new_context()))
-            block_content = ''.join(template.blocks[block](context))
+            block_content = ''.join(template.blocks[block](template.new_context()))
  
             if template_type == 'override':
                 content[block]['override'] = block_content
