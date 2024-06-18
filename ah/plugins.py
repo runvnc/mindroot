@@ -50,7 +50,7 @@ def load(plugin_file = 'plugins.json', app = None):
                         print(f"Included router for plugin: {plugin_name}")
                     static_path = f"ah/{plugin_name}/static"
                     if os.path.exists(static_path):
-                        app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"{plugin_name}_static")
+                        app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"/{plugin_name}/static")
                         print(f"Mounted static files for plugin: {plugin_name}")
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
