@@ -38,7 +38,7 @@ async def collect_content(template, blocks, template_type, data):
     content = {block: {'inject': [], 'override': None} for block in blocks}
     for block in blocks:
         if block in template.blocks:
-            block_content = ''.join(template.blocks[block](template.new_context()))
+            block_content = ''.join(template.blocks[block](template.new_context(data)))
  
             if template_type == 'override':
                 content[block]['override'] = block_content
