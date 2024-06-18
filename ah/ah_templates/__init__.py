@@ -93,14 +93,27 @@ async def render_combined_template(page_name, plugins, context):
 
     # Render the combined child template with the parent template
     # need to make sure all_content is not {} or None
-    if all_content == {} or all_content is None:
-        rendered_html = combined_child_template.render(layout_template=parent_template)
-    else:
-        print("render with combined")
-        rendered_html = combined_child_template.render(
+# Initialize the dictionaries
+    combined_inject = {}
+    combined_override = {}
+
+    # Iterate through all_content items and populate the dictionaries with checks
+    for block, content in all_content.items():
+        # Check if 'inject' exists and is a list
+        if 'inject' in content and isinstance(content['inject'], list):
+            combined_inject[f'combined_{block}_inject'] = ''.join(content['inject'])
+        else:
+            combined_inject[f'combined_{block}_inject'] = ''  # Default to empty string if not present or not a list
+
+        # Check if 'override' exists and is not None
+        if 'override' in content and content['override']:
+            combined_override[f'combined_{block}_override'] = content['override']
+
+    # Render the template with the combined dictionaries and context
+    rendered_html = combined_child_template.render(
         layout_template=parent_template,
-        **{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
-        **{f'combined_{block}_override': content['override'] for block, content in all_content.items() if content['override']},
+        **combined_inject,
+        **combined_override,
         **context
     )
 
