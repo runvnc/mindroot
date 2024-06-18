@@ -1,4 +1,4 @@
-import { LitElement, html, css } from '/static/js/lit-core.min.js';
+import { LitElement, html, css } from './lit-core.min.js';
 import { BaseEl } from './base.js';
 import './toggle-switch.js';
 
