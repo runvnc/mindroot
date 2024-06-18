@@ -22,7 +22,11 @@ async def load_plugin_templates(page_name, plugins):
         template_path = os.path.join(plugin, 'inject', f'{page_name}.jinja2')
         if os.path.exists(template_path):
             with open(template_path) as f:
+                print("Found inject template for page", page_name, "in plugin", plugin, "at", template_path)
                 templates.append({'type': 'inject', 'template': env.from_string(f.read())})
+        else:
+            print("No inject template found for page", page_name, "in plugin", plugin, "at", template_path)
+
         template_path2 = os.path.join(plugin, 'override', f'{page_name}.jinja2')
         if os.path.exists(template_path2):
             with open(template_path2) as f:
