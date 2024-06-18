@@ -28,10 +28,10 @@ async def load_plugin_templates(page_name, plugins):
             with open(template_path2) as f:
                 templates.append({'type': 'override', 'template': env.from_string(f.read())})
         # Check for parent template in plugin's templates subdirectory
-        parent_template_path = await find_parent_template(page_name, plugins)
-        if parent_template_path:
-            with open(parent_template_path) as f:
-                templates.append({'type': 'parent', 'template': env.from_string(f.read())})
+        #parent_template_path = await find_parent_template(page_name, plugins)
+        #if parent_template_path:
+        #   with open(parent_template_path) as f:
+        #        templates.append({'type': 'parent', 'template': env.from_string(f.read())})
     return templates
 
 # Function to collect content from child templates
@@ -64,7 +64,10 @@ async def render_combined_template(page_name, plugins, context):
     # Collect content from child templates
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
 
+    print("child_templates", child_templates)
+
     for child_template_info in child_templates:
+        print("calling collect_content")
         child_content = await collect_content(child_template_info['template'], parent_blocks, child_template_info['type'])
         for block, content in child_content.items():
             if content['override']:
@@ -78,6 +81,7 @@ async def render_combined_template(page_name, plugins, context):
         if all_content[block]['override']:
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_override|safe }}}}\n{{% endblock %}}\n'
         else:
+            print("injecting")
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
     combined_child_template = env.from_string(combined_template_str)
@@ -92,6 +96,7 @@ async def render_combined_template(page_name, plugins, context):
     if all_content == {} or all_content is None:
         rendered_html = combined_child_template.render(layout_template=parent_template)
     else:
+        print("render with combined")
         rendered_html = combined_child_template.render(
         layout_template=parent_template,
         **{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
