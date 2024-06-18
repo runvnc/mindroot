@@ -34,11 +34,13 @@ async def load_plugin_templates(page_name, plugins):
     return templates
 
 # Function to collect content from child templates
-async def collect_content(template, blocks, template_type):
+async def collect_content(template, blocks, template_type, context):
     content = {block: {'inject': [], 'override': None} for block in blocks}
     for block in blocks:
         if block in template.blocks:
-            block_content = ''.join(template.blocks[block](template.new_context()))
+            #block_content = ''.join(template.blocks[block](template.new_context()))
+            block_content = ''.join(template.blocks[block](context))
+ 
             if template_type == 'override':
                 content[block]['override'] = block_content
             else:
@@ -67,7 +69,7 @@ async def render_combined_template(page_name, plugins, context):
 
     for child_template_info in child_templates:
         print("calling collect_content")
-        child_content = await collect_content(child_template_info['template'], parent_blocks, child_template_info['type'])
+        child_content = await collect_content(child_template_info['template'], parent_blocks, child_template_info['type'], context)
         for block, content in child_content.items():
             if content['override']:
                 all_content[block]['override'] = content['override']
@@ -88,7 +90,6 @@ async def render_combined_template(page_name, plugins, context):
     print("combined_child_template", combined_child_template)
     print("parent_template", parent_template)
     print("all_content", all_content)
-
 
     # Render the combined child template with the parent template
     # need to make sure all_content is not {} or None
