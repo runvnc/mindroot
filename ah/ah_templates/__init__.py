@@ -82,7 +82,7 @@ async def render_combined_template(page_name, plugins, context):
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_override|safe }}}}\n{{% endblock %}}\n'
         else:
             print("injecting")
-            combined_template_str += f'{{% block {block} %}}\n  {{ super() }}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
+            combined_template_str += f'{{% block {block} %}}\n  {{{{ super() }}}}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
     combined_child_template = env.from_string(combined_template_str)
     print("combined_template_str", combined_template_str)

@@ -50,5 +50,9 @@
   {
     "name": "ah_shell",
     "enabled": true
+  },
+  {
+    "name": "ah_light_theme",
+    "enabled": true
   }
 ]
