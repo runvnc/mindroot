@@ -108,12 +108,14 @@ async def render_combined_template(page_name, plugins, context):
         if 'override' in content and content['override']:
             combined_override[f'combined_{block}_override'] = content['override']
 
+    print("in render combined, context is", context)
+
     # Render the template with the combined dictionaries and context
     rendered_html = combined_child_template.render(
         layout_template=parent_template,
         **combined_inject,
         **combined_override,
-        #**context
+        **context
     )
 
     return rendered_html

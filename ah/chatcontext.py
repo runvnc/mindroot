@@ -17,7 +17,6 @@ class ChatContext:
         self.data = {}
         self.log_id = None
         self.data['current_dir'] = 'data/users/default'
-
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
 
@@ -25,6 +24,7 @@ class ChatContext:
         if not self.log_id:
             raise ValueError("log_id is not set for the context.")
         context_file = f'data/context/context_{self.log_id}.json'
+        self.data['log_id'] = self.log_id
         context_data = {
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),
@@ -45,7 +45,9 @@ class ChatContext:
             self.agent_name = context_data.get('agent_name')  
             self.agent = await service_manager.get_agent_data(self.agent_name, self)
             self.flags = self.agent.get('flags', [])
+            self.data['log_id'] = log_id
             self.chat_log = ChatLog(log_id=log_id)
+
             self.uncensored = True
         else:
             print("Context file not found for id:", log_id)
