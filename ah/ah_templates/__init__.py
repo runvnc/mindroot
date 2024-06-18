@@ -19,7 +19,7 @@ async def find_parent_template(page_name, plugins):
 async def load_plugin_templates(page_name, plugins):
     templates = []
     for plugin in plugins:
-        template_path = os.path.join(plugin, 'inject', f'{page_name}.jinja2')
+        template_path = os.path.join('ah', plugin, 'inject', f'{page_name}.jinja2')
         if os.path.exists(template_path):
             with open(template_path) as f:
                 print("Found inject template for page", page_name, "in plugin", plugin, "at", template_path)
@@ -27,15 +27,10 @@ async def load_plugin_templates(page_name, plugins):
         else:
             print("No inject template found for page", page_name, "in plugin", plugin, "at", template_path)
 
-        template_path2 = os.path.join(plugin, 'override', f'{page_name}.jinja2')
+        template_path2 = os.path.join('ah', plugin, 'override', f'{page_name}.jinja2')
         if os.path.exists(template_path2):
             with open(template_path2) as f:
                 templates.append({'type': 'override', 'template': env.from_string(f.read())})
-        # Check for parent template in plugin's templates subdirectory
-        #parent_template_path = await find_parent_template(page_name, plugins)
-        #if parent_template_path:
-        #   with open(parent_template_path) as f:
-        #        templates.append({'type': 'parent', 'template': env.from_string(f.read())})
     return templates
 
 # Function to collect content from child templates
