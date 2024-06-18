@@ -194,6 +194,7 @@ async def send_message(log_id: str, message_data: Message):
             print("Found an error in agent output: ")
             print(e)
             print(traceback.format_exc())
+            continue_processing = False
 
     return {"status": "ok"}
 

@@ -88,13 +88,15 @@ async def render_combined_template(page_name, plugins, context):
 
 
     # Render the combined child template with the parent template
-    rendered_html = combined_child_template.render(layout_template=parent_template)
- 
-    #rendered_html = combined_child_template.render(
-    #layout_template=parent_template,
-    #**{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
-    #**{f'combined_{block}_override': content['override'] for block, content in all_content.items() if content['override']},
-    #**context
-    #)
+    # need to make sure all_content is not {} or None
+    if all_content == {} or all_content is None:
+        rendered_html = combined_child_template.render(layout_template=parent_template)
+    else:
+        rendered_html = combined_child_template.render(
+        layout_template=parent_template,
+        **{f'combined_{block}_inject': ''.join(content['inject']) for block, content in all_content.items()},
+        **{f'combined_{block}_override': content['override'] for block, content in all_content.items() if content['override']},
+        **context
+    )
 
     return rendered_html
