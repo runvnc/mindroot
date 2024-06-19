@@ -269,24 +269,9 @@ async def get_chat_html(agent_name: str):
     context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
     context.save_context()
 
-    with open("static/chat.html", "r") as file:
-        chat_html = file.read()
-        chat_html = chat_html.replace("{{CHAT_ID}}", log_id)
-    return chat_html
+    plugins = list_enabled()
+    html = await render_combined_template('chat', plugins, context.data)
+ 
+    return html
 
-@router.get("/admin", response_class=HTMLResponse)
-async def get_admin_html():
-    log_id = nanoid.generate()
-    context = ChatContext(command_manager, service_manager)
-    context.log_id = log_id
-    #agent_ = await service_manager.get_agent_data(agent_name)
-
-    context.agent = {} #agent_
-    context.chat_log = ChatLog(log_id=log_id, agent='admin')
-    context.save_context()
-
-    with open("static/admin.html", "r") as file:
-        admin_html = file.read()
-        admin_html = chat_html.replace("{{CHAT_ID}}", log_id)
-    return admin_html
 
