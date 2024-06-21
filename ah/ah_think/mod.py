@@ -45,8 +45,8 @@ async def think(thoughts="", done=False, context=None):
     """
     #await context.agent_output("thought", {"content": assistant_message,
     #                                           "persona": persona_['name'] })
-    json_cmd = { "think": thoughts }
-    context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+    #json_cmd = { "think": { thoughts } }
+    #context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
     if done:
         return 'stop'
     else:
