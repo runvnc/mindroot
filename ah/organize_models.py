@@ -62,7 +62,9 @@ def organize_for_display(models: List[Dict], providers: List[Dict], equivalent_f
 async def load_organized():
     models = load_json('data/models.json')
     providers = load_json('data/providers.json')
-    providers = [provider for provider in providers if provider['enabled']]
+    plugins = load_json('plugins.json')
+    # filter providers where plugin == plugin and plugin is enabled
+    providers = [provider for provider in providers if any(provider['plugin'] == plugin['name'] and plugin['enabled'] for plugin in plugins)]
     equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
     return organize_for_display(models, providers, equivalent_flags)
 
