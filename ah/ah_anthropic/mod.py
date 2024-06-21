@@ -10,18 +10,24 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
         client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         system = messages[0]['content']
         messages = messages[1:]
-        async with client.messages.stream(
+        original_stream = await client.messages.create(
                 model=model,
                 system=system,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=max_tokens
-        ) as original_stream:
-            async def content_stream():
-                async for chunk in original_stream.text_stream:
-                    yield chunk
+                max_tokens=max_tokens,
+                stream=True
+        )
+        async def content_stream():
+            async for chunk in original_stream:
+                print("claude chunk:", chunk)
+                if chunk.type == 'content_block_delta':
+                    print("claude chunk:", chunk)
+                    yield chunk.content_block_delta.delta.text
+                else:
+                    yield ''
 
-            return content_stream()
+        return content_stream()
     
     except Exception as e:
         print('claude.ai error:', e)
