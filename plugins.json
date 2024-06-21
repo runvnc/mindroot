@@ -5,8 +5,12 @@
   },
   {
     "name": "ah_openai",
-    "enabled": true
+    "enabled": false
   },
+  {
+    "name": "ah_anthropic",
+    "enabled": true
+  },  
   {
     "name": "ah_chat",
     "enabled": true
