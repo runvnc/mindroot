@@ -21,7 +21,10 @@ class ChatLog:
         return len(json.dumps(message)) // 3
 
     def add_message(self, message: Dict[str, str]) -> None:
-        self.messages.append(message)
+        if self.messages and self.messages[-1].get('role') == message.get('role'):
+            self.messages[-1]['text'] += '\n' + message.get('text')
+        else:
+            self.messages.append(message)
         self.save_log()
 
     def get_history(self) -> List[Dict[str, str]]:
