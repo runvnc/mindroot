@@ -21,11 +21,12 @@ class ChatLog:
         return len(json.dumps(message)) // 3
 
     def add_message(self, message: Dict[str, str]) -> None:
-        if self.messages[-1]['role'] == message['role']:
+        if len(self.messages)>0 and self.messages[-1]['role'] == message['role']:
             print("found repeat role")
             self.messages[-1]['content'] += '\n' + message['content']
         else:
-            print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
+            if len(self.messages)>0:
+                print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
             self.messages.append(message)
         self.save_log()
 
