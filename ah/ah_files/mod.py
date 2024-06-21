@@ -32,10 +32,10 @@ async def write(fname="", text="", context=None):
 
 
 @command()
-async def read(fname, context=None):
+async def read(fname="", context=None):
     """Read text from a file.
     Example:
-    { "read": "file1.txt" }
+    { "read": { "fname": "file1.txt" } }
     """
     if 'current_dir' in context.data:
         if fname.startswith('/') or fname.startswith('./') or fname.startswith('../'):
