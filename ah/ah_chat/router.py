@@ -184,9 +184,13 @@ async def send_message(log_id: str, message_data: Message):
             results = await agent_.chat_commands(current_model, context=context, messages=context.chat_log.get_recent())
             out_results = []
             for result in results:
-                if result['result'] is not None and (result['result'] != 'stop'):
-                    out_results.append(result)
-                    continue_processing = True
+                if result['result'] is not None:
+                    if result['result'] == 'continue':
+                        out_results.append(result)
+                        continue_processing = True
+                    elif result['result'] == 'stop':
+                        continue_processing = False
+
             if continue_processing:
                 print("Processing iteration: ", iterations, "adding message")
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
