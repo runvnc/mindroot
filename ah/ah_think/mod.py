@@ -26,7 +26,7 @@ async def think(thoughts="", done=False, context=None):
     ( System responds with "continue" )
 
     [
-    { "say": {"text": "Here is the plan I have come up with [...]", "done": true }
+    { "say": {"text": "Here is the plan I have come up with [...]", "done": true } }
     ] 
 
     ( System waits for user reply )
@@ -34,8 +34,8 @@ async def think(thoughts="", done=False, context=None):
     Example 2 (rough abstraction, not literal):
 
     [
-    { "think": {"thoughts": "Since the user wants [X] and we currently know [Y], therefore [Z]. Then assuming [Z], we will need to [1], [2]. The best way to [1] is ...", "done": true }} ,
-    { "say": {"text": "Here is the plan I have come up with [...]", "done": true }
+    { "think": {"thoughts": "Since the user wants [X] and we currently know [Y], therefore [Z]. Then assuming [Z], we will need to [1], [2]. The best way to [1] is ...", "done": true } } ,
+    { "say": {"text": "Here is the plan I have come up with [...]", "done": true } }
     ]
 
     ( System waits for user reply )

@@ -139,8 +139,8 @@ async def send_message(log_id: str, message_data: Message):
         so use "done": true )
 
         [
-            { "say": { "text": "Hello, user.", "done": true },
-            { "say": { "text": "How can I help you today?", "done": true }
+            { "say": { "text": "Hello, user.", "done": true } },
+            { "say": { "text": "How can I help you today?", "done": true } }
         ]
 
         (The system waits for the user reply)
@@ -152,7 +152,7 @@ async def send_message(log_id: str, message_data: Message):
          so we use "done": false )
 
         [
-            { "say": { "text": "Sure, I can run that command", "done": false }
+            { "say": { "text": "Sure, I can run that command", "done": false } }
         ]
 
         (The system replies with "continue" and expects more commands)
