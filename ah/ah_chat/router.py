@@ -165,9 +165,9 @@ async def send_message(log_id: str, message_data: Message):
         print("say command called, text = ", text, "done = ", done)
         await context.agent_output("new_message", {"content": text,
                                    "agent": context.agent['name'] })
-        json_cmd = { "say": {"text": text } }
+        #json_cmd = { "say": {"text": text } }
 
-        context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+        #context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
         if done:
             return "stop"
         else:
