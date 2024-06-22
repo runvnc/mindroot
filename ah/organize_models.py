@@ -1,5 +1,6 @@
 import json
 from typing import List, Dict, Optional
+from termcolor import colored
 
 # Load JSON data from files
 def load_json(file_path: str) -> List[Dict]:
@@ -64,7 +65,13 @@ async def load_organized():
     providers = load_json('data/providers.json')
     plugins = load_json('plugins.json')
     # filter providers where plugin == plugin and plugin is enabled
+    
+    # print providers before filtering in green
+    print(colored('providers before filtering = ', 'green'), providers)
+    
     providers = [provider for provider in providers if any(provider['plugin'] == plugin['name'] and plugin['enabled'] for plugin in plugins)]
+    print("After filter by enabled (red):", colored(providers, 'red'))
+
     equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
     return organize_for_display(models, providers, equivalent_flags)
 
