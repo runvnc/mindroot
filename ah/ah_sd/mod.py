@@ -82,10 +82,8 @@ async def warmup(context=None):
     global use_sdxl
     model_id = current_model
  
-    # this seems to keep running every time I open a session
-    # and using a lot of resources/crashing my computer
-    # needs some debugging. maybe to just make sure it only runs once
-    return
+    if pipeline is not None:
+        return
 
     if from_huggingface is None:
         from_huggingface = not local_model
