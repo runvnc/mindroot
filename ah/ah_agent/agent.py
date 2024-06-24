@@ -201,7 +201,7 @@ class Agent:
             if not isinstance(commands, list):
                 commands = [commands]
 
-            print("commands: ", commands)
+            print("commands: ", commands, "partial_cmd:", partial_cmd)
 
             if len(commands) > num_processed:
                 print("New command(s) found")
@@ -221,7 +221,8 @@ class Agent:
                         pass
             else:
                 print("No new commands found")
-                if partial_cmd:
+                # check if not None or empty object                
+                if partial_cmd is not None and partial_cmd != {}:
                     print("Partial command", partial_cmd)
                     try:
                         cmd_name = next(iter(partial_cmd))
