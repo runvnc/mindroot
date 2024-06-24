@@ -65,6 +65,19 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     if current_command.strip():
         remaining_buffer = current_command + remaining_buffer
     
+    # Handle cases where there are no square brackets
+    if not complete_commands and remaining_buffer:
+        try:
+            cmd = json.loads(remaining_buffer)
+            if isinstance(cmd, dict) and len(cmd) == 1:
+                cmd_name = next(iter(cmd))
+                cmd_args = cmd[cmd_name]
+                if isinstance(cmd_args, dict):
+                    complete_commands.append(cmd)
+                    remaining_buffer = ""
+        except json.JSONDecodeError:
+            pass
+    
     return complete_commands, remaining_buffer
 
 # Test cases
