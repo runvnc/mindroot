@@ -8,10 +8,10 @@ from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
 from ..services import service 
-import partial_json_parser
 from ..services import service_manager
 import sys
 from ..check_args import *
+from ..command_parser import parse_streaming_commands
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -188,45 +188,34 @@ class Agent:
 
 
     async def parse_cmd_stream(self, stream, context):
-        from partial_json_parser import loads, Allow
-        from partial_json_parser.core.options import OBJ, ARR
-
         buffer = ""
         results = []
-        processed_commands = 0
 
         async for part in stream:
             buffer += part
             print(f"Current buffer: ||{buffer}||")
 
-            try:
-                # Try to parse the buffer as a complete or partial JSON
-                parsed = loads(buffer, OBJ | ARR)
-                
-                if not isinstance(parsed, list):
-                    parsed = [parsed]
+            commands, buffer = parse_streaming_commands(buffer)
 
-                for i, cmd in enumerate(parsed[processed_commands:], start=processed_commands):
-                    cmd_name = next(iter(cmd))
-                    cmd_args = cmd[cmd_name]
+            for cmd in commands:
+                cmd_name = next(iter(cmd))
+                cmd_args = cmd[cmd_name]
 
-                    # Check if the command is complete
-                    if i == processed_commands and isinstance(cmd_args, dict) and len(cmd_args) > 0:
-                        print(f"Processing complete command: {cmd}")
-                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
-                        await context.command_result(cmd_name, result)
-                        results.append({"cmd": cmd_name, "result": result})
-                        processed_commands += 1
-                    else:
-                        print(f"Partial command detected: {cmd}")
-                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                print(f"Processing complete command: {cmd}")
+                result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                await context.command_result(cmd_name, result)
+                results.append({"cmd": cmd_name, "result": result})
 
-                # Remove processed commands from the buffer
-                if processed_commands > 0:
-                    buffer = json.dumps(parsed[processed_commands:])
-
-            except Exception as e:
-                print(f"Error parsing JSON: {e}")
+            # Handle partial commands
+            if buffer:
+                try:
+                    partial_cmd = json.loads(buffer)
+                    cmd_name = next(iter(partial_cmd))
+                    cmd_args = partial_cmd[cmd_name]
+                    print(f"Partial command detected: {partial_cmd}")
+                    await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                except json.JSONDecodeError:
+                    pass
 
         return results
 
