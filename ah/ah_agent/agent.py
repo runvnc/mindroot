@@ -11,7 +11,7 @@ from ..services import service
 from ..services import service_manager
 import sys
 from ..check_args import *
-from ..command_parser import parse_streaming_commands
+from ..ah_agent.command_parser import parse_streaming_commands
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -204,14 +204,19 @@ class Agent:
             if len(commands) > num_processed:
                 print("New command(s) found")
                 for i in range(num_processed, len(commands)):
-                    cmd = commands[i]
-                    cmd_name = next(iter(cmd))
-                    cmd_args = cmd[cmd_name]
-                    print(f"Processing command: {cmd}")
-                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
-                    await context.command_result(cmd_name, result)
-                    results.append({"cmd": cmd_name, "result": result})
-                    num_processed = len(commands)
+                    try:
+                        cmd = commands[i]
+                        cmd_name = next(iter(cmd))
+                        cmd_args = cmd[cmd_name]
+                        print(f"Processing command: {cmd}")
+                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                        await context.command_result(cmd_name, result)
+                        results.append({"cmd": cmd_name, "result": result})
+                        num_processed = len(commands)
+                    except Exception as e:
+                        print("Error processing command.")
+                        print(e)
+                        pass
             else:
                 print("No new commands found")
                 if partial_cmd:

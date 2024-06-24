@@ -6,7 +6,7 @@ from gitignore_parser import parse_gitignore
 from collections import OrderedDict
 
 @command()
-async def execute_command(cmd, context=None):
+async def execute_command(cmd="", context=None):
     """Execute a system command and return the output.
     Example:
     { "execute_command": { "cmd": "ls -la" } }
@@ -24,7 +24,7 @@ async def execute_command(cmd, context=None):
         return f"Command '{cmd}' failed with error: {e}"
 
 @command()
-async def mkdir(directory, context=None):
+async def mkdir(directory="", context=None):
     """Create a new directory.
     Example:
     { "mkdir": { "directory": "new_folder" } }
