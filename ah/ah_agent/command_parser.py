@@ -33,7 +33,8 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         except Exception:
             # If parsing fails, return an empty list of commands and None as partial
             return [], None
-    
+    if not isinstance(current_partial, dict):
+        current_partial = None
     return complete_commands, current_partial
 
 # Test cases

@@ -1,7 +1,7 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_openai",
@@ -9,7 +9,7 @@
   },
   {
     "name": "ah_anthropic",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_chat",
@@ -29,7 +29,7 @@
   },
   {
     "name": "ah_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_runpod_sd",
