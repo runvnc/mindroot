@@ -12,50 +12,58 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     Tuple[List[Dict[str, Any]], str]: A tuple containing a list of complete commands and the remaining buffer.
     """
     complete_commands = []
-    remaining_buffer = buffer
+    remaining_buffer = buffer.strip()
     
     # Find the outermost square brackets
-    start = buffer.find('[')
-    end = buffer.rfind(']')
+    start = remaining_buffer.find('[')
+    end = remaining_buffer.rfind(']')
     
-    if start == -1 or end == -1 or start > end:
-        return [], buffer
-    
-    # Extract the content within the outermost square brackets
-    content = buffer[start+1:end].strip()
+    if start == -1:
+        # If no opening bracket, treat the whole buffer as a potential command
+        content = remaining_buffer
+    elif end == -1 or start > end:
+        # If no closing bracket or mismatched brackets, return no commands
+        return [], remaining_buffer
+    else:
+        # Extract the content within the outermost square brackets
+        content = remaining_buffer[start+1:end].strip()
+        remaining_buffer = remaining_buffer[end+1:].strip()
     
     # Split the content into individual command strings
-    command_strings = []
     bracket_count = 0
     current_command = ""
+    in_string = False
+    escape_next = False
     
     for char in content:
-        if char == '{':
-            bracket_count += 1
-        elif char == '}':
-            bracket_count -= 1
+        if not in_string:
+            if char == '{':
+                bracket_count += 1
+            elif char == '}':
+                bracket_count -= 1
+        
+        if char == '"' and not escape_next:
+            in_string = not in_string
+        
+        escape_next = char == '\\' and not escape_next
         
         current_command += char
         
         if bracket_count == 0 and char == '}':
-            command_strings.append(current_command.strip())
+            try:
+                cmd = json.loads(current_command)
+                if isinstance(cmd, dict) and len(cmd) == 1:
+                    cmd_name = next(iter(cmd))
+                    cmd_args = cmd[cmd_name]
+                    if isinstance(cmd_args, dict):
+                        complete_commands.append(cmd)
+            except json.JSONDecodeError:
+                pass
             current_command = ""
     
-    # Parse each command string
-    for cmd_str in command_strings:
-        try:
-            cmd = json.loads('{' + cmd_str + '}')
-            if isinstance(cmd, dict) and len(cmd) == 1:
-                cmd_name = next(iter(cmd))
-                cmd_args = cmd[cmd_name]
-                if isinstance(cmd_args, dict) and len(cmd_args) > 0:
-                    complete_commands.append(cmd)
-        except json.JSONDecodeError:
-            pass
-    
-    # Update the remaining buffer
-    if complete_commands:
-        remaining_buffer = buffer[end+1:].strip()
+    # If there's an incomplete command at the end, add it back to the remaining buffer
+    if current_command.strip():
+        remaining_buffer = current_command + remaining_buffer
     
     return complete_commands, remaining_buffer
 
