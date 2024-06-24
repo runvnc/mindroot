@@ -186,13 +186,14 @@ async def send_message(log_id: str, message_data: Message):
             out_results = []
             
             for result in results:
-                if result['result'] is not None:                    
+                if result['result'] is not None:
                     if result['result'] == 'continue':
                         out_results.append(result)
                         continue_processing = True
                     elif result['result'] == 'stop':
                         continue_processing = False
                     else:
+                        out_results.append(result)
                         continue_processing = True
 
             if continue_processing:
