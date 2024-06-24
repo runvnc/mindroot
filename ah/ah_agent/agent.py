@@ -197,6 +197,22 @@ class Agent:
         async for part in stream:
             chunk = part
             buffer += chunk
+
+
+            # try to parse as partial
+            # should be an array with at least one object
+            # keep track of number of commands processed
+            # if the total number of commands processed is the number
+            # of items in the array then we are done
+            # we ignore N commands already processed
+            # call partial_command
+            # to detect a new full command:
+            # run with allow.OBJ only and see if number of found
+            # commands is the same as with allow.ALL  
+            # if not then the last command is incomplete
+            # to get full commands use allow.OBJ
+            # any commands greater than number already processed are new  
+            
             buffer_changed = True
 
             print(f"start of part processing.\n part: ||{part}|| current buffer:\n||{buffer}||")
