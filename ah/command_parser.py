@@ -1,5 +1,6 @@
 import json
 from typing import List, Dict, Tuple, Any
+from partial_json_parser import parse_partial_json
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -14,69 +15,24 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     complete_commands = []
     remaining_buffer = buffer.strip()
     
-    # Find the outermost square brackets
-    start = remaining_buffer.find('[')
-    end = remaining_buffer.rfind(']')
+    # Use partial_json_parser to parse the buffer
+    parsed_data, index = parse_partial_json(remaining_buffer)
     
-    if start == -1:
-        # If no opening bracket, treat the whole buffer as a potential command
-        content = remaining_buffer
-    elif end == -1 or start > end:
-        # If no closing bracket or mismatched brackets, return no commands
-        return [], remaining_buffer
-    else:
-        # Extract the content within the outermost square brackets
-        content = remaining_buffer[start+1:end].strip()
-        remaining_buffer = remaining_buffer[end+1:].strip()
-    
-    # Split the content into individual command strings
-    bracket_count = 0
-    current_command = ""
-    in_string = False
-    escape_next = False
-    
-    for char in content:
-        if not in_string:
-            if char == '{':
-                bracket_count += 1
-            elif char == '}':
-                bracket_count -= 1
-        
-        if char == '"' and not escape_next:
-            in_string = not in_string
-        
-        escape_next = char == '\\' and not escape_next
-        
-        current_command += char
-        
-        if bracket_count == 0 and char == '}':
-            try:
-                cmd = json.loads(current_command)
-                if isinstance(cmd, dict) and len(cmd) == 1:
-                    cmd_name = next(iter(cmd))
-                    cmd_args = cmd[cmd_name]
-                    if isinstance(cmd_args, dict):
-                        complete_commands.append(cmd)
-            except json.JSONDecodeError:
-                pass
-            current_command = ""
-    
-    # If there's an incomplete command at the end, add it back to the remaining buffer
-    if current_command.strip():
-        remaining_buffer = current_command + remaining_buffer
-    
-    # Handle cases where there are no square brackets
-    if not complete_commands and remaining_buffer:
-        try:
-            cmd = json.loads(remaining_buffer)
-            if isinstance(cmd, dict) and len(cmd) == 1:
-                cmd_name = next(iter(cmd))
-                cmd_args = cmd[cmd_name]
+    if isinstance(parsed_data, list):
+        for item in parsed_data:
+            if isinstance(item, dict) and len(item) == 1:
+                cmd_name = next(iter(item))
+                cmd_args = item[cmd_name]
                 if isinstance(cmd_args, dict):
-                    complete_commands.append(cmd)
-                    remaining_buffer = ""
-        except json.JSONDecodeError:
-            pass
+                    complete_commands.append(item)
+    elif isinstance(parsed_data, dict) and len(parsed_data) == 1:
+        cmd_name = next(iter(parsed_data))
+        cmd_args = parsed_data[cmd_name]
+        if isinstance(cmd_args, dict):
+            complete_commands.append(parsed_data)
+    
+    # Update the remaining buffer
+    remaining_buffer = remaining_buffer[index:].strip()
     
     return complete_commands, remaining_buffer
 
