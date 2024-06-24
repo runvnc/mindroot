@@ -10,38 +10,32 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     buffer (str): The current buffer of streamed data.
     
     Returns:
-    Tuple[List[Dict[str, Any]], str]: A tuple containing a list of complete commands and the remaining buffer.
+    Tuple[List[Dict[str, Any]], str]: A tuple containing a list of complete commands and the last partial command (if any).
     """
     complete_commands = []
-    
+    current_partial = None
+
     if not buffer.strip():
-        return [], ''
+        return [], None
     
+    try:
+        # try to parse using normal json parser 
+        complete_commands = json.loads(buffer)
+        return complete_commands, None
     try:
         # Use partial_json_parser to parse the buffer
         parsed_data = loads(buffer)
-        
-        if isinstance(parsed_data, list):
-            for item in parsed_data:
-                if isinstance(item, dict) and len(item) == 1:
-                    cmd_name = next(iter(item))
-                    cmd_args = item[cmd_name]
-                    if isinstance(cmd_args, dict):
-                        complete_commands.append(item)
-        elif isinstance(parsed_data, dict) and len(parsed_data) == 1:
-            cmd_name = next(iter(parsed_data))
-            cmd_args = parsed_data[cmd_name]
-            if isinstance(cmd_args, dict):
-                complete_commands.append(parsed_data)
-        
-        # Calculate the remaining buffer
-        parsed_json = ensure_json(buffer)
-        remaining_buffer = buffer[len(parsed_json):].strip()
+        num_completed = len(parsed_data) - 1
+        if num_completed > 0:
+            if num_completed > 1:
+                current_partial = parsed_data[-1]
+            complete_commands = parsed_data[:num_completed]
+
     except Exception:
         # If parsing fails, return an empty list of commands and the entire buffer as remaining
-        return [], buffer.strip()
+        return [], None
     
-    return complete_commands, remaining_buffer
+    return complete_commands, current_partial
 
 # Test cases
 import unittest
