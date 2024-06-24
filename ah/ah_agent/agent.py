@@ -198,6 +198,8 @@ class Agent:
             print(f"Current buffer: ||{buffer}||")
             
             commands, partial_cmd = parse_streaming_commands(buffer)
+            if not isinstance(commands, list):
+                commands = [commands]
 
             print("commands: ", commands)
 
@@ -214,7 +216,7 @@ class Agent:
                         results.append({"cmd": cmd_name, "result": result})
                         num_processed = len(commands)
                     except Exception as e:
-                        print("Error processing command.")
+                        print("Error processing command:", e)
                         print(e)
                         pass
             else:

@@ -177,19 +177,23 @@ async def send_message(log_id: str, message_data: Message):
 
     continue_processing = True
     iterations = 0
-    while continue_processing and iterations < 3:
+    while continue_processing and iterations < 5:
         iterations += 1
         continue_processing = False
         try:
             results = await agent_.chat_commands(current_model, context=context, messages=context.chat_log.get_recent())
+            print("results from chat commands: ", colored(results, 'cyan'))
             out_results = []
+            
             for result in results:
-                if result['result'] is not None:
+                if result['result'] is not None:                    
                     if result['result'] == 'continue':
                         out_results.append(result)
                         continue_processing = True
                     elif result['result'] == 'stop':
                         continue_processing = False
+                    else:
+                        continue_processing = True
 
             if continue_processing:
                 print("Processing iteration: ", iterations, "adding message")
