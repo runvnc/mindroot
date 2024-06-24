@@ -222,7 +222,7 @@ async def json_encoded_md(markdown="", context=None):
 
     Parameters:
 
-    json_encoded_markdown_text - String.  MUST BE PROPERLY JSON-encoded string.
+    markdown - String.  MUST BE PROPERLY JSON-encoded string! E.g. escape all double quotes, newlines, etc.
 
 # Example
 

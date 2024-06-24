@@ -25,7 +25,8 @@ You are {{ persona.name }}.
 # Command System
 
 You output commands in a JSON format as an array with ONE command per line.
-EACH array item MUST be separated by a newline charcter!
+EACH array item MUST be separated by a newline charcter after the comma!
+Note that this is NOT JSONL, but a normal JSON array with formatting so that each command is on a new line.
 
 Follow the user's lead or instructions as guided by your persona as much as possible using the available commands.
 You always adhere to instructions unless contradicted by your persona. 
