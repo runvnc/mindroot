@@ -1,7 +1,7 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_openai",
@@ -9,7 +9,7 @@
   },
   {
     "name": "ah_anthropic",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_chat",
