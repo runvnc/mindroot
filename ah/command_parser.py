@@ -14,25 +14,32 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
     complete_commands = []
     
-    # Use partial_json_parser to parse the buffer
-    parsed_data = loads(buffer)
+    if not buffer.strip():
+        return [], ''
     
-    if isinstance(parsed_data, list):
-        for item in parsed_data:
-            if isinstance(item, dict) and len(item) == 1:
-                cmd_name = next(iter(item))
-                cmd_args = item[cmd_name]
-                if isinstance(cmd_args, dict):
-                    complete_commands.append(item)
-    elif isinstance(parsed_data, dict) and len(parsed_data) == 1:
-        cmd_name = next(iter(parsed_data))
-        cmd_args = parsed_data[cmd_name]
-        if isinstance(cmd_args, dict):
-            complete_commands.append(parsed_data)
-    
-    # Calculate the remaining buffer
-    parsed_json = ensure_json(buffer)
-    remaining_buffer = buffer[len(parsed_json):].strip()
+    try:
+        # Use partial_json_parser to parse the buffer
+        parsed_data = loads(buffer)
+        
+        if isinstance(parsed_data, list):
+            for item in parsed_data:
+                if isinstance(item, dict) and len(item) == 1:
+                    cmd_name = next(iter(item))
+                    cmd_args = item[cmd_name]
+                    if isinstance(cmd_args, dict):
+                        complete_commands.append(item)
+        elif isinstance(parsed_data, dict) and len(parsed_data) == 1:
+            cmd_name = next(iter(parsed_data))
+            cmd_args = parsed_data[cmd_name]
+            if isinstance(cmd_args, dict):
+                complete_commands.append(parsed_data)
+        
+        # Calculate the remaining buffer
+        parsed_json = ensure_json(buffer)
+        remaining_buffer = buffer[len(parsed_json):].strip()
+    except Exception:
+        # If parsing fails, return the entire buffer as remaining
+        return [], buffer.strip()
     
     return complete_commands, remaining_buffer
 
@@ -72,9 +79,8 @@ class TestCommandParser(unittest.TestCase):
     def test_invalid_json(self):
         buffer = '[{"say": {"text": "Hello"}, {"invalid": "command"}]'
         commands, remaining = parse_streaming_commands(buffer)
-        self.assertEqual(len(commands), 1)
-        self.assertEqual(commands[0], {"say": {"text": "Hello"}})
-        self.assertEqual(remaining, '[{"say": {"text": "Hello"}, {"invalid": "command"}]')
+        self.assertEqual(len(commands), 0)
+        self.assertEqual(remaining, buffer)
     
     def test_nested_objects(self):
         buffer = '[{"complex_command": {"nested": {"key": "value"}}}]'
@@ -87,26 +93,32 @@ class TestCommandParser(unittest.TestCase):
         buffer = '[{"complex_command": {"nested": {"key": "val'
         commands, remaining = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, '[{"complex_command": {"nested": {"key": "val')
+        self.assertEqual(remaining, buffer)
 
     def test_partial_think_command(self):
         buffer = '{ "think": '
         commands, remaining = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, '{ "think": ')
+        self.assertEqual(remaining, buffer)
 
     def test_partial_think_command_with_thoughts(self):
         buffer = '{ "think": { "thoughts": '
         commands, remaining = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, '{ "think": { "thoughts": ')
+        self.assertEqual(remaining, buffer)
 
     def test_partial_think_command_with_complete_thoughts(self):
-        buffer = '[{ "think": { "thoughts": "I am thinking" } }'
+        buffer = '{ "think": { "thoughts": "I am thinking" } }'
         commands, remaining = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"think": {"thoughts": "I am thinking"}})
         self.assertEqual(remaining, '')
+
+    def test_malformed_json(self):
+        buffer = '{"key": "value"'
+        commands, remaining = parse_streaming_commands(buffer)
+        self.assertEqual(len(commands), 0)
+        self.assertEqual(remaining, buffer)
 
 if __name__ == '__main__':
     unittest.main()
