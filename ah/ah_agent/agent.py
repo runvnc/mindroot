@@ -189,7 +189,7 @@ class Agent:
 
     async def parse_cmd_stream(self, stream, context):
         from partial_json_parser import loads, Allow
-        from partial_json_parser.options import OBJ, ARR
+        from partial_json_parser.core.options import OBJ, ARR
 
         buffer = ""
         results = []
