@@ -112,5 +112,24 @@ class TestCommandParser(unittest.TestCase):
         self.assertEqual(len(commands), 0)
         self.assertEqual(remaining, '[{"complex_command": {"nested": {"key": "val')
 
+    def test_partial_think_command(self):
+        buffer = '{ "think": '
+        commands, remaining = parse_streaming_commands(buffer)
+        self.assertEqual(len(commands), 0)
+        self.assertEqual(remaining, '{ "think": ')
+
+    def test_partial_think_command_with_thoughts(self):
+        buffer = '{ "think": { "thoughts": '
+        commands, remaining = parse_streaming_commands(buffer)
+        self.assertEqual(len(commands), 0)
+        self.assertEqual(remaining, '{ "think": { "thoughts": ')
+
+    def test_partial_think_command_with_complete_thoughts(self):
+        buffer = '[{ "think": { "thoughts": "I am thinking" } }'
+        commands, remaining = parse_streaming_commands(buffer)
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0], {"think": {"thoughts": "I am thinking"}})
+        self.assertEqual(remaining, '')
+
 if __name__ == '__main__':
     unittest.main()
