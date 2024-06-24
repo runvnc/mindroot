@@ -44,75 +44,75 @@ class TestCommandParser(unittest.TestCase):
     
     def test_single_complete_command(self):
         buffer = '[{"say": {"text": "Hello", "done": true}}]'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"say": {"text": "Hello", "done": True}})
-        self.assertEqual(remaining, '')
+        self.assertIsNone(partial)
     
     def test_multiple_complete_commands(self):
         buffer = '[{"say": {"text": "Hello"}}, {"do_something": {"arg1": "value1"}}]'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 2)
         self.assertEqual(commands[0], {"say": {"text": "Hello"}})
         self.assertEqual(commands[1], {"do_something": {"arg1": "value1"}})
-        self.assertEqual(remaining, '')
+        self.assertIsNone(partial)
     
     def test_partial_command(self):
         buffer = '[{"say": {"text": "Hello"}}, {"do_something": {"arg1": "valu'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"say": {"text": "Hello"}})
-        self.assertEqual(remaining, ', {"do_something": {"arg1": "valu')
+        self.assertEqual(partial, {"do_something": {"arg1": "valu"}})
     
     def test_empty_buffer(self):
         buffer = ''
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, '')
+        self.assertIsNone(partial)
     
     def test_invalid_json(self):
         buffer = '[{"say": {"text": "Hello"}, {"invalid": "command"}]'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, buffer)
+        self.assertIsNone(partial)
     
     def test_nested_objects(self):
         buffer = '[{"complex_command": {"nested": {"key": "value"}}}]'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"complex_command": {"nested": {"key": "value"}}})
-        self.assertEqual(remaining, '')
+        self.assertIsNone(partial)
     
     def test_partial_nested_objects(self):
         buffer = '[{"complex_command": {"nested": {"key": "val'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, buffer)
+        self.assertEqual(partial, {"complex_command": {"nested": {"key": "val"}}})
 
     def test_partial_think_command(self):
         buffer = '{ "think": '
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, buffer)
+        self.assertEqual(partial, {"think": None})
 
     def test_partial_think_command_with_thoughts(self):
         buffer = '{ "think": { "thoughts": '
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, buffer)
+        self.assertEqual(partial, {"think": {"thoughts": None}})
 
     def test_partial_think_command_with_complete_thoughts(self):
         buffer = '{ "think": { "thoughts": "I am thinking" } }'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"think": {"thoughts": "I am thinking"}})
-        self.assertEqual(remaining, '')
+        self.assertIsNone(partial)
 
     def test_malformed_json(self):
         buffer = '{"key": "value"'
-        commands, remaining = parse_streaming_commands(buffer)
+        commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(remaining, buffer)
+        self.assertEqual(partial, {"key": "value"})
 
 if __name__ == '__main__':
     unittest.main()
