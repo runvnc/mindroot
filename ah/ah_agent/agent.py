@@ -211,7 +211,7 @@ class Agent:
                     cmd_args = cmd[cmd_name]
 
                     # Check if the command is complete
-                    if loads(json.dumps(cmd), OBJ) == cmd:
+                    if i == processed_commands and isinstance(cmd_args, dict) and len(cmd_args) > 0:
                         print(f"Processing complete command: {cmd}")
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
@@ -219,9 +219,7 @@ class Agent:
                         processed_commands += 1
                     else:
                         print(f"Partial command detected: {cmd}")
-                        if i > processed_commands:
-                            # This is a new partial command
-                            await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
 
                 # Remove processed commands from the buffer
                 if processed_commands > 0:
