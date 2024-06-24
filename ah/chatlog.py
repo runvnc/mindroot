@@ -23,7 +23,12 @@ class ChatLog:
     def add_message(self, message: Dict[str, str]) -> None:
         if len(self.messages)>0 and self.messages[-1]['role'] == message['role']:
             print("found repeat role")
-            self.messages[-1]['content'] += '\n' + message['content']
+            try:
+                cmd_list = json.loads(self.messages[-1]['content'])
+                new_cmd_list = cmd_list + json.loads(message['content'])
+                self.messages[-1]['content'] = json.dumps(new_cmd_list)
+            except Exception as e:
+                print('error combining commands', e)
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
