@@ -241,7 +241,7 @@ async def json_encoded_md(markdown="", context=None):
                                             "agent": context.agent['name'] })
     json_cmd = { "json_encoded_md": { "markdown": markdown } }
 
-    context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
+    #context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
 
 
 @router.get("/admin", response_class=HTMLResponse)

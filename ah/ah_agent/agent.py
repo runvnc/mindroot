@@ -89,7 +89,7 @@ class Agent:
         #    #print("Unloading llm")
         #    #await use_ollama.unload(self.model)
         #    #await asyncio.sleep(0.3)
-        context.chat_log.add_message({"role": "assistant", "content": json_cmd})
+        context.chat_log.add_message({"role": "assistant", "content": [json_cmd]})
 
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
