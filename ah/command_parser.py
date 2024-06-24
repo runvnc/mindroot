@@ -38,7 +38,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         parsed_json = ensure_json(buffer)
         remaining_buffer = buffer[len(parsed_json):].strip()
     except Exception:
-        # If parsing fails, return the entire buffer as remaining
+        # If parsing fails, return an empty list of commands and the entire buffer as remaining
         return [], buffer.strip()
     
     return complete_commands, remaining_buffer
@@ -68,7 +68,7 @@ class TestCommandParser(unittest.TestCase):
         commands, remaining = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"say": {"text": "Hello"}})
-        self.assertEqual(remaining, '[{"say": {"text": "Hello"}}, {"do_something": {"arg1": "valu')
+        self.assertEqual(remaining, ', {"do_something": {"arg1": "valu')
     
     def test_empty_buffer(self):
         buffer = ''
