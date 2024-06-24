@@ -188,111 +188,47 @@ class Agent:
 
 
     async def parse_cmd_stream(self, stream, context):
+        from partial_json_parser import loads, Allow
+        from partial_json_parser.options import OBJ, ARR
+
         buffer = ""
         results = []
-        last_partial_command = None
-        last_partial_args = None
-        parse_error = ''
+        processed_commands = 0
 
         async for part in stream:
-            chunk = part
-            buffer += chunk
+            buffer += part
+            print(f"Current buffer: ||{buffer}||")
 
+            try:
+                # Try to parse the buffer as a complete or partial JSON
+                parsed = loads(buffer, OBJ | ARR)
+                
+                if not isinstance(parsed, list):
+                    parsed = [parsed]
 
-            # try to parse as partial
-            # should be an array with at least one object
-            # keep track of number of commands processed
-            # if the total number of commands processed is the number
-            # of items in the array then we are done
-            # we ignore N commands already processed
-            # call partial_command
-            # to detect a new full command:
-            # run with allow.OBJ only and see if number of found
-            # commands is the same as with allow.ALL  
-            # if not then the last command is incomplete
-            # to get full commands use allow.OBJ
-            # any commands greater than number already processed are new  
-            
-            buffer_changed = True
+                for i, cmd in enumerate(parsed[processed_commands:], start=processed_commands):
+                    cmd_name = next(iter(cmd))
+                    cmd_args = cmd[cmd_name]
 
-            print(f"start of part processing.\n part: ||{part}|| current buffer:\n||{buffer}||")
-
-            while buffer and buffer_changed:
-                buffer_changed = False
-                try:
-                    # Attempt to parse the buffer as a full JSON object
-                    json_obj = json.loads(buffer)
-                    if isinstance(json_obj, str):
-                        print("not processing string, incomplete command")
-                        break
+                    # Check if the command is complete
+                    if loads(json.dumps(cmd), OBJ) == cmd:
+                        print(f"Processing complete command: {cmd}")
+                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                        await context.command_result(cmd_name, result)
+                        results.append({"cmd": cmd_name, "result": result})
+                        processed_commands += 1
                     else:
-                        print("json_obj is not a string")
-                        print(json_obj)
+                        print(f"Partial command detected: {cmd}")
+                        if i > processed_commands:
+                            # This is a new partial command
+                            await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
 
-                    buffer = ""
-                    result_ = None
-                    if not isinstance(json_obj, list):
-                        json_obj = [json_obj]
-                    for cmd in json_obj:
-                        print(f"Processing command: {cmd}")
-                        if isinstance(cmd, str):
-                            print("2 - not processing string, incomplete command")
-                            break
-                        result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
-                        if result_ is not None:
-                            for result in result_:
-                                results.append(result)
-                    if result_ is not None:
-                        for result in result_:
-                            results.append(result)
-                except JSONDecodeError as e:
-                    # Handle partial JSON objects
-                    try:
-                        partial = partial_json_parser.loads(buffer)
-                        if isinstance(partial, list):
-                            partial = partial[0]
+                # Remove processed commands from the buffer
+                if processed_commands > 0:
+                    buffer = json.dumps(parsed[processed_commands:])
 
-                        partial_command = next(iter(partial))
-                        if partial_command is not None:
-                            if isinstance(partial, list):
-                                partial = partial[0]
-                            partial_args = partial[partial_command]
-                            if partial_command != last_partial_command or partial_args != last_partial_args:
-                                if isinstance(partial_args, str) and last_partial_args is not None:
-                                    diff_str = find_new_substring(last_partial_args, partial_args)
-                                else:
-                                    diff_str = json.dumps(partial_args)
-                                await context.partial_command(partial_command, diff_str, partial_args)
-                                last_partial_command = partial_command
-                                last_partial_args = partial_args
-                                buffer_changed = True
-                    except Exception as e:
-                        print("error parsing partial command:", e)
-                        print("buffer = ", buffer)
-                        break
-                    
-            if len(buffer) > 0: 
-                print("Remaining buffer:")
-                print(buffer)
-                try:
-                    json_obj = json.loads(buffer)
-                    for cmd in json_obj:
-                        print(f"Processing remaining command: {cmd}")
-                        result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
-                        if result_ is not None:
-                            for result in result_:
-                                results.append(result)
-                    if result_:
-                        for result in result_:
-                            results.append(result)
-
-                except Exception as e:
-                    print("Parse error?:")
-                    print(parse_error)
-
-            print("--- processed stream part --- ")
-
-
+            except Exception as e:
+                print(f"Error parsing JSON: {e}")
 
         return results
 
