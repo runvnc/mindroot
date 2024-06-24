@@ -1,6 +1,6 @@
 import json
 from typing import List, Dict, Tuple, Any
-from partial_json_parser import parse_partial_json
+from partial_json_parser import loads
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -16,7 +16,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     remaining_buffer = buffer.strip()
     
     # Use partial_json_parser to parse the buffer
-    parsed_data, index = parse_partial_json(remaining_buffer)
+    parsed_data = loads(remaining_buffer)
     
     if isinstance(parsed_data, list):
         for item in parsed_data:
