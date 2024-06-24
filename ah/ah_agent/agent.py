@@ -215,12 +215,13 @@ class Agent:
             else:
                 print("No new commands found")
                 if partial_cmd:
-                    cmd_name = next(iter(partial_cmd))
-                    cmd_args = partial_cmd[cmd_name]
-                    print(f"Partial command detected: {partial_cmd}")
-                    await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
-                except json.JSONDecodeError:
-                    pass
+                    try:
+                        cmd_name = next(iter(partial_cmd))
+                        cmd_args = partial_cmd[cmd_name]
+                        print(f"Partial command detected: {partial_cmd}")
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                    except json.JSONDecodeError:
+                        pass
 
         return results
 
