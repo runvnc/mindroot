@@ -32,7 +32,7 @@ lpips
 
 fastapi
 gdown
-partial_json_parser
+partial-json-parser
 pluggy
 runpod
 together

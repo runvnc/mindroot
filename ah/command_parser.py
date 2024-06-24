@@ -19,18 +19,17 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return [], None
     
     try:
-        # try to parse using normal json parser 
         complete_commands = json.loads(buffer)
         return complete_commands, None
     except json.JSONDecodeError:
-        # Use partial_json_parser to parse the buffer
         try:
             parsed_data = loads(buffer)
-            num_completed = len(parsed_data) - 1
-            if num_completed > 0:
-                complete_commands = parsed_data[:num_completed]
-                if num_completed < len(parsed_data):
-                    current_partial = parsed_data[-1]
+            num_commands = len(parsed_data)
+            if num_commands > 1:
+                complete_commands = parsed_data[:num_commands-1]
+            else:
+                complete_commands = []
+            current_partial = parsed_data[-1]
         except Exception:
             # If parsing fails, return an empty list of commands and None as partial
             return [], None
@@ -84,32 +83,32 @@ class TestCommandParser(unittest.TestCase):
         self.assertIsNone(partial)
     
     def test_partial_nested_objects(self):
-        buffer = '[{"complex_command": {"nested": {"key": "val'
+        buffer = '[ {"complex_command": {"nested": {"key": "val'
         commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
         self.assertEqual(partial, {"complex_command": {"nested": {"key": "val"}}})
 
     def test_partial_think_command(self):
-        buffer = '{ "think": '
+        buffer = '[{ "think": {'
         commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(partial, {"think": None})
+        self.assertEqual(partial, {"think": {} })
 
     def test_partial_think_command_with_thoughts(self):
-        buffer = '{ "think": { "thoughts": '
+        buffer = '[{ "think": { "thoughts": {'
         commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
-        self.assertEqual(partial, {"think": {"thoughts": None}})
+        self.assertEqual(partial, {"think": {"thoughts": {} }})
 
     def test_partial_think_command_with_complete_thoughts(self):
-        buffer = '{ "think": { "thoughts": "I am thinking" } }'
+        buffer = '[{ "think": { "thoughts": "I am thinking" } }]'
         commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 1)
         self.assertEqual(commands[0], {"think": {"thoughts": "I am thinking"}})
         self.assertIsNone(partial)
 
     def test_malformed_json(self):
-        buffer = '{"key": "value"'
+        buffer = '[{"key": "value"'
         commands, partial = parse_streaming_commands(buffer)
         self.assertEqual(len(commands), 0)
         self.assertEqual(partial, {"key": "value"})
