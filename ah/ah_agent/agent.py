@@ -191,25 +191,30 @@ class Agent:
         buffer = ""
         results = []
 
+        num_processed = 0
+
         async for part in stream:
             buffer += part
             print(f"Current buffer: ||{buffer}||")
+            
+            commands, partial_cmd = parse_streaming_commands(buffer)
 
-            commands, buffer = parse_streaming_commands(buffer)
+            print("commands: ", commands)
 
-            for cmd in commands:
-                cmd_name = next(iter(cmd))
-                cmd_args = cmd[cmd_name]
-
-                print(f"Processing complete command: {cmd}")
-                result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
-                await context.command_result(cmd_name, result)
-                results.append({"cmd": cmd_name, "result": result})
-
-            # Handle partial commands
-            if buffer:
-                try:
-                    partial_cmd = json.loads(buffer)
+            if len(commands) > num_processed:
+                print("New command(s) found")
+                for i in range(num_processed, len(commands)):
+                    cmd = commands[i]
+                    cmd_name = next(iter(cmd))
+                    cmd_args = cmd[cmd_name]
+                    print(f"Processing command: {cmd}")
+                    result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                    await context.command_result(cmd_name, result)
+                    results.append({"cmd": cmd_name, "result": result})
+                    num_processed = len(commands)
+            else:
+                print("No new commands found")
+                if partial_cmd:
                     cmd_name = next(iter(partial_cmd))
                     cmd_args = partial_cmd[cmd_name]
                     print(f"Partial command detected: {partial_cmd}")
