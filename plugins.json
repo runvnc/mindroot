@@ -1,7 +1,7 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_openai",
@@ -57,6 +57,6 @@
   },
   {
     "name": "ah_light_theme",
-    "enabled": true
+    "enabled": false
   }
 ]
