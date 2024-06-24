@@ -1,6 +1,6 @@
 import json
 from typing import List, Dict, Tuple, Any
-from partial_json_parser import loads
+from partial_json_parser import loads, ensure_json
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -13,10 +13,9 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     Tuple[List[Dict[str, Any]], str]: A tuple containing a list of complete commands and the remaining buffer.
     """
     complete_commands = []
-    remaining_buffer = buffer.strip()
     
     # Use partial_json_parser to parse the buffer
-    parsed_data = loads(remaining_buffer)
+    parsed_data = loads(buffer)
     
     if isinstance(parsed_data, list):
         for item in parsed_data:
@@ -31,8 +30,9 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         if isinstance(cmd_args, dict):
             complete_commands.append(parsed_data)
     
-    # Update the remaining buffer
-    remaining_buffer = remaining_buffer[index:].strip()
+    # Calculate the remaining buffer
+    parsed_json = ensure_json(buffer)
+    remaining_buffer = buffer[len(parsed_json):].strip()
     
     return complete_commands, remaining_buffer
 
