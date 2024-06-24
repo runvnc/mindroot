@@ -22,18 +22,18 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         # try to parse using normal json parser 
         complete_commands = json.loads(buffer)
         return complete_commands, None
-    try:
+    except json.JSONDecodeError:
         # Use partial_json_parser to parse the buffer
-        parsed_data = loads(buffer)
-        num_completed = len(parsed_data) - 1
-        if num_completed > 0:
-            if num_completed > 1:
-                current_partial = parsed_data[-1]
-            complete_commands = parsed_data[:num_completed]
-
-    except Exception:
-        # If parsing fails, return an empty list of commands and the entire buffer as remaining
-        return [], None
+        try:
+            parsed_data = loads(buffer)
+            num_completed = len(parsed_data) - 1
+            if num_completed > 0:
+                complete_commands = parsed_data[:num_completed]
+                if num_completed < len(parsed_data):
+                    current_partial = parsed_data[-1]
+        except Exception:
+            # If parsing fails, return an empty list of commands and None as partial
+            return [], None
     
     return complete_commands, current_partial
 
