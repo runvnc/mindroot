@@ -1,6 +1,7 @@
 import os
 import json
 from typing import List, Dict
+import sys
 
 class ChatLog:
     def __init__(self, log_id=0, agent=None, context_length: int = 4096):
@@ -29,6 +30,9 @@ class ChatLog:
                 self.messages[-1]['content'] = json.dumps(new_cmd_list)
             except Exception as e:
                 print('error combining commands', e)
+                print(message)
+                print(self.messages[-1])
+                sys.exit(1)
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
