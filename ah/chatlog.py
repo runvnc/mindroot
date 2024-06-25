@@ -29,10 +29,10 @@ class ChatLog:
                 new_cmd_list = cmd_list + json.loads(message['content'])
                 self.messages[-1]['content'] = json.dumps(new_cmd_list)
             except Exception as e:
-                print('error combining commands', e)
+                print('could not combine commands. probably normal if user message and previous system output', e)
                 print(message)
                 print(self.messages[-1])
-                sys.exit(1)
+                self.messages[-1]['content'] = self.messages[-1]['content'] + '\n'+ message['content']
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
