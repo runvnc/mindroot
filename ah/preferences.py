@@ -40,10 +40,10 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
             matching_models.append(setting)
 
     if not matching_models:
-        logging.info('No matching models found')
+        logging.debug('No matching models found')
         return None
 
-    logging.info(f'Matching models found: {matching_models}')
+    logging.debug(f'Matching models found: {matching_models}')
     return matching_models
 
 

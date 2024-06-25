@@ -20,9 +20,7 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
         )
         async def content_stream():
             async for chunk in original_stream:
-                print("claude chunk:", chunk)
                 if chunk.type == 'content_block_delta':
-                    print("claude chunk:", chunk)
                     yield chunk.delta.text
                 else:
                     yield ''

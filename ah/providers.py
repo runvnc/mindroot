@@ -126,7 +126,6 @@ class ProviderManager:
 
     def __getattr__(self, name):
         async def method(*args, **kwargs):
-            print(f"method: {name} called")
             return await self.execute(name, *args, **kwargs)
 
         return method
