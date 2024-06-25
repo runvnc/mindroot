@@ -93,9 +93,12 @@ class ProviderManager:
                     break
 
         if function_info is None:
-            raise ValueError(f"function '{name}' not found. preferred_provider is '{preferred_provider}'.")
+            raise ValueError(f"1. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         implementation = function_info['implementation']
+
+        if implementation is None:
+            raise ValueError(f"2. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         try:
             #print(f"about to execute {name}, args= {args}, kwargs={kwargs}")

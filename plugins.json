@@ -37,7 +37,7 @@
   },
   {
     "name": "ah_swapface",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_ollama",
