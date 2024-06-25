@@ -64,13 +64,11 @@ async def load_organized():
     models = load_json('data/models.json')
     providers = load_json('data/providers.json')
     plugins = load_json('plugins.json')
-    # filter providers where plugin == plugin and plugin is enabled
     
-    # print providers before filtering in green
-    print(colored('providers before filtering = ', 'green'), providers)
+    #print(colored('providers before filtering = ', 'green'), providers)
     
     providers = [provider for provider in providers if any(provider['plugin'] == plugin['name'] and plugin['enabled'] for plugin in plugins)]
-    print("After filter by enabled (red):", colored(providers, 'red'))
+    #print("After filter by enabled (red):", colored(providers, 'red'))
 
     equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
     return organize_for_display(models, providers, equivalent_flags)
@@ -93,7 +91,7 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
         logging.error('Invalid flags')
         return None
 
-    print('matching_models, flags is = ', flags, 'service_or_command_name = ', service_or_command_name)
+    #print('matching_models, flags is = ', flags, 'service_or_command_name = ', service_or_command_name)
     if len(flags) == 0:
         flags = ['no_flags']
     organized_data = await load_organized()
@@ -102,12 +100,12 @@ async def matching_models(service_or_command_name: str, flags: List[str]) -> Opt
     for service in organized_data:
         if service['service'] == service_or_command_name:
             for flag in service['flags']:
-                print('flag = ', flag)
+                #print('flag = ', flag)
                 if flag['flag'] in flags:
                     for entry in flag['models']:
                         result = {}  
                         models = entry['provider']['models']
-                        print('models = ', models)
+                        #print('models = ', models)
                         available_models = [model for model in models if model['available']]
                         if len(available_models) > 0:
                             result.update(available_models[0])
@@ -125,4 +123,4 @@ if __name__ == '__main__':
     providers = load_json('data/providers.json')
     equivalent_flags = load_equivalent_flags('data/equivalent_flags.json')
     organized_data = organize_for_display(models, providers, equivalent_flags)
-    print(json.dumps(organized_data, indent=4))
+    #print(json.dumps(organized_data, indent=4))

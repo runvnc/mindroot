@@ -62,10 +62,10 @@ async def chat_events(log_id: str):
 @service()
 async def agent_output(event: str, data: dict, context=None):
     log_id = context.log_id
-    print("Try to send event: ", event, data)
+    #print("Try to send event: ", event, data)
     if log_id in sse_clients:
         for queue in sse_clients[log_id]:
-            print("sending to sse client!")
+            #print("sending to sse client!")
             await queue.put({"event": event, "data": json.dumps(data)})
 
 @service()

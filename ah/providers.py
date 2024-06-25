@@ -32,7 +32,7 @@ class ProviderManager:
 
     
     async def execute(self, name, *args, **kwargs):
-        print(f"execute: {name} called")
+        #print(f"execute: {name} called")
 
         if check_empty_args(args, kwargs=kwargs):
             raise ValueError(f"function '{name}' called with empty arguments.")
@@ -55,7 +55,7 @@ class ProviderManager:
             kwargs['context'] = self.context
             context = self.context
 
-        print("context is ", context)
+        #print("context is ", context)
         need_model = await uses_models(name)
 
         if context.__class__.__name__ == 'ChatContext':
@@ -63,7 +63,7 @@ class ProviderManager:
             context.data['model'] = None
 
             if need_model and preferred_models is None:
-                print("Did not find preferred, loading all matching based on flags")
+                #print("Did not find preferred, loading all matching based on flags")
                 preferred_models = await matching_models(name, context.flags)
             
             if preferred_models is not None:
@@ -74,20 +74,20 @@ class ProviderManager:
             if len(preferred_models) > 0:
                 preferred_provider = preferred_models[0]['provider']
 
-        print('name = ', name)
-        if need_model:
-            print('preferred models = ', preferred_models)
+        #print('name = ', name)
+        #if need_model:
+        #    print('preferred models = ', preferred_models)
         function_info = None
 
         if not need_model and (preferred_provider is None):
             preferred_provider = self.functions[name][0]['provider']
 
-        print(colored(f"need_model: {need_model}, preferred_provider: {preferred_provider}", "green"))
+        #print(colored(f"need_model: {need_model}, preferred_provider: {preferred_provider}", "green"))
 
         if preferred_provider is not None:
-            print(f"Trying to find function info with preferred provider {preferred_provider}")
+            #print(f"Trying to find function info with preferred provider {preferred_provider}")
             for func_info in self.functions[name]:
-                print("func_info provider", func_info['provider'])
+                #print("func_info provider", func_info['provider'])
                 if func_info['provider'] == preferred_provider:
                     function_info = func_info
                     break
@@ -98,12 +98,12 @@ class ProviderManager:
         implementation = function_info['implementation']
 
         try:
-            print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
-            try: 
-                print(colored(f"model in context: {context.data['model']}", "cyan"))
-                print(colored(f"provider: {function_info['provider']}", "green"))
-            except:
-                pass
+            #print(f"about to execute {name}, args= {args}, kwargs={kwargs}")
+            #try: 
+            #    print(colored(f"model in context: {context.data['model']}", "cyan"))
+            #    print(colored(f"provider: {function_info['provider']}", "green"))
+            #except:
+            #    pass
                 
             result = await implementation(*args, **kwargs)
         except Exception as e:
