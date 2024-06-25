@@ -51,7 +51,7 @@ class ModelPreferences extends BaseEl {
     const response = await fetch('/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({settings})
+      body: JSON.stringify(settings)
     });
 
     if (response.ok) {

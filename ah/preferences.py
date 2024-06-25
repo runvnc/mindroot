@@ -28,18 +28,15 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
         return None
 
     matching_models = []
+    # filter by service_or_command_name
+    settings = [setting for setting in settings if setting['service_or_command_name'] == service_or_command_name]
 
+    # example settings
     for setting in settings:
         print("setting: ", setting)
-        
-        if setting['service_or_command_name'] != service_or_command_name:
-            continue
 
-        positive_flags = set(setting['positive_flags'])
-        negative_flags = set(setting['negative_flags'])
-        input_flags = set(flags)
-
-        if positive_flags.issubset(input_flags) and negative_flags.isdisjoint(input_flags):
+        #if setting['flag'] is in flags
+        if setting['flag'] in flags:
             matching_models.append(setting)
 
     if not matching_models:

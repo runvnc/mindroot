@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
 from typing import List, Dict
 import json
 import os
@@ -48,14 +49,34 @@ def read_equivalent_flags() -> List[List[str]]:
     with open(EQUIVALENT_FLAGS_FILE_PATH, 'r') as equivalent_flags_file:
         return json.load(equivalent_flags_file)
 
+class Setting(BaseModel):
+    service_or_command_name: str
+    flag: str
+    model: str
+
 @router.get('/settings', response_model=List[Dict])
 async def get_settings():
     return read_settings()
 
-@router.post('/settings', response_model=Dict)
-async def save_settings(settings: list):
-    write_settings(settings)
-    return setting
+@router.post('/settings')
+async def save_settings(request: Request):
+    try:
+        body = await request.json()
+        print(f"Received raw body: {body}")
+        
+        if isinstance(body, dict) and 'settings' in body:
+            settings = [Setting(**item) for item in body['settings']]
+        elif isinstance(body, list):
+            settings = [Setting(**item) for item in body]
+        else:
+            raise ValueError("Invalid data format")
+        
+        print(f"Parsed settings: {settings}")
+        write_settings([s.dict() for s in settings])
+        return settings
+    except Exception as e:
+        print(f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.put('/settings/{setting_id}', response_model=Dict)
 async def update_setting(setting_id: int, updated_setting: Dict):
