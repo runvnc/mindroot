@@ -198,7 +198,7 @@ async def send_message(log_id: str, message_data: Message):
                 else:
                     continue_processing = False
 
-            if continue_processing:
+            if len(out_results) > 0:
                 print("Processing iteration: ", iterations, "adding message")
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
         except Exception as e:
