@@ -5,6 +5,15 @@ from typing import List, Dict, Optional
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+async def load_models(model_path: str = 'data/models.json') -> Optional[Dict]:
+    try:
+        with open(model_path, 'r') as model_file:
+            models = json.load(model_file)
+    except Exception as e:
+        logging.error(f'Error reading model file: {e}')
+        return None
+    return models
+
 async def load_provider_data(provider_data_file_path: str = 'data/providers.json') -> Optional[Dict]:
     try:
         with open(provider_data_file_path, 'r') as provider_data_file:
@@ -54,15 +63,18 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
         return None
 
     providers = await load_provider_data()
-    # loop over all matching_models
-    # find provider data where provider.model.name == model.name
-    # set provider name = provider.plugin
+    models = await load_models()
+
     for model in matching_models:
         for provider in providers:
             for provider_model in provider['models']:
                 if provider_model['name'] == model['model']:
                     model['provider'] = provider['plugin']
                     model.update(provider_model)
+                    for model_entry in models:
+                        if model['name'] == provider_model['name']:
+                            model.update(model_entry)
+
                     if 'meta' in model:
                         model.update(model['meta'])
 
