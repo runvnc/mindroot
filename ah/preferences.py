@@ -5,6 +5,16 @@ from typing import List, Dict, Optional
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+async def load_provider_data(provider_data_file_path: str = 'data/providers.json') -> Optional[Dict]:
+    try:
+        with open(provider_data_file_path, 'r') as provider_data_file:
+            provider_data = json.load(provider_data_file)
+    except Exception as e:
+        logging.error(f'Error reading provider data file: {e}')
+        return None
+    return provider_data
+
+
 async def find_preferred_models(service_or_command_name: str, flags: List[str], settings_file_path: str = 'data/preferred_models.json') -> Optional[List[Dict]]:
     if not isinstance(service_or_command_name, str) or not service_or_command_name:
         logging.error('Invalid service_or_command_name')
@@ -43,6 +53,15 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
         logging.debug('No matching models found')
         return None
 
+    providers = await load_provider_data()
+    # loop over all matching_models
+    # find provider data where provider.model.name == model.name
+    # set provider name = provider.plugin
+    for model in matching_models:
+        for provider in providers:
+            for provider_model in provider['model']:
+            if provider_model['name'] == model['name']:
+                model['provider'] = provider['plugin']
     logging.debug(f'Matching models found: {matching_models}')
     return matching_models
 

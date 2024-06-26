@@ -72,6 +72,7 @@ class ProviderManager:
 
         if preferred_models is not None:
             if len(preferred_models) > 0:
+                print("preferred models:", preferred_models)
                 preferred_provider = preferred_models[0]['provider']
 
         #print('name = ', name)
