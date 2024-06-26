@@ -72,14 +72,13 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str], 
                     model['provider'] = provider['plugin']
                     model.update(provider_model)
                     for model_entry in models:
-                        if model['name'] == provider_model['name']:
+                        if model['name'] == model['model']:
                             model.update(model_entry)
+                            break
 
                     if 'meta' in model:
                         model.update(model['meta'])
 
-
-    
 
     logging.debug(f'Matching models found: {matching_models}')
     return matching_models
