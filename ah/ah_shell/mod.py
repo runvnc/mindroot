@@ -46,7 +46,13 @@ async def tree(directory='', context=None):
     if 'current_dir' in context.data:
         directory = os.path.join(context.data['current_dir'], directory)
     gitignore_path = os.path.join(directory, '.gitignore')
-    matches = parse_gitignore(gitignore_path)
+    # check if .gitignore exists
+    if not os.path.exists(gitignore_path):
+        # if not, ignore node_modules, python cache, etc.
+        # if in one of those dirs then return false
+        matches = lambda path: not any(fnmatch.fnmatch(path, pattern) for pattern in [ '.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__' ])
+    else:
+        matches = parse_gitignore(gitignore_path)
 
     def exclude(path):
         ignore = [ '.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__' ]
