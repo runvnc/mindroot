@@ -128,7 +128,8 @@ async def send_message(log_id: str, message_data: Message):
         Parameters:
         text - String. The text to say.
         done - Boolean. If true, the system will stop and wait for the user to reply.
-                        If false, the system will reply with "continue", expecting more commands.
+                        If false, the system will expect more commands.
+                        IMPORTANT: specify 'done: true' unless you have more SAY commands to run.
         
         IMPORTANT: if you have additional commands to run, return "done": false!
                    otherwise the user will have to ask you to just continue.
