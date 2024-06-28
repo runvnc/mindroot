@@ -3,11 +3,13 @@ from ..services import service
 import anthropic
 import os
 
+client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+
 @service()
 async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperature=0.0, max_tokens=400, num_gpu_layers=0):
     try:
         model = "claude-3-5-sonnet-20240620"
-        client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         system = messages[0]['content']
         messages = messages[1:]
         original_stream = await client.messages.create(
