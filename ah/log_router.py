@@ -1,7 +1,7 @@
 from loguru import logger
 from fastapi import APIRouter, Query
 from fastapi.responses import HTMLResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from .logfiles import get_logs
 
 router = APIRouter()
@@ -16,10 +16,13 @@ async def get_logs_page():
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
             h1 { color: #333; }
-            .instructions { background-color: #f4f4f4; padding: 15px; border-radius: 5px; }
+            .instructions { background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
             .browser-instructions { margin-top: 20px; }
             .browser-instructions h3 { margin-bottom: 5px; }
             .browser-instructions ul { margin-top: 5px; }
+            form { margin-bottom: 20px; }
+            label { display: inline-block; margin-right: 10px; }
+            input[type="datetime-local"] { margin-right: 20px; }
         </style>
     </head>
     <body>
@@ -54,15 +57,57 @@ async def get_logs_page():
             </div>
         </div>
         
+        <form id="logForm">
+            <label for="startTime">Start Time:</label>
+            <input type="datetime-local" id="startTime" name="startTime">
+            
+            <label for="endTime">End Time:</label>
+            <input type="datetime-local" id="endTime" name="endTime">
+            
+            <label for="presentTime">
+                <input type="checkbox" id="presentTime" name="presentTime" checked>
+                Use Present Time
+            </label>
+            
+            <button type="submit">Fetch Logs</button>
+        </form>
+        
         <script>
+            function setDefaultTimes() {
+                const now = new Date();
+                const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+                
+                document.getElementById('startTime').value = tenMinutesAgo.toISOString().slice(0, 16);
+                document.getElementById('endTime').value = now.toISOString().slice(0, 16);
+            }
+
+            function toggleEndTime() {
+                const endTimeInput = document.getElementById('endTime');
+                endTimeInput.disabled = document.getElementById('presentTime').checked;
+            }
+
+            document.getElementById('presentTime').addEventListener('change', toggleEndTime);
+
+            document.getElementById('logForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await fetchLogs();
+            });
+
             async function fetchLogs() {
-                const end = new Date();
-                const start = new Date(end.getTime() - 10 * 60 * 1000);  // 10 minutes ago
-                const response = await fetch(`/api/logs?start=${start.toISOString()}&end=${end.toISOString()}`);
+                const startTime = document.getElementById('startTime').value;
+                let endTime = document.getElementById('endTime').value;
+                
+                if (document.getElementById('presentTime').checked) {
+                    endTime = new Date().toISOString();
+                }
+
+                const response = await fetch(`/api/logs?start=${startTime}&end=${endTime}`);
                 const logs = await response.json();
                 console.log(logs);
             }
-            fetchLogs();
+
+            setDefaultTimes();
+            toggleEndTime();
         </script>
     </body>
     </html>
