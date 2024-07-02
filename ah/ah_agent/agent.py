@@ -186,7 +186,7 @@ class Agent:
 
         async for part in stream:
             buffer += part
-            #print(f"Current buffer: ||{buffer}||")
+            logger.debug(f"Current buffer: ||{buffer}||")
             
             commands, partial_cmd = parse_streaming_commands(buffer)
             if not isinstance(commands, list):
