@@ -20,6 +20,9 @@ def json_sink(message):
     }
     write_log(log_entry)
 
+# Log an example message to test function logging
+logger.info("This is a test log message")
+
 logger.add(json_sink, level="DEBUG")
 
 def generate_file_name(timestamp):
