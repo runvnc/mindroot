@@ -29,7 +29,7 @@
   },
   {
     "name": "ah_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_runpod_sd",

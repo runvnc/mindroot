@@ -5,6 +5,8 @@ from ..commands import command
 from gitignore_parser import parse_gitignore
 from collections import OrderedDict
 
+DEFAULT_EXCLUDE = ['.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__', '.ipynb_checkpoints']
+
 @command()
 async def execute_command(cmd="", context=None):
     """Execute a system command and return the output.
@@ -37,47 +39,37 @@ async def mkdir(directory="", context=None):
     except Exception as e:
         return f"Failed to create directory '{directory}': {e}"
 
+def should_exclude(path, matches):
+    return any(fnmatch.fnmatch(path, pattern) for pattern in DEFAULT_EXCLUDE) or matches(path)
+
 @command()
 async def tree(directory='', context=None):
-    """List directory structure excluding patterns from .gitignore.
+    """List directory structure excluding patterns from .gitignore and default exclusions.
     Example:
     { "tree": { "directory": "" } }
     """
     if 'current_dir' in context.data:
         directory = os.path.join(context.data['current_dir'], directory)
     gitignore_path = os.path.join(directory, '.gitignore')
-    # check if .gitignore exists
-    if not os.path.exists(gitignore_path):
-        # if not, ignore node_modules, python cache, etc.
-        # if in one of those dirs then return false
-        matches = lambda path: any(fnmatch.fnmatch(path, pattern) for pattern in [ '.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__' ])
-    else:
+    if os.path.exists(gitignore_path):
         matches = parse_gitignore(gitignore_path)
-
-    def exclude(path):
-        ignore = [ '.git', 'node_modules', 'dist', 'build', 'coverage', '__pycache__' ]
-        if path.startswith('.'):
-            return True
-        if any(fnmatch.fnmatch(path, pattern) for pattern in ignore):
-            return True
-        return matches(path)
+    else:
+        matches = lambda path: False
 
     def list_dir(dir_path):
         tree_structure = []
         for root, dirs, files in os.walk(dir_path):
-            dirs[:] = [d for d in dirs if not matches(os.path.join(root, d))]
-            files = [f for f in files if not matches(os.path.join(root, f))]
+            dirs[:] = [d for d in dirs if not should_exclude(os.path.join(root, d), matches)]
+            files = [f for f in files if not should_exclude(os.path.join(root, f), matches)]
             node = OrderedDict()
             node['root'] = root
             node['dirs'] = dirs
             node['files'] = files
             tree_structure.append(node)
-
         return tree_structure
 
     tree_structure = list_dir(directory)
     return tree_structure
-
 
 class TestContext:
     def __init__(self, data):

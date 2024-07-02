@@ -40,14 +40,22 @@ async def pic_of_me(prompt="", context=None):
     Generate a picture of the persona given a detailed description of what they 
     they look like and what are doing, where they are, etc.. You will (usually) want to include
     the full text from the Appearance section of the Persona.
+
     The description should be very detailed and specific, and should include
     the persona's appearance such as what they are wearing, their expression, what they are doing.
     Also include details about the background or scene where they are as well as the pose they are in. 
     Always use this instead of 'image' when creating an image of the persona!
 
+    CRITICAL: include details about the image composition such as front-view, side-view, focus,
+    camera settings, lighting, etc.
+    CRITICAL: put the most relevant and distinguishing aspects such as pose or anything unique about this
+    image up front in the description.
+
+    
+
     Example:
 
-    { "pic_of_me": { "prompt": "[where they are, what they are doing, details of appearance, details of scene, etc. etc.]" } }
+    { "pic_of_me": { "prompt": "[in third person: image composition, taken from angle, where they are, what they are doing, details of appearance, details of scene, camera settings, etc. etc.]" } }
 
     """
     persona = context.agent['persona']

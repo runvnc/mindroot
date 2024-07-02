@@ -8,10 +8,10 @@ from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
 from ..services import service 
-import partial_json_parser
 from ..services import service_manager
 import sys
 from ..check_args import *
+from ..ah_agent.command_parser import parse_streaming_commands
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -89,7 +89,7 @@ class Agent:
         #    #print("Unloading llm")
         #    #await use_ollama.unload(self.model)
         #    #await asyncio.sleep(0.3)
-        context.chat_log.add_message({"role": "assistant", "content": json_cmd})
+        context.chat_log.add_message({"role": "assistant", "content": '['+json_cmd+']' })
 
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
@@ -140,36 +140,24 @@ class Agent:
     async def parse_single_cmd(self, json_str, context, buffer, match=None):
         cmd_name = '?'
         try:
-            print("json_str: ", json_str)
             cmd_obj = json.loads(json_str)
-            print(2)
-            print("cmd_obj: ",)
             cmd_name = next(iter(cmd_obj))
-            print("cmd_name: ", cmd_name)
-            print(3)
             if isinstance(cmd_obj, list):
-                print(4)
                 cmd_obj = cmd_obj[0]
-                print(5)
                 cmd_name = next(iter(cmd_obj))
-            print(6)
 
             cmd_args = cmd_obj[cmd_name]
-            print(7)
             # make sure that cmd_name is in self.agent["commands"]
             if cmd_name not in self.agent["commands"]:
                 print("Command not found in agent commands. cmd_name=", cmd_name)
                 return None, buffer
-            print(8)
             if check_empty_args(cmd_args):
                 print("Empty args, cmd_name=", cmd_name)
                 return None, buffer
             else:
                 print("Non-empty args, cmd_name=", cmd_name, "args=", cmd_args)
-            print(9)
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
-            print(10)
             await context.command_result(cmd_name, result)
   
             cmd = {"cmd": cmd_name, "result": result}
@@ -190,99 +178,55 @@ class Agent:
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
-        last_partial_command = None
-        last_partial_args = None
-        parse_error = ''
+
+        num_processed = 0
 
         async for part in stream:
-            chunk = part
-            buffer += chunk
-            buffer_changed = True
+            buffer += part
+            #print(f"Current buffer: ||{buffer}||")
+            
+            commands, partial_cmd = parse_streaming_commands(buffer)
+            if not isinstance(commands, list):
+                commands = [commands]
 
-            print(f"start of part processing.\n part: ||{part}|| current buffer:\n||{buffer}||")
+            #print("commands: ", commands, "partial_cmd:", partial_cmd)
 
-            while buffer and buffer_changed:
-                buffer_changed = False
-                try:
-                    # Attempt to parse the buffer as a full JSON object
-                    json_obj = json.loads(buffer)
-                    if isinstance(json_obj, str):
-                        print("not processing string, incomplete command")
-                        break
-                    else:
-                        print("json_obj is not a string")
-                        print(json_obj)
-
-                    buffer = ""
-                    result_ = None
-                    if not isinstance(json_obj, list):
-                        json_obj = [json_obj]
-                    for cmd in json_obj:
-                        print(f"Processing command: {cmd}")
-                        if isinstance(cmd, str):
-                            print("2 - not processing string, incomplete command")
-                            break
-                        result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
-                        if result_ is not None:
-                            for result in result_:
-                                results.append(result)
-                    if result_ is not None:
-                        for result in result_:
-                            results.append(result)
-                except JSONDecodeError as e:
-                    # Handle partial JSON objects
+            if len(commands) > num_processed:
+                #print("New command(s) found")
+                for i in range(num_processed, len(commands)):
                     try:
-                        partial = partial_json_parser.loads(buffer)
-                        if isinstance(partial, list):
-                            partial = partial[0]
-
-                        partial_command = next(iter(partial))
-                        if partial_command is not None:
-                            if isinstance(partial, list):
-                                partial = partial[0]
-                            partial_args = partial[partial_command]
-                            if partial_command != last_partial_command or partial_args != last_partial_args:
-                                if isinstance(partial_args, str) and last_partial_args is not None:
-                                    diff_str = find_new_substring(last_partial_args, partial_args)
-                                else:
-                                    diff_str = json.dumps(partial_args)
-                                await context.partial_command(partial_command, diff_str, partial_args)
-                                last_partial_command = partial_command
-                                last_partial_args = partial_args
-                                buffer_changed = True
+                        cmd = commands[i]
+                        cmd_name = next(iter(cmd))
+                        cmd_args = cmd[cmd_name]
+                        #print(f"Processing command: {cmd}")
+                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                        await context.command_result(cmd_name, result)
+                        results.append({"cmd": cmd_name, "result": result})
+                        num_processed = len(commands)
                     except Exception as e:
-                        print("error parsing partial command:", e)
-                        print("buffer = ", buffer)
-                        break
-                    
-            if len(buffer) > 0: 
-                print("Remaining buffer:")
-                print(buffer)
-                try:
-                    json_obj = json.loads(buffer)
-                    for cmd in json_obj:
-                        print(f"Processing remaining command: {cmd}")
-                        result_, buffer = await self.parse_single_cmd(json.dumps(cmd), context, buffer)
-                        if result_ is not None:
-                            for result in result_:
-                                results.append(result)
-                    if result_:
-                        for result in result_:
-                            results.append(result)
-
-                except Exception as e:
-                    print("Parse error?:")
-                    print(parse_error)
-
-            print("--- processed stream part --- ")
-
-
+                        #print("Error processing command:", e)
+                        #print(e)
+                        pass
+            else:
+                #print("No new commands found")
+                # check if not None or empty object                
+                if partial_cmd is not None and partial_cmd != {}:
+                    #print("Partial command", partial_cmd)
+                    try:
+                        cmd_name = next(iter(partial_cmd))
+                        cmd_args = partial_cmd[cmd_name]
+                        #print(f"Partial command detected: {partial_cmd}")
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                    except json.JSONDecodeError as de:
+                        #print("failed to parse partial command")
+                        #print(de)
+                        pass
 
         return results
 
     async def render_system_msg(self):
-        print("docstrings:")
-        print(command_manager.get_some_docstrings(self.agent["commands"]))
+        #print("docstrings:")
+        #print(command_manager.get_some_docstrings(self.agent["commands"]))
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,
@@ -295,8 +239,6 @@ class Agent:
             self.system_message += instruction + "\n\n"
 
         return self.system_message
-
-
 
 
     async def chat_commands(self, model, context,
