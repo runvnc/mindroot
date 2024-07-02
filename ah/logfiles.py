@@ -6,7 +6,7 @@ from loguru import logger
 
 # Configure loguru
 logger.remove()  # Remove default handler
-logger.add(sys.stderr, format="{time} | {level} | {message}", level="INFO")
+logger.add(sys.stderr, format="{time} | {level} | {function} | {message}", level="INFO")
 
 # Custom sink for JSON logging
 def json_sink(message):
@@ -14,6 +14,7 @@ def json_sink(message):
     log_entry = {
         "time": record["time"].isoformat(),
         "level": record["level"].name,
+        "function": record["function"],
         "message": record["message"],
         "extra": record["extra"],
     }
