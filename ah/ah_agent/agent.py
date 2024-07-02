@@ -66,6 +66,7 @@ class Agent:
         self.context = context
 
         #if clear_model:
+        #    logger.debug("Unloading model")
         #    asyncio.create_task(use_ollama.unload(self.model))
 
     def use_model(self, model_id, local=True):
@@ -88,7 +89,7 @@ class Agent:
             "context": str(context)
         })
         #if cmd_name != 'say':
-        #    #print("Unloading llm")
+        #    logger.debug("Unloading llm")
         #    #await use_ollama.unload(self.model)
         #    #await asyncio.sleep(0.3)
         context.chat_log.add_message({"role": "assistant", "content": '['+json_cmd+']' })
@@ -191,44 +192,44 @@ class Agent:
             if not isinstance(commands, list):
                 commands = [commands]
 
-            #print("commands: ", commands, "partial_cmd:", partial_cmd)
+            logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
 
             if len(commands) > num_processed:
-                #print("New command(s) found")
+                logger.debug("New command(s) found")
                 for i in range(num_processed, len(commands)):
                     try:
                         cmd = commands[i]
                         cmd_name = next(iter(cmd))
                         cmd_args = cmd[cmd_name]
-                        #print(f"Processing command: {cmd}")
+                        logger.debug(f"Processing command: {cmd}")
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
                         results.append({"cmd": cmd_name, "result": result})
                         num_processed = len(commands)
                     except Exception as e:
-                        #print("Error processing command:", e)
-                        #print(e)
+                        logger.error(f"Error processing command: {e}")
+                        logger.error(str(e))
                         pass
             else:
-                #print("No new commands found")
+                logger.debug("No new commands found")
                 # check if not None or empty object                
                 if partial_cmd is not None and partial_cmd != {}:
-                    #print("Partial command", partial_cmd)
+                    logger.debug(f"Partial command {partial_cmd}")
                     try:
                         cmd_name = next(iter(partial_cmd))
                         cmd_args = partial_cmd[cmd_name]
-                        #print(f"Partial command detected: {partial_cmd}")
+                        logger.debug(f"Partial command detected: {partial_cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
                     except json.JSONDecodeError as de:
-                        #print("failed to parse partial command")
-                        #print(de)
+                        logger.error("Failed to parse partial command")
+                        logger.error(str(de))
                         pass
 
         return results
 
     async def render_system_msg(self):
-        #print("docstrings:")
-        #print(command_manager.get_some_docstrings(self.agent["commands"]))
+        logger.debug("Docstrings:")
+        logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,
@@ -256,8 +257,8 @@ class Agent:
                                         messages=messages)
 
         ret = await self.parse_cmd_stream(stream, context)
-        #print("system message was:")
-        #print(await self.render_system_msg())
+        logger.debug("System message was:")
+        logger.debug(await self.render_system_msg())
         return ret
 
 from ..logfiles import logger
