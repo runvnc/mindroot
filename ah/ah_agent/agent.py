@@ -73,10 +73,10 @@ class Agent:
 
     async def set_cmd_handler(self, cmd_name, callback):
         self.cmd_handler[cmd_name] = callback
-        print("recorded handler for ", cmd_name)
+        logger.info("Recorded handler", extra={"command": cmd_name})
 
     async def unload_llm_if_needed(self):
-        print("not unloading llm")
+        logger.info("Not unloading LLM")
         #await use_ollama.unload(self.model)
         #await asyncio.sleep(1)
 
@@ -98,26 +98,27 @@ class Agent:
             if isinstance(cmd_args, list):
                 #filter out empty strings
                 cmd_args = [x for x in cmd_args if x != '']
-                print(11)
+                logger.debug("Executing command with list arguments", extra={"step": 1})
                 await context.running_command(cmd_name)
-                print(22)
+                logger.debug("Executing command with list arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, *cmd_args)
             elif isinstance(cmd_args, dict):
-                print(33)
+                logger.debug("Executing command with dict arguments", extra={"step": 1})
                 await context.running_command(cmd_name)
-                print(44)
+                logger.debug("Executing command with dict arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, **cmd_args)
             else:
-                print(55)
+                logger.debug("Executing command with single argument", extra={"step": 1})
                 await context.running_command(cmd_name)
-                print(66)
+                logger.debug("Executing command with single argument", extra={"step": 2})
                 return await command_manager.execute(cmd_name, cmd_args)
 
         except Exception as e:
-            print("Error in handle_cmds.")
-            print(e)
-            print("Command:", cmd_name)
-            print("Arguments:", cmd_args)
+            logger.error("Error in handle_cmds", extra={
+                "error": str(e),
+                "command": cmd_name,
+                "arguments": cmd_args
+            })
 
             return {"error": str(e)}
 
@@ -150,13 +151,13 @@ class Agent:
             cmd_args = cmd_obj[cmd_name]
             # make sure that cmd_name is in self.agent["commands"]
             if cmd_name not in self.agent["commands"]:
-                print("Command not found in agent commands. cmd_name=", cmd_name)
+                logger.warning("Command not found in agent commands", extra={"command": cmd_name})
                 return None, buffer
             if check_empty_args(cmd_args):
-                print("Empty args, cmd_name=", cmd_name)
+                logger.info("Empty arguments for command", extra={"command": cmd_name})
                 return None, buffer
             else:
-                print("Non-empty args, cmd_name=", cmd_name, "args=", cmd_args)
+                logger.info("Non-empty arguments for command", extra={"command": cmd_name, "arguments": cmd_args})
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
             await context.command_result(cmd_name, result)
@@ -168,8 +169,7 @@ class Agent:
                 buffer = buffer.lstrip(',').rstrip(',')
             return [cmd], buffer
         except Exception as e:
-            print("Error processing command.")
-            print(e)
+            logger.error("Error processing command", extra={"error": str(e)})
 
             json_str = '[' + json_str + ']'
             
@@ -247,7 +247,7 @@ class Agent:
 
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
-        print("Messages:", messages, flush=True)
+        logger.info("Messages for chat", extra={"messages": messages})
         
         stream = await context.stream_chat(model,
                                         temperature=temperature,
