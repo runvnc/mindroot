@@ -1,6 +1,25 @@
 import os
 import json
+import sys
 from datetime import datetime, timedelta
+from loguru import logger
+
+# Configure loguru
+logger.remove()  # Remove default handler
+logger.add(sys.stderr, format="{time} | {level} | {message}", level="INFO")
+
+# Custom sink for JSON logging
+def json_sink(message):
+    record = message.record
+    log_entry = {
+        "time": record["time"].isoformat(),
+        "level": record["level"].name,
+        "message": record["message"],
+        "extra": record["extra"],
+    }
+    write_log(log_entry)
+
+logger.add(json_sink, level="DEBUG")
 
 def generate_file_name(timestamp):
     return f"logs/log_{timestamp.strftime('%Y-%m-%d_%H')}.json"

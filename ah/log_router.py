@@ -1,27 +1,8 @@
 from loguru import logger
-import sys
-import json
 from fastapi import APIRouter, Query
 from fastapi.responses import HTMLResponse
-from datetime import datetime, timedelta
-from .logfiles import get_logs, write_log
-
-# Configure loguru
-logger.remove()  # Remove default handler
-logger.add(sys.stderr, format="{time} | {level} | {message}", level="INFO")
-
-# Custom sink for JSON logging
-def json_sink(message):
-    record = message.record
-    log_entry = {
-        "time": record["time"].isoformat(),
-        "level": record["level"].name,
-        "message": record["message"],
-        "extra": record["extra"],
-    }
-    write_log(log_entry)
-
-logger.add(json_sink, level="DEBUG")
+from datetime import datetime
+from .logfiles import get_logs
 
 router = APIRouter()
 
