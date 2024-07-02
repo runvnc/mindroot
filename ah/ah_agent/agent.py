@@ -281,3 +281,41 @@ def json_sink(message):
     print(json.dumps(log_entry))
 
 logger.add(json_sink, level="INFO")
+
+from fastapi import APIRouter
+from fastapi.responses import HTMLResponse
+
+router = APIRouter()
+
+@router.get("/logs", response_class=HTMLResponse)
+async def get_logs():
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Log Viewer</title>
+    </head>
+    <body>
+        <h1>Log Viewer</h1>
+        <p>Open the browser console (F12) to view logs.</p>
+        <script>
+            async function fetchLogs() {
+                const response = await fetch('/api/logs');
+                const logs = await response.json();
+                console.log(logs);
+            }
+            fetchLogs();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@router.get("/api/logs")
+async def api_logs():
+    # This is a placeholder. You'll need to implement log reading logic here.
+    # For now, we'll return a sample log entry
+    return [
+        {"time": "2023-06-01T12:00:00", "level": "INFO", "message": "Sample log entry"},
+        {"time": "2023-06-01T12:01:00", "level": "DEBUG", "message": "Another log entry"}
+    ]
