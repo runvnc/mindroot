@@ -36,7 +36,9 @@ def generate_file_name(timestamp):
 
 def get_log_files(start_time, end_time):
     files_to_read = []
-    current_time = start_time
+    # Ensure both datetimes are naive
+    current_time = start_time.replace(tzinfo=None)
+    end_time = end_time.replace(tzinfo=None)
     while current_time <= end_time:
         file_name = generate_file_name(current_time)
         if os.path.exists(file_name):
@@ -45,6 +47,10 @@ def get_log_files(start_time, end_time):
     return files_to_read
 
 async def get_logs(start_time, end_time, limit=1000, cursor=None):
+    # Ensure start_time and end_time are naive
+    start_time = start_time.replace(tzinfo=None)
+    end_time = end_time.replace(tzinfo=None)
+    
     files = get_log_files(start_time, end_time)
     logs = []
     next_cursor = None
@@ -53,9 +59,9 @@ async def get_logs(start_time, end_time, limit=1000, cursor=None):
         with open(file, 'r') as f:
             for line in f:
                 log_entry = json.loads(line)
-                log_time = datetime.fromisoformat(log_entry['time'])
+                log_time = datetime.fromisoformat(log_entry['time']).replace(tzinfo=None)
                 
-                if cursor and log_time <= cursor:
+                if cursor and log_time <= cursor.replace(tzinfo=None):
                     continue
                 
                 if start_time <= log_time <= end_time:
