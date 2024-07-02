@@ -15,7 +15,7 @@ from ..ah_agent.command_parser import parse_streaming_commands
 
 @service()
 async def get_agent_data(agent_name, context=None):
-    print("agent name is", agent_name, file=sys.stderr)
+    logger.info("Agent name", extra={"agent_name": agent_name})
 
     agent_path = os.path.join('data/agents', 'local', agent_name)
 
@@ -81,10 +81,11 @@ class Agent:
         #await asyncio.sleep(1)
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
-        print(f"Command: {cmd_name}")
-        print(f"Arguments: {cmd_args}")
-        print("Context:", context)
-        print('----------------------------------')
+        logger.info("Command execution", extra={
+            "command": cmd_name,
+            "arguments": cmd_args,
+            "context": str(context)
+        })
         #if cmd_name != 'say':
         #    #print("Unloading llm")
         #    #await use_ollama.unload(self.model)
@@ -258,3 +259,13 @@ class Agent:
         #print(await self.render_system_msg())
         return ret
 
+import logging
+from pythonjsonlogger import jsonlogger
+
+# Set up the logger
+logger = logging.getLogger()
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter()
+logHandler.setFormatter(formatter)
+logger.addHandler(logHandler)
+logger.setLevel(logging.INFO)
