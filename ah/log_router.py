@@ -13,10 +13,47 @@ async def get_logs_page():
     <html>
     <head>
         <title>Log Viewer</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+            h1 { color: #333; }
+            .instructions { background-color: #f4f4f4; padding: 15px; border-radius: 5px; }
+            .browser-instructions { margin-top: 20px; }
+            .browser-instructions h3 { margin-bottom: 5px; }
+            .browser-instructions ul { margin-top: 5px; }
+        </style>
     </head>
     <body>
         <h1>Log Viewer</h1>
-        <p>Open the browser console (F12) to view logs.</p>
+        <div class="instructions">
+            <p>To view logs, you need to open your browser's Developer Console. Here's how to do it in different browsers:</p>
+            
+            <div class="browser-instructions">
+                <h3>Chrome / Edge:</h3>
+                <ul>
+                    <li>Windows/Linux: Press Ctrl + Shift + J</li>
+                    <li>Mac: Press Cmd + Option + J</li>
+                    <li>Or go to Menu > More Tools > Developer Tools, then click on "Console" tab</li>
+                </ul>
+            </div>
+            
+            <div class="browser-instructions">
+                <h3>Firefox:</h3>
+                <ul>
+                    <li>Windows/Linux: Press Ctrl + Shift + K</li>
+                    <li>Mac: Press Cmd + Option + K</li>
+                    <li>Or go to Menu > Web Developer > Web Console</li>
+                </ul>
+            </div>
+            
+            <div class="browser-instructions">
+                <h3>Safari:</h3>
+                <ul>
+                    <li>Press Cmd + Option + C</li>
+                    <li>Or go to Develop > Show JavaScript Console (you may need to enable the Develop menu in Safari preferences)</li>
+                </ul>
+            </div>
+        </div>
+        
         <script>
             async function fetchLogs() {
                 const end = new Date();
