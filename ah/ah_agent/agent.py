@@ -15,7 +15,7 @@ from ..ah_agent.command_parser import parse_streaming_commands
 
 @service()
 async def get_agent_data(agent_name, context=None):
-    logger.info("Agent name", extra={"agent_name": agent_name})
+    logger.info("Agent name: {agent_name}", agent_name=agent_name)
 
     agent_path = os.path.join('data/agents', 'local', agent_name)
 
@@ -73,7 +73,7 @@ class Agent:
 
     async def set_cmd_handler(self, cmd_name, callback):
         self.cmd_handler[cmd_name] = callback
-        logger.info("Recorded handler", extra={"command": cmd_name})
+        logger.info("Recorded handler for command: {command}", command=cmd_name)
 
     async def unload_llm_if_needed(self):
         logger.info("Not unloading LLM")
@@ -81,7 +81,8 @@ class Agent:
         #await asyncio.sleep(1)
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
-        logger.info("Command execution", extra={
+        logger.info("Command execution: {command}", command=cmd_name)
+        logger.debug("Command details: {details}", details={
             "command": cmd_name,
             "arguments": cmd_args,
             "context": str(context)
@@ -259,13 +260,24 @@ class Agent:
         #print(await self.render_system_msg())
         return ret
 
-import logging
-from pythonjsonlogger import jsonlogger
+from loguru import logger
+import sys
+import json
 
-# Set up the logger
-logger = logging.getLogger()
-logHandler = logging.StreamHandler()
-formatter = jsonlogger.JsonFormatter()
-logHandler.setFormatter(formatter)
-logger.addHandler(logHandler)
-logger.setLevel(logging.INFO)
+# Configure loguru
+logger.remove()  # Remove default handler
+logger.add(sys.stderr, format="{time} | {level} | {message}", level="INFO")
+logger.add("logs/file_{time}.log", rotation="500 MB", level="DEBUG", serialize=True)
+
+# Custom sink for JSON logging
+def json_sink(message):
+    record = message.record
+    log_entry = {
+        "time": record["time"].isoformat(),
+        "level": record["level"].name,
+        "message": record["message"],
+        "extra": record["extra"],
+    }
+    print(json.dumps(log_entry))
+
+logger.add(json_sink, level="INFO")
