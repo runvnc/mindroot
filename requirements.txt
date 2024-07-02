@@ -45,3 +45,4 @@ termcolor
 gitignore_parser
 
 anthropic
+loguru

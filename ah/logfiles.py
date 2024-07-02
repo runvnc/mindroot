@@ -4,6 +4,12 @@ import sys
 from datetime import datetime, timedelta
 from loguru import logger
 
+# Make sure logs directory exists. If not, create it first
+# This is required because we are appending
+# Dir is ./logs 
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
 # Configure loguru
 logger.remove()  # Remove default handler
 logger.add(sys.stderr, format="{time} | {level} | {function} | {message}", level="INFO")
