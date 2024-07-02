@@ -29,6 +29,9 @@ app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name=
 
 app.mount("/imgs", StaticFiles(directory="imgs"), name="imgs")
 
+from ah.log_router import router as log_router
+app.include_router(log_router)
+
 from routers.settings_router import router as settings_router
 app.include_router(settings_router)
 
