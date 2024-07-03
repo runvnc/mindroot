@@ -13,6 +13,10 @@ class ChatLog:
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
         self.log_dir = os.path.join(self.log_dir, self.agent)
+        # make sure dir exists
+        # if not create it 
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir
         self.load_log()
 
     def _get_log_data(self) -> Dict[str, any]:
