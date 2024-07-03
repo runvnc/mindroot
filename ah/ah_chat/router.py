@@ -92,6 +92,7 @@ async def command_result(command: str, result, context=None):
 @router.put("/chat/{log_id}/{agent_name}")
 async def init_chat(log_id: str, agent_name: str):
     context = ChatContext(command_manager, service_manager)
+    context.agent_name = agent_name
     context.log_id = log_id    
     context.agent = await service_manager.get_agent_data(agent_name)
 

@@ -41,12 +41,17 @@ class ChatContext:
             with open(context_file, 'r') as f:
                 context_data = json.load(f)
                 self.data = context_data.get('data', {})
-                self.chat_log = ChatLog(log_id=log_id)
-            self.agent_name = context_data.get('agent_name')  
+                print(self.data)
+                if 'agent_name' in context_data and context_data.get('agent_name') is not None:
+                    self.agent_name = context_data.get('agent_name')
+                else:
+                    raise ValueError("Could not load agent name in load_context")
+                print('agent_name=', self.agent_name)
+                print('context_data', context_data)
             self.agent = await service_manager.get_agent_data(self.agent_name, self)
             self.flags = self.agent.get('flags', [])
             self.data['log_id'] = log_id
-            self.chat_log = ChatLog(log_id=log_id)
+            self.chat_log = ChatLog(log_id=log_id, agent=self.agent_name)
 
             self.uncensored = True
         else:

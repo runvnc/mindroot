@@ -8,8 +8,11 @@ class ChatLog:
         self.log_id = log_id
         self.messages = []
         self.agent = agent
+        if agent is None or agent == '':
+            raise ValueError('Agent must be provided')
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
+        self.log_dir = os.path.join(self.log_dir, self.agent)
         self.load_log()
 
     def _get_log_data(self) -> Dict[str, any]:
