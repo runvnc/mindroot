@@ -16,7 +16,7 @@ class ChatLog:
         # make sure dir exists
         # if not create it 
         if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir
+            os.makedirs(self.log_dir)
         self.load_log()
 
     def _get_log_data(self) -> Dict[str, any]:
