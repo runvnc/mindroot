@@ -128,21 +128,17 @@ async def send_message(log_id: str, message_data: Message):
 
         Parameters:
         text - String. The text to say.
-        done - Boolean. If true, the system will stop and wait for the user to reply.
-                        If false, the system will expect more commands.
-                        IMPORTANT: specify 'done: true' unless you have more SAY commands to run.
-        
-        IMPORTANT: if you have additional commands to run, return "done": false!
-                   otherwise the user will have to ask you to just continue.
+
+        Return: No return value. To continue without waiting for user reply, add more commands  
+                in the command array.
 
         ## Example 1
        
-       (in this example we issue multiple 'say' commands, but are finished with commands after that,
-        so use "done": true )
+       (in this example we issue multiple 'say' commands, but are finished with commands after that)
 
         [
-            { "say": { "text": "Hello, user.", "done": true } },
-            { "say": { "text": "How can I help you today?", "done": true } }
+            { "say": { "text": "Hello, user." } },
+            { "say": { "text": "How can I help you today? } }
         ]
 
         (The system waits for the user reply)
@@ -150,16 +146,11 @@ async def send_message(log_id: str, message_data: Message):
 
         ## Example 2
 
-        (In this example we want to acknowledge a request, but then issue another command,
-         so we use "done": false )
+        (In this example we wait for the user reply before issuing more commands)
 
         [
-            { "say": { "text": "Sure, I can run that command", "done": false } }
+            { "say": { "text": "Sure, I can run that command" } }
         ]
-
-        (The system replies with "continue" and expects more commands)
-
-        [  { "some_command": {"arg1": "[some param]"  }  }]
 
         (The system now waits for the user reply)
 
@@ -170,10 +161,7 @@ async def send_message(log_id: str, message_data: Message):
         #json_cmd = { "say": {"text": text } }
 
         #context.chat_log.add_message({"role": "assistant", "content": json.dumps(json_cmd)})
-        if done:
-            return "stop"
-        else:
-            return "continue"
+        return None
             
     context.save_context()
 
