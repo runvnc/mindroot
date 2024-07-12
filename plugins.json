@@ -33,10 +33,14 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_swapface",
+    "enabled": false
+  },
+  {
+    "name": "ah_faceswap",
     "enabled": true
   },
   {
@@ -58,5 +62,9 @@
   {
     "name": "ah_light_theme",
     "enabled": false
+  },
+  {
+    "name": "ah_powerpoint",
+    "enabled": true
   }
 ]

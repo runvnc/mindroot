@@ -63,7 +63,11 @@ async def pic_of_me(prompt="", context=None):
     img = await context.text_to_image(prompt + ', ' + persona['appearance'], 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
-    swapped = await context.swap_face(img_dir, img)
+    try:
+        swapped = await context.swap_face(img_dir, img)
+    except Exception as e:
+        print("Error swapping face:", e)
+        swapped = img
     await context.insert_image(swapped)
 
 
