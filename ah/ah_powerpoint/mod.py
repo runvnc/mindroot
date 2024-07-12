@@ -112,13 +112,13 @@ async def replace_all(replacements=None, case_sensitive=True, whole_word=False, 
                         for paragraph in cell.text_frame.paragraphs:
                             for run in paragraph.runs:
                                 run.text = replace_text(run.text)
-            elif shape.has_chart:
-                if shape.chart.has_title:
-                    shape.chart.chart_title.text_frame.text = replace_text(shape.chart.chart_title.text_frame.text)
-                for series in shape.chart.series:
-                    series.name = replace_text(series.name)
-                for category in shape.chart.categories:
-                    category.label = replace_text(category.label)
+            #elif shape.has_chart:
+            #    if shape.chart.has_title:
+            #        shape.chart.chart_title.text_frame.text = replace_text(shape.chart.chart_title.text_frame.text)
+            #    for series in shape.chart.series:
+            #        series.name = replace_text(series.name)
+            #    for category in shape.chart.categories:
+            #        category.label = replace_text(category.label)
 
     _save_presentation_cache(prs)
     return f"Completed {total_replacements} replacements across the presentation."
@@ -147,3 +147,73 @@ async def replace_image(original_image_fname=None, replace_with_image_fname=None
 
     _save_presentation_cache(prs)
     return f"Replaced {replacements_count} instance(s) of {original_image_fname} with {replace_with_image_fname}"
+
+
+@command()
+async def read_slide_content(slide_number, context=None):
+    """Read and return the content of a slide.
+    Example:
+    { "read_slide_content": { "slide_number": 1 } }
+    """
+    prs = _get_presentation()
+    slide = prs.slides[slide_number - 1]
+    content = {}
+    for shape in slide.shapes:
+        if shape.has_text_frame:
+            content[shape.name] = shape.text_frame.text
+        elif shape.has_table:
+            content[shape.name] = [[cell.text for cell in row.cells] for row in shape.table.rows]
+        elif shape.has_chart:
+            content[shape.name] = "Chart: " + shape.chart.chart_type
+    return json.dumps(content)
+
+@command()
+async def update_slide_content(slide_number, content_json, context=None):
+    """Update a slide with content provided in JSON format.
+    Example:
+    { "update_slide_content": { "slide_number": 1, "content_json": {"title": "New Title", "subtitle": "New Subtitle"} } }
+    """
+    prs = _get_presentation()
+    slide = prs.slides[slide_number - 1]
+    content = json.loads(content_json)
+    for shape in slide.shapes:
+        if shape.name in content:
+            if shape.has_text_frame:
+                shape.text_frame.text = content[shape.name]
+            elif shape.has_table:
+                if isinstance(content[shape.name], list) and all(isinstance(row, list) for row in content[shape.name]):
+                    for i, row in enumerate(content[shape.name]):
+                        for j, cell_content in enumerate(row):
+                            if i < len(shape.table.rows) and j < len(shape.table.columns):
+                                shape.table.cell(i, j).text = str(cell_content)
+                else:
+                    raise ValueError(f"Content for table '{shape.name}' must be a 2D list")
+            elif shape.has_chart:
+                if isinstance(content[shape.name], dict) and 'categories' in content[shape.name] and 'values' in content[shape.name]:
+                    chart_data = CategoryChartData()
+                    chart_data.categories = content[shape.name]['categories']
+                    chart_data.add_series('Series 1', content[shape.name]['values'])
+                    shape.chart.replace_data(chart_data)
+                else:
+                    raise ValueError(f"Content for chart '{shape.name}' must be a dict with 'categories' and 'values' keys")
+    _save_presentation_cache(prs)
+    return f"Updated content of slide {slide_number}"
+
+@command()
+async def create_chart(slide_number, chart_type, data, position, context=None):
+    """Create a chart on the specified slide.
+    Example:
+    { "create_chart": { "slide_number": 1, "chart_type": "BAR_CLUSTERED", "data": {"categories": ["A", "B", "C"], "values": [1, 2, 3]}, "position": {"left": 1, "top": 2, "width": 8, "height": 5} } }
+    """
+    prs = _get_presentation()
+    slide = prs.slides[slide_number - 1]
+    chart_data = CategoryChartData()
+    chart_data.categories = data['categories']
+    chart_data.add_series('Series 1', data['values'])
+    x, y, cx, cy = [Inches(position[key]) for key in ['left', 'top', 'width', 'height']]
+    chart = slide.shapes.add_chart(
+        getattr(XL_CHART_TYPE, chart_type), x, y, cx, cy, chart_data
+    ).chart
+    _save_presentation_cache(prs)
+    return f"Created {chart_type} chart on slide {slide_number}"
+
