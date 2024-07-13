@@ -54,12 +54,12 @@ def slide_replace_all(presentation, replacements, case_sensitive=True, whole_wor
         elif shape.has_chart:
             if shape.chart.has_title:
                 shape.chart.chart_title.text_frame.text = replace_text(shape.chart.chart_title.text_frame.text)
-            for series in shape.chart.series:
-                if series.name:
-                    series.name = replace_text(series.name)
-            for category in shape.chart.categories:
-                if category.label:
-                    category.label = replace_text(category.label)
+            #for series in shape.chart.series:
+            #   if series.name:
+            #      series.name = replace_text(series.name)
+            #for category in shape.chart.categories:
+            #   if category.label:
+            #    category.label = replace_text(category.label)
 
     for slide in presentation.slides:
         for shape in slide.shapes:
