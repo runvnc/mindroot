@@ -6,6 +6,7 @@ from pptx.util import Inches, Pt
 import json
 import io
 import re
+from .read_slide import read_slide_content as new_read_slide_content
 
 # Module-level cache for the presentation
 _presentation_cache = None
@@ -48,15 +49,15 @@ async def save_presentation(filename=None, context=None):
     return f"Saved presentation as {filename}"
 
 @command()
-async def replace_all(replacements=None, case_sensitive=True, whole_word=False, context=None):
+async def slide_replace_all(replacements=None, case_sensitive=True, whole_word=False, context=None):
     """Replace all occurrences of specified strings in the presentation.
     
     Examples:
     1. Simple text replacement:
-    { "replace_all": { "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
+    { "slide_replace_all": { "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
     
     2. Multiple replacements including percentages:
-    { "replace_all": { "replacements": [
+    { "slide_replace_all": { "replacements": [
         {"match": "total: 5%", "replace": "total: 10%"},
         {"match": "revenue", "replace": "income"}
       ], 
@@ -64,64 +65,26 @@ async def replace_all(replacements=None, case_sensitive=True, whole_word=False, 
       "whole_word": true 
     } }
     
-    3. Using regex (new feature):
-    { "replace_all": { "replacements": [
+    3. Using regex:
+    { "slide_replace_all": { "replacements": [
         {"match": "total: \d+%", "replace": "total: 15%", "is_regex": true},
         {"match": "Q[1-4]", "replace": "Quarter ", "is_regex": true}
       ], 
       "case_sensitive": true
     } }
     """
+    from .replace_all import slide_replace_all as new_slide_replace_all
+    
     if replacements is None:
         return "No replacements provided"
 
-    prs = _get_presentation()
-    total_replacements = 0
-
-    # Compile regex patterns for each replacement
-    patterns = []
-    for rep in replacements:
-        if rep.get('is_regex', False):
-            pattern = rep['match']
-        else:
-            pattern = re.escape(rep['match'])
-        
-        if whole_word and not rep.get('is_regex', False):
-            pattern = r'\b' + pattern + r'\b'
-        
-        flags = 0 if case_sensitive else re.IGNORECASE
-        patterns.append((re.compile(pattern, flags), rep['replace']))
-
-    def replace_text(text):
-        nonlocal total_replacements
-        for pattern, replacement in patterns:
-            new_text, count = pattern.subn(replacement, text)
-            total_replacements += count
-            text = new_text
-        return text
-
-    for slide in prs.slides:
-        for shape in slide.shapes:
-            if shape.has_text_frame:
-                for paragraph in shape.text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        run.text = replace_text(run.text)
-            elif shape.has_table:
-                for row in shape.table.rows:
-                    for cell in row.cells:
-                        for paragraph in cell.text_frame.paragraphs:
-                            for run in paragraph.runs:
-                                run.text = replace_text(run.text)
-            #elif shape.has_chart:
-            #    if shape.chart.has_title:
-            #        shape.chart.chart_title.text_frame.text = replace_text(shape.chart.chart_title.text_frame.text)
-            #    for series in shape.chart.series:
-            #        series.name = replace_text(series.name)
-            #    for category in shape.chart.categories:
-            #        category.label = replace_text(category.label)
-
-    _save_presentation_cache(prs)
-    return f"Completed {total_replacements} replacements across the presentation."
+    try:
+        prs = _get_presentation()
+        total_replacements = new_slide_replace_all(prs, replacements, case_sensitive, whole_word)
+        _save_presentation_cache(prs)
+        return f"Completed {total_replacements} replacements across the presentation."
+    except Exception as e:
+        return f"Error during replacement: {str(e)}"
 
 @command()
 async def replace_image(original_image_fname=None, replace_with_image_fname=None, context=None):
@@ -155,17 +118,12 @@ async def read_slide_content(slide_number, context=None):
     Example:
     { "read_slide_content": { "slide_number": 1 } }
     """
-    prs = _get_presentation()
-    slide = prs.slides[slide_number - 1]
-    content = {}
-    for shape in slide.shapes:
-        if shape.has_text_frame:
-            content[shape.name] = shape.text_frame.text
-        elif shape.has_table:
-            content[shape.name] = [[cell.text for cell in row.cells] for row in shape.table.rows]
-        elif shape.has_chart:
-            content[shape.name] = "Chart: " + shape.chart.chart_type
-    return json.dumps(content)
+    try:
+        prs = _get_presentation()
+        content = new_read_slide_content(prs, slide_number)
+        return json.dumps(content)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
 
 @command()
 async def update_slide_content(slide_number, content_json, context=None):
