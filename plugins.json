@@ -1,7 +1,7 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_openai",
@@ -55,6 +55,10 @@
     "name": "ah_files",
     "enabled": true
   },
+  {
+    "name": "ah_excel",
+    "enabled": true
+  },   
   {
     "name": "ah_shell",
     "enabled": true

@@ -47,3 +47,4 @@ gitignore_parser
 anthropic
 loguru
 python-pptx
+openpyxl

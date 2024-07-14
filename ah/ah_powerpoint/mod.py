@@ -1,5 +1,5 @@
 from ..commands import command
-from pptx import Presentation
+from pptx import Presentation, parts
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE
 from pptx.util import Inches, Pt
@@ -103,9 +103,12 @@ async def replace_image(original_image_fname=None, replace_with_image_fname=None
         for shape in slide.shapes:
             if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
                 if shape.image.filename == original_image_fname:
-                    with open(replace_with_image_fname, 'rb') as f:
-                        image_bytes = f.read()
-                    shape.element.blip.embed = prs.part.get_or_add_image_part(image_bytes)
+                    im = parts.image.Image.from_file(replace_with_image_fname)
+
+                    slide_part, rId = shape.part, shape._element.blip_rId
+                    image_part = slide_part.related_part(rId)
+                    image_part.blob = im._blob
+
                     replacements_count += 1
 
     _save_presentation_cache(prs)
