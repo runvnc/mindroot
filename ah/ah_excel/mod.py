@@ -75,10 +75,12 @@ async def read_cells(arrangement='row', context=None):
         wb = _get_workbook()
         sheet_name = context.data['current_sheet']
         result = excel_to_nested_lists(io.BytesIO(_workbook_cache), sheet_name, arrangement)
-        return result
+        return json.dumps(result)
     except Exception as e:
         print(e)
-        return f"Error: {str(e)}"
+        # reraise
+        raise e
+        #return f"Error: {str(e)}"
 
 @command()
 async def write_cell(cell_reference, value, context=None):

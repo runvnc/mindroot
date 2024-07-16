@@ -3,53 +3,67 @@ from openpyxl.utils import get_column_letter
 from typing import List, Union
 from datetime import datetime, date
 
-def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'row') -> List[List[Union[str, None, int, float]]]:
+def process_cell_value(value):
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    elif isinstance(value, (int, float, str)):
+        return value
+    elif value is None:
+        return None
+    else:
+        return str(value)
+
+def process_cell(cell, cell_value, cell_formula, cell_ref):
+    if cell_value is None and (cell_formula == '' or cell_formula is None):
+        return []  # Return an empty list for empty cells
+    return [
+        cell_ref,
+        process_cell_value(cell_value),
+        str(cell_formula) if cell_formula else None
+    ]
+
+def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'row') -> List[List[List[Union[str, None, int, float]]]]:
     if arrangement not in ['row', 'column']:
         raise ValueError("Arrangement must be either 'row' or 'column'")
 
     wb = openpyxl.load_workbook(file_path, data_only=False)
-    wb_values = openpyxl.load_workbook(file_path, data_only=True)
     
     if sheet_name not in wb.sheetnames:
         raise ValueError(f"Sheet '{sheet_name}' not found in the workbook.")
     
     ws = wb[sheet_name]
-    ws_values = wb_values[sheet_name]
     
     max_row = ws.max_row
     max_col = ws.max_column
     
-    def process_cell_value(value):
-        if isinstance(value, (datetime, date)):
-            return value.isoformat()
-        elif isinstance(value, (int, float, str, type(None))):
-            return value
-        else:
-            return str(value)
-    
-    def process_cell(cell, cell_value, cell_formula, cell_ref):
-        if cell_value is None and (cell_formula == '' or cell_formula is None):
-            return []
-        return [cell_ref, process_cell_value(cell_value), cell_formula or None]
-    
     if arrangement == 'row':
-        result = [[] for _ in range(max_row)]
+        result = []
         for row in range(1, max_row + 1):
+            row_data = []
             for col in range(1, max_col + 1):
                 cell = ws.cell(row=row, column=col)
-                cell_value = ws_values.cell(row=row, column=col).value
+                cell_value = cell.value
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
-                result[row-1].append(process_cell(cell, cell_value, cell_formula, cell_ref))
+                cell_data = process_cell(cell, cell_value, cell_formula, cell_ref)
+                if cell_data:  # Only append non-empty cells
+                    row_data.append(cell_data)
+            if row_data:  # Only append non-empty rows
+                result.append(row_data)
     else:  # column-based arrangement
-        result = [[] for _ in range(max_col)]
+        result = []
         for col in range(1, max_col + 1):
+            col_data = []
             for row in range(1, max_row + 1):
                 cell = ws.cell(row=row, column=col)
-                cell_value = ws_values.cell(row=row, column=col).value
+                cell_value = cell.value
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
-                result[col-1].append(process_cell(cell, cell_value, cell_formula, cell_ref))
+                cell_data = process_cell(cell, cell_value, cell_formula, cell_ref)
+                if cell_data:  # Only append non-empty cells
+                    col_data.append(cell_data)
+            if col_data:  # Only append non-empty columns
+                result.append(col_data)
     
     return result
 
