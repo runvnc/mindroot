@@ -1,6 +1,5 @@
 import openpyxl
 from openpyxl.utils import get_column_letter
-from openpyxl.formula.translate import Translator
 from typing import List, Union
 from datetime import datetime, date
 
@@ -14,7 +13,7 @@ def process_cell_value(value):
     elif hasattr(value, 'value'):  # Handle openpyxl cell objects
         return process_cell_value(value.value)
     elif isinstance(value, openpyxl.worksheet.formula.ArrayFormula):
-        return str(Translator(value.text, value.origin).translate_formula())
+        return str(value)
     else:
         return str(value)
 
@@ -52,11 +51,13 @@ def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'r
             for col in range(1, max_col + 1):
                 cell = ws.cell(row=row, column=col)
                 cell_value = ws_values.cell(row=row, column=col).value
+                #print("cell value? ", cell_value)
+
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
                 cell_data = process_cell(cell, cell_value, cell_formula, cell_ref)
-                if cell_data:  # Only append non-empty cells
-                    row_data.append(cell_data)
+                #if cell_data:
+                row_data.append(cell_data)
             if row_data:  # Only append non-empty rows
                 result.append(row_data)
     else:  # column-based arrangement
@@ -69,12 +70,21 @@ def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'r
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
                 cell_data = process_cell(cell, cell_value, cell_formula, cell_ref)
-                if cell_data:  # Only append non-empty cells
-                    col_data.append(cell_data)
+                #if cell_data:  # Only append non-empty cells
+                col_data.append(cell_data)
             if col_data:  # Only append non-empty columns
                 result.append(col_data)
     
     return result
+
+
+if __name__ == '__main__':
+    excel_file = 'valuation.xlsx'
+    sheet_name = 'Inputs'
+    output_row_based = excel_to_nested_lists(excel_file, sheet_name, 'row')
+    output_column_based = excel_to_nested_lists(excel_file, sheet_name, 'column')
+    print(output_row_based)
+    #print(output_column_based)
 
 # Usage example:
 # excel_file = 'path/to/your/spreadsheet.xlsx'

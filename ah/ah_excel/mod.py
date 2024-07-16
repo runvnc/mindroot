@@ -66,15 +66,16 @@ async def select_sheet(sheet_name, context=None):
         return f"Error: {str(e)}"
 
 @command()
-async def read_cells(arrangement='row', context=None):
+async def read_cells(workbook_filename = '/data/file.xlsx', sheet_name="Sheet1", arrangement='row', context=None):
     """Read all cells from the current sheet and return as nested lists.
+    Does not use state, so the workbook and sheet name must be provided.
+
     Example:
-    { "read_cells": { "arrangement": "row" } }
+    { "read_cells": { "workbook_filename": "/data/file.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
     """
     try:
-        wb = _get_workbook()
         sheet_name = context.data['current_sheet']
-        result = excel_to_nested_lists(io.BytesIO(_workbook_cache), sheet_name, arrangement)
+        result = excel_to_nested_lists(workbook_filename, sheet_name, arrangement)
         return json.dumps(result)
     except Exception as e:
         print(e)
