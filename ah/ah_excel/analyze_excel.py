@@ -2,6 +2,42 @@ from openpyxl.styles import Font, Alignment, Border, Fill
 from openpyxl.utils import get_column_letter, column_index_from_string
 from collections import defaultdict
 import traceback
+from .info_box_detection import detect_info_boxes
+
+def is_header(cell, row, merged_ranges):
+    # Only consider cells in the first 5 rows as potential headers
+    if row > 5:
+        return False, None
+    
+    # Check if the cell contains a formula
+    if cell.data_type == 'f':
+        return False, None
+    
+    # Check if the cell contains only numbers
+    if isinstance(cell.value, (int, float)):
+        return False, None
+    
+    # Count the number of header-like characteristics
+    header_score = 0
+    
+    if cell.font.bold:
+        header_score += 1
+    
+    if cell.alignment.horizontal == 'center':
+        header_score += 1
+    
+    if cell.fill.start_color.index != '00000000':  # Has fill color
+        header_score += 1
+    
+    if isinstance(cell.value, str):
+        if cell.value.isupper() or len(cell.value.split()) <= 3:
+            header_score += 1
+    
+    # Check if the cell is part of a merged range
+    merged_range = next((str(rng) for rng in merged_ranges if cell.coordinate in rng), None)
+    
+    # Consider it a header if it meets at least 2 criteria
+    return header_score >= 2, merged_range
 
 def analyze_structure(ws):
     """Analyze the structure of the given worksheet."""
@@ -17,25 +53,23 @@ def analyze_structure(ws):
             "numeric_cells": [],
         }
 
-        # Helper function to check if a cell is likely a header
-        def is_header(cell):
-            return (
-                cell.font.bold or
-                cell.alignment.horizontal == 'center' or
-                cell.fill.start_color.index != '00000000' or  # Has fill color
-                any(cell.coordinate in merged_range for merged_range in ws.merged_cells.ranges)
-            )
+        # Get all merged cell ranges
+        merged_ranges = ws.merged_cells.ranges
 
         # Analyze cells
         for row in range(1, ws.max_row + 1):
             for col in range(1, ws.max_column + 1):
                 cell = ws.cell(row=row, column=col)
                 if cell.value is not None:
-                    if is_header(cell):
-                        structure["headers"].append({
+                    is_header_cell, merged_range = is_header(cell, row, merged_ranges)
+                    if is_header_cell:
+                        header_info = {
                             "cell": cell.coordinate,
                             "value": str(cell.value)
-                        })
+                        }
+                        if merged_range:
+                            header_info["merged_range"] = merged_range
+                        structure["headers"].append(header_info)
                     elif isinstance(cell.value, (int, float)):
                         structure["numeric_cells"].append(cell.coordinate)
                     else:
@@ -64,24 +98,22 @@ def analyze_structure(ws):
                 structure["empty_rows"].append(row)
 
         # Detect merged cells
-        structure["merged_cells"] = [str(merged_cell) for merged_cell in ws.merged_cells.ranges]
+        structure["merged_cells"] = [str(merged_cell) for merged_cell in merged_ranges]
 
-        # Identify info boxes based on borders and patterns
-        current_box = None
-        for row in range(1, ws.max_row + 1):
-            for col in range(1, ws.max_column + 1):
-                cell = ws.cell(row=row, column=col)
-                if cell.border.left.style or cell.border.top.style:
-                    if current_box is None:
-                        current_box = {"start": cell.coordinate, "end": cell.coordinate}
-                elif current_box is not None:
-                    current_box["end"] = ws.cell(row=row-1, column=col-1).coordinate
-                    structure["info_boxes"].append(f"{current_box['start']}:{current_box['end']}")
-                    current_box = None
+        # Detect info boxes
+        structure["info_boxes"] = detect_info_boxes(ws, structure["headers"])
+
+        # Limit the number of cells reported to prevent excessive output
+        max_cells = 1000
+        if len(structure["text_cells"]) > max_cells:
+            structure["text_cells"] = structure["text_cells"][:max_cells]
+            structure["text_cells"].append(f"... and {len(structure['text_cells']) - max_cells} more")
+        if len(structure["numeric_cells"]) > max_cells:
+            structure["numeric_cells"] = structure["numeric_cells"][:max_cells]
+            structure["numeric_cells"].append(f"... and {len(structure['numeric_cells']) - max_cells} more")
 
         return structure
     except Exception as e:
         # print full stack trace
         traceback.print_exc()
         return {"error": str(e)}
-

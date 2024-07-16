@@ -37,11 +37,11 @@
   },
   {
     "name": "ah_swapface",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_faceswap",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_ollama",
@@ -58,7 +58,7 @@
   {
     "name": "ah_excel",
     "enabled": true
-  },   
+  },
   {
     "name": "ah_shell",
     "enabled": true
