@@ -1,6 +1,7 @@
 import openpyxl
 from openpyxl.utils import get_column_letter
 from typing import List, Union
+from datetime import datetime, date
 
 def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'row') -> List[List[Union[str, None, int, float]]]:
     if arrangement not in ['row', 'column']:
@@ -18,6 +19,19 @@ def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'r
     max_row = ws.max_row
     max_col = ws.max_column
     
+    def process_cell_value(value):
+        if isinstance(value, (datetime, date)):
+            return value.isoformat()
+        elif isinstance(value, (int, float, str, type(None))):
+            return value
+        else:
+            return str(value)
+    
+    def process_cell(cell, cell_value, cell_formula, cell_ref):
+        if cell_value is None and (cell_formula == '' or cell_formula is None):
+            return []
+        return [cell_ref, process_cell_value(cell_value), cell_formula or None]
+    
     if arrangement == 'row':
         result = [[] for _ in range(max_row)]
         for row in range(1, max_row + 1):
@@ -26,7 +40,7 @@ def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'r
                 cell_value = ws_values.cell(row=row, column=col).value
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
-                result[row-1].append([cell_ref, cell_value, cell_formula])
+                result[row-1].append(process_cell(cell, cell_value, cell_formula, cell_ref))
     else:  # column-based arrangement
         result = [[] for _ in range(max_col)]
         for col in range(1, max_col + 1):
@@ -35,7 +49,7 @@ def excel_to_nested_lists(file_path: str, sheet_name: str, arrangement: str = 'r
                 cell_value = ws_values.cell(row=row, column=col).value
                 cell_formula = cell.data_type == 'f' and cell.value or ''
                 cell_ref = f"{get_column_letter(col)}{row}"
-                result[col-1].append([cell_ref, cell_value, cell_formula])
+                result[col-1].append(process_cell(cell, cell_value, cell_formula, cell_ref))
     
     return result
 

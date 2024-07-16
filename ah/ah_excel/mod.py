@@ -60,8 +60,7 @@ async def select_sheet(sheet_name, context=None):
         }
         
         context.data['sheet_structure'] = structure
-
-        return f"Selected sheet {sheet_name}. Structure summary:\n{json.dumps(summary, indent=2)}\n\nFull structure available in context.data['sheet_structure']."
+        return summary 
     except Exception as e:
         print(e)
         return f"Error: {str(e)}"
@@ -76,7 +75,7 @@ async def read_cells(arrangement='row', context=None):
         wb = _get_workbook()
         sheet_name = context.data['current_sheet']
         result = excel_to_nested_lists(io.BytesIO(_workbook_cache), sheet_name, arrangement)
-        return f"Read {len(result)} {'rows' if arrangement == 'row' else 'columns'} from sheet {sheet_name}."
+        return result
     except Exception as e:
         print(e)
         return f"Error: {str(e)}"
