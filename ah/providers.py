@@ -116,7 +116,7 @@ class ProviderManager:
 
     def get_docstring(self, name):
         if name not in self.functions:
-            raise ValueError(f"function '{name}' not found.")
+            logging.warning(f"docstring for '{name}' not found.")
         return [func_info['docstring'] for func_info in self.functions[name]]
 
     def get_functions(self):
