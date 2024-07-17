@@ -1,51 +1,31 @@
 from ..commands import command
 from openpyxl import load_workbook, Workbook
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import get_column_letter, column_index_from_string, range_boundaries
 from collections import defaultdict
 import json
-import io
 from .analyze_excel import analyze_structure
 from .output_data import excel_to_nested_lists
 
-# Module-level cache for the workbook
-_workbook_cache = None
-
-def _get_workbook():
-    global _workbook_cache
-    if _workbook_cache is None:
-        raise ValueError("No workbook is currently cached. Use open_workbook first.")
-    return load_workbook(filename=io.BytesIO(_workbook_cache))
-
-def _save_workbook_cache(wb):
-    global _workbook_cache
-    buffer = io.BytesIO()
-    wb.save(buffer)
-    _workbook_cache = buffer.getvalue()
-
 @command()
-async def open_workbook(filename, context=None):
-    """Open an Excel workbook and cache it in memory.
+async def open_workbook(filename):
+    """Open an Excel workbook and return its sheets.
     Example:
     { "open_workbook": { "filename": "example.xlsx" } }
     """
     wb = load_workbook(filename)
-    _save_workbook_cache(wb)
-    context.data['current_workbook'] = filename
-    context.data['current_sheet'] = wb.active.title
-    return f"Opened and cached workbook {filename}. Sheets: {', '.join(wb.sheetnames)}"
+    return f"Opened workbook {filename}. Sheets: {', '.join(wb.sheetnames)}"
 
 @command()
-async def select_sheet(sheet_name, context=None):
-    """Select a specific sheet and analyze its structure.
+async def analyze_sheet(filename, sheet_name):
+    """Analyze the structure of a specific sheet.
     Example:
-    { "select_sheet": { "sheet_name": "Sheet1" } }
+    { "analyze_sheet": { "filename": "example.xlsx", "sheet_name": "Sheet1" } }
     """
     try:
-        wb = _get_workbook()
+        wb = load_workbook(filename)
         if sheet_name not in wb.sheetnames:
             return f"Sheet {sheet_name} not found in the workbook."
         
-        context.data['current_sheet'] = sheet_name
         structure = analyze_structure(wb[sheet_name])
         
         summary = {
@@ -59,51 +39,73 @@ async def select_sheet(sheet_name, context=None):
             "numeric_cells_count": len(structure["numeric_cells"]),
         }
         
-        context.data['sheet_structure'] = structure
         return summary 
     except Exception as e:
-        print(e)
         return f"Error: {str(e)}"
 
 @command()
-async def read_cells(workbook_filename = '/data/file.xlsx', sheet_name="Sheet1", arrangement='row', context=None):
-    """Read all cells from the current sheet and return as nested lists.
-    Does not use state, so the workbook and sheet name must be provided.
-
+async def read_cells(filename, sheet_name, arrangement='row'):
+    """Read all cells from sheet and return as nested lists.
     Example:
-    { "read_cells": { "workbook_filename": "/data/file.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
+    { "read_cells": { "filename": "example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
     """
     try:
-        sheet_name = context.data['current_sheet']
-        result = excel_to_nested_lists(workbook_filename, sheet_name, arrangement)
+        result = excel_to_nested_lists(filename, sheet_name, arrangement)
         return json.dumps(result)
     except Exception as e:
-        print(e)
-        # reraise
-        raise e
-        #return f"Error: {str(e)}"
+        return f"Error: {str(e)}"
 
 @command()
-async def write_cell(cell_reference, value, context=None):
+async def write_cell(filename, sheet_name, cell_reference, value):
     """Write a value to a specific cell.
     Example:
-    { "write_cell": { "cell_reference": "C7", "value": 1500 } }
+    { "write_cell": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_reference": "C7", "value": 1500 } }
     """
-    wb = _get_workbook()
-    ws = wb[context.data['current_sheet']]
-    ws[cell_reference] = value
-    _save_workbook_cache(wb)
-    return f"Wrote {value} to cell {cell_reference} and updated the cache."
+    try:
+        wb = load_workbook(filename)
+        ws = wb[sheet_name]
+        ws[cell_reference] = value
+        wb.save(filename)
+        return f"Wrote {value} to cell {cell_reference} in {filename}, sheet {sheet_name}."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @command()
-async def save_workbook(filename=None, context=None):
+async def write_cell_range(filename, sheet_name, cell_range, values):
+    """Write values to a range of cells using Excel range notation.
+    Example:
+    { "write_cell_range": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_range": "A1:C3", "values": [[1, 2, 3], [4, 5, 6], [7, 8, 9]] } }
+    """
+    try:
+        wb = load_workbook(filename)
+        ws = wb[sheet_name]
+        
+        min_col, min_row, max_col, max_row = range_boundaries(cell_range)
+        
+        if len(values) != max_row - min_row + 1 or any(len(row) != max_col - min_col + 1 for row in values):
+            return "Error: Input values do not match the specified range."
+        
+        for row in range(min_row, max_row + 1):
+            for col in range(min_col, max_col + 1):
+                cell_ref = f"{get_column_letter(col)}{row}"
+                value = values[row - min_row][col - min_col]
+                ws[cell_ref] = value
+        
+        wb.save(filename)
+        return f"Updated range {cell_range} in {filename}, sheet {sheet_name} successfully."
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@command()
+async def save_workbook(filename, new_filename=None):
     """Save the workbook to disk, optionally with a new filename.
     Example:
-    { "save_workbook": { "filename": "updated_file.xlsx" } }
+    { "save_workbook": { "filename": "example.xlsx", "new_filename": "updated_file.xlsx" } }
     """
-    wb = _get_workbook()
-    if filename is None:
-        filename = context.data['current_workbook']
-    wb.save(filename)
-    context.data['current_workbook'] = filename
-    return f"Saved workbook as {filename}"
+    try:
+        wb = load_workbook(filename)
+        save_filename = new_filename if new_filename else filename
+        wb.save(save_filename)
+        return f"Saved workbook as {save_filename}"
+    except Exception as e:
+        return f"Error: {str(e)}"
