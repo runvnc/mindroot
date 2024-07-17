@@ -117,6 +117,7 @@ class ProviderManager:
     def get_docstring(self, name):
         if name not in self.functions:
             logging.warning(f"docstring for '{name}' not found.")
+            return []
         return [func_info['docstring'] for func_info in self.functions[name]]
 
     def get_functions(self):
@@ -126,7 +127,13 @@ class ProviderManager:
         return {name: self.get_docstring(name) for name in self.functions.keys()}
 
     def get_some_docstrings(self, names):
-        return {name: self.get_docstring(name) for name in names}
+        filtered = []
+        for name in names:
+            if name not in self.functions:
+                logging.warning(f"agent function '{name}' not found")
+            else:
+                filtered.append(name)
+        return {name: self.get_docstring(name) for name in filtered}
 
     def __getattr__(self, name):
         async def method(*args, **kwargs):
