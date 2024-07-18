@@ -7,16 +7,16 @@ from .analyze_excel import analyze_structure
 from .output_data import excel_to_nested_lists
 
 @command()
-async def open_workbook(filename):
+async def list_sheets(filename, context):
     """Open an Excel workbook and return its sheets.
     Example:
-    { "open_workbook": { "filename": "example.xlsx" } }
+    { "list_sheets": { "filename": "example.xlsx" } }
     """
     wb = load_workbook(filename)
     return f"Opened workbook {filename}. Sheets: {', '.join(wb.sheetnames)}"
 
 @command()
-async def analyze_sheet(filename, sheet_name):
+async def analyze_sheet(filename, sheet_name, context=None):
     """Analyze the structure of a specific sheet.
     Example:
     { "analyze_sheet": { "filename": "example.xlsx", "sheet_name": "Sheet1" } }
@@ -44,7 +44,7 @@ async def analyze_sheet(filename, sheet_name):
         return f"Error: {str(e)}"
 
 @command()
-async def read_cells(filename, sheet_name, arrangement='row'):
+async def read_cells(filename, sheet_name, arrangement='row', context=None):
     """Read all cells from sheet and return as nested lists.
     Example:
     { "read_cells": { "filename": "example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
@@ -56,7 +56,7 @@ async def read_cells(filename, sheet_name, arrangement='row'):
         return f"Error: {str(e)}"
 
 @command()
-async def write_cell(filename, sheet_name, cell_reference, value):
+async def write_cell(filename, sheet_name, cell_reference, value, context=None):
     """Write a value to a specific cell.
     Example:
     { "write_cell": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_reference": "C7", "value": 1500 } }
@@ -71,7 +71,7 @@ async def write_cell(filename, sheet_name, cell_reference, value):
         return f"Error: {str(e)}"
 
 @command()
-async def write_cell_range(filename, sheet_name, cell_range, values):
+async def write_cell_range(filename, sheet_name, cell_range, values, context=None):
     """Write values to a range of cells using Excel range notation.
     Example:
     { "write_cell_range": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_range": "A1:C3", "values": [[1, 2, 3], [4, 5, 6], [7, 8, 9]] } }
@@ -97,7 +97,7 @@ async def write_cell_range(filename, sheet_name, cell_range, values):
         return f"Error: {str(e)}"
 
 @command()
-async def save_workbook(filename, new_filename=None):
+async def save_workbook(filename, new_filename=None, context=None):
     """Save the workbook to disk, optionally with a new filename.
     Example:
     { "save_workbook": { "filename": "example.xlsx", "new_filename": "updated_file.xlsx" } }
