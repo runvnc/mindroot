@@ -51,6 +51,11 @@ async def read_cells(filename, sheet_name, arrangement='row', context=None):
     """
     try:
         result = excel_to_nested_lists(filename, sheet_name, arrangement)
+        rows = len(result)
+        cols = len(result[0])
+        max_allowed = 400
+        max_row = max(max_allowed, rows)
+        result = result[:max_row]
         return json.dumps(result)
     except Exception as e:
         return f"Error: {str(e)}"
