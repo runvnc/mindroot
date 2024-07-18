@@ -55,7 +55,7 @@ async def pic_of_me(prompt, context=None):
     """
     persona = context.agent['persona']
     print("persona:", persona)
-    img = await context.text_to_image(prompt + ', solo, score_9, score_8_up', 'split-view, diptych, side-by-side, 2girl, 2boy')
+    img = await context.text_to_image(prompt + ', score_9, score_8_up', 'split-view, diptych, side-by-side, 2girl, 2boy')
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     swapped = await context.swap_face(img_dir, img)

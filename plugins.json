@@ -1,7 +1,7 @@
 [
   {
     "name": "ah_togetherai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_openai",
@@ -17,11 +17,11 @@
   },
   {
     "name": "ah_persona",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_persona_lite",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_img_tags",
@@ -33,7 +33,7 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",

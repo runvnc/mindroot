@@ -7,12 +7,8 @@ import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
 
-# No longer using module-level cache
-
-# The open_presentation function has been removed as it's no longer needed in the stateless approach.
-
 @command()
-async def save_presentation(source_filename, destination_filename):
+async def save_presentation(context, source_filename, destination_filename):
     """Save the presentation to disk, optionally with a new filename.
     Example:
     { "save_presentation": { "source_filename": "original.pptx", "destination_filename": "updated_presentation.pptx" } }
@@ -25,7 +21,7 @@ async def save_presentation(source_filename, destination_filename):
         return f"Error saving presentation: {str(e)}"
 
 @command()
-async def slide_replace_all(filename, replacements=None, case_sensitive=True, whole_word=False):
+async def slide_replace_all(context, filename, replacements=None, case_sensitive=True, whole_word=False):
     """Replace all occurrences of specified strings in the presentation.
     
     Examples:
@@ -63,7 +59,7 @@ async def slide_replace_all(filename, replacements=None, case_sensitive=True, wh
         return f"Error during replacement: {str(e)}"
 
 @command()
-async def replace_image(filename, original_image_fname=None, replace_with_image_fname=None):
+async def replace_image(context, filename, original_image_fname=None, replace_with_image_fname=None):
     """Replace an image in the presentation based on image file names.
     
     Example:
@@ -93,9 +89,8 @@ async def replace_image(filename, original_image_fname=None, replace_with_image_
     except Exception as e:
         return f"Error replacing image: {str(e)}"
 
-
 @command()
-async def read_slide_content(filename, slide_number):
+async def read_slide_content(context, filename, slide_number):
     """Read and return the content of a slide.
     Example:
     { "read_slide_content": { "filename": "presentation.pptx", "slide_number": 1 } }
@@ -108,7 +103,7 @@ async def read_slide_content(filename, slide_number):
         return json.dumps({"error": str(e)})
 
 @command()
-async def update_slide_content(filename, slide_number, content_json):
+async def update_slide_content(context, filename, slide_number, content_json):
     """Update a slide with content provided in JSON format.
     For tables, the number of rows in the provided data must match the existing table.
     Example:
@@ -144,7 +139,7 @@ async def update_slide_content(filename, slide_number, content_json):
         return f"Error updating slide content: {str(e)}"
 
 @command()
-async def create_chart(filename, slide_number, chart_type, data, position):
+async def create_chart(context, filename, slide_number, chart_type, data, position):
     """Create a chart on the specified slide.
     Example:
     { "create_chart": { "filename": "presentation.pptx", "slide_number": 1, "chart_type": "BAR_CLUSTERED", "data": {"categories": ["A", "B", "C"], "values": [1, 2, 3]}, "position": {"left": 1, "top": 2, "width": 8, "height": 5} } }
