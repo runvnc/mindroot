@@ -53,9 +53,12 @@ async def read_cells(filename, sheet_name, arrangement='row', context=None):
         result = excel_to_nested_lists(filename, sheet_name, arrangement)
         rows = len(result)
         cols = len(result[0])
-        max_allowed = 400
-        max_row = max(max_allowed, rows)
+        max_allowed_cells = 400
+        total_cells = rows * cols
+        max_row = max(rows, total_cells // cols)
         result = result[:max_row]
+        if rows > max_allowed:
+            result.append([f"Output truncated to {max_row} rows. Total rows: {rows}"])
         return json.dumps(result)
     except Exception as e:
         return f"Error: {str(e)}"
