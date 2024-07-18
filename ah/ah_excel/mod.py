@@ -6,6 +6,9 @@ import json
 from .analyze_excel import analyze_structure
 from .output_data import excel_to_nested_lists
 
+from .excel_recalculator import recalculate_excel
+
+
 @command()
 async def list_sheets(filename, context):
     """Open an Excel workbook and return its sheets.
@@ -57,7 +60,7 @@ async def read_cells(filename, sheet_name, arrangement='row', context=None):
         total_cells = rows * cols
         max_row = max(rows, total_cells // cols)
         result = result[:max_row]
-        if rows > max_allowed:
+        if rows > max_row:
             result.append([f"Output truncated to {max_row} rows. Total rows: {rows}"])
         return json.dumps(result)
     except Exception as e:
@@ -74,6 +77,7 @@ async def write_cell(filename, sheet_name, cell_reference, value, context=None):
         ws = wb[sheet_name]
         ws[cell_reference] = value
         wb.save(filename)
+        recalculate_excel(filename)
         return f"Wrote {value} to cell {cell_reference} in {filename}, sheet {sheet_name}."
     except Exception as e:
         return f"Error: {str(e)}"
@@ -100,6 +104,7 @@ async def write_cell_range(filename, sheet_name, cell_range, values, context=Non
                 ws[cell_ref] = value
         
         wb.save(filename)
+        recalculate_excel(filename)
         return f"Updated range {cell_range} in {filename}, sheet {sheet_name} successfully."
     except Exception as e:
         return f"Error: {str(e)}"
