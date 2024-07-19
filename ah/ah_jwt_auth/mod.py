@@ -5,7 +5,7 @@ from starlette.routing import Mount
 @hook()
 async def startup(app, context):
     print('Running startup hook')
-    print('Registering public routes:')i
+    print('Registering public routes:')
     for route in app.routes: 
         print(route)
         if isinstance(route, Mount):
