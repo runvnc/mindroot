@@ -6,7 +6,7 @@ from ah.route_decorators import public_route
 router = APIRouter()
 templates = Jinja2Templates(directory="ah/ah_simple_login/templates")
 
-@public_route
 @router.get("/login", response_class=HTMLResponse)
+@public_route()
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})

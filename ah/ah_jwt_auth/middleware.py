@@ -37,7 +37,9 @@ async def middleware(request: Request, call_next):
     except HTTPException:
         print('No valid token found')
         print("request state:", request.state)
-        if not 'public_route' in request.url.path:
+        if getattr(request.state, 'public_route', False):
+            return await call_next(request)
+        else:
             print("Not a public route: ", request.url.path)
             print('Redirecting to login')
             return RedirectResponse(url='/login')
