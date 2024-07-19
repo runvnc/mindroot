@@ -34,7 +34,7 @@ def load_middleware(app, plugin_name):
             app.add_middleware(BaseHTTPMiddleware, dispatch=middleware_module.middleware)
             print(f"Added middleware for plugin: {plugin_name}")
     except ImportError as e:
-        print(f"No middleware found for plugin: {plugin_name}. Error: {e}")
+        print(f"No middleware loaded for plugin: {plugin_name}")
 
 def load(plugin_file = 'plugins.json', app = None):
     global app_instance
