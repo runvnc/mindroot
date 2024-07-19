@@ -49,7 +49,6 @@ from routers.agent_router import router as agent_router
 app.include_router(agent_router)
 
 
-asyncio.run(plugins.load(app=app))
+load_plugins = asyncio.create_task(plugins.load(app=app))
 
-
-
+# ensure task runs in background
