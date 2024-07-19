@@ -1,4 +1,5 @@
 [
+  { "name": "ah_jwt_auth", "enabled": true},
   {
     "name": "ah_togetherai",
     "enabled": true

@@ -48,3 +48,5 @@ anthropic
 loguru
 python-pptx
 openpyxl
+
+jwt

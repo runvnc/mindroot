@@ -3,6 +3,8 @@ import json
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
+from starlette.middleware.base import BaseHTTPMiddleware
+from ah.route_decorators import public_route
 
 import ah.hooks
 import ah.commands
@@ -23,6 +25,14 @@ def list_enabled(plugin_file = 'plugins.json'):
 
     return list
 
+def load_middleware(app, plugin_name):
+    try:
+        middleware_module = importlib.import_module(f"ah.{plugin_name}.middleware")
+        if hasattr(middleware_module, 'middleware'):
+            app.add_middleware(BaseHTTPMiddleware, dispatch=middleware_module.middleware)
+            print(f"Added middleware for plugin: {plugin_name}")
+    except ImportError as e:
+        print(f"No middleware found for plugin: {plugin_name}. Error: {e}")
 
 def load(plugin_file = 'plugins.json', app = None):
     global app_instance
@@ -43,9 +53,19 @@ def load(plugin_file = 'plugins.json', app = None):
                 try:
                     importlib.import_module(f"ah.{plugin_name}.mod")
                     print(f"Loaded plugin: {plugin_name}")
+                    
+                    # Load middleware
+                    load_middleware(app, plugin_name)
+                    
                     router_path = f"ah/{plugin_name}/router.py"
                     if os.path.exists(router_path):
                         router_module = importlib.import_module(f"ah.{plugin_name}.router")
+                        
+                        # Apply public route handling
+                        for route in router_module.router.routes:
+                            if hasattr(route, 'endpoint') and hasattr(route.endpoint, '__public_route__'):
+                                route.endpoint = public_route()(route.endpoint)
+                        
                         app.include_router(router_module.router)
                         print(f"Included router for plugin: {plugin_name}")
                     static_path = f"ah/{plugin_name}/static"
@@ -54,5 +74,3 @@ def load(plugin_file = 'plugins.json', app = None):
                         print(f"Mounted static files for plugin: {plugin_name}")
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
-
-
