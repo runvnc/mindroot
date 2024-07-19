@@ -1,20 +1,23 @@
 from ..hooks import hook, hook_manager
-from ah.route_decorators import public_route
+from ah.route_decorators import public_route, public_routes
 from starlette.routing import Mount
 
 @hook()
 async def startup(app, context):
-    public_routes = set()
-    for route in app.routes:
+    print('Running startup hook')
+    print('Registering public routes:')i
+    for route in app.routes: 
         print(route)
-        print(dir(route))
         if isinstance(route, Mount):
-            # Handle mounted routes
             for sub_route in route.routes:
                 if hasattr(sub_route, 'endpoint') and hasattr(sub_route.endpoint, '__public_route__'):
+                    print(f"Found public route: {route.path}{sub_route.path}")
                     public_routes.add(f"{route.path}{sub_route.path}")
+                else:
+                    print(f"Skipping private route: {route.path}{sub_route}")
         elif hasattr(route, 'endpoint') and hasattr(route.endpoint, '__public_route__'):
+            print(f"Found public route: {route.path}")
             public_routes.add(route.path)
+        else:
+            print(f"Skipping private route: {route}")
     
-    # Store public_routes in the app state or context for later use
-    app.state.public_routes = public_routes
