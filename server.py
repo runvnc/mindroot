@@ -55,4 +55,6 @@ async def start_application():
     await load_plugins
 
 if __name__ == "__main__":
+    import asyncio
+    asyncio.run(start_application())
     uvicorn.run("server:app", host="0.0.0.0", port=8000, lifespan="on")
