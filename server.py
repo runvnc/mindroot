@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from pathlib import Path
 from ah import plugins
+import asyncio
 
 def create_directories():
     directories = [
@@ -48,9 +49,7 @@ from routers.agent_router import router as agent_router
 app.include_router(agent_router)
 
 
-plugins.load(app=app)
+asyncio.run(plugins.load(app=app))
 
-
-# Other server setup code can go here
 
 

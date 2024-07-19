@@ -36,7 +36,7 @@ def load_middleware(app, plugin_name):
     except ImportError as e:
         print(f"No middleware loaded for plugin: {plugin_name}")
 
-def load(plugin_file = 'plugins.json', app = None):
+async def load(plugin_file = 'plugins.json', app = None):
     global app_instance
 
     if app is not None:
@@ -75,7 +75,7 @@ def load(plugin_file = 'plugins.json', app = None):
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
-        hook_manager.startup(app, context=None)
+        await hook_manager.startup(app, context=None)
 
     print(f"Plugin: {plugin_name} is disabled")
 
