@@ -1,4 +1,5 @@
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException,  
+from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
@@ -36,7 +37,8 @@ async def middleware(request: Request, call_next):
     except HTTPException:
         print('No valid token found')
         if not hasattr(request.state, 'public_route'):
-            raise HTTPException(status_code=401, detail=f"Invalid token for route {request.url}")
+            # redirect to login
+            return RedirectResponse(url='/login')
         else:
             pass
     response = await call_next(request)
