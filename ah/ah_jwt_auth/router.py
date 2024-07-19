@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .middleware import create_access_token, decode_token
 from ah.route_decorators import public_routes, public_route
@@ -8,8 +8,8 @@ router = APIRouter()
 security = HTTPBearer()
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Form(...)
+    password: str = Form(...) 
 
 @public_route()
 @router.post("/login")
