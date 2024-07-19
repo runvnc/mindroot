@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException,  
+from fastapi import Request, HTTPException 
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
