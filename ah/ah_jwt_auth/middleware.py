@@ -35,7 +35,7 @@ async def middleware(request: Request, call_next):
         request.state.user = payload
     except HTTPException:
         print('No valid token found')
-        if not request.state.public_route:
+        if not hasattr(request.state, 'public_route'):
             raise HTTPException(status_code=401, detail=f"Invalid token for route {request.url}")
         else:
             pass
