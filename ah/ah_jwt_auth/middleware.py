@@ -43,8 +43,6 @@ async def middleware(request: Request, call_next):
             print("Not a public route: ", request.url.path)
             print('Redirecting to login')
             return RedirectResponse(url='/login')
-        else:
-            pass
     response = await call_next(request)
     return response
 
