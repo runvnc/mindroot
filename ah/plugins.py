@@ -6,6 +6,8 @@ import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from ah.route_decorators import public_route
 
+from .hooks import hook_manager
+
 import ah.hooks
 import ah.commands
 import ah.services
@@ -73,7 +75,7 @@ def load(plugin_file = 'plugins.json', app = None):
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 
-        ah.hooks.hook_manager.startup(app, context=None)
+        hook_manager.startup(app, context=None)
 
     print(f"Plugin: {plugin_name} is disabled")
 

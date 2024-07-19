@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .middleware import create_access_token, decode_token
-from ah.route_decorators import public_route
+from ah.route_decorators import public_routes, public_route
 
 router = APIRouter()
 security = HTTPBearer()
@@ -9,8 +9,6 @@ security = HTTPBearer()
 @public_route()
 @router.post("/login")
 async def login(username: str, password: str):
-    # Here you should verify the username and password
-    # This is a simplified example
     if username == "testuser" and password == "testpass":
         access_token = create_access_token(data={"sub": username})
         return {"access_token": access_token, "token_type": "bearer"}

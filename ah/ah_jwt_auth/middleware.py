@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
-from ah.route_decorator import public_routes
+from ah.route_decorators import public_routes, public_route
 
 
 SECRET_KEY = "your-secret-key"  # Change this to a secure secret key
@@ -32,6 +32,7 @@ async def middleware(request: Request, call_next):
     try:
         print('-------------------------- auth middleware ----------------------------')
         if request.url.path in public_routes:
+            print('Public route: ', request.url.path)
             return await call_next(request)
         token = await security(request)
         print('token:', token)
