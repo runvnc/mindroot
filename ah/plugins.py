@@ -54,14 +54,12 @@ def load(plugin_file = 'plugins.json', app = None):
                     importlib.import_module(f"ah.{plugin_name}.mod")
                     print(f"Loaded plugin: {plugin_name}")
                     
-                    # Load middleware
                     load_middleware(app, plugin_name)
                     
                     router_path = f"ah/{plugin_name}/router.py"
                     if os.path.exists(router_path):
                         router_module = importlib.import_module(f"ah.{plugin_name}.router")
                         
-                        # Apply public route handling
                         for route in router_module.router.routes:
                             if hasattr(route, 'endpoint') and hasattr(route.endpoint, '__public_route__'):
                                 route.endpoint = public_route()(route.endpoint)
@@ -74,3 +72,8 @@ def load(plugin_file = 'plugins.json', app = None):
                         print(f"Mounted static files for plugin: {plugin_name}")
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
+
+        ah.hooks.hook_manager.startup(app, context=None)
+
+    print(f"Plugin: {plugin_name} is disabled")
+
