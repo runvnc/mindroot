@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from ah import plugins
 import asyncio
+import uvicorn
 
 def create_directories():
     directories = [
@@ -49,6 +50,9 @@ from routers.agent_router import router as agent_router
 app.include_router(agent_router)
 
 
-load_plugins = asyncio.create_task(plugins.load(app=app))
+async def start_application():
+    load_plugins = asyncio.create_task(plugins.load(app=app))
+    await load_plugins
 
-# ensure task runs in background
+if __name__ == "__main__":
+    uvicorn.run("server:app", host="0.0.0.0", port=8000, lifespan="on")
