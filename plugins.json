@@ -1,5 +1,6 @@
 [
   { "name": "ah_jwt_auth", "enabled": true},
+  { "name": "ah_simple_login", "enabled": true},
   {
     "name": "ah_togetherai",
     "enabled": true
