@@ -50,11 +50,6 @@ from routers.agent_router import router as agent_router
 app.include_router(agent_router)
 
 
-async def start_application():
-    load_plugins = asyncio.create_task(plugins.load(app=app))
-    await load_plugins
-
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(start_application())
+    asyncio.run(plugins.load(app=app))
     uvicorn.run("server:app", host="0.0.0.0", port=8000, lifespan="on")
