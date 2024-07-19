@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
+from ah.route_decorator import public_routes
+
 
 SECRET_KEY = "your-secret-key"  # Change this to a secure secret key
 ALGORITHM = "HS256"
@@ -28,21 +30,19 @@ def decode_token(token: str):
 
 async def middleware(request: Request, call_next):
     try:
-        print('-------------------------- middleware ----------------------------')
+        print('-------------------------- auth middleware ----------------------------')
+        if request.url.path in public_routes:
+            return await call_next(request)
         token = await security(request)
         print('token:', token)
         payload = decode_token(token.credentials)
         print('payload:', payload)
         request.state.user = payload
-    except HTTPException:
+    except Exception as e:
         print('No valid token found')
-        print("request state:", request.state)
-        if getattr(request.state, 'public_route', False):
-            return await call_next(request)
-        else:
-            print("Not a public route: ", request.url.path)
-            print('Redirecting to login')
-            return RedirectResponse(url='/login')
+        print("Not a public route: ", request.url.path)
+        print('Redirecting to login')
+        return RedirectResponse(url='/login')
     response = await call_next(request)
     return response
 
