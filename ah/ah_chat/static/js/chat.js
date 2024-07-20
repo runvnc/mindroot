@@ -1,6 +1,6 @@
 // ... (existing code) ...
 
-import { storeAccessToken, getAccessToken, setupAuthInterceptor } from './auth.js';
+import { storeAccessToken, getAccessToken, setupAuthHeader } from './auth.js';
 
 // ... (existing code) ...
 
@@ -11,7 +11,11 @@ function handleLogin(response) {
   // ... (other login handling code) ...
 }
 
-// Set up the custom HTTP interceptor
-setupAuthInterceptor(axios);
+// Set up the custom HTTP header setter
+const originalFetch = fetch;
+fetch = async (...args) => {
+  const request = setupAuthHeader(new Request(...args));
+  return originalFetch(request);
+};
 
 // ... (existing code) ...
