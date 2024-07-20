@@ -3,7 +3,7 @@
 // Store the access token in the browser's local storage and cookie
 export function storeAccessToken(token) {
   localStorage.setItem('accessToken', token);
-  document.cookie = `access_token=${token}; path=/; max-age=1800`; // Expires in 30 minutes
+  document.cookie = `access_token=${token}; path=/; max-age=604800`; // Expires in 1 week
 }
 
 // Retrieve the access token from the browser's local storage or cookie
@@ -27,20 +27,4 @@ function getCookieValue(name) {
     }
   }
   return null;
-}
-
-// Create a custom HTTP interceptor that adds the access token to the headers
-export function setupAuthInterceptor(axios) {
-  axios.interceptors.request.use(
-    config => {
-      const token = getAccessToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    error => {
-      return Promise.reject(error);
-    }
-  );
 }

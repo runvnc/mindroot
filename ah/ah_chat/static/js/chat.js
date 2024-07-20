@@ -5,7 +5,7 @@ import { BaseEl } from './base.js';
 import './action.js';
 import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
-import { getAccessToken, setupAuthHeader } from './auth.js';
+import { getAccessToken } from './auth.js';
 
 
 const marked = new Marked(
@@ -68,20 +68,12 @@ class Chat extends BaseEl {
         },
         body: JSON.stringify({ message: content })
       });
-      this._sendRequestWithAuth(request);
+      fetch(request);
     }
     this.msgSoFar = '';
     setTimeout(() => {
       this._scrollToBottom();
     }, 100)
-  }
-
-  _sendRequestWithAuth(request) {
-    const token = getAccessToken();
-    if (token) {
-      request.headers.set('Authorization', `Bearer ${token}`);
-    }
-    fetch(request);
   }
 
   _partialCmd(event) {
