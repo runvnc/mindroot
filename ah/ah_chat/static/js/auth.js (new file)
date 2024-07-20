@@ -1,0 +1,27 @@
+// This file will handle token storage, retrieval, and HTTP interceptor setup
+
+// Store the access token in the browser's local storage
+export function storeAccessToken(token) {
+  localStorage.setItem('accessToken', token);
+}
+
+// Retrieve the access token from the browser's local storage
+export function getAccessToken() {
+  return localStorage.getItem('accessToken');
+}
+
+// Create a custom HTTP interceptor that adds the access token to the headers
+export function setupAuthInterceptor(axios) {
+  axios.interceptors.request.use(
+    config => {
+      const token = getAccessToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    error => {
+      return Promise.reject(error);
+    }
+  );
+}
