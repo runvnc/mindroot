@@ -50,6 +50,12 @@
             background-color: #45a049;
         }
     </style>
+    <script>
+        function storeAccessToken(token) {
+            localStorage.setItem('accessToken', token);
+            window.location.href = '/';
+        }
+    </script>
 </head>
 <body>
     <div class="login-container">
