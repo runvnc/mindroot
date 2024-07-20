@@ -5,6 +5,7 @@ import { BaseEl } from './base.js';
 import './action.js';
 import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
+import { setupAuthHeader } from './auth.js';
 
 
 const marked = new Marked(
@@ -60,13 +61,15 @@ class Chat extends BaseEl {
     this.messages = [...this.messages, { content: marked.parse("\n" + content), spinning:'no', sender, persona }];
 
     if (sender === 'user') {
-      fetch(`/chat/${this.sessionid}/send`, {
+      const request = new Request(`/chat/${this.sessionid}/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: content })
       });
+      const requestWithAuth = setupAuthHeader(request);
+      fetch(requestWithAuth);
     }
     this.msgSoFar = '';
     setTimeout(() => {
