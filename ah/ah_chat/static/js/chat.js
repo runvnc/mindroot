@@ -5,7 +5,7 @@ import { BaseEl } from './base.js';
 import './action.js';
 import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
-import { getAccessToken } from './auth.js';
+import { getAccessToken, setupAuthHeader } from './auth.js';
 
 
 const marked = new Marked(
