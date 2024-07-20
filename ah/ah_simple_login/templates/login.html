@@ -51,6 +51,24 @@
         }
     </style>
     <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData)
+            });
+            if (response.ok) {
+                const data = await response.json();
+                storeAccessToken(data.access_token);
+            } else {
+                alert('Login failed. Please check your credentials.');
+            }
+        }
+
         function storeAccessToken(token) {
             localStorage.setItem('accessToken', token);
             window.location.href = '/';
@@ -60,7 +78,7 @@
 <body>
     <div class="login-container">
         <h1>Login</h1>
-        <form action="/login" method="post">
+        <form onsubmit="handleLogin(event)">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Log In</button>
