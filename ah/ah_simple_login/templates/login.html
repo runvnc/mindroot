@@ -64,14 +64,14 @@
             if (response.ok) {
                 const data = await response.json();
                 storeAccessToken(data.access_token);
+                window.location.href = '/';
             } else {
                 alert('Login failed. Please check your credentials.');
             }
         }
 
         function storeAccessToken(token) {
-            localStorage.setItem('accessToken', token);
-            window.location.href = '/';
+            document.cookie = `access_token=${token}; path=/`;
         }
     </script>
 </head>
