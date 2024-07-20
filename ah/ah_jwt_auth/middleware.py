@@ -40,7 +40,8 @@ async def middleware(request: Request, call_next):
         print('payload:', payload)
         request.state.user = payload
     except Exception as e:
-        print('No valid token found')
+        print('Error:', e)
+        print('No valid token found?')
         print("Not a public route: ", request.url.path)
         print('Redirecting to login')
         return RedirectResponse(url='/login')
