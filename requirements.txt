@@ -49,4 +49,5 @@ loguru
 python-pptx
 openpyxl
 
-jwt
+PyJWT
+
