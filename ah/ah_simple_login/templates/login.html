@@ -71,7 +71,7 @@
         }
 
         function storeAccessToken(token) {
-            document.cookie = `access_token=${token}; path=/`;
+            document.cookie = `access_token=${token}; path=/; max-age=604800`;  // Expires in 1 week
         }
     </script>
 </head>

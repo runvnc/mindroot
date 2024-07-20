@@ -7,7 +7,7 @@ from ah.route_decorators import public_routes, public_route
 
 SECRET_KEY = "your-secret-key"  # Change this to a secure secret key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 10080  # 1 week
 
 security = HTTPBearer()
 
