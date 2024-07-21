@@ -34,17 +34,15 @@ async def middleware(request: Request, call_next):
             print('Public route: ', request.url.path)
             return await call_next(request)
 
-        # Check for token in headers
-        token = await security(request)
-        if token:
-            payload = decode_token(token.credentials)
-            request.state.user = payload
-            return await call_next(request)
-
-        # Check for token in cookies
         token = request.cookies.get("access_token")
         if token:
             payload = decode_token(token)
+            request.state.user = payload
+            return await call_next(request)
+
+        token = await security(request)
+        if token:
+            payload = decode_token(token.credentials)
             request.state.user = payload
             return await call_next(request)
 

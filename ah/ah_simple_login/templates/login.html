@@ -62,16 +62,11 @@
                 body: new URLSearchParams(formData)
             });
             if (response.ok) {
-                const data = await response.json();
-                storeAccessToken(data.access_token);
+                console.log(document.cookie)
                 window.location.href = '/';
             } else {
                 alert('Login failed. Please check your credentials.');
             }
-        }
-
-        function storeAccessToken(token) {
-            document.cookie = `access_token=${token}; path=/; max-age=604800`;  // Expires in 1 week
         }
     </script>
 </head>
