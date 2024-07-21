@@ -1,4 +1,5 @@
 logs
+__pycache__
 __pycache__/*
 tree.txt
 backup
@@ -16,3 +17,5 @@ chatlog*.json
 node_modules
 imgs
 .git
+
+*/__pycache__/*
