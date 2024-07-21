@@ -53,6 +53,9 @@ async def middleware(request: Request, call_next):
 
     except Exception as e:
         print('Error:', e)
+        # print traceback
+        import traceback
+        traceback.print_exc()
         print('No valid token found?')
         print("Not a public route: ", request.url.path)
         print('Redirecting to login')

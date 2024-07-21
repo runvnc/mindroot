@@ -15,10 +15,3 @@ async def home(request: Request):
 async def admin():
     return RedirectResponse("/admin")
 
-@router.get("/{agent_name}", response_class=HTMLResponse)
-async def agent_page(request: Request, agent_name: str):
-    agent_dir = os.path.join("data/agents/local", agent_name)
-    if os.path.isdir(agent_dir):
-        return templates.TemplateResponse("agent.jinja2", {"request": request, "agent_name": agent_name})
-    else:
-        return HTMLResponse(f"Agent '{agent_name}' not found.")
