@@ -5,7 +5,7 @@ import shutil
 
 router = APIRouter()
 
-BASE_DIR = Path('/files/ah/personas')
+BASE_DIR = Path(__file__).resolve().parent / 'personas'
 
 @router.get('/personas/{scope}/{name}')
 def read_persona(scope: str, name: str):
@@ -102,7 +102,12 @@ def update_persona(scope: str, name:str, persona: str = Form(...), faceref: Uplo
             persona['moderated'] = False
         
         # Create target directory
-        target_dir = Path(f'/files/ah/static/personas/{name}')
+        # Based on BASE_DIR plus static/personas/name
+        # This is where the faceref and avatar
+        # will be stored
+        # This is the directory that the webserver will serve
+        target_dir = Path(f'{BASE_DIR}/static/personas/{name}')
+        #target_dir = Path(f'/files/ah/static/personas/{name}')
         target_dir.mkdir(parents=True, exist_ok=True)
         
         if faceref:
