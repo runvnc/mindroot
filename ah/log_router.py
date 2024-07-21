@@ -77,8 +77,8 @@ async def get_logs_page():
                 const now = new Date();
                 const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
                 
-                document.getElementById('startTime').value = tenMinutesAgo.toISOString().slice(0, 16);
-                document.getElementById('endTime').value = now.toISOString().slice(0, 16);
+                document.getElementById('startTime').value = tenMinutesAgo.toString() ;//toISOString().slice(0, 16);
+                document.getElementById('endTime').value = now.toString(); //
             }
 
             function toggleEndTime() {

@@ -4,17 +4,12 @@ import sys
 from datetime import datetime, timedelta
 from loguru import logger
 
-# Make sure logs directory exists. If not, create it first
-# This is required because we are appending
-# Dir is ./logs 
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-# Configure loguru
 logger.remove()  # Remove default handler
 logger.add(sys.stderr, format="{time} | {level} | {function} | {message}", level="INFO")
 
-# Custom sink for JSON logging
 def json_sink(message):
     record = message.record
     log_entry = {
@@ -26,7 +21,6 @@ def json_sink(message):
     }
     write_log(log_entry)
 
-# Log an example message to test function logging
 logger.info("This is a test log message")
 
 logger.add(json_sink, level="DEBUG")
@@ -48,8 +42,8 @@ def get_log_files(start_time, end_time):
 
 async def get_logs(start_time, end_time, limit=1000, cursor=None):
     # Ensure start_time and end_time are naive
-    start_time = start_time.replace(tzinfo=None)
-    end_time = end_time.replace(tzinfo=None)
+    #start_time = start_time.replace(tzinfo=None)
+    #end_time = end_time.replace(tzinfo=None)
     
     files = get_log_files(start_time, end_time)
     logs = []
