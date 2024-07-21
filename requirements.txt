@@ -1,6 +1,6 @@
-facefusionlib
-insightface
-onnxruntime
+#facefusionlib
+#insightface
+#onnxruntime
 nanoid
 accelerate
 diffusers
@@ -39,7 +39,6 @@ together
 
 openai
 
-mimetypes
 python-multipart
 termcolor
 gitignore_parser
