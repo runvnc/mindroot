@@ -91,5 +91,5 @@
     "name": "ah_powerpoint",
     "enabled": true
   },
-  { "name": "create_download_link", "enabled": true }
+  { "name": "ah_download_link", "enabled": true }
 ]
