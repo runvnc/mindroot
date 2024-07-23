@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 @command()
 async def create_download_link(filename, expiration_time=None, context=None):
-    """Create a download link for a file.
+    """Generate a download link for a file, which you will then insert into a markdown message to the user.
 
     Parameters:
     filename (str): The name of the file to create a download link for.
@@ -21,10 +21,9 @@ async def create_download_link(filename, expiration_time=None, context=None):
     if not os.path.exists(filename):
         return f"Error: File '{filename}' not found."
 
-    # Generate a unique identifier for the download
     download_id = str(uuid.uuid4())
 
-    # Create a relative URL
+    user = 'default'
     download_url = f"/download/{download_id}"
 
     # Set expiration time
@@ -41,6 +40,9 @@ async def create_download_link(filename, expiration_time=None, context=None):
         "expiry": expiry_str
     }
 
+    if context.user is None:
+        context.user = 'default'
+
     # Ensure the directory exists
     os.makedirs(f"data/dl_links/{context.user}", exist_ok=True)
 
@@ -50,5 +52,5 @@ async def create_download_link(filename, expiration_time=None, context=None):
 
     # Create the message with the download link
     filename_only = os.path.basename(filename)
-    message = f"Download link: [**{filename_only}**]({download_url})\nExpires: {expiry_str}"
+    message = f"Download link to be displayed: [**{filename_only}**]({download_url})\nExpires: {expiry_str}"
     return message

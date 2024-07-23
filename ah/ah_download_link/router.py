@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/download/{download_id}")
 async def download_file(download_id: str, request: Request):
-    user = request.session.get('user', 'default')  # Get the user from the session, or use 'default'
+    user = 'default'
     link_file = f"data/dl_links/{user}/{download_id}"
     
     if not os.path.exists(link_file):
