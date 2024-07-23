@@ -12,6 +12,7 @@ from .excel_recalculator import recalculate_excel
 @command()
 async def list_sheets(filename, context):
     """Open an Excel workbook and return its sheets.
+    Always use this before other commands unless you are sure you know the spreadsheet structure.
     Example:
     { "list_sheets": { "filename": "example.xlsx" } }
     """

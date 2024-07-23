@@ -23,7 +23,11 @@ async def save_presentation(context, source_filename, destination_filename):
 @command()
 async def slide_replace_all(context, filename, replacements=None, case_sensitive=True, whole_word=False):
     """Replace all occurrences of specified strings in the presentation.
-    
+
+    Parameters:
+        filename: string
+        replacements: 
+
     Examples:
     1. Simple text replacement:
     { "slide_replace_all": { "filename": "example.pptx", "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
@@ -103,16 +107,15 @@ async def read_slide_content(context, filename, slide_number):
         return json.dumps({"error": str(e)})
 
 @command()
-async def update_slide_content(context, filename, slide_number, content_json):
-    """Update a slide with content provided in JSON format.
+async def update_slide_content(context, filename, slide_number, content):
+    """Update a slide with content.
     For tables, the number of rows in the provided data must match the existing table.
     Example:
-    { "update_slide_content": { "filename": "presentation.pptx", "slide_number": 1, "content_json": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
+    { "update_slide_content": { "filename": "presentation.pptx", "slide_number": 1, "content": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
     """
     try:
         prs = Presentation(filename)
         slide = prs.slides[slide_number - 1]
-        content = json.loads(content_json)
         for shape in slide.shapes:
             if shape.name in content:
                 if shape.has_text_frame:
