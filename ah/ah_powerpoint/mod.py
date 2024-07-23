@@ -109,6 +109,9 @@ async def read_slide_content(context, filename, slide_number):
 @command()
 async def update_slide_content(context, filename, slide_number, content):
     """Update a slide with content.
+    For lists of text in groups or text that can be updated with search and replace, use
+    slide_replace_all instead. Text frame updates must be string only.
+    
     For tables, the number of rows in the provided data must match the existing table.
     Example:
     { "update_slide_content": { "filename": "presentation.pptx", "slide_number": 1, "content": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
