@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 @command()
 async def create_download_link(filename, expiration_time=None, context=None):
-    """Create a download link for a file and send it to the chat.
+    """Create a download link for a file.
 
     Parameters:
     filename (str): The name of the file to create a download link for.
@@ -15,7 +15,7 @@ async def create_download_link(filename, expiration_time=None, context=None):
     context (object): The context object for the current session.
 
     Returns:
-    str: A message indicating success or failure.
+    str: A message with the link which you should output as markdown.
     """
     # Verify file exists
     if not os.path.exists(filename):
@@ -51,11 +51,4 @@ async def create_download_link(filename, expiration_time=None, context=None):
     # Create the message with the download link
     filename_only = os.path.basename(filename)
     message = f"Download link: [**{filename_only}**]({download_url})\nExpires: {expiry_str}"
-
-    # Send the message to the chat
-    await context.agent_output("new_message", {
-        "content": message,
-        "agent": context.agent['name']
-    })
-
-    return "Download link created and sent to chat."
+    return message
