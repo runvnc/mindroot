@@ -96,7 +96,7 @@ async def write_cell_range(filename, sheet_name, cell_range, values, context=Non
         min_col, min_row, max_col, max_row = range_boundaries(cell_range)
         
         if len(values) != max_row - min_row + 1 or any(len(row) != max_col - min_col + 1 for row in values):
-            return "Error: Input values do not match the specified range."
+            return "Error: Input shape does not match the specified range."
         
         for row in range(min_row, max_row + 1):
             for col in range(min_col, max_col + 1):
