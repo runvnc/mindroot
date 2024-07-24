@@ -12,7 +12,10 @@ from ..services import service_manager
 import sys
 from ..check_args import *
 from ..ah_agent.command_parser import parse_streaming_commands
+from datetime import datetime
+import pytz
 
+formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
 @service()
 async def get_agent_data(agent_name, context=None):
     logger.info("Agent name: {agent_name}", agent_name=agent_name)
@@ -230,10 +233,13 @@ class Agent:
     async def render_system_msg(self):
         logger.debug("Docstrings:")
         logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
+        formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,
-            "persona": self.agent['persona']
+            "persona": self.agent['persona'],
+            "formatted_datetime": formatted_time
         }
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)
