@@ -6,6 +6,7 @@ from pptx.util import Inches
 import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
+from .slide_content_updater import update_slide_content as new_update_slide_content
 
 @command()
 async def save_presentation(context, source_filename, destination_filename):
@@ -49,8 +50,6 @@ async def slide_replace_all(context, filename, replacements=None, case_sensitive
       "case_sensitive": true
     } }
     """
-    from .replace_all import slide_replace_all as new_slide_replace_all
-    
     if replacements is None:
         return "No replacements provided"
 
@@ -110,37 +109,14 @@ async def read_slide_content(context, filename, slide_number):
 async def update_slide_content(context, filename, slide_number, content):
     """Update a slide with content.
     For lists of text in groups or text that can be updated with search and replace, use
-    slide_replace_all instead. Text frame updates must be string only.
+    slide_replace_all instead. Text frame updates can be string or list of strings.
     
     For tables, the number of rows in the provided data must match the existing table.
     Example:
     { "update_slide_content": { "filename": "presentation.pptx", "slide_number": 1, "content": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
     """
     try:
-        prs = Presentation(filename)
-        slide = prs.slides[slide_number - 1]
-        for shape in slide.shapes:
-            if shape.name in content:
-                if shape.has_text_frame:
-                    shape.text_frame.text = content[shape.name]
-                elif shape.has_table:
-                    if isinstance(content[shape.name], list) and all(isinstance(row, list) for row in content[shape.name]):
-                        for i, row in enumerate(content[shape.name]):
-                            for j, cell_content in enumerate(row):
-                                if i < len(shape.table.rows) and j < len(shape.table.columns):
-                                    shape.table.cell(i, j).text = str(cell_content)
-                    else:
-                        raise ValueError(f"Content for table '{shape.name}' must be a 2D list")
-                elif shape.has_chart:
-                    if isinstance(content[shape.name], dict) and 'categories' in content[shape.name] and 'values' in content[shape.name]:
-                        chart_data = CategoryChartData()
-                        chart_data.categories = content[shape.name]['categories']
-                        chart_data.add_series('Series 1', content[shape.name]['values'])
-                        shape.chart.replace_data(chart_data)
-                    else:
-                        raise ValueError(f"Content for chart '{shape.name}' must be a dict with 'categories' and 'values' keys")
-        prs.save(filename)
-        return f"Updated content of slide {slide_number} in {filename}"
+        return new_update_slide_content(context, filename, slide_number, content)
     except Exception as e:
         return f"Error updating slide content: {str(e)}"
 

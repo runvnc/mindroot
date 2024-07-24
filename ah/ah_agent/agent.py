@@ -251,7 +251,7 @@ class Agent:
 
 
     async def chat_commands(self, model, context,
-                            temperature=0, max_tokens=2000, messages=[]):
+                            temperature=0, max_tokens=4000, messages=[]):
 
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
