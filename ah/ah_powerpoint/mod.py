@@ -22,19 +22,20 @@ async def save_presentation(context, source_filename, destination_filename):
         return f"Error saving presentation: {str(e)}"
 
 @command()
-async def slide_replace_all(context, filename, replacements=None, case_sensitive=True, whole_word=False):
-    """Replace all occurrences of specified strings in the presentation.
+async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
+    """Replace all occurrences of specified strings on the presentation slide.
 
     Parameters:
         filename: string
+        slide (int): slide number to update
         replacements: 
 
     Examples:
     1. Simple text replacement:
-    { "slide_replace_all": { "filename": "example.pptx", "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
+    { "slide_replace_all": { "filename": "example.pptx", "slide": 1, "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
     
     2. Multiple replacements including percentages:
-    { "slide_replace_all": { "filename": "example.pptx", "replacements": [
+    { "slide_replace_all": { "filename": "example.pptx", "slide": 3, "replacements": [
         {"match": "total: 5%", "replace": "total: 10%"},
         {"match": "revenue", "replace": "income"}
       ], 
@@ -62,33 +63,33 @@ async def slide_replace_all(context, filename, replacements=None, case_sensitive
         return f"Error during replacement: {str(e)}"
 
 @command()
-async def replace_image(context, filename, original_image_fname=None, replace_with_image_fname=None):
-    """Replace an image in the presentation based on image file names.
+async def replace_image(context, filename, slide, name=None, replace_with_image_fname=None):
+    """Replace an image in the presentation based on name.
     
     Example:
-    { "replace_image": { "filename": "presentation.pptx", "original_image_fname": "old_logo.png", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
+    { "replace_image": { "filename": "presentation.pptx", "name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
     """
-    if original_image_fname is None or replace_with_image_fname is None:
-        return "Both original_image_fname and replace_with_image_fname must be provided"
+    if name is None or replace_with_image_fname is None:
+        return "Both fname and replace_with_image_fname must be provided"
 
     try:
         prs = Presentation(filename)
         replacements_count = 0
 
-        for slide in prs.slides:
-            for shape in slide.shapes:
-                if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
-                    if shape.image.filename == original_image_fname:
-                        im = parts.image.Image.from_file(replace_with_image_fname)
+        slide = prs.slides[slide - 1]
+        for shape in slide.shapes:
+            if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
+                if shape.name == original_image_fname:
+                    im = parts.image.Image.from_file(replace_with_image_fname)
 
-                        slide_part, rId = shape.part, shape._element.blip_rId
-                        image_part = slide_part.related_part(rId)
-                        image_part.blob = im._blob
+                    slide_part, rId = shape.part, shape._element.blip_rId
+                    image_part = slide_part.related_part(rId)
+                    image_part.blob = im._blob
 
-                        replacements_count += 1
+                    replacements_count += 1
 
         prs.save(filename)
-        return f"Replaced {replacements_count} instance(s) of {original_image_fname} with {replace_with_image_fname} in {filename}"
+        return f"Replaced {replacements_count} instance(s) of {name} with {replace_with_image_fname} in {filename}"
     except Exception as e:
         return f"Error replacing image: {str(e)}"
 

@@ -1,0 +1,50 @@
+task-editor {
+  display: block;
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+task-editor h2 {
+  margin-bottom: 15px;
+}
+
+task-editor .task-list,
+task-editor .task-form {
+  margin-bottom: 20px;
+}
+
+task-editor input,
+task-editor textarea,
+task-editor select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+task-editor button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+task-editor button:hover {
+  background-color: #0056b3;
+}
+
+task-editor .admin-files {
+  margin-top: 15px;
+}
+
+task-editor .admin-file {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+}
