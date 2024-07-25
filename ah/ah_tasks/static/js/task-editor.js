@@ -28,6 +28,11 @@ class TaskEditor extends LitElement {
       align-items: center;
       margin-bottom: 8px;
     }
+    .file-upload {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   `;
 
   constructor() {
@@ -148,7 +153,10 @@ class TaskEditor extends LitElement {
                 <button @click=${() => this.deleteAdminFile(file.name)}>Delete</button>
               </div>
             `)}
-            <input type="file" @change=${this.uploadAdminFile}>
+            <div class="file-upload">
+              <input type="file" @change=${this.uploadAdminFile}>
+              <button @click=${() => this.shadowRoot.querySelector('input[type=file]').click()}>Upload File</button>
+            </div>
           </div>
 
           <h3>Output Schema</h3>
