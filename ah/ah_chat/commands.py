@@ -40,7 +40,7 @@ async def say(text="", context=None):
     (The system now waits for the user reply)
 
     """
-    print("say command called, text = ", text, "done = ", done)
+    print("say command called, text = ", text)
     await context.agent_output("new_message", {"content": text,
                                "agent": context.agent['name'] })
     return None

@@ -6,6 +6,7 @@ from .services import init_chat_session, send_message_to_agent, subscribe_to_age
 from ..ah_templates import render_combined_template
 from ..plugins import list_enabled
 import nanoid
+from  .commands import *
 
 router = APIRouter()
 

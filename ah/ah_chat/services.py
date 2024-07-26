@@ -3,6 +3,8 @@ from ..commands import command_manager
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
+import colored
+import traceback
 import asyncio
 import json
 
@@ -39,7 +41,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         try:
             results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
 
-            print("results from chat commands: ", colored(results, 'cyan'))
+            print("results from chat commands: ", results)
             out_results = []
             actual_results = False
 
