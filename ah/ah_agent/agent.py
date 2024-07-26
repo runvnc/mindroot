@@ -91,10 +91,6 @@ class Agent:
             "arguments": cmd_args,
             "context": str(context)
         })
-        #if cmd_name != 'say':
-        #    logger.debug("Unloading llm")
-        #    #await use_ollama.unload(self.model)
-        #    #await asyncio.sleep(0.3)
         context.chat_log.add_message({"role": "assistant", "content": '['+json_cmd+']' })
 
         command_manager.context = context

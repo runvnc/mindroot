@@ -1,10 +1,12 @@
-from ..commands import command
+from ..commands import command, command_manager
+from ..services import service_manager
+
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages
 import asyncio
 import json
 
 @command()
-async def say(text="", done=True, context=None):
+async def say(text="", context=None):
     """
     Say something to the user or chat room.
     One sentence per command. If you want to say multiple sentences, use multiple commands.
@@ -13,7 +15,7 @@ async def say(text="", done=True, context=None):
     text - String. The text to say.
 
     Return: No return value. To continue without waiting for user reply, add more commands  
-            in the command array.
+            in the command array. Otherwise, the system will stop and wait for user reply!
 
     ## Example 1
    
@@ -79,14 +81,16 @@ async def json_encoded_md(markdown="", context=None):
 async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
-async def collect_agent_replies(log_id: str, timeout: float = 120.0, max_replies: int = 5):
+async def collect_agent_replies(log_id: str, timeout: float = 240.0, max_replies: int = 10):
     """
     Helper function to collect replies from another agent in an existing conversation.
     """
     replies = []
+    subscription = subscribe_to_agent_messages(log_id)
+
     try:
         async with asyncio.timeout(timeout):
-            async for event in subscribe_to_agent_messages(log_id):
+            async for event in subscription:
                 reply_data = json.loads(event['data'])
                 replies.append(reply_data['content'])
                 if len(replies) >= max_replies:
@@ -110,21 +114,95 @@ async def initiate_agent_session(agent_name: str, context=None):
     return log_id
 
 @command()
-async def communicate_with_agent(log_id: str, message: str, reply_timeout: float = 120.0, max_replies: int = 5, context=None):
+async def exit_conversation(takeaways: str, context=None):
+    """
+    Exit a chat session with another agent. Use this when exit criteria are met.
+
+    Parameters:
+    takeaways - String. A concise summary of relevant details of the conversation.
+
+    """
+    log_id = await init_chat_session(agent_name, context)
+    return log_id
+
+
+# have agent conversation with another agent
+# bring in recent messages from this context/log  but not all messages
+# specify the most important agenda items for the conversation
+#
+
+# chat logs:
+
+# 1. system -> supervistor agent : when user initiates a task, system initiates chat with supervisor agent
+#  this is the parent chat log
+# 2. supervisor agent -> worker agent: supervisor agent initiates chat with worker agent given the task and (if any) recent messages
+#    this goes in a new chat log which for the supervisor which contains recent messages and task but not all messages
+# 3. supervisor agent -> worker agent from worker's perspective: another chat log that contains only the message from the worker's perspective
+#  starting with the supervisor's first message
+#
+
+# supervisor agent chat goes in loop until supervisor calls exit_chat and returns a concise but complete summary of the relevant conversation
+# details  
+
+# the parent chat log is continued with the output of the conversation being added as a "user" system message and then
+# the supervisor decides what to do next such as recording the task as completed or moving on to another worker
+
+@command()
+async def converse_with_agent(sub_log_id: str, message: str, reply_timeout: float = 120.0, max_replies: int = 10, context=None):
     """
     Send a message to an agent in an existing chat session and collect replies.
 
     Parameters:
-    log_id - String. The log_id of the existing chat session.
-    message - String. The message to send to the agent.
-    reply_timeout - Float. The maximum time to wait for replies, in seconds (default: 120.0 seconds).
-    max_replies - Int. The maximum number of replies to collect.
+    sub_log_id - String. The log_id of the existing chat session with a secondary agent.
+    first_message - String. The first message to the agent.
+    contextual_info - String. Relevant details that may come up.
+    exit_criteria - String. The criteria for ending the conversation.
 
-    Return: Dict. Contains the sent message results and collected replies.
+    Return: String. Contains a concise summary of relevant details of conversation.
     """
-    send_result = await send_message_to_agent(log_id, message)
-    replies = await collect_agent_replies(log_id, reply_timeout, max_replies)
+    # create a temp chat log for the agent's perspective on this subconversation
+    my_sub_log_id = init_chat_session(context.agent_name, context)
+    my_sub_context = ChatContext(service_manager, command_manager)
+    await my_sub_context.load_context(my_sub_log_id)
+ 
+    my_sub_log = my_sub_context.chat_log
+
+    to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
+    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{agent_name}] taking User role... " + to_exit
+    my_sub_log.chat_log.add_message({"role": "user", "content": init_sub_msg})
+    my_sub_log.chat_log.add_message({"role": "assistant", "content": first_message})
     
+    sub_agent_replies = subscribe_to_agent_messages(sub_log_id)
+    finished_conversation = False
+    my_sub_context.data['finished_conversation'] = False
+
+    my_sub_replies = subscribe_to_agent_messages(my_sub_log_id)
+
+    while not finished_conversation:
+        replies = []
+        send_result = await send_message_to_agent(sub_log_id, first_message)
+        async for event in sub_agent_replies:
+            print(event)
+            # we really only want 'say' commands and 'json_encoded_markdown' commands
+            # to add to the conversation
+            reply_data = json.loads(event['data'])
+            replies.append(json.loads(event['data'])['content'])
+
+        finished_conversation = True
+
+        #await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
+        #my_replies = []
+        #async for event2 in my_sub_replies:
+        #    print(event2)
+            # we really only want 'say' commands and 'json_encoded_markdown' commands
+            # to add to the conversation
+        #    reply_data = json.loads(event2['data'])
+        #    my_replies.append(json.loads(event2['data'])['content'])
+        #if my_sub_context.data['finished_conversation']:
+        #    finished_conversation = True
+        #else:
+        #    first_message = json.dumps(my_replies)
+        
     return {
         "send_result": send_result,
         "replies": replies

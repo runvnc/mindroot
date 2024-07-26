@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
-    return EventSourceResponse(subscribe_to_agent_messages(log_id))
+    return EventSourceResponse(await subscribe_to_agent_messages(log_id))
 
 @router.put("/chat/{log_id}/{agent_name}")
 async def init_chat(log_id: str, agent_name: str):
@@ -20,6 +20,7 @@ async def init_chat(log_id: str, agent_name: str):
 
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, message_data: Message):
+    print(f"send_message   log_id: {log_id}   message: {message_data.message}")
     results = await send_message_to_agent(log_id, message_data.message)
     return {"status": "ok", "results": results}
 

@@ -1,4 +1,5 @@
-from ..services import service
+from ..services import service, service_manager
+from ..commands import command_manager
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
@@ -19,12 +20,55 @@ async def init_chat_session(agent_name: str, context=None):
     return log_id
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, context=None):
-    context = await ChatContext.load_context(session_id)
+async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None):
+    print("send_message_to_agent: ", session_id, message, max_iterations)
+    context = ChatContext(command_manager, service_manager)
+    await context.load_context(session_id)
     agent_ = agent.Agent(agent=context.agent)
     context.chat_log.add_message({"role": "user", "content": message})
-    results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
-    return results
+    #results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+
+    context.save_context()
+
+    continue_processing = True
+    iterations = 0
+    while continue_processing and iterations < max_iterations:
+        iterations += 1
+        continue_processing = False
+        try:
+            results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+
+            print("results from chat commands: ", colored(results, 'cyan'))
+            out_results = []
+            actual_results = False
+
+            for result in results:
+                if result['result'] is not None:
+                    if result['result'] == 'continue':
+                        out_results.append(result)
+                        continue_processing = True
+                    elif result['result'] == 'stop':
+                        continue_processing = False
+                    else:
+                        out_results.append(result)
+                        actual_results = True
+                        continue_processing = True
+                else:
+                    continue_processing = False
+
+            if actual_results:
+                continue_processing = True
+
+            if len(out_results) > 0:
+                print("Processing iteration: ", iterations, "adding message")
+                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+        except Exception as e:
+            print("Found an error in agent output: ")
+            print(e)
+            print(traceback.format_exc())
+            continue_processing = False
+
+    return
 
 @service()
 async def subscribe_to_agent_messages(session_id: str, context=None):
