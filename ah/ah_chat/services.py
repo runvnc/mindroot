@@ -9,8 +9,7 @@ import json
 sse_clients = {}
 
 @service()
-async def init_chat_session(agent_name: str, context=None):
-    log_id = context.log_id if context else None
+async def init_chat_session(agent_name: str, log_id: str):
     context = ChatContext(command_manager, service_manager)
     context.agent_name = agent_name
     context.log_id = log_id

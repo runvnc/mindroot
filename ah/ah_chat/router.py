@@ -37,6 +37,6 @@ async def get_admin_html():
 async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     plugins = list_enabled()
-    await init_chat_session(agent_name, context={"log_id": log_id})
+    await init_chat_session(agent_name, log_id)
     html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
     return html
