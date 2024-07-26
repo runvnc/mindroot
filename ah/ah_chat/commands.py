@@ -1,9 +1,11 @@
 from ..commands import command, command_manager
 from ..services import service_manager
-
+from ..chatcontext import ChatContext
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages
 import asyncio
 import json
+import nanoid
+
 
 @command()
 async def say(text="", context=None):
@@ -110,8 +112,11 @@ async def initiate_agent_session(agent_name: str, context=None):
 
     Return: String. The log_id for the new chat session.
     """
-    log_id = await init_chat_session(agent_name, context)
+    log_id = nanoid.generate()
+ 
+    await init_chat_session(agent_name, log_id)
     return log_id
+
 
 @command()
 async def exit_conversation(takeaways: str, context=None):
@@ -122,9 +127,8 @@ async def exit_conversation(takeaways: str, context=None):
     takeaways - String. A concise summary of relevant details of the conversation.
 
     """
-    log_id = await init_chat_session(agent_name, context)
-    return log_id
-
+    context.data['finished_conversation'] = True
+    return takeaways
 
 # have agent conversation with another agent
 # bring in recent messages from this context/log  but not all messages
@@ -148,7 +152,7 @@ async def exit_conversation(takeaways: str, context=None):
 # the supervisor decides what to do next such as recording the task as completed or moving on to another worker
 
 @command()
-async def converse_with_agent(sub_log_id: str, message: str, reply_timeout: float = 120.0, max_replies: int = 10, context=None):
+async def converse_with_agent(sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
     """
     Send a message to an agent in an existing chat session and collect replies.
 
@@ -161,7 +165,7 @@ async def converse_with_agent(sub_log_id: str, message: str, reply_timeout: floa
     Return: String. Contains a concise summary of relevant details of conversation.
     """
     # create a temp chat log for the agent's perspective on this subconversation
-    my_sub_log_id = init_chat_session(context.agent_name, context)
+    my_sub_log_id = await init_chat_session(context.agent_name, context)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
  
@@ -172,11 +176,11 @@ async def converse_with_agent(sub_log_id: str, message: str, reply_timeout: floa
     my_sub_log.chat_log.add_message({"role": "user", "content": init_sub_msg})
     my_sub_log.chat_log.add_message({"role": "assistant", "content": first_message})
     
-    sub_agent_replies = subscribe_to_agent_messages(sub_log_id)
+    sub_agent_replies = await subscribe_to_agent_messages(sub_log_id)
     finished_conversation = False
     my_sub_context.data['finished_conversation'] = False
 
-    my_sub_replies = subscribe_to_agent_messages(my_sub_log_id)
+    my_sub_replies = await subscribe_to_agent_messages(my_sub_log_id)
 
     while not finished_conversation:
         replies = []

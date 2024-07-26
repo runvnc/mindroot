@@ -14,6 +14,7 @@ from ..check_args import *
 from ..ah_agent.command_parser import parse_streaming_commands
 from datetime import datetime
 import pytz
+import traceback
 
 formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
 @service()
@@ -115,10 +116,14 @@ class Agent:
                 return await command_manager.execute(cmd_name, cmd_args)
 
         except Exception as e:
+            trace = traceback.format_exc()
+            print("\033[96mError in handle_cmds: " + str(e) + "\033[0m")
+            print("\033[96m" + trace + "\033[0m")
             logger.error("Error in handle_cmds", extra={
                 "error": str(e),
                 "command": cmd_name,
-                "arguments": cmd_args
+                "arguments": cmd_args,
+                "traceback": trace
             })
 
             return {"error": str(e)}
