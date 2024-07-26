@@ -165,14 +165,15 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
     Return: String. Contains a concise summary of relevant details of conversation.
     """
     # create a temp chat log for the agent's perspective on this subconversation
-    my_sub_log_id = await init_chat_session(context.agent_name, context)
+    my_sub_log_id = nanoid.generate()
+    await init_chat_session(context.agent_name, my_sub_log_id)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
  
     my_sub_log = my_sub_context.chat_log
 
     to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
-    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{agent_name}] taking User role... " + to_exit
+    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... " + to_exit
     my_sub_log.chat_log.add_message({"role": "user", "content": init_sub_msg})
     my_sub_log.chat_log.add_message({"role": "assistant", "content": first_message})
     
