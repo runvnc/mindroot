@@ -13,10 +13,12 @@ router = APIRouter()
 async def chat_events(log_id: str):
     return EventSourceResponse(await subscribe_to_agent_messages(log_id))
 
-@router.put("/chat/{log_id}/{agent_name}")
-async def init_chat(log_id: str, agent_name: str):
-    await init_chat_session(agent_name, context={"log_id": log_id})
-    return {"status": "ok"}
+
+#@router.put("/chat/{log_id}/{agent_name}")
+#async def init_chat(log_id: str, agent_name: str):
+#    print(f"init_chat   log_id: {log_id}   agent_name: {agent_name}")
+#    await init_chat_session(agent_name, context={"log_id": log_id})
+#    return {"status": "ok"}
 
 @router.post("/chat/{log_id}/send")
 async def send_message(log_id: str, message_data: Message):
@@ -35,5 +37,6 @@ async def get_admin_html():
 async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     plugins = list_enabled()
+    await init_chat_session(agent_name, context={"log_id": log_id})
     html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
     return html

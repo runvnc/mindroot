@@ -32,7 +32,8 @@ class ChatContext:
         if 'name' in self.agent:
             context_data['agent_name'] = self.agent['name']
         with open(context_file, 'w') as f:
-            json.dump(context_data, f, indent=2)        
+            json.dump(context_data, f, indent=2)
+        print("Saved context to:", context_file)
 
     async def load_context(self, log_id):
         self.log_id = log_id
@@ -56,6 +57,7 @@ class ChatContext:
             self.uncensored = True
         else:
             print("Context file not found for id:", log_id)
+            raise ValueError("Context file not found for id:", log_id)
 
     def __getattr__(self, name):
         if name in self.__dict__ or name in self.__class__.__dict__:
