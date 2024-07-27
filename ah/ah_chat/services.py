@@ -72,7 +72,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
             print(traceback.format_exc())
             continue_processing = False
 
-    return
+    return results
 
 @service()
 async def subscribe_to_agent_messages(session_id: str, context=None):

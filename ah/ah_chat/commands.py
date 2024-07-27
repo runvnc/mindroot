@@ -188,14 +188,17 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
 
     while not finished_conversation:
         replies = []
-        send_result = await send_message_to_agent(sub_log_id, first_message)
+        asyncio.create_task(send_message_to_agent(sub_log_id, first_message))
         async for event in sub_agent_replies:
             print('######################################################################################')
             print(event)
             # we really only want 'say' commands and 'json_encoded_markdown' commands
             # to add to the conversation
-            reply_data = json.loads(event['data'])
-            replies.append(json.loads(event['data'])['content'])
+            data = event['event']
+            if 'running_command' in data:
+                reply_data = json.loads(data['running_command'])
+                print('reply_data:', reply_data)
+                replies.append(reply_data)
 
         finished_conversation = True
 
