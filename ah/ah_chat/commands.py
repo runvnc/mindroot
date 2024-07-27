@@ -166,6 +166,9 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
     """
     # create a temp chat log for the agent's perspective on this subconversation
     my_sub_log_id = nanoid.generate()
+    print('-------------------------------------------------------------------')
+    print('===================================================================')
+    print(context, context.agent_name)
     await init_chat_session(context.agent_name, my_sub_log_id)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
@@ -174,8 +177,8 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
 
     to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
     init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... " + to_exit
-    my_sub_log.chat_log.add_message({"role": "user", "content": init_sub_msg})
-    my_sub_log.chat_log.add_message({"role": "assistant", "content": first_message})
+    my_sub_log.add_message({"role": "user", "content": init_sub_msg})
+    my_sub_log.add_message({"role": "assistant", "content": first_message})
     
     sub_agent_replies = await subscribe_to_agent_messages(sub_log_id)
     finished_conversation = False
@@ -187,6 +190,7 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
         replies = []
         send_result = await send_message_to_agent(sub_log_id, first_message)
         async for event in sub_agent_replies:
+            print('######################################################################################')
             print(event)
             # we really only want 'say' commands and 'json_encoded_markdown' commands
             # to add to the conversation

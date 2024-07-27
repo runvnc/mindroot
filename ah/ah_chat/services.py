@@ -14,6 +14,7 @@ sse_clients = {}
 async def init_chat_session(agent_name: str, log_id: str):
     context = ChatContext(command_manager, service_manager)
     context.agent_name = agent_name
+    context.name = agent_name
     context.log_id = log_id
     context.agent = await service_manager.get_agent_data(agent_name)
     context.chat_log = ChatLog(log_id=log_id, agent=agent_name)

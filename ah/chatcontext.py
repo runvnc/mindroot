@@ -31,6 +31,8 @@ class ChatContext:
         }
         if 'name' in self.agent:
             context_data['agent_name'] = self.agent['name']
+        elif 'agent_name' in self.data:
+            context_data['agent_name'] = self.data['agent_name']
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
         print("Saved context to:", context_file)
