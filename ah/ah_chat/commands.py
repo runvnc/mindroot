@@ -192,28 +192,24 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
         async for event in sub_agent_replies:
             print('######################################################################################')
             print(event)
-            # we really only want 'say' commands and 'json_encoded_markdown' commands
-            # to add to the conversation
-            data = event['event']
-            if 'running_command' in data:
-                reply_data = json.loads(data['running_command'])
+            if event['event'] == 'running_command':
+                reply_data = json.loads(event['data'])
                 print('reply_data:', reply_data)
                 replies.append(reply_data)
 
-        finished_conversation = True
+        asyncio.create_task(send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
+        my_replies = []
+        async for event2 in my_sub_replies:
+            print(event2)
+            if event2['event'] == 'running_command':
+                reply_data = json.loads(event['data'])
+                print('reply_data:', reply_data)
+                my_replies.append(reply_data)
 
-        #await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
-        #my_replies = []
-        #async for event2 in my_sub_replies:
-        #    print(event2)
-            # we really only want 'say' commands and 'json_encoded_markdown' commands
-            # to add to the conversation
-        #    reply_data = json.loads(event2['data'])
-        #    my_replies.append(json.loads(event2['data'])['content'])
-        #if my_sub_context.data['finished_conversation']:
-        #    finished_conversation = True
-        #else:
-        #    first_message = json.dumps(my_replies)
+        if my_sub_context.data['finished_conversation']:
+            finished_conversation = True
+        else:
+            first_message = json.dumps(my_replies)
         
     return {
         "send_result": send_result,
