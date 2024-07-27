@@ -45,7 +45,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
             print("results from chat commands: ", results)
             out_results = []
             actual_results = False
-
+            asyncio.sleep(0.1)
             for result in results:
                 if result['result'] is not None:
                     if result['result'] == 'continue':
@@ -75,6 +75,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
             print(traceback.format_exc())
             continue_processing = False
 
+    await asyncio.sleep(0.1)
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
     return results
 
@@ -117,9 +118,9 @@ async def partial_command(command: str, chunk: str, params, context=None):
                                                     "persona": agent_['persona']['name'] })
 
 @service()
-async def running_command(command: str, context=None):
+async def running_command(command: str, args, context=None):
     agent_ = context.agent
-    await context.agent_output("running_command", { "command": command, "persona": agent_['persona']['name'] })
+    await context.agent_output("running_command", { "command": command, args, "persona": agent_['persona']['name'] })
 
 @service()
 async def command_result(command: str, result, context=None):

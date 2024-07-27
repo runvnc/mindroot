@@ -152,12 +152,17 @@ async def exit_conversation(takeaways: str, context=None):
 # the supervisor decides what to do next such as recording the task as completed or moving on to another worker
 
 @command()
-async def converse_with_agent(sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
+async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
     """
-    Send a message to an agent in an existing chat session and collect replies.
+    Have a conversation with an agent in an existing chat session.
+    Note: once you start the conversation, use normal Say commands etc. to coninue the conversation.
+        do not use this command again to send messages to the agent. 
 
     Parameters:
+    agent_name - String. The name of the agent to converse with.
     sub_log_id - String. The log_id of the existing chat session with a secondary agent.
+    IMPORTANT: this is NOT the agent name. It is the log_id/session_id of the chat session.
+
     first_message - String. The first message to the agent.
     contextual_info - String. Relevant details that may come up.
     exit_criteria - String. The criteria for ending the conversation.
@@ -172,13 +177,13 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
     await init_chat_session(context.agent_name, my_sub_log_id)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
- 
+    
     my_sub_log = my_sub_context.chat_log
 
     to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
     init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... " + to_exit
     my_sub_log.add_message({"role": "user", "content": init_sub_msg})
-    my_sub_log.add_message({"role": "assistant", "content": first_message})
+    my_sub_log.add_message({"role": "assistant", "content": f"[{agent_name}]:" + first_message})
     
     sub_agent_replies = await subscribe_to_agent_messages(sub_log_id)
     finished_conversation = False
@@ -190,41 +195,48 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
     while not finished_conversation:
         replies = []
         run_sub_agent = asyncio.create_task(send_message_to_agent(sub_log_id, first_message))
-        async for event in sub_agent_replies:
-            print(event)
-            if event['event'] == 'running_command':
-                reply_data = json.loads(event['data'])
-                print('reply_data:', reply_data)
-                replies.append(reply_data)
-            if run_sub_agent.done():
-                break
-            print("Waiting for sub-agent replies...")
-
+        async with asyncio.timeout(12.0):
+            async for event in sub_agent_replies:
+                print(event)
+                if event['event'] == 'running_command':
+                    reply_data = json.loads(event['data'])
+                    print('reply_data:', reply_data)
+                    replies.append(reply_data)
+                if run_sub_agent.done():
+                    print("run_sub_agent done")
+                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+                    break
+                print("Waiting for sub-agent replies...")
+        await run_sub_agent
         print("Sending replies to parent agent...")
-        x = """
+        print('oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo OK done')
+        # make sure to flush output with option
+        print(",", flush=True)
+        finished_conversation = True
+        #x = """
         run_parent_agent = asyncio.create_task(send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}"))
         my_replies = []
         print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
-        async for event2 in my_sub_replies:
-            print(event2)
-            if event2['event'] == 'running_command':
-                reply_data = json.loads(event['data'])
-                print('reply_data:', reply_data)
-                my_replies.append(reply_data)
-
-            if run_parent_agent.done():
-                break
-        """
-        print("Sending replies to parent agent...")
+        async with asyncio.timeout(12.0):
+            async for event2 in my_sub_replies:
+                print(event2)
+                if event2['event'] == 'running_command':
+                    reply_data = json.loads(event['data'])
+                    print('reply_data:', reply_data)
+                    my_replies.append(reply_data)
+                asyncio.sleep(0.1)
+                if run_parent_agent.done():
+                    break
+        print("Waiting for parent agent replies...")
+        await run_parent_agent
+        #"""
         print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
         print("my_replies:", my_replies)
-        return
         #if my_sub_context.data['finished_conversation']:
         #    finished_conversation = True
         #else:
         #    first_message = json.dumps(my_replies)
-        
+         
     return {
-        "send_result": send_result,
-        "replies": replies
+        f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} replies were:": replies
     }

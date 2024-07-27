@@ -26,7 +26,10 @@ create_directories()
 import mimetypes
 mimetypes.add_type("application/javascript", ".js", True)
 
-def setup_app():
+app = None
+
+async def setup_app():
+    global app
     app = FastAPI()
     app.mount("/static", StaticFiles(directory="static", follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory="imgs"), name="imgs")
@@ -49,10 +52,13 @@ def setup_app():
     from routers.agent_router import router as agent_router
     app.include_router(agent_router)
 
+    await plugins.load(app=app)
+
     return app
 
-app = setup_app()
-
 if __name__ == "__main__":
-    asyncio.run(plugins.load(app=app))
+    #asyncio.run(plugins.load(app=app))
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(setup_app())
     uvicorn.run(app, host="0.0.0.0", port=8000, lifespan="on")

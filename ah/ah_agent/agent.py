@@ -101,17 +101,17 @@ class Agent:
                 #filter out empty strings
                 cmd_args = [x for x in cmd_args if x != '']
                 logger.debug("Executing command with list arguments", extra={"step": 1})
-                await context.running_command(cmd_name)
+                await context.running_command(cmd_name, cmd_args)
                 logger.debug("Executing command with list arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, *cmd_args)
             elif isinstance(cmd_args, dict):
                 logger.debug("Executing command with dict arguments", extra={"step": 1})
-                await context.running_command(cmd_name)
+                await context.running_command(cmd_name, cmd_args)
                 logger.debug("Executing command with dict arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, **cmd_args)
             else:
                 logger.debug("Executing command with single argument", extra={"step": 1})
-                await context.running_command(cmd_name)
+                await context.running_command(cmd_name, cmd_args)
                 logger.debug("Executing command with single argument", extra={"step": 2})
                 return await command_manager.execute(cmd_name, cmd_args)
 
