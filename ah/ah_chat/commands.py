@@ -198,9 +198,13 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
                 replies.append(reply_data)
             if run_sub_agent.done():
                 break
+            print("Waiting for sub-agent replies...")
 
+        print("Sending replies to parent agent...")
+        x = """
         run_parent_agent = asyncio.create_task(send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}"))
         my_replies = []
+        print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
         async for event2 in my_sub_replies:
             print(event2)
             if event2['event'] == 'running_command':
@@ -210,11 +214,15 @@ async def converse_with_agent(sub_log_id: str, first_message: str, contextual_in
 
             if run_parent_agent.done():
                 break
-
-        if my_sub_context.data['finished_conversation']:
-            finished_conversation = True
-        else:
-            first_message = json.dumps(my_replies)
+        """
+        print("Sending replies to parent agent...")
+        print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
+        print("my_replies:", my_replies)
+        return
+        #if my_sub_context.data['finished_conversation']:
+        #    finished_conversation = True
+        #else:
+        #    first_message = json.dumps(my_replies)
         
     return {
         "send_result": send_result,

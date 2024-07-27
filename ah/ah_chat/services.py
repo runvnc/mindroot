@@ -41,7 +41,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         continue_processing = False
         try:
             results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
-
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             print("results from chat commands: ", results)
             out_results = []
             actual_results = False
@@ -62,16 +62,20 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
 
             if actual_results:
                 continue_processing = True
-
+            
             if len(out_results) > 0:
+                print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+            else:
+                print("Processing iteration: ", iterations, "no message added")
         except Exception as e:
             print("Found an error in agent output: ")
             print(e)
             print(traceback.format_exc())
             continue_processing = False
 
+    print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
     return results
 
 @service()
@@ -84,6 +88,8 @@ async def subscribe_to_agent_messages(session_id: str, context=None):
         try:
             while True:
                 data = await queue.get()
+                asyncio.sleep(0.05)
+                print('.', end='', flush=True)
                 yield data
         except asyncio.CancelledError:
             sse_clients[session_id].remove(queue)
