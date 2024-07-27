@@ -120,7 +120,7 @@ async def partial_command(command: str, chunk: str, params, context=None):
 @service()
 async def running_command(command: str, args, context=None):
     agent_ = context.agent
-    await context.agent_output("running_command", { "command": command, args: args, "persona": agent_['persona']['name'] })
+    await context.agent_output("running_command", { "command": command, "args": args, "persona": agent_['persona']['name'] })
 
 @service()
 async def command_result(command: str, result, context=None):
