@@ -45,7 +45,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
             print("results from chat commands: ", results)
             out_results = []
             actual_results = False
-            asyncio.sleep(0.1)
+            asyncio.sleep(0.01)
             for result in results:
                 if result['result'] is not None:
                     if result['result'] == 'continue':

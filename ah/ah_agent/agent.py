@@ -208,7 +208,7 @@ class Agent:
                         logger.debug(f"Processing command: {cmd}")
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
-                        results.append({"cmd": cmd_name, "result": result})
+                        results.append({"cmd": cmd_name, "args": cmd_args, "result": result})
                         num_processed = len(commands)
                     except Exception as e:
                         logger.error(f"Error processing command: {e}")

@@ -194,39 +194,17 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
 
     while not finished_conversation:
         replies = []
-        run_sub_agent = asyncio.create_task(send_message_to_agent(sub_log_id, first_message))
         async with asyncio.timeout(12.0):
-            async for event in sub_agent_replies:
-                print(event)
-                if event['event'] == 'running_command':
-                    reply_data = json.loads(event['data'])
-                    print('reply_data:', reply_data)
-                    replies.append(reply_data)
-                if run_sub_agent.done():
-                    print("run_sub_agent done")
-                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-                    break
-                print("Waiting for sub-agent replies...")
-        await run_sub_agent
+            replies = await send_message_to_agent(sub_log_id, first_message)
         print("Sending replies to parent agent...")
         print('oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo OK done')
         # make sure to flush output with option
         print(",", flush=True)
         finished_conversation = True
         #x = """
-        run_parent_agent = asyncio.create_task(send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}"))
-        my_replies = []
         print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
         async with asyncio.timeout(12.0):
-            async for event2 in my_sub_replies:
-                print(event2)
-                if event2['event'] == 'running_command':
-                    reply_data = json.loads(event['data'])
-                    print('reply_data:', reply_data)
-                    my_replies.append(reply_data)
-                asyncio.sleep(0.1)
-                if run_parent_agent.done():
-                    break
+            my_replies = await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
         print("Waiting for parent agent replies...")
         await run_parent_agent
         #"""
