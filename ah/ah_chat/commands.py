@@ -5,7 +5,7 @@ from .services import init_chat_session, send_message_to_agent, subscribe_to_age
 import asyncio
 import json
 import nanoid
-
+import termcolor
 
 @command()
 async def say(text="", context=None):
@@ -83,24 +83,6 @@ async def json_encoded_md(markdown="", context=None):
 async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
-async def collect_agent_replies(log_id: str, timeout: float = 240.0, max_replies: int = 10):
-    """
-    Helper function to collect replies from another agent in an existing conversation.
-    """
-    replies = []
-    subscription = subscribe_to_agent_messages(log_id)
-
-    try:
-        async with asyncio.timeout(timeout):
-            async for event in subscription:
-                reply_data = json.loads(event['data'])
-                replies.append(reply_data['content'])
-                if len(replies) >= max_replies:
-                    break
-    except asyncio.TimeoutError:
-        pass  # We've reached the timeout, stop collecting replies
-    
-    return replies
 
 @command()
 async def initiate_agent_session(agent_name: str, context=None):
@@ -127,7 +109,12 @@ async def exit_conversation(takeaways: str, context=None):
     takeaways - String. A concise summary of relevant details of the conversation.
 
     """
+    print('-------------------------------------------------------------------')
+    print(context.log_id)
+    print(termcolor.colored('exiting conversation', 'yellow', attrs=['bold']))
+    print(termcolor.colored(takeaways, 'yellow', attrs=['bold']))
     context.data['finished_conversation'] = True
+    context.save_context()
     return takeaways
 
 # have agent conversation with another agent
@@ -210,6 +197,16 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
             finished_conversation = True
         else:
             first_message = json.dumps(my_replies)
+        print("End of loop")
+        sub_context = ChatContext(service_manager, command_manager)
+        await sub_context.load_context(sub_log_id)
+        await my_sub_context.load_context(my_sub_log_id)
+  
+        #print my_sub_context['data'] and also sub_context['data']  in blue
+        print(termcolor.colored('my_sub_context.data:', 'blue', attrs=['bold']))
+        print(termcolor.colored(my_sub_context.data, 'blue', attrs=['bold']))
+        print(termcolor.colored('sub_context.data:', 'blue', attrs=['bold']))
+        print(termcolor.colored(sub_context.data, 'blue', attrs=['bold']))
          
     return {
         f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} replies were:": replies

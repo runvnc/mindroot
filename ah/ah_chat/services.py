@@ -36,6 +36,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
 
     continue_processing = True
     iterations = 0
+    results = []
     while continue_processing and iterations < max_iterations:
         iterations += 1
         continue_processing = False
@@ -66,7 +67,8 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
             if len(out_results) > 0:
                 print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
-                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})                
+                results.append(out_results)
             else:
                 print("Processing iteration: ", iterations, "no message added")
         except Exception as e:
