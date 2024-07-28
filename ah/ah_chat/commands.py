@@ -194,26 +194,22 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
 
     while not finished_conversation:
         replies = []
-        async with asyncio.timeout(12.0):
+        async with asyncio.timeout(120.0):
             replies = await send_message_to_agent(sub_log_id, first_message)
         print("Sending replies to parent agent...")
         print('oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo OK done')
-        # make sure to flush output with option
         print(",", flush=True)
-        finished_conversation = True
-        #x = """
         print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
-        async with asyncio.timeout(12.0):
+        async with asyncio.timeout(120.0):
             my_replies = await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
         print("Waiting for parent agent replies...")
-        await run_parent_agent
         #"""
         print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
         print("my_replies:", my_replies)
-        #if my_sub_context.data['finished_conversation']:
-        #    finished_conversation = True
-        #else:
-        #    first_message = json.dumps(my_replies)
+        if my_sub_context.data['finished_conversation'] == True:
+            finished_conversation = True
+        else:
+            first_message = json.dumps(my_replies)
          
     return {
         f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} replies were:": replies
