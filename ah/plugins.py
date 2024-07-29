@@ -77,5 +77,4 @@ async def load(plugin_file = 'plugins.json', app = None):
 
         await hook_manager.startup(app, context=None)
 
-    print(f"Plugin: {plugin_name} is disabled")
 
