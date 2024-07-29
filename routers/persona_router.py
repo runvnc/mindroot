@@ -5,7 +5,7 @@ import shutil
 
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent / 'personas'
+BASE_DIR = Path(__file__).resolve().parent.parent / 'personas'
 
 @router.get('/personas/{scope}/{name}')
 def read_persona(scope: str, name: str):
@@ -47,8 +47,8 @@ def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = F
             raise HTTPException(status_code=400, detail='Persona already exists')
         persona_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Create target directory
-        target_dir = Path(f'/files/ah/static/personas/{persona_name}')
+        target_dir = Path(__file__).resolve().parent.parent / 'static/personas' / persona_name
+
         target_dir.mkdir(parents=True, exist_ok=True)
 
         if faceref:
