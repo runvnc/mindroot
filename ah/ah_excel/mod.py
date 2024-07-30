@@ -85,11 +85,19 @@ async def write_cell(filename, sheet_name, cell_reference, value, context=None):
 
 @command()
 async def write_cell_range(filename, sheet_name, cell_range, values, overwrite_formulas=False, context=None):
-    """Write values to a range of cells using Excel range notation.
-       IMPORTANT: check the location of formulas, and consider using insert_rows or insert_columns first if the your data would otherwise
+    """Write values to a rectangular range of cells, in row order.
+       IMPORTANT: check the location of formulas, and consider using insert_rows first if the your data would otherwise
        overwrite formulas.
 
-    Example:
+       cell_range - is specified as upperLeft:lowerRight cell
+
+       values - nested array of values. these will typically be numbers (specified as numbers, not strings!),
+                but could also be strings or formulas (if overwrite_formulas is true).
+
+       overwrite_formulas - typically it important to specify False, otherwise built-in calculations will be broken.
+
+    Example ( note cells are specified in order as [ [ A1, B1, C1], [ A2, B2, C2 ], [ A3, B3, C3 ] ] ):
+
     { "write_cell_range": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_range": "A1:C3", "values": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
                             "overwrite_formulas": false } }
     """
