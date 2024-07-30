@@ -7,7 +7,7 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.AsyncOpenAI()
 
 @service()
-async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=1024, num_gpu_layers=12):
+async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=3024, num_gpu_layers=12):
     try:
         stream = await client.chat.completions.create(
             model="gpt-4o",
