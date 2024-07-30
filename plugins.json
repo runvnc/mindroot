@@ -76,6 +76,10 @@
     "enabled": true
   },
   {
+    "name": "ah_filetree",
+    "enabled": true
+  },
+  {
     "name": "ah_excel",
     "enabled": true
   },
