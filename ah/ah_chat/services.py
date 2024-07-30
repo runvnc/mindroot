@@ -23,7 +23,7 @@ async def init_chat_session(agent_name: str, log_id: str):
     return log_id
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None):
+async def send_message_to_agent(session_id: str, message: str, max_iterations=2, context=None):
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)

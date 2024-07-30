@@ -7,6 +7,10 @@ import glob
 @command()
 async def write(fname="", text="", context=None):
     """Write text to a file. Will overwrite the file if it exists.
+    Note: Do NOT use placeholders instead of full source, such as " # ..keep existing code"
+          as this will not work and will effectively delete all of that code that was there before.
+        All text must be provided to be written to the file.
+
     Example:
     { "write": { "fname": "file1.txt", "text": "This is the text to write to the file." } }
 
