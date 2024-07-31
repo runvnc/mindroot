@@ -1,0 +1,14 @@
+{% block head_scripts %}
+  {{ super() }}
+  <script type="module" src="/ah_chat/static/js/persona-editor.js"></script>
+{% endblock %} 
+
+
+{% block pre_content %}
+  {{ super() }}
+  <details>
+    <summary>Files</summary>
+    <file-tree dir="/">
+    </file-tree>
+  </details>
+{% endblock %

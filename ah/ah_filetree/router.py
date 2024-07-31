@@ -56,7 +56,8 @@ async def upload_file(request: Request, file: UploadFile = File(...), path: str 
     user_root = get_user_root(user.username)
     full_path = verify_path(user_root, path)
     file_path = os.path.join(full_path, file.filename)
-    
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
