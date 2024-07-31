@@ -37,7 +37,7 @@ input::placeholder, textarea::placeholder {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: 72vh;
+  height: 75vh;
 }
 
 chat-form {
