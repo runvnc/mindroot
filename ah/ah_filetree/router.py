@@ -83,7 +83,6 @@ async def create_upload_files(request: Request, files: list[UploadFile], dir: st
             raise HTTPException(status_code=500, detail="Failed to write file")
         
     return JSONResponse({"filename": file.filename, "path": file_path})
-"""
 
 @router.delete("/api/delete")
 async def delete_file(request: Request, path: str):
