@@ -63,21 +63,27 @@ async def get_file_tree(request: Request, dir: str = "/"):
         return JSONResponse({"error": str(e)})
 
 @router.post("/api/upload")
-async def upload_file(request: Request, file: UploadFile = File(...), path: str = Form(...)):
+async def create_upload_files(request: Request, files: list[UploadFile], dir: str = Form(...)):
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> create_upload_files")
+    print("request: ", request)
+    print("files: ", files)
+    print("dir: ", dir)
     user = request.state.user
     user_root = get_user_root(user['sub'])
     print(f'user_root: {user_root}')
-    full_path = verify_path(user_root, path)
-    file_path = os.path.join(full_path, file.filename)
-    if not os.path.exists(full_path):
-        os.makedirs(full_path)
-    try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except IOError:
-        raise HTTPException(status_code=500, detail="Failed to write file")
-    
+    for file in files:
+        full_path = verify_path(user_root, dir)
+        file_path = os.path.join(full_path, file.filename)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
+        try:
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+        except IOError:
+            raise HTTPException(status_code=500, detail="Failed to write file")
+        
     return JSONResponse({"filename": file.filename, "path": file_path})
+"""
 
 @router.delete("/api/delete")
 async def delete_file(request: Request, path: str):
