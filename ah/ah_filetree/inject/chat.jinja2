@@ -3,14 +3,15 @@
   <script type="module" src="/ah_filetree/static/js/file.js"></script>
   <script type="module" src="/ah_filetree/static/js/file-tree.js"></script>
   <style>
-    .chat-container {
+    .page-container {
       display: flex;
       height: 100vh;
     }
-    .sidebar {
-      width: 250px;
+    .left-side {
+      width: 280px;
       border-right: 2px solid #ccc;
       overflow-y: auto;
+      height: 100vh;
     }
     .main-content {
       flex: 1;
@@ -20,9 +21,7 @@
 {% endblock %} 
 
 {% block pre_content %}
-  <div class="chat-container">
-    <div class="sidebar">
       <file-tree dir="/"></file-tree>
-    </div>
-  </div>
 {% endblock %}
+
+

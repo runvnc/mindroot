@@ -15,10 +15,8 @@ export class FileTree extends BaseEl {
 
   static styles = css`
     .file-tree {
-      font-family: Arial, sans-serif;
       padding: 10px;
-      border: 2px dashed #ccc;
-      border-radius: 5px;
+      font-size: 0.92em;
     }
     .file-tree.dragover {
       background-color: rgba(200, 200, 200, 0.1);
@@ -36,8 +34,12 @@ export class FileTree extends BaseEl {
     }
     file-, sub-dir {
       display: block;
+      font-size: 0.92em;
       padding: 2px 5px;
       cursor: pointer;
+    }
+    sub-dir {
+      border-right: 1px solid #ccc;
     }
     file-:hover, sub-dir:hover {
       /* background-color: blue; rgba(200, 200, 200, 0.1); */

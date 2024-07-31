@@ -42,12 +42,20 @@
     console.log("Log ID: {{ log_id }}");
   </script>
   {% endblock %}
+ 
+  <div class="page-container">
 
-  {% block pre_content %}{% endblock %}
+    <div class="left-side">
+      {% block pre_content %}{% endblock %}
+    </div>
 
-  {% block content %}
-  <chat-ai sessionid="{{ log_id }}"></chat-ai>
-  {% endblock %}
+    {% block content %}
+    <div class="main">
+      <chat-ai sessionid="{{ log_id }}"></chat-ai>
+    </div>
+    {% endblock %}
+
+  </div> <!-- page-container -->
 
   {% block body_extra %}{% endblock %}
 </body>
