@@ -10,17 +10,30 @@ router = APIRouter()
 def get_user_root(username: str):
     if username == 'admin':
         return '/'
-    return f'/data/users/{username}'
+    # this should actually be relative to the project root
+    # i.e. parent of the parent of the parent  
+    proj_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    return f'{proj_root}/data/users/{username}'
 
 def verify_path(user_root: str, path: str):
+    if path == '/' or path == '':
+        return user_root
     full_path = os.path.normpath(os.path.join(user_root, path))
     if not full_path.startswith(user_root):
+        print('verify_path failed')
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> verify_path')
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> user_root: ', user_root)
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> path: ', path)
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> full_path: ', full_path)
         raise HTTPException(status_code=403, detail="Access denied")
     return full_path
 
 def get_directory_structure(path):
     try:
         with os.scandir(path) as entries:
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_directory_structure')
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> path: ', path)
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> entries: ', entries)
             return {
                 'name': os.path.basename(path),
                 'type': 'directory',
@@ -34,6 +47,7 @@ def get_directory_structure(path):
                     } for entry in entries
                 ]
             }
+
     except PermissionError:
         return {
             'name': os.path.basename(path),
@@ -45,17 +59,22 @@ def get_directory_structure(path):
 
 @router.get("/api/file-tree")
 async def get_file_tree(request: Request, dir: str = "/"):
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_file_tree')
-    user = request.state.user
-    print(">>>>>>>>>>>>>>>>>>>>>>>> user: ", user)
-    user_root = get_user_root(user.sub)
-    full_path = verify_path(user_root, dir)
-    return JSONResponse(get_directory_structure(full_path))
+    try:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_file_tree')
+        user = request.state.user
+        print(">>>>>>>>>>>>>>>>>>>>>>>> user: ", user)
+        user_root = get_user_root(user['sub'])
+        full_path = verify_path(user_root, dir)
+        return JSONResponse(get_directory_structure(full_path))
+    except Exception as e:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_file_tree error: ', e)
+        return JSONResponse({"error": str(e)})
 
 @router.post("/api/upload")
 async def upload_file(request: Request, file: UploadFile = File(...), path: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.sub)
+    user_root = get_user_root(user['sub'])
+    print(f'user_root: {user_root}')
     full_path = verify_path(user_root, path)
     file_path = os.path.join(full_path, file.filename)
     if not os.path.exists(full_path):
@@ -71,7 +90,7 @@ async def upload_file(request: Request, file: UploadFile = File(...), path: str 
 @router.delete("/api/delete")
 async def delete_file(request: Request, path: str):
     user = request.state.user
-    user_root = get_user_root(user.sub)
+    user_root = get_user_root(user['sub'])
     full_path = verify_path(user_root, path)
     
     try:
@@ -89,7 +108,7 @@ async def delete_file(request: Request, path: str):
 @router.post("/api/rename")
 async def rename_item(request: Request, old_path: str = Form(...), new_name: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.sub)
+    user_root = get_user_root(user['sub'])
     full_old_path = verify_path(user_root, old_path)
     new_path = os.path.join(os.path.dirname(full_old_path), new_name)
     
@@ -103,7 +122,7 @@ async def rename_item(request: Request, old_path: str = Form(...), new_name: str
 @router.post("/api/move")
 async def move_item(request: Request, old_path: str = Form(...), new_path: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.sub)
+    user_root = get_user_root(user['sub'])
     full_old_path = verify_path(user_root, old_path)
     full_new_path = verify_path(user_root, new_path)
     
@@ -117,7 +136,7 @@ async def move_item(request: Request, old_path: str = Form(...), new_path: str =
 @router.get("/api/preview")
 async def get_file_preview(request: Request, path: str):
     user = request.state.user
-    user_root = get_user_root(user.sub)
+    user_root = get_user_root(user['sub'])
     full_path = verify_path(user_root, path)
 
     if not os.path.isfile(full_path):

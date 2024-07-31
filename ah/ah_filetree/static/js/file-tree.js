@@ -3,7 +3,6 @@ import { BaseEl } from './base.js';
 import './file.js';
 import './sub-dir.js';
 import './context-menu.js';
-import './file-preview.js';
 
 export class FileTree extends BaseEl {
   static properties = {
@@ -20,26 +19,29 @@ export class FileTree extends BaseEl {
       padding: 10px;
       border: 2px dashed #ccc;
       border-radius: 5px;
-      display: flex;
     }
     .file-tree.dragover {
-      background-color: #f0f0f0;
+      background-color: rgba(200, 200, 200, 0.1);
     }
     .error {
       color: red;
       padding: 10px;
     }
     .tree-container {
-      flex: 1;
       max-height: 500px;
       overflow-y: auto;
     }
-    .preview-container {
-      flex: 1;
-      margin-left: 20px;
-    }
     .search-container {
       margin-bottom: 10px;
+    }
+    file-, sub-dir {
+      display: block;
+      padding: 2px 5px;
+      cursor: pointer;
+    }
+    file-:hover, sub-dir:hover {
+      /* background-color: blue; rgba(200, 200, 200, 0.1); */
+      border: 1px solid #ccc;
     }
   `;
 
@@ -110,7 +112,54 @@ export class FileTree extends BaseEl {
     this.searchQuery = e.target.value;
   }
 
-  // ... (keep all the existing methods for file operations, drag and drop, etc.)
+  handleDragOver(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  }
+
+  handleDragLeave(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+  }
+
+  handleDrop(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      this.handleUpload({ target: { files } });
+    }
+  }
+
+  handleUpload(e) {
+    const files = e.target.files;
+    if (files.length === 0) return;
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    formData.append('dir', this.dir);
+
+    fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Upload successful:', data);
+      this.loadStructure();
+    })
+    .catch(error => {
+      console.error('Error uploading file:', error);
+    });
+  }
+
+  handleContextMenu(e) {
+    e.preventDefault();
+    const contextMenu = this.getEl('context-menu');
+    contextMenu.show(e.clientX, e.clientY, this.selectedItem);
+  }
 
   _render() {
     return html`
@@ -122,9 +171,6 @@ export class FileTree extends BaseEl {
           </div>
           ${this.structure ? this.renderStructure(this.structure) : 'Loading...'}
           <input type="file" @change=${this.handleUpload} multiple>
-        </div>
-        <div class="preview-container">
-          <file-preview .file=${this.selectedItem}></file-preview>
         </div>
       </div>
       <context-menu></context-menu>

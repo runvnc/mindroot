@@ -13,7 +13,7 @@ export class File_ extends BaseEl {
       cursor: pointer;
     }
     .file:hover {
-      background-color: #f0f0f0;
+      background-color: rgba(200, 200, 200, 0.1)
     }
   `;
 

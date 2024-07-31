@@ -17,7 +17,7 @@ export class SubDir extends BaseEl {
       padding: 5px;
     }
     .dir-name:hover {
-      background-color: #f0f0f0;
+      background-color: rgba(0, 0, 0, 0.1);
     }
   `;
 
