@@ -10,8 +10,6 @@ router = APIRouter()
 def get_user_root(username: str):
     if username == 'admin':
         return '/'
-    # this should actually be relative to the project root
-    # i.e. parent of the parent of the parent  
     proj_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return f'{proj_root}/data/users/{username}'
 
