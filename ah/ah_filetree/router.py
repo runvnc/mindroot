@@ -20,20 +20,12 @@ def verify_path(user_root: str, path: str):
         return user_root
     full_path = os.path.normpath(os.path.join(user_root, path))
     if not full_path.startswith(user_root):
-        print('verify_path failed')
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> verify_path')
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> user_root: ', user_root)
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> path: ', path)
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> full_path: ', full_path)
         raise HTTPException(status_code=403, detail="Access denied")
     return full_path
 
 def get_directory_structure(path):
     try:
         with os.scandir(path) as entries:
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_directory_structure')
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> path: ', path)
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> entries: ', entries)
             return {
                 'name': os.path.basename(path),
                 'type': 'directory',
