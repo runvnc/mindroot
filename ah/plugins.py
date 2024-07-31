@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from ah.route_decorators import public_route
-
+import termcolor
 from .hooks import hook_manager
 
 import ah.hooks
@@ -54,6 +54,7 @@ async def load(plugin_file = 'plugins.json', app = None):
                 plugin_name = plugin['name']
                 try:
                     importlib.import_module(f"ah.{plugin_name}.mod")
+                    print(termcolor.colored(f"Loaded plugin: {plugin_name}", 'green'))
                     print(f"Loaded plugin: {plugin_name}")
                     
                     load_middleware(app, plugin_name)
@@ -67,11 +68,11 @@ async def load(plugin_file = 'plugins.json', app = None):
                                 route.endpoint = public_route()(route.endpoint)
                         
                         app.include_router(router_module.router)
-                        print(f"Included router for plugin: {plugin_name}")
+                        print(termcolor.colored(f"Included router for plugin: {plugin_name}", 'yellow'))
                     static_path = f"ah/{plugin_name}/static"
                     if os.path.exists(static_path):
                         app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"/{plugin_name}/static")
-                        print(f"Mounted static files for plugin: {plugin_name}")
+                        print(termcolor.colored(f"Mounted static files for plugin: {plugin_name}", 'green'))
                 except ImportError as e:
                     print(f"Failed to load plugin: {plugin_name}. Error: {e}")
 

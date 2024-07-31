@@ -34,7 +34,7 @@ async def get_admin_html():
     html = await render_combined_template('admin', plugins, {"log_id": log_id})
     return html
 
-@router.get("/{agent_name}", response_class=HTMLResponse)
+@router.get("/agent/{agent_name}", response_class=HTMLResponse)
 async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     plugins = list_enabled()

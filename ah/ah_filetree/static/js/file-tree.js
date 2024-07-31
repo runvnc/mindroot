@@ -64,6 +64,7 @@ export class FileTree extends BaseEl {
   async loadStructure() {
     try {
       const response = await fetch(`/api/file-tree?dir=${encodeURIComponent(this.dir)}`);
+      console.log({response})
       if (!response.ok) throw new Error('Failed to load file structure');
       this.structure = await response.json();
       this.error = '';

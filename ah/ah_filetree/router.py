@@ -45,15 +45,17 @@ def get_directory_structure(path):
 
 @router.get("/api/file-tree")
 async def get_file_tree(request: Request, dir: str = "/"):
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> get_file_tree')
     user = request.state.user
-    user_root = get_user_root(user.username)
+    print(">>>>>>>>>>>>>>>>>>>>>>>> user: ", user)
+    user_root = get_user_root(user.sub)
     full_path = verify_path(user_root, dir)
     return JSONResponse(get_directory_structure(full_path))
 
 @router.post("/api/upload")
 async def upload_file(request: Request, file: UploadFile = File(...), path: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.username)
+    user_root = get_user_root(user.sub)
     full_path = verify_path(user_root, path)
     file_path = os.path.join(full_path, file.filename)
     if not os.path.exists(full_path):
@@ -69,7 +71,7 @@ async def upload_file(request: Request, file: UploadFile = File(...), path: str 
 @router.delete("/api/delete")
 async def delete_file(request: Request, path: str):
     user = request.state.user
-    user_root = get_user_root(user.username)
+    user_root = get_user_root(user.sub)
     full_path = verify_path(user_root, path)
     
     try:
@@ -87,7 +89,7 @@ async def delete_file(request: Request, path: str):
 @router.post("/api/rename")
 async def rename_item(request: Request, old_path: str = Form(...), new_name: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.username)
+    user_root = get_user_root(user.sub)
     full_old_path = verify_path(user_root, old_path)
     new_path = os.path.join(os.path.dirname(full_old_path), new_name)
     
@@ -101,7 +103,7 @@ async def rename_item(request: Request, old_path: str = Form(...), new_name: str
 @router.post("/api/move")
 async def move_item(request: Request, old_path: str = Form(...), new_path: str = Form(...)):
     user = request.state.user
-    user_root = get_user_root(user.username)
+    user_root = get_user_root(user.sub)
     full_old_path = verify_path(user_root, old_path)
     full_new_path = verify_path(user_root, new_path)
     
@@ -115,7 +117,7 @@ async def move_item(request: Request, old_path: str = Form(...), new_path: str =
 @router.get("/api/preview")
 async def get_file_preview(request: Request, path: str):
     user = request.state.user
-    user_root = get_user_root(user.username)
+    user_root = get_user_root(user.sub)
     full_path = verify_path(user_root, path)
 
     if not os.path.isfile(full_path):

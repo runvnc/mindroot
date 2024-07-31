@@ -56,10 +56,7 @@ async def middleware(request: Request, call_next):
         # print traceback
         import traceback
         traceback.print_exc()
-        print('No valid token found?')
-        print("Not a public route: ", request.url.path)
-        print('Redirecting to login')
-        return RedirectResponse(url='/login')
+        raise HTTPException(status_code=400, detail=f"Error handling request: {e}")
 
     response = await call_next(request)
     return response

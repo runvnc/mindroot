@@ -1,0 +1,18 @@
+{% block head_scripts %}
+  <script type="module" src="/ah_filetree/static/js/sub-dir.js"></script>
+  <script type="module" src="/ah_filetree/static/js/file.js"></script>
+  <script type="module" src="/ah_filetree/static/js/file-preview.js"></script>
+  <script type="module" src="/ah_filetree/static/js/file-tree.js"></script>
+{% endblock %} 
+
+
+{% block pre_content %}
+  <details>
+    <summary>Files</summary>
+    <file-tree dir="/">
+    </file-tree>
+  </details>
+{% endblock %}
+
+
+
