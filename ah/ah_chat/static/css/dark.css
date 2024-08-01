@@ -3,6 +3,11 @@ html, body {
   color: #f0f0f0;
   padding: 5px 5px;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 input, * {
@@ -26,10 +31,19 @@ input::placeholder, textarea::placeholder {
   display: inline-block;
 }
 
-.chat-container {
+.page-container {
   display: flex;
-  flex-direction: column;
-  height: 100vh;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0;
+    overflow-y: hidden;
 }
 
 .chat-log {
@@ -37,13 +51,26 @@ input::placeholder, textarea::placeholder {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: 75vh;
+  padding-right: 16px;
+}
+
+chat-ai {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 chat-form {
   flex-shrink: 0;
   margin: 0;
+  display: flex;
   padding: 0;
+}
+
+.chat-entry {
+  display: flex;
+  width: 100%;
 }
 
 chat-message {
@@ -123,9 +150,8 @@ button, .btn {
 /* style buttons with contemporary look and dark theme */ 
   background-color: #333;
   color: #f0f0f0;
-  border-radius: 15px;
   padding: 2px 15px;
-  margin: 10px;
+  margin: 2px;
   transition: background-color 0.3s ease;
 }
 
@@ -137,7 +163,7 @@ button:hover {
 
 /* Firefox */
 * {
-  scrollbar-width: thin;
+  scrollbar-width: auto
   scrollbar-color: #333 #050510;
 }
 
