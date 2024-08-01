@@ -42,7 +42,6 @@ export class FileTree extends BaseEl {
       border-right: 1px solid #ccc;
     }
     file-:hover, sub-dir:hover {
-      /* background-color: blue; rgba(200, 200, 200, 0.1); */
       border: 1px solid #ccc;
     }
   `;
@@ -61,8 +60,6 @@ export class FileTree extends BaseEl {
     this.addEventListener('dragover', this.handleDragOver);
     this.addEventListener('dragleave', this.handleDragLeave);
     this.addEventListener('drop', this.handleDrop);
-    this.addEventListener('contextmenu', this.handleContextMenu);
-    document.addEventListener('click', () => this.getEl('context-menu').hide());
   }
 
   async loadStructure() {
@@ -82,10 +79,16 @@ export class FileTree extends BaseEl {
     if (this.searchQuery && !this.itemMatchesSearch(item)) return '';
 
     if (item.type === 'file') {
-      return html`<file- name=${item.name} path=${item.path} @file-selected=${this.handleFileSelected}></file->`;
+      return html`<file- name=${item.name} path=${item.path} 
+        @file-selected=${this.handleFileSelected}
+        @file-deleted=${this.handleFileDeleted}></file->`;
     } else if (item.type === 'directory') {
       return html`
-        <sub-dir dir=${item.name} path=${item.path} ?collapsed=${item.collapsed} @dir-toggled=${this.handleDirToggled}>
+        <sub-dir dir=${item.name} path=${item.path} ?collapsed=${item.collapsed} 
+          @dir-toggled=${this.handleDirToggled}
+          @dir-deleted=${this.handleDirDeleted}
+          @new-file-created=${this.handleNewFileCreated}
+          @new-folder-created=${this.handleNewFolderCreated}>
           ${item.children.map(child => this.renderStructure(child))}
         </sub-dir>
       `;
@@ -108,6 +111,34 @@ export class FileTree extends BaseEl {
   handleDirToggled(e) {
     this.selectedItem = e.detail;
     this.dispatch('dir-toggled', this.selectedItem);
+  }
+
+  handleFileDeleted(e) {
+    console.log('File deleted:', e.detail.path);
+    // Implement file deletion logic here
+    // After successful deletion, reload the structure
+    this.loadStructure();
+  }
+
+  handleDirDeleted(e) {
+    console.log('Directory deleted:', e.detail.path);
+    // Implement directory deletion logic here
+    // After successful deletion, reload the structure
+    this.loadStructure();
+  }
+
+  handleNewFileCreated(e) {
+    console.log('New file created:', e.detail.path);
+    // Implement new file creation logic here
+    // After successful creation, reload the structure
+    this.loadStructure();
+  }
+
+  handleNewFolderCreated(e) {
+    console.log('New folder created:', e.detail.path);
+    // Implement new folder creation logic here
+    // After successful creation, reload the structure
+    this.loadStructure();
   }
 
   handleSearchInput(e) {
@@ -155,12 +186,6 @@ export class FileTree extends BaseEl {
     .catch(error => {
       console.error('Error uploading file:', error);
     });
-  }
-
-  handleContextMenu(e) {
-    e.preventDefault();
-    const contextMenu = this.getEl('context-menu');
-    contextMenu.show(e.clientX, e.clientY, this.selectedItem);
   }
 
   _render() {

@@ -23,6 +23,10 @@ export class File_ extends BaseEl {
     this.path = '';
   }
 
+  firstUpdated() {
+    this.addEventListener('contextmenu', this.handleContextMenu);
+  }
+
   _render() {
     return html`
       <div class="file" @click=${this.handleClick}>
@@ -33,6 +37,30 @@ export class File_ extends BaseEl {
 
   handleClick() {
     this.dispatch('file-selected', { name: this.name, path: this.path });
+  }
+
+  handleContextMenu(e) {
+    e.preventDefault();
+    const fileTree = document.querySelector('file-tree');
+    if (!fileTree) {
+      console.error('file-tree element not found');
+      return;
+    }
+    const contextMenu = fileTree.getEl('context-menu');
+    if (!contextMenu) {
+      console.error('context-menu element not found');
+      return;
+    }
+    const menuItems = [{ label: 'Delete', action: () => this.deleteFile() }];
+    contextMenu.show(e.clientX, e.clientY, menuItems);
+  }
+
+  deleteFile() {
+    if (confirm(`Are you sure you want to delete ${this.name}?`)) {
+      console.log('Delete file:', this.path);
+      // Implement delete functionality
+      this.dispatch('file-deleted', { path: this.path });
+    }
   }
 }
 

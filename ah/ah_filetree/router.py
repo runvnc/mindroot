@@ -148,3 +148,20 @@ async def get_file_preview(request: Request, path: str):
         return JSONResponse({"preview": preview, "mime_type": mime_type})
     except IOError:
         raise HTTPException(status_code=500, detail="Failed to read file")
+
+@router.post("/api/create_folder")
+async def create_folder(request: Request, path: str = Form(...)):
+    try:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> create_folder')
+        user = request.state.user
+        user_root = get_user_root(user['sub'])
+        full_path = verify_path(user_root, path)
+        
+        if os.path.exists(full_path):
+            raise HTTPException(status_code=400, detail="Folder already exists")
+        
+        os.makedirs(full_path)
+        return JSONResponse({"status": "success", "path": path})
+    except Exception as e:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> create_folder error: ', e)
+        raise HTTPException(status_code=500, detail=str(e))
