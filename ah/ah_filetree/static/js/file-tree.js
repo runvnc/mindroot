@@ -131,7 +131,7 @@ export class FileTree extends BaseEl {
       this.selectedFolder = path;
       console.log('Selected folder:', this.selectedFolder);
       window.selectedFolder = this.selectedFolder
-      fetch(`/api/selected_dir?path=${encodeURIComponent(path)}`)
+      fetch(`/api/selected_dir?log_id=${window.log_id}&path=${encodeURIComponent(path)}`)
 
     } else if (this.selectedFolder === path) {
       console.log('Unselected folder:', this.selectedFolder);
