@@ -30,7 +30,7 @@ export class File_ extends BaseEl {
   _render() {
     return html`
       <div class="file" @click=${this.handleClick}>
-        <a href=${"/api/download?path=" + encodeURIComponent(this.path)}">
+        <a href=${"/api/download?path=" + encodeURIComponent(this.path)}>
         ${this.name}</a>
       </div>
     `;

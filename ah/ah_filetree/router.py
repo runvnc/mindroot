@@ -154,6 +154,8 @@ async def download_file(request: Request, path: str):
     user = request.state.user
     user_root = get_user_root(user['sub'])
     full_path = verify_path(user_root, path)
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> download_file')
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> full_path: ', full_path)
     if not os.path.isfile(full_path):
         raise HTTPException(status_code=404, detail="File not found")
     try:
