@@ -23,12 +23,16 @@ async def init_chat_session(agent_name: str, log_id: str):
     return log_id
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=2, context=None):
+async def send_message_to_agent(session_id: str, message: str, max_iterations=2, context=None, user=None):
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)
     print(context) 
     agent_ = agent.Agent(agent=context.agent)
+    if user is not None:
+        for key in user:
+            context[key] = user[key]
+            
     context.chat_log.add_message({"role": "user", "content": message})
     #results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
 

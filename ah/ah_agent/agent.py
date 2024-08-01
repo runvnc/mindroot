@@ -240,7 +240,8 @@ class Agent:
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,
             "persona": self.agent['persona'],
-            "formatted_datetime": formatted_time
+            "formatted_datetime": formatted_time,
+            "context_data": self.context.data,
         }
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)

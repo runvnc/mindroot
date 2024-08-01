@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import Message
@@ -15,16 +15,11 @@ async def chat_events(log_id: str):
     return EventSourceResponse(await subscribe_to_agent_messages(log_id))
 
 
-#@router.put("/chat/{log_id}/{agent_name}")
-#async def init_chat(log_id: str, agent_name: str):
-#    print(f"init_chat   log_id: {log_id}   agent_name: {agent_name}")
-#    await init_chat_session(agent_name, context={"log_id": log_id})
-#    return {"status": "ok"}
-
 @router.post("/chat/{log_id}/send")
-async def send_message(log_id: str, message_data: Message):
+async def send_message(request:Request, log_id: str, message_data: Message):
+    user = request.state.user
     print(f"send_message   log_id: {log_id}   message: {message_data.message}")
-    results = await send_message_to_agent(log_id, message_data.message)
+    results = await send_message_to_agent(log_id, message_data.message, user=user)
     return {"status": "ok", "results": results}
 
 @router.get("/admin", response_class=HTMLResponse)

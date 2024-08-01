@@ -1,5 +1,9 @@
 Current System Time: {{ formatted_datetime }}
 
+{% for key in context_data %}
+    {{ key }}: {{ context_data[key] }}
+{% endfor %}
+
 # Persona
 
 ## description
