@@ -31,7 +31,9 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=2,
     agent_ = agent.Agent(agent=context.agent)
     if user is not None:
         for key in user:
-            context[key] = user[key]
+            print("**********************************************************")
+            print("Setting user key: ", key, user[key])
+            context.data[key] = user[key]
             
     context.chat_log.add_message({"role": "user", "content": message})
     #results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())

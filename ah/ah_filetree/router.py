@@ -4,6 +4,8 @@ import os
 import shutil
 import base64
 import mimetypes
+from ..commands import command_manager
+from ..services import service_manager
 
 router = APIRouter()
 
@@ -149,15 +151,17 @@ async def get_file_preview(request: Request, path: str):
     except IOError:
         raise HTTPException(status_code=500, detail="Failed to read file")
 
-@router.get("/api/selectdir")
-async def select_directory(request: Request, path: str):
+@router.get("/api/selected_dir")
+async def select_directory(request: Request, path: str, log_id: str):
     user = request.state.user
     user_root = get_user_root(user['sub'])
     full_path = verify_path(user_root, path)
     if not os.path.isdir(full_path):
         raise HTTPException(status_code=404, detail="Directory not found")
-    user['user_selected_dir'] = full_path
-    user['current_directory'] = full_path
+    context = ChatContext(command_manager, service_manager)
+    await context.load_context(log_id)
+    context.data['selected_dir'] = full_path
+    context.data['current_dir'] = full_path
     return JSONResponse({"status": "success", "path": path})
 
 @router.get("/api/download")
@@ -165,8 +169,6 @@ async def download_file(request: Request, path: str):
     user = request.state.user
     user_root = get_user_root(user['sub'])
     full_path = verify_path(user_root, path)
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> download_file')
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> full_path: ', full_path)
     if not os.path.isfile(full_path):
         raise HTTPException(status_code=404, detail="File not found")
     try:
