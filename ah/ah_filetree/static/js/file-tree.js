@@ -10,7 +10,8 @@ export class FileTree extends BaseEl {
     structure: { type: Object },
     error: { type: String },
     selectedItem: { type: Object },
-    searchQuery: { type: String }
+    searchQuery: { type: String },
+    selectedFolder: { type: String }
   };
 
   static styles = css`
@@ -39,10 +40,15 @@ export class FileTree extends BaseEl {
       cursor: pointer;
     }
     sub-dir {
-      border-right: 1px solid #ccc;
     }
     file-:hover, sub-dir:hover {
-      border: 1px solid #ccc;
+     /* border: 1px solid #ccc; */
+    }
+    .selected-folder {
+      background-color: rgba(0, 0, 255, 0.1);
+    }
+    .upload-container {
+      margin-top: 10px;
     }
   `;
 
@@ -53,6 +59,8 @@ export class FileTree extends BaseEl {
     this.error = '';
     this.selectedItem = null;
     this.searchQuery = '';
+    console.log('resetting selected folder to null in constructor')
+    this.selectedFolder = null;
   }
 
   async firstUpdated() {
@@ -60,6 +68,8 @@ export class FileTree extends BaseEl {
     this.addEventListener('dragover', this.handleDragOver);
     this.addEventListener('dragleave', this.handleDragLeave);
     this.addEventListener('drop', this.handleDrop);
+    this.addEventListener('dir-selected', this.handleDirSelected);
+    this.addEventListener('click', this.handleOutsideClick);
   }
 
   async loadStructure() {
@@ -85,6 +95,7 @@ export class FileTree extends BaseEl {
     } else if (item.type === 'directory') {
       return html`
         <sub-dir dir=${item.name} path=${item.path} ?collapsed=${item.collapsed} 
+          ?selected=${this.selectedFolder === item.path}
           @dir-toggled=${this.handleDirToggled}
           @dir-deleted=${this.handleDirDeleted}
           @new-file-created=${this.handleNewFileCreated}
@@ -113,18 +124,55 @@ export class FileTree extends BaseEl {
     this.dispatch('dir-toggled', this.selectedItem);
   }
 
+  handleDirSelected(e) {
+    console.log('Directory selected:', e.detail);
+    const { path, selected } = e.detail;
+    if (selected) {
+      this.selectedFolder = path;
+      console.log('Selected folder:', this.selectedFolder);
+      window.selectedFolder = this.selectedFolder
+    } else if (this.selectedFolder === path) {
+      console.log('Unselected folder:', this.selectedFolder);
+      this.selectedFolder = null;
+      window.selectedFolder = null;
+    }
+    this.requestUpdate();
+  }
+
+  handleOutsideClick(e) {
+    if (e.target === this || e.target.classList.contains('tree-container')) {
+      this.selectedFolder = null;
+      this.requestUpdate();
+    }
+  }
+
+  async deleteFile(filePath) {
+    try {
+      const response = await fetch(`/api/delete?path=${encodeURIComponent(filePath)}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log('File deleted:', result);
+        await this.loadStructure(); // Refresh the file tree
+      } else {
+        throw new Error('Failed to delete file');
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      // Handle error (e.g., show error message to user)
+      this.error = 'Failed to delete file. Please try again.';
+    }
+  }
+
   handleFileDeleted(e) {
     console.log('File deleted:', e.detail.path);
-    // Implement file deletion logic here
-    // After successful deletion, reload the structure
-    this.loadStructure();
+    this.deleteFile(e.detail.path);
   }
 
   handleDirDeleted(e) {
     console.log('Directory deleted:', e.detail.path);
-    // Implement directory deletion logic here
-    // After successful deletion, reload the structure
-    this.loadStructure();
+    this.deleteFile(e.detail.path);
   }
 
   handleNewFileCreated(e) {
@@ -165,14 +213,21 @@ export class FileTree extends BaseEl {
   }
 
   handleUpload(e) {
+    console.log(this, e, e.target)
     const files = e.target.files;
     if (files.length === 0) return;
+    console.log('this.selectedFolder', this.selectedFolder)
+
+    if (!window.selectedFolder) {
+      alert('Please select a folder for upload.');
+      return;
+    }
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append('files', files[i]);
     }
-    formData.append('dir', this.dir);
+    formData.append('dir', window.selectedFolder);
 
     fetch('/api/upload', {
       method: 'POST',
@@ -190,14 +245,21 @@ export class FileTree extends BaseEl {
 
   _render() {
     return html`
-      <div class="file-tree">
+      <div class="file-tree" @click=${this.handleOutsideClick}>
         <div class="tree-container">
           ${this.error ? html`<div class="error">${this.error}</div>` : ''}
           <div class="search-container">
             <input type="text" placeholder="Search files..." @input=${this.handleSearchInput}>
           </div>
           ${this.structure ? this.renderStructure(this.structure) : 'Loading...'}
-          <input type="file" @change=${this.handleUpload} multiple>
+        </div>
+        <div class="upload-container">
+          ${this.selectedFolder ? html`
+            <p>Selected folder: ${this.selectedFolder}</p>
+            <input type="file" @change=${this.handleUpload} multiple>
+          ` : html`
+            <p>Select a folder to enable upload</p>
+          `}
         </div>
       </div>
       <context-menu></context-menu>

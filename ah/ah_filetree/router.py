@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Request, Response, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 import os
 import shutil
@@ -148,6 +148,18 @@ async def get_file_preview(request: Request, path: str):
         return JSONResponse({"preview": preview, "mime_type": mime_type})
     except IOError:
         raise HTTPException(status_code=500, detail="Failed to read file")
+
+@router.get("/api/download")
+async def download_file(request: Request, path: str):
+    user = request.state.user
+    user_root = get_user_root(user['sub'])
+    full_path = verify_path(user_root, path)
+    if not os.path.isfile(full_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        with open(full_path, 'rb') as file:
+            content = file.read()
+        return Response(content, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename={os.path.basename(full_path)}'})
 
 @router.post("/api/create_folder")
 async def create_folder(request: Request, path: str = Form(...)):

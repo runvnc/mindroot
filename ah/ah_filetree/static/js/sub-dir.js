@@ -5,7 +5,8 @@ export class SubDir extends BaseEl {
   static properties = {
     dir: { type: String },
     path: { type: String },
-    collapsed: { type: Boolean }
+    collapsed: { type: Boolean },
+    selected: { type: Boolean }
   };
 
   static styles = css`
@@ -19,13 +20,17 @@ export class SubDir extends BaseEl {
     .dir-name:hover {
       background-color: rgba(0, 0, 0, 0.1);
     }
+    .selectedx {
+      color: cyan;
+    }
   `;
 
   constructor() {
     super();
     this.dir = '';
     this.path = '';
-    this.collapsed = false;
+    this.collapsed = true;
+    this.selected = false;
   }
 
   firstUpdated() {
@@ -33,9 +38,10 @@ export class SubDir extends BaseEl {
   }
 
   _render() {
+    console.log("render, selected is ", this.selected)
     return html`
       <div class="sub-dir">
-        <div class="dir-name" @click=${this.toggleCollapse}>
+        <div class="dir-name ${this.selected ? 'selectedx' : ''}" @click=${this.handleClick}>
           ${this.collapsed ? '▶' : '▼'} ${this.dir}
         </div>
         ${this.collapsed ? '' : html`<slot></slot>`}
@@ -43,9 +49,33 @@ export class SubDir extends BaseEl {
     `;
   }
 
+  handleClick(e) {
+    //if (e.ctrlKey || e.metaKey) {
+    //  this.toggleSelection();
+    //} else {
+      
+      this.toggleCollapse();
+    //}
+  }
+
   toggleCollapse() {
     this.collapsed = !this.collapsed;
-    this.dispatch('dir-toggled', { dir: this.dir, path: this.path, collapsed: this.collapsed });
+    //this.dispatch('dir-toggled', { dir: this.dir, path: this.path, collapsed: this.collapsed });
+    if (!this.collapsed) {
+      console.log('selecting dir')
+      this.selected = true;
+      setTimeout( () => {
+        this.dispatch('dir-selected', { dir: this.dir, path: this.path, selected: this.selected });
+      }, 15);
+    } else {
+      this.selected = false;
+      console.log('unslecting dir')
+    }
+  }
+
+  toggleSelection() {
+    this.selected = !this.selected;
+    this.dispatch('dir-selected', { dir: this.dir, path: this.path, selected: this.selected });
   }
 
   handleContextMenu(e) {

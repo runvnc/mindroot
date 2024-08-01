@@ -30,7 +30,8 @@ export class File_ extends BaseEl {
   _render() {
     return html`
       <div class="file" @click=${this.handleClick}>
-        ${this.name}
+        <a href=${"/api/download?path=" + encodeURIComponent(this.path)}">
+        ${this.name}</a>
       </div>
     `;
   }
@@ -40,6 +41,7 @@ export class File_ extends BaseEl {
   }
 
   handleContextMenu(e) {
+    e.stopPropagation();
     e.preventDefault();
     const fileTree = document.querySelector('file-tree');
     if (!fileTree) {
@@ -56,11 +58,8 @@ export class File_ extends BaseEl {
   }
 
   deleteFile() {
-    if (confirm(`Are you sure you want to delete ${this.name}?`)) {
-      console.log('Delete file:', this.path);
-      // Implement delete functionality
-      this.dispatch('file-deleted', { path: this.path });
-    }
+    console.log('Delete file:', this.path);
+    this.dispatch('file-deleted', { path: this.path });
   }
 }
 
