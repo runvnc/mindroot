@@ -6,6 +6,7 @@ import base64
 import mimetypes
 from ..commands import command_manager
 from ..services import service_manager
+from ..chatcontext import ChatContext
 
 router = APIRouter()
 
@@ -159,9 +160,14 @@ async def select_directory(request: Request, path: str, log_id: str):
     if not os.path.isdir(full_path):
         raise HTTPException(status_code=404, detail="Directory not found")
     context = ChatContext(command_manager, service_manager)
+    print("log_id: ", log_id)
     await context.load_context(log_id)
+    print(context)
     context.data['selected_dir'] = full_path
     context.data['current_dir'] = full_path
+    print('saving')
+    context.save_context()
+    print('ok')
     return JSONResponse({"status": "success", "path": path})
 
 @router.get("/api/download")
