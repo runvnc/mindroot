@@ -160,11 +160,13 @@ async def download_file(request: Request, path: str):
         with open(full_path, 'rb') as file:
             content = file.read()
         return Response(content, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename={os.path.basename(full_path)}'})
+    except IOError:
+        raise HTTPException(status_code=500, detail="Failed to read file")
+
 
 @router.post("/api/create_folder")
 async def create_folder(request: Request, path: str = Form(...)):
     try:
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> create_folder')
         user = request.state.user
         user_root = get_user_root(user['sub'])
         full_path = verify_path(user_root, path)
