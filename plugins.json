@@ -53,7 +53,7 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_swapface",
@@ -85,10 +85,14 @@
   },
   {
     "name": "ah_light_theme",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_filetree",
+    "enabled": true
+  },
+  {
+    "name": "ah_history",
     "enabled": true
   },
   {
