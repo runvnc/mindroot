@@ -8,6 +8,7 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
     try:
         #model = "cognitivecomputations/dolphin-2.5-mixtral-8x7b"
         # model = "meta-llama/Llama-3-70b-chat-hf"
+        #model = model
         model = "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
         #model = "mistralai/Mixtral-8x22B-Instruct-v0.1"
         #model = "Qwen/Qwen1.5-110B-Chat"
@@ -17,7 +18,7 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
                 model=model,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=max_tokens,
+                max_tokens=500 ,#max_tokens,
                 stream=True
         )
         async def content_stream(original_stream):

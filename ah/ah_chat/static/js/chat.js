@@ -29,7 +29,8 @@ window.registerCommandHandler = function(command, handler) {
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
-    messages: []
+    messages: [],
+    agent_name: { type: String },
   }
 
   static styles = [
@@ -54,6 +55,17 @@ class Chat extends BaseEl {
     this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
+    this.loadHistory()
+  }
+
+  async loadHistory() {
+    // GET to /session/[agent_name]/sessionid  
+    const response = await fetch(`/chatlog/${this.agent_name}/${this.sessionid}/history`);
+    const data = await response.json();
+    console.log('History data:', data);
+    for (let msg of data) {
+      this.messages = [...this.messages, { content: marked.parse("\n" + msg.content), sender: msg.sender, persona: msg.persona }];
+    }
   }
 
   _addMessage(event) {

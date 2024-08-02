@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import Message
-from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages
+from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
 from ..ah_templates import render_combined_template
 from ..plugins import list_enabled
 import nanoid
@@ -13,7 +13,6 @@ router = APIRouter()
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
     return EventSourceResponse(await subscribe_to_agent_messages(log_id))
-
 
 @router.post("/chat/{log_id}/send")
 async def send_message(request:Request, log_id: str, message_data: Message):
@@ -36,3 +35,9 @@ async def get_chat_html(agent_name: str):
     await init_chat_session(agent_name, log_id)
     html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
     return html
+
+@router.get("/chatlog/{agent_name}/{log_id}")
+async def chat_history(agent_name: str, log_id: str):
+    plugins = list_enabled()
+    html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
+

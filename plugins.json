@@ -3,7 +3,7 @@
     "name": "ah_jwt_auth",
     "enabled": true
   },
- {
+  {
     "name": "ah_simple_login",
     "enabled": false
   },
@@ -21,7 +21,7 @@
   },
   {
     "name": "ah_togetherai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_openai",
@@ -29,7 +29,7 @@
   },
   {
     "name": "ah_anthropic",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_chat",
@@ -53,11 +53,11 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_faceswap",
@@ -75,7 +75,7 @@
     "name": "ah_files",
     "enabled": true
   },
-    {
+  {
     "name": "ah_excel",
     "enabled": true
   },
@@ -90,10 +90,13 @@
   {
     "name": "ah_filetree",
     "enabled": true
-  }, 
+  },
   {
     "name": "ah_powerpoint",
     "enabled": true
   },
-  { "name": "ah_download_link", "enabled": true }
+  {
+    "name": "ah_download_link",
+    "enabled": true
+  }
 ]

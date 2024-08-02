@@ -41,6 +41,7 @@
     console.log("Init.");
     console.log("Log ID: {{ log_id }}");
     window.log_id = "{{ log_id }}";
+    window.agent_name = "{{ agent_name }}";
 
   </script>
   {% endblock %}
@@ -53,7 +54,7 @@
 
     {% block content %}
     <div class="main">
-      <chat-ai sessionid="{{ log_id }}"></chat-ai>
+        <chat-ai sessionid="{{ log_id }}" agent_name="{{ agent_name }}"></chat-ai>
     </div>
     {% endblock %}
 

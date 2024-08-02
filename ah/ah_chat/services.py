@@ -23,7 +23,13 @@ async def init_chat_session(agent_name: str, log_id: str):
     return log_id
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=2, context=None, user=None):
+async def get_chat_history(session_id: str):
+    context = ChatContext(command_manager, service_manager)
+    await context.load_context(session_id)
+    return context.chat_log.get_recent()
+
+@service()
+async def send_message_to_agent(session_id: str, message: str, max_iterations=3, context=None, user=None):
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)
@@ -52,7 +58,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=2,
             print("results from chat commands: ", results)
             out_results = []
             actual_results = False
-            asyncio.sleep(0.01)
+            await asyncio.sleep(0.25)
             for result in results:
                 if result['result'] is not None:
                     if result['result'] == 'continue':
