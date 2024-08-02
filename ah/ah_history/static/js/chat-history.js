@@ -27,6 +27,27 @@ export class ChatHistory extends BaseEl {
   text-decoration-color: rgba(100, 100, 255, 0.5);
 }
 
+.chat-item {
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: row;
+}
+
+.chat-history li {
+  list-style-type: none;
+  margin: 0;
+  margin-top: 5px;
+  padding: 0;
+  /* faint border around each chat item */  
+  border: 1px solid rgba(100, 100, 255, 0.2);
+  border-radius: 3px;
+  background-color: rgba(100, 100, 255, 0.1);
+}
+
+.chat-history ul {
+  padding-left: 0;
+}
+
 .tooltip {
     position: relative;
     display: inline-block;
@@ -50,7 +71,7 @@ export class ChatHistory extends BaseEl {
     opacity: 0;
     transition: opacity 0.1s;
 }
-
+  
 .tooltip:hover .tooltiptext {
     visibility: visible;
     opacity: 1;
@@ -88,25 +109,52 @@ export class ChatHistory extends BaseEl {
     }
   }
 
-  _render() {
-     for (let chat of this.chats) {
-       chat.date = new Date(chat.date * 1000).toLocaleDateString('en-US', 
-                            { month: '2-digit', day: '2-digit' })
-      }
-      return html`
-        <div class="chat-history">
-          ${this.chats.map(chat => html`
-        <div class="chat-item tooltip">
-          <div>${chat.date}</div>
-          <div><a target="_blank" href="/session/${this.agent_name}/${chat.log_id}">${chat.descr.substring(0,35)}...</a>
-          <span class="tooltiptext">${chat.descr}</span>
-        </<div>
-        </div>
-          `)}
-        </div>
-      `;
-     }
+// Function to format the date
+formatDate(ts) {
+    return new Date(ts * 1000).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+}
 
-  }
+// Function to group chats by date
+groupByDate(chats) {
+    return chats.reduce((acc, chat) => {
+        const date = this.formatDate(chat.date);
+        (acc[date] = acc[date] || []).push(chat);
+        return acc;
+    }, {});
+}
+
+// Function to render a chat item
+renderChat(chat) {
+    return html`
+        <div class="chat-item">
+            <a href="/session/${this.agent_name}/${chat.log_id}">
+                <li>"${chat.descr.substring(0, 50)}..."</li>
+            </a>
+        </div>
+    `;
+}
+
+// Function to render chat group by date
+renderGroup(date, chats) {
+    return html`
+        <div>
+            <h3>${date}</h3>
+            <ul>${chats.map(chat => this.renderChat(chat))}</ul>
+        </div>
+    `;
+}
+
+// Main render function
+_render() {
+    const chatsByDate = this.groupByDate(this.chats);
+    return html`
+        <div class="chat-history">
+            ${Object.entries(chatsByDate).map(([date, chats]) => this.renderGroup(date, chats))}
+        </div>
+    `;
+}
+
+
+}
 
 customElements.define('chat-history', ChatHistory);
