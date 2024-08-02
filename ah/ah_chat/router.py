@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import Message
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
@@ -33,11 +33,24 @@ async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     plugins = list_enabled()
     await init_chat_session(agent_name, log_id)
-    html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
-    return html
+    print("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+    print("initiated chat session")
+    print(f"redirecting to /chatlog/{agent_name}/{log_id}")
+    return RedirectResponse(f"/session/{agent_name}/{log_id}")
+    #html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
+    #return html
 
-@router.get("/chatlog/{agent_name}/{log_id}")
+# /history get's session history based on log_id
+@router.get("/history/{log_id}")
+async def chat_history(log_id: str):
+    history = await get_chat_history(log_id)
+    return history
+
+
+@router.get("/session/{agent_name}/{log_id}")
 async def chat_history(agent_name: str, log_id: str):
     plugins = list_enabled()
     html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name})
+    return HTMLResponse(html)
+    return html
 

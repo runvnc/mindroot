@@ -59,8 +59,7 @@ class Chat extends BaseEl {
   }
 
   async loadHistory() {
-    // GET to /session/[agent_name]/sessionid  
-    const response = await fetch(`/chatlog/${this.agent_name}/${this.sessionid}/history`);
+    const response = await fetch(`/history/${this.sessionid}`);
     const data = await response.json();
     console.log('History data:', data);
     for (let msg of data) {

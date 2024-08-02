@@ -32,6 +32,7 @@ def decode_token(token: str):
 async def middleware(request: Request, call_next):
     try:
         print('-------------------------- auth middleware ----------------------------')
+        print('Request URL:', request.url.path)
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
@@ -44,7 +45,7 @@ async def middleware(request: Request, call_next):
                 return await call_next(request)
             else:
                 return RedirectResponse(url='/login')
-        
+        print("..Did not find token in cookies..")
         token = await security(request)
         if token:
             payload = decode_token(token.credentials)
@@ -55,7 +56,10 @@ async def middleware(request: Request, call_next):
         print("Not a public route: ", request.url.path)
         print('Redirecting to login')
         return RedirectResponse(url='/login')
-
+    # catch http exceptions
+    except HTTPException as e:
+        print('HTTPException:', e)
+        return RedirectResponse(url='/login')
     except Exception as e:
         print('Error:', e)
         # print traceback
