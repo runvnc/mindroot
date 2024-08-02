@@ -51,7 +51,8 @@ input::placeholder, textarea::placeholder {
 }
 
 .hover-zoom:hover {
-  transform: scale(6);
+  
+  transform: translateX(100px) scale(6);
   z-index: 1;
 }
 
