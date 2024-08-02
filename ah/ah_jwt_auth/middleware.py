@@ -23,9 +23,11 @@ def decode_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
+        print("Token has expired")
+        return False
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        print("Invalid token")
+        return False
 
 async def middleware(request: Request, call_next):
     try:
@@ -37,9 +39,12 @@ async def middleware(request: Request, call_next):
         token = request.cookies.get("access_token")
         if token:
             payload = decode_token(token)
-            request.state.user = payload
-            return await call_next(request)
-
+            if payload:
+                request.state.user = payload
+                return await call_next(request)
+            else:
+                return RedirectResponse(url='/login')
+        
         token = await security(request)
         if token:
             payload = decode_token(token.credentials)
