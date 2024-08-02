@@ -20,6 +20,7 @@
 {% endblock %} 
 
 
-{% block pre_content %}  
-<chat-history agent="{% agent_name %}" user="{% user %}" ></chat-history>
+{% block pre_content %} 
+Hello from chat history
+<chat-history agent_name="{{ agent_name }}" user="{{ user }}" ></chat-history>
 {% endblock %}

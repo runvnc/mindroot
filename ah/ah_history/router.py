@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import os
 import shutil
 import base64
+import json
 import mimetypes
 from ..commands import command_manager
 from ..services import service_manager
@@ -10,36 +11,47 @@ from ..chatcontext import ChatContext
 
 router = APIRouter()
 
-def recent_chats(path):
+async def recent_chats(path):
     try:
+        print("recent_chats. dir = ", path)
         files = []
         for file in os.listdir(path):
             files.append(file)
         files.sort(key=lambda x: os.path.getmtime(os.path.join(path, x)), reverse=True)
+        print(files)
         chats = files[:30]
         results = []
         for chat in chats:
             with open(f"{path}/{chat}", "r") as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                continue
-            message = data["messages"][0]
-            results.append({
-                "content": message["content"][:30],
-                "timestamp": os.path.getmtime(f"{path}/{chat}")
-            })
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    continue
+                message = data["messages"][0]
+                results.append({
+                    "log_id": chat.split("_")[1].split(".")[0],
+                    "descr": message["content"][:80],
+                    "date": os.path.getmtime(f"{path}/{chat}")
+                })
+        print(results)
         return results
     except PermissionError:
-        throw("Permission denied")
+        raise("Permission denied")
+    except Exception as e:
+        print("Error in recent_chats")
+        print(e)
+        raise(str(e))
 
-@router.get("/history/{agent}")
-async def get_file_tree(request: Request, dir: str = "/"):
+@router.get("/session_list/{agent}")
+async def get_session_list(request: Request, agent: str = "/"):
     try:
         user = request.state.user
         dir = f"data/chat/{agent}"
         #dir = f"data/chat/{user}/{agent}"
-        return JSONResponse(await recent_chats(dir))
+        chat = await recent_chats(dir)
+        return JSONResponse(chat)
     except Exception as e:
+        print("Error in get_session_list")
+        print(e)
         return JSONResponse({"error": str(e)})
 

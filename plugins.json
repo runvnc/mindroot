@@ -89,7 +89,7 @@
   },
   {
     "name": "ah_filetree",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_history",

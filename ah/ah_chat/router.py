@@ -42,7 +42,7 @@ async def chat_history(log_id: str):
 
 
 @router.get("/session/{agent_name}/{log_id}")
-async def chat_history(agent_name: str, log_id: str):
+async def chat_history(request: Request, agent_name: str, log_id: str):
     plugins = list_enabled()
     user = request.state.user
     html = await render_combined_template('chat', plugins, {"log_id": log_id, "agent_name": agent_name, "user": user})
