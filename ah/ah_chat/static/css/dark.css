@@ -46,6 +46,16 @@ input::placeholder, textarea::placeholder {
     overflow-y: hidden;
 }
 
+.hover-zoom {
+  transition: transform 0.1s ease;
+}
+
+.hover-zoom:hover {
+  transform: scale(6);
+  z-index: 1;
+}
+
+
 .chat-log {
   flex: 1;
   display: flex;
