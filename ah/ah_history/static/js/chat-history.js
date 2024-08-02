@@ -16,66 +16,45 @@ export class ChatHistory extends BaseEl {
       font-size: 0.85em;
       display: flex;
       flex-direction: column;
+      width: 95%;
+      position: relative;
     }
     chat-history:hover {
-      background-color: rgba(100, 100, 255, 0.2);
-}
+      /* background-color: rgba(100, 100, 255, 0.2); */
+    }
 .chat-item:hover {
   background-color: rgba(100, 100, 255, 0.35);
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: rgba(100, 100, 255, 0.5);
 }
+.chat-item a {
+  display: block;
+  text-decoration: none;
+}
 
 .chat-item {
   font-size: 0.8em;
-  display: flex;
-  flex-direction: row;
+  width: 95%;
+  text-decoration: none;
 }
 
 .chat-history li {
   list-style-type: none;
   margin: 0;
-  margin-top: 5px;
-  padding: 0;
-  /* faint border around each chat item */  
-  border: 1px solid rgba(100, 100, 255, 0.2);
+  color: #ccc;
+  margin-top: 15px;
+  padding: 5px;
+  border: 1px solid rgba(200, 200, 255, 0.2);
   border-radius: 3px;
-  background-color: rgba(100, 100, 255, 0.1);
+  background-color: rgba(200, 200, 255, 0.1);
+  width: 95%;
 }
 
 .chat-history ul {
   padding-left: 0;
 }
 
-.tooltip {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 200px; /* Adjust width as needed */
-    background-color: rgba(200, 200, 200, 0.3);
-    color: #fff;
-    font-size: 0.8em;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 25%; 
-    left: 150%;
-    margin-left: -100px; /* Adjust based on width */
-    opacity: 0;
-    transition: opacity 0.1s;
-}
-  
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
 
   `;
 
