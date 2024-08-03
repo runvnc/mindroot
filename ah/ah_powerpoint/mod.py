@@ -7,19 +7,7 @@ import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
 from .slide_content_updater import update_slide_content as new_update_slide_content
-
-@command()
-async def save_presentation(context, source_filename, destination_filename):
-    """Save the presentation to disk, optionally with a new filename.
-    Example:
-    { "save_presentation": { "source_filename": "original.pptx", "destination_filename": "updated_presentation.pptx" } }
-    """
-    try:
-        prs = Presentation(source_filename)
-        prs.save(destination_filename)
-        return f"Saved presentation from {source_filename} as {destination_filename}"
-    except Exception as e:
-        return f"Error saving presentation: {str(e)}"
+from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide
 
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
@@ -70,7 +58,7 @@ async def replace_image(context, filename, slide, name=None, replace_with_image_
     { "replace_image": { "filename": "presentation.pptx", "name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
     """
     if name is None or replace_with_image_fname is None:
-        return "Both fname and replace_with_image_fname must be provided"
+        return "Both name and replace_with_image_fname must be provided"
 
     try:
         prs = Presentation(filename)
@@ -141,3 +129,87 @@ async def create_chart(context, filename, slide_number, chart_type, data, positi
         return f"Created {chart_type} chart on slide {slide_number} in {filename}"
     except Exception as e:
         return f"Error creating chart: {str(e)}"
+
+@command()
+async def open_presentation_for_xml_edit(context, filename):
+    """Open a presentation for XML editing.
+    Example:
+    { "open_presentation_for_xml_edit": { "filename": "example.pptx" } }
+    """
+    try:
+        result = presentation_manager.open_presentation(filename)
+        return f"Presentation {filename} opened for XML editing" if result else "Failed to open presentation"
+    except Exception as e:
+        return f"Error opening presentation: {str(e)}"
+
+@command()
+async def close_presentation_after_xml_edit(context, filename):
+    """Close a presentation after XML editing.
+    Example:
+    { "close_presentation_after_xml_edit": { "filename": "example.pptx" } }
+    """
+    try:
+        result = presentation_manager.close_presentation(filename)
+        return f"Presentation {filename} closed after XML editing" if result else "Failed to close presentation"
+    except Exception as e:
+        return f"Error closing presentation: {str(e)}"
+
+@command()
+async def extract_slide_xml_content(context, filename, slide_number):
+    """Extract XML content from a slide.
+    Example:
+    { "extract_slide_xml_content": { "filename": "example.pptx", "slide_number": 1 } }
+    """
+    try:
+        xml_content = extract_slide_xml(filename, slide_number)
+        return xml_content
+    except Exception as e:
+        return f"Error extracting slide XML: {str(e)}"
+
+@command()
+async def update_slide_xml_content(context, filename, slide_number, new_xml):
+    """Update XML content of a slide.
+    Example:
+    { "update_slide_xml_content": { "filename": "example.pptx", "slide_number": 1, "new_xml": "<p:sld>...</p:sld>" } }
+    """
+    try:
+        result = update_slide_xml(filename, slide_number, new_xml)
+        return f"Updated XML content for slide {slide_number} in {filename}" if result else "Failed to update slide XML"
+    except Exception as e:
+        return f"Error updating slide XML: {str(e)}"
+
+@command()
+async def append_to_slide_xml_content(context, filename, slide_number, xml_fragment):
+    """Append XML fragment to a slide's content.
+    Example:
+    { "append_to_slide_xml_content": { "filename": "example.pptx", "slide_number": 1, "xml_fragment": "<p:sp>...</p:sp>" } }
+    """
+    try:
+        result = append_to_slide(filename, slide_number, xml_fragment)
+        return f"Appended XML fragment to slide {slide_number} in {filename}" if result else "Failed to append to slide XML"
+    except Exception as e:
+        return f"Error appending to slide XML: {str(e)}"
+
+@command()
+async def clear_slide_xml_content(context, filename, slide_number):
+    """Clear all XML content from a slide.
+    Example:
+    { "clear_slide_xml_content": { "filename": "example.pptx", "slide_number": 1 } }
+    """
+    try:
+        result = clear_slide(filename, slide_number)
+        return f"Cleared XML content from slide {slide_number} in {filename}" if result else "Failed to clear slide XML"
+    except Exception as e:
+        return f"Error clearing slide XML: {str(e)}"
+
+@command()
+async def save_presentation_after_xml_edit(context, filename):
+    """Save the presentation after XML editing.
+    Example:
+    { "save_presentation_after_xml_edit": { "filename": "example.pptx" } }
+    """
+    try:
+        result = presentation_manager.save_presentation(filename)
+        return f"Saved presentation {filename} after XML editing" if result else "Failed to save presentation"
+    except Exception as e:
+        return f"Error saving presentation: {str(e)}"
