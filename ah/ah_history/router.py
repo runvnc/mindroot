@@ -29,7 +29,7 @@ async def recent_chats(path):
                     continue
                 message = data["messages"][0]
                 results.append({
-                    "log_id": chat.split("_")[1].split(".")[0],
+                    "log_id": chat[8:-5],
                     "descr": message["content"][:80],
                     "date": os.path.getmtime(f"{path}/{chat}")
                 })

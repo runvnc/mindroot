@@ -81,7 +81,7 @@ export class ChatHistory extends BaseEl {
       const response = await fetch(`/session_list/${encodeURIComponent(this.agent_name)}`);
       console.log(response)
       this.chats = await response.json();
-      console.log(this.chat)
+      console.log(this.chats)
     } catch (error) {
       console.error('Error loading file structure:', error);
       this.error = 'Failed to load file structure. Please try again.';
@@ -113,7 +113,6 @@ renderChat(chat) {
     `;
 }
 
-// Function to render chat group by date
 renderGroup(date, chats) {
     return html`
         <div>
@@ -123,9 +122,12 @@ renderGroup(date, chats) {
     `;
 }
 
-// Main render function
 _render() {
-    const chatsByDate = this.groupByDate(this.chats);
+    let chatsByDate = {}
+    if (this.chats) {
+      chatsByDate = this.groupByDate(this.chats)
+    }
+    console.log(chatsByDate)
     return html`
         <div class="chat-history">
             ${Object.entries(chatsByDate).map(([date, chats]) => this.renderGroup(date, chats))}

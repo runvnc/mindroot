@@ -59,9 +59,12 @@ class Chat extends BaseEl {
   }
 
   async loadHistory() {
+    // output status message in cyan
+    console.log('%cLoading chat history...', 'color: cyan')
     const response = await fetch(`/history/${this.sessionid}`);
     const data = await response.json();
-    console.log('History data:', data);
+    // output data in cyan also
+    console.log('%cHistory loaded:', 'color: cyan', data)
     for (let msg of data) {
       if (msg.content.startsWith('[SYSTEM]') || msg.content.startsWith('SYSTEM]')) {
         const idx = msg.content.lastIndexOf(']\n')

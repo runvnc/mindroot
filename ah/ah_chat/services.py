@@ -45,12 +45,9 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=3,
     agent_ = agent.Agent(agent=context.agent)
     if user is not None:
         for key in user:
-            print("**********************************************************")
-            print("Setting user key: ", key, user[key])
             context.data[key] = user[key]
             
     context.chat_log.add_message({"role": "user", "content": message})
-    #results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
 
     context.save_context()
 
@@ -66,7 +63,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=3,
             print("results from chat commands: ", results)
             out_results = []
             actual_results = False
-            await asyncio.sleep(0.25)
+            await asyncio.sleep(0.1)
             for result in results:
                 if result['result'] is not None:
                     if result['result'] == 'continue':
@@ -87,7 +84,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=3,
             if len(out_results) > 0:
                 print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
-                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})                
+                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
                 results.append(out_results)
             else:
                 print("Processing iteration: ", iterations, "no message added")
@@ -148,3 +145,4 @@ async def running_command(command: str, args, context=None):
 async def command_result(command: str, result, context=None):
     agent_ = context.agent
     await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'] })
+

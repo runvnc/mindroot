@@ -114,29 +114,9 @@ async def exit_conversation(takeaways: str, context=None):
     print(termcolor.colored('exiting conversation', 'yellow', attrs=['bold']))
     print(termcolor.colored(takeaways, 'yellow', attrs=['bold']))
     context.data['finished_conversation'] = True
+    context.data['takeaways'] = takeaways
     context.save_context()
     return takeaways
-
-# have agent conversation with another agent
-# bring in recent messages from this context/log  but not all messages
-# specify the most important agenda items for the conversation
-#
-
-# chat logs:
-
-# 1. system -> supervistor agent : when user initiates a task, system initiates chat with supervisor agent
-#  this is the parent chat log
-# 2. supervisor agent -> worker agent: supervisor agent initiates chat with worker agent given the task and (if any) recent messages
-#    this goes in a new chat log which for the supervisor which contains recent messages and task but not all messages
-# 3. supervisor agent -> worker agent from worker's perspective: another chat log that contains only the message from the worker's perspective
-#  starting with the supervisor's first message
-#
-
-# supervisor agent chat goes in loop until supervisor calls exit_chat and returns a concise but complete summary of the relevant conversation
-# details  
-
-# the parent chat log is continued with the output of the conversation being added as a "user" system message and then
-# the supervisor decides what to do next such as recording the task as completed or moving on to another worker
 
 @command()
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
@@ -148,7 +128,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     Parameters:
     agent_name - String. The name of the agent to converse with.
     sub_log_id - String. The log_id of the existing chat session with a secondary agent.
-    IMPORTANT: this is NOT the agent name. It is the log_id/session_id of the chat session.
+                IMPORTANT: this is NOT the agent name. It is the log_id/session_id of the chat session.
 
     first_message - String. The first message to the agent.
     contextual_info - String. Relevant details that may come up.
@@ -164,11 +144,11 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     await init_chat_session(context.agent_name, my_sub_log_id)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
-    
+    my_sub_context.data['parent_log_id'] = context.log_id
     my_sub_log = my_sub_context.chat_log
 
     to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
-    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... " + to_exit
+    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... \n\n" + to_exit
     my_sub_log.add_message({"role": "user", "content": init_sub_msg})
     my_sub_log.add_message({"role": "assistant", "content": f"[{agent_name}]:" + first_message})
     
@@ -178,15 +158,17 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
 
     my_sub_replies = await subscribe_to_agent_messages(my_sub_log_id)
     print('######################################################################################')
+    takeaways = ""
 
     while not finished_conversation:
         replies = []
         async with asyncio.timeout(120.0):
             replies = await send_message_to_agent(sub_log_id, first_message)
-        print("Sending replies to parent agent...")
+        print("Sending replies to supervisor agent...")
         print('oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo OK done')
         print(",", flush=True)
         print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+
         async with asyncio.timeout(120.0):
             my_replies = await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
         print("Waiting for parent agent replies...")
@@ -194,6 +176,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
         print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
         print("my_replies:", my_replies)
         if my_sub_context.data['finished_conversation'] == True:
+            takeaways = my_sub_context.data['takeaways']
             finished_conversation = True
         else:
             first_message = json.dumps(my_replies)
@@ -202,12 +185,32 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
         await sub_context.load_context(sub_log_id)
         await my_sub_context.load_context(my_sub_log_id)
   
-        #print my_sub_context['data'] and also sub_context['data']  in blue
         print(termcolor.colored('my_sub_context.data:', 'blue', attrs=['bold']))
         print(termcolor.colored(my_sub_context.data, 'blue', attrs=['bold']))
         print(termcolor.colored('sub_context.data:', 'blue', attrs=['bold']))
         print(termcolor.colored(sub_context.data, 'blue', attrs=['bold']))
          
     return {
-        f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} replies were:": replies
+        f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} takeaways were:": takeaways
     }
+
+
+@command()
+async def send_to_parent_chat(message: str, context=None):
+    """
+    Send a message to the parent chat session.
+    This must only be used within a subconversation initiated by converse_with_agent().
+    It is useful for things like informing the user about task status or requesting that the user provide a file, etc.
+
+Parameters:
+    message - String. The message to send to the parent chat session.
+    Return: None
+    """
+    parent_log = context.data['parent_log_id']
+    parent_context = ChatContext(service_manager, command_manager)
+    await parent_context.load_context(parent_log)
+    chat_log.add_message({"role": "assistant", "content": message})
+    await agent_output("new_message", {"content": message, "agent": context.agent['name']})
+    chat_log = parent_context.chat_log
+    return None
+
