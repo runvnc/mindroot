@@ -37,7 +37,7 @@ async def get_chat_history(session_id: str):
     return messages
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=3, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None, user=None):
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)
