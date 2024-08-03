@@ -38,6 +38,10 @@ async def get_chat_history(session_id: str):
 
 @service()
 async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None, user=None):
+    if session_id is None or session_id == "" or message is None or message == "":
+        print("Invalid session_id or message")
+        return []
+
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)

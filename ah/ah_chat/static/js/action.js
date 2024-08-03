@@ -29,6 +29,27 @@ class ActionComponent extends BaseEl {
 
   static styles = [
     css`
+@keyframes flash {
+  0% { opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+
+.animated-element::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(200,200,200,0.2);
+  animation: flash 0.2s;
+  pointer-events: none;
+}
+
+.animated-element {
+  /* position: relative; */
+}
     `
   ];
 
@@ -101,14 +122,14 @@ class ActionComponent extends BaseEl {
     }
 
     return html` 
-    <div></div>
-    <div style="position: relative; max-width: 800px;">
+    <details class="animated-element" style="position: relative; max-width: 800px;">
+      <summary class="fn_name">${funcName}</summary>
       <div class="av"></div>
       <div class="action" >
         ⚡  <span class="fn_name">${funcName}</span> ${unsafeHTML(paramshtml)}
         ${res}
       </div>
-    </div>
+    </details>
     `;
   }
 }

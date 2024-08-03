@@ -122,13 +122,14 @@ async def exit_conversation(takeaways: str, context=None):
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
     """
     Have a conversation with an agent in an existing chat session.
-    Note: once you start the conversation, use normal Say commands etc. to coninue the conversation.
-        do not use this command again to send messages to the agent. 
+    Note:
+        Do not use this command again to send more messages to the agent. 
+        Again, IMPORTANT: do NOT use this command from within a subconversation.
+        You only issue this command ONCE, then the conversation occurs in another subcontext.
 
     Parameters:
     agent_name - String. The name of the agent to converse with.
     sub_log_id - String. The log_id of the existing chat session with a secondary agent.
-                IMPORTANT: this is NOT the agent name. It is the log_id/session_id of the chat session.
 
     first_message - String. The first message to the agent.
     contextual_info - String. Relevant details that may come up.
@@ -161,6 +162,9 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     takeaways = ""
 
     while not finished_conversation:
+        # make sure that 'finished_conversation' key is in the context.data
+        if 'finished_conversation' not in my_sub_context.data:
+            throw("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
         replies = []
         async with asyncio.timeout(120.0):
             replies = await send_message_to_agent(sub_log_id, first_message)

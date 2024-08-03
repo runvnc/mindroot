@@ -14,7 +14,7 @@ async def think(thoughts="", context=None):
     Example 1 (rough abstraction, not literal):
 
     [
-    { "think": {"thoughts": "Since the user wants [X] and we currently know [Y], therefore [Z]. Then assuming [Z], we will need to [1], [2]. The best way to [1] is ...", "done": false }} ,
+    { "think": {"thoughts": "Since the user wants [X] and we currently know [Y], therefore [Z]. Then assuming [Z], we will need to [1], [2]. The best way to [1] is ..." }} ,
     ]
 
     Actual thoughts will be entirely dependant upon the situation and conversation.
