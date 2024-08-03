@@ -12,6 +12,8 @@ from .pptx_stateless_editor import presentation_manager, extract_slide_xml, upda
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
     """Replace all occurrences of specified strings on the presentation slide.
+        
+    NOTE: for this and ALL PowerPoint commands, filenames must be specified with full absolute paths!
 
     Parameters:
         filename: string
@@ -20,10 +22,10 @@ async def slide_replace_all(context, filename, slide, replacements=None, case_se
 
     Examples:
     1. Simple text replacement:
-    { "slide_replace_all": { "filename": "example.pptx", "slide": 1, "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
+    { "slide_replace_all": { "filename": "/path/to/example.pptx", "slide": 1, "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
     
     2. Multiple replacements including percentages:
-    { "slide_replace_all": { "filename": "example.pptx", "slide": 3, "replacements": [
+    { "slide_replace_all": { "filename": "/path/to/example.pptx", "slide": 3, "replacements": [
         {"match": "total: 5%", "replace": "total: 10%"},
         {"match": "revenue", "replace": "income"}
       ], 
@@ -32,7 +34,7 @@ async def slide_replace_all(context, filename, slide, replacements=None, case_se
     } }
     
     3. Using regex:
-    { "slide_replace_all": { "filename": "example.pptx", "replacements": [
+    { "slide_replace_all": { "filename": "/path/to/example.pptx", "replacements": [
         {"match": "total: \d+%", "replace": "total: 15%", "is_regex": true},
         {"match": "Q[1-4]", "replace": "Quarter ", "is_regex": true}
       ], 
@@ -55,7 +57,7 @@ async def replace_image(context, filename, slide, name=None, replace_with_image_
     """Replace an image in the presentation based on name.
     
     Example:
-    { "replace_image": { "filename": "presentation.pptx", "name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
+    { "replace_image": { "filename": "/path/to/presentation.pptx", "name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
     """
     if name is None or replace_with_image_fname is None:
         return "Both name and replace_with_image_fname must be provided"
@@ -85,7 +87,7 @@ async def replace_image(context, filename, slide, name=None, replace_with_image_
 async def read_slide_content(context, filename, slide_number):
     """Read and return the content of a slide.
     Example:
-    { "read_slide_content": { "filename": "presentation.pptx", "slide_number": 1 } }
+    { "read_slide_content": { "filename": "/path/to/presentation.pptx", "slide_number": 1 } }
     """
     try:
         prs = Presentation(filename)
@@ -102,7 +104,7 @@ async def update_slide_content(context, filename, slide_number, content):
     
     For tables, the number of rows in the provided data must match the existing table.
     Example:
-    { "update_slide_content": { "filename": "presentation.pptx", "slide_number": 1, "content": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
+    { "update_slide_content": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "content": {"title": "New Title", "subtitle": "New Subtitle", "Table 2": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]} } }
     """
     try:
         return new_update_slide_content(context, filename, slide_number, content)
@@ -113,7 +115,7 @@ async def update_slide_content(context, filename, slide_number, content):
 async def create_chart(context, filename, slide_number, chart_type, data, position):
     """Create a chart on the specified slide.
     Example:
-    { "create_chart": { "filename": "presentation.pptx", "slide_number": 1, "chart_type": "BAR_CLUSTERED", "data": {"categories": ["A", "B", "C"], "values": [1, 2, 3]}, "position": {"left": 1, "top": 2, "width": 8, "height": 5} } }
+    { "create_chart": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "chart_type": "BAR_CLUSTERED", "data": {"categories": ["A", "B", "C"], "values": [1, 2, 3]}, "position": {"left": 1, "top": 2, "width": 8, "height": 5} } }
     """
     try:
         prs = Presentation(filename)
@@ -134,7 +136,7 @@ async def create_chart(context, filename, slide_number, chart_type, data, positi
 async def open_presentation_for_xml_edit(context, filename):
     """Open a presentation for XML editing.
     Example:
-    { "open_presentation_for_xml_edit": { "filename": "example.pptx" } }
+    { "open_presentation_for_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
     try:
         result = presentation_manager.open_presentation(filename)
@@ -146,7 +148,7 @@ async def open_presentation_for_xml_edit(context, filename):
 async def close_presentation_after_xml_edit(context, filename):
     """Close a presentation after XML editing.
     Example:
-    { "close_presentation_after_xml_edit": { "filename": "example.pptx" } }
+    { "close_presentation_after_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
     try:
         result = presentation_manager.close_presentation(filename)
@@ -158,7 +160,7 @@ async def close_presentation_after_xml_edit(context, filename):
 async def extract_slide_xml_content(context, filename, slide_number):
     """Extract XML content from a slide.
     Example:
-    { "extract_slide_xml_content": { "filename": "example.pptx", "slide_number": 1 } }
+    { "extract_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
     """
     try:
         xml_content = extract_slide_xml(filename, slide_number)
@@ -170,7 +172,7 @@ async def extract_slide_xml_content(context, filename, slide_number):
 async def update_slide_xml_content(context, filename, slide_number, new_xml):
     """Update XML content of a slide.
     Example:
-    { "update_slide_xml_content": { "filename": "example.pptx", "slide_number": 1, "new_xml": "<p:sld>...</p:sld>" } }
+    { "update_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1, "new_xml": "<p:sld>...</p:sld>" } }
     """
     try:
         result = update_slide_xml(filename, slide_number, new_xml)
@@ -182,7 +184,7 @@ async def update_slide_xml_content(context, filename, slide_number, new_xml):
 async def append_to_slide_xml_content(context, filename, slide_number, xml_fragment):
     """Append XML fragment to a slide's content.
     Example:
-    { "append_to_slide_xml_content": { "filename": "example.pptx", "slide_number": 1, "xml_fragment": "<p:sp>...</p:sp>" } }
+    { "append_to_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1, "xml_fragment": "<p:sp>...</p:sp>" } }
     """
     try:
         result = append_to_slide(filename, slide_number, xml_fragment)
@@ -194,7 +196,7 @@ async def append_to_slide_xml_content(context, filename, slide_number, xml_fragm
 async def clear_slide_xml_content(context, filename, slide_number):
     """Clear all XML content from a slide.
     Example:
-    { "clear_slide_xml_content": { "filename": "example.pptx", "slide_number": 1 } }
+    { "clear_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
     """
     try:
         result = clear_slide(filename, slide_number)
@@ -206,7 +208,7 @@ async def clear_slide_xml_content(context, filename, slide_number):
 async def save_presentation_after_xml_edit(context, filename):
     """Save the presentation after XML editing.
     Example:
-    { "save_presentation_after_xml_edit": { "filename": "example.pptx" } }
+    { "save_presentation_after_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
     try:
         result = presentation_manager.save_presentation(filename)
