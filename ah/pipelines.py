@@ -1,6 +1,7 @@
 import inspect
 from typing import Any, Callable, Dict, List
 import asyncio
+import termcolor
 
 class PipelineManager:
     def __init__(self):
@@ -15,22 +16,27 @@ class PipelineManager:
             'priority': priority,
             'signature': signature
         })
-        # Sort pipes by priority
+        print(termcolor.colored(f"Registering pipe '{name}' with priority {priority}", 'yellow')
         self.pipes[name].sort(key=lambda x: x['priority'])
 
     async def execute_pipeline(self, name: str, data: Any) -> Any:
+        # print debug in yellow
+        # print all debugs in yellow
+        print(termcolor.colored(f"Executing pipeline '{name}'", 'yellow'))
         if name not in self.pipes:
+            print(termcolor.colored(f"Pipeline '{name}' not found", 'red'))
             return data
         for pipe_info in self.pipes[name]:
             implementation = pipe_info['implementation']
+            print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))
             try:
                 if asyncio.iscoroutinefunction(implementation):
                     data = await implementation(data)
                 else:
                     data = implementation(data)
             except Exception as e:
-                print(f"Error in pipeline '{name}' at step with priority {pipe_info['priority']}: {str(e)}")
-                # Optionally, you could raise the exception here if you want to halt the pipeline on errors
+                #print in red
+                print(termcolor.colored(f"Error in pipeline '{name}' at step with priority {pipe_info['priority']}: {str(e)}", 'red'))
                 # raise e
         return data
 
