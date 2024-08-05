@@ -16,7 +16,7 @@ class PipelineManager:
             'priority': priority,
             'signature': signature
         })
-        print(termcolor.colored(f"Registering pipe '{name}' with priority {priority}", 'yellow')
+        print(termcolor.colored(f"Registering pipe '{name}' with priority {priority}", 'yellow'))
         self.pipes[name].sort(key=lambda x: x['priority'])
 
     async def execute_pipeline(self, name: str, data: Any) -> Any:

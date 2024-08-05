@@ -1,7 +1,7 @@
 import re
 from ..services import service
 from ..hooks import hook, hook_manager
-from pipe import pipe
+from ..pipe import pipe
 
 @pipe(name='pre_process_msg', priority=10, context=None)
 def spaces_jailbreak(data: dict) -> dict:
