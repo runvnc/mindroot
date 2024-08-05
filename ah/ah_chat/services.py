@@ -1,13 +1,16 @@
 from ..services import service, service_manager
 from ..commands import command_manager
+from ..hooks import hook_manager
+from ..pipe import pipeline_manager
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
+from ..pie
 import colored
 import traceback
 import asyncio
 import json
-
+import termcolor
 sse_clients = {}
 
 @service()
@@ -27,6 +30,9 @@ async def get_chat_history(session_id: str):
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)
     agent = await service_manager.get_agent_data(context.agent_name)
+    #print agent data in blue
+    termcolor.cprint("Agent data: " + str(agent), "blue")
+    
     persona = agent['persona']['name']
     messages = context.chat_log.get_recent()
     for message in messages:
@@ -38,6 +44,7 @@ async def get_chat_history(session_id: str):
 
 @service()
 async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None, user=None):
+
     if session_id is None or session_id == "" or message is None or message == "":
         print("Invalid session_id or message")
         return []
@@ -50,7 +57,8 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
     if user is not None:
         for key in user:
             context.data[key] = user[key]
-            
+
+    message = pipeline_manager.pre_process_msg(message) 
     context.chat_log.add_message({"role": "user", "content": message})
 
     context.save_context()

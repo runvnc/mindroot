@@ -20,8 +20,16 @@
     "enabled": true
   },
   {
+    "name": "ah_promptguard_jailbreak",
+    "enabled": true
+  },
+  {
     "name": "ah_togetherai",
     "enabled": false
+  },
+  {
+    "name": "ah_openrouter",
+    "enabled": true
   },
   {
     "name": "ah_openai",
@@ -53,11 +61,11 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_faceswap",
