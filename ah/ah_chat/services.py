@@ -5,7 +5,6 @@ from ..pipe import pipeline_manager
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
-from ..pie
 import colored
 import traceback
 import asyncio
@@ -58,7 +57,8 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         for key in user:
             context.data[key] = user[key]
 
-    message = pipeline_manager.pre_process_msg(message) 
+    message = pipeline_manager.pre_process_msg(message)
+    termcolor.cprint("Final message: " + message, "yellow")
     context.chat_log.add_message({"role": "user", "content": message})
 
     context.save_context()

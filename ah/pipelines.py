@@ -1,3 +1,4 @@
+import inspect
 from typing import Any, Callable, Dict, List
 import asyncio
 
@@ -46,3 +47,10 @@ class PipelineManager:
             self.pipes[name] = [p for p in self.pipes[name] if p['priority'] != priority]
             return True
         return False
+
+    def __getattr__(self, name: str) -> Callable:
+        async def pipeline_method(*args, **kwargs):
+            return await self.execute_pipeline(name, *args, **kwargs)
+        return pipeline_method
+
+pipeline_manager = PipelineManager()
