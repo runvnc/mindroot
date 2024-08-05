@@ -57,7 +57,10 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         for key in user:
             context.data[key] = user[key]
 
-    message = await pipeline_manager.pre_process_msg(message)
+    tmp_data = { "message": message }
+    tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
+    message = tmp_data['message']
+
     termcolor.cprint("Final message: " + message, "yellow")
     context.chat_log.add_message({"role": "user", "content": message})
 

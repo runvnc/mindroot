@@ -19,7 +19,7 @@ class PipelineManager:
         print(termcolor.colored(f"Registering pipe '{name}' with priority {priority}", 'yellow'))
         self.pipes[name].sort(key=lambda x: x['priority'])
 
-    async def execute_pipeline(self, name: str, data: Any) -> Any:
+    async def execute_pipeline(self, name: str, data: Any, context=None) -> Any:
         # print debug in yellow
         # print all debugs in yellow
         print(termcolor.colored(f"Executing pipeline '{name}'", 'yellow'))
@@ -31,9 +31,9 @@ class PipelineManager:
             print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))
             try:
                 if asyncio.iscoroutinefunction(implementation):
-                    data = await implementation(data)
+                    data = await implementation(data, context)
                 else:
-                    data = implementation(data)
+                    data = implementation(data, context)
             except Exception as e:
                 #print in red
                 print(termcolor.colored(f"Error in pipeline '{name}' at step with priority {pipe_info['priority']}: {str(e)}", 'red'))
