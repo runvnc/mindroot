@@ -73,13 +73,15 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         iterations += 1
         continue_processing = False
         try:
-            results = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             print("results from chat commands: ", results)
             out_results = []
+            full_results = []
             actual_results = False
             await asyncio.sleep(0.1)
             for result in results:
+                full_results.append(full_cmds)
                 if result['result'] is not None:
                     if result['result'] == 'continue':
                         out_results.append(result)
@@ -111,7 +113,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
 
     await asyncio.sleep(0.1)
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
-    return results
+    return results, full_results
 
 @service()
 async def subscribe_to_agent_messages(session_id: str, context=None):

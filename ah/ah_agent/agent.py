@@ -185,6 +185,7 @@ class Agent:
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
+        full_cmds = []
 
         num_processed = 0
 
@@ -208,7 +209,7 @@ class Agent:
                         logger.debug(f"Processing command: {cmd}")
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
-                        #results.append({"cmd": cmd_name, "args": cmd_args, "result": result})
+                        full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})
                         if result is not None:
                             results.append({"cmd": cmd_name, "args": { "omitted": "(see command msg.)"}, "result": result})
 
@@ -232,7 +233,7 @@ class Agent:
                         logger.error(str(de))
                         pass
 
-        return results
+        return results, full_cmds
 
     async def render_system_msg(self):
         logger.debug("Docstrings:")
@@ -267,9 +268,9 @@ class Agent:
                                         max_tokens=max_tokens,
                                         messages=messages)
 
-        ret = await self.parse_cmd_stream(stream, context)
+        ret, full_cmds = await self.parse_cmd_stream(stream, context)
         logger.debug("System message was:")
         logger.debug(await self.render_system_msg())
-        return ret
+        return ret, full_cmds
 
 from ..logfiles import logger

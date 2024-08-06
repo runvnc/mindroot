@@ -21,7 +21,7 @@
   },
   {
     "name": "ah_add_timestamp",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_togetherai",
@@ -61,11 +61,11 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_swapface",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_faceswap",
