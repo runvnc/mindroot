@@ -124,6 +124,16 @@ async def exit_conversation(output: str, context=None):
                         other than the takeaways listed here. So err on the side of caution of 
                         including MORE information. But be concise without losing ANY potentially 
                         relevant detail.
+
+                        Example: discussion was about a shopping list that was requested from the user.
+                        The output should be the full shopping list verbatim (but you can use abbreviations)
+
+                        Example: discussion was about a long process ending in a file being created. 
+                        The output should be the full filename and path.
+
+                        Example: user requested to have an agent install some software. The output should be 
+                        whether the software was successfully installed or not, and how to start and configure it.
+                        The output in this case should not include all of the steps involved or files installed.
     """
     print('-------------------------------------------------------------------')
     print(context.log_id)
