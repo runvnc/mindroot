@@ -7,12 +7,13 @@ import glob
 @command()
 async def write(fname="", text="", context=None):
     """Write text to a file. Will overwrite the file if it exists.
+    Make sure you know the full path first.
     Note: Do NOT use placeholders instead of full source, such as " # ..keep existing code"
           as this will not work and will effectively delete all of that code that was there before.
         All text must be provided to be written to the file.
 
     Example:
-    { "write": { "fname": "file1.txt", "text": "This is the text to write to the file." } }
+    { "write": { "fname": "/path/to/file1.txt", "text": "This is the text to write to the file." } }
 
     """
     print("Write file, context is:", context, 'context.data is:', context.data)
@@ -38,8 +39,9 @@ async def write(fname="", text="", context=None):
 @command()
 async def read(fname="", context=None):
     """Read text from a file.
+    You should know the full path.
     Example:
-    { "read": { "fname": "file1.txt" } }
+    { "read": { "fname": "/path/to/file1.txt" } }
     """
     if 'current_dir' in context.data:
         if fname.startswith('/') or fname.startswith('./') or fname.startswith('../'):
@@ -73,7 +75,7 @@ async def replace_inclusive(fname=None, starts_with=None, ends_with=None, text=N
 
     Example:
 
-    { "replace_inclusive": { "fname": "somefile.ext", "starts_with": "start of it",
+    { "replace_inclusive": { "fname": "/path/to/somefile.ext", "starts_with": "start of it",
       "ends_with": "end of it", "text": "start of it\\nnew text\\nend of it" } }
 
 
@@ -119,7 +121,7 @@ async def dir(directory='', context=None):
 
     Example:
     
-    { "dir": "subdir1" }
+    { "dir": "/path/to/subdir1" }
 
     Other Example (current dir)
 
@@ -178,6 +180,7 @@ async def cd(directory, context=None):
     """Change the current working directory.
 
     Parameter: directory - The directory to change to. This can be a relative or absolute path.
+                           If unsure, use absolute path.
 
     Example:
 

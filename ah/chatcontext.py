@@ -5,7 +5,7 @@ import json
 from .chatlog import ChatLog
 
 class ChatContext:
-    def __init__(self, command_manager, service_manager):
+    def __init__(self, command_manager, service_manager, user='testuser'):
         self.command_manager = command_manager
         self.service_manager = service_manager
         self._commands = command_manager.functions
@@ -18,7 +18,7 @@ class ChatContext:
         self.agent_name = None
         self.name = None
         self.log_id = None
-        self.data['current_dir'] = 'data/users/default'
+        self.data['current_dir'] = f'data/users/{user}'
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
 
