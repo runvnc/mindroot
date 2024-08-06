@@ -107,8 +107,19 @@ async def exit_conversation(takeaways: str, context=None):
     Exit a chat session with another agent. Use this when exit criteria are met.
 
     Parameters:
-    takeaways - String. A concise summary of relevant details of the conversation.
 
+    takeaways - String. A compressed form of all relevant details of the conversation.
+                        IMPORTANT: if the output of the conversation is a deliverable 
+                        in the form of text, then depending on the wording of the user's  
+                        instructions, you may need to include the ALL reevant details
+                        of the deliverable here.
+                        If the user asked for only a summary, then provide a summary.
+                        If there was work output to a file, this must include the full filename. 
+                        Etc.
+
+                        This should be every detail that is needed to continue, but none of 
+                        any intermediary details of the conversation that aren't relevant.
+                        Such as greetings, intermediary work steps, etc.
     """
     print('-------------------------------------------------------------------')
     print(context.log_id)

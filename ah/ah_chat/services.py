@@ -76,20 +76,22 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
     continue_processing = True
     iterations = 0
     results = []
+    full_results = []
+
     while continue_processing and iterations < max_iterations:
         iterations += 1
         continue_processing = False
         try:
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            for cmd in full_cmds:
+                full_results.append(cmd)
             termcolor.cprint("results from chat commands: " + str(full_cmds), "yellow")
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             print("results from chat commands: ", full_cmds)
             out_results = []
-            full_results = []
             actual_results = False
             await asyncio.sleep(0.1)
             for result in results:
-                full_results.append(full_cmds)
                 if result['result'] is not None:
                     if result['result'] == 'continue':
                         out_results.append(result)
