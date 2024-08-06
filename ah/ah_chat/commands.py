@@ -102,33 +102,38 @@ async def initiate_agent_session(agent_name: str, context=None):
 
 
 @command()
-async def exit_conversation(takeaways: str, context=None):
+async def exit_conversation(output: str, context=None):
     """
     Exit a chat session with another agent. Use this when exit criteria are met.
 
     Parameters:
-
-    takeaways - String. A compressed form of all relevant details of the conversation.
+    output - String :
+                        ALL relevant details of the conversation.
                         IMPORTANT: if the output of the conversation is a deliverable 
                         in the form of text, then depending on the wording of the user's  
-                        instructions, you may need to include the ALL reevant details
-                        of the deliverable here.
+                        instructions, you may need to include the ALL the text
+                        of the deliverable here!
                         If the user asked for only a summary, then provide a summary.
                         If there was work output to a file, this must include the full filename. 
                         Etc.
 
-                        This should be every detail that is needed to continue, but none of 
+                        This should be EVERY detail that is needed to continue, but none of 
                         any intermediary details of the conversation that aren't relevant.
                         Such as greetings, intermediary work steps, etc.
+                        But assume that you will not be able to refer back to this conversation 
+                        other than the takeaways listed here. So err on the side of caution of 
+                        including MORE information. But be concise without losing ANY potentially 
+                        relevant detail.
     """
     print('-------------------------------------------------------------------')
     print(context.log_id)
     print(termcolor.colored('exiting conversation', 'yellow', attrs=['bold']))
-    print(termcolor.colored(takeaways, 'yellow', attrs=['bold']))
+    print(termcolor.colored(output, 'yellow', attrs=['bold']))
     context.data['finished_conversation'] = True
-    context.data['takeaways'] = takeaways
+    context.data['takeaways'] = output
+    
     context.save_context()
-    return takeaways
+    return output
 
 @command()
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
