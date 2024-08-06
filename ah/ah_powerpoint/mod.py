@@ -52,14 +52,18 @@ NOTE: for this and ALL PowerPoint commands, filenames must be specified with ful
         return f"Error during replacement: {str(e)}"
 
 @command()
-async def replace_image(context, filename, slide, name=None, replace_with_image_fname=None):
+async def replace_image(context, filename, slide, image_name=None, replace_with_image_fname=None):
     """Replace an image in the presentation based on name.
     
+       slide - 1-based slide number.
+
     Example:
-    { "replace_image": { "filename": "/path/to/presentation.pptx", "name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
+    { "replace_image": { "filename": "/path/to/presentation.pptx", "slide": 1, "image_name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
     """
-    if name is None or replace_with_image_fname is None:
-        return "Both name and replace_with_image_fname must be provided"
+    if image_name is None or replace_with_image_fname is None:
+        return "Both image_name and replace_with_image_fname must be provided"
+    if slide is None:
+        return "Must provide side #"
 
     try:
         prs = Presentation(filename)
@@ -68,7 +72,7 @@ async def replace_image(context, filename, slide, name=None, replace_with_image_
         slide = prs.slides[slide - 1]
         for shape in slide.shapes:
             if shape.shape_type == 13:  # MSO_SHAPE_TYPE.PICTURE
-                if shape.name == original_image_fname:
+                if shape.name == image_name:
                     im = parts.image.Image.from_file(replace_with_image_fname)
 
                     slide_part, rId = shape.part, shape._element.blip_rId
@@ -78,7 +82,7 @@ async def replace_image(context, filename, slide, name=None, replace_with_image_
                     replacements_count += 1
 
         prs.save(filename)
-        return f"Replaced {replacements_count} instance(s) of {name} with {replace_with_image_fname} in {filename}"
+        return f"Replaced {replacements_count} instance(s) of {image_name} with {replace_with_image_fname} in {filename}"
     except Exception as e:
         return f"Error replacing image: {str(e)}"
 
