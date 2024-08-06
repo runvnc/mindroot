@@ -92,6 +92,7 @@ async def initiate_agent_session(agent_name: str, context=None):
     Parameters:
     agent_name - String. The name of the agent to start a session with.
 
+    Important: wait for the system to return the log_id for the new chat session before using the converse_with_agent() command.
     Return: String. The log_id for the new chat session.
     """
     log_id = nanoid.generate()
@@ -101,26 +102,53 @@ async def initiate_agent_session(agent_name: str, context=None):
 
 
 @command()
-async def exit_conversation(takeaways: str, context=None):
+async def exit_conversation(output: str, context=None):
     """
     Exit a chat session with another agent. Use this when exit criteria are met.
 
     Parameters:
-    takeaways - String. A concise summary of relevant details of the conversation.
+    output - String :
+                        ALL relevant details of the conversation.
+                        IMPORTANT: if the output of the conversation is a deliverable 
+                        in the form of text, then depending on the wording of the user's  
+                        instructions, you may need to include the ALL the text
+                        of the deliverable here!
+                        If the user asked for only a summary, then provide a summary.
+                        If there was work output to a file, this must include the full filename. 
+                        Etc.
 
+                        This should be EVERY detail that is needed to continue, but none of 
+                        any intermediary details of the conversation that aren't relevant.
+                        Such as greetings, intermediary work steps, etc.
+                        But assume that you will not be able to refer back to this conversation 
+                        other than the takeaways listed here. So err on the side of caution of 
+                        including MORE information. But be concise without losing ANY potentially 
+                        relevant detail.
+
+                        Example: discussion was about a shopping list that was requested from the user.
+                        The output should be the full shopping list verbatim (but you can use abbreviations)
+
+                        Example: discussion was about a long process ending in a file being created. 
+                        The output should be the full filename and path.
+
+                        Example: user requested to have an agent install some software. The output should be 
+                        whether the software was successfully installed or not, and how to start and configure it.
+                        The output in this case should not include all of the steps involved or files installed.
     """
     print('-------------------------------------------------------------------')
     print(context.log_id)
     print(termcolor.colored('exiting conversation', 'yellow', attrs=['bold']))
-    print(termcolor.colored(takeaways, 'yellow', attrs=['bold']))
+    print(termcolor.colored(output, 'yellow', attrs=['bold']))
     context.data['finished_conversation'] = True
-    context.data['takeaways'] = takeaways
+    context.data['takeaways'] = output
+    
     context.save_context()
-    return takeaways
+    return output
 
 @command()
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
     """
+    IMPORTANT: Wait for the system to return the sub_log_id from the initiate_agent_session() command before using this command.
     Have a conversation with an agent in an existing chat session.
     Note:
         Do not use this command again to send more messages to the agent. 
@@ -153,39 +181,38 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     my_sub_log.add_message({"role": "user", "content": init_sub_msg})
     my_sub_log.add_message({"role": "assistant", "content": f"[{agent_name}]:" + first_message})
     
-    sub_agent_replies = await subscribe_to_agent_messages(sub_log_id)
     finished_conversation = False
     my_sub_context.data['finished_conversation'] = False
+    my_sub_context.save_context()
 
-    my_sub_replies = await subscribe_to_agent_messages(my_sub_log_id)
-    print('######################################################################################')
     takeaways = ""
 
     while not finished_conversation:
-        # make sure that 'finished_conversation' key is in the context.data
         if 'finished_conversation' not in my_sub_context.data:
-            throw("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
+            raise Exception("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
         replies = []
         async with asyncio.timeout(120.0):
-            replies = await send_message_to_agent(sub_log_id, first_message)
-        print("Sending replies to supervisor agent...")
-        print('oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo OK done')
-        print(",", flush=True)
-        print("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+            [_, replies] = await send_message_to_agent(sub_log_id, first_message)
+        #print replies data for debugging, in magenta
+        print(termcolor.colored('replies:', 'magenta', attrs=['bold']))
+        print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
         async with asyncio.timeout(120.0):
-            my_replies = await send_message_to_agent(my_sub_log_id, f"[agent_name]: {json.dumps(replies)}")
-        print("Waiting for parent agent replies...")
-        #"""
-        print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
-        print("my_replies:", my_replies)
+            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}")
+            # print my_replies data for debugging, in cyan
+            print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
+            print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
+
         if my_sub_context.data['finished_conversation'] == True:
             takeaways = my_sub_context.data['takeaways']
             finished_conversation = True
+            break
         else:
             first_message = json.dumps(my_replies)
+            
         print("End of loop")
         sub_context = ChatContext(service_manager, command_manager)
+
         await sub_context.load_context(sub_log_id)
         await my_sub_context.load_context(my_sub_log_id)
   

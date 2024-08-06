@@ -5,7 +5,7 @@ import json
 from .chatlog import ChatLog
 
 class ChatContext:
-    def __init__(self, command_manager, service_manager):
+    def __init__(self, command_manager, service_manager, user='testuser'):
         self.command_manager = command_manager
         self.service_manager = service_manager
         self._commands = command_manager.functions
@@ -15,8 +15,10 @@ class ChatContext:
         self.flags = []
 
         self.data = {}
+        self.agent_name = None
+        self.name = None
         self.log_id = None
-        self.data['current_dir'] = 'data/users/default'
+        self.data['current_dir'] = f'data/users/{user}'
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
 
@@ -33,6 +35,10 @@ class ChatContext:
             context_data['agent_name'] = self.agent['name']
         elif 'agent_name' in self.data:
             context_data['agent_name'] = self.data['agent_name']
+        elif self.agent_name is not None:
+            context_data['agent_name'] = self.agent_name
+        if 'agent_name' not in context_data:
+            raise ValueError("Tried to save chat context, but agent name not found in context")
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
         print("Saved context to:", context_file)
@@ -45,6 +51,7 @@ class ChatContext:
                 context_data = json.load(f)
                 self.data = context_data.get('data', {})
                 print(self.data)
+                print(context_data)
                 if 'agent_name' in context_data and context_data.get('agent_name') is not None:
                     self.agent_name = context_data.get('agent_name')
                 else:

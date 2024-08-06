@@ -59,6 +59,6 @@ async def pic_of_me(prompt, context=None):
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     swapped = await context.swap_face(img_dir, img)
-    await context.insert_image(swapped)
+    await context.insert_image("/" + swapped)
 
 

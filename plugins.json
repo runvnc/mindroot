@@ -20,7 +20,15 @@
     "enabled": true
   },
   {
+    "name": "ah_add_timestamp",
+    "enabled": false
+  },
+  {
     "name": "ah_togetherai",
+    "enabled": false
+  },
+  {
+    "name": "ah_openrouter",
     "enabled": false
   },
   {
@@ -53,7 +61,7 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",
