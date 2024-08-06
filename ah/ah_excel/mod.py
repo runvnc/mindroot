@@ -13,8 +13,9 @@ from .excel_recalculator import recalculate_excel
 async def list_sheets(filename, context):
     """Open an Excel workbook and return its sheets.
     Always use this before other commands unless you are sure you know the spreadsheet structure.
+    Always use absolute file paths in commands.
     Example:
-    { "list_sheets": { "filename": "example.xlsx" } }
+    { "list_sheets": { "filename": "/path/to/example.xlsx" } }
     """
     wb = load_workbook(filename)
     return f"Opened workbook {filename}. Sheets: {', '.join(wb.sheetnames)}"
@@ -23,7 +24,7 @@ async def list_sheets(filename, context):
 async def analyze_sheet(filename, sheet_name, context=None):
     """Analyze the structure of a specific sheet.
     Example:
-    { "analyze_sheet": { "filename": "example.xlsx", "sheet_name": "Sheet1" } }
+    { "analyze_sheet": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1" } }
     """
     try:
         wb = load_workbook(filename)
@@ -51,7 +52,7 @@ async def analyze_sheet(filename, sheet_name, context=None):
 async def read_cells(filename, sheet_name, arrangement='row', context=None):
     """Read all cells from sheet and return as nested lists.
     Example:
-    { "read_cells": { "filename": "example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
+    { "read_cells": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
     """
     try:
         result = excel_to_nested_lists(filename, sheet_name, arrangement)
@@ -98,7 +99,7 @@ async def write_cell_range(filename, sheet_name, cell_range, values, overwrite_f
 
     Example ( note cells are specified in order as [ [ A1, B1, C1], [ A2, B2, C2 ], [ A3, B3, C3 ] ] ):
 
-    { "write_cell_range": { "filename": "example.xlsx", "sheet_name": "Sheet1", "cell_range": "A1:C3", "values": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+    { "write_cell_range": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "cell_range": "A1:C3", "values": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
                             "overwrite_formulas": false } }
     """
     try:
