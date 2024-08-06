@@ -14,12 +14,19 @@ sse_clients = {}
 
 @service()
 async def init_chat_session(agent_name: str, log_id: str):
+    if agent_name is None or agent_name == "" or log_id is None or log_id == "":
+        print("Invalid agent_name or log_id")
+        print("agent_name: ", agent_name)
+        print("log_id: ", log_id)
+        raise Exception("Invalid agent_name or log_id")
+
     context = ChatContext(command_manager, service_manager)
     context.agent_name = agent_name
     context.name = agent_name
     context.log_id = log_id
     context.agent = await service_manager.get_agent_data(agent_name)
     context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
+    print("context.agent_name: ", context.agent_name)
     context.save_context()
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
     return log_id
@@ -74,8 +81,9 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
         continue_processing = False
         try:
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            termcolor.cprint("results from chat commands: " + str(full_cmds), "yellow")
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-            print("results from chat commands: ", results)
+            print("results from chat commands: ", full_cmds)
             out_results = []
             full_results = []
             actual_results = False
@@ -113,7 +121,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=5,
 
     await asyncio.sleep(0.1)
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
-    return results, full_results
+    return [results, full_results]
 
 @service()
 async def subscribe_to_agent_messages(session_id: str, context=None):

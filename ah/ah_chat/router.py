@@ -18,7 +18,7 @@ async def chat_events(log_id: str):
 async def send_message(request:Request, log_id: str, message_data: Message):
     user = request.state.user
     print(f"send_message   log_id: {log_id}   message: {message_data.message}")
-    results = await send_message_to_agent(log_id, message_data.message, user=user)
+    [results,full_results] = await send_message_to_agent(log_id, message_data.message, user=user)
     return {"status": "ok", "results": results}
 
 @router.get("/admin", response_class=HTMLResponse)
@@ -32,6 +32,7 @@ async def get_admin_html():
 async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
     plugins = list_enabled()
+    print(f"Init chat with {agent_name}")
     await init_chat_session(agent_name, log_id)
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 

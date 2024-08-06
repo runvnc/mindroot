@@ -157,22 +157,30 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     
     finished_conversation = False
     my_sub_context.data['finished_conversation'] = False
+    my_sub_context.save_context()
 
     takeaways = ""
 
     while not finished_conversation:
         if 'finished_conversation' not in my_sub_context.data:
-            throw("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
+            raise Exception("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
         replies = []
         async with asyncio.timeout(120.0):
-            _, replies = await send_message_to_agent(sub_log_id, first_message)
+            [_, replies] = await send_message_to_agent(sub_log_id, first_message)
+        #print replies data for debugging, in magenta
+        print(termcolor.colored('replies:', 'magenta', attrs=['bold']))
+        print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
         async with asyncio.timeout(120.0):
-            _, my_replies = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}")
+            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}")
+            # print my_replies data for debugging, in cyan
+            print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
+            print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
 
         if my_sub_context.data['finished_conversation'] == True:
             takeaways = my_sub_context.data['takeaways']
             finished_conversation = True
+            break
         else:
             first_message = json.dumps(my_replies)
             

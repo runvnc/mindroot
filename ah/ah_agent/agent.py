@@ -233,6 +233,8 @@ class Agent:
                         logger.error(str(de))
                         pass
 
+        # for debugging, print full_cmds in green
+        print("\033[92m" + str(full_cmds) + "\033[0m")
         return results, full_cmds
 
     async def render_system_msg(self):
