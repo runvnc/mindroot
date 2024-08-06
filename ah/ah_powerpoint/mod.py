@@ -12,8 +12,7 @@ from .pptx_stateless_editor import presentation_manager, extract_slide_xml, upda
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
     """Replace all occurrences of specified strings on the presentation slide.
-        
-    NOTE: for this and ALL PowerPoint commands, filenames must be specified with full absolute paths!
+NOTE: for this and ALL PowerPoint commands, filenames must be specified with full absolute paths!
 
     Parameters:
         filename: string
