@@ -215,7 +215,7 @@ async def done_appending_slide(context, filename, slide_number):
     { "done_appending_slide": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
     """
     try:
-        result = done_appending(filename, slide_number, xml_fragment)
+        result = done_appending(filename, slide_number)
         return f"Finished appending. Presentation saved."
     except Exception as e:
         return f"Error finishing appending to slide XML: {str(e)}"
