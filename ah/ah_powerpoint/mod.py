@@ -209,7 +209,7 @@ async def clear_slide_xml_content(context, filename, slide_number):
         return f"Error clearing slide XML: {str(e)}"
 
 @command()
-async def done_appending_slide(context, filename):
+async def done_appending_slide(context, filename, slide_number):
     """Use this when you are finished appending XML to a slide.
     Example:
     { "done_appending_slide": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
