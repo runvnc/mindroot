@@ -31,6 +31,7 @@ class Chat extends BaseEl {
     sessionid: { type: String },
     messages: [],
     agent_name: { type: String },
+    task_id: { type: String }
   }
 
   static styles = [

@@ -123,12 +123,12 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=7,
 
     await asyncio.sleep(0.1)
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
-    context.finished_chat()
+    await context.finished_chat()
     return [results, full_results]
 
 @service()
 async def finished_chat(context=None):
-    context.agent_output("finished_chat", { "persona": context.agent['persona']['name'] })
+    await context.agent_output("finished_chat", { "persona": context.agent['persona']['name'] })
 
 @service()
 async def subscribe_to_agent_messages(session_id: str, context=None):
