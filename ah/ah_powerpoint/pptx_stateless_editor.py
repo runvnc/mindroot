@@ -109,7 +109,7 @@ def append_to_slide(pptx_path, slide_number, xml_fragment):
     if pptx_path not in cache_xml_str:
         raise Exception('Open and cleader slide first')
 
-    cache_ml_str[pptx_path] += xml_fragment
+    cache_xml_str[pptx_path] += xml_fragment
 
 
 def done_appending(pptx_path, slide_number):
