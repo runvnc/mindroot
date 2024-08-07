@@ -7,7 +7,7 @@ import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
 from .slide_content_updater import update_slide_content as new_update_slide_content
-from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide
+from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
 
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
@@ -186,6 +186,7 @@ async def update_slide_xml_content(context, filename, slide_number, new_xml):
 @command()
 async def append_to_slide_xml_content(context, filename, slide_number, xml_fragment):
     """Append XML fragment to a slide's content.
+       Use this if you aren't sure you can output the full slide contents in one go.
     Example:
     { "append_to_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1, "xml_fragment": "<p:sp>...</p:sp>" } }
     """
@@ -207,6 +208,18 @@ async def clear_slide_xml_content(context, filename, slide_number):
     except Exception as e:
         return f"Error clearing slide XML: {str(e)}"
 
+@command()
+async def done_appending_slide(context, filename):
+    """Use this when you are finished appending XML to a slide.
+    Example:
+    { "done_appending_slide": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
+    """
+    try:
+        result = done_appending(filename, slide_number, xml_fragment)
+        return f"Finished appending. Presentation saved."
+    except Exception as e:
+        return f"Error finishing appending to slide XML: {str(e)}"
+ 
 @command()
 async def save_presentation_after_xml_edit(context, filename):
     """Save the presentation after XML editing.

@@ -9,6 +9,7 @@ client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 @service()
 async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperature=0.0, max_tokens=400, num_gpu_layers=0):
     try:
+        max_tokens = 6500
         model = "claude-3-5-sonnet-20240620"
         system = messages[0]['content']
         messages = messages[1:]
@@ -18,7 +19,8 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                stream=True
+                stream=True,
+                extra_headers={"anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15"}
         )
         async def content_stream():
             async for chunk in original_stream:

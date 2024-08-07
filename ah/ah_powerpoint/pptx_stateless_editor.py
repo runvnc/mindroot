@@ -97,23 +97,23 @@ def update_slide_xml(pptx_path, slide_number, new_xml):
     pptx.writestr(slide_path, new_xml)
     return True
 
-def clear_slide(pptx_path, slide_number):
-    return update_slide_xml(pptx_path, slide_number, "")
+cache_xml_str = {}
 
-#def clear_slide(pptx_path, slide_number):
-#    empty_slide_xml = """<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
-#<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
-#  <p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm/></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>"""
-#    return update_slide_xml(pptx_path, slide_number, empty_slide_xml)
+def clear_slide(pptx_path, slide_number):
+    global cache_xml_str
+    cache_xml_str[pptx_path] = ''
+    return True
 
 def append_to_slide(pptx_path, slide_number, xml_fragment):
-    current_xml = extract_slide_xml(pptx_path, slide_number)
-    root = ET.fromstring(current_xml)
-    sp_tree = root.find('.//{http://schemas.openxmlformats.org/presentationml/2006/main}spTree')
-    
-    fragment_root = ET.fromstring(xml_fragment)
-    for element in fragment_root:
-        sp_tree.append(element)
-    
-    new_xml = ET.tostring(root, encoding='unicode')
-    return update_slide_xml(pptx_path, slide_number, new_xml)
+    global cache_xml_str
+    if pptx_path not in cache_xml_str:
+        raise Exception('Open and cleader slide first')
+
+    cache_ml_str[pptx_path] += xml_fragment
+
+
+def done_appending(pptx_path, slide_number):
+    global cache_xml_str
+    update_slide_xml(pptx_path, slide_number, cache_xml_str[pptx_path])
+    return save_presentation(pptx_path)
+
