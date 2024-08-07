@@ -107,7 +107,14 @@ class Chat extends BaseEl {
         },
         body: JSON.stringify({ message: content })
       });
-      fetch(request);
+
+      fetch(request).then(response => {
+        return response.json();
+      }).then(data => {
+          console.log(data);
+          this.task_id = data.task_id;
+        }
+      )
     }
     this.msgSoFar = '';
     setTimeout(() => {
@@ -215,7 +222,7 @@ class Chat extends BaseEl {
             </chat-message>
           `)}
         </div>
-        <chat-form @addmessage="${this._addMessage}"></chat-form>
+        <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}"></chat-form>
     <!--  </div> -->
     `;
   }

@@ -220,7 +220,6 @@ class Agent:
                         pass
             else:
                 logger.debug("No new commands found")
-                # check if not None or empty object                
                 if partial_cmd is not None and partial_cmd != {}:
                     logger.debug(f"Partial command {partial_cmd}")
                     try:
@@ -233,7 +232,6 @@ class Agent:
                         logger.error(str(de))
                         pass
 
-        # for debugging, print full_cmds in green
         print("\033[92m" + str(full_cmds) + "\033[0m")
         return results, full_cmds
 
