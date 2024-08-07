@@ -253,8 +253,6 @@ class Agent:
         for instruction in additional_instructions:
             self.system_message += instruction + "\n\n"
 
-        print("\033[95m" + "--------------------------------------------------------" + "\033[0m")
-        print("\033[95m" + self.system_message + "\033[0m")
         return self.system_message
 
 

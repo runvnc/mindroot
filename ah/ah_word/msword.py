@@ -1,5 +1,4 @@
 from docx import Document
-from ah.commands import command
 
 async def replace_all(file_path, replacements, save_path=None, context=None):
     doc = Document(file_path)
@@ -14,3 +13,10 @@ async def replace_all(file_path, replacements, save_path=None, context=None):
     save_path = save_path or file_path
     doc.save(save_path)
     return f"Replacements made and document saved to {save_path}"
+
+async def read_document(file_path, context=None):
+    doc = Document(file_path)
+    full_text = []
+    for para in doc.paragraphs:
+        full_text.append(para.text)
+    return '\n'.join(full_text)
