@@ -32,6 +32,10 @@
     "enabled": false
   },
   {
+    "name": "ah_word",
+    "enabled": true
+  },
+  {
     "name": "ah_openai",
     "enabled": false
   },
