@@ -24,16 +24,16 @@
     "enabled": false
   },
   {
+    "name": "ah_word",
+    "enabled": true
+  },
+  {
     "name": "ah_togetherai",
     "enabled": false
   },
   {
     "name": "ah_openrouter",
     "enabled": false
-  },
-  {
-    "name": "ah_word",
-    "enabled": true
   },
   {
     "name": "ah_openai",
