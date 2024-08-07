@@ -187,6 +187,7 @@ async def update_slide_xml_content(context, filename, slide_number, new_xml):
 async def append_to_slide_xml_content(context, filename, slide_number, xml_fragment):
     """Append XML fragment to a slide's content.
        Use this if you aren't sure you can output the full slide contents in one go.
+       If you just cleared, don't forget "header"/namespace tags etc.
     Example:
     { "append_to_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1, "xml_fragment": "<p:sp>...</p:sp>" } }
     """
@@ -201,6 +202,8 @@ async def append_to_slide_xml_content(context, filename, slide_number, xml_fragm
 @command()
 async def clear_slide_xml_content(context, filename, slide_number):
     """Clear all XML content from a slide.
+    Note that this includes ALL XML, including namespaces and other attributes.
+
     Example:
     { "clear_slide_xml_content": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
     """
