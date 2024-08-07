@@ -49,7 +49,7 @@ async def get_chat_history(session_id: str):
     return messages
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=5, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str, max_iterations=7, context=None, user=None):
 
     if session_id is None or session_id == "" or message is None or message == "":
         print("Invalid session_id or message")

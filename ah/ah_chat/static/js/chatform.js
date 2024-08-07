@@ -58,7 +58,9 @@ class ChatForm extends BaseEl {
       const data = await response.json()
       console.log('Chat cancelled:', data)
       this.taskid = null
-      this.requestUpdate()
+      setTimeout(() => {
+       this.requestUpdate()
+      },500)
     }
   }
 
