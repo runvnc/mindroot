@@ -192,6 +192,8 @@ async def append_to_slide_xml_content(context, filename, slide_number, xml_fragm
     """
     try:
         result = append_to_slide(filename, slide_number, xml_fragment)
+        # print out in magent for debugging
+        print(f"appended: \033[35m{xml_fragment}\033[0m")
         return f"Appended XML fragment to slide {slide_number} in {filename}" if result else "Failed to append to slide XML"
     except Exception as e:
         return f"Error appending to slide XML: {str(e)}"
@@ -231,3 +233,4 @@ async def save_presentation_after_xml_edit(context, filename):
         return f"Saved presentation {filename} after XML editing" if result else "Failed to save presentation"
     except Exception as e:
         return f"Error saving presentation: {str(e)}"
+
