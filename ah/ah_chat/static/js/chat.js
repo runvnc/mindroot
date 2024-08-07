@@ -55,6 +55,7 @@ class Chat extends BaseEl {
     this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
+    this.sse.addEventListener('finished_chat', this._finished.bind(this));
     this.loadHistory()
   }
 
@@ -116,11 +117,20 @@ class Chat extends BaseEl {
         }
       )
     }
+    this.lastMessageTime = Date.now()
+    console.log(`%c ${this.lastMessageTime}`, 'color: red')
+ 
     this.msgSoFar = '';
     setTimeout(() => {
       this._scrollToBottom();
     }, 100)
   }
+
+  _finished(event) {
+    console.log('Chat finished');
+    this.task_id = null
+  }
+
 
   _partialCmd(event) {
     console.log('Event received');
