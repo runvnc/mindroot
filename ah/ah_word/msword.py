@@ -1,8 +1,7 @@
 from docx import Document
 from ah.commands import command
 
-@command()
-async def word_replace_all(file_path, replacements, save_path=None, context=None):
+async def replace_all(file_path, replacements, save_path=None, context=None):
     doc = Document(file_path)
     for paragraph in doc.paragraphs:
         for old_text, new_text in replacements.items():

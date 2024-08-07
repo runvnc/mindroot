@@ -1,5 +1,5 @@
 from ..commands import command
-from .msword import word_replace_all
+from .msword import replace_all
 
 @command()
 async def word_replace_all(file_path, replacements, save_path=None, context=None):
@@ -29,7 +29,7 @@ async def word_replace_all(file_path, replacements, save_path=None, context=None
     """
 
     try:
-        result = word_replace_all(file_path, replacements, save_path, context)
+        result = replace_all(file_path, replacements, save_path, context)
         return result
     except Exception as e:
         return f"Error: {str(e)}"
