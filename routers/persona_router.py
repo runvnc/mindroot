@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pathlib import Path
 import json
 import shutil
+import traceback
 
 router = APIRouter()
 
@@ -50,7 +51,7 @@ def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = F
         target_dir = Path(__file__).resolve().parent.parent / 'static/personas' / persona_name
 
         target_dir.mkdir(parents=True, exist_ok=True)
-
+        print('\033[93m' + str(target_dir) + '\033[0m')
         if faceref:
             print("Trying to save faceref")
             faceref_path = persona_path.parent / 'faceref.png'
@@ -90,7 +91,10 @@ def update_persona(scope: str, name:str, persona: str = Form(...), faceref: Uplo
         print("In update_persona")
         print("scope is ", scope)
         print("name is ", name)
+        print("BASE_DIR is ", BASE_DIR)
         persona = json.loads(persona)
+        persona_name = persona.get('name')
+
         print("persona is ", persona)
         
         if scope not in ['local', 'shared']:
@@ -101,15 +105,12 @@ def update_persona(scope: str, name:str, persona: str = Form(...), faceref: Uplo
         if 'moderated' not in persona:
             persona['moderated'] = False
         
-        # Create target directory
-        # Based on BASE_DIR plus static/personas/name
-        # This is where the faceref and avatar
-        # will be stored
-        # This is the directory that the webserver will serve
-        target_dir = Path(f'{BASE_DIR}/static/personas/{name}')
-        #target_dir = Path(f'/files/ah/static/personas/{name}')
+        target_dir = Path(__file__).resolve().parent.parent / 'static/personas' / persona_name
+
         target_dir.mkdir(parents=True, exist_ok=True)
-        
+        print('\033[93m' + str(BASE_DIR) + '\033[0m')
+        print('\033[93m' + str(target_dir) + '\033[0m')
+ 
         if faceref:
             print("Trying to save faceref")
             faceref_path = persona_path.parent / 'faceref.png'
@@ -138,5 +139,7 @@ def update_persona(scope: str, name:str, persona: str = Form(...), faceref: Uplo
         return {'status': 'success'}
     except Exception as e:
         print("Error in update_persona")
+        print(str(e))
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail='Internal server error '+ str(e))
 

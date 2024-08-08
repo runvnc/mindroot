@@ -154,6 +154,11 @@ textarea, .text_lg {
   height: 4em;
 }
 
+.text_lg {
+  height: 35vh;
+  scrollbar-width: thin;
+}
+
 input, .text_inp {
   background-color: #050510;
   color: #f0f0f0;
