@@ -127,7 +127,7 @@ async def do_swap_face(src_dir, target_img_filepath):
         
         output_fname = "imgs/" + nanoid.generate() + ".png"
         swapped_img.save(output_fname)
-        return "/" + output_fname
+        return output_fname
     else:
         print("No source images found in the directory.")
 
