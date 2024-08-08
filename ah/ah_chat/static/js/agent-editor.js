@@ -158,7 +158,7 @@ class AgentEditor extends BaseEl {
   <div>
     <label>
       Instructions:
-      <textarea class="text_lg" name="instructions" .value=${this.agent.instructions || ''} @input=${this.handleInputChange}></textarea>
+      <textarea class="text_lg" name="instructions" rows="20" .value=${this.agent.instructions || ''} @input=${this.handleInputChange}></textarea>
     </label>
   </div>
   <div>
