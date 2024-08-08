@@ -25,6 +25,8 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
         async def content_stream():
             async for chunk in original_stream:
                 if chunk.type == 'content_block_delta':
+                    if os.environ.get('AH_DEBUG') == 'True':
+                        print('\033[92m' + chunk.delta.text + '\033[0m', end='')
                     yield chunk.delta.text
                 else:
                     yield ''
