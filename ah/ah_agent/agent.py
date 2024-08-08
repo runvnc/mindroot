@@ -86,6 +86,11 @@ class Agent:
         #await asyncio.sleep(1)
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
+        if 'finished_conversation' in context.data and context.data['finished_conversation']:
+            logger.warning("Conversation is finished, not executing command")
+            print("\033[91mConversation is finished, not executing command\033[0m")
+            return None
+
         logger.info("Command execution: {command}", command=cmd_name)
         logger.debug("Command details: {details}", details={
             "command": cmd_name,
