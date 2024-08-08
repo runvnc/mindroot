@@ -88,6 +88,8 @@ async def insert_image(image_url, context=None):
 async def initiate_agent_session(agent_name: str, context=None):
     """
     Initiate a chat session with another agent.
+    IMPORTANT NOTE: You may not use this command while already in conversation with another agent.
+    You must exit the current conversation and then the parent context will continue.
 
     Parameters:
     agent_name - String. The name of the agent to start a session with.
@@ -105,6 +107,7 @@ async def initiate_agent_session(agent_name: str, context=None):
 async def exit_conversation(output: str, context=None):
     """
     Exit a chat session with another agent. Use this when exit criteria are met.
+    Use this command when you are finished with an agent. You may not initiate another conversation whie in a chat session with an agent.
 
     Parameters:
     output - String :
