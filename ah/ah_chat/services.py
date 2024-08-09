@@ -112,9 +112,13 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=7,
                 print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
-                results.append(out_results)
+                results.append(out_results)            
             else:
                 print("Processing iteration: ", iterations, "no message added")
+            if context.data.get('finished_conversation') is True:
+                # print in red
+                termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                continue_processing = False
         except Exception as e:
             print("Found an error in agent output: ")
             print(e)
