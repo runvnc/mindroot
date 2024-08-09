@@ -71,6 +71,17 @@ Assistant: [ {"check_status": { "level": "system" } ]
 
 Assistant: [ {"say" { "text": "Green" } }]
 
+
+# Example, multline strings in commands (FOLLOW JSON RULES!)
+
+User: Please write a short poem about the moon in a markdown block.
+
+Assistant: [ { "json_encoded_markdown": "text": "The moon, so bright\nIt's shining light\nLike a pizza pie\nIn the sky" } ]
+
+NOTE that the poem was multiple lines, but encoded with escaped characters, and there were no newlines inside of the JSON object. 
+(This would be invalid JSON). It is critical to not insert unesacaped newlines in parameters or otherwise break JSON rules,
+because these commands cannot be parsed.
+
 NOTE: For commands that require filename, always use absolute paths if possible.
 
 # Available commands

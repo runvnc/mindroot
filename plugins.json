@@ -9,7 +9,7 @@
   },
   {
     "name": "ah_simple_home",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "cre_login",

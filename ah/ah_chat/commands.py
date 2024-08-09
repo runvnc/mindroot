@@ -75,6 +75,10 @@ async def json_encoded_md(markdown="", context=None):
         { "json_encoded_md": { "markdown": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }} 
     ]
 
+
+    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
+    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
+
     """
     await context.agent_output("new_message", {"content": markdown,
                                             "agent": context.agent['name'] })
