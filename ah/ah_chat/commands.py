@@ -194,6 +194,8 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
 
     takeaways = ""
 
+    blank_my_replies = 0
+
     while not finished_conversation:
         if 'finished_conversation' not in my_sub_context.data:
             raise Exception("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
@@ -209,6 +211,12 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
+            if len(my_replies) == 0:
+                blank_my_replies += 1
+                if blank_my_replies > 3:
+                    # print in red for debugging
+                    print("Too many blank replies, exiting conversation")
+                    break
 
         if my_sub_context.data['finished_conversation'] == True:
             takeaways = my_sub_context.data['takeaways']
