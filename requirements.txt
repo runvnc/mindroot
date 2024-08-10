@@ -53,3 +53,4 @@ pytz
 colored
 
 python-docx
+unstructured[all-docs]
