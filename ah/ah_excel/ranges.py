@@ -67,7 +67,8 @@ def read_ranges(filename, range_list):
                     ws = workbook[sheet_name]
                     cells = ws[cell_range]
                     
-                    if isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)):
+                    if ( isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)) or
+                          len(cells) == 1 and len(cells[0]) == 1 ):
                         value = cells.value
                         result[range_name] = None if value == '#DIV/0!' else value
                     else:
@@ -131,11 +132,10 @@ def write_range(filename, range_name, values):
 if __name__ == "__main__":
     filename = "/xfiles/ah/ah/ah_excel/example.xlsx"
     print("Global ranges:", list_ranges(filename))
-    print("Input ranges:", list_ranges(filename, "Inputs"))
 
     # print out values in all global ranges
     for name in list_ranges(filename):
         print(f"Reading '{name}':", read_ranges(filename, [name]))
 
     #print("Reading 'NamedRange1':", read_ranges(filename, ["NamedRange1"]))
-    #print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [[1, 2], [3, 4]]))
+    print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [[=]]))
