@@ -131,11 +131,11 @@ def write_range(filename, range_name, values):
 # Example usage:
 if __name__ == "__main__":
     filename = "/xfiles/ah/ah/ah_excel/example.xlsx"
-    print("Global ranges:", list_ranges(filename))
+    #print("Global ranges:", list_ranges(filename))
 
     # print out values in all global ranges
-    for name in list_ranges(filename):
-        print(f"Reading '{name}':", read_ranges(filename, [name]))
+    #for name in list_ranges(filename):
+    #    print(f"Reading '{name}':", read_ranges(filename, [name]))
 
     #print("Reading 'NamedRange1':", read_ranges(filename, ["NamedRange1"]))
-    print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [[=]]))
+    print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [['=10*20']]))
