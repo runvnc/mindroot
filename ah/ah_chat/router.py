@@ -34,13 +34,10 @@ async def send_message(request: Request, log_id: str, message_data: Message):
     user = request.state.user
     print(f"send_message   log_id: {log_id}   message: {message_data.message}")
     
-    # Create a task for sending the message
     task = asyncio.create_task(send_message_to_agent(log_id, message_data.message, user=user))
     
-    # Generate a unique task ID
     task_id = nanoid.generate()
     
-    # Store the task in the dictionary
     tasks[task_id] = task
     
     return {"status": "ok", "task_id": task_id}

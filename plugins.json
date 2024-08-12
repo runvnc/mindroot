@@ -12,6 +12,10 @@
     "enabled": true
   },
   {
+    "name": "ah_bov",
+    "enabled": true
+  },
+  {
     "name": "cre_login",
     "enabled": true
   },
