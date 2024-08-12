@@ -167,10 +167,10 @@ async def insert_columns(filename, sheet_name, column_letter, num_columns, conte
 from .ranges import list_ranges, read_ranges, write_range
 
 @command()
-async def list_ranges_command(filename, sheet=None, context=None):
+async def list_named_ranges(filename, sheet=None, context=None):
     """List all named ranges in a workbook or specific sheet.
     Example:
-    { "list_ranges": { "filename": "/path/to/example.xlsx", "sheet": "Sheet1" } }
+    { "list_named_ranges": { "filename": "/path/to/example.xlsx", "sheet": "Sheet1" } }
     """
     try:
         ranges = list_ranges(filename, sheet)
@@ -179,10 +179,10 @@ async def list_ranges_command(filename, sheet=None, context=None):
         return f"Error: {str(e)}"
 
 @command()
-async def read_ranges_command(filename, range_list, context=None):
+async def read_named_ranges(filename, range_list, context=None):
     """Read data from specified named ranges.
     Example:
-    { "read_ranges": { "filename": "/path/to/example.xlsx", "range_list": ["Range1", "Range2"] } }
+    { "read_named_ranges": { "filename": "/path/to/example.xlsx", "range_list": ["Range1", "Range2"] } }
     """
     try:
         result = read_ranges(filename, range_list)
@@ -191,10 +191,10 @@ async def read_ranges_command(filename, range_list, context=None):
         return f"Error: {str(e)}"
 
 @command()
-async def write_range_command(filename, range_name, values, context=None):
+async def write_named_range(filename, range_name, values, context=None):
     """Write data to a specified named range.
     Example:
-    { "write_range": { "filename": "/path/to/example.xlsx", "range_name": "InputRange", "values": [[1, 2], [3, 4]] } }
+    { "write_named_range": { "filename": "/path/to/example.xlsx", "range_name": "InputRange", "values": [[1, 2], [3, 4]] } }
     """
     try:
         success = write_range(filename, range_name, values)
