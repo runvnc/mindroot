@@ -1,5 +1,4 @@
 import openpyxl
-from openpyxl.utils import get_column_letter
 from openpyxl.utils.exceptions import InvalidFileException
 
 def list_ranges(filename, sheet=None):
@@ -24,6 +23,12 @@ def list_ranges(filename, sheet=None):
         return [name for name, range_obj in workbook.defined_names.items() if range_obj.localSheetId == workbook.sheetnames.index(sheet)]
     else:
         return [name for name, range_obj in workbook.defined_names.items() if range_obj.localSheetId is None]
+
+def is_merged_cell(cell, merged_ranges):
+    for merged_range in merged_ranges:
+        if cell.coordinate in merged_range:
+            return True, str(merged_range)
+    return False, None
 
 def read_ranges(filename, range_list):
     """
@@ -65,14 +70,30 @@ def read_ranges(filename, range_list):
 
                 if sheet_name in workbook.sheetnames:
                     ws = workbook[sheet_name]
+                    merged_ranges = ws.merged_cells.ranges
                     cells = ws[cell_range]
                     
-                    if ( isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)) or
-                          len(cells) == 1 and len(cells[0]) == 1 ):
-                        value = cells.value
-                        result[range_name] = None if value == '#DIV/0!' else value
+                    if isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)):
+                        merged, merge_range = is_merged_cell(cells, merged_ranges)
+                        result[range_name] = [{
+                            'address': cells.coordinate,
+                            'value': None if cells.value == '#DIV/0!' else cells.value,
+                            'merged': merged,
+                            'merge_range': merge_range
+                        }]
                     else:
-                        result[range_name] = [[None if cell.value == '#DIV/0!' else cell.value for cell in row] for row in cells]
+                        result[range_name] = []
+                        for row in cells:
+                            row_data = []
+                            for cell in row:
+                                merged, merge_range = is_merged_cell(cell, merged_ranges)
+                                row_data.append({
+                                    'address': cell.coordinate,
+                                    'value': None if cell.value == '#DIV/0!' else cell.value,
+                                    'merged': merged,
+                                    'merge_range': merge_range
+                                })
+                            result[range_name].append(row_data)
                 else:
                     print(f"Warning: Sheet '{sheet_name}' not found for range '{range_name}'")
                     result[range_name] = None
@@ -130,12 +151,12 @@ def write_range(filename, range_name, values):
 
 # Example usage:
 if __name__ == "__main__":
-    filename = "/xfiles/ah/ah/ah_excel/example.xlsx"
-    #print("Global ranges:", list_ranges(filename))
+    filename = "example.xlsx"
+    print("Global ranges:", list_ranges(filename))
 
     # print out values in all global ranges
     #for name in list_ranges(filename):
     #    print(f"Reading '{name}':", read_ranges(filename, [name]))
 
     #print("Reading 'NamedRange1':", read_ranges(filename, ["NamedRange1"]))
-    print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [['=10*20']]))
+    #print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [['=10*20']]))
