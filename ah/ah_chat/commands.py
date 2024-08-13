@@ -50,7 +50,8 @@ async def say(text="", context=None):
 @command()
 async def json_encoded_md(markdown="", context=None):
     """
-    Output some markdown text to the user or chat room.
+    Output some markdown text (JSON-encoded in command, e.g. escape newlines)
+    to the user or chat room.
     Use this for any somewhat longer text that the user can read and
     and doesn't necessarily need to be spoken out loud.
 
