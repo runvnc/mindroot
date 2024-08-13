@@ -83,8 +83,18 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
         continue_processing = False
         try:
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            try:
+                tmp_data3 = { "results": full_cmds }
+                tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)
+                out_results = tmp_data3['results']
+            except Exception as e:
+                print("Error processing results: ", e)
+                print(traceback.format_exc())
+
             for cmd in full_cmds:
                 full_results.append(cmd)
+
+
             termcolor.cprint("results from chat commands: " + str(full_cmds), "yellow")
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             print("results from chat commands: ", full_cmds)

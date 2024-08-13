@@ -28,6 +28,10 @@
     "enabled": false
   },
   {
+    "name": "ah_concise_results",
+    "enabled": true
+  },
+  {
     "name": "ah_word",
     "enabled": true
   },
