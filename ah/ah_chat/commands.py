@@ -153,6 +153,8 @@ async def exit_conversation(output: str, context=None):
     context.save_context()
     return output
 
+
+
 @command()
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
     """
@@ -212,6 +214,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
+
             if len(my_replies) == 0:
                 blank_my_replies += 1
                 if blank_my_replies > 3:

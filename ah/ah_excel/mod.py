@@ -49,18 +49,18 @@ async def analyze_sheet(filename, sheet_name, context=None):
         return f"Error: {str(e)}"
 
 @command()
-async def read_cells(filename, sheet_name, arrangement='row', context=None):
-    """Read all cells from sheet and return as nested lists.
+async def read_cells(filename, sheet_name, arrangement='row', cell_range=None, context=None):
+    """Read cells from sheet and return as nested lists.
     Example:
-    { "read_cells": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
+    { "read_cells": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "arrangement": "row", "cell_range": "A1:C10" } }
     """
     try:
-        result = excel_to_nested_lists(filename, sheet_name, arrangement)
+        result = excel_to_nested_lists(filename, sheet_name, arrangement, cell_range)
         rows = len(result)
-        cols = len(result[0])
+        cols = len(result[0]) if rows > 0 else 0
         max_allowed_cells = 600
         total_cells = rows * cols
-        max_row = min(rows, total_cells // cols)
+        max_row = min(rows, total_cells // cols) if cols > 0 else 0
         result = result[:max_row]
         if rows > max_row:
             result.append([f"Output truncated to {max_row} rows. Total rows: {rows}"])

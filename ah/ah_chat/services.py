@@ -1,7 +1,7 @@
 from ..services import service, service_manager
 from ..commands import command_manager
 from ..hooks import hook_manager
-from ..pipe import pipeline_manager
+from ..pipe import pipeline_manager, pipe
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
@@ -111,12 +111,20 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
             if len(out_results) > 0:
                 print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
+
+                try:
+                    tmp_data2 = { "results": out_results }
+                    tmp_data2 = await pipeline_manager.process_results(tmp_data2, context=context)
+                    out_results = tmp_data2['results']
+                except Exception as e:
+                    print("Error processing results: ", e)
+                    print(traceback.format_exc())
+
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
-                results.append(out_results)            
+                results.append(out_results) 
             else:
                 print("Processing iteration: ", iterations, "no message added")
             if context.data.get('finished_conversation') is True:
-                # print in red
                 termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
                 continue_processing = False
         except Exception as e:
@@ -129,6 +137,13 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
     await context.finished_chat()
     return [results, full_results]
+
+
+@pipe(name='process_results', priority=5)
+def add_current_time(data: dict, context=None) -> dict:
+    data['results'] = data['results']
+    return data
+
 
 @service()
 async def finished_chat(context=None):
