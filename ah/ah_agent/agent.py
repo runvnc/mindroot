@@ -7,6 +7,7 @@ from json import JSONDecodeError
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
+from ..pipelines import pipeline_manager
 from ..services import service 
 from ..services import service_manager
 import sys
@@ -267,10 +268,14 @@ class Agent:
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         logger.info("Messages for chat", extra={"messages": messages})
-      
-        tmp_data = { "messages": messages }
-        tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
-        messages = tmp_data['messages']
+
+        try:
+            tmp_data = { "messages": messages }
+            tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
+            messages = tmp_data['messages']
+        except Exception as e:
+            logger.error("Error filtering messages")
+            logger.error(str(e))
 
         stream = await context.stream_chat(model,
                                         temperature=temperature,
