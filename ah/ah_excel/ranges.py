@@ -1,5 +1,6 @@
 import openpyxl
 from openpyxl.utils.exceptions import InvalidFileException
+from openpyxl.utils import get_column_letter, column_index_from_string
 
 def list_ranges(filename, sheet=None):
     """
@@ -30,12 +31,14 @@ def is_merged_cell(cell, merged_ranges):
             return True, str(merged_range)
     return False, None
 
-def read_ranges(filename, range_list):
+def read_ranges(filename, range_list, include_empty=False, include_merge_info=True):
     """
     Reads data from specified ranges in the Excel file.
 
     :param filename: Path to the Excel file
     :param range_list: List of range names to read
+    :param include_empty: Whether to include empty cells in the output
+    :param include_merge_info: Whether to include merge information
     :return: Dictionary with range names as keys and data as values
     """
     try:
@@ -73,27 +76,40 @@ def read_ranges(filename, range_list):
                     merged_ranges = ws.merged_cells.ranges
                     cells = ws[cell_range]
                     
+                    result[range_name] = {
+                        "data": [],
+                        "merged_cells": [] if include_merge_info else None,
+                        "repeated_values": []
+                    }
+                    
                     if isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)):
                         merged, merge_range = is_merged_cell(cells, merged_ranges)
-                        result[range_name] = [{
-                            'address': cells.coordinate,
-                            'value': None if cells.value == '#DIV/0!' else cells.value,
-                            'merged': merged,
-                            'merge_range': merge_range
-                        }]
+                        cell_data = [cells.coordinate, cells.value if cells.value != '#DIV/0!' else None]
+                        if include_empty or cell_data[1] is not None:
+                            result[range_name]["data"].append(cell_data)
+                        if merged and include_merge_info:
+                            result[range_name]["merged_cells"].append(merge_range)
                     else:
-                        result[range_name] = []
+                        value_count = {}
                         for row in cells:
                             row_data = []
                             for cell in row:
                                 merged, merge_range = is_merged_cell(cell, merged_ranges)
-                                row_data.append({
-                                    'address': cell.coordinate,
-                                    'value': None if cell.value == '#DIV/0!' else cell.value,
-                                    'merged': merged,
-                                    'merge_range': merge_range
-                                })
-                            result[range_name].append(row_data)
+                                cell_data = [cell.coordinate, cell.value if cell.value != '#DIV/0!' else None]
+                                if include_empty or cell_data[1] is not None:
+                                    row_data.extend(cell_data)
+                                if merged and include_merge_info and merge_range not in result[range_name]["merged_cells"]:
+                                    result[range_name]["merged_cells"].append(merge_range)
+                                if cell_data[1] is not None:
+                                    value_count[cell_data[1]] = value_count.get(cell_data[1], 0) + 1
+                            if row_data:
+                                result[range_name]["data"].append(row_data)
+                        
+                        # Process repeated values
+                        for value, count in value_count.items():
+                            if count > 1:
+                                cells_with_value = [cell[0] for row in result[range_name]["data"] for cell in zip(row[::2], row[1::2]) if cell[1] == value]
+                                result[range_name]["repeated_values"].append([value, cells_with_value])
                 else:
                     print(f"Warning: Sheet '{sheet_name}' not found for range '{range_name}'")
                     result[range_name] = None
@@ -131,15 +147,15 @@ def write_range(filename, range_name, values):
         cells = ws[coord]
 
         if isinstance(cells, openpyxl.cell.cell.Cell):
-            if not isinstance(values, list) or len(values) != 1 or len(values[0]) != 1:
+            if not isinstance(values, list) or len(values) != 1 or len(values[0]) != 2:
                 raise ValueError("Input values do not match the range size (single cell)")
-            cells.value = values[0][0]
+            cells.value = values[0][1]
         else:
-            if len(values) != len(cells) or any(len(row) != len(cells[0]) for row in values):
+            flat_values = [item for sublist in values for item in sublist]
+            if len(flat_values) != len(cells) * 2:
                 raise ValueError("Input values do not match the range size")
-            for i, row in enumerate(cells):
-                for j, cell in enumerate(row):
-                    cell.value = values[i][j]
+            for i, cell in enumerate(cells):
+                cell.value = flat_values[i*2 + 1]
 
     try:
         workbook.save(filename)
@@ -159,4 +175,4 @@ if __name__ == "__main__":
     #    print(f"Reading '{name}':", read_ranges(filename, [name]))
 
     print("Reading 'ExpensesBox':", read_ranges(filename, ["ExpensesBox"]))
-    #print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [['=10*20']]))
+    #print("Writing to 'NamedRange2':", write_range(filename, "NamedRange2", [["A1", "=10*20"]]))
