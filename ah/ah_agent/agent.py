@@ -7,7 +7,7 @@ from json import JSONDecodeError
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
-from ..pipelines import pipeline_manager
+from ..pipe import pipeline_manager
 from ..services import service 
 from ..services import service_manager
 import sys

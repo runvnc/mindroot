@@ -8,30 +8,52 @@ def truncate_long_results(data: dict, context=None) -> dict:
     max_context = int(os.getenv('AH_MAX_CONTEXT', 64000))
     messages = data['messages']
     
-    if len(messages) <= 7:  # 3 (start) + 4 (end)
-        return data  # No truncation needed
+    if len(messages) <= 3:
+        return data
     
-    # Always keep the first 3 messages and last 4 messages
-    start_messages = messages[:3]
-    end_messages = messages[-4:]
-    middle_messages = messages[3:-4]
+    # Store the role of the last message
+    last_role = messages[-1]['role']
     
-    processed_results = start_messages.copy()
-    total_length = sum(len(msg['content']) for msg in processed_results + end_messages)
+    # Always keep the first 3 messages (system, user, assistant)
+    processed_results = messages[:3]
+    total_length = sum(len(msg['content']) for msg in processed_results)
     
-    for i in range(0, len(middle_messages), 2):
-        if i + 1 < len(middle_messages):  # Ensure we have a pair
-            user_msg, assistant_msg = middle_messages[i], middle_messages[i+1]
-            pair_length = len(user_msg['content']) + len(assistant_msg['content'])
+    # Process remaining messages, ensuring alternating roles
+    i = 3
+    while i < len(messages):
+        if i + 1 < len(messages):
+            user_msg, assistant_msg = messages[i], messages[i+1]
             
-            if total_length + pair_length <= max_context:
-                processed_results.extend([user_msg, assistant_msg])
-                total_length += pair_length
+            # Ensure the pair is user-assistant
+            if user_msg['role'] == 'user' and assistant_msg['role'] == 'assistant':
+                pair_length = len(user_msg['content']) + len(assistant_msg['content'])
+                
+                if total_length + pair_length <= max_context:
+                    processed_results.extend([user_msg, assistant_msg])
+                    total_length += pair_length
+                    i += 2
+                else:
+                    break  # Stop processing if we exceed max_context
             else:
-                break  # Stop processing if we exceed max_context
+                # If roles are not alternating, skip to the next potential pair
+                i += 1
+        else:
+            # If there's an odd number of messages, check if we can add the last one
+            last_msg = messages[i]
+            if last_msg['role'] != processed_results[-1]['role']:
+                if total_length + len(last_msg['content']) <= max_context:
+                    processed_results.append(last_msg)
+            break
     
-    # Add the last 4 messages, even if it exceeds max_context
-    processed_results.extend(end_messages)
+    # Ensure the last role matches the original last role
+    if processed_results[-1]['role'] != last_role:
+        if len(processed_results) > 3 and total_length - len(processed_results[-1]['content']) + len(messages[-1]['content']) <= max_context:
+            # Remove the last processed message and add the original last message
+            total_length -= len(processed_results.pop()['content'])
+            processed_results.append(messages[-1])
+        elif total_length + len(messages[-1]['content']) <= max_context:
+            # If there's room, just add the original last message
+            processed_results.append(messages[-1])
     
     data['messages'] = processed_results
     return data
