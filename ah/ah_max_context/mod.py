@@ -5,7 +5,7 @@ from ..pipe import pipe
 
 @pipe(name='filter_messages', priority=8)
 def truncate_long_results(data: dict, context=None) -> dict:
-    max_context = int(os.getenv('AH_MAX_CONTEXT', 64000))
+    max_context = int(os.getenv('AH_MAX_CONTEXT', 100000))
     messages = data['messages']
     
     if len(messages) <= 3:
