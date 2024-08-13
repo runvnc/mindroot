@@ -267,7 +267,11 @@ class Agent:
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         logger.info("Messages for chat", extra={"messages": messages})
-        
+      
+        tmp_data = { "messages": messages }
+        tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
+        messages = tmp_data['messages']
+
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
