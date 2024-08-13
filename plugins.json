@@ -33,7 +33,7 @@
   },
   {
     "name": "ah_max_context",
-    "enabled": false
+    "enabled": true
   }, 
   {
     "name": "ah_word",
