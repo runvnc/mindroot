@@ -2,6 +2,7 @@ from pptx import Presentation
 from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.util import Pt
+from .table_helpers import add_row, add_column, remove_row, remove_column 
 
 def read_slide_table(presentation, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format."""
@@ -38,7 +39,7 @@ def read_slide_table(presentation, slide_number, table_name):
     return table_data
 
 def update_slide_table(presentation, slide_number, table_name, table_data):
-    """Update a table on a specific slide using the provided JSON data."""
+    """Update a table on a specific slide using the provided dict with data."""
     slide = presentation.slides[slide_number - 1]
     table = None
     for shape in slide.shapes:
@@ -55,9 +56,10 @@ def update_slide_table(presentation, slide_number, table_name, table_data):
     
     # Recreate table with new data
     for row_data in table_data["data"]:
-        row = table.add_row()
-        for cell_data in row_data:
-            cell = row.cells[len(row.cells) - 1]
+        add_row(table)  # Use the custom add_row function
+        row = table.rows[-1]  # Get the newly added row
+        for i, cell_data in enumerate(row_data):
+            cell = row.cells[i]
             style_id, text = cell_data
             cell.text = text
             apply_style(cell, table_data["styles"][style_id - 1])

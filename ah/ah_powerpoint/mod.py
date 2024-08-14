@@ -256,7 +256,7 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
         filename (str): Full path to the PowerPoint file.
         slide_number (int): 1-based slide number containing the table.
         table_name (str): Name of the table shape to update.
-        table_data (str): JSON string representing the table structure, content, and styling.
+        table_data (str): Dict representing the table structure, content, and styling.
 
     Returns:
         str: A message indicating success or describing an error.
@@ -326,7 +326,6 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
     """
     try:
         prs = Presentation(filename)
-        table_data = json.loads(table_data)
         update_slide_table_impl(prs, slide_number, table_name, table_data)
         prs.save(filename)
         return "Table updated successfully"
