@@ -8,37 +8,22 @@ from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
 from .slide_content_updater import update_slide_content as new_update_slide_content
 from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
+from .table_operations import read_slide_table, update_slide_table
 
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
     """Replace all occurrences of specified strings on the presentation slide.
-NOTE: for this and ALL PowerPoint commands, filenames must be specified with full absolute paths!
+    NOTE: for this and ALL PowerPoint commands, filenames must be specified with full absolute paths!
 
     Parameters:
         filename: string
         slide (int): slide number to update
-        replacements: 
+        replacements: list of dicts with 'match' and 'replace' keys
+        case_sensitive: boolean
+        whole_word: boolean
 
-    Examples:
-    1. Simple text replacement:
+    Example:
     { "slide_replace_all": { "filename": "/path/to/example.pptx", "slide": 1, "replacements": [{"match": "old text", "replace": "new text"}], "case_sensitive": true, "whole_word": false } }
-    
-    2. Multiple replacements including percentages:
-    { "slide_replace_all": { "filename": "/path/to/example.pptx", "slide": 3, "replacements": [
-        {"match": "total: 5%", "replace": "total: 10%"},
-        {"match": "revenue", "replace": "income"}
-      ], 
-      "case_sensitive": false, 
-      "whole_word": true 
-    } }
-    
-    3. Using regex:
-    { "slide_replace_all": { "filename": "/path/to/example.pptx", "replacements": [
-        {"match": "total: \d+%", "replace": "total: 15%", "is_regex": true},
-        {"match": "Q[1-4]", "replace": "Quarter ", "is_regex": true}
-      ], 
-      "case_sensitive": true
-    } }
     """
     if replacements is None:
         return "No replacements provided"
@@ -55,7 +40,11 @@ NOTE: for this and ALL PowerPoint commands, filenames must be specified with ful
 async def replace_image(context, filename, slide, image_name=None, replace_with_image_fname=None):
     """Replace an image in the presentation based on name.
     
-       slide - 1-based slide number.
+    Parameters:
+        filename: string
+        slide (int): 1-based slide number
+        image_name: string
+        replace_with_image_fname: string (full path to new image)
 
     Example:
     { "replace_image": { "filename": "/path/to/presentation.pptx", "slide": 1, "image_name": "Picture 1", "replace_with_image_fname": "/absolute/path/to/new_logo.png" } }
@@ -63,7 +52,7 @@ async def replace_image(context, filename, slide, image_name=None, replace_with_
     if image_name is None or replace_with_image_fname is None:
         return "Both image_name and replace_with_image_fname must be provided"
     if slide is None:
-        return "Must provide side #"
+        return "Must provide slide #"
 
     try:
         prs = Presentation(filename)
@@ -193,7 +182,7 @@ async def append_to_slide_xml_content(context, filename, slide_number, xml_fragm
     """
     try:
         result = append_to_slide(filename, slide_number, xml_fragment)
-        # print out in magent for debugging
+        # print out in magenta for debugging
         print(f"appended: \033[35m{xml_fragment}\033[0m")
         return f"Appended XML fragment to slide {slide_number} in {filename}" if result else "Failed to append to slide XML"
     except Exception as e:
@@ -237,3 +226,49 @@ async def save_presentation_after_xml_edit(context, filename):
     except Exception as e:
         return f"Error saving presentation: {str(e)}"
 
+@command()
+async def read_slide_table_command(context, filename, slide_number, table_name):
+    """Read a table from a specific slide and return its content in a compact JSON format.
+
+    Parameters:
+        filename: string (full path to the PowerPoint file)
+        slide_number: int (1-based slide number)
+        table_name: string (name of the table shape)
+
+    Returns:
+        A JSON string representing the table structure, content, and styling.
+
+    Example:
+    { "read_slide_table_command": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "table_name": "Table 1" } }
+    """
+    try:
+        prs = Presentation(filename)
+        table_data = read_slide_table(prs, slide_number, table_name)
+        return json.dumps(table_data)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@command()
+async def update_slide_table_command(context, filename, slide_number, table_name, table_data):
+    """Update a table on a specific slide using the provided JSON data.
+
+    Parameters:
+        filename: string (full path to the PowerPoint file)
+        slide_number: int (1-based slide number)
+        table_name: string (name of the table shape)
+        table_data: JSON string (table structure, content, and styling)
+
+    Returns:
+        A string indicating success or describing an error.
+
+    Example:
+    { "update_slide_table_command": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "table_name": "Table 1", "table_data": "{...}" } }
+    """
+    try:
+        prs = Presentation(filename)
+        table_data = json.loads(table_data)
+        update_slide_table(prs, slide_number, table_name, table_data)
+        prs.save(filename)
+        return "Table updated successfully"
+    except Exception as e:
+        return f"Error updating table: {str(e)}"
