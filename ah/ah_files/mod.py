@@ -13,7 +13,9 @@ async def write(fname="", text="", context=None):
         All text must be provided to be written to the file.
 
     Example:
-    { "write": { "fname": "/path/to/file1.txt", "text": "This is the text to write to the file." } }
+    { "write": { "fname": "/path/to/file1.txt", "text": "This is the text to write to the file.\nLine 2." } }
+
+    Remember: this is JSON, which means that all strings must be properly escaped, such as for newlines, etc. !
 
     """
     print("Write file, context is:", context, 'context.data is:', context.data)

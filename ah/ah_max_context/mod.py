@@ -5,7 +5,7 @@ from ..pipe import pipe
 
 @pipe(name='filter_messages', priority=8)
 def truncate_long_results(data: dict, context=None) -> dict:
-    max_context = int(os.getenv('AH_MAX_CONTEXT', 100000))
+    max_context = int(os.getenv('AH_MAX_CONTEXT', 180000))
     messages = data['messages']
     
     if len(messages) <= 3:
@@ -55,5 +55,10 @@ def truncate_long_results(data: dict, context=None) -> dict:
             # If there's room, just add the original last message
             processed_results.append(messages[-1])
     
+    # print messages and processed_results lengths in cyan
+    print(f"\033[36m{len(messages)}\033[0m, \033[36m{len(processed_results)}\033[0m")
     data['messages'] = processed_results
+    # if they are not the same, print a warning in yellow
+    if len(messages) != len(processed_results):
+        print("\033[33mWarning: Truncated messages\033[0m")
     return data
