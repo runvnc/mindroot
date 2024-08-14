@@ -102,7 +102,6 @@ def extract_cell_style(cell):
         try:
             if run.font.color.rgb:
                 font_props.append(rgb_to_hex(run.font.color.rgb))
-        # catch all errors
         except Exception as e:
             print("Error in reading font color (may be okay if no color defined)", e)
             pass
@@ -123,6 +122,9 @@ def extract_cell_style(cell):
 
 def extract_border_style(cell):
     """Extract the border style from a cell."""
+    if not hasattr(cell._tc.tcPr, 'tcBorders'):
+        return None
+    
     borders = cell._tc.tcPr.tcBorders
     if not borders:
         return None
@@ -131,12 +133,13 @@ def extract_border_style(cell):
     border_styles = []
     
     for side in border_sides:
-        border = getattr(borders, side)
-        if border and border.val:
-            width = border.sz.pt if border.sz else 1
-            style = border.val
-            color = rgb_to_hex(border.color.rgb) if border.color and border.color.rgb else "#000000"
-            border_styles.append(f"{side[0]}:{width}px {style} {color}")
+        if hasattr(borders, side):
+            border = getattr(borders, side)
+            if border and border.val:
+                width = border.sz.pt if border.sz else 1
+                style = border.val
+                color = rgb_to_hex(border.color.rgb) if border.color and border.color.rgb else "#000000"
+                border_styles.append(f"{side[0]}:{width}px {style} {color}")
     
     return "; ".join(border_styles) if border_styles else None
 
