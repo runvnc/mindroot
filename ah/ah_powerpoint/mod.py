@@ -330,4 +330,8 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
         prs.save(filename)
         return "Table updated successfully"
     except Exception as e:
-        return f"Error updating table: {str(e)}"
+        # capture stack trace in string format
+        stack_trace = traceback.format_exc()
+        print(stack_trace)
+        # incude stack trace in error message
+        return f"Error updating table: {str(e)}\n{stack_trace}"
