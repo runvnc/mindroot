@@ -8,7 +8,7 @@ from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
 from .slide_content_updater import update_slide_content as new_update_slide_content
 from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
-from .table_operations import read_slide_table, update_slide_table
+from .table_operations import read_slide_table as read_slide_table_impl, update_slide_table as update_slide_table_impl
 
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):
@@ -227,7 +227,7 @@ async def save_presentation_after_xml_edit(context, filename):
         return f"Error saving presentation: {str(e)}"
 
 @command()
-async def read_slide_table_command(context, filename, slide_number, table_name):
+async def read_slide_table(context, filename, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format.
 
     Parameters:
@@ -243,13 +243,13 @@ async def read_slide_table_command(context, filename, slide_number, table_name):
     """
     try:
         prs = Presentation(filename)
-        table_data = read_slide_table(prs, slide_number, table_name)
+        table_data = read_slide_table_impl(prs, slide_number, table_name)
         return json.dumps(table_data)
     except Exception as e:
         return json.dumps({"error": str(e)})
 
 @command()
-async def update_slide_table_command(context, filename, slide_number, table_name, table_data):
+async def update_slide_table(context, filename, slide_number, table_name, table_data):
     """Update a table on a specific slide using the provided JSON data.
 
     Parameters:
@@ -267,7 +267,7 @@ async def update_slide_table_command(context, filename, slide_number, table_name
     try:
         prs = Presentation(filename)
         table_data = json.loads(table_data)
-        update_slide_table(prs, slide_number, table_name, table_data)
+        update_slide_table_impl(prs, slide_number, table_name, table_data)
         prs.save(filename)
         return "Table updated successfully"
     except Exception as e:
