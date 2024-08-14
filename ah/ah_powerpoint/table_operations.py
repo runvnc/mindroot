@@ -83,17 +83,43 @@ def extract_cell_style(cell):
     paragraph = cell.text_frame.paragraphs[0]
     run = paragraph.runs[0] if paragraph.runs else None
     
-    style = {
-        "bg": rgb_to_hex(cell.fill.fore_color.rgb) if cell.fill.fore_color.rgb else None,
-        "font": f"{run.font.name},{run.font.size.pt},{run.font.bold},{rgb_to_hex(run.font.color.rgb)}" if run else None,
-        "align": paragraph.alignment.name if paragraph.alignment else None,
-    }
+    style = {}
     
+    # Background color
+    if cell.fill.fore_color.type != None:
+        bg_color = cell.fill.fore_color.rgb
+        if bg_color:
+            style["bg"] = rgb_to_hex(bg_color)
+    
+    # Font properties
+    if run:
+        font_props = []
+        if run.font.name:
+            font_props.append(run.font.name)
+        if run.font.size:
+            font_props.append(str(run.font.size.pt))
+        font_props.append(str(run.font.bold))
+        try:
+            if run.font.color.rgb:
+                font_props.append(rgb_to_hex(run.font.color.rgb))
+        # catch all errors
+        except Exception as e:
+            print("Error in reading font color (may be okay if no color defined)", e)
+            pass
+
+        if font_props:
+            style["font"] = ",".join(font_props)
+    
+    # Alignment
+    if paragraph.alignment:
+        style["align"] = paragraph.alignment.name
+    
+    # Border
     border = extract_border_style(cell)
     if border:
         style["border"] = border
     
-    return {k: v for k, v in style.items() if v is not None}
+    return style
 
 def extract_border_style(cell):
     """Extract the border style from a cell."""
@@ -121,13 +147,17 @@ def apply_style(cell, style):
         cell.fill.fore_color.rgb = hex_to_rgb(style["bg"])
     
     if "font" in style:
-        name, size, bold, color = style["font"].split(",")
+        font_props = style["font"].split(",")
         paragraph = cell.text_frame.paragraphs[0]
         run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
-        run.font.name = name
-        run.font.size = Pt(float(size))
-        run.font.bold = bold.lower() == "true"
-        run.font.color.rgb = hex_to_rgb(color)
+        if len(font_props) > 0:
+            run.font.name = font_props[0]
+        if len(font_props) > 1:
+            run.font.size = Pt(float(font_props[1]))
+        if len(font_props) > 2:
+            run.font.bold = font_props[2].lower() == "true"
+        if len(font_props) > 3:
+            run.font.color.rgb = hex_to_rgb(font_props[3])
     
     if "align" in style:
         cell.text_frame.paragraphs[0].alignment = getattr(PP_ALIGN, style["align"])
@@ -159,6 +189,8 @@ def get_merged_cells(table):
 
 def rgb_to_hex(rgb):
     """Convert RGB tuple to hex color string."""
+    if rgb is None:
+        return None
     return '#{:02x}{:02x}{:02x}'.format(*rgb)
 
 def hex_to_rgb(hex_color):
