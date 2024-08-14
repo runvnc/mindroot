@@ -19,6 +19,9 @@ async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperatur
 
         async def content_stream(original_stream):
             async for chunk in original_stream:
+                if os.environ.get('AH_DEBUG') == 'True':
+                    print('\033[92m' + str(chunk.choices[0].delta.content) + '\033[0m', end='')
+
                 yield chunk.choices[0].delta.content or ""
 
         return content_stream(stream)

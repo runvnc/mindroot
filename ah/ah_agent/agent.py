@@ -263,7 +263,7 @@ class Agent:
 
 
     async def chat_commands(self, model, context,
-                            temperature=0, max_tokens=2500, messages=[]):
+                            temperature=0, max_tokens=3500, messages=[]):
 
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
@@ -279,7 +279,7 @@ class Agent:
 
         #print in white
         #print first message in white
-        print("\033[97m" + messages[0]['role'] + ': ' + messages[0]["content"] + "\033[0m")
+        #print("\033[97m" + messages[0]['role'] + ': ' + messages[0]["content"] + "\033[0m")
         # if role of first message is not 'system' then throw an error
         if messages[0]['role'] != 'system':
             logger.error("First message is not a system message")
