@@ -128,6 +128,8 @@ async def create_chart(context, filename, slide_number, chart_type, data, positi
 @command()
 async def open_presentation_for_xml_edit(context, filename):
     """Open a presentation for XML editing.
+    NOTE: This only appplies to xml presentation commands!\
+
     Example:
     { "open_presentation_for_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
@@ -140,6 +142,8 @@ async def open_presentation_for_xml_edit(context, filename):
 @command()
 async def close_presentation_after_xml_edit(context, filename):
     """Close a presentation after XML editing.
+    NOTE: This only appplies to xml presentation commands!
+
     Example:
     { "close_presentation_after_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
@@ -192,6 +196,8 @@ async def append_to_slide_xml_content(context, filename, slide_number, xml_fragm
 @command()
 async def clear_slide_xml_content(context, filename, slide_number):
     """Clear all XML content from a slide.
+    NOTE: Only use this with other xml commands.
+
     Note that this includes ALL XML, including namespaces and other attributes.
 
     Example:
@@ -206,6 +212,8 @@ async def clear_slide_xml_content(context, filename, slide_number):
 @command()
 async def done_appending_slide(context, filename, slide_number):
     """Use this when you are finished appending XML to a slide.
+    NOTE: Only use this with other xml commands.
+
     Example:
     { "done_appending_slide": { "filename": "/path/to/example.pptx", "slide_number": 1 } }
     """
@@ -218,6 +226,8 @@ async def done_appending_slide(context, filename, slide_number):
 @command()
 async def save_presentation_after_xml_edit(context, filename):
     """Save the presentation after XML editing.
+    NOTE: This only appplies to xml presentation commands!
+
     Example:
     { "save_presentation_after_xml_edit": { "filename": "/path/to/example.pptx" } }
     """
@@ -266,6 +276,7 @@ async def read_slide_table(context, filename, slide_number, table_name):
 @command()
 async def update_slide_table(context, filename, slide_number, table_name, table_data):
     """Update a table on a specific slide using the provided JSON data.
+    Note: the presentation will automatically be saved after updating the table.
 
     Parameters:
         filename (str): Full path to the PowerPoint file.
