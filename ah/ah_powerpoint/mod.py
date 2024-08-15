@@ -6,7 +6,7 @@ from pptx.util import Inches
 import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
-from .slide_content_updater import slide_update_content as new_update_slide_content
+from .slide_content_updater import update_slide_content as new_update_slide_content
 from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
 from .table_operations import read_slide_table as read_slide_table_impl, slide_add_table as slide_add_table_impl
 import traceback

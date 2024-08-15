@@ -52,7 +52,7 @@ def slide_add_table(presentation, slide_number, table_data, position):
             table.cell(start_row, start_col).merge(table.cell(end_row, end_col))
         
         # Set table name
-        table.shape.name = table_data['name']
+        table.name = table_data['name']
         
         return f"Table '{table_data['name']}' successfully added to slide {slide_number}"
     
