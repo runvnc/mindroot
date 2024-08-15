@@ -105,6 +105,7 @@ async def initiate_agent_session(agent_name: str, context=None):
     log_id = nanoid.generate()
  
     await init_chat_session(agent_name, log_id)
+    
     return log_id
 
 

@@ -213,6 +213,8 @@ class Agent:
                         cmd_name = next(iter(cmd))
                         cmd_args = cmd[cmd_name]
                         logger.debug(f"Processing command: {cmd}")
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+ 
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
                         full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})

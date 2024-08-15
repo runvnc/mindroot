@@ -10,6 +10,9 @@ DEFAULT_EXCLUDE = ['.git', 'node_modules', 'dist', 'build', 'coverage', '__pycac
 @command()
 async def execute_command(cmd="", context=None):
     """Execute a system command and return the output.
+
+    REMEMBER: cmd MUST be properly JSON-encoded, e.g. newlines must be escaped!
+
     Example:
     { "execute_command": { "cmd": "ls -la" } }
     """
