@@ -1,12 +1,20 @@
 import collections 
 import collections.abc
 from pptx import Presentation
-from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
+from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
-from pptx.util import Pt
+from pptx.util import Pt, Emu
 
-
-#from .table_helpers import add_row, add_column, remove_row, remove_column 
+# Alignment mapping dictionary
+alignment_map = {
+    PP_ALIGN.LEFT: "LEFT",
+    PP_ALIGN.CENTER: "CENTER",
+    PP_ALIGN.RIGHT: "RIGHT",
+    PP_ALIGN.JUSTIFY: "JUSTIFY",
+    PP_ALIGN.DISTRIBUTE: "DISTRIBUTE",
+    PP_ALIGN.JUSTIFY_LOW: "JUSTIFY_LOW",
+    PP_ALIGN.THAI_DISTRIBUTE: "THAI_DISTRIBUTE"
+}
 
 def read_slide_table(presentation, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format."""
@@ -24,7 +32,8 @@ def read_slide_table(presentation, slide_number, table_name):
         "name": table_name,
         "data": [],
         "styles": [],
-        "merged_cells": []
+        "merged_cells": [],
+        "column_widths": []  # New key for column widths
     }
     
     style_map = {}
@@ -39,6 +48,10 @@ def read_slide_table(presentation, slide_number, table_name):
     
     table_data["styles"] = list(style_map.values())
     table_data["merged_cells"] = get_merged_cells(table)
+    
+    # Add column widths
+    for column in table.columns:
+        table_data["column_widths"].append(column.width.emu)
     
     return table_data
 
@@ -64,11 +77,13 @@ def update_slide_table(presentation, slide_number, table_name, table_data):
         for i, cell_data in enumerate(row_data):
             cell = row.cells[i]
             style_id, text = cell_data
-            cell.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE 
             cell.text = text
             apply_style(cell, table_data["styles"][style_id - 1])
 
-    #table.rows.remove(table.rows[0])
+    # Apply column widths if provided
+    if "column_widths" in table_data:
+        for i, width in enumerate(table_data["column_widths"]):
+            table.columns[i].width = Emu(width)
 
     # Apply merged cells
     for merge_range in table_data["merged_cells"]:
@@ -119,7 +134,7 @@ def extract_cell_style(cell):
     
     # Alignment
     if paragraph.alignment:
-        style["align"] = paragraph.alignment.name
+        style["align"] = alignment_map.get(paragraph.alignment, "LEFT")  # Default to LEFT if not found
     
     # Border
     border = extract_border_style(cell)
@@ -218,5 +233,3 @@ if __name__ == "__main__":
     print(table_data)
     update_slide_table(presentation, 6, "Val_table", table_data)
     presentation.save("test.pptx")
-
-

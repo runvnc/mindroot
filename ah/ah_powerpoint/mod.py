@@ -232,15 +232,29 @@ async def read_slide_table(context, filename, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format.
 
     Parameters:
-        filename: string (full path to the PowerPoint file)
-        slide_number: int (1-based slide number)
-        table_name: string (name of the table shape)
+        filename (str): Full path to the PowerPoint file.
+        slide_number (int): 1-based slide number containing the table.
+        table_name (str): Name of the table shape to read.
 
     Returns:
-        A JSON string representing the table structure, content, and styling.
+        str: A JSON string representing the table structure, content, styling, and column widths.
+
+    The returned JSON structure includes:
+    {
+        "name": "Table Name",
+        "data": [[cell_data], [cell_data], ...],
+        "styles": [style_data],
+        "merged_cells": [[start_row, start_col, end_row, end_col], ...],
+        "column_widths": [width1, width2, ...]
+    }
+
+    Where:
+    - cell_data is [style_id, "cell content"]
+    - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "alignment", "border": "border_style"}
+    - column_widths are in EMU (English Metric Units)
 
     Example:
-    { "read_slide_table_command": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "table_name": "Table 1" } }
+    { "read_slide_table": { "filename": "/path/to/presentation.pptx", "slide_number": 1, "table_name": "Table 1" } }
     """
     try:
         prs = Presentation(filename)
@@ -257,73 +271,42 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
         filename (str): Full path to the PowerPoint file.
         slide_number (int): 1-based slide number containing the table.
         table_name (str): Name of the table shape to update.
-        table_data (str): Dict representing the table structure, content, and styling.
+        table_data (dict): Dict representing the table structure, content, styling, and optionally column widths.
 
     Returns:
         str: A message indicating success or describing an error.
 
-    The table_data JSON should have the following structure:
+    The table_data should have the following structure:
     {
         "name": "Table Name",
         "data": [[cell_data], [cell_data], ...],
         "styles": [style_data],
-        "merged_cells": [[start_row, start_col, end_row, end_col], ...]
+        "merged_cells": [[start_row, start_col, end_row, end_col], ...],
+        "column_widths": [width1, width2, ...] (optional)
     }
 
     Where:
     - cell_data is [style_id, "cell content"]
     - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "alignment", "border": "border_style"}
+    - column_widths are in EMU (English Metric Units)
 
-    Simple Example:
+    Note: Column widths are optional. If not provided, existing widths will be maintained.
+
+    Example:
     {
-        "update_slide_table_command": {
+        "update_slide_table": {
             "filename": "/path/to/presentation.pptx",
             "slide_number": 1,
             "table_name": "Table 1",
             "table_data": {
-                "name": "Simple Table",
-                "data": [
-                    [[1, "Header 1"], [1, "Header 2"]],
-                    [[2, "Data 1"], [2, "Data 2"]]
-                ],
-                "styles": [
-                    {"id": 1, "bg": "#CCCCCC", "font": "Arial,12,true,#000000", "align": "CENTER"},
-                    {"id": 2, "font": "Calibri,11,false,#000000", "align": "LEFT"}
-                ],
-                "merged_cells": []
+                "name": "Sample Table",
+                "data": [[1, "Header"], [2, "Data"]],
+                "styles": [{"id": 1, "bg": "#CCCCCC"}, {"id": 2, "font": "Arial,12,false,#000000"}],
+                "merged_cells": [],
+                "column_widths": [914400, 914400]  # Optional: 1 inch each (914400 EMU = 1 inch)
             }
         }
     }
-
-    Complex Example:
-    {
-        "update_slide_table_command": {
-            "filename": "/path/to/presentation.pptx",
-            "slide_number": 2,
-            "table_name": "Sales Table",
-            "table_data": {
-                "name": "Quarterly Sales",
-                "data": [
-                    [[1, "Region"], [1, "Q1"], [1, "Q2"], [1, "Q3"], [1, "Q4"]],
-                    [[2, "North"], [3, "$10,000"], [3, "$12,000"], [3, "$15,000"], [3, "$18,000"]],
-                    [[2, "South"], [3, "$8,000"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"]],
-                    [[2, "East"], [3, "$12,000"], [3, "$13,000"], [3, "$14,000"], [3, "$15,000"]],
-                    [[2, "West"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [3, "$12,000"]],
-                    [[4, "Total"], [5, "$39,000"], [5, "$44,000"], [5, "$50,000"], [5, "$56,000"]]
-                ],
-                "styles": [
-                    {"id": 1, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "CENTER", "border": "t,b:1px solid #FFFFFF"},
-                    {"id": 2, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "LEFT", "border": "r:1px solid #FFFFFF"},
-                    {"id": 3, "font": "Calibri,11,false,#000000", "align": "RIGHT", "border": "r:1px solid #D9E1F2"},
-                    {"id": 4, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "LEFT", "border": "t:1px solid #4472C4"},
-                    {"id": 5, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "RIGHT", "border": "t:1px solid #4472C4"}
-                ],
-                "merged_cells": [[5, 0, 5, 1]]
-            }
-        }
-    }
-
-
     """
     try:
         prs = Presentation(filename)
