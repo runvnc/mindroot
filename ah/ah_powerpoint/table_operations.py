@@ -16,6 +16,49 @@ alignment_map = {
     PP_ALIGN.THAI_DISTRIBUTE: "THAI_DISTRIBUTE"
 }
 
+def slide_add_table(presentation, slide_number, table_data, position):
+    """Add a new table to a specific slide in the presentation."""
+    try:
+        # Get the specified slide
+        slide = presentation.slides[slide_number - 1]
+        
+        # Extract table dimensions from data
+        rows = len(table_data['data'])
+        cols = len(table_data['data'][0]) if rows > 0 else 0
+        
+        # Create a new table
+        left = Emu(position['left'])
+        top = Emu(position['top'])
+        width = Emu(position['width'])
+        height = Emu(position['height'])
+        table = slide.shapes.add_table(rows, cols, left, top, width, height).table
+        
+        # Populate table with data and apply styles
+        for row_index, row_data in enumerate(table_data['data']):
+            for col_index, cell_data in enumerate(row_data):
+                cell = table.cell(row_index, col_index)
+                style_id, text = cell_data
+                cell.text = text
+                apply_style(cell, table_data['styles'][style_id - 1])
+        
+        # Set column widths if provided
+        if 'column_widths' in table_data:
+            for i, width in enumerate(table_data['column_widths']):
+                table.columns[i].width = Emu(width)
+        
+        # Apply merged cells
+        for merge_range in table_data['merged_cells']:
+            start_row, start_col, end_row, end_col = merge_range
+            table.cell(start_row, start_col).merge(table.cell(end_row, end_col))
+        
+        # Set table name
+        table.shape.name = table_data['name']
+        
+        return f"Table '{table_data['name']}' successfully added to slide {slide_number}"
+    
+    except Exception as e:
+        raise ValueError(f"Error adding table to slide {slide_number}: {str(e)}")
+
 def read_slide_table(presentation, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format."""
     slide = presentation.slides[slide_number - 1]
@@ -54,41 +97,6 @@ def read_slide_table(presentation, slide_number, table_name):
         table_data["column_widths"].append(column.width.emu)
     
     return table_data
-
-def update_slide_table(presentation, slide_number, table_name, table_data):
-    """Update a table on a specific slide using the provided dict with data."""
-    slide = presentation.slides[slide_number - 1]
-    table = None
-    for shape in slide.shapes:
-        if shape.has_table and shape.name == table_name:
-            table = shape.table
-            break
-    
-    if not table:
-        raise ValueError(f"Table '{table_name}' not found on slide {slide_number}")
-    
-    # can't remove all rows because it breaks rows.add()
-    while len(table.rows) > 1:
-        table.rows.remove(table.rows[0])
-    
-    # Recreate table with new data
-    for row_data in table_data["data"]:
-        row = table.rows.add()
-        for i, cell_data in enumerate(row_data):
-            cell = row.cells[i]
-            style_id, text = cell_data
-            cell.text = text
-            apply_style(cell, table_data["styles"][style_id - 1])
-
-    # Apply column widths if provided
-    if "column_widths" in table_data:
-        for i, width in enumerate(table_data["column_widths"]):
-            table.columns[i].width = Emu(width)
-
-    # Apply merged cells
-    for merge_range in table_data["merged_cells"]:
-        start_row, start_col, end_row, end_col = merge_range
-        table.cell(start_row, start_col).merge(table.cell(end_row, end_col))
 
 def get_or_create_style(cell, style_map, style_counter):
     """Get an existing style ID or create a new one for the given cell."""
@@ -231,7 +239,34 @@ side_map = {"t": "top", "r": "right", "b": "bottom", "l": "left"}
 
 if __name__ == "__main__":
     presentation = Presentation("test.pptx")
-    table_data = read_slide_table(presentation, 6, "Val_table")
+    
+    # Example usage of slide_add_table
+    table_data = {
+        "name": "New Table",
+        "data": [
+            [[1, "Header 1"], [1, "Header 2"]],
+            [[2, "Data 1"], [2, "Data 2"]]
+        ],
+        "styles": [
+            {"id": 1, "bg": "#CCCCCC", "font": "Arial,12,true,#000000", "align": "CENTER"},
+            {"id": 2, "font": "Calibri,11,false,#000000", "align": "LEFT"}
+        ],
+        "merged_cells": [],
+        "column_widths": [Emu(914400).emu, Emu(914400).emu]  # 1 inch each
+    }
+    
+    position = {
+        "left": Emu(914400).emu,  # 1 inch from left
+        "top": Emu(914400).emu,   # 1 inch from top
+        "width": Emu(5486400).emu, # 6 inches wide
+        "height": Emu(914400).emu # 1 inch tall
+    }
+    
+    result = slide_add_table(presentation, 1, table_data, position)
+    print(result)
+    
+    # Example usage of read_slide_table
+    table_data = read_slide_table(presentation, 1, "New Table")
     print(table_data)
-    update_slide_table(presentation, 6, "Val_table", table_data)
-    presentation.save("test.pptx")
+    
+    presentation.save("test_with_new_table.pptx")

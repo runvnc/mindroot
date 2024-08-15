@@ -6,7 +6,7 @@ from pptx.util import Inches
 import json
 from .read_slide import read_slide_content as new_read_slide_content
 from .replace_all import slide_replace_all as new_slide_replace_all
-from .slide_content_updater import update_slide_content as new_update_slide_content
+from .slide_content_updater import slide_add_table as slide_add_table_impl
 from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
 from .table_operations import read_slide_table as read_slide_table_impl, update_slide_table as update_slide_table_impl
 import traceback
@@ -275,15 +275,15 @@ async def read_slide_table(context, filename, slide_number, table_name):
         return json.dumps({"error": str(e)})
 
 @command()
-async def update_slide_table(context, filename, slide_number, table_name, table_data):
-    """Update a table on a specific slide using the provided JSON data.
-    Note: the presentation will automatically be saved after updating the table.
+async def slide_add_table(context, filename, slide_number, table_data, position):
+    """Add a new table to a specific slide in the presentation.
+    Note: the presentation will automatically be saved after adding the table.
 
     Parameters:
         filename (str): Full path to the PowerPoint file.
-        slide_number (int): 1-based slide number containing the table.
-        table_name (str): Name of the table shape to update.
-        table_data (dict): Dict representing the table structure, content, styling, and optionally column widths.
+        slide_number (int): 1-based slide number where the table will be added.
+        table_data (dict): Dict representing the table structure, content, and styling.
+        position (dict): Dict specifying the position and size of the table on the slide.
 
     Returns:
         str: A message indicating success or describing an error.
@@ -302,14 +302,20 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
     - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "ALIGNMENT"}
     - column_widths are in EMU (English Metric Units)
 
-    Note: Column widths are optional. If not provided, existing widths will be maintained.
-
-    Basic Example:
+    The position dict should have the following structure:
     {
-        "update_slide_table": {
+        "left": left_position,
+        "top": top_position,
+        "width": table_width,
+        "height": table_height
+    }
+    All values in the position dict should be in EMU (English Metric Units).
+
+    Example:
+    {
+        "slide_add_table": {
             "filename": "/path/to/presentation.pptx",
             "slide_number": 1,
-            "table_name": "Table 1",
             "table_data": {
                 "name": "Sample Table",
                 "data": [
@@ -322,49 +328,22 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
                 ],
                 "merged_cells": [],
                 "column_widths": [914400, 914400]  // Optional: 1 inch each (914400 EMU = 1 inch)
+            },
+            "position": {
+                "left": 1828800,  // 2 inches from left
+                "top": 1828800,   // 2 inches from top
+                "width": 5486400, // 6 inches wide
+                "height": 1828800 // 2 inches tall
             }
         }
     }
-
-    Comprehensive Example:
-    {
-        "update_slide_table": {
-            "filename": "/path/to/presentation.pptx",
-            "slide_number": 2,
-            "table_name": "Quarterly Sales Table",
-            "table_data": {
-                "name": "Quarterly Sales Report",
-                "data": [
-                    [[1, "Region"], [1, "Q1 Sales"], [1, "Q2 Sales"], [1, "Q3 Sales"], [1, "Q4 Sales"], [1, "Total"]],
-                    [[2, "North"], [3, "$10,000"], [3, "$12,000"], [3, "$15,000"], [3, "$18,000"], [4, "$55,000"]],
-                    [[2, "South"], [3, "$8,000"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [4, "$38,000"]],
-                    [[2, "East"], [3, "$12,000"], [3, "$13,000"], [3, "$14,000"], [3, "$15,000"], [4, "$54,000"]],
-                    [[2, "West"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [3, "$12,000"], [4, "$42,000"]],
-                    [[5, "Total"], [6, "$39,000"], [6, "$44,000"], [6, "$50,000"], [6, "$56,000"], [7, "$189,000"]]
-                ],
-                "styles": [
-                    {"id": 1, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "CENTER"},
-                    {"id": 2, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "LEFT"},
-                    {"id": 3, "font": "Calibri,11,false,#000000", "align": "RIGHT"},
-                    {"id": 4, "bg": "#E2EFDA", "font": "Calibri,11,true,#000000", "align": "RIGHT"},
-                    {"id": 5, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "LEFT"},
-                    {"id": 6, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT"},
-                    {"id": 7, "bg": "#70AD47", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT"}
-                ],
-                "merged_cells": [[5, 0, 5, 1]],
-                "column_widths": [1828800, 1371600, 1371600, 1371600, 1371600, 1828800]  // 2 inches, 1.5 inches, 1.5 inches, 1.5 inches, 1.5 inches, 2 inches
-            }
-        }
-    }
-"""
+    """
     try:
         prs = Presentation(filename)
-        update_slide_table_impl(prs, slide_number, table_name, table_data)
+        result = slide_add_table_impl(prs, slide_number, table_data, position)
         prs.save(filename)
-        return "Table updated successfully"
+        return result
     except Exception as e:
-        # capture stack trace in string format
-        stack_trace = traceback.format_exc()
-        print(stack_trace)
-        # incude stack trace in error message
-        return f"Error updating table: {str(e)}\n{stack_trace}"
+        return json.dumps({"error": str(e)})
+
+
