@@ -252,13 +252,14 @@ async def read_slide_table(context, filename, slide_number, table_name):
     The returned JSON structure includes:
     {
         "name": "Table Name",
-        "data": [[cell_data], [cell_data], ...],
+        "data": [[[cell_data], [cell_data]],[ ] ...],
         "styles": [style_data],
         "merged_cells": [[start_row, start_col, end_row, end_col], ...],
         "column_widths": [width1, width2, ...]
     }
 
     Where:
+    - data is list of rows, each row is a list of cell_data
     - cell_data is [style_id, "cell content"]
     - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "alignment", "border": "border_style"}
     - column_widths are in EMU (English Metric Units)
@@ -290,7 +291,7 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
     The table_data should have the following structure:
     {
         "name": "Table Name",
-        "data": [[cell_data], [cell_data], ...],
+        "data": [[[cell_data], [cell_data], ...], [[cell_data], [cell_data], ...], ...],
         "styles": [style_data],
         "merged_cells": [[start_row, start_col, end_row, end_col], ...],
         "column_widths": [width1, width2, ...] (optional)
@@ -298,7 +299,7 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
 
     Where:
     - cell_data is [style_id, "cell content"]
-    - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "ALIGNMENT", "border": "border_style"}
+    - style_data is {"id": style_id, "bg": "#RRGGBB", "font": "name,size,bold,color", "align": "ALIGNMENT"}
     - column_widths are in EMU (English Metric Units)
 
     Note: Column widths are optional. If not provided, existing widths will be maintained.
@@ -312,8 +313,8 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
             "table_data": {
                 "name": "Sample Table",
                 "data": [
-                    [1, "Header 1"], [1, "Header 2"],
-                    [2, "Data 1"], [2, "Data 2"]
+                    [[1, "Header 1"], [1, "Header 2"]],
+                    [[2, "Data 1"], [2, "Data 2"]]
                 ],
                 "styles": [
                     {"id": 1, "bg": "#CCCCCC", "font": "Arial,12,true,#000000", "align": "CENTER"},
@@ -334,28 +335,28 @@ async def update_slide_table(context, filename, slide_number, table_name, table_
             "table_data": {
                 "name": "Quarterly Sales Report",
                 "data": [
-                    [1, "Region"], [1, "Q1 Sales"], [1, "Q2 Sales"], [1, "Q3 Sales"], [1, "Q4 Sales"], [1, "Total"],
-                    [2, "North"], [3, "$10,000"], [3, "$12,000"], [3, "$15,000"], [3, "$18,000"], [4, "$55,000"],
-                    [2, "South"], [3, "$8,000"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [4, "$38,000"],
-                    [2, "East"], [3, "$12,000"], [3, "$13,000"], [3, "$14,000"], [3, "$15,000"], [4, "$54,000"],
-                    [2, "West"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [3, "$12,000"], [4, "$42,000"],
-                    [5, "Total"], [6, "$39,000"], [6, "$44,000"], [6, "$50,000"], [6, "$56,000"], [7, "$189,000"]
+                    [[1, "Region"], [1, "Q1 Sales"], [1, "Q2 Sales"], [1, "Q3 Sales"], [1, "Q4 Sales"], [1, "Total"]],
+                    [[2, "North"], [3, "$10,000"], [3, "$12,000"], [3, "$15,000"], [3, "$18,000"], [4, "$55,000"]],
+                    [[2, "South"], [3, "$8,000"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [4, "$38,000"]],
+                    [[2, "East"], [3, "$12,000"], [3, "$13,000"], [3, "$14,000"], [3, "$15,000"], [4, "$54,000"]],
+                    [[2, "West"], [3, "$9,000"], [3, "$10,000"], [3, "$11,000"], [3, "$12,000"], [4, "$42,000"]],
+                    [[5, "Total"], [6, "$39,000"], [6, "$44,000"], [6, "$50,000"], [6, "$56,000"], [7, "$189,000"]]
                 ],
                 "styles": [
-                    {"id": 1, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "CENTER", "border": "t,b:1px solid #FFFFFF"},
-                    {"id": 2, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "LEFT", "border": "r:1px solid #FFFFFF"},
-                    {"id": 3, "font": "Calibri,11,false,#000000", "align": "RIGHT", "border": "r:1px solid #D9E1F2"},
-                    {"id": 4, "bg": "#E2EFDA", "font": "Calibri,11,true,#000000", "align": "RIGHT", "border": "r:1px solid #D9E1F2"},
-                    {"id": 5, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "LEFT", "border": "t:1px solid #4472C4"},
-                    {"id": 6, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT", "border": "t:1px solid #4472C4"},
-                    {"id": 7, "bg": "#70AD47", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT", "border": "t:1px solid #4472C4"}
+                    {"id": 1, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "CENTER"},
+                    {"id": 2, "bg": "#D9E1F2", "font": "Calibri,11,true,#000000", "align": "LEFT"},
+                    {"id": 3, "font": "Calibri,11,false,#000000", "align": "RIGHT"},
+                    {"id": 4, "bg": "#E2EFDA", "font": "Calibri,11,true,#000000", "align": "RIGHT"},
+                    {"id": 5, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "LEFT"},
+                    {"id": 6, "bg": "#4472C4", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT"},
+                    {"id": 7, "bg": "#70AD47", "font": "Arial,12,true,#FFFFFF", "align": "RIGHT"}
                 ],
                 "merged_cells": [[5, 0, 5, 1]],
                 "column_widths": [1828800, 1371600, 1371600, 1371600, 1371600, 1828800]  // 2 inches, 1.5 inches, 1.5 inches, 1.5 inches, 1.5 inches, 2 inches
             }
         }
     }
-    """
+"""
     try:
         prs = Presentation(filename)
         update_slide_table_impl(prs, slide_number, table_name, table_data)

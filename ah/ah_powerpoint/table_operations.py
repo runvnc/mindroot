@@ -191,8 +191,10 @@ def apply_style(cell, style):
     if "border" in style:
         apply_border_style(cell, style["border"])
 
-def apply_border_style(cell, border_string):
+def apply_border_style(cell, border_string):    
     """Apply the border style to a cell."""
+    # not working, causes error
+    return
     borders = cell._tc.tcPr.get_or_add_tcBorders()
     for border_part in border_string.split(";"):
         side, style = border_part.strip().split(":")
