@@ -9,6 +9,7 @@ from .replace_all import slide_replace_all as new_slide_replace_all
 from .slide_content_updater import update_slide_content as new_update_slide_content
 from .pptx_stateless_editor import presentation_manager, extract_slide_xml, update_slide_xml, clear_slide, append_to_slide, done_appending
 from .table_operations import read_slide_table as read_slide_table_impl, update_slide_table as update_slide_table_impl
+import traceback
 
 @command()
 async def slide_replace_all(context, filename, slide, replacements=None, case_sensitive=True, whole_word=False):

@@ -10,7 +10,7 @@ client = openai.AsyncOpenAI()
 async def stream_chat(model, messages=[], context=None, num_ctx=2048, temperature=0.0, max_tokens=3024, num_gpu_layers=12):
     try:
         stream = await client.chat.completions.create(
-            model="gpt-4o",
+            model="chatgpt-4o-latest",
             stream=True,
             messages=messages,
             temperature=temperature,

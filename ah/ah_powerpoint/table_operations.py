@@ -1,8 +1,12 @@
+import collections 
+import collections.abc
 from pptx import Presentation
 from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.util import Pt
-from .table_helpers import add_row, add_column, remove_row, remove_column 
+
+
+#from .table_helpers import add_row, add_column, remove_row, remove_column 
 
 def read_slide_table(presentation, slide_number, table_name):
     """Read a table from a specific slide and return its content in a compact JSON format."""
@@ -51,19 +55,23 @@ def update_slide_table(presentation, slide_number, table_name, table_data):
         raise ValueError(f"Table '{table_name}' not found on slide {slide_number}")
     
     # Clear existing table content
-    while len(table.rows) > 0:
+    # Except for one row because otherwise
+    # table.rows.add() doesn't work
+    while len(table.rows) > 1:
         table._tbl.remove(table._tbl.tr_lst[0])
     
     # Recreate table with new data
     for row_data in table_data["data"]:
-        add_row(table)  # Use the custom add_row function
-        row = table.rows[-1]  # Get the newly added row
+        row = table.rows.add()
         for i, cell_data in enumerate(row_data):
             cell = row.cells[i]
             style_id, text = cell_data
             cell.text = text
             apply_style(cell, table_data["styles"][style_id - 1])
-    
+
+
+    table._tbl.remove(table._tbl.tr_lst[0])
+     
     # Apply merged cells
     for merge_range in table_data["merged_cells"]:
         start_row, start_col, end_row, end_col = merge_range
@@ -204,3 +212,13 @@ def hex_to_rgb(hex_color):
     return RGBColor(int(hex_color[:2], 16), int(hex_color[2:4], 16), int(hex_color[4:], 16))
 
 side_map = {"t": "top", "r": "right", "b": "bottom", "l": "left"}
+
+
+if __name__ == "__main__":
+    presentation = Presentation("test.pptx")
+    table_data = read_slide_table(presentation, 6, "Val_table")
+    print(table_data)
+    update_slide_table(presentation, 6, "Val_table", table_data)
+    presentation.save("test.pptx")
+
+
