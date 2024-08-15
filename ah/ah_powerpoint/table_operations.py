@@ -1,7 +1,7 @@
 import collections 
 import collections.abc
 from pptx import Presentation
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
 from pptx.dml.color import RGBColor
 from pptx.util import Pt
 
@@ -54,11 +54,9 @@ def update_slide_table(presentation, slide_number, table_name, table_data):
     if not table:
         raise ValueError(f"Table '{table_name}' not found on slide {slide_number}")
     
-    # Clear existing table content
-    # Except for one row because otherwise
-    # table.rows.add() doesn't work
+    # can't remove all rows because it breaks rows.add()
     while len(table.rows) > 1:
-        table._tbl.remove(table._tbl.tr_lst[0])
+        table.rows.remove(table.rows[0])
     
     # Recreate table with new data
     for row_data in table_data["data"]:
@@ -66,12 +64,12 @@ def update_slide_table(presentation, slide_number, table_name, table_data):
         for i, cell_data in enumerate(row_data):
             cell = row.cells[i]
             style_id, text = cell_data
+            cell.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE 
             cell.text = text
             apply_style(cell, table_data["styles"][style_id - 1])
 
+    #table.rows.remove(table.rows[0])
 
-    table._tbl.remove(table._tbl.tr_lst[0])
-     
     # Apply merged cells
     for merge_range in table_data["merged_cells"]:
         start_row, start_col, end_row, end_col = merge_range
