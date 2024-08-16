@@ -50,7 +50,8 @@ async def say(text="", context=None):
 @command()
 async def json_encoded_md(markdown="", context=None):
     """
-    Output some markdown text to the user or chat room.
+    Output some markdown text (JSON-encoded in command, e.g. escape newlines)
+    to the user or chat room.
     Use this for any somewhat longer text that the user can read and
     and doesn't necessarily need to be spoken out loud.
 
@@ -75,6 +76,10 @@ async def json_encoded_md(markdown="", context=None):
         { "json_encoded_md": { "markdown": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }} 
     ]
 
+
+    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
+    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
+
     """
     await context.agent_output("new_message", {"content": markdown,
                                             "agent": context.agent['name'] })
@@ -88,6 +93,8 @@ async def insert_image(image_url, context=None):
 async def initiate_agent_session(agent_name: str, context=None):
     """
     Initiate a chat session with another agent.
+    IMPORTANT NOTE: You may not use this command while already in conversation with another agent.
+    You must exit the current conversation and then the parent context will continue.
 
     Parameters:
     agent_name - String. The name of the agent to start a session with.
@@ -98,6 +105,7 @@ async def initiate_agent_session(agent_name: str, context=None):
     log_id = nanoid.generate()
  
     await init_chat_session(agent_name, log_id)
+    
     return log_id
 
 
@@ -105,6 +113,7 @@ async def initiate_agent_session(agent_name: str, context=None):
 async def exit_conversation(output: str, context=None):
     """
     Exit a chat session with another agent. Use this when exit criteria are met.
+    Use this command when you are finished with an agent. You may not initiate another conversation whie in a chat session with an agent.
 
     Parameters:
     output - String :
@@ -144,6 +153,8 @@ async def exit_conversation(output: str, context=None):
     
     context.save_context()
     return output
+
+
 
 @command()
 async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: str, contextual_info: str, exit_criteria: str, context=None):
@@ -187,21 +198,30 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
 
     takeaways = ""
 
+    blank_my_replies = 0
+
     while not finished_conversation:
         if 'finished_conversation' not in my_sub_context.data:
             raise Exception("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
         replies = []
-        async with asyncio.timeout(120.0):
+        async with asyncio.timeout(1200.0):
             [_, replies] = await send_message_to_agent(sub_log_id, first_message)
         #print replies data for debugging, in magenta
         print(termcolor.colored('replies:', 'magenta', attrs=['bold']))
         print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
-        async with asyncio.timeout(120.0):
+        async with asyncio.timeout(1200.0):
             [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}")
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
+
+            if len(my_replies) == 0:
+                blank_my_replies += 1
+                if blank_my_replies > 3:
+                    # print in red for debugging
+                    print("Too many blank replies, exiting conversation")
+                    break
 
         if my_sub_context.data['finished_conversation'] == True:
             takeaways = my_sub_context.data['takeaways']

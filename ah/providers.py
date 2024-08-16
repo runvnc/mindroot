@@ -104,10 +104,7 @@ class ProviderManager:
     def get_docstring(self, name):
         if name not in self.functions:
             logging.warning(f"docstring for '{name}' not found.")
-            print(colored(f"docstring for '{name}' not found.", 'magenta'))
             return []
-        print(colored(f"docstring for '{name}':", 'magenta'))
-        print(self.functions[name][0])
         return [func_info['docstring'] for func_info in self.functions[name]]
 
     def get_functions(self):
@@ -117,14 +114,11 @@ class ProviderManager:
         return {name: self.get_docstring(name) for name in self.functions.keys()}
 
     def get_some_docstrings(self, names):
-        print(colored(f"getting docstrings for {names}", 'green'))
         filtered = []
         for name in names:
             if name not in self.functions:
-                print(colored(f"function '{name}' not found", 'magenta'))
                 logging.warning(f"agent function '{name}' not found")
             else:
-                print(colored(f"function '{name}' found", 'green'))
                 filtered.append(name)
         return {name: self.get_docstring(name) for name in filtered}
 

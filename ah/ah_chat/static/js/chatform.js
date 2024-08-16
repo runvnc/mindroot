@@ -11,7 +11,6 @@ class ChatForm extends BaseEl {
   static styles = [
     css`
       .stop-button {
-        background-color: #ff4136;
         color: white;
         border: none;
         padding: 8px;

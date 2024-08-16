@@ -9,7 +9,11 @@
   },
   {
     "name": "ah_simple_home",
-    "enabled": false
+    "enabled": true
+  },
+  {
+    "name": "ah_bov",
+    "enabled": true
   },
   {
     "name": "cre_login",
@@ -23,6 +27,14 @@
     "name": "ah_add_timestamp",
     "enabled": false
   },
+  {
+    "name": "ah_concise_results",
+    "enabled": true
+  },
+  {
+    "name": "ah_max_context",
+    "enabled": true
+  }, 
   {
     "name": "ah_word",
     "enabled": true

@@ -7,6 +7,7 @@ from json import JSONDecodeError
 from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
+from ..pipe import pipeline_manager
 from ..services import service 
 from ..services import service_manager
 import sys
@@ -86,6 +87,11 @@ class Agent:
         #await asyncio.sleep(1)
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
+        if 'finished_conversation' in context.data and context.data['finished_conversation']:
+            logger.warning("Conversation is finished, not executing command")
+            print("\033[91mConversation is finished, not executing command\033[0m")
+            return None
+
         logger.info("Command execution: {command}", command=cmd_name)
         logger.debug("Command details: {details}", details={
             "command": cmd_name,
@@ -207,6 +213,8 @@ class Agent:
                         cmd_name = next(iter(cmd))
                         cmd_args = cmd[cmd_name]
                         logger.debug(f"Processing command: {cmd}")
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+ 
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
                         full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})
@@ -257,12 +265,32 @@ class Agent:
 
 
     async def chat_commands(self, model, context,
-                            temperature=0, max_tokens=4000, messages=[]):
+                            temperature=0, max_tokens=3500, messages=[]):
 
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         logger.info("Messages for chat", extra={"messages": messages})
-        
+
+        try:
+            tmp_data = { "messages": messages }
+            tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
+            messages = tmp_data['messages']
+        except Exception as e:
+            logger.error("Error filtering messages")
+            logger.error(str(e))
+
+        #print in white
+        #print first message in white
+        #print("\033[97m" + messages[0]['role'] + ': ' + messages[0]["content"] + "\033[0m")
+        # if role of first message is not 'system' then throw an error
+        if messages[0]['role'] != 'system':
+            logger.error("First message is not a system message")
+            print("\033[91mFirst message is not a system message\033[0m")
+            print("\033[91mFirst message is not a system message\033[0m")
+            print("\033[91mFirst message is not a system message\033[0m")
+            print("\033[91mFirst message is not a system message\033[0m")
+            return None, None
+
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,

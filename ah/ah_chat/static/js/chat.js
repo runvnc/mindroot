@@ -153,7 +153,14 @@ class Chat extends BaseEl {
       } else {
         this.msgSoFar = data.params
       }
-      this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar);
+      try {
+        this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar+'');
+      } catch (e) {
+        console.error("Marked: could not parse:", e)
+        console.log('msgSoFar:')
+        console.log(this.msgSoFar)
+        this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
+      }
     } else {
       console.log('data.params', data.params)
       if (typeof(data.params) == 'array') {

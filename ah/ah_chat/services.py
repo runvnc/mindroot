@@ -1,7 +1,7 @@
 from ..services import service, service_manager
 from ..commands import command_manager
 from ..hooks import hook_manager
-from ..pipe import pipeline_manager
+from ..pipe import pipeline_manager, pipe
 from ..chatcontext import ChatContext
 from ..chatlog import ChatLog
 from ..ah_agent import agent
@@ -49,7 +49,7 @@ async def get_chat_history(session_id: str):
     return messages
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=7, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str, max_iterations=35, context=None, user=None):
 
     if session_id is None or session_id == "" or message is None or message == "":
         print("Invalid session_id or message")
@@ -83,8 +83,18 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=7,
         continue_processing = False
         try:
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            try:
+                tmp_data3 = { "results": full_cmds }
+                tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)
+                out_results = tmp_data3['results']
+            except Exception as e:
+                print("Error processing results: ", e)
+                print(traceback.format_exc())
+
             for cmd in full_cmds:
                 full_results.append(cmd)
+
+
             termcolor.cprint("results from chat commands: " + str(full_cmds), "yellow")
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
             print("results from chat commands: ", full_cmds)
@@ -111,10 +121,22 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=7,
             if len(out_results) > 0:
                 print('**********************************************************')
                 print("Processing iteration: ", iterations, "adding message")
+
+                try:
+                    tmp_data2 = { "results": out_results }
+                    tmp_data2 = await pipeline_manager.process_results(tmp_data2, context=context)
+                    out_results = tmp_data2['results']
+                except Exception as e:
+                    print("Error processing results: ", e)
+                    print(traceback.format_exc())
+
                 context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
-                results.append(out_results)
+                results.append(out_results) 
             else:
                 print("Processing iteration: ", iterations, "no message added")
+            if context.data.get('finished_conversation') is True:
+                termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                continue_processing = False
         except Exception as e:
             print("Found an error in agent output: ")
             print(e)
@@ -125,6 +147,13 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=7,
     print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
     await context.finished_chat()
     return [results, full_results]
+
+
+@pipe(name='process_results', priority=5)
+def add_current_time(data: dict, context=None) -> dict:
+    data['results'] = data['results']
+    return data
+
 
 @service()
 async def finished_chat(context=None):
@@ -140,7 +169,7 @@ async def subscribe_to_agent_messages(session_id: str, context=None):
         try:
             while True:
                 data = await queue.get()
-                asyncio.sleep(0.05)
+                await asyncio.sleep(0.05)
                 print('.', end='', flush=True)
                 yield data
         except asyncio.CancelledError:

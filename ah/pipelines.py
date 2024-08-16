@@ -59,4 +59,3 @@ class PipelineManager:
             return await self.execute_pipeline(name, *args, **kwargs)
         return pipeline_method
 
-pipeline_manager = PipelineManager()

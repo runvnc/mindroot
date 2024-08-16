@@ -129,9 +129,11 @@ img.avatar {
   border-radius: 30px;
 }
 
-/* only the first child should be flex */
 .msg-ai:first-child {
   display: flex;
+  /* align/justfiy to top */  
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .spacer {
@@ -684,6 +686,10 @@ button:hover {
   word-break: break-word !important;
   font-family: monospace !important;
  /* text-wrap: wrap !important; */
+}
+
+.fn_name {
+  cursor: pointer;
 }
 
 .one_line_result {

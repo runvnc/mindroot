@@ -10,6 +10,9 @@ DEFAULT_EXCLUDE = ['.git', 'node_modules', 'dist', 'build', 'coverage', '__pycac
 @command()
 async def execute_command(cmd="", context=None):
     """Execute a system command and return the output.
+
+    REMEMBER: cmd MUST be properly JSON-encoded, e.g. newlines must be escaped!
+
     Example:
     { "execute_command": { "cmd": "ls -la" } }
     """
@@ -20,10 +23,10 @@ async def execute_command(cmd="", context=None):
         output = result.stdout.decode('utf-8')
         error = result.stderr.decode('utf-8')
         if error:
-            return f"Error: {error}"
+            return f"Command executed with stderr output:\n{error}\nStdout:\n{output}"
         return output
     except subprocess.CalledProcessError as e:
-        return f"Command '{cmd}' failed with error: {e}"
+        return f"Command '{cmd}' failed with error code {e.returncode}:\nStderr:\n{e.stderr.decode('utf-8')}\nStdout:\n{e.stdout.decode('utf-8')}"
 
 @command()
 async def mkdir(directory="", context=None):

@@ -9,19 +9,25 @@ def update_slide_content(context, filename, slide_number, content):
         content_applied = {key: False for key in content.keys()}  # Track which content has been applied
         print('-----------------------------------------------------')
         print(f"Updating content of slide {slide_number} in {filename}")
+        num_updates = 0
         for shape in slide.shapes:
             if shape.name in content and not content_applied[shape.name]:
                 print("Found shape", shape.name)
                 if shape.has_text_frame:
                     update_text_frame(shape.text_frame, content[shape.name])
+                    num_updates += 1
                 elif shape.has_table:
                     update_table(shape.table, content[shape.name])
+                    num_updates += 1
                 elif shape.has_chart:
                     update_chart(shape.chart, content[shape.name])
+                    num_updates += 1
                 content_applied[shape.name] = True  # Mark this content as applied
         print("Done updating content")
         prs.save(filename)
-        return f"Updated content of slide {slide_number} in {filename}"
+        if num_updates == 0:
+            return f"Error: No names matched in attempt to update slide {slide_number} in {filename}"
+        return f"Updated content of slide {slide_number} in {filename}, matched {num_updates} names"
     except Exception as e:
         import traceback
         tb = traceback.format_exc()

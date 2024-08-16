@@ -49,18 +49,18 @@ async def analyze_sheet(filename, sheet_name, context=None):
         return f"Error: {str(e)}"
 
 @command()
-async def read_cells(filename, sheet_name, arrangement='row', context=None):
-    """Read all cells from sheet and return as nested lists.
+async def read_cells(filename, sheet_name, arrangement='row', cell_range=None, context=None):
+    """Read cells from sheet and return as nested lists.
     Example:
-    { "read_cells": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "arrangement": "row" } }
+    { "read_cells": { "filename": "/path/to/example.xlsx", "sheet_name": "Sheet1", "arrangement": "row", "cell_range": "A1:C10" } }
     """
     try:
-        result = excel_to_nested_lists(filename, sheet_name, arrangement)
+        result = excel_to_nested_lists(filename, sheet_name, arrangement, cell_range)
         rows = len(result)
-        cols = len(result[0])
-        max_allowed_cells = 400
+        cols = len(result[0]) if rows > 0 else 0
+        max_allowed_cells = 600
         total_cells = rows * cols
-        max_row = max(rows, total_cells // cols)
+        max_row = min(rows, total_cells // cols) if cols > 0 else 0
         result = result[:max_row]
         if rows > max_row:
             result.append([f"Output truncated to {max_row} rows. Total rows: {rows}"])
@@ -164,4 +164,43 @@ async def insert_columns(filename, sheet_name, column_letter, num_columns, conte
     except Exception as e:
         return f"Error: {str(e)}"
 
+from .ranges import list_ranges, read_ranges, write_range
 
+@command()
+async def list_named_ranges(filename, sheet=None, context=None):
+    """List all named ranges in a workbook or specific sheet.
+    Example:
+    { "list_named_ranges": { "filename": "/path/to/example.xlsx", "sheet": "Sheet1" } }
+    """
+    try:
+        ranges = list_ranges(filename, sheet)
+        return json.dumps(ranges)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@command()
+async def read_named_ranges(filename, range_list, context=None):
+    """Read data from specified named ranges.
+    Example:
+    { "read_named_ranges": { "filename": "/path/to/example.xlsx", "range_list": ["Range1", "Range2"] } }
+    """
+    try:
+        result = read_ranges(filename, range_list)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@command()
+async def write_named_range(filename, range_name, values, context=None):
+    """Write data to a specified named range.
+    Example:
+    { "write_named_range": { "filename": "/path/to/example.xlsx", "range_name": "InputRange", "values": [[1, 2], [3, 4]] } }
+    """
+    try:
+        success = write_range(filename, range_name, values)
+        if success:
+            return f"Successfully wrote data to range '{range_name}' in {filename}."
+        else:
+            return f"Failed to write data to range '{range_name}' in {filename}."
+    except Exception as e:
+        return f"Error: {str(e)}"

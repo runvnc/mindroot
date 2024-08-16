@@ -11,7 +11,4 @@ async def home(request: Request):
     agents = [agent for agent in os.listdir("data/agents/local") if os.path.isdir(os.path.join("data/agents/local", agent))]
     return templates.TemplateResponse("home.jinja2", {"request": request, "agents": agents})
 
-@router.get("/admin")
-async def admin():
-    return RedirectResponse("/admin")
 
