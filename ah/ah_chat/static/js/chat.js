@@ -12,8 +12,10 @@ const marked = new Marked(
   markedHighlight({
     langPrefix: 'hljs language-',
     highlight(code, lang, info) {
+      console.log('highlighting code:', code, lang, info)
       const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-      return hljs.highlight(code, { language }).value;
+      return code;
+      //return hljs.highlight(code, { language }).value;
     }
   })
 )
@@ -25,6 +27,55 @@ const commandHandlers = {};
 window.registerCommandHandler = function(command, handler) {
   commandHandlers[command] = handler;
 }
+
+function tryParse(markdown) {
+    try {
+      console.log('markdown =', markdown);
+      // Handle code blocks separately
+      const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+      const codeBlocks = [];
+      markdown = markdown.replace(codeBlockRegex, (match, lang, code) => {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        const highlightedCode = hljs.highlight(code.trim(), { language }).value;
+        const highlightedBlock = `
+${highlightedCode}
+`;
+        codeBlocks.push(highlightedBlock);
+        return `CODEBLOCK${codeBlocks.length - 1}`;
+      });
+      
+      // Parse the markdown
+      let parsed = marked.parse(markdown + "\n");
+      
+      // Replace code block placeholders
+      codeBlocks.forEach((block, index) => {
+        parsed = parsed.replace(`CODEBLOCK${index}`,
+        `<pre><code>${block}</code></pre>`);
+      });
+      
+      return parsed;
+    } catch (e) {
+      console.warn(e);
+      return `
+${markdown}
+`;
+    }
+}
+
+/*
+function tryParse(markdown) {
+    try {
+      console.log('markdown =',markdown)
+      markdown = markdown + "\n"
+      //markdown = markdown.replaceAll(/```/g, '\\`\\`\\`');
+      return marked.parse(markdown)
+    } catch (e) {
+      console.warn(e)
+      return `<pre><code>${markdown}</code></pre>`
+    }
+}
+*/
+
 
 class Chat extends BaseEl {
   static properties = {
@@ -80,8 +131,8 @@ class Chat extends BaseEl {
         console.log('cmd:', cmds)
         for (let cmd of cmds) {
           let md = null
-          if (cmd.say) md = marked.parse(cmd.say.text)
-          if (cmd.json_encoded_md) md = marked.parse(cmd.json_encoded_md.markdown)
+          if (cmd.say) md = tryParse(cmd.say.text)
+          if (cmd.json_encoded_md) md =  tryParse(cmd.json_encoded_md.markdown)
           if (md) {
             this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
             console.log("Added message:", md)
@@ -90,6 +141,7 @@ class Chat extends BaseEl {
           }
         }
       } catch (e) {
+        console.error(e)
         console.info('Could not parse as JSON. Assuming user message. Message:', msg.content)
 
         this.messages = [...this.messages, { content: msg.content, sender:'user', persona: msg.persona }];
