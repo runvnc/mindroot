@@ -74,7 +74,8 @@ async def load(plugin_file = 'plugins.json', app = None):
                         app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"/{plugin_name}/static")
                         print(termcolor.colored(f"Mounted static files for plugin: {plugin_name}", 'green'))
                 except ImportError as e:
-                    print(f"Failed to load plugin: {plugin_name}. Error: {e}")
+                    # print in red
+                    print(termcolor.colored(f"Failed to load plugin: {plugin_name}. Error: {e}", 'red'))
 
         await hook_manager.startup(app, context=None)
 

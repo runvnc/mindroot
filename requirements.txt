@@ -54,3 +54,5 @@ colored
 
 python-docx
 unstructured[all-docs]
+
+fal-client

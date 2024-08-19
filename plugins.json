@@ -5,11 +5,11 @@
   },
   {
     "name": "ah_simple_login",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_simple_home",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_bov",
@@ -17,11 +17,11 @@
   },
   {
     "name": "cre_login",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "cre_home",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_add_timestamp",
@@ -75,6 +75,10 @@
     "name": "ah_sd",
     "enabled": false
   },
+  {
+    "name": "ah_flux",
+    "enabled": true
+  }, 
   {
     "name": "ah_runpod_sd",
     "enabled": false
