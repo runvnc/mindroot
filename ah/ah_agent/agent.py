@@ -8,7 +8,7 @@ from jinja2 import Template
 from ..commands import command_manager
 from ..hooks import hook_manager
 from ..pipe import pipeline_manager
-from ..services import service 
+from ..services import service
 from ..services import service_manager
 import sys
 from ..check_args import *
@@ -35,7 +35,7 @@ async def get_agent_data(agent_name, context=None):
         agent_data = json.load(f)
 
     agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
-    agent_data["flags"] = agent_data["flags"] 
+    agent_data["flags"] = agent_data["flags"]
     agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
     return agent_data
 
@@ -66,7 +66,7 @@ class Agent:
             self.sys_core_template = sys_core_template
 
         self.sys_template = Template(self.sys_core_template)
- 
+
         self.cmd_handler = {}
         self.context = context
 
@@ -149,7 +149,7 @@ class Agent:
             buffer = buffer[1:]
         if buffer.endswith('},'):
             buffer = buffer[:-1]
-        return buffer 
+        return buffer
 
     async def parse_single_cmd(self, json_str, context, buffer, match=None):
         cmd_name = '?'
@@ -173,7 +173,7 @@ class Agent:
             # Handle the full command
             result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json_str, context=context)
             await context.command_result(cmd_name, result)
-  
+
             cmd = {"cmd": cmd_name, "result": result}
             # Remove the processed JSON object from the buffer
             if match is not None:
@@ -184,7 +184,7 @@ class Agent:
             logger.error("Error processing command", extra={"error": str(e)})
 
             json_str = '[' + json_str + ']'
-            
+
             return None, buffer
 
 
@@ -198,7 +198,7 @@ class Agent:
         async for part in stream:
             buffer += part
             logger.debug(f"Current buffer: ||{buffer}||")
-            
+
             commands, partial_cmd = parse_streaming_commands(buffer)
             if not isinstance(commands, list):
                 commands = [commands]
@@ -214,7 +214,7 @@ class Agent:
                         cmd_args = cmd[cmd_name]
                         logger.debug(f"Processing command: {cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
- 
+
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
                         full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})
@@ -246,7 +246,7 @@ class Agent:
     async def render_system_msg(self):
         logger.debug("Docstrings:")
         logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
-        formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
+        formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d')
 
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
