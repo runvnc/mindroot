@@ -9,7 +9,7 @@
   },
   {
     "name": "ah_simple_home",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_bov",
@@ -77,7 +77,7 @@
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_swapface",
