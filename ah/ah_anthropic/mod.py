@@ -9,6 +9,9 @@ client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 @service()
 async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperature=0.0, max_tokens=1500, num_gpu_layers=0):
     try:
+        # first make a deep copy of the messages so that original aren't modified
+        messages = [dict(message) for message in messages]
+
         model = "claude-3-5-sonnet-20240620"
         system = messages[0]['content']
         system = [{
@@ -20,8 +23,14 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
 
         # remove any existing cache_control
         for message in messages:
-            if 'cache_control' in message:
-                del message['cache_control']
+            # check if converted to dict
+            # if converted, remove any cache_control
+            if isinstance(message, dict):
+                if 'content' in message:
+                    if isinstance(message['content'], list):
+                        for content in message['content']:
+                            if 'cache_control' in content:
+                                del content['cache_control']
 
         for i in range(-1, -4, -1):
             if len(messages) >= abs(i):

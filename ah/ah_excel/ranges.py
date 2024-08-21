@@ -1,6 +1,7 @@
 import openpyxl
 from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.utils import get_column_letter, column_index_from_string
+import datetime
 
 def list_ranges(filename, sheet=None):
     """
@@ -54,13 +55,13 @@ def read_ranges(filename, range_list, include_empty=False, include_merge_info=Tr
             try:
                 range_string = workbook.defined_names[range_name].attr_text
                 print(f"Range string for {range_name}: {range_string}")
-                
+
                 # Handle invalid references
                 if '#REF!' in range_string:
                     print(f"Warning: Invalid reference in range '{range_name}'")
                     result[range_name] = None
                     continue
-                
+
                 # Parse the range string
                 if '!' in range_string:
                     sheet_name, cell_range = range_string.rsplit('!', 1)
@@ -75,13 +76,13 @@ def read_ranges(filename, range_list, include_empty=False, include_merge_info=Tr
                     ws = workbook[sheet_name]
                     merged_ranges = ws.merged_cells.ranges
                     cells = ws[cell_range]
-                    
+
                     result[range_name] = {
                         "data": [],
                         "merged_cells": [] if include_merge_info else None,
                         "repeated_values": []
                     }
-                    
+
                     if isinstance(cells, (openpyxl.cell.read_only.ReadOnlyCell, openpyxl.cell.cell.Cell)):
                         merged, merge_range = is_merged_cell(cells, merged_ranges)
                         cell_data = [cells.coordinate, cells.value if cells.value != '#DIV/0!' else None]
@@ -96,6 +97,15 @@ def read_ranges(filename, range_list, include_empty=False, include_merge_info=Tr
                             for cell in row:
                                 merged, merge_range = is_merged_cell(cell, merged_ranges)
                                 cell_data = [cell.coordinate, cell.value if cell.value != '#DIV/0!' else None]
+                                # make sure that cell_data is JSON serializable
+                                # for example, datetime is not, so
+                                # we convert it to string
+                                if isinstance(cell_data[1], datetime.datetime):
+                                    cell_data[1] = cell_data[1].isoformat()
+                                else:
+                                    cell_data[1] = cell_data[1]
+
+
                                 if include_empty or cell_data[1] is not None:
                                     row_data.extend(cell_data)
                                 if merged and include_merge_info and merge_range not in result[range_name]["merged_cells"]:
@@ -104,7 +114,7 @@ def read_ranges(filename, range_list, include_empty=False, include_merge_info=Tr
                                     value_count[cell_data[1]] = value_count.get(cell_data[1], 0) + 1
                             if row_data:
                                 result[range_name]["data"].append(row_data)
-                        
+
                         # Process repeated values
                         for value, count in value_count.items():
                             if count > 1:

@@ -37,13 +37,13 @@ async def get_persona_data(persona_name, context=None):
 async def pic_of_me(prompt="", context=None):
     """pic_of_me
 
-    Generate a picture of the persona given a detailed description of what they 
+    Generate a picture of the persona given a detailed description of what they
     they look like and what are doing, where they are, etc.. You will (usually) want to include
     the full text from the Appearance section of the Persona.
 
     The description should be very detailed and specific, and should include
     the persona's appearance such as what they are wearing, their expression, what they are doing.
-    Also include details about the background or scene where they are as well as the pose they are in. 
+    Also include details about the background or scene where they are as well as the pose they are in.
     Always use this instead of 'image' when creating an image of the persona!
 
     CRITICAL: include details about the image composition such as front-view, side-view, focus,
@@ -51,7 +51,7 @@ async def pic_of_me(prompt="", context=None):
     CRITICAL: put the most relevant and distinguishing aspects such as pose or anything unique about this
     image up front in the description.
 
-    
+
 
     Example:
 
@@ -68,6 +68,4 @@ async def pic_of_me(prompt="", context=None):
     except Exception as e:
         print("Error swapping face:", e)
         swapped = img
-    await context.insert_image(swapped)
-
-
+    await context.insert_image("/"+swapped)
