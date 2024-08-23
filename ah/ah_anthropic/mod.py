@@ -7,7 +7,7 @@ client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
 @service()
-async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperature=0.0, max_tokens=1500, num_gpu_layers=0):
+async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperature=0.0, max_tokens=2500, num_gpu_layers=0):
     try:
         # first make a deep copy of the messages so that original aren't modified
         messages = [dict(message) for message in messages]
