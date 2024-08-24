@@ -5,11 +5,11 @@
   },
   {
     "name": "ah_simple_login",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_simple_home",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "cre_bov",
@@ -17,11 +17,11 @@
   },
   {
     "name": "cre_login",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "cre_home",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_add_timestamp",
