@@ -41,7 +41,8 @@ async def stream_chat(model, messages=[], context=None, num_ctx=200000, temperat
                         "cache_control": { "type": "ephemeral" }
                     }]
 
-        original_stream = await client.beta.prompt_caching.messages.create(
+        #original_stream = await client.beta.prompt_caching.messages.create( 
+        original_stream = await client.messages.create(
                 model=model,
                 system=system,
                 messages=messages,
