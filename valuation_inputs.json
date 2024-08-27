@@ -1,0 +1,322 @@
+{
+  "property_data": {
+    "total_units": 49,
+    "unit_mix": {
+      "1 Bed": 43,
+      "Studio": 1,
+      "2 Bed": 5
+    },
+    "avg_unit_size": 666.0,
+    "net_rental_sf": 32634
+  },
+  "rent_roll_params": {
+    "units": [
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1830
+      },
+      {
+        "unit_type": "Studio",
+        "size": 404,
+        "rent": 1680
+      },
+      {
+        "unit_type": "2 Bed",
+        "size": 770,
+        "rent": 2100
+      },
+      {
+        "unit_type": "2 Bed",
+        "size": 770,
+        "rent": 1900
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1880
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1900
+      },
+      {
+        "unit_type": "2 Bed",
+        "size": 770,
+        "rent": 2200
+      },
+      {
+        "unit_type": "2 Bed",
+        "size": 770,
+        "rent": 2200
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1950
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 2095
+      },
+      {
+        "unit_type": "2 Bed",
+        "size": 770,
+        "rent": 2100
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1880
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      },
+      {
+        "unit_type": "1 Bed",
+        "size": 660,
+        "rent": 1980
+      }
+    ],
+    "laundry_income": 0,
+    "parking_income_per_unit": 0,
+    "vacancy_rate": 0,
+    "rent_growth_rate": 0,
+    "bad_debt_rate": 0
+  },
+  "expense_data": {
+    "current_expenses": {
+      "property_tax": 87570.06,
+      "insurance": 52347.14,
+      "utilities_non_water_sewer": 54000,
+      "maintenance": 59180,
+      "general_admin": 0,
+      "contracted_services": 8250,
+      "water_sewer": 86810.73,
+      "management": 0.04
+    },
+    "pro_forma_expenses": {
+      "property_tax": 0,
+      "insurance": 0,
+      "utilities": 0,
+      "maintenance": 0,
+      "general_admin": 0,
+      "contracted_services": 0,
+      "water_sewer": 55000,
+      "management": 0.04
+    },
+    "expense_growth_rate": 0.0
+  },
+  "financial_assumptions": {
+    "hold_period": 10,
+    "closing_costs": 4,
+    "sales_costs": 3,
+    "loan_to_cost": 60,
+    "interest_rate": 5.95,
+    "amortization": 30,
+    "loan_term": 10,
+    "debt_yield": 9.5,
+    "dscr": 1.25,
+    "loan_fee": 1,
+    "going_in_cap_rate": 6.5,
+    "exit_cap_rate": 5.75,
+    "preferred_return": 8,
+    "irr_hurdles": [
+      10,
+      15
+    ],
+    "promote_structure": [
+      [
+        0.8,
+        0.2
+      ],
+      [
+        0.7,
+        0.3
+      ],
+      [
+        0.6,
+        0.4
+      ]
+    ]
+  }
+}
