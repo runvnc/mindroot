@@ -21,3 +21,5 @@ imgs
 */__pycache__/*
 
 personas
+cre*.md
+valuation_inputs.json
