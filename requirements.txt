@@ -58,4 +58,4 @@ unstructured[all-docs]
 fal-client
 pyxirr
 
-
+numpy_financial
