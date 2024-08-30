@@ -11,6 +11,11 @@ from ..chatcontext import ChatContext
 router = APIRouter()
 
 def get_user_root(username: str):
+    if os.environ.get('AH_FILETREE_ROOT'):
+        root = os.environ.get('AH_FILETREE_ROOT')
+        # print in bright yellow
+        print('\033[93m' + f'Using AH_FILETREE_ROOT environment variable = {root}' + '\033[0m')
+        return root
     if username == 'admin':
         return '/'
     proj_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,7 +31,10 @@ def verify_path(user_root: str, path: str):
 
 def get_directory_structure(path):
     try:
+        #print in bright yellow
+        print('\033[93m' + f'get_directory_structure path = {path}')
         with os.scandir(path) as entries:
+            entries = [entry for entry in os.scandir(path) if not entry.name.startswith('.')]
             return {
                 'name': os.path.basename(path),
                 'type': 'directory',
@@ -42,6 +50,8 @@ def get_directory_structure(path):
             }
 
     except PermissionError:
+        # print details in red  
+        print('\033[91m' + f'PermissionError: {path}' + '\033[0m')
         return {
             'name': os.path.basename(path),
             'type': 'directory',
