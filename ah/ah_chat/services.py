@@ -110,6 +110,8 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
                         continue_processing = False
                     else:
                         out_results.append(result)
+                        # print found result in magenta
+                        termcolor.cprint("Found result: " + str(result), "magenta")
                         actual_results = True
                         continue_processing = True
                 else:

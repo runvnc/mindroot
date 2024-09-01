@@ -62,21 +62,6 @@ ${markdown}
     }
 }
 
-/*
-function tryParse(markdown) {
-    try {
-      console.log('markdown =',markdown)
-      markdown = markdown + "\n"
-      //markdown = markdown.replaceAll(/```/g, '\\`\\`\\`');
-      return marked.parse(markdown)
-    } catch (e) {
-      console.warn(e)
-      return `<pre><code>${markdown}</code></pre>`
-    }
-}
-*/
-
-
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
@@ -151,7 +136,8 @@ class Chat extends BaseEl {
 
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
-    this.messages = [...this.messages, { content: marked.parse("\n" + content), spinning:'no', sender, persona }];
+    const parsed = tryParse(content);
+    this.messages = [...this.messages, { content: parsed, spinning:'no', sender, persona }];
 
     if (sender === 'user') {
       const request = new Request(`/chat/${this.sessionid}/send`, {
@@ -206,7 +192,7 @@ class Chat extends BaseEl {
         this.msgSoFar = data.params
       }
       try {
-        this.messages[this.messages.length - 1].content = marked.parse(this.msgSoFar+'');
+        this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar+'');
       } catch (e) {
         console.error("Marked: could not parse:", e)
         console.log('msgSoFar:')
