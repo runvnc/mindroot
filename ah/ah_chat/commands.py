@@ -7,9 +7,9 @@ import json
 import nanoid
 import termcolor
 
-@command()
+x="""
+#@command()
 async def say(text="", context=None):
-    """
     Say something to the user or chat room.
     One sentence per command. If you want to say multiple sentences, use multiple commands.
 
@@ -41,11 +41,11 @@ async def say(text="", context=None):
 
     (The system now waits for the user reply)
 
-    """
     print("say command called, text = ", text)
-    await context.agent_output("new_message", {"content": text,
-                               "agent": context.agent['name'] })
+    #await context.agent_output("new_message", {"content": text,
+    #                           "agent": context.agent['name'] })
     return None
+"""
 
 @command()
 async def json_encoded_md(markdown="", context=None):
@@ -81,8 +81,8 @@ async def json_encoded_md(markdown="", context=None):
     DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
 
     """
-    await context.agent_output("new_message", {"content": markdown,
-                                            "agent": context.agent['name'] })
+    #await context.agent_output("new_message", {"content": markdown,
+    #                                        "agent": context.agent['name'] })
 
 @command()
 async def insert_image(image_url, context=None):

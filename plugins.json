@@ -28,6 +28,10 @@
     "enabled": false
   },
   {
+    "name": "ah_tts",
+    "enabled": true
+  },
+  {
     "name": "ah_concise_results",
     "enabled": true
   },

@@ -270,7 +270,9 @@ class Agent:
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         logger.info("Messages for chat", extra={"messages": messages})
-
+        
+        if os.environ.get("AH_DEFAULT_MAX_TOKENS"):
+            max_tokens = int(os.environ.get("AH_DEFAULT_MAX_TOKENS"))
         try:
             tmp_data = { "messages": messages }
             tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
