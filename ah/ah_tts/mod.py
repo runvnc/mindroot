@@ -58,19 +58,14 @@ async def say(text="", context=None):
     rnd_tmp_file = "/tmp/" + nanoid.generate() + ".wav"
     #voice_file = script_path.replace("mod.py", "voice.wav")
     voice_file = os.environ.get("AH_DEFAULT_VOICE")
-    await text_to_wav_file(text, voice_file, "en", rnd_tmp_file)
-    # need to play the wave file
-    # in a playlist
-    # make sure the previous one finishes playing before starting the next
-    # we can do this by waiting for the previous one to finish
-    # we will use xdg-open to play the file
-    # we will use aplay to play the file
+    voice_file2 = os.environ.get("AH_DEFAULT_VOICE2")
+    #voice_file = None
+    await text_to_wav_file(text, [voice_file, voice_file2], "en", rnd_tmp_file)
+    # play in background with aplay
     os.system("aplay " + rnd_tmp_file)
-    await asyncio.sleep(0.1)
+    await context.agent_output("new_message", {"content": text,
+                               "agent": context.agent['name'] })
+    await asyncio.sleep(0.05)
     return None
 
-
-
-#await context.agent_output("new_message", {"content": text,
-    #                           "agent": context.agent['name'] })
 

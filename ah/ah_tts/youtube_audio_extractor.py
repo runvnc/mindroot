@@ -29,9 +29,10 @@ def download_and_extract_audio(url, start_time, end_time, output_file):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
+    print(f"start: {start_time}, end: {end_time}")
     # Extract portion of audio using ffmpeg
     input_file = 'temp_audio.wav'
-    stream = ffmpeg.input(input_file, ss=start_time, t=end_time)
+    stream = ffmpeg.input(input_file, ss=start_time, to=end_time)
     stream = ffmpeg.output(stream, output_file, acodec='pcm_s16le')
     ffmpeg.run(stream)
 

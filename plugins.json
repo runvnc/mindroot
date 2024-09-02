@@ -8,6 +8,10 @@
     "enabled": false
   },
   {
+    "name": "ah_tts",
+    "enabled": true
+  },
+  {
     "name": "ah_simple_home",
     "enabled": false
   },
@@ -27,11 +31,7 @@
     "name": "ah_add_timestamp",
     "enabled": false
   },
-  {
-    "name": "ah_tts",
-    "enabled": true
-  },
-  {
+ {
     "name": "ah_concise_results",
     "enabled": true
   },
@@ -49,7 +49,7 @@
   },
   {
     "name": "ah_openrouter",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_openai",
@@ -57,7 +57,7 @@
   },
   {
     "name": "ah_anthropic",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_chat",
@@ -81,15 +81,15 @@
   },
   {
     "name": "ah_flux",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_runpod_sd",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_swapface",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_faceswap",
