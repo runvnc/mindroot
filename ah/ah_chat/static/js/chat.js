@@ -79,9 +79,12 @@ class Chat extends BaseEl {
     super();
     console.log({ args });
     this.messages = [];
+    this.userScrolling = false;
+    window.userScrolling = false;
     console.log('Chat component created');
     console.log(this);
   }
+
 
   firstUpdated() {
     console.log('First updated');
@@ -93,6 +96,29 @@ class Chat extends BaseEl {
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
     this.sse.addEventListener('finished_chat', this._finished.bind(this));
+
+    // when the user scrolls in the chat log, stop auto-scrolling to the bottom
+    this.shadowRoot.querySelector('.chat-log').addEventListener('scroll', () => {
+      console.log('User scrolling');
+      console.log(this.userScrolling);
+      let chatLog = this.shadowRoot.querySelector('.chat-log');
+      console.log('difference:',chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight))
+
+      if (this.shadowRoot.querySelector('.chat-log').scrollTop == this.shadowRoot.querySelector('.chat-log').scrollHeight - this.shadowRoot.querySelector('.chat-log').clientHeight) {
+        this.userScrolling = false;
+        window.userScrolling = false;
+        console.log("Set userScrolling to false")
+                console.log('chatlog scrollTop:', this.shadowRoot.querySelector('.chat-log').scrollTop)
+        console.log('chatlog scrollHeight:', this.shadowRoot.querySelector('.chat-log').scrollHeight)
+
+      } else {
+        console.log('chatlog scrollTop:', this.shadowRoot.querySelector('.chat-log').scrollTop)
+        console.log('chatlog scrollHeight:', this.shadowRoot.querySelector('.chat-log').scrollHeight)
+        this.userScrolling = true;
+        window.userScrolling = true;
+        console.log('userScrolling!')
+      }
+    })
     this.loadHistory()
   }
 
@@ -140,6 +166,9 @@ class Chat extends BaseEl {
     this.messages = [...this.messages, { content: parsed, spinning:'no', sender, persona }];
 
     if (sender === 'user') {
+      this.userScrolling = false;
+      window.userScrolling = false;
+      console.log("Set userScrolling to false")
       const request = new Request(`/chat/${this.sessionid}/send`, {
         method: 'POST',
         headers: {
@@ -260,12 +289,32 @@ class Chat extends BaseEl {
   }
 
   _scrollToBottom() {
-    //const chatLog = this.shadowRoot.querySelector('.chat-log');
-    const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
-    const lastEl = lastMessageEls[lastMessageEls.length-1]
-    lastEl.scrollIntoView(false)
-    //chatLog.scrollTop = chatLog.scrollHeight;
+    const chatLog = this.shadowRoot.querySelector('.chat-log');
+    const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
+    const isAtBottom = difference > - 250
+    console.log('isAtBottom:', isAtBottom)
+    console.log('scrollHeight:', chatLog.scrollHeight)
+    console.log('clientHeight:', chatLog.clientHeight)
+    console.log('scrollTop:', chatLog.scrollTop)
+    console.log('difference:', chatLog.scrollHeight - chatLog.clientHeight)
+    if (isAtBottom) {
+      console.log("We are at the bottom, autoscrolling")
+      const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
+      const lastEl = lastMessageEls[lastMessageEls.length-1];
+      lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    } else {
+      console.log("We are not at the bottom, not autoscrolling")
+    }
   }
+  /*
+  _scrollToBottom() {
+    //const chatLog = this.shadowRoot.querySelector('.chat-log');
+    if (!window.userScrolling) {
+      const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
+      const lastEl = lastMessageEls[lastMessageEls.length-1]
+      lastEl.scrollIntoView(false)
+    }
+  } */
 
   _render() {
     return html`
