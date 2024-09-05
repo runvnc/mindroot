@@ -64,6 +64,10 @@
     "enabled": true
   },
   {
+    "name": "ah_google",
+    "enabled": true
+  },
+  {
     "name": "ah_persona",
     "enabled": false
   },

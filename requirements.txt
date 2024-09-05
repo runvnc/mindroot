@@ -60,3 +60,7 @@ pyxirr
 
 numpy_financial
 json5
+beautifulsoup4
+
+trafilatura
+
