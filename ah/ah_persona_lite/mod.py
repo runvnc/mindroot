@@ -26,12 +26,15 @@ async def get_persona_data(persona_name, context=None):
     persona_data['avatar_image_path'] = os.path.join(persona_path, 'avatar.png')
     persona_data['face_ref_image_path'] = os.path.join(persona_path, 'faceref.png')
 
-    # if faceref image does not exist, use the avatar image
     if not os.path.exists(persona_data['face_ref_image_path']):
         persona_data['face_ref_image_path'] = persona_data['avatar_image_path']
 
-    return persona_data
+    persona_data['voice_samples'] = []
+    for file in os.listdir(persona_path):
+        if file.endswith(".wav"):
+            persona_data['voice_samples'].append(os.path.join(persona_path, file)
 
+    return persona_data
 
 @command()
 async def pic_of_me(prompt="", context=None):

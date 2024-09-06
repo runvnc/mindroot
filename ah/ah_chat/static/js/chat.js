@@ -45,7 +45,7 @@ ${highlightedCode}
       });
       
       // Parse the markdown
-      let parsed = marked.parse(markdown + "\n");
+      let parsed = marked.parse(markdown + "\n", { sanitize: false });
       
       // Replace code block placeholders
       codeBlocks.forEach((block, index) => {

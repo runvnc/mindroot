@@ -28,6 +28,11 @@ async def get_persona_data(persona_name, context=None):
     # if faceref image does not exist, use the avatar image
     if not os.path.exists(persona_data['face_ref_image_path']):
         persona_data['face_ref_image_path'] = persona_data['avatar_image_path']
+    
+    persona_data['voice_samples'] = []
+    for file in os.listdir(persona_path):
+        if file.endswith(".wav"):
+            persona_data['voice_samples'].append(os.path.join(persona_path, file)
 
     return persona_data
 

@@ -56,16 +56,18 @@ async def say(text="", context=None):
     # get voice.wav from same dir as script file_path
     script_path = __file__
     rnd_tmp_file = "/tmp/" + nanoid.generate() + ".wav"
-    #voice_file = script_path.replace("mod.py", "voice.wav")
-    voice_file = os.environ.get("AH_DEFAULT_VOICE")
-    voice_file2 = os.environ.get("AH_DEFAULT_VOICE2")
-    #voice_file = None
-    await text_to_wav_file(text, [voice_file, voice_file2], "en", rnd_tmp_file)
+
+    try:
+        voice_samples = context.agent['persona']['voice_samples']
+    except:
+        throw("No voice samples found in persona")
+
+    await text_to_wav_file(text, voice_samples, "en", rnd_tmp_file)
     # play in background with aplay
     os.system("aplay " + rnd_tmp_file)
     await context.agent_output("new_message", {"content": text,
                                "agent": context.agent['name'] })
-    await asyncio.sleep(0.05)
+    await asyncio.sleep(0.01)
     return None
 
 
