@@ -32,7 +32,7 @@ async def get_persona_data(persona_name, context=None):
     persona_data['voice_samples'] = []
     for file in os.listdir(persona_path):
         if file.endswith(".wav"):
-            persona_data['voice_samples'].append(os.path.join(persona_path, file)
+            persona_data['voice_samples'].append(os.path.join(persona_path, file))
 
     return persona_data
 

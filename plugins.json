@@ -85,7 +85,7 @@
   },
   {
     "name": "ah_flux",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_runpod_sd",

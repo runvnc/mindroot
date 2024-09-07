@@ -60,6 +60,9 @@ async def say(text="", context=None):
     try:
         voice_samples = context.agent['persona']['voice_samples']
     except:
+        print(context)
+        print(context.agent)
+        
         throw("No voice samples found in persona")
 
     await text_to_wav_file(text, voice_samples, "en", rnd_tmp_file)

@@ -86,6 +86,7 @@ class ProviderManager:
                 if func_info['provider'] == preferred_provider:
                     function_info = func_info
                     break
+            function_info = self.functions[name][0]
 
         if function_info is None:
             raise ValueError(f"1. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
