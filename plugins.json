@@ -1,142 +1,44 @@
-[
-  {
-    "name": "ah_jwt_auth",
-    "enabled": true
+{
+  "core": {
+    "ah_chat": { "enabled": true },
+    "ah_agent": { "enabled": true }
   },
-  {
-    "name": "ah_simple_login",
-    "enabled": false
+  "local": {
+    "cre_bov": { "enabled": true },
+    "cre_login": { "enabled": true },
+    "cre_home": { "enabled": true }
   },
-  {
-    "name": "ah_tts",
-    "enabled": false
-  },
-  {
-    "name": "ah_simple_home",
-    "enabled": false
-  },
-  {
-    "name": "cre_bov",
-    "enabled": true
-  },
-  {
-    "name": "cre_login",
-    "enabled": true
-  },
-  {
-    "name": "cre_home",
-    "enabled": true
-  },
-  {
-    "name": "ah_add_timestamp",
-    "enabled": false
-  },
-  {
-    "name": "ah_concise_results",
-    "enabled": true
-  },
-  {
-    "name": "ah_max_context",
-    "enabled": false
-  },
-  {
-    "name": "ah_word",
-    "enabled": true
-  },
-  {
-    "name": "ah_togetherai",
-    "enabled": false
-  },
-  {
-    "name": "ah_openrouter",
-    "enabled": false
-  },
-  {
-    "name": "ah_openai",
-    "enabled": false
-  },
-  {
-    "name": "ah_anthropic",
-    "enabled": true
-  },
-  {
-    "name": "ah_chat",
-    "enabled": true
-  },
-  {
-    "name": "ah_google",
-    "enabled": true
-  },
-  {
-    "name": "ah_persona",
-    "enabled": false
-  },
-  {
-    "name": "ah_persona_lite",
-    "enabled": true
-  },
-  {
-    "name": "ah_img_tags",
-    "enabled": false
-  },
-  {
-    "name": "ah_sd",
-    "enabled": false
-  },
-  {
-    "name": "ah_flux",
-    "enabled": false
-  },
-  {
-    "name": "ah_runpod_sd",
-    "enabled": false
-  },
-  {
-    "name": "ah_swapface",
-    "enabled": false
-  },
-  {
-    "name": "ah_faceswap",
-    "enabled": false
-  },
-  {
-    "name": "ah_ollama",
-    "enabled": false
-  },
-  {
-    "name": "ah_think",
-    "enabled": true
-  },
-  {
-    "name": "ah_files",
-    "enabled": true
-  },
-  {
-    "name": "ah_excel",
-    "enabled": true
-  },
-  {
-    "name": "ah_shell",
-    "enabled": true
-  },
-  {
-    "name": "ah_light_theme",
-    "enabled": false
-  },
-  {
-    "name": "ah_filetree",
-    "enabled": true
-  },
-  {
-    "name": "ah_history",
-    "enabled": true
-  },
-  {
-    "name": "ah_powerpoint",
-    "enabled": true
-  },
-  {
-    "name": "ah_download_link",
-    "enabled": true
+  "installed": {
+    "ah_jwt_auth": { "enabled": true },
+    "ah_simple_login": { "enabled": false },
+    "ah_tts": { "enabled": false },
+    "ah_simple_home": { "enabled": false },
+    "ah_add_timestamp": { "enabled": false },
+    "ah_concise_results": { "enabled": true },
+    "ah_max_context": { "enabled": false },
+    "ah_word": { "enabled": true },
+    "ah_togetherai": { "enabled": false },
+    "ah_openrouter": { "enabled": false },
+    "ah_openai": { "enabled": false },
+    "ah_anthropic": { "enabled": true },
+    "ah_google": { "enabled": true },
+    "ah_persona": { "enabled": false },
+    "ah_persona_lite": { "enabled": true },
+    "ah_img_tags": { "enabled": false },
+    "ah_sd": { "enabled": false },
+    "ah_flux": { "enabled": false },
+    "ah_runpod_sd": { "enabled": false },
+    "ah_swapface": { "enabled": false },
+    "ah_faceswap": { "enabled": false },
+    "ah_ollama": { "enabled": false },
+    "ah_think": { "enabled": true },
+    "ah_files": { "enabled": true },
+    "ah_excel": { "enabled": true },
+    "ah_shell": { "enabled": true },
+    "ah_light_theme": { "enabled": false },
+    "ah_filetree": { "enabled": true },
+    "ah_history": { "enabled": true },
+    "ah_powerpoint": { "enabled": true },
+    "ah_download_link": { "enabled": true }
   }
-]
+}
