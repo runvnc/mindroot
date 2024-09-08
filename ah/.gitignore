@@ -1,1 +1,4 @@
-data
+
+# Ignore local and installed components
+local/
+installed/
