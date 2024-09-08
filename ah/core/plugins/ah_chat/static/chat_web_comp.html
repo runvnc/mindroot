@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="static/main.css" rel="stylesheet">
+  <title>AgentHost v0.1</title>
+
+  <style>
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+  text: white;
+  background-color: black;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+input, button, textarea, select {
+  font: inherit;
+}
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+#root, #__next {
+  isolation: isolate;
+}
+ 
+.chat-group * {
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.chat-group {
+/* neon green with bloom effect: */
+  background-color: #00ff00;
+  box-shadow: 0 0 1rem 0.5rem #00ff00;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1rem;
+}
+
+  </style>
+</head>
+<body>
+  <div id="chat-group">
+      <div id="chat">
+        <!-- messages -->
+      </div>
+      <form method="post" target="/chat/{{CHAT_ID}}/send" id="chat-form">
+      <textarea id="user-in" type="text" name="message" placeholder="Type your message...">
+      <button id="send">Send</button>
+    </form>
+  </div>
+
+  <template id="ai-msg">
+      <div class="msg ai">
+        <img src="static/ai.png" alt="AI" width="50" height="50">
+        <div class="streamto"></div>
+      </div>
+  </template>
+
+  <script>
+    const getEl = (id) => document.getElementById(id)
+    const selectEl = (selector) => document.querySelector(selector)
+      
+    getEl('send').addEventListener('click', () => {
+      setTimeout( () => { getEl('user-in').value = '' }, 30)
+    });
+
+    events = new EventSource('/chat/{{CHAT_ID}}/events')
+
+    const scrollChat = () => {
+      getEl('chat').scrollTop = getEl('chat').scrollHeight
+    }
+
+    var mdRender = new marked.Renderer()
+    mdRender.code = (code, lang) => {
+      if (lang == 'math') {
+          return katex.renderToString(code, { throwOnError: false })
+      } else {
+          return `<pre><code>${code}</code></pre>`;
+      }
+    }
+
+    events.on('add_chat', (ev) => {
+      let el = selectEl('.streamto').pop()
+      el.dataset.md = el.dataset.md ? el.dataset.md + ev.data : ev.data
+      el.innerHTML = marked(el.dataset.md, { renderer: mdRender })
+      scrollChat()
+    });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="static/main.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+  <title>AgentHost v0.1</title>
+</head>
+<body class="bg-black dark">
+  <div class="container mx-auto px-4 shadow-lg rounded-lg border-4 border-green-500">
+    <div hx-ext="sse" sse-connect="/chat/events" hx-swap="beforeend" sse-swap="new_message"
+        id="chat-container" class="bg-box shadow-lg p-theme">
+      <!-- Chat messages will be dynamically added here -->
+    </div>
+    <form hx-post="/chat/send" hx-target="#chat-container" hx-swap="beforeend" class="flex">
+      <input id="message-input" type="text" name="message" class="flex-grow dark bg-black focus:bg-black active:bg-black hover:bg-black py-2 text-secondary text-white focus:outline-none" placeholder="Type your message...">
+      <button id="send-button" class="bg-primary hover:bg-black active:bg-black rounded-r-theme px-theme py-2 text-green-500 font-semibold focus:outline-none focus:ring-2 focus:ring-primary" >
+          Send</button>
+    </form>
+  </div>
+
+  <script>
+    /* document.getElementById('send-button').addEventListener('click', function() {
+      var input = document.getElementById('message-input');
+      input.value = '';
+    }); */
+
+    var chatContainer = document.getElementById('chat-container');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    htmx.on('htmx:afterSwap', function(event) {
+      if (event.target.id === 'chat-container') {
+        event.target.scrollTop = event.target.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
