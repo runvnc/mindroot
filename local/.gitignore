@@ -1,0 +1,11 @@
+agents/*
+!agents/.gitkeep
+
+models/*
+!models/.gitkeep
+
+personas/*
+!personas/.gitkeep
+
+plugins/*
+!plugins/.gitkeep
