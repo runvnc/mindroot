@@ -27,6 +27,8 @@ async def think(thoughts="", context=None):
 
     [ { "think": { "thoughts": "[Line 1]\n[Line 2]\n ..." } ]
 
+    Returns: None
+
     Think through the ENTIRE problem and compose and analyze your planned commands
     until you are satisfied that you have correctly finished.
 
@@ -50,6 +52,8 @@ async def think(thoughts="", context=None):
     ALSO IMPORTANT: remember to escape newlines in your thoughts, to ensure valid JSON for the full comand list.
 
     The output commands after this should use work you have already prepared and considered carefully in this think() command.
+
+    NOTE: Do NOT end a command list with think() -- if you do so, the command chain will exit!
 
     """
     return None
