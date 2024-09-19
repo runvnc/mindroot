@@ -53,7 +53,7 @@ async def write(fname, text, context=None):
     return True
 
 @command()
-async def read(fnamei, context=None):
+async def read(fname, context=None):
     """Read text from a file.
     You should know the full path.
     Example:

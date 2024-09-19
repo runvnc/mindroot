@@ -56,6 +56,7 @@ def analyze_structure(ws):
         # Get all merged cell ranges
         merged_ranges = ws.merged_cells.ranges
 
+        print("analyzing cells") 
         # Analyze cells
         for row in range(1, ws.max_row + 1):
             for col in range(1, ws.max_column + 1):
@@ -75,6 +76,7 @@ def analyze_structure(ws):
                     else:
                         structure["text_cells"].append(cell.coordinate)
 
+        print("analyzing data")
         # Analyze data ranges and empty columns/rows
         data_ranges = defaultdict(lambda: {"start": None, "end": None})
         for col in range(1, ws.max_column + 1):
@@ -92,17 +94,23 @@ def analyze_structure(ws):
             elif data_ranges[col_letter]["start"] is not None:
                 structure["data_ranges"].append(f"{col_letter}{data_ranges[col_letter]['start']}:{col_letter}{data_ranges[col_letter]['end']}")
 
+        print("detecting empty rows")
         # Detect empty rows
         for row in range(1, ws.max_row + 1):
             if all(ws.cell(row=row, column=col).value is None for col in range(1, ws.max_column + 1)):
                 structure["empty_rows"].append(row)
 
+        print("detecting merged cells")
         # Detect merged cells
         structure["merged_cells"] = [str(merged_cell) for merged_cell in merged_ranges]
 
-        # Detect info boxes
-        structure["info_boxes"] = detect_info_boxes(ws, structure["headers"])
+        print("detecting info boxes")
 
+        # Detect info boxes
+        # Can be very slow and doesn't work for all sheets
+        #structure["info_boxes"] = detect_info_boxes(ws, structure["headers"])
+
+        print("done analyzing")
         # Limit the number of cells reported to prevent excessive output
         max_cells = 1000
         if len(structure["text_cells"]) > max_cells:
@@ -111,6 +119,7 @@ def analyze_structure(ws):
         if len(structure["numeric_cells"]) > max_cells:
             structure["numeric_cells"] = structure["numeric_cells"][:max_cells]
             structure["numeric_cells"].append(f"... and {len(structure['numeric_cells']) - max_cells} more")
+        print("done analyzing sheet")
 
         return structure
     except Exception as e:
