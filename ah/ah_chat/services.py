@@ -10,6 +10,7 @@ import traceback
 import asyncio
 import json
 import termcolor
+import os
 sse_clients = {}
 
 @service()
@@ -81,8 +82,14 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
     while continue_processing and iterations < max_iterations:
         iterations += 1
         continue_processing = False
+        print(1)
         try:
+            if os.environ.get("DEFAULT_LLM_MODEL") is not None:
+                print(2)
+                context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
+            print(4)
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+            print(5)
             try:
                 tmp_data3 = { "results": full_cmds }
                 tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)

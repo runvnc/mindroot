@@ -53,11 +53,11 @@
   },
   {
     "name": "ah_openai",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "ah_anthropic",
-    "enabled": true
+    "enabled": false
   },
   {
     "name": "ah_chat",
