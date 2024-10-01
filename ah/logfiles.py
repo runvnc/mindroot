@@ -40,11 +40,15 @@ def get_log_files(start_time, end_time):
         current_time += timedelta(hours=1)
     return files_to_read
 
-async def get_logs(start_time, end_time, limit=1000, cursor=None):
+async def get_logs(start_time, end_time, limit=30000, cursor=None):
     # Ensure start_time and end_time are naive
-    #start_time = start_time.replace(tzinfo=None)
-    #end_time = end_time.replace(tzinfo=None)
-    
+    start_time = start_time.replace(tzinfo=None)
+    end_time = end_time.replace(tzinfo=None)
+
+    print("get_logs:")
+    print(start_time)
+    print(end_time)
+
     files = get_log_files(start_time, end_time)
     logs = []
     next_cursor = None
