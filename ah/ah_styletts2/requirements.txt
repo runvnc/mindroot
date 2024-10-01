@@ -1,4 +1,0 @@
-styletts2
-pyaudio
-flask
-openai
