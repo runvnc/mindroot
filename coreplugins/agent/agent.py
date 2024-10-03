@@ -16,6 +16,7 @@ from ..ah_agent.command_parser import parse_streaming_commands
 from datetime import datetime
 import pytz
 import traceback
+from ..logfiles import logger
 
 formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
 @service()
@@ -246,7 +247,9 @@ class Agent:
     async def render_system_msg(self):
         logger.debug("Docstrings:")
         logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
-        formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d')
+        now = datetime.now()
+
+        formatted_time = formatted_string = now.strftime("%Y-%m-%d %H:%M:%S %Z%z")
 
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
@@ -303,4 +306,3 @@ class Agent:
         logger.debug(await self.render_system_msg())
         return ret, full_cmds
 
-from ..logfiles import logger

@@ -1,5 +1,5 @@
 import inspect
-from .providers import HookManager
+from lib.providers import HookManager
 
 hook_manager = HookManager()
 

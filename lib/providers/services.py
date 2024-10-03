@@ -1,6 +1,6 @@
 import os
 import inspect
-from .providers import ProviderManager
+from lib.providers import ProviderManager
 
 service_manager = ProviderManager()
 

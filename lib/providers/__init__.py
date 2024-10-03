@@ -3,9 +3,9 @@ import traceback
 import json
 import logging
 from typing import List, Dict, Optional
-from .data.preferences import find_preferred_models
-from .data.organize_models import uses_models, matching_models
-from .utils.check_args import *
+from lib.db.preferences import find_preferred_models
+from lib.db.organize_models import uses_models, matching_models
+from lib.utils.check_args import *
 import sys
 from termcolor import colored
 

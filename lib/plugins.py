@@ -9,11 +9,11 @@ import subprocess
 from starlette.middleware.base import BaseHTTPMiddleware
 from .route_decorators import public_route
 import termcolor
-from .hooks import hook_manager
+from lib.providers.hooks import hook_manager
 
-from . import hooks
-from . import commands
-from . import services
+from lib.providers import hooks
+from lib.providers import commands
+from lib.providers import services
 
 app_instance = None
 
@@ -28,6 +28,8 @@ def get_plugin_path(plugin_name):
     
     if plugin_info['source'] == 'local':
         return plugin_info['source_path']
+    elif plugin_info['source'] == 'core':
+        return f"coreplugins.{plugin_name}"
     else:
         # For PyPI and GitHub installations, use importlib to find the package
         from importlib.util import find_spec
@@ -106,18 +108,23 @@ def plugin_update(plugin_name):
     print(f"Failed to update plugin {plugin_name}.")
     return False
 
-def load_plugin_config():
+async def load_plugin_config():
     config_path = 'plugin_config.json'
-    if os.path.exists(config_path):
-        with open(config_path, 'r') as f:
-            return json.load(f)
-    return {'installed_plugins': {}}
 
-def update_plugin_config(plugin_name, source, source_path):
+    if not (os.path.exists(config_path)):
+        await create_default_plugin_config()
+
+    with open(config_path, 'r') as f:
+        return json.load(f)
+
+async def update_plugin_config(plugin_name, source, source_path):
     config_path = 'plugin_config.json'
+    if not os.path.exists(config_path):
+        await create_default_plugin_config()
+
     with open(config_path, 'r') as f:
         config = json.load(f)
-    
+
     config['installed_plugins'][plugin_name] = {
         'installed': True,
         'source': source,
@@ -125,6 +132,17 @@ def update_plugin_config(plugin_name, source, source_path):
     }
     
     with open(config_path, 'w') as f:
+        json.dump(config, f, indent=2)
+
+async def create_default_plugin_config():
+    config = {
+            'installed_plugins': {
+                'chat': {'installed': True, 'source': 'core'},
+                'agent': {'installed': True, 'source': 'core'},
+                'templates': {'installed': True, 'source': 'core'}
+            }
+        }
+    with open('plugin_config.json', 'w') as f:
         json.dump(config, f, indent=2)
 
 async def load(plugin_file = 'plugins.json', app = None):
@@ -138,8 +156,11 @@ async def load(plugin_file = 'plugins.json', app = None):
         else:
             raise Exception("No FastAPI app instance provided or found in plugin loader")
 
-    config = load_plugin_config()
+    config = await load_plugin_config()
     enabled_plugins = list_enabled(plugin_file)
+    print("Loading plugins...")
+    print(config)
+    print(enabled_plugins)
     for plugin_name, category in enabled_plugins:
         plugin_info = config['installed_plugins'].get(plugin_name)
         if not plugin_info or not plugin_info['installed']:
@@ -156,7 +177,10 @@ async def load(plugin_file = 'plugins.json', app = None):
             continue
         
         try:
-            importlib.import_module(f"{plugin_path}.mod")
+            try:
+                module = importlib.import_module(plugin_path)
+            except ImportError:
+                importlib.import_module(f"{plugin_path}.mod")
             print(termcolor.colored(f"Loaded plugin: {plugin_name} ({category})", 'green'))
             
             load_middleware(app, plugin_name, plugin_path)

@@ -1,6 +1,6 @@
 import inspect
 import os
-from .providers import ProviderManager
+from lib.providers import ProviderManager
 
 command_manager = ProviderManager()
 

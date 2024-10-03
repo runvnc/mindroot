@@ -1,7 +1,8 @@
 {
   "core": {
-    "ah_chat": { "enabled": true },
-    "ah_agent": { "enabled": true }
+    "chat": { "enabled": true },
+    "agent": { "enabled": true },
+    "templates": { "enabled": true }
   },
   "local": {
     "cre_bov": { "enabled": true },
