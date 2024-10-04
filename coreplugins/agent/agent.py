@@ -5,18 +5,18 @@ import re
 import json
 from json import JSONDecodeError
 from jinja2 import Template
-from ..commands import command_manager
-from ..hooks import hook_manager
-from ..pipe import pipeline_manager
-from ..services import service
-from ..services import service_manager
+from lib.providers.commands import command_manager
+from lib.providers.hooks import hook_manager
+from lib.pipelines.pipe import pipeline_manager
+from lib.providers.services import service
+from lib.services import service_manager
 import sys
-from ..check_args import *
-from ..ah_agent.command_parser import parse_streaming_commands
+from lib.check_args import *
+from .command_parser import parse_streaming_commands
 from datetime import datetime
 import pytz
 import traceback
-from ..logfiles import logger
+from lib.logging.logfiles import logger
 
 formatted_time = pytz.timezone('America/New_York').localize(datetime.now()).strftime('%Y-%m-%d %H:%M:%S %Z%z')
 @service()

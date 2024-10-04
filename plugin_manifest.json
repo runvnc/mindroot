@@ -1,0 +1,20 @@
+{
+  "plugins": {
+    "core": {
+      "chat": {
+        "enabled": true,
+        "source": "core"
+      },
+      "agent": {
+        "enabled": true,
+        "source": "core"
+      },
+      "templates": {
+        "enabled": true,
+        "source": "core"
+      }
+    },
+    "local": {},
+    "installed": {}
+  }
+}

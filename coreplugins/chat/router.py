@@ -4,9 +4,9 @@ from sse_starlette.sse import EventSourceResponse
 from .models import Message
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
 from lib.templates import render
-from ..plugins import list_enabled
+from lib.plugins import list_enabled
 import nanoid
-from .commands import *
+from lib.providers.commands import *
 import asyncio
 from .plugin_manager import router as plugin_manager_router
 

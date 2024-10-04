@@ -1,10 +1,10 @@
-from ..services import service, service_manager
-from ..commands import command_manager
-from ..hooks import hook_manager
-from ..pipe import pipeline_manager, pipe
-from ..chatcontext import ChatContext
-from ..chatlog import ChatLog
-from ..ah_agent import agent
+from lib.providers.services import service, service_manager
+from lib.providers.commands import command_manager
+from lib.providers.hooks import hook_manager
+from lib.pipelines.pipe import pipeline_manager, pipe
+from lib.chatcontext import ChatContext
+from lib.chatlog import ChatLog
+from ..agent import agent
 import colored
 import traceback
 import asyncio

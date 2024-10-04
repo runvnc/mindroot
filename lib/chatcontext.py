@@ -1,5 +1,5 @@
-from .services import service_manager
-from .commands import command_manager
+from lib.providers.services import service_manager
+from lib.providers.commands import command_manager
 import os
 import json
 from .chatlog import ChatLog
