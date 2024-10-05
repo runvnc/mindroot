@@ -62,6 +62,17 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         current_partial = None
     return complete_commands, current_partial
 
+def invalid_start_format(str):
+    # string is supposed to be an array in JSON format
+    # if it starts with a non-whitespace character that is not [
+    # then it is invalid and we return true
+    # we might want to use a regex
+    # try to match anything that is not a whitespace character or [
+    # if it matches, then it is invalid and return True
+    is_invalid = re.match(r'^[^\s\[]', str)
+    return is_invalid
+
+
 # Test cases
 import unittest
 

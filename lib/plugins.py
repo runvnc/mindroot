@@ -63,6 +63,15 @@ def list_enabled(include_category=True):
                 print(f"{plugin_name} is disabled ({category})")
     return enabled_list
 
+def toggle_plugin_state(plugin_name, enabled):
+    manifest = load_plugin_manifest()
+    for category in manifest['plugins']:
+        if plugin_name in manifest['plugins'][category]:
+            manifest['plugins'][category][plugin_name]['enabled'] = enabled
+            with open(MANIFEST_FILE, 'w') as f:
+                json.dump(manifest, f, indent=2)
+            return True
+    return False
 
 def load_middleware(app, plugin_name, plugin_path):
     try:
@@ -72,7 +81,6 @@ def load_middleware(app, plugin_name, plugin_path):
             print(f"Added middleware for plugin: {plugin_name}")
     except ImportError as e:
         print(f"No middleware loaded for plugin: {plugin_name}")
-
 def check_plugin_dependencies(plugin_path):
     requirements_file = os.path.join(plugin_path, 'requirements.txt')
     if os.path.exists(requirements_file):
@@ -142,7 +150,6 @@ def update_plugin_manifest(plugin_name, source, source_path):
     
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
-
 def create_default_plugin_manifest():
     manifest = {
         'plugins': {
@@ -226,7 +233,6 @@ async def load(app = None):
         if category != 'core' and not check_plugin_dependencies(plugin_path):
             print(f"Dependencies not met for plugin {plugin_name}. Please update it.")
             continue
-        
         try:
             try:
                 print(f"DEBUG: Attempting to import module for {plugin_name}")

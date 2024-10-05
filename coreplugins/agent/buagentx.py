@@ -5,18 +5,18 @@ import re
 import json
 from json import JSONDecodeError
 from jinja2 import Template
-from lib.providers.commands import command_manager
-from lib.providers.hooks import hook_manager
-from lib.pipelines import pipeline_manager
-from lib.providers.services import service
-from lib.providers.services import service_manager
+from ..commands import command_manager
+from ..hooks import hook_manager
+from ..pipe import pipeline_manager
+from ..services import service
+from ..services import service_manager
 import sys
-from lib.utils.check_args import *
-from .command_parser import parse_streaming_commands, invalid_start_format
+from ..check_args import *
+from ..ah_agent.command_parser import parse_streaming_commands
 from datetime import datetime
 import pytz
 import traceback
-from lib.logfiles import logger
+from ..logfiles import logger
 
 @service()
 async def get_agent_data(agent_name, context=None):
@@ -199,25 +199,6 @@ class Agent:
             buffer += part
             logger.debug(f"Current buffer: ||{buffer}||")
 
-            if invalid_start_format(buffer):
-                error_result = """
-                    [SYSTEM]: ERROR, invalid response format.
-
-                    Your response does not appear to adhere to the command list format.
-                    
-                    Common causes:
-
-                    - replied with JSON inside of fenced code blocks instead of raw JSON
-
-                    - plain text response before JSON.
-
-                    - some JSON args with unescaped newlines, etc.
-
-                    Please adhere to the system JSON command list reponse format carefully.
-                """
-                results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
-                return results, full_cmds 
- 
             commands, partial_cmd = parse_streaming_commands(buffer)
             if not isinstance(commands, list):
                 commands = [commands]

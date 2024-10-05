@@ -23,7 +23,17 @@ class PluginToggle extends BaseEl {
 
   async fetchPlugins() {
     const response = await fetch('/get-plugins');
-    this.plugins = await response.json();
+    const data = await response.json();
+    console.log({plugins: this.plugins})
+    this.plugins  = []
+    const {plugins} = data
+    for (let [category, val] of Object.entries(plugins)) {
+      for (let [name, data ] of Object.entries(val)) {
+        data.name = name
+        this.plugins.push(data)
+      }
+    }
+    console.log({newPlugins: this.plugins})
   }
 
   handleToggle(event, plugin) {
