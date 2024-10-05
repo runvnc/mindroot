@@ -50,7 +50,7 @@ async def send_message(request: Request, log_id: str, message_data: Message):
 async def get_admin_html():
     log_id = nanoid.generate()
     plugins = list_enabled()
-    html = await render_combined_template('admin', {"log_id": log_id})
+    html = await render('admin', {"log_id": log_id})
     return html
 
 @router.get("/agent/{agent_name}", response_class=HTMLResponse)
@@ -70,7 +70,7 @@ async def chat_history(log_id: str):
 async def chat_history(request: Request, agent_name: str, log_id: str):
     plugins = list_enabled()
     user = request.state.user
-    html = await render_combined_template('chat', {"log_id": log_id, "agent_name": agent_name, "user": user})
+    html = await render('chat', {"log_id": log_id, "agent_name": agent_name, "user": user})
     return HTMLResponse(html)
 
 

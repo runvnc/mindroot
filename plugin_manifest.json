@@ -8,10 +8,6 @@
       "agent": {
         "enabled": true,
         "source": "core"
-      },
-      "templates": {
-        "enabled": true,
-        "source": "core"
       }
     },
     "local": {},

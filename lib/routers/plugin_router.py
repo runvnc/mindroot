@@ -21,17 +21,16 @@ def update_plugins(request: PluginUpdateRequest):
         with open('plugins.json', 'w') as file:
             json.dump(plugins_data, file, indent=2)
 
-        plugins.load('plugins.json')
+        plugins.load('plugin_manifest.json')
 
         return {"message": "Plugins updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/get-plugins")
-def get_plugins():
+async def get_plugins():
     try:
-        with open('plugins.json', 'r') as file:
-            plugins_data = json.load(file)
-        return plugins_data
+        return plugins.load_plugin_manifest()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

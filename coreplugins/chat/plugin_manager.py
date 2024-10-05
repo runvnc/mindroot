@@ -29,7 +29,9 @@ async def scan_directory(request: DirectoryRequest):
     if not os.path.isdir(directory):
         raise HTTPException(status_code=400, detail="Invalid directory path")
     
+    print(f"Scanning directory {directory}")
     discovered_plugins = discover_plugins(directory)
+
     plugins.update(discovered_plugins)
     return {"message": f"Scanned {len(discovered_plugins)} plugins in {directory}"}
 
@@ -88,17 +90,24 @@ async def toggle_plugin(request: TogglePluginRequest):
 def discover_plugins(directory):
     discovered = {}
     for item in os.listdir(directory):
+        print(f"Checking {item}")
         item_path = os.path.join(directory, item)
         if os.path.isdir(item_path) and is_valid_plugin(item_path):
             plugin_info = load_plugin_info(item_path)
             plugin_info['source'] = directory
             plugin_info['state'] = 'available'
             discovered[plugin_info['name']] = plugin_info
+        else:
+            print(f"looked in dir {item_path}")
+            print(f"Skipping {item} because it is not a valid plugin")
+
+    print(f"Discovered {len(discovered)} plugins")
     return discovered
 
 def is_valid_plugin(path):
     return os.path.isfile(os.path.join(path, 'plugin_info.json')) and \
-           os.path.isfile(os.path.join(path, '__init__.py'))
+           (os.path.isfile(os.path.join(path, '__init__.py')) or \
+        os.path.isfile(os.path.join(path, 'mod.py')))
 
 def load_plugin_info(path):
     with open(os.path.join(path, 'plugin_info.json'), 'r') as f:

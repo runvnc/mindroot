@@ -28,23 +28,41 @@ def get_plugin_path(plugin_name):
             if plugin_info['source'] == 'local':
                 return plugin_info['source_path']
             elif plugin_info['source'] == 'core':
+                return f"coreplugins/{plugin_name}"
+            else:
+                spec = find_spec(plugin_name)
+                return spec.origin if spec else None
+    return None
+
+def get_plugin_import_path(plugin_name):
+    manifest = load_plugin_manifest()
+    for category in manifest['plugins']:
+        if plugin_name in manifest['plugins'][category]:
+            plugin_info = manifest['plugins'][category][plugin_name]
+            if plugin_info['source'] == 'local':
+                return plugin_info['source_path']
+            elif plugin_info['source'] == 'core':
                 return f"coreplugins.{plugin_name}"
             else:
                 spec = find_spec(plugin_name)
                 return spec.origin if spec else None
     return None
 
-def list_enabled():
+def list_enabled(include_category=True):
     enabled_list = []
     manifest = load_plugin_manifest()
     for category in manifest['plugins']:
         for plugin_name, plugin_info in manifest['plugins'][category].items():
             if plugin_info.get('enabled'):
                 print(f"{plugin_name} is enabled ({category})")
-                enabled_list.append((plugin_name, category))
+                if include_category:
+                    enabled_list.append((plugin_name, category))
+                else:
+                    enabled_list.append(plugin_name)
             else:
                 print(f"{plugin_name} is disabled ({category})")
     return enabled_list
+
 
 def load_middleware(app, plugin_name, plugin_path):
     try:
@@ -199,7 +217,7 @@ async def load(app = None):
             print(f"Plugin {plugin_name} is not in the manifest. Please reinstall it.")
             continue
         
-        plugin_path = get_plugin_path(plugin_name)
+        plugin_path = get_plugin_import_path(plugin_name)
         print(f"DEBUG: Plugin path for {plugin_name}: {plugin_path}")
         if not plugin_path:
             print(f"Failed to locate plugin: {plugin_name}")
@@ -249,11 +267,12 @@ async def load(app = None):
             else:
                 print(f"DEBUG: No router file found for {plugin_name}")
             
-            if category != 'core':
-                static_path = os.path.join(os.path.dirname(plugin_path), 'static')
-                if os.path.exists(static_path):
-                    app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"/{plugin_name}/static")
-                    print(termcolor.colored(f"Mounted static files for plugin: {plugin_name}", 'green'))
+            plugin_dir = get_plugin_path(plugin_name)
+            static_path = os.path.join(plugin_dir, 'static')
+            if os.path.exists(static_path):
+                app.mount(f"/{plugin_name}/static", StaticFiles(directory=static_path), name=f"/{plugin_name}/static")
+                print(termcolor.colored(f"Mounted static files for plugin: {plugin_name} at route path {static_path}", 'green'))
+
         except ImportError as e:
             # we need to make sure to include a traceback, so save that in a string first
             trace = traceback.format_exc()

@@ -1,6 +1,6 @@
 import os
 from jinja2 import Environment, FileSystemLoader
-from lib.plugins import list_enabled
+from lib.plugins import list_enabled, get_plugin_path
 
 # Create a Jinja2 environment
 env = Environment(loader=FileSystemLoader('.'))
@@ -8,7 +8,8 @@ env = Environment(loader=FileSystemLoader('.'))
 # New helper function to find parent templates in plugins
 async def find_parent_template(page_name, plugins):
     for plugin in plugins:
-        template_path = os.path.join('ah', plugin, 'templates', f'{page_name}.jinja2')
+        plugin_path = get_plugin_path(plugin)
+        template_path = os.path.join(plugin_path, 'templates', f'{page_name}.jinja2')
         if os.path.exists(template_path):
             print(f'Found parent template in plugin: {template_path}')
             return template_path
@@ -49,6 +50,7 @@ async def collect_content(template, blocks, template_type, data):
 
 # Function to render the combined template
 async def render_combined_template(page_name, plugins, context):
+    print("plugins:", plugins)
     # Find parent template in plugins
     parent_template_path = await find_parent_template(page_name, plugins)
     if parent_template_path:
@@ -122,6 +124,6 @@ async def render_combined_template(page_name, plugins, context):
     return rendered_html
 
 async def render(page_name, context):
-    plugins = list_enabled()
+    plugins = list_enabled(False)
     return await render_combined_template(page_name, plugins, context)
 

@@ -24,6 +24,7 @@ class PluginManager extends BaseEl {
   async fetchPlugins() {
     const response = await fetch('/plugin-manager/get-all-plugins');
     this.plugins = await response.json();
+    console.log({plugins: this.plugins})
   }
 
   async handleScanDirectory() {
@@ -33,7 +34,7 @@ class PluginManager extends BaseEl {
         const dirHandle = await window.showDirectoryPicker();
         directory = dirHandle.name; // This is just the directory name, not the full path
       } catch (err) {
-        console.log('User cancelled directory selection or it's not supported');
+        console.log("User cancelled directory selection or it's not supported");
       }
     }
     
@@ -124,7 +125,7 @@ class PluginManager extends BaseEl {
         </div>
 
         <h3>Plugins</h3>
-        ${this.plugins.map(plugin => html`
+        ${this.plugins.length && this.plugins.map(plugin => html`
           <div class="plugin-item">
             <span>${plugin.name}</span>
             <span>${plugin.state}</span>

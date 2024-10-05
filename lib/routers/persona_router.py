@@ -6,7 +6,7 @@ import traceback
 
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent / 'personas'
+BASE_DIR = Path(__file__).resolve().parent.parent.parent / 'personas'
 
 @router.get('/personas/{scope}/{name}')
 def read_persona(scope: str, name: str):
