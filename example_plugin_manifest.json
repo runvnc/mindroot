@@ -1,0 +1,31 @@
+{
+  "plugins": {
+    "core": {
+      "chat": {
+        "enabled": true,
+        "source": "core"
+      },
+      "agent": {
+        "enabled": true,
+        "source": "core"
+      }
+    },
+    "local": {
+      "OpenAI": {
+        "name": "OpenAI",
+        "version": "1.0.0",
+        "description": "OpenAI API",
+        "services": [
+          {
+            "name": "stream_chat",
+            "description": "Streaming text chat completion"
+          }
+        ],
+        "enabled": false,
+        "source": "local",
+        "source_path": "/xfiles/backup_ah/ah/ah_openai"
+      }
+    },
+    "installed": {}
+  }
+}

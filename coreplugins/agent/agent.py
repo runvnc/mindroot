@@ -7,7 +7,7 @@ from json import JSONDecodeError
 from jinja2 import Template
 from lib.providers.commands import command_manager
 from lib.providers.hooks import hook_manager
-from lib.pipelines import pipeline_manager
+from lib.pipelines.pipe import pipeline_manager
 from lib.providers.services import service
 from lib.providers.services import service_manager
 import sys
@@ -16,7 +16,7 @@ from .command_parser import parse_streaming_commands, invalid_start_format
 from datetime import datetime
 import pytz
 import traceback
-from lib.logfiles import logger
+from lib.logging.logfiles import logger
 
 @service()
 async def get_agent_data(agent_name, context=None):

@@ -81,6 +81,7 @@ def load_middleware(app, plugin_name, plugin_path):
             print(f"Added middleware for plugin: {plugin_name}")
     except ImportError as e:
         print(f"No middleware loaded for plugin: {plugin_name}")
+
 def check_plugin_dependencies(plugin_path):
     requirements_file = os.path.join(plugin_path, 'requirements.txt')
     if os.path.exists(requirements_file):
@@ -138,18 +139,24 @@ def load_plugin_manifest():
     with open(MANIFEST_FILE, 'r') as f:
         return json.load(f)
 
-def update_plugin_manifest(plugin_name, source, source_path):
+def save_plugin_manifest(manifest):    
+    with open(MANIFEST_FILE, 'w') as f:
+        json.dump(manifest, f, indent=2)
+
+def update_plugin_manifest(plugin_name, source, source_path, version="0.0.1"):
     manifest = load_plugin_manifest()
     category = 'installed' if source != 'core' else 'core'
     
     manifest['plugins'][category][plugin_name] = {
         'enabled': True,
         'source': source,
-        'source_path': source_path if source == 'local' else None
+        'source_path': source_path if source == 'local' else None,
+        'version': version
     }
     
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
+
 def create_default_plugin_manifest():
     manifest = {
         'plugins': {

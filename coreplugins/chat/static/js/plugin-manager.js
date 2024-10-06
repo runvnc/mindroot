@@ -23,8 +23,13 @@ class PluginManager extends BaseEl {
 
   async fetchPlugins() {
     const response = await fetch('/plugin-manager/get-all-plugins');
-    this.plugins = await response.json();
-    console.log({plugins: this.plugins})
+    const result = await response.json();
+    if (result.success) {
+      this.plugins = result.data;
+      console.log({plugins: this.plugins});
+    } else {
+      console.error('Failed to fetch plugins:', result.message);
+    }
   }
 
   async handleScanDirectory() {
@@ -125,11 +130,12 @@ class PluginManager extends BaseEl {
         </div>
 
         <h3>Plugins</h3>
-        ${this.plugins.length && this.plugins.map(plugin => html`
+        ${this.plugins.length ? this.plugins.map(plugin => html`
           <div class="plugin-item">
             <span>${plugin.name}</span>
             <span>${plugin.state}</span>
             <span>Source: ${plugin.source}</span>
+            <span>Version: ${plugin.version}</span>
             ${plugin.state === 'available' ? html`
               <button @click=${() => this.handleInstallLocal(plugin)}>Install</button>
             ` : ''}
@@ -141,7 +147,7 @@ class PluginManager extends BaseEl {
               <button @click=${() => this.handleToggle(plugin)}>${plugin.enabled ? 'Disable' : 'Enable'}</button>
             ` : ''}
           </div>
-        `)}
+        `) : html`<p>No plugins found.</p>`}
       </div>
     `;
   }
