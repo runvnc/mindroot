@@ -55,11 +55,12 @@ class PluginManager extends BaseEl {
       body: JSON.stringify({ directory })
     });
 
-    if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
       alert('Directory scanned successfully');
       this.fetchPlugins();
     } else {
-      alert('Failed to scan directory');
+      alert(`Failed to scan directory: ${result.message}`);
     }
   }
 
@@ -69,11 +70,12 @@ class PluginManager extends BaseEl {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plugin: plugin.name })
     });
-    if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
       alert(`Plugin ${plugin.name} installed successfully`);
       this.fetchPlugins();
     } else {
-      alert(`Failed to install plugin ${plugin.name}`);
+      alert(`Failed to install plugin ${plugin.name}: ${result.message}`);
     }
   }
 
@@ -86,11 +88,12 @@ class PluginManager extends BaseEl {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plugin: plugin.name, url: githubUrl })
     });
-    if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
       alert(`Plugin ${plugin.name} installed successfully from GitHub`);
       this.fetchPlugins();
     } else {
-      alert(`Failed to install plugin ${plugin.name} from GitHub`);
+      alert(`Failed to install plugin ${plugin.name} from GitHub: ${result.message}`);
     }
   }
 
@@ -100,11 +103,12 @@ class PluginManager extends BaseEl {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plugin: plugin.name })
     });
-    if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
       alert(`Plugin ${plugin.name} updated successfully`);
       this.fetchPlugins();
     } else {
-      alert(`Failed to update plugin ${plugin.name}`);
+      alert(`Failed to update plugin ${plugin.name}: ${result.message}`);
     }
   }
 
@@ -114,11 +118,12 @@ class PluginManager extends BaseEl {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plugin: plugin.name, enabled: !plugin.enabled })
     });
-    if (response.ok) {
+    const result = await response.json();
+    if (result.success) {
       alert(`Plugin ${plugin.name} ${plugin.enabled ? 'disabled' : 'enabled'} successfully`);
       this.fetchPlugins();
     } else {
-      alert(`Failed to toggle plugin ${plugin.name}`);
+      alert(`Failed to toggle plugin ${plugin.name}: ${result.message}`);
     }
   }
 

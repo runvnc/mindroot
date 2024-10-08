@@ -27,17 +27,25 @@ class TogglePluginRequest(BaseModel):
 @router.post("/scan-directory")
 async def scan_directory(request: DirectoryRequest):
     directory = request.directory
-    if not os.path.isdir(directory):
-        return {"success": False, "message": "Invalid directory path"}
-    
-    print(f"Scanning directory {directory}")
-    discovered_plugins = discover_plugins(directory)
+    try:
+        if not os.path.isdir(directory):
+            return {"success": False, "message": "Invalid directory path"}
+        
+        print(f"Scanning directory {directory}")
+        discovered_plugins = discover_plugins(directory)
 
-    manifest = load_plugin_manifest()
-    manifest['plugins']['local'].update(discovered_plugins)
-    save_plugin_manifest(manifest)
+        manifest = load_plugin_manifest()
+        manifest['plugins']['local'].update(discovered_plugins)
+        save_plugin_manifest(manifest)
 
-    return {"success": True, "message": f"Scanned {len(discovered_plugins)} plugins in {directory}"}
+        return {"success": True, "message": f"Scanned {len(discovered_plugins)} plugins in {directory}"}
+    except PermissionError:
+        return {"success": False, "message": f"Permission denied: Unable to access directory {directory}"}
+    except json.JSONDecodeError:
+        return {"success": False, "message": "Error reading plugin info: Invalid JSON format"}
+    except Exception as e:
+        return {"success": False, "message": f"Unexpected error during directory scan: {str(e)}"}
+
 
 @router.get("/get-all-plugins")
 async def get_all_plugins():
@@ -64,14 +72,22 @@ async def install_local_plugin(request: PluginRequest):
         return {"success": False, "message": "Plugin not found"}
     
     plugin_path = get_plugin_path(plugin_name)
+    print(f"DEBUG: Attempting to install local plugin: {plugin_name} from path: {plugin_path}")
     if not plugin_path:
         return {"success": False, "message": "Plugin path not found"}
     
     try:
         plugin_install(plugin_name, source='local', source_path=plugin_path)
         return {"success": True, "message": f"Plugin {plugin_name} installed successfully"}
+    except ValueError as e:
+        return {"success": False, "message": f"Invalid input: {str(e)}"}
+    except RuntimeError as e:
+        return {"success": False, "message": str(e)}  # This will now include the pip error message
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": f"Unexpected error: {str(e)}"}
+
+
+
 
 @router.post("/install-github-plugin")
 async def install_github_plugin(request: GitHubPluginRequest):
@@ -81,8 +97,13 @@ async def install_github_plugin(request: GitHubPluginRequest):
     try:
         plugin_install(plugin_name, source='github', source_path=github_url)
         return {"success": True, "message": f"Plugin {plugin_name} installed successfully from GitHub"}
+    except ValueError as e:
+        return {"success": False, "message": f"Invalid input: {str(e)}"}
+    except RuntimeError as e:
+        return {"success": False, "message": f"Installation failed: {str(e)}"}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": f"Unexpected error: {str(e)}"}
+
 
 @router.post("/update-plugin")
 async def update_plugin(request: PluginRequest):
@@ -96,8 +117,13 @@ async def update_plugin(request: PluginRequest):
             return {"success": True, "message": f"Plugin {plugin_name} updated successfully"}
         else:
             return {"success": False, "message": "Failed to update plugin"}
+    except ValueError as e:
+        return {"success": False, "message": f"Invalid input: {str(e)}"}
+    except RuntimeError as e:
+        return {"success": False, "message": f"Update failed: {str(e)}"}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": f"Unexpected error: {str(e)}"}
+
 
 @router.post("/toggle-plugin")
 async def toggle_plugin(request: TogglePluginRequest):
@@ -111,8 +137,13 @@ async def toggle_plugin(request: TogglePluginRequest):
             return {"success": True, "message": f"Plugin {plugin_name} {'enabled' if request.enabled else 'disabled'} successfully"}
         else:
             return {"success": False, "message": "Failed to toggle plugin state"}
+    except ValueError as e:
+        return {"success": False, "message": f"Invalid input: {str(e)}"}
+    except RuntimeError as e:
+        return {"success": False, "message": f"Toggle operation failed: {str(e)}"}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": f"Unexpected error: {str(e)}"}
+
 
 # Helper function
 def discover_plugins(directory):

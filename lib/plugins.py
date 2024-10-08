@@ -107,30 +107,47 @@ def install_plugin_dependencies(plugin_path):
     return True
 
 def plugin_install(plugin_name, source='pypi', source_path=None):
-    if source == 'local':
-        if not source_path:
-            raise ValueError("source_path is required for local installation")
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', source_path])
-    elif source == 'pypi':
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', plugin_name])
-    elif source == 'github':
-        if not source_path:
-            raise ValueError("source_path (GitHub URL) is required for GitHub installation")
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'git+{source_path}'])
-    else:
-        raise ValueError(f"Unsupported installation source: {source}")
-    
-    update_plugin_manifest(plugin_name, source, source_path)
-    return True
+    try:
+        if source == 'local':
+            if not source_path:
+                raise ValueError("source_path is required for local installation")
+            if not os.path.isfile(os.path.join(source_path, 'setup.py')) and not os.path.isfile(os.path.join(source_path, 'pyproject.toml')):
+                raise ValueError(f"{source_path} does not appear to be a valid Python project: neither 'setup.py' nor 'pyproject.toml' found")
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', source_path])
+        elif source == 'pypi':
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', plugin_name])
+        elif source == 'github':
+            if not source_path:
+                raise ValueError("source_path (GitHub URL) is required for GitHub installation")
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'git+{source_path}'])
+        else:
+            raise ValueError(f"Unsupported installation source: {source}")
+        
+        update_plugin_manifest(plugin_name, source, source_path)
+        return True
+    except subprocess.CalledProcessError as e:
+        error_message = e.output.decode() if e.output else str(e)
+        raise RuntimeError(f"Pip installation failed: {error_message}")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error during installation: {str(e)}")
+
+
+
 
 def plugin_update(plugin_name):
-    plugin_path = get_plugin_path(plugin_name)
-    if plugin_path:
+    try:
+        plugin_path = get_plugin_path(plugin_name)
+        if not plugin_path:
+            raise ValueError(f"Plugin {plugin_name} not found")
+        
         if install_plugin_dependencies(plugin_path):
             print(f"Plugin {plugin_name} updated successfully.")
             return True
-    print(f"Failed to update plugin {plugin_name}.")
-    return False
+        else:
+            raise RuntimeError(f"Failed to install dependencies for plugin {plugin_name}")
+    except Exception as e:
+        print(f"Error updating plugin {plugin_name}: {str(e)}")
+        return False
 
 def load_plugin_manifest():
     if not os.path.exists(MANIFEST_FILE):
@@ -206,6 +223,12 @@ def migrate_to_new_manifest():
 
 async def load(app = None):
     global app_instance
+
+    # Add the main project directory to sys.path
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)  # This is the parent directory of lib/
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
 
     if app is not None:
         app_instance = app
