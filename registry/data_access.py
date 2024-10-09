@@ -6,7 +6,7 @@ class DataAccess:
         self.data_dir = 'data'
         self.models_file = os.path.join(self.data_dir, 'models.json')
         self.providers_file = os.path.join(self.data_dir, 'providers.json')
-        self.plugins_file = 'plugins.json'
+        self.plugins_file = 'plugin_manifest.json'
         self.equivalent_flags_file = os.path.join(self.data_dir, 'equivalent_flags.json')
         self.preferred_models_file = os.path.join(self.data_dir, 'preferred_models.json')
 
@@ -68,28 +68,58 @@ class DataAccess:
 
     # Plugins
     def read_plugins(self):
-        return self.read_json(self.plugins_file)
+        try:
+            manifest = self.read_json(self.plugins_file)
+            all_plugins = []
+            for category in ['core', 'local', 'installed']:
+                for plugin_name, plugin_info in manifest['plugins'].get(category, {}).items():
+                    all_plugins.append({
+                        'name': plugin_name,
+                        'enabled': plugin_info.get('enabled', False),
+                        'category': category,
+                        **plugin_info
+                    })
+            return all_plugins
+        except FileNotFoundError:
+            print(f"Warning: {self.plugins_file} not found. Returning empty list.")
+            return []
+        except json.JSONDecodeError:
+            print(f"Error: {self.plugins_file} is not a valid JSON file. Returning empty list.")
+            return []
+        except KeyError:
+            print(f"Error: {self.plugins_file} does not have the expected structure. Returning empty list.")
+            return []
 
     def write_plugins(self, plugins):
-        self.write_json(self.plugins_file, plugins)
+        manifest = {'plugins': {'core': {}, 'local': {}, 'installed': {}}}
+        for plugin in plugins:
+            category = plugin.pop('category', 'installed')
+            name = plugin.pop('name')
+            manifest['plugins'][category][name] = plugin
+        self.write_json(self.plugins_file, manifest)
 
     def add_plugin(self, plugin_data):
-        plugins = self.read_plugins()
-        plugins.append(plugin_data)
-        self.write_plugins(plugins)
+        manifest = self.read_json(self.plugins_file)
+        category = plugin_data.get('category', 'installed')
+        name = plugin_data['name']
+        manifest['plugins'][category][name] = plugin_data
+        self.write_json(self.plugins_file, manifest)
 
     def remove_plugin(self, plugin_name):
-        plugins = self.read_plugins()
-        plugins = [p for p in plugins if p['name'] != plugin_name]
-        self.write_plugins(plugins)
+        manifest = self.read_json(self.plugins_file)
+        for category in manifest['plugins']:
+            if plugin_name in manifest['plugins'][category]:
+                del manifest['plugins'][category][plugin_name]
+                self.write_json(self.plugins_file, manifest)
+                return
 
     def update_plugin(self, plugin_name, updates):
-        plugins = self.read_plugins()
-        for plugin in plugins:
-            if plugin['name'] == plugin_name:
-                plugin.update(updates)
-                break
-        self.write_plugins(plugins)
+        manifest = self.read_json(self.plugins_file)
+        for category in manifest['plugins']:
+            if plugin_name in manifest['plugins'][category]:
+                manifest['plugins'][category][plugin_name].update(updates)
+                self.write_json(self.plugins_file, manifest)
+                return
 
     # Equivalent Flags
     def read_equivalent_flags(self):

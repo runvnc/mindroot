@@ -39,13 +39,23 @@ def get_plugin_import_path(plugin_name):
     for category in manifest['plugins']:
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
+            print(f"DEBUG: Plugin info for {plugin_name}: {plugin_info}")
             if plugin_info['source'] == 'local':
-                return plugin_info['source_path']
+                source_path = plugin_info['source_path']
+                print(f"DEBUG: Local plugin path for {plugin_name}: {source_path}")
+                if not os.path.exists(source_path):
+                    print(f"DEBUG: Plugin path does not exist: {source_path}")
+                    return None
+                parent_dir = os.path.dirname(source_path)
+                if parent_dir not in sys.path:
+                    sys.path.insert(0, parent_dir)
+                return os.path.basename(source_path)
             elif plugin_info['source'] == 'core':
                 return f"coreplugins.{plugin_name}"
             else:
                 spec = find_spec(plugin_name)
                 return spec.origin if spec else None
+    print(f"DEBUG: Plugin {plugin_name} not found in manifest")
     return None
 
 def list_enabled(include_category=True):

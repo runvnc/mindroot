@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+import traceback
 import os
 import json
 from lib.plugins import (
@@ -44,7 +45,8 @@ async def scan_directory(request: DirectoryRequest):
     except json.JSONDecodeError:
         return {"success": False, "message": "Error reading plugin info: Invalid JSON format"}
     except Exception as e:
-        return {"success": False, "message": f"Unexpected error during directory scan: {str(e)}"}
+        trace = traceback.format_exc()
+        return {"success": False, "message": f"Unexpected error during directory scan: {str(e)}\n\n{trace}"}
 
 
 @router.get("/get-all-plugins")
@@ -53,6 +55,12 @@ async def get_all_plugins():
     plugins = []
     for category, category_plugins in manifest['plugins'].items():
         for plugin_name, plugin_info in category_plugins.items():
+            if plugin_info is None:
+                continue
+            if not 'enabled' in plugin_info:
+                print(f"Plugin {plugin_name} has no enabled key")
+                print("Skipping")
+                continue
             plugins.append({
                 "name": plugin_name,
                 "category": category,
