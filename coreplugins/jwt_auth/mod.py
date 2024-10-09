@@ -2,6 +2,8 @@ from lib.providers.hooks import hook, hook_manager
 from lib.route_decorators import public_route, public_routes
 from starlette.routing import Mount
 
+print("---  Hello from JWT mod ---")
+
 @hook()
 async def startup(app, context):
     print('Running startup hook')

@@ -143,6 +143,8 @@ class HookManager:
             'implementation': implementation,
             'docstring': docstring
         })
+        # print message white blue background and white text
+        print(colored(f"registered hook: {name}", 'white', 'on_blue', attrs=['bold']))
 
     async def execute_hooks(self, name, *args, **kwargs):
         if name not in self.hooks:

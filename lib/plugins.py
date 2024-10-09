@@ -302,9 +302,13 @@ async def load(app = None):
                     print(f"DEBUG: Successfully imported router for {plugin_name}")
                     
                     for route in router_module.router.routes:
+                        print("Found route:", route)
                         if hasattr(route, 'endpoint') and hasattr(route.endpoint, '__public_route__'):
+                            print("Public route")
                             route.endpoint = public_route()(route.endpoint)
-                    
+                        else:
+                            print("Not a public route")
+
                     app.include_router(router_module.router)
                     print(termcolor.colored(f"Included router for plugin: {plugin_name}", 'yellow'))
                 except Exception as e:
@@ -324,4 +328,5 @@ async def load(app = None):
             trace = traceback.format_exc()
             print(termcolor.colored(f"Failed to load plugin: {plugin_name}. Error: {e}", 'red'))
 
+    print(termcolor.colored("Calling startup() hook...", 'yellow', 'on_green'))
     await hook_manager.startup(app, context=None)

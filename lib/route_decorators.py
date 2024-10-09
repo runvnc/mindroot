@@ -17,6 +17,7 @@ def public_route():
                 request.state.public_route = True
             return await func(*args, **kwargs)
         wrapper.__public_route__ = True
+        public_routes.add(func.__name__)
         print("wrapper.__public_route__", wrapper.__public_route__)
         return wrapper
     return decorator

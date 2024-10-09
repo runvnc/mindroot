@@ -41,6 +41,12 @@ async def middleware(request: Request, call_next):
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
+        else:
+            print('Not a public route: ', request.url.path)
+            # public_routes is set, iterate and print all
+            print("Printing all public routes: ")
+            for route in public_routes:
+                print('Public route: ', route)
 
         token = request.cookies.get("access_token")
         if token:
