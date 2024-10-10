@@ -1,6 +1,6 @@
-from ..commands import command, command_manager
-from ..services import service_manager
-from ..chatcontext import ChatContext
+from lib.providers.commands import command, command_manager
+from lib.providers.services import service_manager
+from lib.chatcontext import ChatContext
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages
 import asyncio
 import json

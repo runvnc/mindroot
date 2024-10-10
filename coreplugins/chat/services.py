@@ -4,7 +4,7 @@ from lib.providers.hooks import hook_manager
 from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
 from lib.chatlog import ChatLog
-from ..agent import agent
+from coreplugins.agent import agent
 import colored
 import traceback
 import asyncio
