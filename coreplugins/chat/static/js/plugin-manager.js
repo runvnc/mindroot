@@ -34,15 +34,17 @@ class PluginManager extends BaseEl {
 
   async handleScanDirectory() {
     let directory;
+    /*
     if (window.showDirectoryPicker) {
       try {
         const dirHandle = await window.showDirectoryPicker();
         directory = dirHandle.name; // This is just the directory name, not the full path
+        // we can't get the full path, this won't work
       } catch (err) {
         console.log("User cancelled directory selection or it's not supported");
       }
     }
-    
+    */
     if (!directory) {
       directory = prompt("Enter the directory path to scan for plugins:");
     }

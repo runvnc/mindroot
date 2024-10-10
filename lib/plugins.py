@@ -278,6 +278,7 @@ async def load(app = None):
                 print(f"DEBUG: Attempting to import module for {plugin_name}")
                 module = importlib.import_module(plugin_path)
                 print(f"DEBUG: Successfully imported module for {plugin_name}")
+                print("plugin_path = ", plugin_path)
             except ImportError as e:
                 print(f"DEBUG: ImportError for {plugin_name}: {str(e)}")
                 print(f"DEBUG: Attempting to import {plugin_path}.mod for {plugin_name}")
@@ -291,10 +292,11 @@ async def load(app = None):
                 router_spec = find_spec(f"{plugin_path}.router")
                 router_path = router_spec.origin if router_spec else None
             else:
+                
                 router_path = os.path.join(os.path.dirname(plugin_path), 'router.py')
             
             print(f"DEBUG: Checking for router at {router_path}")
-            if router_path and (category == 'core' or os.path.exists(router_path)):
+            if True or router_path and (category == 'core' or os.path.exists(router_path)):
                 print(f"DEBUG: Router file found for {plugin_name}")
                 try:
                     print(f"DEBUG: Attempting to import router for {plugin_name}")
@@ -311,9 +313,12 @@ async def load(app = None):
 
                     app.include_router(router_module.router)
                     print(termcolor.colored(f"Included router for plugin: {plugin_name}", 'yellow'))
+                except ImportError as e:
+                    trace = traceback.format_exc()
+                    print(f"DEBUG: No router found for {plugin_name}: {str(e)}")
                 except Exception as e:
                     trace = traceback.format_exc()
-                    print(f"DEBUG: Error importing router for {plugin_name}: {str(e)} \n\n {trace}")
+                    print(f"DEBUG: No router found for {plugin_name}: {str(e)} \n\n {trace}")
             else:
                 print(f"DEBUG: No router file found for {plugin_name}")
             

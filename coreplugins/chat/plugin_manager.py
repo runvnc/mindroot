@@ -27,6 +27,8 @@ class TogglePluginRequest(BaseModel):
 
 @router.post("/scan-directory")
 async def scan_directory(request: DirectoryRequest):
+    print("request", request)
+    print("dir", request.directory)
     directory = request.directory
     try:
         if not os.path.isdir(directory):
@@ -155,15 +157,25 @@ async def toggle_plugin(request: TogglePluginRequest):
 
 # Helper function
 def discover_plugins(directory):
+    print("discover_plugins")
+    print(f"Scanning directory: {directory}")
     discovered = {}
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
-        if os.path.isdir(item_path) and os.path.isfile(os.path.join(item_path, 'plugin_info.json')):
-            with open(os.path.join(item_path, 'plugin_info.json'), 'r') as f:
+        print(f"Checking item: {item_path}")
+        is_plugin_info = os.path.isfile(item_path) and item_path.endswith('plugin_info.json')
+        if is_plugin_info:
+            full_path = item_path
+            source_path = directory
+        else:
+            full_path = os.path.join(item_path, 'plugin_info.json')
+            source_path = item_path
+        if is_plugin_info or os.path.isdir(item_path) and os.path.isfile(full_path):
+            with open(full_path, 'r') as f:
                 plugin_info = json.load(f)
             plugin_info['enabled'] = False
             plugin_info['source'] = 'local'
-            plugin_info['source_path'] = item_path
+            plugin_info['source_path'] = source_path
             discovered[plugin_info['name']] = plugin_info
 
     return discovered
