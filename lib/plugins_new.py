@@ -315,24 +315,30 @@ async def load(app = None):
                     print(termcolor.colored(f"Included router for plugin: {plugin_name}", 'yellow'))
                 except ImportError as e:
                     trace = traceback.format_exc()
-                    print(f"DEBUG: No router found (may not be an error) or import error for {plugin_name}: {str(e)} \n\n {trace}")
+                    print(f"DEBUG: No router found for {plugin_name}: {str(e)}")
                 except Exception as e:
                     trace = traceback.format_exc()
-                    print(f"DEBUG: No router found or other error for {plugin_name}: {str(e)} \n\n {trace}")
+                    print(f"DEBUG: No router found for {plugin_name}: {str(e)} \n\n {trace}")
             else:
                 print(f"DEBUG: No router file found for {plugin_name}")
             
             plugin_dir = get_plugin_path(plugin_name)
-            dir_name = plugin_dir.split('/')[-1]
-
-            if category != 'core': 
-                static_path = os.path.join(plugin_dir, 'src', dir_name, 'static')
-            else:
+            print(f"DEBUG: Plugin dir for {plugin_name}: {plugin_dir}")
+            if plugin_info['source'] == 'local':
                 static_path = os.path.join(plugin_dir, 'static')
-
+            elif plugin_info['source'] == 'core':
+                static_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), plugin_dir, 'static')
+            else:
+                static_path = os.path.join(os.path.dirname(plugin_dir), 'static')
+            
+            print(f"DEBUG: Static path for {plugin_name}: {static_path}")
             if os.path.exists(static_path):
-                app.mount(f"/{dir_name}/static", StaticFiles(directory=static_path), name=f"/{dir_name}/static")
-                print(termcolor.colored(f"Mounted static files for plugin: {plugin_name} at route path {static_path}", 'green'))
+                mount_path = f"/{plugin_name}/static"
+                app.mount(mount_path, StaticFiles(directory=static_path), name=f"{plugin_name}_static")
+                print(termcolor.colored(f"Mounted static files for plugin: {plugin_name} at route path {mount_path}, directory: {static_path}", 'green'))
+            else:
+                print(f"DEBUG: Static directory not found for {plugin_name} at {static_path}")
+
 
         except ImportError as e:
             # we need to make sure to include a traceback, so save that in a string first

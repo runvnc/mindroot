@@ -1,6 +1,6 @@
 import {LitElement, html, css} from './lit-core.min.js';
 import {BaseEl} from './base.js'
-import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
+import { unsafeHTML } from './unsafe-html.js';
 
 export class ChatMessage extends BaseEl {
   static properties = {
