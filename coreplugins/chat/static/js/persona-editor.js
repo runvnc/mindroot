@@ -8,11 +8,16 @@ class PersonaEditor extends BaseEl {
     scope: { type: String },
     name: { type: String },
     personas: { type: Array },
-    newPersona: { type: Boolean }
+    newPersona: { type: Boolean },
+    facerefFileName: { type: String },
+    avatarFileName: { type: String }
   };
 
   static styles = [
     css`
+      .file-upload-container {
+        margin-bottom: 10px;
+      }
     `
   ];
 
@@ -22,6 +27,8 @@ class PersonaEditor extends BaseEl {
     this.personas = [];
     this.scope = 'local';
     this.newPersona = false;
+    this.facerefFileName = '';
+    this.avatarFileName = '';
     this.fetchPersonas();
   }
 
@@ -58,6 +65,8 @@ class PersonaEditor extends BaseEl {
   handleNewPersona() {
     this.newPersona = true;
     this.persona = {};
+    this.facerefFileName = '';
+    this.avatarFileName = '';
   }
 
   handleInputChange(event) {
@@ -71,9 +80,6 @@ class PersonaEditor extends BaseEl {
     const method = this.newPersona ? 'POST' : 'PUT';
     const url = this.newPersona ? `/personas/${this.scope}` : `/personas/${this.scope}/${this.name}`;
     const formData = new FormData();
-    //for (const key in this.persona) {
-    //  formData.append(key, this.persona[key]);
-    //}
     console.log('persona=', JSON.stringify(this.persona));
     formData.append('persona', JSON.stringify(this.persona))
     const faceref = this.shadowRoot.querySelector('input[name="faceref"]').files[0];
@@ -95,7 +101,14 @@ class PersonaEditor extends BaseEl {
 
   handleFileChange(event) {
     const { name, files } = event.target;
-    this.persona = { ...this.persona, [name]: files[0] };
+    if (files.length > 0) {
+      this.persona = { ...this.persona, [name]: files[0] };
+      if (name === 'faceref') {
+        this.facerefFileName = files[0].name;
+      } else if (name === 'avatar') {
+        this.avatarFileName = files[0].name;
+      }
+    }
   }
 
   _render() {
@@ -123,10 +136,6 @@ class PersonaEditor extends BaseEl {
           <textarea class="text_lg" name="description" .value=${this.persona.description || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
-          Behavior:
-          <textarea class="text_lg"  name="behavior" .value=${this.persona.behavior || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
           Speech Patterns:
           <textarea class="text_lg"  name="speech_patterns" .value=${this.persona.speech_patterns || ''} @input=${this.handleInputChange}></textarea>
         </label>
@@ -135,21 +144,19 @@ class PersonaEditor extends BaseEl {
           <textarea  class="text_lg" name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
-          Commands:
-          <textarea  class="text_lg" name="commands" .value=${this.persona.commands || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
           Moderated:
           <toggle-switch .checked=${this.persona.moderated || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'moderated', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
         </label>
-        <label>
-          Face Reference Image:
-          <input class="text_inp" type="file" name="faceref" @change=${this.handleFileChange} />
-        </label>
-        <label>
-          Avatar Image:
-          <input class="text_inp" type="file" name="avatar" @change=${this.handleFileChange} />
-        </label>
+        <div class="file-upload-container">
+          <label class="file-upload-label" for="faceref">Choose Face Reference Image</label>
+          <input id="faceref" type="file" name="faceref" @change=${this.handleFileChange} />
+          <span class="file-name">${this.facerefFileName}</span>
+        </div>
+        <div class="file-upload-container">
+          <label class="file-upload-label" for="avatar">Choose Avatar Image</label>
+          <input id="avatar" type="file" name="avatar" @change=${this.handleFileChange} />
+          <span class="file-name">${this.avatarFileName}</span>
+        </div>
         <button  class="btn" type="submit">Save</button>
       </form>
     `;

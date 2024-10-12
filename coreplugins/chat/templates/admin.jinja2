@@ -4,15 +4,16 @@
   {% block head_meta %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat</title>
+  <title>Admin Interface</title>
   {% endblock %}
   {% block head %}
   <link rel="stylesheet" href="/chat/static/css/reset.css">
   <link rel="stylesheet" href="/chat/static/css/default.css">
+  <link rel="stylesheet" href="/chat/static/css/admin-custom.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-  <script type="module" src="/chat/static/js/chatmessage.js" ></script>
+  <script type="module" src="/chat/static/js/chatmessage.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
   <script type="module" src="/chat/static/js/persona-editor.js"></script>
@@ -29,35 +30,51 @@
   {% endblock %}
 </head>
 <body>
-    {% block content_top %}
-    {{ log_id  }}
-    <script>window.theme = 'default';
-            console.log("Init.")
-    </script>
-    {% endblock %}
-    {% block content %}
-    <plugin-toggle></plugin-toggle>
+  {% block content_top %}
+  <script>window.theme = 'default';
+          console.log("Init.")
+  </script>
+  {% endblock %}
+  {% block content %}
+  <div class="admin-container">
+
+    <details>
+      <summary>Toggle Plugins</summary>
+      <div class="details-content">
+        <plugin-toggle></plugin-toggle>
+      </div>
+    </details>
 
     <details>
       <summary>Plugin Manager</summary>
-      <plugin-manager></plugin-manager>
+      <div class="details-content">
+        <plugin-manager></plugin-manager>
+      </div>
     </details>
 
     <details>
       <summary>Persona Editor</summary>
-      <persona-editor theme="dark" scope="local"></persona-editor>
+      <div class="details-content">
+        <persona-editor theme="dark" scope="local"></persona-editor>
+      </div>
     </details>
+
     <details>
       <summary>Agent Editor</summary>
-      <agent-editor theme="dark" scope="local"></agent-editor>
+      <div class="details-content">
+        <agent-editor theme="dark" scope="local"></agent-editor>
+      </div>
     </details>
 
     <details>
       <summary>Model Preferences</summary>
-      <model-preferences theme="dark" scope="local"></model-preferences>
+      <div class="details-content">
+        <model-preferences theme="dark" scope="local"></model-preferences>
+      </div>
     </details>
-    {% endblock %}
-    {% block footer %}
-    {% endblock %}
+  </div>
+  {% endblock %}
+  {% block footer %}
+  {% endblock %}
 </body>
 </html>

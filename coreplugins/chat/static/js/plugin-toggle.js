@@ -63,8 +63,6 @@ class PluginToggle extends BaseEl {
 
   _render() {
     return html`
-      <details class="plugin-toggle">
-        <summary>Toggle Plugins</summary>
         ${this.plugins.map(plugin => html`
           <div class="plugin-item">
             <label>
@@ -77,7 +75,6 @@ class PluginToggle extends BaseEl {
           <button @click=${this.handleSubmit}>Submit</button>
           <button @click=${this.handleCancel}>Cancel</button>
         </div>
-      </details>
     `;
   }
 }
