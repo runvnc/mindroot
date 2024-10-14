@@ -64,3 +64,4 @@ beautifulsoup4
 
 trafilatura
 
+polib
