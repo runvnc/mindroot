@@ -288,11 +288,13 @@ async def load(app = None):
             
             load_middleware(app, plugin_name, plugin_path)
             
-            if category == 'core':
+            if True or category == 'core':
                 router_spec = find_spec(f"{plugin_path}.router")
+                print("router_spec:", router_spec)
                 router_path = router_spec.origin if router_spec else None
+                print("Core plugin, router_path is", router_path)
             else:
-                
+                print("Non-core plugin, plugin_path is", plugin_path)
                 router_path = os.path.join(os.path.dirname(plugin_path), 'router.py')
             
             print(f"DEBUG: Checking for router at {router_path}")
@@ -300,6 +302,7 @@ async def load(app = None):
                 print(f"DEBUG: Router file found for {plugin_name}")
                 try:
                     print(f"DEBUG: Attempting to import router for {plugin_name}")
+                    print("Importing: ", f"{plugin_path}.router")
                     router_module = importlib.import_module(f"{plugin_path}.router")
                     print(f"DEBUG: Successfully imported router for {plugin_name}")
                     

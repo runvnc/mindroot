@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 from pathlib import Path
 import json
+from .agent_importer import scan_and_import_agents
 
 router = APIRouter()
 
@@ -9,7 +11,6 @@ local_dir = BASE_DIR / "local"
 shared_dir = BASE_DIR / "shared"
 local_dir.mkdir(parents=True, exist_ok=True)
 shared_dir.mkdir(parents=True, exist_ok=True)
-
 
 @router.get('/agents/{scope}/{name}')
 def read_agent(scope: str, name: str):
@@ -63,3 +64,21 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
         return {'status': 'success'}
     except Exception as e:
         raise HTTPException(status_code=500, detail='Internal server error ' + str(e))
+
+class ScanDirectoryRequest(BaseModel):
+    directory: str
+    scope: str
+
+@router.post('/scan-and-import-agents')
+def scan_and_import_agents_endpoint(request: ScanDirectoryRequest):
+    try:
+        result = scan_and_import_agents(Path(request.directory), request.scope)
+        return {
+            'success': True,
+            'message': f"Imported {result['total_imported']} out of {result['total_discovered']} discovered agents",
+            'imported_agents': result['imported_agents']
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during import: {str(e)}")

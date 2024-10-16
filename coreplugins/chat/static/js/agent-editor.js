@@ -10,11 +10,22 @@ class AgentEditor extends BaseEl {
     agents: { type: Array },
     newAgent: { type: Boolean },
     personas: { type: Array },
-    commands: { type: Array }
+    commands: { type: Array },
+    importStatus: { type: String }
   };
 
   static styles = [
     css`
+      .import-status {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+      .import-status.success {
+        color: green;
+      }
+      .import-status.error {
+        color: red;
+      }
     `
   ];
 
@@ -26,6 +37,7 @@ class AgentEditor extends BaseEl {
     this.commands = [];
     this.scope = 'local';
     this.newAgent = false;
+    this.importStatus = '';
     this.fetchPersonas();
     this.fetchCommands();
   }
@@ -124,6 +136,34 @@ class AgentEditor extends BaseEl {
     this.agent = { ...this.agent, [name]: files[0] };
   }
 
+  async handleScanAndImport() {
+    const directory = prompt("Enter the directory path to scan for agents:");
+    if (!directory) return;
+
+    try {
+      const response = await fetch('/scan-and-import-agents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ directory, scope: this.scope })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        this.importStatus = `Success: Imported ${result.imported_agents.length} agents`;
+        this.fetchAgents(); // Refresh the agent list
+      } else {
+        this.importStatus = `Error: ${result.message}`;
+      }
+    } catch (error) {
+      this.importStatus = `Error: ${error.message}`;
+    }
+
+    // Clear the status message after 5 seconds
+    setTimeout(() => {
+      this.importStatus = '';
+    }, 5000);
+  }
+
   _render() {
     return html`
       <div>
@@ -138,6 +178,8 @@ class AgentEditor extends BaseEl {
           ${this.agents.map(agent => html`<option value="${agent.name}">${agent.name}</option>`) }
         </select>
         <button @click=${this.handleNewAgent}>New Agent</button>
+        <button @click=${this.handleScanAndImport}>Scan and Import Agents</button>
+        ${this.importStatus ? html`<div class="import-status ${this.importStatus.startsWith('Success') ? 'success' : 'error'}">${this.importStatus}</div>` : ''}
       </div>
       <form @submit=${this.handleSubmit} class="agent">
   <div>
