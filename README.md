@@ -4,7 +4,7 @@ Welcome to AgentHost's documentation!
 AgentHost is a powerful, plugin-based Python framework for creating and managing AI agents. It offers a flexible architecture with an open, customizable registry system for easy installation and management of plugins, agents, and AI capabilities.
 
 Key Features:
-- Open registry system for plugins, agents, personas, models, and knowledgebases
+- Open registry system for sharing and finding plugins, agents, personas, models, and knowledgebases
   - Customizable and swappable for user-specific registries
 - Extensible plugin architecture
 - Customizable AI agents with persona definitions
@@ -19,7 +19,7 @@ Core Concepts Overview
 
 AgentHost revolves around several key concepts:
 
-1. **Open Registry**: A flexible system for indexing and managing plugins, agents, personas, and potentially models. It can be customized or replaced with user-specific registries.
+1. **Open Public Registry**: A flexible system for indexing and sharing plugins, agents, personas, and potentially models. It can be customized or replaced with user-specific registries.
 
 2. **Plugins**: Extend the functionality of AgentHost, providing new features, services, or integrations.
 
