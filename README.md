@@ -10,9 +10,9 @@ Key Features:
 - Customizable AI agents with persona definitions
 - Intelligent service management based on agent requirements
 - Flexible service providers for various AI capabilities
-- Easily customizable UI
+- Easily customizable UI built on Jinja2 and Lit Web Components
 - Support for both local and remote AI services
-- RAG: easily share, find and use pre-generated embeddings for topic knowledgebases
+- RAG: easily share, find and use pre-generated embeddings and documents for topic knowledgebases
 
 Core Concepts Overview
 ----------------------
@@ -25,10 +25,10 @@ AgentHost revolves around several key concepts:
 
 3. **Agents and Personas**: AI agents with defined capabilities and customizable personalities.
 
-4. **Services and Providers**: Backend services that power agent capabilities, with support for both local and remote implementations.
+4. **Services and Providers**: Backend services that power agent capabilities, with support for swapping between local and remote implementations.
 
 5. **Intelligent Service Management**: The system automatically determines and installs required services based on agent definitions.
 
-6. **UI Customization**: Easily modifiable user interface through theme overrides and plugin injections.
+6. **UI Customization**: Easily modifiable user interface through theme overrides and injections.
 
-7. **RAG and Knowledgebases**: Planned features for enhanced AI capabilities, also integrated with the registry system.
+7. **RAG and Knowledgebases**: The community can easily share and search for topic embeddings and document sets rather than everyone rebuilding them per topic.
