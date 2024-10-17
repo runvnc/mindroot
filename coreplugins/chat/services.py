@@ -82,6 +82,10 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
         iterations += 1
         continue_processing = False
         try:
+            if os.environ.get("DEFAULT_LLM_MODEL") is not None:
+                print(2)
+                context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
+ 
             results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
             try:
                 tmp_data3 = { "results": full_cmds }
