@@ -5,6 +5,7 @@ from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
 from lib.chatlog import ChatLog
 from coreplugins.agent import agent
+import os
 import colored
 import traceback
 import asyncio
