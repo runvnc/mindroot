@@ -1,0 +1,9 @@
+[
+  {
+    "test_text": START_RAW
+def foo():
+  print("foo")
+END_RAW,
+    "count": 100
+  }
+]

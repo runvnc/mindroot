@@ -1,0 +1,14 @@
+{
+  "data": [
+    {"code": "RAWSTRING
+if True:
+    pass
+RAWSTRING"},
+    {"text": "RAWSTRING
+Some
+multiline
+text
+RAWSTRING"}
+  ],
+  "count": 2
+}
