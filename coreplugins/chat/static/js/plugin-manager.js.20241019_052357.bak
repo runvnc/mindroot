@@ -33,7 +33,22 @@ class PluginManager extends BaseEl {
   }
 
   async handleScanDirectory() {
-    let directory = prompt("Enter the directory path to scan for plugins:");
+    let directory;
+    /*
+    if (window.showDirectoryPicker) {
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        directory = dirHandle.name; // This is just the directory name, not the full path
+        // we can't get the full path, this won't work
+      } catch (err) {
+        console.log("User cancelled directory selection or it's not supported");
+      }
+    }
+    */
+    if (!directory) {
+      directory = prompt("Enter the directory path to scan for plugins:");
+    }
+    
     if (!directory) return;
 
     const response = await fetch('/plugin-manager/scan-directory', {
@@ -134,7 +149,7 @@ class PluginManager extends BaseEl {
             ${plugin.state === 'installable' ? html`
               <button @click=${() => this.handleInstallGitHub(plugin)}>Install from GitHub</button>
             ` : ''}
-            ${(plugin.state === 'installed' || plugin.category === 'core') ? html`
+            ${plugin.state === 'installed' ? html`
               <button @click=${() => this.handleUpdate(plugin)}>Update</button>
               <button @click=${() => this.handleToggle(plugin)}>${plugin.enabled ? 'Disable' : 'Enable'}</button>
             ` : ''}

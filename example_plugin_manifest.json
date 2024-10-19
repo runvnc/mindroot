@@ -8,24 +8,101 @@
       "agent": {
         "enabled": true,
         "source": "core"
+      },
+      "jwt_auth": {
+        "enabled": true,
+        "source": "core"
+      },
+      "home": {
+        "enabled": true,
+        "source": "core"
+      },
+      "login": {
+        "enabled": true,
+        "source": "core"
+      },
+      "persona": {
+        "enabled": true,
+        "source": "core"
       }
     },
-    "local": {
+    "installed": {
       "OpenAI": {
-        "name": "OpenAI",
-        "version": "1.0.0",
-        "description": "OpenAI API",
+        "enabled": false,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_openai",
+        "version": "0.0.1"
+      },
+      "CRE Login": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/maverickcre/plugins/cre_login",
+        "version": "0.0.1"
+      },
+      "CRE Home": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/maverickcre/plugins/cre_home",
+        "version": "0.0.1"
+      },
+      "CRE BOV": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/maverickcre/plugins/cre_bov",
+        "version": "0.0.1"
+      },
+      "CRE Valuation": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/maverickcre/plugins/cre_valuation",
+        "version": "0.0.1"
+      },
+      "Files (simple)": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_files",
+        "version": "0.0.1"
+      },
+      "Think (Chain-of-Thought)": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_think",
+        "version": "0.0.1"
+      },
+      "Excel Operations": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_excel",
+        "version": "0.0.1"
+      },
+      "Anthropic (Claude)": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_anthropic",
+        "version": "0.0.1"
+      }
+    },
+    "available": {
+      "ah_persona_lite": {
+        "name": "ah_persona_lite",
+        "version": "0.1.0",
+        "description": "A lite module for persona management and image generation",
         "services": [
           {
-            "name": "stream_chat",
-            "description": "Streaming text chat completion"
+            "name": "get_persona_data",
+            "description": "Retrieve persona data from JSON files"
+          }
+        ],
+        "commands": [
+          {
+            "name": "pic_of_me",
+            "description": "Generate an image of the persona"
           }
         ],
         "enabled": false,
-        "source": "local",
-        "source_path": "/xfiles/backup_ah/ah/ah_openai"
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_persona_lite"
       }
-    },
-    "installed": {}
+    }
   }
 }

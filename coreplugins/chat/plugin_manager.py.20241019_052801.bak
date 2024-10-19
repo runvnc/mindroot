@@ -114,8 +114,7 @@ async def install_github_plugin(request: GitHubPluginRequest):
         return {"success": False, "message": f"Unexpected error: {str(e)}"}
 
 
-@router.post("/update-plugin")
-async def update_plugin(request: PluginRequest):
+
     plugin_name = request.plugin
     if not get_plugin_path(plugin_name):
         return {"success": False, "message": "Plugin not found"}

@@ -154,8 +154,7 @@ async def toggle_plugin(request: TogglePluginRequest):
         return {"success": False, "message": f"Unexpected error: {str(e)}"}
 
 
-# Helper function
-def discover_plugins(directory):
+
     print("discover_plugins")
     print(f"Scanning directory: {directory}")
     discovered = {}

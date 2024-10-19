@@ -57,27 +57,26 @@ async def json_encoded_md(markdown="", context=None):
     You can write as much text/sentences etc. as you need.
 
     IMPORTANT: make sure everything is properly encoded as this is a JSON 
-    command (such as escaping double quotes, escaping newlines, etc.)
+    command (such as escaping newlines, etc.)
 
     Parameters:
 
-    markdown - String.  MUST BE PROPERLY JSON-encoded string! E.g. escape all double quotes, newlines, etc.
+    markdown - String.  MUST BE PROPERLY JSON-encoded just like the rest of the command.
 
     # Example
 
     [
-        { "json_encoded_md": { "markdown": "## Section 1\\n\\n- item 1\\n- item 2" } }
+        { "json_encoded_md": { "markdown": "## Section 1\n\n- item 1\n- item 2" } }
     ]
 
     # Example
 
     [
-        { "json_encoded_md": { "markdown": "Here is a list:\\n\\n- item 1\\n- item 2\\n- line 3" }} 
+        { "json_encoded_md": { "markdown": "Here is a list:\n\n- item 1\n- item 2\n- line 3" }} 
     ]
 
-
-    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
-    DO NOT INCLUDE NEWLINES IN JSON STRINGS WITHOUT ESCAPING THEM!
+    So escape everything that needs to be escaped, but not anything that doesn't need to be.
+    The bottom line is that the full command list this command is in needs to be valid JSON.
 
     """
     #await context.agent_output("new_message", {"content": markdown,

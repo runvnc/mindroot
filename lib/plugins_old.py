@@ -25,7 +25,7 @@ def get_plugin_path(plugin_name):
     for category in manifest['plugins']:
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
-            if plugin_info['source'] == 'available':
+            if plugin_info['source'] == 'local':
                 return plugin_info['source_path']
             elif plugin_info['source'] == 'core':
                 return f"coreplugins/{plugin_name}"
@@ -40,9 +40,9 @@ def get_plugin_import_path(plugin_name):
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
             print(f"DEBUG: Plugin info for {plugin_name}: {plugin_info}")
-            if plugin_info['source'] == 'available':
+            if plugin_info['source'] == 'local':
                 source_path = plugin_info['source_path']
-                print(f"DEBUG: Available plugin path for {plugin_name}: {source_path}")
+                print(f"DEBUG: Local plugin path for {plugin_name}: {source_path}")
                 if not os.path.exists(source_path):
                     print(f"DEBUG: Plugin path does not exist: {source_path}")
                     return None
@@ -118,9 +118,9 @@ def install_plugin_dependencies(plugin_path):
 
 def plugin_install(plugin_name, source='pypi', source_path=None):
     try:
-        if source == 'available':
+        if source == 'local':
             if not source_path:
-                raise ValueError("source_path is required for available installation")
+                raise ValueError("source_path is required for local installation")
             if not os.path.isfile(os.path.join(source_path, 'setup.py')) and not os.path.isfile(os.path.join(source_path, 'pyproject.toml')):
                 raise ValueError(f"{source_path} does not appear to be a valid Python project: neither 'setup.py' nor 'pyproject.toml' found")
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', source_path])
@@ -140,6 +140,9 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
         raise RuntimeError(f"Pip installation failed: {error_message}")
     except Exception as e:
         raise RuntimeError(f"Unexpected error during installation: {str(e)}")
+
+
+
 
 def plugin_update(plugin_name):
     try:
@@ -163,7 +166,7 @@ def load_plugin_manifest():
     with open(MANIFEST_FILE, 'r') as f:
         return json.load(f)
 
-def save_plugin_manifest(manifest):    
+def slableave_plugin_manifest(manifest):    
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
 
@@ -174,7 +177,7 @@ def update_plugin_manifest(plugin_name, source, source_path, version="0.0.1"):
     manifest['plugins'][category][plugin_name] = {
         'enabled': True,
         'source': source,
-        'source_path': source_path if source == 'available' else None,
+        'source_path': source_path if source == 'local' else None,
         'version': version
     }
     
@@ -189,7 +192,7 @@ def create_default_plugin_manifest():
                 'agent': {'enabled': True, 'source': 'core'},
                 'templates': {'enabled': True, 'source': 'core'}
             },
-            'available': {},
+            'local': {},
             'installed': {}
         }
     }
@@ -198,12 +201,12 @@ def create_default_plugin_manifest():
 
 def migrate_to_new_manifest():
     if os.path.exists('plugins.json') or os.path.exists('plugin_config.json'):
-        manifest = {'plugins': {'core': {}, 'available': {}, 'installed': {}}}
+        manifest = {'plugins': {'core': {}, 'local': {}, 'installed': {}}}
         
         if os.path.exists('plugins.json'):
             with open('plugins.json', 'r') as f:
                 old_plugins = json.load(f)
-            for category in ['core', 'available', 'installed']:
+            for category in ['core', 'local', 'installed']:
                 for plugin_name, plugin_info in old_plugins.get(category, {}).items():
                     manifest['plugins'][category][plugin_name] = {
                         'enabled': plugin_info.get('enabled', False),

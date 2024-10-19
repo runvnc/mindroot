@@ -18,6 +18,24 @@ import pytz
 import traceback
 from lib.logging.logfiles import logger
 
+error_result = """
+[SYSTEM]: ERROR, invalid response format.
+
+Your response does not appear to adhere to the command list format.
+
+Common causes:
+
+- replied with JSON inside of fenced code blocks instead of raw JSON
+
+- plain text response before JSON.
+
+- some JSON args with unescaped newlines, etc.
+
+- some characters escaped that did not need to be/invalid
+
+Please adhere to the system JSON command list reponse format carefully.
+"""
+
 @service()
 async def get_agent_data(agent_name, context=None):
     logger.info("Agent name: {agent_name}", agent_name=agent_name)
@@ -200,21 +218,6 @@ class Agent:
             logger.debug(f"Current buffer: ||{buffer}||")
 
             if invalid_start_format(buffer):
-                error_result = """
-                    [SYSTEM]: ERROR, invalid response format.
-
-                    Your response does not appear to adhere to the command list format.
-                    
-                    Common causes:
-
-                    - replied with JSON inside of fenced code blocks instead of raw JSON
-
-                    - plain text response before JSON.
-
-                    - some JSON args with unescaped newlines, etc.
-
-                    Please adhere to the system JSON command list reponse format carefully.
-                """
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
                 return results, full_cmds 
  
@@ -260,6 +263,13 @@ class Agent:
                         pass
 
         print("\033[92m" + str(full_cmds) + "\033[0m")
+        if len(results) == 0:
+            try:
+                ok = json.loads(buffer)
+            except JSONDecodeError as e:
+                print("\033[91m" + "No results and parse failed" + "\033[0m")
+                results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
+ 
         return results, full_cmds
 
     async def render_system_msg(self):
@@ -274,7 +284,7 @@ class Agent:
             "agent": self.agent,
             "persona": self.agent['persona'],
             "formatted_datetime": formatted_time,
-            "context_data": self.context.data,
+            "context_data": self.context.data
         }
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)
@@ -308,9 +318,6 @@ class Agent:
         # if role of first message is not 'system' then throw an error
         if messages[0]['role'] != 'system':
             logger.error("First message is not a system message")
-            print("\033[91mFirst message is not a system message\033[0m")
-            print("\033[91mFirst message is not a system message\033[0m")
-            print("\033[91mFirst message is not a system message\033[0m")
             print("\033[91mFirst message is not a system message\033[0m")
             return None, None
 

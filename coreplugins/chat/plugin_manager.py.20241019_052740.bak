@@ -98,8 +98,7 @@ async def install_local_plugin(request: PluginRequest):
 
 
 
-@router.post("/install-github-plugin")
-async def install_github_plugin(request: GitHubPluginRequest):
+
     plugin_name = request.plugin
     github_url = request.url
     

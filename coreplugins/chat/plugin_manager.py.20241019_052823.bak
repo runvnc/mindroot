@@ -134,8 +134,7 @@ async def update_plugin(request: PluginRequest):
         return {"success": False, "message": f"Unexpected error: {str(e)}"}
 
 
-@router.post("/toggle-plugin")
-async def toggle_plugin(request: TogglePluginRequest):
+
     plugin_name = request.plugin
     if not get_plugin_path(plugin_name):
         return {"success": False, "message": "Plugin not found"}
