@@ -1,0 +1,7 @@
+[ {"write": { "filename": "/test.py",
+              "text": START_RAW
+def foo():
+    print('hello world')
+END_RAW, "second_text": "horses" }
+ } 
+]

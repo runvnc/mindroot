@@ -1,19 +1,27 @@
 import json
-# we need a partial json parser
-# library. there is a good on in pypi
-# here we import it:
-import partialjson
+from partial_json_parser import loads, ensure_json
 
 
-# scan line by line
-# does the line contain "RAWSTRING ?
-# if so, put begginging part in final_string
-# scan until you find another RAWSTRING"
-# or run into the end of the string
-# escape the raw string part as json string
-# add it to the final_string
-# add the rest of the line to final_string
 def replace_raw_blocks(jsonish):
+    """
+    Allows embedding raw text blocks for JSON properties, e.g.:
+
+    [ {"write": { "filename": "/test.py",
+                "text": START_RAW
+    def foo():
+        print('hello world')
+
+
+    (with optional END_RAW and continuation of JSON):
+
+    [ {"write": { "filename": "/test.py",
+                "text": START_RAW
+    def foo():
+        print('hello world')
+    END_RAW }
+    } 
+    ]
+    """
     final_string = ""
     in_raw = False
     raw_string = ""
@@ -35,19 +43,21 @@ def replace_raw_blocks(jsonish):
                 final_string += line
             else:
                 final_string += line + "\n"
+    if in_raw:
+        final_string += json.dumps(raw_string)
     return final_string
 
 
 if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    with open("ex1.txt") as f:
+    with open("ex3.txt") as f:
         #with open("test_case_1.json") as f:
         jsonish = f.read()
     new_json = replace_raw_blocks(jsonish)
 
     print(new_json)
 
-    data = json.loads(new_json)
+    data = loads(new_json)
 
     print('-----------------------------------------')
     print(data)
