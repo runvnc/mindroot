@@ -9,13 +9,13 @@ export class ChatMessage extends BaseEl {
     spinning : {type: String}
   }
 
-  static styles = [ css`
-  img.avatar {
-     height: 48px;
-     display: inline-block;
-   }
-  ` ]
-
+  static styles = css`
+    img.avatar {
+      height: var(--avatar-height, 48px);
+      display: var(--avatar-display, inline-block);
+      margin-right: var(--avatar-margin-right, 10px);
+    }
+  `
   constructor() {
     super()
     this.sender = 'user'
@@ -25,7 +25,7 @@ export class ChatMessage extends BaseEl {
 
   _render() {
     return html`
-    <div class="outer-msg">
+    <div class="outer-msg ${this.sender}">
       <img class="avatar hover-zoom" onerror="this.style.display='none'" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>

@@ -227,10 +227,6 @@ class Agent:
                 commands = [commands]
 
             logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
-            if len(commands) == 0:
-                parse_failed = True
-            else:
-                parse_failed = False
 
             if len(commands) > num_processed:
                 logger.debug("New command(s) found")
@@ -268,9 +264,10 @@ class Agent:
                         pass
 
         print("\033[92m" + str(full_cmds) + "\033[0m")
-        if len(results) == 0 and parse_failed:
-            print("\033[91m" + "No results and parse failed" + "\033[0m")
-            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
+        # getting false positive on this check
+        #if len(results) == 0 and parse_failed:
+        #    print("\033[91m" + "No results and parse failed" + "\033[0m")
+        #    results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
  
         return results, full_cmds
 
