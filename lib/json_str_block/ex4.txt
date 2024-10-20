@@ -1,0 +1,26 @@
+[
+{"say": {"text": "Sure, I can write a chicken casserole recipe for you."}},
+{"json_encoded_md": {"markdown": START_RAW
+# Simple Chicken Casserole Recipe
+
+## Ingredients:
+- 4 chicken breasts, diced
+- 1 can cream of chicken soup
+- 1 cup sour cream
+- 1 cup shredded cheddar cheese
+- 1 package of stuffing mix
+- 1/2 cup butter, melted
+
+## Instructions:
+1. Preheat oven to 350°F (175°C).
+2. Spread diced chicken in a 9x13 inch baking dish.
+3. Mix soup and sour cream, pour over chicken.
+4. Sprinkle cheese on top.
+5. Combine stuffing mix with melted butter, spread over cheese.
+6. Bake for 30-35 minutes until golden and bubbly.
+
+Enjoy your homemade chicken casserole!
+END_RAW
+}},
+{"say": {"text": "There you go! A simple chicken casserole recipe. Need anything else?"}}
+]

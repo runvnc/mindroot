@@ -2,7 +2,7 @@ import json
 import re
 from typing import List, Dict, Tuple, Any
 from partial_json_parser import loads, ensure_json
-
+from lib.json_str_block import replace_raw_blocks
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -21,7 +21,8 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return [], None
     
     try:
-        complete_commands = json.loads(buffer)
+        raw_replaced = replace_raw_blocks(buffer)
+        complete_commands = json.loads(raw_replaced)
         return complete_commands, None
     except json.JSONDecodeError:
         try:
@@ -49,7 +50,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 pass
             pass
         try:
-            parsed_data = loads(buffer)
+            parsed_data = loads(raw_replaced)
             num_commands = len(parsed_data)
             if num_commands > 1:
                 complete_commands = parsed_data[:num_commands-1]

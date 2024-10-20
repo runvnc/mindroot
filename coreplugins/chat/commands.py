@@ -49,34 +49,31 @@ async def say(text="", context=None):
 @command()
 async def json_encoded_md(markdown="", context=None):
     """
-    Output some markdown text (JSON-encoded in command, e.g. escape newlines)
-    to the user or chat room.
+    Output some markdown text to the user or chat room.
     Use this for any somewhat longer text that the user can read and
     and doesn't necessarily need to be spoken out loud.
 
     You can write as much text/sentences etc. as you need.
 
-    IMPORTANT: make sure everything is properly encoded as this is a JSON 
-    command (such as escaping newlines, etc.)
+    Use the special RAW format with START_RAW and END_RAW to output raw markdown.
 
     Parameters:
 
-    markdown - String.  MUST BE PROPERLY JSON-encoded just like the rest of the command.
+    markdown - String. Insert using RAW mode.
 
     # Example
 
     [
-        { "json_encoded_md": { "markdown": "## Section 1\n\n- item 1\n- item 2" } }
+        { "json_encoded_md":
+          { "markdown": START_RAW
+    ## Section 1
+
+    - item 1
+    - item 2
+    END_RAW
+          }
+        }
     ]
-
-    # Example
-
-    [
-        { "json_encoded_md": { "markdown": "Here is a list:\n\n- item 1\n- item 2\n- line 3" }} 
-    ]
-
-    So escape everything that needs to be escaped, but not anything that doesn't need to be.
-    The bottom line is that the full command list this command is in needs to be valid JSON.
 
     """
     #await context.agent_output("new_message", {"content": markdown,

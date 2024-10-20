@@ -28,7 +28,9 @@ def replace_raw_blocks(jsonish):
     for line in jsonish.split("\n"):
         if in_raw:
             if "END_RAW" in line:
+                line = line.replace("\nEND_RAW\"", "")
                 line = line.replace("\nEND_RAW", "")
+                line = line.replace("END_RAW\"", "")
                 line = line.replace("END_RAW", "")
                 final_string += json.dumps(raw_string) + line
                 in_raw = False
@@ -50,7 +52,7 @@ def replace_raw_blocks(jsonish):
 
 if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    with open("ex3.txt") as f:
+    with open("ex4.txt") as f:
         #with open("test_case_1.json") as f:
         jsonish = f.read()
     new_json = replace_raw_blocks(jsonish)
