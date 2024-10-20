@@ -1,5 +1,5 @@
 import { LitElement, html, css } from './lit-core.min.js'
-import { unsafeHTML } from 'https://unpkg.com/lit-html/directives/unsafe-html.js';
+import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
 
 export class BaseEl extends LitElement {
   static properties = {

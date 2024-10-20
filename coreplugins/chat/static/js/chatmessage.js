@@ -1,6 +1,6 @@
 import {LitElement, html, css} from './lit-core.min.js';
 import {BaseEl} from './base.js'
-import { unsafeHTML } from './unsafe-html.js';
+import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
 
 export class ChatMessage extends BaseEl {
   static properties = {
@@ -10,6 +10,10 @@ export class ChatMessage extends BaseEl {
   }
 
   static styles = [ css`
+  img.avatar {
+     height: 48px;
+     display: inline-block;
+   }
   ` ]
 
   constructor() {

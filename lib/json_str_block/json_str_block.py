@@ -28,6 +28,7 @@ def replace_raw_blocks(jsonish):
     for line in jsonish.split("\n"):
         if in_raw:
             if "END_RAW" in line:
+                line = line.replace("\nEND_RAW\n\"", "") 
                 line = line.replace("\nEND_RAW\"", "")
                 line = line.replace("\nEND_RAW", "")
                 line = line.replace("END_RAW\"", "")

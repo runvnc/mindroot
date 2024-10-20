@@ -16,7 +16,7 @@ class ChatForm extends BaseEl {
         resize: none;
         overflow-y: hidden;
         box-sizing: border-box;
-        width: 100%;
+        width: 93%;
       }
       .stop-button {
         color: white;
