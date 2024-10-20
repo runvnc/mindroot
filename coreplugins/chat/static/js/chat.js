@@ -7,7 +7,6 @@ import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
 import { getAccessToken } from './auth.js';
 
-
 const marked = new Marked(
   markedHighlight({
     langPrefix: 'hljs language-',
@@ -67,7 +66,8 @@ class Chat extends BaseEl {
     sessionid: { type: String },
     messages: [],
     agent_name: { type: String },
-    task_id: { type: String }
+    task_id: { type: String },
+    lastSender: { type: String }
   }
 
   static styles = [
@@ -80,11 +80,17 @@ class Chat extends BaseEl {
     console.log({ args });
     this.messages = [];
     this.userScrolling = false;
+    this.lastSender = null;
     window.userScrolling = false;
     console.log('Chat component created');
     console.log(this);
   }
 
+  shouldShowAvatar(sender) {
+    const showAvatar = this.lastSender !== sender;
+    this.lastSender = sender;
+    return showAvatar;
+  }
 
   firstUpdated() {
     console.log('First updated');
@@ -291,7 +297,7 @@ class Chat extends BaseEl {
   _scrollToBottom() {
     const chatLog = this.shadowRoot.querySelector('.chat-log');
     const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
-    const isAtBottom = difference > - 250
+    const isAtBottom = difference > -250
     console.log('isAtBottom:', isAtBottom)
     console.log('scrollHeight:', chatLog.scrollHeight)
     console.log('clientHeight:', chatLog.clientHeight)
@@ -306,29 +312,20 @@ class Chat extends BaseEl {
       console.log("We are not at the bottom, not autoscrolling")
     }
   }
-  /*
-  _scrollToBottom() {
-    //const chatLog = this.shadowRoot.querySelector('.chat-log');
-    if (!window.userScrolling) {
-      const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
-      const lastEl = lastMessageEls[lastMessageEls.length-1]
-      lastEl.scrollIntoView(false)
-    }
-  } */
 
   _render() {
     return html`
-      <!-- <div class="chat-container">
-        SessionID: ${this.sessionid} -->
-        <div class="chat-log">
-          ${this.messages.map(({ content, sender, persona, spinning }) => html`
-            <chat-message sender="${sender}" class="${sender}" persona="${persona}" spinning="${spinning}">
+      <div class="chat-log">
+        ${this.messages.map(({ content, sender, persona, spinning }) => {
+          const showAvatar = this.shouldShowAvatar(sender);
+          return html`
+            <chat-message sender="${sender}" class="${sender}" persona="${persona}" spinning="${spinning}" ?show-avatar="${showAvatar}">
               ${unsafeHTML(content)}
             </chat-message>
-          `)}
-        </div>
-        <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}"></chat-form>
-    <!--  </div> -->
+          `;
+        })}
+      </div>
+      <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}"></chat-form>
     `;
   }
 }
