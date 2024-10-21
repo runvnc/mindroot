@@ -1,3 +1,32 @@
+Metadata-Version: 2.1
+Name: ah-framework
+Version: 0.1.0
+Summary: An agent framework using LLMs
+Author-email: Your Name <your.email@example.com>
+Project-URL: Homepage, https://github.com/yourusername/ah-framework
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: jinja2
+Requires-Dist: nanoid
+Requires-Dist: termcolor
+Requires-Dist: colored
+Requires-Dist: loguru
+Requires-Dist: python-multipart
+Requires-Dist: pytz
+Requires-Dist: PyJWT
+Requires-Dist: pluggy
+Requires-Dist: pydantic
+
 Welcome to AgentHost's documentation!
 ====================================
 

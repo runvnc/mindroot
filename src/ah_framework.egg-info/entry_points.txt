@@ -1,0 +1,2 @@
+[console_scripts]
+ah = ah.server:main

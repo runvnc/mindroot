@@ -1,0 +1,17 @@
+{
+  "name": "ah_persona_lite",
+  "version": "0.1.0",
+  "description": "A lite module for persona management and image generation",
+  "services": [
+    {
+      "name": "get_persona_data",
+      "description": "Retrieve persona data from JSON files"
+    }
+  ],
+  "commands": [
+    {
+      "name": "pic_of_me",
+      "description": "Generate an image of the persona"
+    }
+  ]
+}

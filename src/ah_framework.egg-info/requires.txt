@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+jinja2
+nanoid
+termcolor
+colored
+loguru
+python-multipart
+pytz
+PyJWT
+pluggy
+pydantic

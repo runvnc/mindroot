@@ -1,0 +1,7 @@
+global-exclude *.py[cod]
+prune src/ah/local
+prune src/ah/data
+prune src/ah/personas
+prune src/ah/static
+prune src/ah/imgs
+prune src/ah/models

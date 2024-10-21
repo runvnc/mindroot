@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ah_persona_lite"
+version = "0.1.0"
+description = "A lite module for persona management and image generation"
+requires-python = ">=3.7"
+dependencies = [
+    # Add any dependencies your plugin needs
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
