@@ -30,6 +30,7 @@ dependencies = [
     "pytz",
     "PyJWT",
     "pluggy",
+    "partial-json-parser",
     "pydantic",
 ]
 

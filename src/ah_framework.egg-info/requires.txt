@@ -9,4 +9,5 @@ python-multipart
 pytz
 PyJWT
 pluggy
+partial-json-parser
 pydantic

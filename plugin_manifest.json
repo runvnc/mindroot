@@ -24,6 +24,10 @@
       "persona": {
         "enabled": true,
         "source": "core"
+      },
+      "startup": {
+        "enabled": true,
+        "source": "core"
       }
     },
     "installed": {

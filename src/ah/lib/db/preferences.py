@@ -1,6 +1,6 @@
 import logging
 from typing import List, Dict, Optional
-from ...registry import data_access
+from ah.registry import data_access
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

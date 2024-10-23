@@ -9,7 +9,7 @@ import subprocess
 from starlette.middleware.base import BaseHTTPMiddleware
 from .route_decorators import public_route
 import termcolor
-from .providers.hooks import hook_manager
+from ah.lib.providers.hooks import hook_manager
 from importlib.util import find_spec
 import traceback
 
@@ -138,7 +138,6 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
         raise RuntimeError(f"Pip installation failed: {error_message}")
     except Exception as e:
         raise RuntimeError(f"Unexpected error during installation: {str(e)}")
-
 def plugin_update(plugin_name):
     try:
         plugin_path = get_plugin_path(plugin_name)
@@ -193,7 +192,7 @@ def create_default_plugin_manifest():
     }
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
-
+        
 def migrate_to_new_manifest():
     if os.path.exists('plugins.json') or os.path.exists('plugin_config.json'):
         manifest = {'plugins': {'core': {}, 'available': {}, 'installed': {}}}
@@ -277,10 +276,13 @@ async def load(app = None):
             except ImportError as e:
                 print(f"DEBUG: ImportError for {plugin_name}: {str(e)}")
                 print(f"DEBUG: Attempting to import {plugin_path}.mod for {plugin_name}")
-                importlib.import_module(f"{plugin_path}.mod")
+                module = importlib.import_module(f"{plugin_path}.mod")
                 print(f"DEBUG: Successfully imported {plugin_path}.mod for {plugin_name}")
             print(termcolor.colored(f"Loaded plugin: {plugin_name} ({category})", 'green'))
-            
+            if hasattr(module, 'on_load'):
+                print(termcolor.colored(f"Calling on_load() hook for plugin: {plugin_name}", 'yellow', 'on_green'))
+                await module.on_load(app)
+
             load_middleware(app, plugin_name, plugin_path)
             
             if True or category == 'core':
@@ -291,7 +293,6 @@ async def load(app = None):
             else:
                 print("Non-core plugin, plugin_path is", plugin_path)
                 router_path = os.path.join(os.path.dirname(plugin_path), 'router.py')
-            
             print(f"DEBUG: Checking for router at {router_path}")
             if True or router_path and (category == 'core' or os.path.exists(router_path)):
                 print(f"DEBUG: Router file found for {plugin_name}")
@@ -335,7 +336,5 @@ async def load(app = None):
         except ImportError as e:
             # we need to make sure to include a traceback, so save that in a string first
             trace = traceback.format_exc()
-            print(termcolor.colored(f"Failed to load plugin: {plugin_name}. Error: {e}", 'red'))
+            print(termcolor.colored(f"Failed to load plugin: {plugin_name}. Error: {e}\n\{trace}", 'red'))
 
-    print(termcolor.colored("Calling startup() hook...", 'yellow', 'on_green'))
-    await hook_manager.startup(app, context=None)

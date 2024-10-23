@@ -24,6 +24,8 @@ src/ah/coreplugins/login/mod.py
 src/ah/coreplugins/login/router.py
 src/ah/coreplugins/persona/__init__.py
 src/ah/coreplugins/persona/mod.py
+src/ah/coreplugins/startup/__init__.py
+src/ah/coreplugins/startup/mod.py
 src/ah/lib/__init__.py
 src/ah/lib/chatcontext.py
 src/ah/lib/chatlog.py

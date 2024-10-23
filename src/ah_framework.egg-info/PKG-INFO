@@ -25,6 +25,7 @@ Requires-Dist: python-multipart
 Requires-Dist: pytz
 Requires-Dist: PyJWT
 Requires-Dist: pluggy
+Requires-Dist: partial-json-parser
 Requires-Dist: pydantic
 
 Welcome to AgentHost's documentation!

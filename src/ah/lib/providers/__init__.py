@@ -7,6 +7,7 @@ from ..db.preferences import find_preferred_models
 from ..db.organize_models import uses_models, matching_models
 from ..utils.check_args import *
 import sys
+import nanoid
 from termcolor import colored
 
 
@@ -97,6 +98,8 @@ class ProviderManager:
             raise ValueError(f"2. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         try:
+            #debug text with green text and blue background
+            print(colored(f"executing function: {name} with provider: {preferred_provider}", 'green', 'on_blue'))
             result = await implementation(*args, **kwargs)
         except Exception as e:
             raise e
@@ -130,24 +133,44 @@ class ProviderManager:
         return method
 
 
-import inspect
+print(colored("Loading HookManager module", 'blue', 'on_yellow'))
 
 class HookManager:
+    _instance = None
+    _initialized = False
+    _hook_manager = None  # class-level storage for the instance
+    
+    def __new__(cls):
+        print(colored(f"HookManager.__new__ called from:\n{traceback.format_stack()}", 'blue', 'on_white'))
+        if cls._instance is None:
+            print(colored("Creating new HookManager instance", 'white', 'on_blue'))
+            cls._instance = super().__new__(cls)
+            cls._hook_manager = cls._instance  # Store in class-level variable
+        else:
+            print(colored(f"Returning existing HookManager instance (id: {id(cls._instance)})", 'yellow', 'on_blue'))
+        return cls._instance
+
     def __init__(self):
-        self.hooks = {}
+        if not self._initialized:
+            self.unique_id = nanoid.generate()
+            print(colored(f"HookManager initialized with id = {self.unique_id} from:\n{traceback.format_stack()}", 'white', 'on_blue'))
+            self.hooks = {}
+            self.__class__._initialized = True
+        else:
+            print(colored(f"Skipping HookManager re-initialization (id: {self.unique_id})", 'yellow', 'on_blue'))
 
     def register_hook(self, name, implementation, signature, docstring):
+        print(colored(f"Registering hook {name} with HookManager (id: {self.unique_id})", 'white', 'on_blue', attrs=['bold']))
         if name not in self.hooks:
             self.hooks[name] = []
         self.hooks[name].append({
             'implementation': implementation,
             'docstring': docstring
         })
-        # print message white blue background and white text
-        print(colored(f"registered hook: {name}", 'white', 'on_blue', attrs=['bold']))
 
     async def execute_hooks(self, name, *args, **kwargs):
         if name not in self.hooks:
+            print(colored(f"hook '{name}' not found.", 'yellow', 'on_blue'))
             return []
         results = []
         for hook_info in self.hooks[name]:

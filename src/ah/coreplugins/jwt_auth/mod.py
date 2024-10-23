@@ -1,4 +1,4 @@
-from lib.providers.hooks import hook, hook_manager
+from lib.providers.hooks import hook
 from lib.route_decorators import public_route, public_routes
 from starlette.routing import Mount
 

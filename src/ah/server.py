@@ -6,6 +6,7 @@ from pathlib import Path
 from .lib import plugins
 import asyncio
 import uvicorn
+from termcolor import colored
 
 def get_project_root():
     return Path(__file__).parent
@@ -37,6 +38,8 @@ templates = None
 async def setup_app():
     global app, templates
     app = FastAPI()
+    
+    
     root = get_project_root()
     app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory=str(root / "imgs")), name="imgs")

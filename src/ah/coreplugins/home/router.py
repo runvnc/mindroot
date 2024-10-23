@@ -4,7 +4,9 @@ from fastapi.templating import Jinja2Templates
 import os
 
 router = APIRouter()
-templates = Jinja2Templates(directory="coreplugins/home/templates")
+
+this_path = os.path.dirname(os.path.realpath(__file__))
+templates = Jinja2Templates(directory=os.path.join(this_path, "templates"))
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
