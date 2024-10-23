@@ -9,6 +9,7 @@ env = Environment(loader=FileSystemLoader('.'))
 async def find_parent_template(page_name, plugins):
     for plugin in plugins:
         plugin_path = get_plugin_path(plugin)
+        print(f'Checking plugin: {plugin}, path: {plugin_path}')
         template_path = os.path.join(plugin_path, 'templates', f'{page_name}.jinja2')
         if os.path.exists(template_path):
             print(f'Found parent template in plugin: {template_path}')
@@ -53,6 +54,12 @@ async def render_combined_template(page_name, plugins, context):
     print("plugins:", plugins)
     # Find parent template in plugins
     parent_template_path = await find_parent_template(page_name, plugins)
+    # print a green top border with ascii
+    print("\033[92m" + "----------------------------------")
+    print("parent_template_path", parent_template_path)
+    print("page name", page_name, "plugins:", plugins, "context:", context)
+    #back to normal text
+    print("\033[0m")
     if parent_template_path:
         parent_template = env.get_template(parent_template_path)
     else:

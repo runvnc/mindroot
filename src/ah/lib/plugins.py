@@ -26,7 +26,7 @@ def get_plugin_path(plugin_name):
             if plugin_info['source'] == 'available':
                 return plugin_info['source_path']
             elif plugin_info['source'] == 'core':
-                return f"coreplugins/{plugin_name}"
+                return f"src/ah/coreplugins/{plugin_name}"
             else:
                 spec = find_spec(plugin_name)
                 return spec.origin if spec else None

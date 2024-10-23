@@ -38,25 +38,25 @@
         "version": "0.0.1"
       },
       "CRE Login": {
-        "enabled": true,
+        "enabled": false,
         "source": "available",
         "source_path": "/xfiles/maverickcre/plugins/cre_login",
         "version": "0.0.1"
       },
       "CRE Home": {
-        "enabled": true,
+        "enabled": false,
         "source": "available",
         "source_path": "/xfiles/maverickcre/plugins/cre_home",
         "version": "0.0.1"
       },
       "CRE BOV": {
-        "enabled": true,
+        "enabled": false,
         "source": "available",
         "source_path": "/xfiles/maverickcre/plugins/cre_bov",
         "version": "0.0.1"
       },
       "CRE Valuation": {
-        "enabled": true,
+        "enabled": false,
         "source": "available",
         "source_path": "/xfiles/maverickcre/plugins/cre_valuation",
         "version": "0.0.1"
