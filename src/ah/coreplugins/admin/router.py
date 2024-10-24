@@ -1,7 +1,9 @@
+import nanoid
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-
-from lib.plugin_manager import router as plugin_manager_router
+from lib.plugins import list_enabled
+from lib.templates import render
+from .plugin_manager import router as plugin_manager_router
 
 router = APIRouter()
 
@@ -15,19 +17,19 @@ async def get_admin_html():
     return html
 
 
-from .lib.logging.log_router import router as log_router
-app.include_router(log_router)
+from lib.logging.log_router import router as log_router
+router.include_router(log_router)
 
-from .lib.routers.settings_router import router as settings_router
-app.include_router(settings_router)
+from .settings_router import router as settings_router
+router.include_router(settings_router)
 
-from .lib.routers.plugin_router import router as plugin_router
-app.include_router(plugin_router)
+from .plugin_router import router as plugin_router
+router.include_router(plugin_router)
 
-from .lib.routers.persona_router import router as persona_router
-app.include_router(persona_router)
+from .persona_router import router as persona_router
+router.include_router(persona_router)
 
-from .lib.routers.agent_router import router as agent_router
-app.include_router(agent_router)
+from .agent_router import router as agent_router
+router.include_router(agent_router)
 
 

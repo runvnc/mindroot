@@ -1,6 +1,10 @@
 {
   "plugins": {
     "core": {
+      "admin": {
+        "enabled": true,
+        "source": "core"
+      },
       "chat": {
         "enabled": true,
         "source": "core"
@@ -14,14 +18,18 @@
         "source": "core"
       },
       "home": {
-        "enabled": true,
+        "enabled": false,
         "source": "core"
       },
       "login": {
-        "enabled": true,
+        "enabled": false,
         "source": "core"
       },
       "persona": {
+        "enabled": true,
+        "source": "core"
+      },
+      "startup": {
         "enabled": true,
         "source": "core"
       }
@@ -80,6 +88,12 @@
         "source": "available",
         "source_path": "/xfiles/plugins_ah/ah_anthropic",
         "version": "0.0.1"
+      },
+      "Shell (simple)": {
+        "enabled": true,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_shell",
+        "version": "0.0.1"
       }
     },
     "available": {
@@ -102,6 +116,15 @@
         "enabled": false,
         "source": "available",
         "source_path": "/xfiles/plugins_ah/ah_persona_lite"
+      },
+      "Shell (simple)": {
+        "name": "Shell (simple)",
+        "version": "1.0.0",
+        "description": "Dir tree and execute shell commands",
+        "services": [],
+        "enabled": false,
+        "source": "available",
+        "source_path": "/xfiles/plugins_ah/ah_shell"
       }
     }
   }

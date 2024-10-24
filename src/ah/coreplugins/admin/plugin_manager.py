@@ -78,8 +78,8 @@ async def get_all_plugins():
 async def install_local_plugin(request: PluginRequest):
     plugin_name = request.plugin
     manifest = load_plugin_manifest()
-    if plugin_name not in manifest['plugins']['available']:
-        return {"success": False, "message": "Plugin not found"}
+    #if plugin_name not in manifest['plugins']['available']:
+    #    return {"success": False, "message": "Plugin not found"}
     
     plugin_path = get_plugin_path(plugin_name)
     print(f"DEBUG: Attempting to install local plugin: {plugin_name} from path: {plugin_path}")

@@ -12,9 +12,6 @@ from .plugin_manager import router as plugin_manager_router
 
 router = APIRouter()
 
-# Include the plugin_manager router
-router.include_router(plugin_manager_router, prefix="/plugin-manager", tags=["plugin-manager"])
-
 # Global dictionary to store tasks
 tasks = {}
 

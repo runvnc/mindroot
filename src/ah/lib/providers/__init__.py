@@ -30,7 +30,7 @@ class ProviderManager:
             'provider': provider
         })
         print("registered function: ", name, provider, implementation, signature, docstring, flags)
-
+        print("updated functions: ", self.functions)
     
     async def execute(self, name, *args, **kwargs):
         #print(f"execute: {name} called")

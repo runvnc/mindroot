@@ -10,3 +10,4 @@ backup/*
 # ignore all .bak files in all subdirectories
 # **/ means any subdirectory
 **/*.bak
+plugin_manifest.json

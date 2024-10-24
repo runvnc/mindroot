@@ -133,25 +133,15 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
         
         update_plugin_manifest(plugin_name, source, source_path)
         return True
+
     except subprocess.CalledProcessError as e:
         error_message = e.output.decode() if e.output else str(e)
         raise RuntimeError(f"Pip installation failed: {error_message}")
     except Exception as e:
         raise RuntimeError(f"Unexpected error during installation: {str(e)}")
+
 def plugin_update(plugin_name):
-    try:
-        plugin_path = get_plugin_path(plugin_name)
-        if not plugin_path:
-            raise ValueError(f"Plugin {plugin_name} not found")
-        
-        if install_plugin_dependencies(plugin_path):
-            print(f"Plugin {plugin_name} updated successfully.")
-            return True
-        else:
-            raise RuntimeError(f"Failed to install dependencies for plugin {plugin_name}")
-    except Exception as e:
-        print(f"Error updating plugin {plugin_name}: {str(e)}")
-        return False
+    return plugin_install(plugin_name)
 
 def load_plugin_manifest():
     if not os.path.exists(MANIFEST_FILE):
