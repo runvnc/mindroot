@@ -44,21 +44,6 @@ async def setup_app():
     app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory=str(root / "imgs")), name="imgs")
 
-    from .lib.logging.log_router import router as log_router
-    app.include_router(log_router)
-
-    from .lib.routers.settings_router import router as settings_router
-    app.include_router(settings_router)
-
-    from .lib.routers.plugin_router import router as plugin_router
-    app.include_router(plugin_router)
-
-    from .lib.routers.persona_router import router as persona_router
-    app.include_router(persona_router)
-
-    from .lib.routers.agent_router import router as agent_router
-    app.include_router(agent_router)
-
     await plugins.load(app=app)
 
     return app

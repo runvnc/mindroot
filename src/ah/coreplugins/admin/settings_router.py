@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from typing import List, Dict
 import json
 import os
+from lib.providers.commands import command, command_manager
+from lib.providers import services
 from lib.providers.commands import command_manager
-from lib.providers.services import service_manager
 from lib.db.organize_models import organize_for_display
 
 router = APIRouter()

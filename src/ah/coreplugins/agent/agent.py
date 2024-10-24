@@ -311,10 +311,6 @@ class Agent:
             logger.error("Error filtering messages")
             logger.error(str(e))
 
-        #print in white
-        #print first message in white
-        #print("\033[97m" + messages[0]['role'] + ': ' + messages[0]["content"] + "\033[0m")
-        # if role of first message is not 'system' then throw an error
         if messages[0]['role'] != 'system':
             logger.error("First message is not a system message")
             print("\033[91mFirst message is not a system message\033[0m")

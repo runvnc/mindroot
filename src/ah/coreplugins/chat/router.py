@@ -46,13 +46,6 @@ async def send_message(request: Request, log_id: str, message_data: Message):
     
     return {"status": "ok", "task_id": task_id}
 
-@router.get("/admin", response_class=HTMLResponse)
-async def get_admin_html():
-    log_id = nanoid.generate()
-    plugins = list_enabled()
-    html = await render('admin', {"log_id": log_id})
-    return html
-
 @router.get("/agent/{agent_name}", response_class=HTMLResponse)
 async def get_chat_html(agent_name: str):
     log_id = nanoid.generate()
