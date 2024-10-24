@@ -3,6 +3,8 @@ from lib.providers.commands import command
 import os
 import json
 import sys
+from pathlib import Path
+
 
 print("Loading person lite")
 
@@ -10,9 +12,11 @@ print("Loading person lite")
 async def get_persona_data(persona_name, context=None):
     print("persona name is", persona_name, file=sys.stderr)
 
-    persona_path = os.path.join('personas', 'local', persona_name)
+    # need to start relative to the current file
+    script_path = Path(os.path.dirname(os.path.realpath(__file__)))
+    persona_path = os.path.join(script_path.parent.parent, 'personas', 'local', persona_name)
     if not os.path.exists(persona_path):
-        persona_path = os.path.join('personas', 'shared', persona_name)
+        persona_path = os.path.join(script_path.parent.parent, 'personas', 'shared', persona_name)
         if not os.path.exists(persona_path):
             return {}
     # read the persona data

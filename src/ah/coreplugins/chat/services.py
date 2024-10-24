@@ -200,6 +200,8 @@ async def agent_output(event: str, data: dict, context=None):
 @service()
 async def partial_command(command: str, chunk: str, params, context=None):
     agent_ = context.agent
+    print("Agent data: ", agent_)
+    print("Agent persona data: ", agent_['persona'])
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
                                                     "persona": agent_['persona']['name'] })
 
