@@ -11,3 +11,4 @@ backup/*
 # **/ means any subdirectory
 **/*.bak
 plugin_manifest.json
+cre*.md

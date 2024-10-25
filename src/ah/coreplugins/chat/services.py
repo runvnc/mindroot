@@ -36,8 +36,6 @@ async def get_chat_history(session_id: str):
     context = ChatContext(command_manager, service_manager)
     await context.load_context(session_id)
     agent = await service_manager.get_agent_data(context.agent_name)
-    #print agent data in blue
-    termcolor.cprint("Agent data: " + str(agent), "blue")
     
     persona = agent['persona']['name']
     messages = context.chat_log.get_recent()
@@ -200,8 +198,6 @@ async def agent_output(event: str, data: dict, context=None):
 @service()
 async def partial_command(command: str, chunk: str, params, context=None):
     agent_ = context.agent
-    print("Agent data: ", agent_)
-    print("Agent persona data: ", agent_['persona'])
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
                                                     "persona": agent_['persona']['name'] })
 

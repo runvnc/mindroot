@@ -98,8 +98,6 @@ class ProviderManager:
             raise ValueError(f"2. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
 
         try:
-            #debug text with green text and blue background
-            print(colored(f"executing function: {name} with provider: {preferred_provider}", 'green', 'on_blue'))
             result = await implementation(*args, **kwargs)
         except Exception as e:
             raise e
