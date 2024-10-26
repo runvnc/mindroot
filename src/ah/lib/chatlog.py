@@ -13,8 +13,6 @@ class ChatLog:
         self.context_length = context_length
         self.log_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
         self.log_dir = os.path.join(self.log_dir, self.agent)
-        # make sure dir exists
-        # if not create it 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         self.load_log()
@@ -31,15 +29,20 @@ class ChatLog:
     def add_message(self, message: Dict[str, str]) -> None:
         if len(self.messages)>0 and self.messages[-1]['role'] == message['role']:
             print("found repeat role")
+            # check if messasge is str
+            # if so, convert to dict with type 'text':
+            if type(message['content']) == str:
+                message['content'] = {'type':'text', 'text': message['content']}
+
             try:
-                cmd_list = json.loads(self.messages[-1]['content'])
-                new_cmd_list = cmd_list + json.loads(message['content'])
-                self.messages[-1]['content'] = json.dumps(new_cmd_list)
+                cmd_list = self.messages[-1]['content']
+                new_cmd_list = cmd_list + message['content']
+                self.messages[-1]['content'] = new_cmd_list
             except Exception as e:
                 print('could not combine commands. probably normal if user message and previous system output', e)
                 print(message)
                 print(self.messages[-1])
-                self.messages[-1]['content'] = self.messages[-1]['content'] + '\n'+ message['content']
+                raise e
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])

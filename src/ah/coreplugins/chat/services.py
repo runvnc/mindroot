@@ -67,7 +67,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
     message = tmp_data['message']
 
     termcolor.cprint("Final message: " + message, "yellow")
-    context.chat_log.add_message({"role": "user", "content": message})
+    context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
 
     context.save_context()
 
@@ -134,7 +134,18 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
                     print("Error processing results: ", e)
                     print(traceback.format_exc())
 
-                context.chat_log.add_message({"role": "user", "content": "[SYSTEM]:\n\n" + json.dumps(out_results, indent=4)})
+                formatted_results = []
+                for result in out_results:
+                    if 'result' in result and 'type' in result['result'] and result['result']['type'] == 'image':
+                        img_data = result['result']
+                        result['result'] = '...'
+                        new_result = { "type": "text", "text": json.dumps(result) } 
+                        formatted_results.append(new_result)
+                        formatted_results.append(img_data)
+                    else:
+                        new_result = { "type": "text", "text": json.dumps(result) }
+                        formatted_results.append(new_result)
+                context.chat_log.add_message({"role": "user", "content": formatted_results})
                 results.append(out_results) 
             else:
                 print("Processing iteration: ", iterations, "no message added")

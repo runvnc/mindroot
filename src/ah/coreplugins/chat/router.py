@@ -8,7 +8,6 @@ from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
-from .plugin_manager import router as plugin_manager_router
 
 router = APIRouter()
 

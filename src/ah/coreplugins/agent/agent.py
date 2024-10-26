@@ -116,8 +116,8 @@ class Agent:
             "arguments": cmd_args,
             "context": str(context)
         })
-        context.chat_log.add_message({"role": "assistant", "content": '['+json_cmd+']' })
-
+        context.chat_log.add_message({"role": "assistant", "content": [{"type": "text", 
+                                                                       "text": '[' +json_cmd+']' }]})
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
         try:
@@ -239,13 +239,20 @@ class Agent:
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
 
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                        print("result: ", result)
                         await context.command_result(cmd_name, result)
+                        print(2)
                         full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})
+                        print(3)
                         if result is not None:
+                            print(4)
                             results.append({"cmd": cmd_name, "args": { "omitted": "(see command msg.)"}, "result": result})
+                            print(5)
 
                         num_processed = len(commands)
                     except Exception as e:
+                        # print a border in red
+                        # print("\033[91m" + "Error processing command" + "\033[0m")
                         logger.error(f"Error processing command: {e}")
                         logger.error(str(e))
                         pass

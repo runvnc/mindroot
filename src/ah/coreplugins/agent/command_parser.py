@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple, Any
 from partial_json_parser import loads, ensure_json
 from lib.json_str_block import replace_raw_blocks
 
+
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
     Parse streaming commands from a buffer, identifying complete commands.
@@ -38,7 +39,6 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             print("\033[96m", end="")
             print(f"Successfully parsed command: {complete_commands}")
             print("\033[0m", end="")
-
             return complete_commands, current_partial
         except Exception:
             # if ends in ']', then may be end of command list
