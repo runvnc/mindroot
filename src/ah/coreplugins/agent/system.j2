@@ -82,14 +82,18 @@ for a particular property.
 
 For example:
 
-    [ {"write": { "filename": "/test.py",
+(... other commands JSON ),
+
+    {"write": { "filename": "/test.py",
                   "text": START_RAW
     def foo():
         print('hello world')
     END_RAW
                 }
       } 
-    ]
+
+(, ... other commands JSON )
+
 
 Note that a START_RAW must be followed by a newline and then the unescaped text.
 
@@ -109,6 +113,11 @@ Note that the number of curly braces after END_RAW here is two!
 Be careful to match the curly braces correctly.
 
 Pay special attention to match the curly braces etc.
+And remember, there is ONLY one command list in your response.
+So there should be one outer [ ] and all commands as items in that single array!
+E.g., this is invalid:
+[ { "say": "Hello" }][{ "say": "World" } ]
+
 
 Note that outside of RAW blocks, you must follow JSON rules such as escaping newlines etc.
 

@@ -25,11 +25,27 @@ Your response does not appear to adhere to the command list format.
 
 Common causes:
 
-- replied with JSON inside of fenced code blocks instead of raw JSON
+- replied with JSON inside of fenced code blocks instead of JSON or RAW string format as below
+
+- for multiline string arguments, use the RAW format described in system instructions, e.g.:
+
+...
+
+{ "json_encoded_markdown": { "markdown": START_RAW
+The moon, so bright
+It's shining light
+Like a pizza pie
+In the sky
+END_RAW
+} }
+
+...
 
 - plain text response before JSON.
 
 - some JSON args with unescaped newlines, etc.
+
+- multiple command lists. Only one command list response is allowed.
 
 - some characters escaped that did not need to be/invalid
 
@@ -274,7 +290,12 @@ class Agent:
         # getting false positive on this check
         if len(full_cmds) == 0:
             print("\033[91m" + "No results and parse failed" + "\033[0m")
-            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
+            try:
+                parse_ok = json.loads(buffer)
+                parse_fail_reason = ""
+            except JSONDecodeError as e:
+                parse_fail_reason = str(e)
+            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + ' ' + parse_fail_reason })
  
         return results, full_cmds
 

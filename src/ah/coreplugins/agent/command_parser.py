@@ -3,7 +3,7 @@ import re
 from typing import List, Dict, Tuple, Any
 from partial_json_parser import loads, ensure_json
 from lib.json_str_block import replace_raw_blocks
-
+from lib.json_escape import escape_for_json
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -27,8 +27,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return complete_commands, None
     except json.JSONDecodeError:
         try:
-            # try escaping newlines
-            complete_commands = json.loads(buffer.replace('\n', '\\n'))
+            complete_commands = json.loads(escape_for_json(buffer))
             num_commands = len(complete_commands)
             if num_commands > 1:
                 complete_commands = complete_commands[:num_commands-1]

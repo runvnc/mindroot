@@ -63,7 +63,6 @@ async def json_encoded_md(markdown="", context=None):
 
     # Example
 
-    [
         { "json_encoded_md":
           { "markdown": START_RAW
     ## Section 1
@@ -73,7 +72,8 @@ async def json_encoded_md(markdown="", context=None):
     END_RAW
           }
         }
-    ]
+
+    NOTE: Do NOT start a new command list if there already is one!!
 
     """
     #await context.agent_output("new_message", {"content": markdown,

@@ -136,7 +136,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
 
                 formatted_results = []
                 for result in out_results:
-                    if 'result' in result and 'type' in result['result'] and result['result']['type'] == 'image':
+                    if 'result' in result and type(result['result']) is dict and 'type' in result['result'] and result['result']['type'] == 'image': 
                         img_data = result['result']
                         result['result'] = '...'
                         new_result = { "type": "text", "text": json.dumps(result) } 

@@ -41,6 +41,7 @@ def replace_raw_blocks(jsonish):
             if "START_RAW" in line:
                 in_raw = True
                 raw_string = ""
+                line = line.replace("START_RAW \n", "")
                 line = line.replace("START_RAW\n", "")
                 line = line.replace("START_RAW", "")
                 final_string += line
