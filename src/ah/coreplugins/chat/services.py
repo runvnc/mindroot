@@ -46,6 +46,30 @@ async def get_chat_history(session_id: str):
             message['persona'] = persona
     return messages
 
+def process_result(result, formatted_results):
+    print("type of result is ", type(result))
+    if 'result' in result and type(result['result']) is dict and 'type' in result['result'] and result['result']['type'] == 'image': 
+        print("A")
+        img_data = result['result']
+        result['result'] = '...'
+        new_result = { "type": "text", "text": json.dumps(result) } 
+        formatted_results.append(new_result)
+        formatted_results.append(img_data)
+    elif 'result' in result and type(result['result']) is list:
+        print("B")
+        for item in result['result']:
+            process_result({ "result": item}, formatted_results)
+    else:
+        print("C")
+        new_result = { "type": "text", "text": json.dumps(result) }
+        formatted_results.append(new_result)
+    
+    print("length of results is ", len(formatted_results))
+    with open("output/processed_results.json", "w") as f: 
+        f.write(json.dumps(formatted_results) + "\n")
+
+    return formatted_results
+
 @service()
 async def send_message_to_agent(session_id: str, message: str, max_iterations=35, context=None, user=None):
 
@@ -136,15 +160,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
 
                 formatted_results = []
                 for result in out_results:
-                    if 'result' in result and type(result['result']) is dict and 'type' in result['result'] and result['result']['type'] == 'image': 
-                        img_data = result['result']
-                        result['result'] = '...'
-                        new_result = { "type": "text", "text": json.dumps(result) } 
-                        formatted_results.append(new_result)
-                        formatted_results.append(img_data)
-                    else:
-                        new_result = { "type": "text", "text": json.dumps(result) }
-                        formatted_results.append(new_result)
+                    process_result(result, formatted_results)
                 context.chat_log.add_message({"role": "user", "content": formatted_results})
                 results.append(out_results) 
             else:
