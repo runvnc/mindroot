@@ -1,13 +1,15 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
-from .models import Message
+from .models import MessageParts
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
 from lib.templates import render
 from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
+from typing import List
+
 
 router = APIRouter()
 
@@ -30,11 +32,10 @@ async def cancel_chat(log_id: str, task_id: str):
 
 
 @router.post("/chat/{log_id}/send")
-async def send_message(request: Request, log_id: str, message_data: Message):
+async def send_message(request: Request, log_id: str, message_parts: List[MessageParts] ):
     user = request.state.user
-    print(f"send_message   log_id: {log_id}   message: {message_data.message}")
-    
-    task = asyncio.create_task(send_message_to_agent(log_id, message_data.message, user=user))
+
+    task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))
     
     task_id = nanoid.generate()
     

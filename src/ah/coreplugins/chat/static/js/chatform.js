@@ -43,11 +43,13 @@ class ChatForm extends BaseEl {
   }
 
   async _handlePaste(e) {
+    console.log("paste detected")
     const items = e.clipboardData.items;
     let hasImage = false;
 
     for (let item of items) {
       if (item.type.indexOf('image') !== -1) {
+        console.log("found image")
         hasImage = true;
         const blob = item.getAsFile();
         const reader = new FileReader();
@@ -75,6 +77,7 @@ class ChatForm extends BaseEl {
     
     // Add any images
     for (let imageData of this.pastedImages) {
+      console.log('adding pasted image')
       messageContent.push({
         type: 'image',
         data: imageData

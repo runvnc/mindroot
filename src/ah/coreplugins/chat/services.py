@@ -3,6 +3,8 @@ from lib.providers.commands import command_manager
 from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
 from lib.chatlog import ChatLog
+from typing import List
+from .models import MessageParts
 from coreplugins.agent import agent
 import os
 import colored
@@ -71,7 +73,9 @@ def process_result(result, formatted_results):
     return formatted_results
 
 @service()
-async def send_message_to_agent(session_id: str, message: str, max_iterations=35, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
+    if type(message) is list:
+        message = [m.dict() for m in message]
 
     if session_id is None or session_id == "" or message is None or message == "":
         print("Invalid session_id or message")
@@ -79,6 +83,7 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
 
     print("send_message_to_agent: ", session_id, message, max_iterations)
     context = ChatContext(command_manager, service_manager)
+
     await context.load_context(session_id)
     print(context) 
     agent_ = agent.Agent(agent=context.agent)
@@ -90,8 +95,11 @@ async def send_message_to_agent(session_id: str, message: str, max_iterations=35
     tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
     message = tmp_data['message']
 
-    termcolor.cprint("Final message: " + message, "yellow")
-    context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+    termcolor.cprint("Final message: " + str(message), "yellow")
+    if type(message) is str:
+        context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+    else:
+        context.chat_log.add_message({"role": "user", "content": message})
 
     context.save_context()
 

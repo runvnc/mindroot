@@ -770,3 +770,8 @@ chat-message .outer-msg.without-avatar {
 chat-message:first-of-type .outer-msg.without-avatar {
   margin-top: 0; /* Reset top margin for the first message */
 }
+
+.image_input {
+  width: 200px;
+}
+

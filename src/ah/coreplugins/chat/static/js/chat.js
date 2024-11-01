@@ -159,21 +159,20 @@ class Chat extends BaseEl {
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
     
-    // Handle new message format
     if (Array.isArray(content)) {
       let combinedContent = '';
       for (let item of content) {
         if (item.type === 'text') {
           combinedContent += tryParse(item.text);
         } else if (item.type === 'image') {
-          combinedContent += `<img src="${item.data}" alt="pasted image">`;
+          combinedContent += `<img src="${item.data}" class="image_input" alt="pasted image">`;
         }
       }
       this.messages = [...this.messages, { content: combinedContent, spinning:'no', sender, persona }];
     } else {
-      // Handle legacy format
       const parsed = tryParse(content);
       this.messages = [...this.messages, { content: parsed, spinning:'no', sender, persona }];
+      content = [{ type: 'text', text: content }]
     }
 
     if (sender === 'user') {
@@ -185,7 +184,7 @@ class Chat extends BaseEl {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: content })
+        body: JSON.stringify(content )
       });
 
       fetch(request).then(response => {
