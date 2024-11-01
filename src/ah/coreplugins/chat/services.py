@@ -4,6 +4,7 @@ from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
 from lib.chatlog import ChatLog
 from typing import List
+from lib.utils.dataurl import dataurl_to_pil
 from .models import MessageParts
 from coreplugins.agent import agent
 import os
@@ -12,6 +13,10 @@ import traceback
 import asyncio
 import json
 import termcolor
+from PIL import Image
+from io import BytesIO
+import base64
+
 sse_clients = {}
 
 @service()
@@ -74,119 +79,124 @@ def process_result(result, formatted_results):
 
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
-    if type(message) is list:
-        message = [m.dict() for m in message]
+    try:
+        if type(message) is list:
+            message = [m.dict() for m in message]
 
-    if session_id is None or session_id == "" or message is None or message == "":
-        print("Invalid session_id or message")
-        return []
+        if session_id is None or session_id == "" or message is None or message == "":
+            print("Invalid session_id or message")
+            return []
 
-    print("send_message_to_agent: ", session_id, message, max_iterations)
-    context = ChatContext(command_manager, service_manager)
+        print("send_message_to_agent: ", session_id, message, max_iterations)
+        context = ChatContext(command_manager, service_manager)
 
-    await context.load_context(session_id)
-    print(context) 
-    agent_ = agent.Agent(agent=context.agent)
-    if user is not None:
-        for key in user:
-            context.data[key] = user[key]
+        await context.load_context(session_id)
+        print(context) 
+        agent_ = agent.Agent(agent=context.agent)
+        if user is not None:
+            for key in user:
+                context.data[key] = user[key]
 
-    tmp_data = { "message": message }
-    tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
-    message = tmp_data['message']
+        tmp_data = { "message": message }
+        tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
+        message = tmp_data['message']
 
-    termcolor.cprint("Final message: " + str(message), "yellow")
-    if type(message) is str:
-        context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
-    else:
-        context.chat_log.add_message({"role": "user", "content": message})
-
-    context.save_context()
-
-    continue_processing = True
-    iterations = 0
-    results = []
-    full_results = []
-
-    while continue_processing and iterations < max_iterations:
-        iterations += 1
-        continue_processing = False
-        try:
-            if os.environ.get("DEFAULT_LLM_MODEL") is not None:
-                print(2)
-                context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
- 
-            results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
-            try:
-                tmp_data3 = { "results": full_cmds }
-                tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)
-                out_results = tmp_data3['results']
-            except Exception as e:
-                print("Error processing results: ", e)
-                print(traceback.format_exc())
-
-            for cmd in full_cmds:
-                full_results.append(cmd)
-
-
-            termcolor.cprint("results from chat commands: " + str(full_cmds), "yellow")
-            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-            print("results from chat commands: ", full_cmds)
-            out_results = []
-            actual_results = False
-            await asyncio.sleep(0.1)
-            for result in results:
-                if result['result'] is not None:
-                    if result['result'] == 'continue':
-                        out_results.append(result)
-                        continue_processing = True
-                    elif result['result'] == 'stop':
-                        continue_processing = False
-                    else:
-                        out_results.append(result)
-                        # print found result in magenta
-                        termcolor.cprint("Found result: " + str(result), "magenta")
-                        actual_results = True
-                        continue_processing = True
+        termcolor.cprint("Final message: " + str(message), "yellow")
+        if type(message) is str:
+            context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+        else:
+            new_parts = []
+            for part in message:
+                if part['type'] == 'image':
+                    img = dataurl_to_pil(part['data'])
+                    img_msg = await context.format_image_message(img)
+                    new_parts.append(img_msg)
                 else:
-                    continue_processing = False
+                    new_parts.append(part)
+            context.chat_log.add_message({"role": "user", "content": new_parts })
 
-            if actual_results:
-                continue_processing = True
-            
-            if len(out_results) > 0:
-                print('**********************************************************')
-                print("Processing iteration: ", iterations, "adding message")
+        context.save_context()
 
+        continue_processing = True
+        iterations = 0
+        results = []
+        full_results = []
+
+        while continue_processing and iterations < max_iterations:
+            iterations += 1
+            continue_processing = False
+            try:
+                if os.environ.get("DEFAULT_LLM_MODEL") is not None:
+                    print(2)
+                    context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
+    
+                results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
                 try:
-                    tmp_data2 = { "results": out_results }
-                    tmp_data2 = await pipeline_manager.process_results(tmp_data2, context=context)
-                    out_results = tmp_data2['results']
+                    tmp_data3 = { "results": full_cmds }
+                    tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)
+                    out_results = tmp_data3['results']
                 except Exception as e:
                     print("Error processing results: ", e)
                     print(traceback.format_exc())
 
-                formatted_results = []
-                for result in out_results:
-                    process_result(result, formatted_results)
-                context.chat_log.add_message({"role": "user", "content": formatted_results})
-                results.append(out_results) 
-            else:
-                print("Processing iteration: ", iterations, "no message added")
-            if context.data.get('finished_conversation') is True:
-                termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                for cmd in full_cmds:
+                    full_results.append(cmd)
+
+
+                out_results = []
+                actual_results = False
+                await asyncio.sleep(0.1)
+                for result in results:
+                    if result['result'] is not None:
+                        if result['result'] == 'continue':
+                            out_results.append(result)
+                            continue_processing = True
+                        elif result['result'] == 'stop':
+                            continue_processing = False
+                        else:
+                            out_results.append(result)
+                            termcolor.cprint("Found result: " + str(result), "magenta")
+                            actual_results = True
+                            continue_processing = True
+                    else:
+                        continue_processing = False
+
+                if actual_results:
+                    continue_processing = True
+                
+                if len(out_results) > 0:
+                    try:
+                        tmp_data2 = { "results": out_results }
+                        tmp_data2 = await pipeline_manager.process_results(tmp_data2, context=context)
+                        out_results = tmp_data2['results']
+                    except Exception as e:
+                        print("Error processing results: ", e)
+                        print(traceback.format_exc())
+
+                    formatted_results = []
+                    for result in out_results:
+                        process_result(result, formatted_results)
+                    context.chat_log.add_message({"role": "user", "content": formatted_results})
+                    results.append(out_results) 
+                else:
+                    print("Processing iteration: ", iterations, "no message added")
+                if context.data.get('finished_conversation') is True:
+                    termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                    continue_processing = False
+            except Exception as e:
+                print("Found an error in agent output: ")
+                print(e)
+                print(traceback.format_exc())
                 continue_processing = False
-        except Exception as e:
-            print("Found an error in agent output: ")
-            print(e)
-            print(traceback.format_exc())
-            continue_processing = False
 
-    await asyncio.sleep(0.1)
-    print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
-    await context.finished_chat()
-    return [results, full_results]
-
+        await asyncio.sleep(0.1)
+        print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
+        await context.finished_chat()
+        return [results, full_results]
+    except Exception as e:
+        print("Error in send_message_to_agent: ", e)
+        print(traceback.format_exc())
+        return []
 
 @pipe(name='process_results', priority=5)
 def add_current_time(data: dict, context=None) -> dict:
