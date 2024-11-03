@@ -128,13 +128,18 @@ class Chat extends BaseEl {
     for (let msg of data) {
       for (let part of msg.content) {
         console.log({part})
+        if (!part.text) continue
         if (part.text.startsWith('[SYSTEM]') || part.text.startsWith('SYSTEM]')) {
           continue
         }
         if (part.text.startsWith('SYSTEM')) continue
         if (msg.role == 'user') {
-          this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
-          continue
+          try {
+            const cmds = JSON.parse(part.text);
+            continue
+          } catch (e) {
+            this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
+          }
         } else {
           if (part.type == 'image') {
             // TODO: show images
@@ -192,8 +197,11 @@ class Chat extends BaseEl {
       }).then(data => {
           console.log(data);
           this.task_id = data.task_id;
-        }
-      )
+          setTimeout(() => { 
+            this._scrollToBottom();
+            this.userScrolling = false;
+          }, 300)         
+      })      
     }
     this.lastMessageTime = Date.now()
     console.log(`%c ${this.lastMessageTime}`, 'color: red')
@@ -300,7 +308,7 @@ class Chat extends BaseEl {
   _scrollToBottom() {
     const chatLog = this.shadowRoot.querySelector('.chat-log');
     const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
-    const isAtBottom = difference > -250
+    const isAtBottom = difference > -120
     if (isAtBottom) {
       const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
       const lastEl = lastMessageEls[lastMessageEls.length-1];
