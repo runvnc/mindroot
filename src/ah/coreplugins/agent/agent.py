@@ -10,6 +10,7 @@ from lib.providers.hooks import hook_manager
 from lib.pipelines.pipe import pipeline_manager
 from lib.providers.services import service
 from lib.providers.services import service_manager
+from lib.json_str_block import replace_raw_blocks
 import sys
 from lib.utils.check_args import *
 from .command_parser import parse_streaming_commands, invalid_start_format
@@ -257,13 +258,9 @@ class Agent:
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         print("result: ", result)
                         await context.command_result(cmd_name, result)
-                        print(2)
                         full_cmds.append({"cmd": cmd_name, "args": cmd_args, "result": result})
-                        print(3)
                         if result is not None:
-                            print(4)
                             results.append({"cmd": cmd_name, "args": { "omitted": "(see command msg.)"}, "result": result})
-                            print(5)
 
                         num_processed = len(commands)
                     except Exception as e:
@@ -291,11 +288,13 @@ class Agent:
         if len(full_cmds) == 0:
             print("\033[91m" + "No results and parse failed" + "\033[0m")
             try:
+                buffer = replace_raw_blocks(buffer)
                 parse_ok = json.loads(buffer)
                 parse_fail_reason = ""
             except JSONDecodeError as e:
                 parse_fail_reason = str(e)
-            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + ' ' + parse_fail_reason })
+            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\ncommand list received was: '+
+                 buffer +'\n\nJSON parse error was: ' + parse_fail_reason })
  
         return results, full_cmds
 

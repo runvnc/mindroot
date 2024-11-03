@@ -29,6 +29,12 @@ class ChatForm extends BaseEl {
         width: 24px;
         height: 24px;
       }
+      .image-preview-container {
+        display: none;
+      }
+      .image-preview-container.has-images {
+        display: flex;
+      }
     `
   ]
 
@@ -56,11 +62,39 @@ class ChatForm extends BaseEl {
         
         reader.onload = (e) => {
           this.pastedImages.push(e.target.result);
+          this._updateImagePreviews();
         };
         
         reader.readAsDataURL(blob);
       }
     }
+  }
+
+  _updateImagePreviews() {
+    const container = this.shadowRoot.querySelector('.image-preview-container');
+    container.innerHTML = '';
+    
+    if (this.pastedImages.length > 0) {
+      container.classList.add('has-images');
+      this.pastedImages.forEach((imageData, index) => {
+        const preview = document.createElement('div');
+        preview.className = 'preview-thumbnail';
+        preview.innerHTML = `
+          <img src="${imageData}" alt="preview">
+          <button class="remove-image" data-index="${index}">×</button>
+        `;
+        preview.querySelector('.remove-image').addEventListener('click', () => this._removeImage(index));
+        container.appendChild(preview);
+      });
+    } else {
+      container.classList.remove('has-images');
+    }
+    this.requestUpdate();
+  }
+
+  _removeImage(index) {
+    this.pastedImages.splice(index, 1);
+    this._updateImagePreviews();
   }
 
   async _send(event) {
@@ -93,6 +127,7 @@ class ChatForm extends BaseEl {
     this.dispatch('addmessage', ev_)
     this.messageEl.value = ''
     this.pastedImages = []
+    this._updateImagePreviews()
     this._resizeTextarea() // Reset size after sending
     this.requestUpdate()
   }
@@ -120,7 +155,7 @@ class ChatForm extends BaseEl {
     // Reset height to auto to get the correct scrollHeight
     textarea.style.height = 'auto';
     // Set the height to the scrollHeight
-    const newHeight = Math.min(Math.max(textarea.scrollHeight, 48), 640); // 3em to 40em
+    const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640); // 3em to 40em
     textarea.style.height = `${newHeight}px`;
     this.requestUpdate();
     console.log('resize')
@@ -140,18 +175,22 @@ class ChatForm extends BaseEl {
   _render() {
     return html`
       <div class="chat-entry flex py-2">
-        <textarea id="inp_message" class="message-input"
-          @keydown=${(e) => {
-            if (e.key === 'Enter') {
-              if (!e.shiftKey) {
-                e.preventDefault();
-                this._send();
+        <div class="message-container">
+          <div class="image-preview-container"></div>
+          <textarea id="inp_message" class="message-input"
+            rows="4" 
+            @keydown=${(e) => {
+              if (e.key === 'Enter') {
+                if (!e.shiftKey) {
+                  e.preventDefault();
+                  this._send();
+                }
               }
-            }
-          }}
-          @input=${this._messageChanged}
-          required
-        ></textarea>
+            }}
+            @input=${this._messageChanged}
+            required
+          ></textarea>
+        </div>
         <button type="button" @click=${this._send} class="send_msg">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M11.354 8.354a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.708.708L10.293 8l-6.647 6.646a.5.5 0 0 0 .708.708l7-7a.5.5 0 0 0 0-.708z"/>

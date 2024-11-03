@@ -3,6 +3,7 @@ import re
 from typing import List, Dict, Tuple, Any
 from partial_json_parser import loads, ensure_json
 from lib.json_str_block import replace_raw_blocks
+from lib.utils.merge_arrays import merge_json_arrays
 from lib.json_escape import escape_for_json
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
@@ -27,7 +28,12 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return complete_commands, None
     except json.JSONDecodeError:
         try:
-            complete_commands = json.loads(escape_for_json(buffer))
+            complete_commands = merge_json_arrays(buffer)
+            return complete_commands, None
+        except json.JSONDecodeError:
+            pass
+        try:
+            complete_commands = loads(raw_replaced) # escape_for_json
             num_commands = len(complete_commands)
             if num_commands > 1:
                 complete_commands = complete_commands[:num_commands-1]
@@ -44,7 +50,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             #if it failed to parse, write buffer that failed to debug in orange text
             if buffer[-1] == ']':
                 print("\033[93m", end="")
-                print(f"Failed to parse buffer even with escaped newlines: {buffer}")
+                print(f"Failed to parse buffer even with escaped newlines: {raw_replaced}")
                 print("\033[0m", end="")
                 pass
             pass

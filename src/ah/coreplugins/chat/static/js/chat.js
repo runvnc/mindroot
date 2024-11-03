@@ -126,32 +126,32 @@ class Chat extends BaseEl {
     // output data in cyan also
     console.log('%cHistory loaded:', 'color: cyan', data)
     for (let msg of data) {
-      if (msg.content.startsWith('[SYSTEM]') || msg.content.startsWith('SYSTEM]')) {
-        const idx = msg.content.lastIndexOf(']\n')
-        msg.content = msg.content.slice(idx+2)
-        if (msg.content.startsWith('SYSTEM')) continue
-        this.messages = [...this.messages, { content: msg.content, sender:'user', persona: msg.persona }];
-        continue
-      }
-      try {
-        const cmds = JSON.parse(msg.content);
-        console.log('cmd:', cmds)
-        for (let cmd of cmds) {
-          let md = null
-          if (cmd.say) md = tryParse(cmd.say.text)
-          if (cmd.json_encoded_md) md =  tryParse(cmd.json_encoded_md.markdown)
-          if (md) {
-            this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
-            console.log("Added message:", md)
-          } else {
-            console.log("Did not see text in message, skipping.")
+      for (let part of msg.content) {
+        console.log({part})
+        if (part.text.startsWith('[SYSTEM]') || part.text.startsWith('SYSTEM]')) {
+          continue
+        }
+        if (part.text.startsWith('SYSTEM')) continue
+        if (msg.role == 'user') {
+          this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
+          continue
+        } else {
+          if (part.type == 'image') {
+            // TODO: show images
+            continue
+          }
+          const cmds = JSON.parse(part.text);
+          console.log('cmd:', cmds)
+          for (let cmd of cmds) {
+            let md = null
+            if (cmd.say) md = tryParse(cmd.say.text)
+            if (cmd.json_encoded_md) md =  tryParse(cmd.json_encoded_md.markdown)
+            if (md) {
+              this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
+              console.log("Added message:", md)
+            } 
           }
         }
-      } catch (e) {
-        console.error(e)
-        console.info('Could not parse as JSON. Assuming user message. Message:', msg.content)
-
-        this.messages = [...this.messages, { content: msg.content, sender:'user', persona: msg.persona }];
       }
     }
   }

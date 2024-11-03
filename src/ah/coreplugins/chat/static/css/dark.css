@@ -169,6 +169,14 @@ textarea, .text_lg {
   height: 4em;
 }
 
+#inp_message {
+  width: 95%;
+}
+
+.message-container {
+  width: 100%;
+}
+
 .text_lg {
   height: 35vh;
   scrollbar-width: thin;
@@ -775,3 +783,54 @@ chat-message:first-of-type .outer-msg.without-avatar {
   width: 200px;
 }
 
+
+/* Add new styles for image preview */
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+  max-height: 100px;
+  overflow-y: auto;
+  background-color: #050510;
+  border: 1px solid #333;
+  border-radius: 15px;
+  margin-bottom: 8px;
+}
+
+.preview-thumbnail {
+  position: relative;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-thumbnail img {
+  height: 100%;
+  width: auto;
+}
+
+.remove-image {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(255, 77, 77, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-image:hover {
+  background: rgba(255, 26, 26, 0.9);
+}
+
+.preview-thumbnail:hover .remove-image {
+  display: flex;
+}
