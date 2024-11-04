@@ -8,10 +8,40 @@ class PluginManager extends BaseEl {
 
   static styles = [
     css`
-      .plugin-manager { /* styles */ }
-      .plugin-item { /* styles */ }
-      .scan-section { /* styles */ }
-      .buttons { /* styles */ }
+      .github-modal {
+        padding: 20px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);    
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .button-group button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
     `
   ];
 
@@ -32,6 +62,37 @@ class PluginManager extends BaseEl {
     }
   }
 
+  showGitHubInstallModal() {
+    const modal = this.shadowRoot.querySelector('#github-install-modal');
+    modal.showModal({ modal: true, focus: true, center: true })
+  }
+
+  async handleGitHubInstall(e) {
+    e.preventDefault();
+    const modal = this.shadowRoot.querySelector('#github-install-modal');
+    const pluginName = this.shadowRoot.querySelector('#plugin-name').value;
+    const githubUrl = this.shadowRoot.querySelector('#github-url').value;
+
+    if (!pluginName || !githubUrl) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    const response = await fetch('/plugin-manager/install-github-plugin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plugin: pluginName, url: githubUrl })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert(`Plugin ${pluginName} installed successfully from GitHub`);
+      this.fetchPlugins();
+      modal.close();
+    } else {
+      alert(`Failed to install plugin ${pluginName} from GitHub: ${result.message}`);
+    }
+  }
   async handleScanDirectory() {
     let directory = prompt("Enter the directory path to scan for plugins:");
     if (!directory) return;
@@ -119,6 +180,7 @@ class PluginManager extends BaseEl {
       <div class="plugin-manager">
         <div class="scan-section">
           <button @click=${this.handleScanDirectory}>Scan Directory for Plugins</button>
+          <button @click=${this.showGitHubInstallModal}>Install from GitHub</button>
         </div>
 
         <h3>Plugins</h3>
@@ -141,6 +203,19 @@ class PluginManager extends BaseEl {
           </div>
         `) : html`<p>No plugins found.</p>`}
       </div>
+      <dialog id="github-install-modal" class="github-modal">
+        <form method="dialog">
+          <h2>Install Plugin from GitHub</h2>
+          <div class="form-group">
+            <label for="github-url">GitHub Repo</label>
+            <input type="text" id="github-url" placeholder="e.g. user/repo or user/repo:tag" required>
+          </div>
+          <div class="button-group">
+            <button value="cancel">Cancel</button>
+            <button value="install" @click=${this.handleGitHubInstall}>Install</button>
+          </div>
+        </form>
+      </dialog>
     `;
   }
 }

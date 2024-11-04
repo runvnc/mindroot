@@ -14,6 +14,15 @@ body {
   margin: 0 auto;
 }
 
+dialog, div, form {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+dialog {
+  padding: 20px;
+}
+
 details {
   background: rgb(10, 10, 25);
   border: 1px solid rgba(255, 255, 255, 0.1);

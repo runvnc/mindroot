@@ -114,6 +114,19 @@ def install_plugin_dependencies(plugin_path):
             return False
     return True
 
+def github_to_pip(github_ref):
+    # Split into parts (user/repo or user/repo:tag)
+    parts = github_ref.split(':')
+    repo_path = parts[0]
+    tag = parts[1] if len(parts) > 1 else None
+    
+    # Build pip install URL
+    base_url = f"git+https://github.com/{repo_path}.git"
+    if tag:
+        base_url += f"@{tag}"
+    
+    return base_url
+
 def plugin_install(plugin_name, source='pypi', source_path=None):
     try:
         if source == 'available':
@@ -126,8 +139,17 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', plugin_name])
         elif source == 'github':
             if not source_path:
-                raise ValueError("source_path (GitHub URL) is required for GitHub installation")
+                raise ValueError("source_path (e.g. repo/name or repo/name:tag) is required for GitHub installation")
+            source_path = github_to_pip(source_path)
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'git+{source_path}'])
+            installed_at = subprocess.check_output([sys.executable, '-m', 'pip', 'show', plugin_name]).decode()
+            installed_at = installed_at.split('\n')[0].split(': ')[1]
+            print("Installed at:", installed_at)
+            plugin_info_path = os.path.join(installed_at, 'plugin_info.json')
+            if os.path.exists(plugin_info_path):
+                with open(plugin_info_path, 'r') as f:
+                    plugin_info = json.load(f)
+                plugin_name = plugin_info['name']
         else:
             raise ValueError(f"Unsupported installation source: {source}")
         
