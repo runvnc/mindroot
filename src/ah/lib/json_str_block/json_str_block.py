@@ -41,6 +41,8 @@ def replace_raw_blocks(jsonish):
             if "START_RAW" in line:
                 in_raw = True
                 raw_string = ""
+                line = line.replace("\"START_RAW\n", "")
+                line = line.replace("\"START_RAW", "")
                 line = line.replace("START_RAW \n", "")
                 line = line.replace("START_RAW\n", "")
                 line = line.replace("START_RAW", "")
@@ -54,7 +56,7 @@ def replace_raw_blocks(jsonish):
 
 if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    with open("ex4.txt") as f:
+    with open("ex5.txt") as f:
         #with open("test_case_1.json") as f:
         jsonish = f.read()
     new_json = replace_raw_blocks(jsonish)
