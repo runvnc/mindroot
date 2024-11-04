@@ -36,7 +36,12 @@ class ChatLog:
 
             try:
                 cmd_list = json.loads(self.messages[-1]['content'][0]['text'])
-                new_cmd_list = cmd_list + json.loads(message['content'][0]['text'])
+                if type(cmd_list) != list:
+                    cmd_list = [cmd_list]
+                new_json = json.loads(message['content'][0]['text'])
+                if type(new_json) != list:
+                    new_json = [new_json]
+                new_cmd_list = cmd_list + new_json
                 self.messages[-1]['content'] = [{ 'type': 'text', 'text': json.dumps(new_cmd_list) }]
             except Exception as e:
                 print('could not combine commands. probably normal if user message and previous system output', e)

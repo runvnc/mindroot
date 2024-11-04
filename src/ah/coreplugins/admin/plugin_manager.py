@@ -98,14 +98,12 @@ async def install_local_plugin(request: PluginRequest):
 
 
 
-@router.post("/install-github-plugin")
+@router.post("/install-x-github-plugin")
 async def install_github_plugin(request: GitHubPluginRequest):
-    plugin_name = request.plugin
     github_url = request.url
-    
     try:
-        plugin_install(plugin_name, source='github', source_path=github_url)
-        return {"success": True, "message": f"Plugin {plugin_name} installed successfully from GitHub"}
+        plugin_install('read_manifest', source='github', source_path=github_url)
+        return {"success": True, "message": f"Plugin installed successfully from GitHub"}
     except ValueError as e:
         return {"success": False, "message": f"Invalid input: {str(e)}"}
     except RuntimeError as e:

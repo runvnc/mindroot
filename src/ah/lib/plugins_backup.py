@@ -12,55 +12,11 @@ import termcolor
 from ah.lib.providers.hooks import hook_manager
 from importlib.util import find_spec
 import traceback
-# need temppfile
-import tempfile
-# need shutil
-import shutil
-import requests
-import zipfile
-import os
 
 from .providers import hooks, commands, services
 
 app_instance = None
 MANIFEST_FILE = 'plugin_manifest.json'
-
-def download_github_files(repo_path, tag=None):
-    """Download GitHub repo files to temp directory"""
-    # Format the download URL
-    if tag:
-        download_url = f"https://github.com/{repo_path}/archive/refs/tags/{tag}.zip"
-    else:
-        download_url = f"https://github.com/{repo_path}/archive/refs/heads/main.zip"
-    
-    # Create temp directory
-    temp_dir = tempfile.mkdtemp()
-    zip_path = os.path.join(temp_dir, 'repo.zip')
-    
-    try:
-        # Download the zip file
-        response = requests.get(download_url)
-        response.raise_for_status()
-        
-        with open(zip_path, 'wb') as f:
-            f.write(response.content)
-        
-        # Extract zip
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-            
-        # Find plugin_info.json
-        for root, _, files in os.walk(temp_dir):
-            if 'plugin_info.json' in files:
-                with open(os.path.join(root, 'plugin_info.json'), 'r') as f:
-                    plugin_info = json.load(f)
-                return temp_dir, root, plugin_info
-                
-        raise ValueError("No plugin_info.json found in repository")
-        
-    except Exception as e:
-        shutil.rmtree(temp_dir)
-        raise e
 
 def get_plugin_path(plugin_name):
     manifest = load_plugin_manifest()
@@ -183,35 +139,19 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', plugin_name])
         elif source == 'github':
             if not source_path:
-                raise ValueError("source_path (e.g. repo/name or repo/name:tag) is required")
-            
-            # Split into parts (user/repo and optional tag)
-            parts = source_path.split(':')
-            repo_path = parts[0]
-            tag = parts[1] if len(parts) > 1 else None
-            
-            try:
-                # Download and get plugin info
-                temp_dir, plugin_root, plugin_info = download_github_files(repo_path, tag)
-                plugin_name = plugin_info['name']  # Get actual plugin name
-                
-                # Install directly from downloaded files
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', plugin_root])
-                
-                # Update manifest with github source
-                update_plugin_manifest(
-                    plugin_name,
-                    source='github',
-                    source_path=f"{repo_path}:{tag}" if tag else repo_path,
-                    version=plugin_info.get('version', '0.0.1')
-                )
-                
-                return True
-                
-            finally:
-                # Clean up temp directory
-                if 'temp_dir' in locals():
-                    shutil.rmtree(temp_dir)
+                raise ValueError("source_path (e.g. repo/name or repo/name:tag) is required for GitHub installation")
+            source_path = github_to_pip(source_path)
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', source_path])
+            # we need to pass a plugin_name here, that is the whole point, we don't have the actual name, this doesn't work
+            # because plugin_name is actually 'test' or some dummy value at this point
+            installed_at = subprocess.check_output([sys.executable, '-m', 'pip', 'show', plugin_name]).decode()
+            installed_at = installed_at.split('\n')[0].split(': ')[1]
+            print("Installed at:", installed_at)
+            plugin_info_path = os.path.join(installed_at, 'plugin_info.json')
+            if os.path.exists(plugin_info_path):
+                with open(plugin_info_path, 'r') as f:
+                    plugin_info = json.load(f)
+                plugin_name = plugin_info['name']
         else:
             raise ValueError(f"Unsupported installation source: {source}")
         

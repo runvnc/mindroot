@@ -70,27 +70,26 @@ class PluginManager extends BaseEl {
   async handleGitHubInstall(e) {
     e.preventDefault();
     const modal = this.shadowRoot.querySelector('#github-install-modal');
-    const pluginName = this.shadowRoot.querySelector('#plugin-name').value;
     const githubUrl = this.shadowRoot.querySelector('#github-url').value;
 
-    if (!pluginName || !githubUrl) {
+    if (!githubUrl) {
       alert('Please fill in all fields');
       return;
     }
 
-    const response = await fetch('/plugin-manager/install-github-plugin', {
+    const response = await fetch('/plugin-manager/install-x-github-plugin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plugin: pluginName, url: githubUrl })
+      body: JSON.stringify({ plugin:'test', url: githubUrl })
     });
 
     const result = await response.json();
     if (result.success) {
-      alert(`Plugin ${pluginName} installed successfully from GitHub`);
+      alert(`Plugin installed successfully from GitHub`);
       this.fetchPlugins();
       modal.close();
     } else {
-      alert(`Failed to install plugin ${pluginName} from GitHub: ${result.message}`);
+      alert(`Failed to install plugin from GitHub: ${result.message}`);
     }
   }
   async handleScanDirectory() {
