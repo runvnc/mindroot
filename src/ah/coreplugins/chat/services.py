@@ -64,8 +64,18 @@ def process_result(result, formatted_results):
         formatted_results.append(img_data)
     elif 'result' in result and type(result['result']) is list:
         print("B")
+        # does one of them items contain an another result
+        found_result = False
         for item in result['result']:
-            process_result({ "result": item}, formatted_results)
+            if 'result' in item:
+                found_result = True
+                break
+        if found_result:
+            for item in result['result']:
+                process_result({ "result": item}, formatted_results)
+        else:
+            new_result = { "type": "text", "text": json.dumps(result['result']) }
+            formatted_results.append(new_result)
     else:
         print("C")
         new_result = { "type": "text", "text": json.dumps(result) }

@@ -214,6 +214,8 @@ class Chat extends BaseEl {
   _finished(event) {
     console.log('Chat finished');
     this.task_id = null
+    this.userScrolling = false;
+    this._scrollToBottom()
   }
 
 
@@ -308,12 +310,14 @@ class Chat extends BaseEl {
   _scrollToBottom() {
     const chatLog = this.shadowRoot.querySelector('.chat-log');
     const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
-    const isAtBottom = difference > -120
-    if (isAtBottom) {
+    console.log({difference, userScrolling: this.userScrolling, windowUserScrolling: window.userScrolling})
+    const isAtBottom = difference > -250
+    if (isAtBottom || !this.userScrolling) {
       const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
       const lastEl = lastMessageEls[lastMessageEls.length-1];
       lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
     } else {
+      console.log('Not scrolling to bottom')
     }
   }
 

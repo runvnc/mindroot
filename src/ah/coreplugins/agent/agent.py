@@ -134,7 +134,7 @@ class Agent:
             "context": str(context)
         })
         context.chat_log.add_message({"role": "assistant", "content": [{"type": "text", 
-                                                                       "text": '[' +json_cmd+']' }]})
+                                                                       "text": '['+json_cmd+']' }]})
         command_manager.context = context
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
         try:
