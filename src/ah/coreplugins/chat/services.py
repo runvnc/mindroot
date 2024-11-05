@@ -8,6 +8,7 @@ from lib.utils.dataurl import dataurl_to_pil
 from .models import MessageParts
 from coreplugins.agent import agent
 import os
+import sys
 import colored
 import traceback
 import asyncio
@@ -64,12 +65,9 @@ def process_result(result, formatted_results):
         formatted_results.append(img_data)
     elif 'result' in result and type(result['result']) is list:
         print("B")
-        found_image = False
-        for item in result['result']:
-            if 'type' in item and item['type'] == 'image':
-                found_result = True
-                break
+        found_image = json.dumps(result['result']).find('"image"') > -1
         if found_image:
+            print("Found image")
             for item in result['result']:
                 process_result({ "result": item}, formatted_results)
         else:
@@ -115,14 +113,18 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
         else:
             new_parts = []
+            has_image = False
             for part in message:
                 if part['type'] == 'image':
+                    has_image = True
                     img = dataurl_to_pil(part['data'])
                     img_msg = await context.format_image_message(img)
                     new_parts.append(img_msg)
                 else:
                     new_parts.append(part)
-            context.chat_log.add_message({"role": "user", "content": new_parts })
+            msg_to_add= {"role": "user", "content": new_parts }
+            has_image = has_image or str(msg_to_add).find("image") > -1
+            context.chat_log.add_message(msg_to_add)
 
         context.save_context()
 
