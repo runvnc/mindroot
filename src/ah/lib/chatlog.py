@@ -70,7 +70,7 @@ class ChatLog:
     def get_recent(self, max_tokens: int = 4096) -> List[Dict[str, str]]:
         recent_messages = []
         total_length = 0
-        print('returning all messages', self.messages)
+        #print('returning all messages', self.messages)
         return self.messages
 
         #for message in self.messages:
