@@ -51,6 +51,13 @@ def replace_raw_blocks(jsonish):
                 final_string += line + "\n"
     if in_raw:
         final_string += json.dumps(raw_string)
+
+    # check if parsable as partial json
+    try:
+        ensure_json(final_string)
+    except json.JSONDecodeError:
+        # try converting to valid JSON string
+        return json.dumps(final_string)
     return final_string
 
 

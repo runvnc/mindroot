@@ -32,7 +32,14 @@ class ChatLog:
             # check if messasge is str
             # if so, convert to dict with type 'text':
             if type(message['content']) == str:
-                message['content'] = {'type':'text', 'text': message['content']}
+                message['content'] = [{'type':'text', 'text': message['content']}]
+            elif type(message['content']) == list:
+                for part in message['content']:
+                    if part['type'] == 'image':
+                        print("found image")
+                        self.messages.append(message)
+                        save_log()
+                        return
 
             try:
                 cmd_list = json.loads(self.messages[-1]['content'][0]['text'])
@@ -45,12 +52,12 @@ class ChatLog:
                 self.messages[-1]['content'] = [{ 'type': 'text', 'text': json.dumps(new_cmd_list) }]
             except Exception as e:
                 # assume previous mesage was not a command, was a string
-                new_msg_text = self.messages[-1]['content'][0]['text'] + message['content']['text']
+                new_msg_text = self.messages[-1]['content'][0]['text'] + message['content'][0]['text']
                 self.messages.append({'role': message['role'], 'content': [{'type': 'text', 'text': new_msg_text}]})
-                print('could not combine commands. probably normal if user message and previous system output', e)
-                print(self.messages[-1])
-                print(message)
-                raise e
+                #print('could not combine commands. probably normal if user message and previous system output', e)
+                #print(self.messages[-1])
+                #print(message)
+                #raise e
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])

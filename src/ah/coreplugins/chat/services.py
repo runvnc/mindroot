@@ -64,13 +64,12 @@ def process_result(result, formatted_results):
         formatted_results.append(img_data)
     elif 'result' in result and type(result['result']) is list:
         print("B")
-        # does one of them items contain an another result
-        found_result = False
+        found_image = False
         for item in result['result']:
-            if 'result' in item:
+            if 'type' in item and item['type'] == 'image':
                 found_result = True
                 break
-        if found_result:
+        if found_image:
             for item in result['result']:
                 process_result({ "result": item}, formatted_results)
         else:
