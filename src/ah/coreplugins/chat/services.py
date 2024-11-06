@@ -166,7 +166,9 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                             continue_processing = False
                         else:
                             out_results.append(result)
-                            termcolor.cprint("Found result: " + str(result), "magenta")
+                            # only print up to 200 characters
+                            truncated_result = str(result)[:200] + '...'
+                            termcolor.cprint("Found result: " + truncated_result, "magenta")
                             actual_results = True
                             continue_processing = True
                     else:
@@ -202,6 +204,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
         await asyncio.sleep(0.1)
         print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
+
         await context.finished_chat()
         return [results, full_results]
     except Exception as e:

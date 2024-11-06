@@ -282,7 +282,7 @@ class Agent:
                         logger.error(str(de))
                         pass
 
-        print("\033[92m" + str(full_cmds) + "\033[0m")
+        #print("\033[92m" + str(full_cmds) + "\033[0m")
         # getting false positive on this check
         if len(full_cmds) == 0:
             print("\033[91m" + "No results and parse failed" + "\033[0m")

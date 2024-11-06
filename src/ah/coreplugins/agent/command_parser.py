@@ -28,7 +28,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return complete_commands, None
     except json.JSONDecodeError:
         try:
-            complete_commands = merge_json_arrays(buffer)
+            complete_commands = merge_json_arrays(raw_replaced)
             return complete_commands, None
         except json.JSONDecodeError:
             pass
@@ -50,7 +50,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             #if it failed to parse, write buffer that failed to debug in orange text
             if buffer[-1] == ']':
                 print("\033[93m", end="")
-                print(f"Failed to parse buffer even with escaped newlines: {raw_replaced}")
+                print(f"Failed to parse buffer even with escaping: {raw_replaced}")
                 print("\033[0m", end="")
                 pass
             pass

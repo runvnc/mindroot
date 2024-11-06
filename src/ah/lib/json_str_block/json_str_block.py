@@ -55,7 +55,7 @@ def replace_raw_blocks(jsonish):
     # check if parsable as partial json
     try:
         ensure_json(final_string)
-    except json.JSONDecodeError:
+    except Exception as e:
         # try converting to valid JSON string
         return json.dumps(final_string)
     return final_string
