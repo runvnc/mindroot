@@ -236,6 +236,8 @@ class Agent:
             logger.debug(f"Current buffer: ||{buffer}||")
 
             if invalid_start_format(buffer):
+                context.chat_log.add_message({"role": "assistant", "content": buffer})
+ 
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
                 return results, full_cmds 
  
@@ -292,8 +294,8 @@ class Agent:
                 parse_fail_reason = ""
             except JSONDecodeError as e:
                 parse_fail_reason = str(e)
-            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\ncommand list received was: '+
-                 buffer +'\n\nJSON parse error was: ' + parse_fail_reason })
+                context.chat_log.add_message({"role": "assistant", "content": buffer})
+            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason })
  
         return results, full_cmds
 

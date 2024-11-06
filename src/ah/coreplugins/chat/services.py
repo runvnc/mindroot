@@ -10,6 +10,7 @@ from coreplugins.agent import agent
 import os
 import sys
 import colored
+import time
 import traceback
 import asyncio
 import json
@@ -66,7 +67,7 @@ def process_result(result, formatted_results):
     elif 'result' in result and type(result['result']) is list:
         print("B")
         found_image = json.dumps(result['result']).find('"image"') > -1
-        if found_image:
+        if True or found_image:
             print("Found image")
             for item in result['result']:
                 process_result({ "result": item}, formatted_results)
@@ -79,8 +80,8 @@ def process_result(result, formatted_results):
         formatted_results.append(new_result)
     
     print("length of results is ", len(formatted_results))
-    with open("output/processed_results.json", "w") as f: 
-        f.write(json.dumps(formatted_results) + "\n")
+    #with open("output/processed_results.json", "w") as f: 
+    #    f.write(json.dumps(formatted_results) + "\n")
 
     return formatted_results
 
@@ -110,7 +111,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
         termcolor.cprint("Final message: " + str(message), "yellow")
         if type(message) is str:
-            context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+            #context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+            context.chat_log.add_message({"role": "user", "content": message })
         else:
             new_parts = []
             has_image = False
@@ -187,8 +189,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                         print(traceback.format_exc())
 
                     formatted_results = []
+                    st_process = time.time()
                     for result in out_results:
                         process_result(result, formatted_results)
+                    print("Time to process results: ", time.time() - st_process)
                     context.chat_log.add_message({"role": "user", "content": formatted_results})
                     results.append(out_results) 
                 else:
