@@ -69,7 +69,12 @@ async def get_agent_data(agent_name, context=None):
     with open(agent_file, 'r') as f:
         agent_data = json.load(f)
 
-    agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
+    try:
+        agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
+    except Exception as e:
+        logger.error("Error getting persona data", extra={"error": str(e)})
+        raise e
+
     agent_data["flags"] = agent_data["flags"]
     agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
     return agent_data

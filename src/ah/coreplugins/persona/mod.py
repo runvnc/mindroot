@@ -11,15 +11,22 @@ print("Loading person lite")
 @service()
 async def get_persona_data(persona_name, context=None):
     print("persona name is", persona_name, file=sys.stderr)
-
-    # need to start relative to the current file
-    script_path = Path(os.path.dirname(os.path.realpath(__file__)))
-    persona_path = os.path.join(script_path.parent.parent, 'personas', 'local', persona_name)
+    # use pwd as base dir
+    # current working dir of process 
+    pwd = os.getcwd()
+    persona_path = os.path.join(pwd, 'personas', 'local', persona_name)
     if not os.path.exists(persona_path):
-        persona_path = os.path.join(script_path.parent.parent, 'personas', 'shared', persona_name)
+        persona_path = os.path.join(pwd, 'personas', 'shared', persona_name)
         if not os.path.exists(persona_path):
-            return {}
+            # need to raise an error here
+            raise Exception(f"Persona {persona_name} not found in {persona_path}")
+
     # read the persona data
+    # use blue background and yellow text
+    print("\033[44m\033[33m", file=sys.stderr)
+    print(f"Reading persona data from {persona_path}", file=sys.stderr)
+
+
     persona_file = os.path.join(persona_path, 'persona.json')
     if not os.path.exists(persona_file):
         return {}
@@ -37,6 +44,8 @@ async def get_persona_data(persona_name, context=None):
         if file.endswith(".wav"):
             persona_data['voice_samples'].append(os.path.join(persona_path, file))
 
+    print("persona data is", persona_data, file=sys.stderr)
+    print("\033[0m", file=sys.stderr)
     return persona_data
 
 @command()

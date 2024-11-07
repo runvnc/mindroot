@@ -35,8 +35,10 @@ dependencies = [
     "pydantic",
 ]
 
+
 [project.urls]
 Homepage = "https://github.com/yourusername/ah-framework"
+
 
 [project.scripts]
 ah = "ah.server:main"
@@ -44,6 +46,10 @@ ah = "ah.server:main"
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["*local*", "*data*", "*personas*", "*static*", "*imgs*", "*models*"]
+
+
+

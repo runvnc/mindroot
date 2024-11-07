@@ -6,7 +6,12 @@ import traceback
 
 router = APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent / 'personas'
+BASE_DIR = Path('personas')
+local_dir = BASE_DIR / "local"
+shared_dir = BASE_DIR / "shared"
+local_dir.mkdir(parents=True, exist_ok=True)
+shared_dir.mkdir(parents=True, exist_ok=True)
+
 
 @router.get('/personas/{scope}/{name}')
 def read_persona(scope: str, name: str):
@@ -27,6 +32,7 @@ def list_personas(scope: str):
         raise HTTPException(status_code=400, detail='Invalid scope')
     scope_dir = BASE_DIR / scope
     personas = [p.name for p in scope_dir.iterdir() if p.is_dir()]
+    print(f"Read personas from dir {scope_dir}: {personas}")
     return [{'name': name} for name in personas]
 
 @router.post('/personas/{scope}')
