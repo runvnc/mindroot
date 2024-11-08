@@ -57,7 +57,7 @@ async def get_logs(start_time, end_time, search_str=None, limit=30000, cursor=No
     for file in files:
         with open(file, 'r') as f:
             for line in f:
-                if searc_str is not None and search_str not in line:
+                if search_str is not None and search_str not in line:
                     continue
                 log_entry = json.loads(line)
                 log_time = datetime.fromisoformat(log_entry['time']).replace(tzinfo=None)

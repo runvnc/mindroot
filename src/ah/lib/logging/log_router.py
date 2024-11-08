@@ -12,7 +12,7 @@ async def get_logs_page():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Log Viewer</title>
+        <title>Log Viewer 0.5</title>
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
             h1 { color: #333; }
@@ -134,6 +134,8 @@ async def api_logs(
     end_time = datetime.fromisoformat(end)
     cursor_time = datetime.fromisoformat(cursor) if cursor else None
     search_str = search_str.strip() if search_str else None
+    if search_str == 'null':
+        search_str = None
 
     logs, next_cursor = await get_logs(start_time, end_time, search_str, limit, cursor_time)
 
