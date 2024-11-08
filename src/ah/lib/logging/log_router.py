@@ -68,6 +68,11 @@ async def get_logs_page():
                 <input type="checkbox" id="presentTime" name="presentTime" checked>
                 Use Present Time
             </label>
+
+            <label for="searchStr">Search:
+                <input type="text" id="searchStr" name="search" placeholder="Search string">
+            </label>
+            
             
             <button type="submit">Fetch Logs</button>
         </form>
@@ -100,8 +105,11 @@ async def get_logs_page():
                 if (document.getElementById('presentTime').checked) {
                     endTime = new Date().toISOString();
                 }
-
-                const response = await fetch(`/api/logs?start=${startTime}&end=${endTime}`);
+                let searchStr = null;
+                if (document.getElementById('searchStr').value) {
+                    searchStr = document.getElementById('searchStr').value;
+                }
+                const response = await fetch(`/api/logs?start=${startTime}&end=${endTime}&search_str=${searchStr}`)
                 const logs = await response.json();
                 console.log(logs);
             }
@@ -119,13 +127,15 @@ async def api_logs(
     start: str = Query(..., description="Start time (ISO format)"),
     end: str = Query(..., description="End time (ISO format)"),
     limit: int = Query(1000, description="Maximum number of logs to return"),
+    search_str: str = Query(None, description="Search string"),
     cursor: str = Query(None, description="Cursor for pagination")
 ):
     start_time = datetime.fromisoformat(start)
     end_time = datetime.fromisoformat(end)
     cursor_time = datetime.fromisoformat(cursor) if cursor else None
+    search_str = search_str.strip() if search_str else None
 
-    logs, next_cursor = await get_logs(start_time, end_time, limit, cursor_time)
+    logs, next_cursor = await get_logs(start_time, end_time, search_str, limit, cursor_time)
 
     return {
         "logs": logs,
