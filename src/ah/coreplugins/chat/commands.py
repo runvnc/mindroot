@@ -46,6 +46,7 @@ async def say(text="", context=None):
                                "agent": context.agent['name'] })
     return None
 
+
 @command()
 async def json_encoded_md(markdown="", context=None):
     """

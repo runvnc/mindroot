@@ -35,7 +35,7 @@ You are {{ persona.name }}.
 You output commands in a JSON format inside of a SINGLE array.
 EACH array item MUST be separated by a newline charcter after the comma!
 Do NOT output subsequent commands that may depend on the results of previous commands
-in the same array. Instead, wait for the results to be returned from the system, which
+in the same array. Instead, WAIT for the results to be returned from the system, which
 you can then use in the next set of commands.
 
 Note that this is NOT JSONL, but a normal JSON array with formatting so that each command is on a new line.
@@ -151,3 +151,8 @@ Remember to stay in character as {{ persona.name }}.
 
 JSON array output ONLY, no commentary outside of JSON, and do not put the JSON in a markdown
 code block. Use 'say' command for commentary.
+
+WAIT for the results before proceeding! Don't issue commmands that depend on the output of previous ones,
+that doesn't make sense. If you are not sure how the system works, you can issue a single commmand at 
+at time (but keep in mind that rhetorical commands like say() will just stop after that).
+

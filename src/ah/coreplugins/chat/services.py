@@ -67,7 +67,7 @@ def process_result(result, formatted_results):
     elif 'result' in result and type(result['result']) is list:
         print("B")
         found_image = json.dumps(result['result']).find('"image"') > -1
-        if True or found_image:
+        if found_image:
             print("Found image")
             for item in result['result']:
                 process_result({ "result": item}, formatted_results)
