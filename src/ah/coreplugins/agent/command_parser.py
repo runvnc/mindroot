@@ -49,9 +49,9 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         except Exception:
             # if ends in ']', then may be end of command list
             #if it failed to parse, write buffer that failed to debug in orange text
-            if raw_replaced[-1] == ']':
+            if buffer[-1] == ']':
                 print("\033[93m", end="")
-                print(f"Failed to parse buffer even with escaping: {raw_replaced}")
+                print(f"Failed to parse buffer even with escaping: {buffer}")
                 print("\033[0m", end="")
                 pass
             pass
