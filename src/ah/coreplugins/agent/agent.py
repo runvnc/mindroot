@@ -221,7 +221,8 @@ class Agent:
                 buffer = buffer.lstrip(',').rstrip(',')
             return [cmd], buffer
         except Exception as e:
-            logger.error("Error processing command", extra={"error": str(e)})
+            trace = traceback.format_exc()
+            logger.error("Error processing command", extra={"error": str(e) + "\n\n" + trace})
 
             json_str = '[' + json_str + ']'
 
@@ -270,9 +271,8 @@ class Agent:
 
                         num_processed = len(commands)
                     except Exception as e:
-                        # print a border in red
-                        # print("\033[91m" + "Error processing command" + "\033[0m")
-                        logger.error(f"Error processing command: {e}")
+                        trace = traceback.format_exc()
+                        logger.error(f"Error processing command: {e} \n{trace}")
                         logger.error(str(e))
                         pass
             else:

@@ -5,6 +5,7 @@ from partial_json_parser import loads, ensure_json
 from lib.json_str_block import replace_raw_blocks
 from lib.utils.merge_arrays import merge_json_arrays
 from lib.json_escape import escape_for_json
+import sys
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -26,11 +27,11 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         raw_replaced = replace_raw_blocks(buffer)
         complete_commands = json.loads(raw_replaced)
         return complete_commands, None
-    except json.JSONDecodeError:
+    except Exception:
         try:
             complete_commands = merge_json_arrays(raw_replaced)
             return complete_commands, None
-        except json.JSONDecodeError:
+        except Exception:
             pass
         try:
             complete_commands = loads(raw_replaced) # escape_for_json
@@ -48,7 +49,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         except Exception:
             # if ends in ']', then may be end of command list
             #if it failed to parse, write buffer that failed to debug in orange text
-            if buffer[-1] == ']':
+            if raw_replaced[-1] == ']':
                 print("\033[93m", end="")
                 print(f"Failed to parse buffer even with escaping: {raw_replaced}")
                 print("\033[0m", end="")
@@ -84,7 +85,6 @@ def invalid_start_format(str):
 import unittest
 
 class TestCommandParser(unittest.TestCase):
-    
     def test_single_complete_command(self):
         buffer = '[{"say": {"text": "Hello", "done": true}}]'
         commands, partial = parse_streaming_commands(buffer)
@@ -157,5 +157,23 @@ class TestCommandParser(unittest.TestCase):
         self.assertEqual(len(commands), 0)
         self.assertEqual(partial, {"key": "value"})
 
-if __name__ == '__main__':
-    unittest.main()
+
+
+def ex6():
+    buffer = """
+[ {"write": { "filename": "/test.py",
+              "text": "START_RAW
+def foo():
+    print('hello world')
+END_RAW
+" }
+ } 
+]
+"""
+    commands, partial = parse_streaming_commands(buffer)
+    print(commands)
+    print(partial)
+
+ex6()
+sys.exit(0)
+

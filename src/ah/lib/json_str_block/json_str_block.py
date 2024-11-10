@@ -52,6 +52,7 @@ def replace_raw_blocks(jsonish):
     if in_raw:
         final_string += json.dumps(raw_string)
 
+    final_string = final_string.replace('""', "")
     # check if parsable as partial json
     try:
         ensure_json(final_string)
@@ -61,18 +62,18 @@ def replace_raw_blocks(jsonish):
     return final_string
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    with open("ex5.txt") as f:
-        #with open("test_case_1.json") as f:
-        jsonish = f.read()
-    new_json = replace_raw_blocks(jsonish)
+    #with open("ex6.txt") as f:
+    #    #with open("test_case_1.json") as f:
+    #    jsonish = f.read()
+    #new_json = replace_raw_blocks(jsonish)
 
-    print(new_json)
+    #print(new_json)
 
-    data = loads(new_json)
+    #data = loads(new_json)
 
-    print('-----------------------------------------')
-    print(data)
+    #print('-----------------------------------------')
+    #print(data)
 
 
