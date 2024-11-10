@@ -174,6 +174,4 @@ END_RAW
     print(commands)
     print(partial)
 
-ex6()
-sys.exit(0)
 
