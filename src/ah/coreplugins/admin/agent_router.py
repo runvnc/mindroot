@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from pathlib import Path
 import json
-from .agent_importer import scan_and_import_agents
+from .agent_importer import scan_and_import_agents, import_github_agent
 
 router = APIRouter()
 
@@ -11,6 +11,11 @@ local_dir = BASE_DIR / "local"
 shared_dir = BASE_DIR / "shared"
 local_dir.mkdir(parents=True, exist_ok=True)
 shared_dir.mkdir(parents=True, exist_ok=True)
+
+class GitHubImportRequest(BaseModel):
+    repo_path: str  # Format: "owner/repo"
+    scope: str
+    tag: str = None
 
 @router.get('/agents/{scope}/{name}')
 def read_agent(scope: str, name: str):
@@ -82,3 +87,21 @@ def scan_and_import_agents_endpoint(request: ScanDirectoryRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during import: {str(e)}")
+
+@router.post('/import-github-agent')
+def import_github_agent_endpoint(request: GitHubImportRequest):
+    try:
+        if request.scope not in ['local', 'shared']:
+            raise HTTPException(status_code=400, detail='Invalid scope')
+
+        result = import_github_agent(request.repo_path, request.scope, request.tag)
+        
+        if not result['success']:
+            raise HTTPException(status_code=400, detail=result['message'])
+            
+        return result
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during GitHub import: {str(e)}")

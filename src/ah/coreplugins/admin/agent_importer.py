@@ -4,6 +4,9 @@ import shutil
 import logging
 from typing import Dict, List
 import os
+import tempfile
+import requests
+import zipfile
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +21,36 @@ if CONFIRM_OVERWRITE_AGENT.lower() in ['true', '1']:
     CONFIRM_OVERWRITE_AGENT = True
 else:
     CONFIRM_OVERWRITE_AGENT = False
+
+def download_github_files(repo_path: str, tag: str = None) -> tuple[str, str]:
+    """Download GitHub repo files to temp directory"""
+    # Format the download URL
+    if tag:
+        download_url = f"https://github.com/{repo_path}/archive/refs/tags/{tag}.zip"
+    else:
+        download_url = f"https://github.com/{repo_path}/archive/refs/heads/main.zip"
+    
+    # Create temp directory
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, 'repo.zip')
+    
+    try:
+        # Download the zip file
+        response = requests.get(download_url)
+        response.raise_for_status()
+        
+        with open(zip_path, 'wb') as f:
+            f.write(response.content)
+        
+        # Extract zip
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+        
+        return temp_dir, os.path.dirname(zip_path)
+            
+    except Exception as e:
+        shutil.rmtree(temp_dir)
+        raise e
 
 def scan_for_agents(directory: Path) -> Dict[str, Dict]:
     discovered_agents = {}
@@ -105,3 +138,36 @@ def scan_and_import_agents(directory: Path, scope: str) -> Dict[str, List[str]]:
         'total_imported': len(imported_agents),
         'total_discovered': len(discovered_agents)
     }
+
+def import_github_agent(repo_path: str, scope: str, tag: str = None) -> Dict[str, any]:
+    """Import an agent from a GitHub repository"""
+    try:
+        # Download and extract GitHub repository
+        temp_dir, extract_path = download_github_files(repo_path, tag)
+        
+        try:
+            # Scan the downloaded directory for agents
+            discovered = scan_for_agents(Path(temp_dir))
+            if not discovered:
+                raise ValueError("No valid agents found in repository")
+            
+            # Import each discovered agent
+            result = scan_and_import_agents(Path(temp_dir), scope)
+            
+            return {
+                'success': True,
+                'message': f"Successfully imported {result['total_imported']} agents from GitHub",
+                'imported_agents': result['imported_agents']
+            }
+            
+        finally:
+            # Clean up temp directory
+            shutil.rmtree(temp_dir)
+            
+    except Exception as e:
+        logger.error(f"Failed to import agent from GitHub: {str(e)}")
+        return {
+            'success': False,
+            'message': f"Failed to import agent: {str(e)}",
+            'imported_agents': []
+        }

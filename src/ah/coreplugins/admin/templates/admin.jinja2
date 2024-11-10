@@ -37,43 +37,42 @@
   </script>
   {% endblock %}
   {% block content %}
-  <div class="admin-container">
+   <div class="admin-container">
     <details>
-      <summary>Toggle Plugins</summary>
+      <summary><span class="material-icons">extension</span>Toggle Plugins</summary>
       <div class="details-content">
         <plugin-toggle></plugin-toggle>
       </div>
     </details>
 
     <details>
-      <summary>Plugin Manager</summary>
+      <summary><span class="material-icons">apps</span>Plugin Manager</summary>
       <div class="details-content">
         <plugin-manager></plugin-manager>
       </div>
     </details>
 
     <details>
-      <summary>Persona Editor</summary>
+      <summary><span class="material-icons">person</span>Persona Editor</summary>
       <div class="details-content">
         <persona-editor theme="dark" scope="local"></persona-editor>
       </div>
     </details>
 
     <details>
-      <summary>Agent Editor</summary>
+      <summary><span class="material-icons">smart_toy</span>Agent Editor</summary>
       <div class="details-content">
         <agent-editor theme="dark" scope="local"></agent-editor>
       </div>
     </details>
 
     <details>
-      <summary>Model Preferences</summary>
+      <summary><span class="material-icons">settings</span>Model Preferences</summary>
       <div class="details-content">
         <model-preferences theme="dark" scope="local"></model-preferences>
       </div>
     </details>
-  </div>
-  {% endblock %}
+   </div>  {% endblock %}
   {% block footer %}
   {% endblock %}
 </body>

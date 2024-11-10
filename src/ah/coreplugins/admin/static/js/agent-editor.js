@@ -11,7 +11,8 @@ class AgentEditor extends BaseEl {
     newAgent: { type: Boolean },
     personas: { type: Array },
     commands: { type: Array },
-    importStatus: { type: String }
+    importStatus: { type: String },
+    githubImportStatus: { type: String }
   };
 
   static styles = [
@@ -26,6 +27,16 @@ class AgentEditor extends BaseEl {
       .import-status.error {
         color: red;
       }
+      .github-import {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .github-import input {
+        margin-right: 10px;
+        padding: 4px;
+      }
     `
   ];
 
@@ -38,6 +49,7 @@ class AgentEditor extends BaseEl {
     this.scope = 'local';
     this.newAgent = false;
     this.importStatus = '';
+    this.githubImportStatus = '';
     this.fetchPersonas();
     this.fetchCommands();
   }
@@ -164,6 +176,43 @@ class AgentEditor extends BaseEl {
     }, 5000);
   }
 
+  async handleGitHubImport() {
+    const repoPath = this.shadowRoot.querySelector('#githubRepo').value;
+    const tag = this.shadowRoot.querySelector('#githubTag').value;
+
+    if (!repoPath) {
+      this.githubImportStatus = 'Error: Repository path is required';
+      return;
+    }
+
+    try {
+      const response = await fetch('/import-github-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo_path: repoPath,
+          scope: this.scope,
+          tag: tag || null
+        })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        this.githubImportStatus = `Success: ${result.message}`;
+        this.fetchAgents(); // Refresh the agent list
+      } else {
+        this.githubImportStatus = `Error: ${result.detail || result.message}`;
+      }
+    } catch (error) {
+      this.githubImportStatus = `Error: ${error.message}`;
+    }
+
+    // Clear the status message after 5 seconds
+    setTimeout(() => {
+      this.githubImportStatus = '';
+    }, 5000);
+  }
+
   _render() {
     return html`
       <div>
@@ -180,6 +229,15 @@ class AgentEditor extends BaseEl {
         <button @click=${this.handleNewAgent}>New Agent</button>
         <button @click=${this.handleScanAndImport}>Scan and Import Agents</button>
         ${this.importStatus ? html`<div class="import-status ${this.importStatus.startsWith('Success') ? 'success' : 'error'}">${this.importStatus}</div>` : ''}
+        
+        <!-- GitHub Import Section -->
+        <div class="github-import">
+          <h3>Import from GitHub</h3>
+          <input type="text" id="githubRepo" placeholder="owner/repository" />
+          <input type="text" id="githubTag" placeholder="tag (optional)" />
+          <button @click=${this.handleGitHubImport}>Import from GitHub</button>
+          ${this.githubImportStatus ? html`<div class="import-status ${this.githubImportStatus.startsWith('Success') ? 'success' : 'error'}">${this.githubImportStatus}</div>` : ''}
+        </div>
       </div>
       <form @submit=${this.handleSubmit} class="agent">
   <div>
