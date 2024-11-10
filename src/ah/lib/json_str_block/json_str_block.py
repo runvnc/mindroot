@@ -52,7 +52,7 @@ def replace_raw_blocks(jsonish):
     if in_raw:
         final_string += json.dumps(raw_string)
 
-    final_string = final_string.replace('""', "")
+    final_string = re.sub(r'(?<!")""(?!")', '"', final_string)
     # check if parsable as partial json
     try:
         ensure_json(final_string)
