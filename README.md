@@ -1,6 +1,6 @@
 # logo image placeholder here:
 
-![XinGen](src/xingen/coreplugins/chat/static/xingen.png)
+![XinGen](src/xingen/coreplugins/chat/static/xingen_logo2.png)
 
 [![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
 
