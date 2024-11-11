@@ -2,7 +2,7 @@
 XinGen
 ======
 
-![XinGen](src/xingen/coreplugins/chat/static/xingen_logo2.png)
+![XinGen](src/xingen/coreplugins/chat/static/xingen_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
 
