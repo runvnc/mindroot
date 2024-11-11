@@ -1,11 +1,10 @@
-# logo image placeholder here:
+
+XinGen
+======
 
 ![XinGen](src/xingen/coreplugins/chat/static/xingen_logo2.png)
 
 [![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
-
-XinGen
-======
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
 
