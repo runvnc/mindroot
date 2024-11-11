@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home</title>
+    <title>XinGen Agent Host</title>
+    <link rel="stylesheet" type="text/css" href="/home/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/home/static/css/default.css">
+    <link rel="stylesheet" type="text/css" href="/home/static/css/home.css">
+    <link rel="stylesheet" type="text/css" href="/home/static/css/update.css">
 </head>
 <body>
-    <h1>Welcome to the Home Page</h1>
+    <img class="logo" src="/home/static/imgs/logo.png" alt="logo">
+    <h1>XinGen Agent Host</h1>
     <p>
         <a href="/admin">Admin</a>
     </p>
-    <h2>Agents</h2>
+    <h2>Click an Agent to Start a Chat Session:</h2>
     <ul>
         {% for agent in agents %}
         <li><a href="/agent/{{ agent }}">{{ agent }}</a></li>

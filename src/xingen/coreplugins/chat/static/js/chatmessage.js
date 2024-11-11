@@ -32,7 +32,7 @@ export class ChatMessage extends BaseEl {
   _render() {
     return html`
     <div class="outer-msg ${this.sender} ${this.showAvatar ? 'with-avatar' : 'without-avatar'}">
-      <img class="avatar hover-zoom" onerror="this.style.display='none'" src="/static/personas/${this.persona}/avatar.png" alt="avatar">
+      <img class="avatar hover-zoom" onerror="this.style.display='none'" src="/chat/personas/${this.persona}/avatar.png" alt="avatar">
       <div class="message msg-${this.sender}">
         <slot></slot>
       </div>

@@ -16,6 +16,16 @@ router = APIRouter()
 # Global dictionary to store tasks
 tasks = {}
 
+
+# need to serve persona images from ./personas/local/[persona_name]/avatar.png
+@router.get("/chat/personas/{persona_name}/avatar.png")
+async def get_persona_avatar(persona_name: str):
+    # need to serve the image from the persona
+    # just read in the file and return it
+    with open(f"personas/local/{persona_name}/avatar.png", "rb") as f:
+        return f.read()
+    
+
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
     return EventSourceResponse(await subscribe_to_agent_messages(log_id))

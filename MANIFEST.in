@@ -6,9 +6,9 @@ prune src/ah/static
 prune src/ah/imgs
 prune src/ah/models
 
-include src/ah/coreplugins/agent/*.j2
-include src/ah/coreplugins/chat/templates
-include src/ah/coreplugins/chat/static
-include src/ah/coreplugins/admin/templates
-include src/ah/coreplugins/admin/static
+include src/xingen/coreplugins/agent/*.j2
+include src/xingen/coreplugins/chat/templates
+include src/xingen/coreplugins/chat/static
+include src/xingen/coreplugins/admin/templates
+include src/xingen/coreplugins/admin/static
 include *templates*
