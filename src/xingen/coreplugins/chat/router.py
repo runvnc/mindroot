@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
@@ -20,11 +20,22 @@ tasks = {}
 # need to serve persona images from ./personas/local/[persona_name]/avatar.png
 @router.get("/chat/personas/{persona_name}/avatar.png")
 async def get_persona_avatar(persona_name: str):
-    # need to serve the image from the persona
-    # just read in the file and return it
-    with open(f"personas/local/{persona_name}/avatar.png", "rb") as f:
-        return f.read()
+    file_path = f"personas/local/{persona_name}/avatar.png"
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+        
+    with open(file_path, "rb") as f:
+        image_bytes = f.read()
     
+    return Response(
+        content=image_bytes, 
+        media_type="image/png",
+        headers={
+            "Cache-Control": "max-age=3600",
+            "Content-Disposition": "inline; filename=avatar.png"
+        }
+    )
+
 
 @router.get("/chat/{log_id}/events")
 async def chat_events(log_id: str):
