@@ -1,38 +1,33 @@
-Welcome to AgentHost's documentation!
-====================================
+# logo image placeholder here:
+
+![XinGen](src/xingen/coreplugins/chat/static/xingen.png)
+
+[![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
+
+XinGen
+======
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
 
-AgentHost is a powerful, plugin-based Python framework for creating and managing AI agents. It offers a flexible architecture with an public registry for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
+XinGen is a powerful, plugin-based Python framework for creating and managing AI agents. It offers a flexible architecture with an public registry for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
 
 Installation
 ------------
 
-You can install AgentHost using pip:
+You can install XinGen using pip:
 
 ```bash
-pip install ah-framework
+pip install xingen
 ```
 
 For development, you can install the package in editable mode:
 
 ```bash
-git clone https://github.com/yourusername/ah-framework.git
-cd ah-framework
+git clone https://github.com/xingen/xingen.git
+cd xingen
 pip install -e .
 ```
 
-To install with optional plugin dependencies:
-
-```bash
-pip install ah-framework[plugins]
-```
-
-Or for development with plugins:
-
-```bash
-pip install -e .[plugins]
-```
 
 Key Features:
 
@@ -51,11 +46,11 @@ Key Features:
 Core Concepts Overview
 ----------------------
 
-AgentHost revolves around several key concepts:
+XinGen revolves around several key concepts:
 
 1. **Open Public Registry**: A flexible system for indexing and sharing plugins, agents, personas, and potentially models. It can be customized or replaced with user-specific registries.
 
-2. **Plugins**: Extend the functionality of AgentHost, providing new features, services, or integrations.
+2. **Plugins**: Extend the functionality of XinGen, providing new features, services, or integrations.
 
 3. **Agents and Personas**: AI agents with defined capabilities and customizable personalities.
 

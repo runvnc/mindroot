@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "xingen"
 version = "0.1.0"
 description = "An agent framework using LLMs"
-authors = [{name = "Your Name", email = "your.email@example.com"}]
+authors = [{name = "Jason Livesay", email = "runvnc@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -37,11 +37,11 @@ dependencies = [
 
 
 [project.urls]
-Homepage = "https://github.com/yourusername/ah-framework"
+Homepage = "https://github.com/runvncxingen"
 
 
 [project.scripts]
-ah = "ah.server:main"
+xingen = "xingen.server:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
