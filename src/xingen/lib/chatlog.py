@@ -38,7 +38,7 @@ class ChatLog:
                     if part['type'] == 'image':
                         print("found image")
                         self.messages.append(message)
-                        save_log()
+                        self.save_log()
                         return
 
             try:
