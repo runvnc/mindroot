@@ -8,7 +8,7 @@ XinGen
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
 
-XinGen is a powerful, plugin-based Python framework for creating and managing AI agents. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
+XinGen is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
 
 Installation
 ------------
