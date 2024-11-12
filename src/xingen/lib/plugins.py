@@ -9,7 +9,7 @@ import subprocess
 from starlette.middleware.base import BaseHTTPMiddleware
 from .route_decorators import public_route
 import termcolor
-from ah.lib.providers.hooks import hook_manager
+from .providers.hooks import hook_manager
 from importlib.util import find_spec
 import traceback
 # need temppfile
@@ -65,6 +65,7 @@ def download_github_files(repo_path, tag=None):
 def get_plugin_path(plugin_name):
     manifest = load_plugin_manifest()
     for category in manifest['plugins']:
+        print(f"looking for plugin {plugin_name} in {category}")
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
             if plugin_info['source'] == 'available':

@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
 from termcolor import colored
-from ah.registry import data_access
+from xingen.registry import data_access
 
 # Load equivalent flags
 def load_equivalent_flags() -> List[List[str]]:
