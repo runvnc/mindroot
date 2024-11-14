@@ -33,6 +33,8 @@ dependencies = [
     "sse_starlette",
     "partial-json-parser",
     "pydantic",
+    "setuptools",
+    "requests"
 ]
 
 
