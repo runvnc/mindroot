@@ -32,8 +32,8 @@ def download_github_files(repo_path, tag=None):
         download_url = f"https://github.com/{repo_path}/archive/refs/tags/{tag}.zip"
     else:
         download_url = f"https://github.com/{repo_path}/archive/refs/heads/main.zip"
-    
-    # Create temp directory
+   
+    repo = repo_path.split("/")[1]
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, 'repo.zip')
     
@@ -54,7 +54,9 @@ def download_github_files(repo_path, tag=None):
             if 'plugin_info.json' in files:
                 with open(os.path.join(root, 'plugin_info.json'), 'r') as f:
                     plugin_info = json.load(f)
-                return temp_dir, root, plugin_info
+                plugin_name = plugin_info['name']
+                shutil.move(temp_dir, f"./local/plugins/{repo}")
+                return f"./local/plugins/{repo}", root, plugin_info
                 
         raise ValueError("No plugin_info.json found in repository")
         
@@ -203,7 +205,7 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                 update_plugin_manifest(
                     plugin_name,
                     source='github',
-                    source_path=f"{repo_path}:{tag}" if tag else repo_path,
+                    source_path=temp_dir, #f"{repo_path}:{tag}" if tag else repo_path,
                     version=plugin_info.get('version', '0.0.1')
                 )
                 

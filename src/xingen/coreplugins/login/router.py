@@ -10,5 +10,5 @@ router = APIRouter()
 @router.get("/login", response_class=HTMLResponse)
 @public_route()
 async def login_page(request: Request):
-    html = await render('login.html', {"request": request })
+    html = await render('login', {"request": request })
     return html
