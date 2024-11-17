@@ -1,5 +1,5 @@
-import { LitElement, html, css } from '/admin/static/js/lit-core.min.js';
-import { BaseEl } from '/admin/static/js/base.js';
+import { LitElement, html, css } from './lit-core.min.js';
+import { BaseEl } from './base.js';
 
 class IndexManager extends BaseEl {
   static properties = {
@@ -114,6 +114,7 @@ class IndexManager extends BaseEl {
 
   constructor() {
     super();
+    console.log('Index Manager constructed')
     this.indices = [];
     this.selectedIndex = null;
     this.fetchIndices();
@@ -379,3 +380,6 @@ class IndexManager extends BaseEl {
 }
 
 customElements.define('index-manager', IndexManager);
+
+console.log('Index Manager defined')
+
