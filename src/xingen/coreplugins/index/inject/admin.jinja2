@@ -1,5 +1,12 @@
+{% block head %}
+<script type="module" src="/index/static/js/index-manager.js"></script>
+{% endblock %}
+
 {% block content %}
-
-Hello from Index section
-
+<details>
+  <summary><span class="material-icons">inventory_2</span>Index Manager</summary>
+  <div class="details-content">
+    <index-manager theme="dark" scope="local"></index-manager>
+  </div>
+</details>
 {% endblock %}

@@ -57,8 +57,19 @@ def replace_raw_blocks(jsonish):
     try:
         ensure_json(final_string)
     except Exception as e:
-        # try converting to valid JSON string
-        return json.dumps(final_string)
+        escaped_nl_in_fenced = re.sub(r'```[\s\S]*?```',
+                          lambda m: m.group(0).replace('\n', '\\n'),
+                          text)
+        try:
+            ensure_json(escaped_nl_in_fenced)
+            return escaped_nl_in_fenced
+        except Exception as e:
+            try:
+                final_string = final_string.strip().replace("\n", "\\n")
+                ensure_json(final_string)
+                return final_string
+            except Exception as e:
+                return json.dumps(final_string)
     return final_string
 
 
