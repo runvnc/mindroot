@@ -219,10 +219,12 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', plugin_dir])
                 print("called pip")
                 # Update manifest with github source
+                abs_dir = os.path.abspath(plugin_dir)
                 update_plugin_manifest(
                     plugin_name,
                     source='github',
-                    source_path=plugin_dir, #f"{repo_path}:{tag}" if tag else repo_path,
+                    remote_source=repo_path,
+                    source_path=abs_path, #f"{repo_path}:{tag}" if tag else repo_path,
                     version=plugin_info.get('version', '0.0.1')
                 )
                 print("done")
