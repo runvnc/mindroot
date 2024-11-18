@@ -3,11 +3,12 @@ import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
+from lib.paths import get_instance_path
 
 router = APIRouter()
 
 # Define the directory where index files will be stored
-INDEX_DIR = Path('./indices')
+INDEX_DIR = Path(get_instance_path()) / 'indices'
 
 # Ensure index directory exists
 os.makedirs(INDEX_DIR, exist_ok=True)
@@ -98,7 +99,7 @@ async def add_plugin(request: Request):
             return JSONResponse({'success': False, 'message': 'Index not found'})
 
         # Load plugin manifest
-        manifest_path = Path('./plugin_manifest.json')
+        manifest_path = Path(get_instance_path()) / 'plugin_manifest.json'
         with open(manifest_path, 'r') as f:
             manifest = json.load(f)
 

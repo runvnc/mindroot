@@ -1,123 +1,61 @@
-import { LitElement, html, css } from './lit-core.min.js';
-import { BaseEl } from './base.js';
+import { LitElement, html, css } from '/admin/static/js/lit-core.min.js';
+import { BaseEl } from '/admin/static/js/base.js';
 
 class IndexManager extends BaseEl {
   static properties = {
     indices: { type: Array },
     selectedIndex: { type: Object },
+    availablePlugins: { type: Object },
+    availableAgents: { type: Array },
+    searchPlugins: { type: String },
+    searchAgents: { type: String }
   }
-
-  static styles = [
-    css`
-      .index-manager {
-        display: flex;
-        gap: 20px;
-        padding: 15px;
-      }
-
-      .index-list {
-        flex: 1;
-        max-width: 300px;
-        border-right: 1px solid var(--border-color, #444);
-        padding-right: 15px;
-      }
-
-      .index-content {
-        flex: 2;
-      }
-
-      .create-index {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        background: var(--primary-color, #2196F3);
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-      }
-
-      .index-entry {
-        padding: 10px;
-        margin: 5px 0;
-        border: 1px solid var(--border-color, #444);
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-      .index-entry.selected {
-        background: var(--selected-bg, #2196F3);
-        color: white;
-      }
-
-      .index-metadata {
-        margin-bottom: 20px;
-      }
-
-      .index-metadata input {
-        width: 100%;
-        padding: 8px;
-        margin: 5px 0;
-        background: var(--input-bg, #333);
-        border: 1px solid var(--border-color, #444);
-        border-radius: 4px;
-        color: var(--text-color, #fff);
-      }
-
-      .content-section {
-        margin: 15px 0;
-        padding: 15px;
-        border: 1px solid var(--border-color, #444);
-        border-radius: 4px;
-      }
-
-      .content-section h3 {
-        margin-bottom: 10px;
-        font-size: 1.1em;
-      }
-
-      .add-button {
-        padding: 8px 15px;
-        background: var(--secondary-color, #4CAF50);
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-        margin: 10px 0;
-      }
-
-      .item-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .item-entry {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        border: 1px solid var(--border-color, #444);
-        border-radius: 4px;
-      }
-
-      .item-entry button {
-        padding: 5px 10px;
-        background: var(--danger-color, #f44336);
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-      }
-    `
-  ];
 
   constructor() {
     super();
     console.log('Index Manager constructed')
     this.indices = [];
     this.selectedIndex = null;
+    this.availablePlugins = { core: [], installed: [], available: [] };
+    this.availableAgents = [];
+    this.searchPlugins = '';
+    this.searchAgents = '';
     this.fetchIndices();
+    this.fetchAvailablePlugins();
+    this.fetchAvailableAgents();
+  }
+
+  async fetchAvailablePlugins() {
+    try {
+      const response = await fetch('/plugin-manager/get-all-plugins');
+      const result = await response.json();
+      if (result.success) {
+        // Organize plugins by category
+        const categorized = { core: [], installed: [], available: [] };
+        result.data.forEach(plugin => {
+          if (plugin.source === 'core') {
+            categorized.core.push(plugin);
+          } else if (plugin.state === 'installed') {
+            categorized.installed.push(plugin);
+          } else {
+            categorized.available.push(plugin);
+          }
+        });
+        this.availablePlugins = categorized;
+      }
+    } catch (error) {
+      console.error('Error fetching plugins:', error);
+    }
+  }
+
+  async fetchAvailableAgents() {
+    try {
+      const response = await fetch('/agents/local');
+      const agents = await response.json();
+      this.availableAgents = agents;
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+    }
   }
 
   async fetchIndices() {
@@ -126,8 +64,6 @@ class IndexManager extends BaseEl {
       const result = await response.json();
       if (result.success) {
         this.indices = result.data;
-      } else {
-        console.error('Failed to fetch indices:', result.message);
       }
     } catch (error) {
       console.error('Error fetching indices:', error);
@@ -196,12 +132,8 @@ class IndexManager extends BaseEl {
     }
   }
 
-  async addPlugin() {
+  async addPlugin(plugin) {
     if (!this.selectedIndex) return;
-
-    // TODO: Show modal with available plugins from plugin_manifest.json
-    const pluginName = prompt('Enter plugin name:');
-    if (!pluginName) return;
 
     try {
       const response = await fetch('/index/add-plugin', {
@@ -209,7 +141,7 @@ class IndexManager extends BaseEl {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           index: this.selectedIndex.name,
-          plugin: pluginName
+          plugin: plugin.name
         })
       });
 
@@ -226,11 +158,8 @@ class IndexManager extends BaseEl {
     }
   }
 
-  async addAgent() {
+  async addAgent(agent) {
     if (!this.selectedIndex) return;
-
-    const agentName = prompt('Enter agent name:');
-    if (!agentName) return;
 
     try {
       const response = await fetch('/index/add-agent', {
@@ -238,7 +167,7 @@ class IndexManager extends BaseEl {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           index: this.selectedIndex.name,
-          agent: agentName
+          agent: agent.name
         })
       });
 
@@ -307,8 +236,45 @@ class IndexManager extends BaseEl {
     }
   }
 
+  isPluginInIndex(plugin) {
+    return this.selectedIndex?.plugins?.some(p => p.name === plugin.name) || false;
+  }
+
+  isAgentInIndex(agent) {
+    return this.selectedIndex?.agents?.some(a => a.name === agent.name) || false;
+  }
+
+  renderAvailablePlugins() {
+    const searchTerm = this.searchPlugins.toLowerCase();
+    return html`
+      ${Object.entries(this.availablePlugins).map(([category, plugins]) => {
+        const filteredPlugins = plugins.filter(plugin => 
+          plugin.name.toLowerCase().includes(searchTerm)
+        );
+        if (filteredPlugins.length === 0) return '';
+        
+        return html`
+          <div class="category-group">
+            <div class="category-title">${category}</div>
+            ${filteredPlugins.map(plugin => html`
+              <div class="item-entry">
+                <span class="name">${plugin.name}</span>
+                <span class="version">${plugin.version || '0.0.1'}</span>
+                ${this.isPluginInIndex(plugin)
+                  ? html`<button class="remove" @click=${() => this.removePlugin(plugin)}>Remove</button>`
+                  : html`<button class="add" @click=${() => this.addPlugin(plugin)}>Add</button>`
+                }
+              </div>
+            `)}
+          </div>
+        `;
+      })}
+    `;
+  }
+
   _render() {
     return html`
+      <link rel="stylesheet" href="/index/static/css/index-manager.css">
       <div class="index-manager">
         <div class="index-list">
           <button class="create-index" @click=${this.createNewIndex}>
@@ -343,31 +309,76 @@ class IndexManager extends BaseEl {
 
             <div class="content-section">
               <h3>Plugins</h3>
-              <button class="add-button" @click=${this.addPlugin}>
-                Add Plugin
-              </button>
-              <div class="item-list">
-                ${this.selectedIndex.plugins?.map(plugin => html`
-                  <div class="item-entry">
-                    <span>${plugin.name}</span>
-                    <button @click=${() => this.removePlugin(plugin)}>Remove</button>
+              <div class="split-view">
+                <div class="available-items">
+                  <h4>Available Plugins</h4>
+                  <input type="text" 
+                         class="search-box"
+                         placeholder="Search plugins..."
+                         .value=${this.searchPlugins}
+                         @input=${e => this.searchPlugins = e.target.value}>
+                  <div class="item-list">
+                    ${this.renderAvailablePlugins()}
                   </div>
-                `) || ''}
+                </div>
+                <div class="selected-items">
+                  <h4>Index Plugins</h4>
+                  <div class="item-list">
+                    ${this.selectedIndex.plugins?.length ? this.selectedIndex.plugins.map(plugin => html`
+                      <div class="item-entry">
+                        <span class="name">${plugin.name}</span>
+                        <span class="version">${plugin.version || '0.0.1'}</span>
+                        <button class="remove" @click=${() => this.removePlugin(plugin)}>Remove</button>
+                      </div>
+                    `) : html`
+                      <div class="no-items">No plugins in index</div>
+                    `}
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="content-section">
               <h3>Agents</h3>
-              <button class="add-button" @click=${this.addAgent}>
-                Add Agent
-              </button>
-              <div class="item-list">
-                ${this.selectedIndex.agents?.map(agent => html`
-                  <div class="item-entry">
-                    <span>${agent.name}</span>
-                    <button @click=${() => this.removeAgent(agent)}>Remove</button>
+              <div class="split-view">
+                <div class="available-items">
+                  <h4>Available Agents</h4>
+                  <input type="text" 
+                         class="search-box"
+                         placeholder="Search agents..."
+                         .value=${this.searchAgents}
+                         @input=${e => this.searchAgents = e.target.value}>
+                  <div class="item-list">
+                    ${this.availableAgents.length ? this.availableAgents
+                      .filter(agent => agent.name.toLowerCase().includes(this.searchAgents.toLowerCase()))
+                      .map(agent => html`
+                        <div class="item-entry">
+                          <span class="name">${agent.name}</span>
+                          <span class="version">${agent.version || '0.0.1'}</span>
+                          ${this.isAgentInIndex(agent)
+                            ? html`<button class="remove" @click=${() => this.removeAgent(agent)}>Remove</button>`
+                            : html`<button class="add" @click=${() => this.addAgent(agent)}>Add</button>`
+                          }
+                        </div>
+                      `) : html`
+                        <div class="no-items">No agents available</div>
+                      `}
                   </div>
-                `) || ''}
+                </div>
+                <div class="selected-items">
+                  <h4>Index Agents</h4>
+                  <div class="item-list">
+                    ${this.selectedIndex.agents?.length ? this.selectedIndex.agents.map(agent => html`
+                      <div class="item-entry">
+                        <span class="name">${agent.name}</span>
+                        <span class="version">${agent.version || '0.0.1'}</span>
+                        <button class="remove" @click=${() => this.removeAgent(agent)}>Remove</button>
+                      </div>
+                    `) : html`
+                      <div class="no-items">No agents in index</div>
+                    `}
+                  </div>
+                </div>
               </div>
             </div>
           ` : html`
@@ -380,6 +391,3 @@ class IndexManager extends BaseEl {
 }
 
 customElements.define('index-manager', IndexManager);
-
-console.log('Index Manager defined')
-

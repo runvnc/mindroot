@@ -207,7 +207,9 @@ class PluginManager extends BaseEl {
           <h2>Install Plugin from GitHub</h2>
           <div class="form-group">
             <label for="github-url">GitHub Repo</label>
-            <input type="text" id="github-url" placeholder="e.g. user/repo or user/repo:tag" required>
+            <input type="text" id="github-url" 
+              @keydown=${(e) => { if (e.key === 'Enter') this.handleGitHubInstall(e) }}
+              placeholder="e.g. user/repo or user/repo:tag"  required>
           </div>
           <div class="button-group">
             <button value="cancel">Cancel</button>

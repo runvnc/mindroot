@@ -2,6 +2,26 @@
   "name": "dev",
   "description": "",
   "version": "1.0.0",
-  "plugins": [],
-  "agents": []
+  "plugins": [
+    {
+      "enabled": true,
+      "source": "available",
+      "source_path": "/xfiles/plugins_ah/ah_think",
+      "version": "0.0.1",
+      "name": "Think (Chain-of-Thought)"
+    },
+    {
+      "enabled": true,
+      "source": "available",
+      "source_path": "/xfiles/plugins_ah/ah_excel",
+      "version": "0.0.1",
+      "name": "Excel Operations"
+    }
+  ],
+  "agents": [
+    {
+      "name": "Dr_Alex_Morgan",
+      "version": "1.0.0"
+    }
+  ]
 }

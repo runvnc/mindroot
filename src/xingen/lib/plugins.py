@@ -195,26 +195,23 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
             
             try:
                 # Download and get plugin info
-                temp_dir, plugin_root, plugin_info = download_github_files(repo_path, tag)
+                plugin_dir, plugin_root, plugin_info = download_github_files(repo_path, tag)
                 plugin_name = plugin_info['name']  # Get actual plugin name
                 
                 # Install directly from downloaded files
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', plugin_root])
+                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', plugin_dir])
                 
                 # Update manifest with github source
                 update_plugin_manifest(
                     plugin_name,
                     source='github',
-                    source_path=temp_dir, #f"{repo_path}:{tag}" if tag else repo_path,
+                    source_path=plugin_dir, #f"{repo_path}:{tag}" if tag else repo_path,
                     version=plugin_info.get('version', '0.0.1')
                 )
-                
+            except Exception as e:
+                raise RuntimeError(f"Failed to install plugin from GitHub: {str(e)}")
                 return True
                 
-            finally:
-                # Clean up temp directory
-                if 'temp_dir' in locals():
-                    shutil.rmtree(temp_dir)
         else:
             raise ValueError(f"Unsupported installation source: {source}")
         
