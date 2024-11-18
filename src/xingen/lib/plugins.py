@@ -226,6 +226,7 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                     version=plugin_info.get('version', '0.0.1')
                 )
                 print("done")
+                return True
             except Exception as e:
                 raise RuntimeError(f"Failed to install plugin from GitHub: {str(e)}")
                 return True
