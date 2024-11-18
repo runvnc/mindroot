@@ -83,7 +83,7 @@ def get_plugin_path(plugin_name):
         print(f"looking for plugin {plugin_name} in {category}")
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
-            if plugin_info['source'] == 'available':
+            if plugin_info['source'] == 'available' or plugin_info['source'] == 'github':
                 return plugin_info['source_path']
             elif plugin_info['source'] == 'core':
                 return f"src/xingen/coreplugins/{plugin_name}"
@@ -101,7 +101,7 @@ def get_plugin_import_path(plugin_name):
         if plugin_name in manifest['plugins'][category]:
             plugin_info = manifest['plugins'][category][plugin_name]
             print(f"DEBUG: Plugin info for {plugin_name}: {plugin_info}")
-            if plugin_info['source'] == 'available':
+            if plugin_info['source'] == 'available' or plugin_info['source'] == 'github':
                 source_path = plugin_info['source_path']
                 print(f"DEBUG: Available plugin path for {plugin_name}: {source_path}")
                 if not os.path.exists(source_path):
@@ -433,7 +433,7 @@ async def load(app = None):
                 app.mount(f"/{dir_name}/static", StaticFiles(directory=static_path), name=f"/{dir_name}/static")
                 print(termcolor.colored(f"Mounted static files for plugin: {plugin_name} at route path {static_path}", 'green'))
 
-        except ImportError as e:
+        except Exception as e:
             # we need to make sure to include a traceback, so save that in a string first
             trace = traceback.format_exc()
 
