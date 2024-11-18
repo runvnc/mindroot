@@ -56,7 +56,7 @@ def download_github_files(repo_path, tag=None):
                     plugin_info = json.load(f)
                 plugin_name = plugin_info['name']
                 shutil.move(temp_dir, f"./local/plugins/{repo}")
-                files = os.listdir(f"./local/plugins/{repo}"
+                files = os.listdir(f"./local/plugins/{repo}")
                 subdir = [f for f in files if os.path.isdir(os.path.join(f"./local/plugins/{repo}", f))][0]
                 return f"./local/plugins/{repo}/{subdir}", root, plugin_info
                 
