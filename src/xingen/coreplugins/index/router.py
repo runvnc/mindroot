@@ -3,11 +3,15 @@ import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from lib.paths import get_instance_path
 
 router = APIRouter()
 
 # Define the directory where index files will be stored
+# the instance path is based on the process startup path
+#
+def get_instance_path():
+    return Path(__file__).resolve().parent.parent.parent
+
 INDEX_DIR = Path(get_instance_path()) / 'indices'
 
 # Ensure index directory exists
