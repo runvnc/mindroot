@@ -224,7 +224,7 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                     plugin_name,
                     source='github',
                     remote_source=repo_path,
-                    source_path=abs_path, #f"{repo_path}:{tag}" if tag else repo_path,
+                    source_path=abs_dir, #f"{repo_path}:{tag}" if tag else repo_path,
                     version=plugin_info.get('version', '0.0.1')
                 )
                 print("done")
@@ -259,13 +259,14 @@ def save_plugin_manifest(manifest):
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
 
-def update_plugin_manifest(plugin_name, source, source_path, version="0.0.1"):
+def update_plugin_manifest(plugin_name, source, source_path,remote_source=None, version="0.0.1"):
     manifest = load_plugin_manifest()
     category = 'installed' if source != 'core' else 'core'
     
     manifest['plugins'][category][plugin_name] = {
         'enabled': True,
         'source': source,
+        'remote_source': remote_source,
         'source_path': source_path,
         'version': version
     }
