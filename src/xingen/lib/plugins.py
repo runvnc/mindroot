@@ -263,7 +263,7 @@ def update_plugin_manifest(plugin_name, source, source_path, version="0.0.1"):
     manifest['plugins'][category][plugin_name] = {
         'enabled': True,
         'source': source,
-        'source_path': source_path if source == 'available' else None,
+        'source_path': source_path,
         'version': version
     }
     
