@@ -65,11 +65,14 @@ def download_github_files(repo_path, tag=None):
                 shutil.move(temp_dir, f"./local/plugins/{repo}")
                 print("listing dir", os.listdir(f"./local/plugins/{repo}"))
                 files = os.listdir(f"./local/plugins/{repo}")
+
                 subdir = [f for f in files if os.path.isdir(os.path.join(f"./local/plugins/{repo}", f))][0]
+                if subdir != repo:
+                    shutil.move(f"./local/plugins/{repo}/{subdir}", f"./local/plugins/{repo}/{repo}")
                 print("repo:", repo)
                 print("subdir", subdir)
                 print("root", root)
-                return f"./local/plugins/{repo}/{subdir}", root, plugin_info
+                return f"./local/plugins/{repo}/{repo}", root, plugin_info
                 
         raise ValueError("No plugin_info.json found in repository")
         
