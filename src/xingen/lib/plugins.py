@@ -48,6 +48,9 @@ def download_github_files(repo_path, tag=None):
         # Extract zip
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
+
+        print("removing zip_path", zip_path)
+        os.remove(zip_path)
             
         # Find plugin_info.json
         for root, _, files in os.walk(temp_dir):
@@ -55,9 +58,17 @@ def download_github_files(repo_path, tag=None):
                 with open(os.path.join(root, 'plugin_info.json'), 'r') as f:
                     plugin_info = json.load(f)
                 plugin_name = plugin_info['name']
+                # if the dir already exists then remove it
+                if os.path.exists(f"./local/plugins/{repo}"):
+                    shutil.rmtree(f"./local/plugins/{repo}")
+                print(f"moving {temp_dir} to ./local/plugins/{repo}")
                 shutil.move(temp_dir, f"./local/plugins/{repo}")
+                print("listing dir", os.listdir(f"./local/plugins/{repo}"))
                 files = os.listdir(f"./local/plugins/{repo}")
                 subdir = [f for f in files if os.path.isdir(os.path.join(f"./local/plugins/{repo}", f))][0]
+                print("repo:", repo)
+                print("subdir", subdir)
+                print("root", root)
                 return f"./local/plugins/{repo}/{subdir}", root, plugin_info
                 
         raise ValueError("No plugin_info.json found in repository")
@@ -78,8 +89,11 @@ def get_plugin_path(plugin_name):
                 return f"src/xingen/coreplugins/{plugin_name}"
             else:
                 spec = find_spec(plugin_name)
-                return spec.origin if spec else None
-    return None
+                if spec:
+                    return spec.origin
+                else:
+                    raise ValueError(f"Plugin {plugin_name}: failed to locate plugin path in manifest")
+    raise ValueError(f"Plugin {plugin_name}: failed to locate plugin path in manifest")
 
 def get_plugin_import_path(plugin_name):
     manifest = load_plugin_manifest()
@@ -198,11 +212,12 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
             try:
                 # Download and get plugin info
                 plugin_dir, plugin_root, plugin_info = download_github_files(repo_path, tag)
+                print(f"DEBUG: Downloaded plugin files to {plugin_dir}")
                 plugin_name = plugin_info['name']  # Get actual plugin name
                 
                 # Install directly from downloaded files
                 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', plugin_dir])
-                
+                print("called pip")
                 # Update manifest with github source
                 update_plugin_manifest(
                     plugin_name,
@@ -210,6 +225,7 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                     source_path=plugin_dir, #f"{repo_path}:{tag}" if tag else repo_path,
                     version=plugin_info.get('version', '0.0.1')
                 )
+                print("done")
             except Exception as e:
                 raise RuntimeError(f"Failed to install plugin from GitHub: {str(e)}")
                 return True
@@ -327,21 +343,25 @@ async def load(app = None):
     print("Loading plugins...")
     print(manifest)
     print(enabled_plugins)
+    failed = []
     for plugin_name, category in enabled_plugins:
         print(f"DEBUG: Processing plugin {plugin_name} in category {category}")
         plugin_info = manifest['plugins'][category].get(plugin_name)
         if not plugin_info:
-            print(f"Plugin {plugin_name} is not in the manifest. Please reinstall it.")
+            reason = f"Plugin {plugin_name} is not in the manifest. Please reinstall it."
+            failed.append((plugin_name, reason))
             continue
         
         plugin_path = get_plugin_import_path(plugin_name)
         print(f"DEBUG: Plugin path for {plugin_name}: {plugin_path}")
         if not plugin_path:
-            print(f"Failed to locate plugin: {plugin_name}")
+            reason = f"Failed to locate plugin: {plugin_name}"
+            failed.append((plugin_name, reason))
             continue
         
         if category != 'core' and not check_plugin_dependencies(plugin_path):
-            print(f"Dependencies not met for plugin {plugin_name}. Please update it.")
+            reason = f"Dependencies not met for plugin {plugin_name}. Please update it."
+            failed.append((plugin_name, reason))
             continue
         try:
             try:
@@ -412,5 +432,12 @@ async def load(app = None):
         except ImportError as e:
             # we need to make sure to include a traceback, so save that in a string first
             trace = traceback.format_exc()
-            print(termcolor.colored(f"Failed to load plugin: {plugin_name}. Error: {e}\n\{trace}", 'red'))
+
+            reason = f"Failed to load plugin: {plugin_name}. Error: {e}\n\{trace}"
+            failed.append((plugin_name, reason))
+
+    if len(failed) > 0:
+        print(termcolor.colored("Failed to load the following plugins:", 'red'))
+        for plugin_name, reason in failed:
+            print(f"{plugin_name}: {reason}")
 

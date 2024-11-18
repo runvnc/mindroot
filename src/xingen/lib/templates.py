@@ -22,19 +22,23 @@ async def find_parent_template(page_name, plugins):
 async def load_plugin_templates(page_name, plugins):
     templates = []
     for plugin in plugins:
-        plugin_path = get_plugin_path(plugin)
-        template_path = os.path.join(plugin_path, 'inject', f'{page_name}.jinja2')
-        if os.path.exists(template_path):
-            with open(template_path) as f:
-                print("Found inject template for page", page_name, "in plugin", plugin, "at", template_path)
-                templates.append({'type': 'inject', 'template': env.from_string(f.read())})
-        else:
-            print("No inject template found for page", page_name, "in plugin", plugin, "at", template_path)
+        try:
+            plugin_path = get_plugin_path(plugin)
+            template_path = os.path.join(plugin_path, 'inject', f'{page_name}.jinja2')
+            if os.path.exists(template_path):
+                with open(template_path) as f:
+                    print("Found inject template for page", page_name, "in plugin", plugin, "at", template_path)
+                    templates.append({'type': 'inject', 'template': env.from_string(f.read())})
+            else:
+                print("No inject template found for page", page_name, "in plugin", plugin, "at", template_path)
 
-        template_path2 = os.path.join('xingen', plugin, 'override', f'{page_name}.jinja2')
-        if os.path.exists(template_path2):
-            with open(template_path2) as f:
-                templates.append({'type': 'override', 'template': env.from_string(f.read())})
+            template_path2 = os.path.join('xingen', plugin, 'override', f'{page_name}.jinja2')
+            if os.path.exists(template_path2):
+                with open(template_path2) as f:
+                    templates.append({'type': 'override', 'template': env.from_string(f.read())})
+        except Exception as e:
+            print(f'Error loading plugin template: {e}')
+            return []
     return templates
 
 # Function to collect content from child templates
