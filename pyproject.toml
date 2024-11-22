@@ -34,7 +34,8 @@ dependencies = [
     "partial-json-parser",
     "pydantic",
     "setuptools",
-    "requests"
+    "requests",
+    "aiohttp"
 ]
 
 
