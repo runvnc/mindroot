@@ -16,19 +16,41 @@ async def create_sse_client(url: str, access_token: str, queue: asyncio.Queue, c
     
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
+            current_event = None
+            current_data = None
+            
             async for line in response.content:
                 if line:
                     try:
-                        msg = line.decode()
-                        if msg.startswith('data:'):
-                            # Parse the SSE data and add conversation ID
-                            data = json.loads(msg[5:])  # Skip 'data:' prefix
-                            data['conversation_id'] = conv_id
+                        decoded_line = line.decode().strip()
+                        
+                        # Handle event line
+                        if decoded_line.startswith('event:'):
+                            current_event = decoded_line.split(':', 1)[1].strip()
+                            continue
+                            
+                        # Handle data line
+                        if decoded_line.startswith('data:'):
+                            current_data = decoded_line.split(':', 1)[1].strip()
+                            try:
+                                # Parse and add conversation ID
+                                data = json.loads(current_data)
+                                data['conversation_id'] = conv_id
+                                current_data = json.dumps(data)
+                            except Exception as e:
+                                print(f"Error processing data JSON: {e}")
+                            
                             # Reconstruct SSE message
-                            msg = f"data: {json.dumps(data)}"
+                            if current_event:
+                                await queue.put(f"event: {current_event}\ndata: {current_data}\n\n")
+                            else:
+                                await queue.put(f"data: {current_data}\n\n")
+                            
+                            current_event = None
+                            current_data = None
+                            
                     except Exception as e:
-                        print(f"Error processing SSE message: {e}")
-                    await queue.put(msg)
+                        print(f"Error processing SSE line: {e}")
 
 @router.get("/events/multi")
 async def multiplexed_events(
@@ -43,9 +65,6 @@ async def multiplexed_events(
     if not access_token:
         raise HTTPException(status_code=401, detail="Access token required")
 
-    #print blue back with yellow text bold
-    print(f"\033[1;30;46;33mMultiplexed events for conversations: {conversation_ids} access token= {access_token}\033[0m")
-        
     # Create queue for aggregated messages
     main_queue = asyncio.Queue()
 
@@ -59,16 +78,12 @@ async def multiplexed_events(
         task = asyncio.create_task(
             create_sse_client(url, access_token, main_queue, conv_id)
         )
-        # print with blue background and yellow text, all bold
-        print(f"\033[1;30;46;33mCreated SSE client for conversation {conv_id} {url}\033[0m")
         tasks.append(task)
 
     async def event_generator():
         try:
             while True:
                 message = await main_queue.get()
-                # print with blue background and yellow text, all bold
-                print(f"\033[1;30;46;33mReceived message: {message}\033[0m")
                 if message:
                     yield message
         except asyncio.CancelledError:
@@ -78,4 +93,3 @@ async def multiplexed_events(
             raise
 
     return EventSourceResponse(event_generator())
-
