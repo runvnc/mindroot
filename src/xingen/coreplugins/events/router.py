@@ -32,9 +32,12 @@ async def create_sse_client(url: str, access_token: str, queue: asyncio.Queue, c
 
 @router.get("/events/multi")
 async def multiplexed_events(
-    conversation_ids: List[str] = Query(...),  # Required query parameter
-    request: Request
+    request: Request,
+    conversation_ids: List[str] = Query(None)
 ):
+    if not conversation_ids:
+        raise HTTPException(status_code=400, detail="conversation_ids parameter is required")
+
     # Get access token from cookie
     access_token = request.cookies.get('access_token')
     if not access_token:
