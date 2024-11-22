@@ -43,6 +43,9 @@ async def multiplexed_events(
     if not access_token:
         raise HTTPException(status_code=401, detail="Access token required")
 
+    #print blue back with yellow text bold
+    print(f"\033[1;30;46;33mMultiplexed events for conversations: {conversation_ids} access token= {access_token}\033[0m")
+        
     # Create queue for aggregated messages
     main_queue = asyncio.Queue()
 
@@ -56,12 +59,16 @@ async def multiplexed_events(
         task = asyncio.create_task(
             create_sse_client(url, access_token, main_queue, conv_id)
         )
+        # print with blue background and yellow text, all bold
+        print(f"\033[1;30;46;33mCreated SSE client for conversation {conv_id} {url}\033[0m")
         tasks.append(task)
 
     async def event_generator():
         try:
             while True:
                 message = await main_queue.get()
+                # print with blue background and yellow text, all bold
+                print(f"\033[1;30;46;33mReceived message: {message}\033[0m")
                 if message:
                     yield message
         except asyncio.CancelledError:
@@ -71,3 +78,4 @@ async def multiplexed_events(
             raise
 
     return EventSourceResponse(event_generator())
+
