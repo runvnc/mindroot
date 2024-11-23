@@ -6,11 +6,11 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
-# Define the directory where index files will be stored
-# the instance path is based on the process startup path
-#
+ORIGINAL_WORKING_DIR = os.getcwd()
+
 def get_instance_path():
-    return Path(__file__).resolve().parent.parent.parent
+    return ORIGINAL_WORKING_DIR
+    #return Path(__file__).resolve().parent.parent.parent
 
 INDEX_DIR = Path(get_instance_path()) / 'indices'
 
