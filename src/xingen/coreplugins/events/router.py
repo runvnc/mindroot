@@ -73,7 +73,6 @@ async def multiplexed_events(
     
     tasks = []
     for conv_id in conversation_ids:
-        # Construct URL for each conversation's events
         url = f"{base_url}/chat/{conv_id}/events"
         task = asyncio.create_task(
             create_sse_client(url, access_token, main_queue, conv_id)
@@ -87,9 +86,9 @@ async def multiplexed_events(
                 if message:
                     yield message
         except asyncio.CancelledError:
-            # Cancel all SSE client tasks
             for task in tasks:
                 task.cancel()
             raise
 
     return EventSourceResponse(event_generator())
+
