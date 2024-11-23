@@ -252,11 +252,19 @@ def plugin_update(plugin_name):
     return plugin_install(plugin_name)
 
 def load_plugin_manifest():
+    # resolve absolute path to manifest file
+    abs_path = os.path.abspath(MANIFEST_FILE)
+    print("Loading plugin manifest from", abs_path)
     if not os.path.exists(MANIFEST_FILE):
+        print("Creating default plugin manifest")
         create_default_plugin_manifest()
 
     with open(MANIFEST_FILE, 'r') as f:
-        return json.load(f)
+        print("Loading plugin manifest")
+        json_data = json.load(f)
+        print("Loaded plugin manifest")
+        print(json_data)
+        return json_data
 
 def save_plugin_manifest(manifest):    
     with open(MANIFEST_FILE, 'w') as f:
