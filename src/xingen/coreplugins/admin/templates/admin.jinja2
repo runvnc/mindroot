@@ -25,58 +25,76 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/admin/static/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/admin/static/favicon/favicon-16x16.png">
   <link rel="manifest" href="/admin/static/site.webmanifest">
-  <link rel="stylesheet" href="/admin/static/css/update.css">
   {% endblock %}
   {% block head_end %}
   {% endblock %}
 </head>
 <body>
   {% block content_top %}
-  <script>window.theme = 'default';
-          console.log("Init.")
-  </script>
+  <header class="admin-header">
+    <a href="/" class="logo">
+      <span class="material-icons">smart_toy</span>
+      <span>Xingen Admin</span>
+    </a>
+  </header>
+  <script>window.theme = 'default';</script>
   {% endblock %}
+
   {% block content %}
-   <div class="admin-container">
+  <div class="admin-container">
     <details>
-      <summary><span class="material-icons">apps</span>Plugins</summary>
+      <summary>
+        <span class="material-icons">apps</span>
+        <span>Plugins</span>
+      </summary>
       <div class="details-content">
         <plugin-manager></plugin-manager>
       </div>
     </details>
 
     <details>
-      <summary><span class="material-icons">extension</span>Plugin States</summary>
+      <summary>
+        <span class="material-icons">extension</span>
+        <span>Plugin States</span>
+      </summary>
       <div class="details-content">
         <plugin-toggle></plugin-toggle>
       </div>
     </details>
 
     <details>
-      <summary><span class="material-icons">smart_toy</span>Agents</summary>
+      <summary>
+        <span class="material-icons">smart_toy</span>
+        <span>Agents</span>
+      </summary>
       <div class="details-content">
         <agent-editor theme="dark" scope="local"></agent-editor>
       </div>
     </details>
 
     <details>
-      <summary><span class="material-icons">person</span>Personas</summary>
+      <summary>
+        <span class="material-icons">person</span>
+        <span>Personas</span>
+      </summary>
       <div class="details-content">
         <persona-editor theme="dark" scope="local"></persona-editor>
       </div>
     </details>
 
     <details>
-      <summary><span class="material-icons">settings</span>Model Preferences</summary>
+      <summary>
+        <span class="material-icons">settings</span>
+        <span>Model Preferences</span>
+      </summary>
       <div class="details-content">
         <model-preferences theme="dark" scope="local"></model-preferences>
       </div>
     </details>
+  </div>
+  {% endblock %}
 
-    {% endblock %}
-
-   </div>    
-    {% block footer %}
-    {% endblock %}
+  {% block footer %}
+  {% endblock %}
 </body>
 </html>

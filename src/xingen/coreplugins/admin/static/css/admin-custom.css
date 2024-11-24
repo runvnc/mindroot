@@ -1,187 +1,151 @@
-/* Admin Custom Styles */
+/* Admin Interface Styles */
 
-body {
-  min-height: 100vh;
-  padding: 20px;
-  box-sizing: border-box;
-  background-color: rgb(5, 5, 16);
-  color: #f0f0f0;
+/* Header Area */
+.admin-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10, 10, 25, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
 }
 
+.admin-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-header .logo:hover {
+    color: #4a9eff;
+}
+
+/* Container Layout */
 .admin-container {
-  width: 100%;
-  /* max-width: 1200px; */
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
-dialog, div, form {
-  background-color: #050510;
-  color: #f0f0f0;
-}
-
-dialog {
-  padding: 20px;
-}
-
+/* Section Styling */
 details {
-  background: rgb(10, 10, 25);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  transition: all 0.3s ease;
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
 }
 
-details[open] {
-  border-color: #4a90e2;
+details summary {
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
 }
 
-summary {
-  padding: 15px 20px;
-  background: rgb(15, 15, 30);
-  color: #f0f0f0;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-weight: bold;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+details summary:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-summary:hover {
-  background: rgb(20, 20, 40);
-}
-
-details[open] summary {
-  background: rgb(25, 25, 50);
+details summary .material-icons {
+    font-size: 1.2rem;
+    opacity: 0.8;
 }
 
 .details-content {
-  padding: 20px;
+    padding: 1.5rem;
 }
 
-/* Smooth opening/closing of details */
-.details-content {
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-details:not([open]) .details-content {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-details[open] .details-content {
-  max-height: none;
-}
-
-/* Improve focus styles for accessibility */
-details:focus-within {
-  outline: none;
-  border-color: #4a90e2;
-}
-
-/* Button styles */
-button,
-input[type="submit"],
-.btn {
-  background-color: rgb(25, 25, 50);
-  color: #f0f0f0;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-button:hover,
-input[type="submit"]:hover,
-.btn:hover {
-  background-color: rgb(35, 35, 70);
-}
-
-/* File input styles */
-#faceref,
-#avatar {
-  display: none;
-}
-
-.file-upload-container {
-  margin-bottom: 10px;
-}
-
-.file-upload-label {
-  display: inline-block;
-  padding: 8px 12px;
-  background-color: rgb(25, 25, 50);
-  color: #f0f0f0;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.file-upload-label:hover {
-  background-color: rgb(35, 35, 70);
-}
-
-.file-name {
-  margin-left: 10px;
-  font-style: italic;
-}
-
-/* Plugin manager styles */
-.plugin-manager {
-  padding: 20px;
-  background: rgb(10, 10, 25);
-  border-radius: 8px;
-}
-
-.scan-section {
-  margin-bottom: 20px;
+/* Plugin List Styling */
+.plugin-list {
+    display: grid;
+    gap: 1rem;
 }
 
 .plugin-item {
-  background: rgb(15, 15, 30);
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.plugin-item span {
-  margin-right: 10px;
-  margin-bottom: 5px;
-}
-
-.plugin-item button {
-  margin-left: 5px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
-  summary {
-    padding: 10px 15px;
-  }
-
-  .details-content {
-    padding: 15px;
-  }
-
-  .plugin-item {
+.plugin-info {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-  }
+    gap: 0.25rem;
+}
 
-  .plugin-item button {
-    margin-left: 0;
-    margin-top: 5px;
-  }
+.plugin-name {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.plugin-version {
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.plugin-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.plugin-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Status Indicators */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-enabled {
+    background: #4caf50;
+}
+
+.status-disabled {
+    background: #f44336;
+}
+
+/* Button Styles */
+.admin-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-btn .material-icons {
+    font-size: 1.1rem;
 }

@@ -11,46 +11,137 @@ export class PluginBase extends BaseEl {
   static styles = css`
     .plugin-item {
       background: rgb(15, 15, 30);
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: grid;
+      grid-template-columns: minmax(200px, 2fr) auto 1fr auto;
+      gap: 1rem;
       align-items: center;
-      flex-wrap: wrap;
     }
 
-    .plugin-item span {
-      margin-right: 10px;
-      margin-bottom: 5px;
+    .plugin-item:hover {
+      background: rgb(20, 20, 40);
+      border-color: rgba(255, 255, 255, 0.1);
     }
 
-    .plugin-item button {
-      margin-left: 5px;
+    .plugin-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .plugin-name {
+      font-weight: 500;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .plugin-version {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: fit-content;
+    }
+
+    .plugin-description {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      grid-column: 3;
+    }
+
+    .plugin-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .plugin-actions button {
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .plugin-actions button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .plugin-actions button .material-icons {
+      font-size: 1rem;
     }
 
     .search-box {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
       background: rgb(25, 25, 50);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+      border-radius: 6px;
       color: #f0f0f0;
+      font-size: 0.95rem;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgb(30, 30, 60);
     }
 
     .loading {
       text-align: center;
-      padding: 20px;
-      font-style: italic;
-      color: #888;
+      padding: 2rem;
+      color: rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .loading .material-icons {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
     }
 
     .error {
       color: #ff6b6b;
-      padding: 10px;
-      border-radius: 4px;
-      margin: 10px 0;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+
+    .status-enabled {
+      background: #4caf50;
+    }
+
+    .status-disabled {
+      background: #f44336;
     }
   `;
 
@@ -61,7 +152,6 @@ export class PluginBase extends BaseEl {
     this.loading = false;
   }
 
-  // Utility method for API calls
   async apiCall(endpoint, method = 'GET', body = null) {
     try {
       const options = {
@@ -86,7 +176,6 @@ export class PluginBase extends BaseEl {
     }
   }
 
-  // Filter plugins based on search term
   filterPlugins(plugins, searchTerm) {
     if (!searchTerm) return plugins;
     const term = searchTerm.toLowerCase();
@@ -96,35 +185,39 @@ export class PluginBase extends BaseEl {
     );
   }
 
-  // Common plugin display template
   renderPlugin(plugin, actions) {
     return html`
       <div class="plugin-item">
-        <span class="name">${plugin.name}</span>
-        <span class="version">v${plugin.version || '0.0.1'}</span>
+        <div class="plugin-info">
+          <div class="plugin-name">
+            <span class="status-indicator ${plugin.enabled ? 'status-enabled' : 'status-disabled'}"></span>
+            ${plugin.name}
+          </div>
+        </div>
+        <div class="plugin-version">v${plugin.version || '0.0.1'}</div>
         ${plugin.description ? html`
-          <span class="description">${plugin.description}</span>
-        ` : ''}
-        <div class="actions">
+          <div class="plugin-description">${plugin.description}</div>
+        ` : html`<div></div>`}
+        <div class="plugin-actions">
           ${actions(plugin)}
         </div>
       </div>
     `;
   }
 
-  // Loading indicator
   renderLoading() {
     return html`
       <div class="loading">
-        Loading...
+        <span class="material-icons">refresh</span>
+        Loading plugins...
       </div>
     `;
   }
 
-  // Error display
   renderError(message) {
     return html`
       <div class="error">
+        <span class="material-icons">error_outline</span>
         ${message}
       </div>
     `;
