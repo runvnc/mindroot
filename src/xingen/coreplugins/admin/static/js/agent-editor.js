@@ -38,27 +38,6 @@ class AgentEditor extends BaseEl {
         content: " *";
         color: #e57373;
       }
-      .tooltip {
-        position: relative;
-        display: inline-block;
-      }
-      .tooltip .tooltip-text {
-        visibility: hidden;
-        background-color: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        text-align: center;
-        padding: 5px 10px;
-        border-radius: 6px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        white-space: nowrap;
-      }
-      .tooltip:hover .tooltip-text {
-        visibility: visible;
-      }
     `
   ];
 
@@ -111,13 +90,22 @@ class AgentEditor extends BaseEl {
   }
 
   organizeCommands(commands) {
-    // Group commands by category based on their prefix
-    const grouped = commands.reduce((acc, cmd) => {
-      const category = cmd.split('_')[0] || 'Other';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(cmd);
-      return acc;
-    }, {});
+    // Group commands by provider
+    const grouped = {};
+    for (const [cmdName, cmdInfoArray] of Object.entries(commands)) {
+      // Take the first implementation's provider as the grouping key
+      // This assumes all implementations of a command come from the same provider
+      const cmdInfo = cmdInfoArray[0];
+      const provider = cmdInfo.provider || 'Other';
+      if (!grouped[provider]) {
+        grouped[provider] = [];
+      }
+      grouped[provider].push({
+        name: cmdName,
+        docstring: cmdInfo.docstring,
+        flags: cmdInfo.flags
+      });
+    }
     return grouped;
   }
 
@@ -141,7 +129,7 @@ class AgentEditor extends BaseEl {
         const response = await fetch(`/agents/${this.scope}/${this.name}`);
         if (!response.ok) throw new Error('Failed to fetch agent');
         this.agent = await response.json();
-        this.agent.uncensored = this.agent.flags.includes('uncensored');
+        this.agent.uncensored = this.agent.flags?.includes('uncensored');
       } catch (error) {
         this.errorMessage = `Error loading agent: ${error.message}`;
       } finally {
@@ -204,7 +192,7 @@ class AgentEditor extends BaseEl {
     } else {
       this.agent = { ...this.agent, [name]: inputValue };
     }
-    this.errorMessage = ''; // Clear error when user makes changes
+    this.errorMessage = '';
   }
 
   async handleSubmit(event) {
@@ -246,89 +234,24 @@ class AgentEditor extends BaseEl {
     }
   }
 
-  async handleScanAndImport() {
-    const directory = prompt("Enter the directory path to scan for agents:");
-    if (!directory) return;
-
-    try {
-      this.loading = true;
-      const response = await fetch('/scan-and-import-agents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ directory, scope: this.scope })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        this.importStatus = `Success: Imported ${result.imported_agents.length} agents`;
-        await this.fetchAgents();
-      } else {
-        this.importStatus = `Error: ${result.message}`;
-      }
-    } catch (error) {
-      this.importStatus = `Error: ${error.message}`;
-    } finally {
-      this.loading = false;
-      setTimeout(() => {
-        this.importStatus = '';
-      }, 5000);
-    }
-  }
-
-  async handleGitHubImport() {
-    const repoPath = this.shadowRoot.querySelector('#githubRepo').value;
-    const tag = this.shadowRoot.querySelector('#githubTag').value;
-
-    if (!repoPath) {
-      this.githubImportStatus = 'Error: Repository path is required';
-      return;
-    }
-
-    try {
-      this.loading = true;
-      const response = await fetch('/import-github-agent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          repo_path: repoPath,
-          scope: this.scope,
-          tag: tag || null
-        })
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        this.githubImportStatus = `Success: ${result.message}`;
-        await this.fetchAgents();
-      } else {
-        this.githubImportStatus = `Error: ${result.detail || result.message}`;
-      }
-    } catch (error) {
-      this.githubImportStatus = `Error: ${error.message}`;
-    } finally {
-      this.loading = false;
-      setTimeout(() => {
-        this.githubImportStatus = '';
-      }, 5000);
-    }
-  }
-
   renderCommands() {
-    return Object.entries(this.commands).map(([category, cmds]) => html`
+    return Object.entries(this.commands).map(([provider, commands]) => html`
       <div class="commands-category">
-        <h4>${category}</h4>
+        <h4>${provider}</h4>
         <div class="commands-grid">
-          ${cmds.map(command => html`
+          ${commands.map(command => html`
             <div class="command-item">
               <input type="checkbox" 
                      name="commands" 
-                     value="${command}" 
-                     .checked=${this.agent.commands?.includes(command)}
+                     value="${command.name}" 
+                     .checked=${this.agent.commands?.includes(command.name)}
                      @change=${this.handleInputChange} />
-              <span class="tooltip">
-                ${command}
-                <span class="tooltip-text">Click to toggle this command</span>
-              </span>
+              <div class="tooltip">
+                <span class="command-name">${command.name}</span>
+                ${command.docstring ? html`
+                  <span class="tooltip-text">${command.docstring}</span>
+                ` : ''}
+              </div>
             </div>
           `)}
         </div>
@@ -401,8 +324,7 @@ class AgentEditor extends BaseEl {
             <label class="required">Name:</label>
             <input type="text" name="name" 
                    .value=${this.agent.name || ''} 
-                   @input=${this.handleInputChange} 
-                   class="tooltip">
+                   @input=${this.handleInputChange}>
           </div>
 
           <div class="form-group">

@@ -105,12 +105,19 @@ async def get_models():
 async def get_providers():
     return read_providers()
 
-@router.get('/commands', response_model=List[str])
+@router.get('/commands', response_model=Dict)
 async def get_commands():
     print("retrieving commands")
-    funcs = command_manager.get_functions()
-    print(funcs)
-    return funcs
+    #funcs = command_manager.get_functions()
+    funcs = command_manager.get_detailed_functions()
+    # we need to clone and remove the 'implementation' key which can't be serialized
+    copy = funcs.copy()
+    for key in copy:
+        del copy[key]['implementation']
+
+    print("retrieved commands:")
+    print(copy)
+    return copy
 
 @router.get('/services', response_model=List[str])
 async def get_services():

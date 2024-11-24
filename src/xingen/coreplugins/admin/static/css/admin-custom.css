@@ -32,12 +32,46 @@
     min-width: 70%;
 }
 
+/* Section Styling */
+details {
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+details summary {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+details summary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+details summary .material-icons {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.details-content {
+    padding: 1rem;
+}
+
 /* Agent Editor Specific Styles */
 .agent-editor {
     background: rgba(10, 10, 25, 0.8);
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .agent-editor form {
@@ -85,25 +119,40 @@
 .commands-section {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
-    padding: 1rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.commands-category {
+    margin-bottom: 1rem;
+}
+
+.commands-category h4 {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
 }
 
 .commands-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 .command-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.35rem 0.5rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
 
 .command-item:hover {
@@ -112,6 +161,48 @@
 
 .command-item input[type="checkbox"] {
     margin: 0;
+    flex-shrink: 0;
+}
+
+.command-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+}
+
+/* Enhanced Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #fff;
+    text-align: left;
+    padding: 0.75rem;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 300px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* GitHub Import Section */
@@ -120,12 +211,16 @@
     border-radius: 6px;
     padding: 1.5rem;
     margin-top: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .github-import h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
 }
 
 .github-import-form {
@@ -149,6 +244,7 @@
     border-radius: 6px;
     margin-top: 1rem;
     font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .status-message.success {
@@ -186,6 +282,15 @@
 
 .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.15);
+}
+
+/* Section Headers */
+h2, h3, h4 {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Responsive Design */

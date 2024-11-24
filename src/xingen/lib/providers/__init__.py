@@ -108,6 +108,9 @@ class ProviderManager:
             return []
         return [func_info['docstring'] for func_info in self.functions[name]]
 
+    def get_detailed_functions(self):
+        return self.functions
+
     def get_functions(self):
         return list(self.functions.keys())
 
