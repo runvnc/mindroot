@@ -1,0 +1,185 @@
+[{"think": {"extensive_chain_of_thoughts": "Now with full context, I can see the complete structure:\n\n1. Component Architecture:\n- Using Lit Elements for web components\n- Plugin management split into multiple components:\n  * PluginBase (base class with core styling)\n  * PluginList (handles core vs installed plugins)\n  * PluginManager (main component)\n\n2. Template Structure:\n- Main admin.jinja2 template uses <details> elements for sections\n- Each section loads its own web component\n- Plugin section is already set up for collapsible behavior\n\n3. Current CSS Distribution:\n- Base styles in default.css\n- Admin-specific styles in admin-custom.css\n- Component-specific styles in the Lit components\n\n4. Key Improvements Needed:\n\na) Layout Changes:\n- Modify admin-container max-width to 1600px\n- Reduce header padding/margin\n- Improve responsive behavior\n\nb) Plugin List Component:\n- Add collapsed state for core plugins section\n- Optimize grid layout in plugin-item\n- Improve search box integration\n\nc) Visual Hierarchy:\n- Better distinction between core and installed plugins\n- More compact but clear version badges\n- Improved status indicators\n\nSpecific Implementation Plan:\n\n1. Update admin-custom.css:\n- Modify admin-container width\n- Reduce header spacing\n- Adjust details/summary styling\n\n2. Modify plugin-base.js styles:\n- Update plugin-item grid layout\n- Improve version badge styling\n- Enhance status indicators\n\n3. Update plugin-list.js:\n- Add collapsed state for core plugins\n- Improve search box integration\n\nLet's start with the CSS changes first, focusing on the layout issues."}}], {"write": {"fname": "/files/xingen/src/xingen/coreplugins/admin/static/css/admin-custom.css", "text": START_RAW
+/* Admin Interface Styles */
+
+/* Header Area */
+.admin-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 2rem;  /* Reduced from 1rem */
+    background: rgba(10, 10, 25, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;  /* Reduced from 2rem */
+}
+
+.admin-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-header .logo:hover {
+    color: #4a9eff;
+}
+
+/* Container Layout */
+.admin-container {
+    max-width: 1600px;  /* Increased from 1200px */
+    margin: 0 auto;
+    padding: 0 2rem;    /* Increased padding */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* For ultra-wide screens */
+@media (min-width: 2000px) {
+    .admin-container {
+        max-width: 80%;  /* Relative width for very wide screens */
+    }
+}
+
+/* Section Styling */
+details {
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;  /* Reduced from 1rem */
+    overflow: hidden;
+}
+
+details summary {
+    padding: 0.75rem 1rem;  /* Reduced from 1rem */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+details summary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+details summary .material-icons {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+details[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.details-content {
+    padding: 1.25rem;
+}
+
+/* Plugin List Styling */
+.plugin-list {
+    display: grid;
+    gap: 0.75rem;  /* Reduced from 1rem */
+}
+
+.plugin-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;  /* Reduced padding */
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.plugin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.plugin-name {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.plugin-version {
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.15rem 0.4rem;  /* Reduced padding */
+    border-radius: 4px;
+    font-size: 0.85rem;  /* Slightly smaller */
+    display: inline-block;
+}
+
+.plugin-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.plugin-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Status Indicators */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    display: inline-block;
+    position: relative;
+}
+
+.status-enabled {
+    background: #4caf50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+
+.status-disabled {
+    background: #f44336;
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.4);
+}
+
+/* Button Styles */
+.admin-btn {
+    padding: 0.4rem 0.8rem;  /* Reduced padding */
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-btn .material-icons {
+    font-size: 1rem;
+}
+
+/* Core Plugins Section */
+details.core-plugins {
+    opacity: 0.85;  /* Slightly dimmed to de-emphasize */
+}
+
+details.core-plugins .plugin-item {
+    background: rgba(10, 10, 25, 0.6);  /* Darker background for core plugins */
+}
+END_RAW
+}}]

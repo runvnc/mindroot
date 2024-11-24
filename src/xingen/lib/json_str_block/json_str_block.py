@@ -55,11 +55,12 @@ def replace_raw_blocks(jsonish):
     final_string = re.sub(r'(?<!")""(?!")', '"', final_string)
     # check if parsable as partial json
     try:
+        print("should be json: \n", final_string)
         ensure_json(final_string)
     except Exception as e:
         escaped_nl_in_fenced = re.sub(r'```[\s\S]*?```',
                           lambda m: m.group(0).replace('\n', '\\n'),
-                          text)
+                          final_string)
         try:
             ensure_json(escaped_nl_in_fenced)
             return escaped_nl_in_fenced
@@ -73,18 +74,18 @@ def replace_raw_blocks(jsonish):
     return final_string
 
 
-#if __name__ == "__main__":
+if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    #with open("ex6.txt") as f:
+    with open("ex7.txt") as f:
     #    #with open("test_case_1.json") as f:
-    #    jsonish = f.read()
-    #new_json = replace_raw_blocks(jsonish)
+        jsonish = f.read()
+    new_json = replace_raw_blocks(jsonish)
 
-    #print(new_json)
+    print(new_json)
 
-    #data = loads(new_json)
+    data = loads(new_json)
 
-    #print('-----------------------------------------')
-    #print(data)
+    print('-----------------------------------------')
+    print(data)
 
 
