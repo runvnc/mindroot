@@ -259,6 +259,11 @@ class Agent:
                     try:
                         cmd = commands[i]
                         cmd_name = next(iter(cmd))
+                        if isinstance(cmd, str):
+                            print("\033[91m" + "Invalid command format, expected object, trying to parse anyway" + "\033[0m")
+                            print("\033[91m" + str(cmd) + "\033[0m")
+                            cmd = json.loads(cmd)
+                            cmd_name = next(iter(cmd))
                         cmd_args = cmd[cmd_name]
                         logger.debug(f"Processing command: {cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)

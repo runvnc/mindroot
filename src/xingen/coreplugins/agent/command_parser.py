@@ -25,10 +25,12 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     
     try:
         raw_replaced = replace_raw_blocks(buffer)
+        #raw_replaced = escape_for_json(raw_replaced)
         complete_commands = json.loads(raw_replaced)
         return complete_commands, None
     except Exception:
         try:
+            print("Failed to parse:\n",raw_replaced)
             complete_commands = merge_json_arrays(raw_replaced)
             return complete_commands, None
         except Exception:

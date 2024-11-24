@@ -76,7 +76,7 @@ def replace_raw_blocks(jsonish):
 
 if __name__ == "__main__":
     # read test example 1 from ex1.txt
-    with open("ex7.txt") as f:
+    with open("ex9.txt") as f:
     #    #with open("test_case_1.json") as f:
         jsonish = f.read()
     new_json = replace_raw_blocks(jsonish)
