@@ -12,6 +12,43 @@ def _get_project_root():
     current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return current_dir
 
+def _find_core_plugin_path(plugin_name):
+    """Find the correct path for a core plugin, checking both development and installed locations.
+    
+    Args:
+        plugin_name (str): Name of the core plugin
+        
+    Returns:
+        str: Absolute path to the plugin directory or None if not found
+    """
+    # Try development path first
+    dev_path = os.path.join(_get_project_root(), 'coreplugins', plugin_name)
+    if os.path.exists(dev_path):
+        print(f"Found core plugin {plugin_name} in development path: {dev_path}")
+        return dev_path
+        
+    # Try to find installed package
+    try:
+        import xingen
+        pkg_path = os.path.dirname(xingen.__file__)
+        installed_path = os.path.join(pkg_path, 'coreplugins', plugin_name)
+        if os.path.exists(installed_path):
+            print(f"Found core plugin {plugin_name} in installed path: {installed_path}")
+            return installed_path
+    except ImportError:
+        pass
+        
+    # Try site-packages directly
+    for path in sys.path:
+        if 'site-packages' in path or 'dist-packages' in path:
+            potential_path = os.path.join(path, 'xingen', 'coreplugins', plugin_name)
+            if os.path.exists(potential_path):
+                print(f"Found core plugin {plugin_name} in site-packages: {potential_path}")
+                return potential_path
+                
+    print(f"Warning: Could not find core plugin {plugin_name} in any location")
+    return None
+
 def get_plugin_path(plugin_name):
     """Get the filesystem path for a plugin.
     
@@ -27,14 +64,17 @@ def get_plugin_path(plugin_name):
             plugin_info = manifest['plugins'][category][plugin_name]
             
             if plugin_info['source'] == 'core':
-                # Use project root to build absolute path
-                return os.path.join(_get_project_root(), 'coreplugins', plugin_name)
+                return _find_core_plugin_path(plugin_name)
             elif plugin_info['source'] in ['local', 'github']:
                 # source_path should already be absolute
-                return plugin_info['source_path']
+                if os.path.exists(plugin_info['source_path']):
+                    return plugin_info['source_path']
+                print(f"Warning: Plugin path does not exist: {plugin_info['source_path']}")
             else:
                 spec = find_spec(plugin_name)
-                return spec.origin if spec else None
+                if spec:
+                    return spec.origin
+                print(f"Warning: Could not find spec for plugin: {plugin_name}")
     return None
 
 def get_plugin_import_path(plugin_name):

@@ -1,48 +1,140 @@
 import os
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 from .plugins import list_enabled, get_plugin_path
 
-# Create a Jinja2 environment
-env = Environment(loader=FileSystemLoader('.'))
-
-# New helper function to find parent templates in plugins
-async def find_parent_template(page_name, plugins):
+def setup_template_environment():
+    """Set up Jinja2 environment with multiple template paths.
+    
+    Returns:
+        Environment: Configured Jinja2 environment
+    """
+    # Get all enabled plugins
+    plugins = list_enabled(False)
+    template_paths = ['.']
+    
+    # Add plugin template paths
     for plugin in plugins:
         plugin_path = get_plugin_path(plugin)
+        if plugin_path:
+            # Add main template directory
+            template_dir = os.path.join(plugin_path, 'templates')
+            if os.path.exists(template_dir):
+                template_paths.append(template_dir)
+                print(f"Added template path: {template_dir}")
+            
+            # Add inject directory
+            inject_dir = os.path.join(plugin_path, 'inject')
+            if os.path.exists(inject_dir):
+                template_paths.append(inject_dir)
+                print(f"Added inject path: {inject_dir}")
+    
+    # Create environment with multiple loaders
+    loaders = [FileSystemLoader(path) for path in template_paths]
+    return Environment(loader=ChoiceLoader(loaders))
+
+# Create a Jinja2 environment with multiple template paths
+env = setup_template_environment()
+
+async def find_parent_template(page_name, plugins):
+    """Find parent template in enabled plugins.
+    
+    Args:
+        page_name (str): Name of the template page
+        plugins (list): List of enabled plugins
+        
+    Returns:
+        str: Template path if found, None otherwise
+    """
+    for plugin in plugins:
+        plugin_path = get_plugin_path(plugin)
+        if not plugin_path:
+            print(f'Warning: Could not find path for plugin: {plugin}')
+            continue
+            
         print(f'Checking plugin: {plugin}, path: {plugin_path}')
         template_path = os.path.join(plugin_path, 'templates', f'{page_name}.jinja2')
+        
         if os.path.exists(template_path):
             print(f'Found parent template in plugin: {template_path}')
             return template_path
         else:
             print(f'No parent template found in plugin: {plugin}, template path was {template_path}')
+            
+            # Try alternate locations
+            alt_paths = [
+                os.path.join(plugin_path, 'src', plugin, 'templates', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', 'templates', f'{page_name}.jinja2'),
+            ]
+            
+            for alt_path in alt_paths:
+                if os.path.exists(alt_path):
+                    print(f'Found parent template in alternate location: {alt_path}')
+                    return alt_path
     return None
 
-# Function to load templates from plugins
 async def load_plugin_templates(page_name, plugins):
+    """Load templates from plugins.
+    
+    Args:
+        page_name (str): Name of the template page
+        plugins (list): List of enabled plugins
+        
+    Returns:
+        list: List of template info dictionaries
+    """
     templates = []
     for plugin in plugins:
         try:
             plugin_path = get_plugin_path(plugin)
-            template_path = os.path.join(plugin_path, 'inject', f'{page_name}.jinja2')
-            if os.path.exists(template_path):
-                with open(template_path) as f:
-                    print("Found inject template for page", page_name, "in plugin", plugin, "at", template_path)
-                    templates.append({'type': 'inject', 'template': env.from_string(f.read())})
-            else:
-                print("No inject template found for page", page_name, "in plugin", plugin, "at", template_path)
-
-            template_path2 = os.path.join('xingen', plugin, 'override', f'{page_name}.jinja2')
-            if os.path.exists(template_path2):
-                with open(template_path2) as f:
-                    templates.append({'type': 'override', 'template': env.from_string(f.read())})
+            if not plugin_path:
+                print(f'Warning: Could not find path for plugin: {plugin}')
+                continue
+                
+            # Check inject templates
+            inject_paths = [
+                os.path.join(plugin_path, 'inject', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', plugin, 'inject', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', 'inject', f'{page_name}.jinja2')
+            ]
+            
+            for path in inject_paths:
+                if os.path.exists(path):
+                    with open(path) as f:
+                        print(f"Found inject template at: {path}")
+                        templates.append({'type': 'inject', 'template': env.from_string(f.read())})
+                        break
+            
+            # Check override templates
+            override_paths = [
+                os.path.join(plugin_path, 'override', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', plugin, 'override', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', 'override', f'{page_name}.jinja2')
+            ]
+            
+            for path in override_paths:
+                if os.path.exists(path):
+                    with open(path) as f:
+                        print(f"Found override template at: {path}")
+                        templates.append({'type': 'override', 'template': env.from_string(f.read())})
+                        break
+                        
         except Exception as e:
             print(f'Error loading plugin template: {e}')
-            return []
+            continue
     return templates
 
-# Function to collect content from child templates
 async def collect_content(template, blocks, template_type, data):
+    """Collect content from child templates.
+    
+    Args:
+        template: Jinja2 template object
+        blocks (list): List of block names
+        template_type (str): Type of template ('inject' or 'override')
+        data (dict): Template context data
+        
+    Returns:
+        dict: Collected content by block
+    """
     content = {block: {'inject': [], 'override': None} for block in blocks}
     for block in blocks:
         if block in template.blocks:
@@ -54,43 +146,54 @@ async def collect_content(template, blocks, template_type, data):
                 content[block]['inject'].append(block_content)
     return content
 
-# Function to render the combined template
 async def render_combined_template(page_name, plugins, context):
+    """Render combined template with injections and overrides.
+    
+    Args:
+        page_name (str): Name of the template page
+        plugins (list): List of enabled plugins
+        context (dict): Template context data
+        
+    Returns:
+        str: Rendered HTML
+    """
     print("plugins:", plugins)
-    # Find parent template in plugins
     parent_template_path = await find_parent_template(page_name, plugins)
-    # print a green top border with ascii
+    
     print("\033[92m" + "----------------------------------")
     print("parent_template_path", parent_template_path)
     print("page name", page_name, "plugins:", plugins, "context:", context)
-    #back to normal text
     print("\033[0m")
+    
     if parent_template_path:
         parent_template = env.get_template(parent_template_path)
     else:
-        parent_template = env.get_template(f'templates/{page_name}.jinja2')
+        # Try default template location
+        default_path = f'templates/{page_name}.jinja2'
+        if not os.path.exists(default_path):
+            raise FileNotFoundError(f"Template not found: {page_name}")
+        parent_template = env.get_template(default_path)
 
-    # Load child templates from plugins
     child_templates = await load_plugin_templates(page_name, plugins)
-
-    # Get the blocks defined in the parent template
     parent_blocks = parent_template.blocks.keys()
-
-    # Collect content from child templates
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
 
     print("child_templates", child_templates)
 
     for child_template_info in child_templates:
         print("calling collect_content")
-        child_content = await collect_content(child_template_info['template'], parent_blocks, child_template_info['type'], context)
+        child_content = await collect_content(
+            child_template_info['template'],
+            parent_blocks,
+            child_template_info['type'],
+            context
+        )
         for block, content in child_content.items():
             if content['override']:
                 all_content[block]['override'] = content['override']
             else:
                 all_content[block]['inject'].extend(content['inject'])
 
-    # Generate the combined template dynamically
     combined_template_str = '{% extends layout_template %}\n'
     for block in all_content:
         if all_content[block]['override']:
@@ -100,32 +203,21 @@ async def render_combined_template(page_name, plugins, context):
             combined_template_str += f'{{% block {block} %}}\n  {{{{ super() }}}}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
     combined_child_template = env.from_string(combined_template_str)
-    print("combined_template_str", combined_template_str)
-    print("combined_child_template", combined_child_template)
-    print("parent_template", parent_template)
-    print("all_content", all_content)
 
-    # Render the combined child template with the parent template
-    # need to make sure all_content is not {} or None
-    # Initialize the dictionaries
     combined_inject = {}
     combined_override = {}
 
-    # Iterate through all_content items and populate the dictionaries with checks
     for block, content in all_content.items():
-        # Check if 'inject' exists and is a list
         if 'inject' in content and isinstance(content['inject'], list):
             combined_inject[f'combined_{block}_inject'] = ''.join(content['inject'])
         else:
-            combined_inject[f'combined_{block}_inject'] = ''  # Default to empty string if not present or not a list
+            combined_inject[f'combined_{block}_inject'] = ''
 
-        # Check if 'override' exists and is not None
         if 'override' in content and content['override']:
             combined_override[f'combined_{block}_override'] = content['override']
 
     print("in render combined, context is", context)
 
-    # Render the template with the combined dictionaries and context
     rendered_html = combined_child_template.render(
         layout_template=parent_template,
         **combined_inject,
@@ -136,6 +228,14 @@ async def render_combined_template(page_name, plugins, context):
     return rendered_html
 
 async def render(page_name, context):
+    """Render a template with plugin injections and overrides.
+    
+    Args:
+        page_name (str): Name of the template page
+        context (dict): Template context data
+        
+    Returns:
+        str: Rendered HTML
+    """
     plugins = list_enabled(False)
     return await render_combined_template(page_name, plugins, context)
-
