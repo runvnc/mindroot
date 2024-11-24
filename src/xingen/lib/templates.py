@@ -10,7 +10,7 @@ def setup_template_environment():
     """
     # Get all enabled plugins
     plugins = list_enabled(False)
-    template_paths = ['.']
+    template_paths = set(['templates'])  # Start with default templates directory
     
     # Add plugin template paths
     for plugin in plugins:
@@ -19,18 +19,24 @@ def setup_template_environment():
             # Add main template directory
             template_dir = os.path.join(plugin_path, 'templates')
             if os.path.exists(template_dir):
-                template_paths.append(template_dir)
+                template_paths.add(template_dir)
                 print(f"Added template path: {template_dir}")
             
             # Add inject directory
             inject_dir = os.path.join(plugin_path, 'inject')
             if os.path.exists(inject_dir):
-                template_paths.append(inject_dir)
+                template_paths.add(inject_dir)
                 print(f"Added inject path: {inject_dir}")
+
+            # Add parent directories to handle absolute paths
+            template_paths.add(os.path.dirname(plugin_path))
+            template_paths.add(os.path.dirname(os.path.dirname(plugin_path)))
     
     # Create environment with multiple loaders
     loaders = [FileSystemLoader(path) for path in template_paths]
-    return Environment(loader=ChoiceLoader(loaders))
+    env = Environment(loader=ChoiceLoader(loaders))
+    print(f"Initialized Jinja2 environment with paths: {template_paths}")
+    return env
 
 # Create a Jinja2 environment with multiple template paths
 env = setup_template_environment()
@@ -56,6 +62,14 @@ async def find_parent_template(page_name, plugins):
         
         if os.path.exists(template_path):
             print(f'Found parent template in plugin: {template_path}')
+            # Convert to relative path from one of our template roots
+            for loader in env.loader.loaders:
+                for template_dir in loader.searchpath:
+                    rel_path = os.path.relpath(template_path, template_dir)
+                    if not rel_path.startswith('..'):
+                        print(f'Using template path: {rel_path}')
+                        return rel_path
+            # Fallback to absolute path if no relative path works
             return template_path
         else:
             print(f'No parent template found in plugin: {plugin}, template path was {template_path}')
@@ -69,6 +83,13 @@ async def find_parent_template(page_name, plugins):
             for alt_path in alt_paths:
                 if os.path.exists(alt_path):
                     print(f'Found parent template in alternate location: {alt_path}')
+                    # Convert to relative path
+                    for loader in env.loader.loaders:
+                        for template_dir in loader.searchpath:
+                            rel_path = os.path.relpath(alt_path, template_dir)
+                            if not rel_path.startswith('..'):
+                                print(f'Using template path: {rel_path}')
+                                return rel_path
                     return alt_path
     return None
 
@@ -166,9 +187,13 @@ async def render_combined_template(page_name, plugins, context):
     print("\033[0m")
     
     if parent_template_path:
-        parent_template = env.get_template(parent_template_path)
+        try:
+            parent_template = env.get_template(parent_template_path)
+        except Exception as e:
+            print(f"Error loading template {parent_template_path}: {e}")
+            print(f"Template search paths: {[l.searchpath for l in env.loader.loaders]}")
+            raise
     else:
-        # Try default template location
         default_path = f'templates/{page_name}.jinja2'
         if not os.path.exists(default_path):
             raise FileNotFoundError(f"Template not found: {page_name}")
