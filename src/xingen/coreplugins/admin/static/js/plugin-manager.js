@@ -9,34 +9,74 @@ class PluginManager extends BaseEl {
     .plugin-manager {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
     }
 
     .section {
       background: rgb(10, 10, 25);
       border-radius: 8px;
-      padding: 20px;
+      padding: 1rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .section-title {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
     .section-title .material-icons {
-      font-size: 1.2em;
+      font-size: 1.2rem;
       opacity: 0.8;
     }
 
     .divider {
       height: 1px;
       background: rgba(255, 255, 255, 0.1);
-      margin: 20px 0;
+      margin: 0.75rem 0;
+    }
+
+    /* Core plugins collapsed by default */
+    plugin-list[category="core"] {
+      display: none;
+    }
+
+    .section details {
+      margin-bottom: 0.75rem;
+    }
+
+    .section details summary {
+      cursor: pointer;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    .section details summary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .section details[open] plugin-list[category="core"] {
+      display: block;
+      margin-top: 0.75rem;
+    }
+
+    .section details summary .material-icons.expand {
+      transition: transform 0.2s ease;
+    }
+
+    .section details[open] summary .material-icons.expand {
+      transform: rotate(90deg);
     }
   `;
 
@@ -60,8 +100,14 @@ class PluginManager extends BaseEl {
             <span class="material-icons">extension</span>
             Installed Plugins
           </div>
-          <plugin-list category="core"></plugin-list>
-          <div class="divider"></div>
+          <details>
+            <summary>
+              <span class="material-icons expand">chevron_right</span>
+              <span class="material-icons">settings</span>
+              Core Plugins
+            </summary>
+            <plugin-list category="core"></plugin-list>
+          </details>
           <plugin-list category="installed"></plugin-list>
         </section>
 

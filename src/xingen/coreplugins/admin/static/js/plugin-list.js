@@ -13,7 +13,7 @@ export class PluginList extends PluginBase {
       .category-header {
         font-size: 1.1em;
         font-weight: 500;
-        margin: 1rem 0;
+        margin: 0.75rem 0;
         padding-bottom: 0.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         display: flex;
@@ -34,6 +34,7 @@ export class PluginList extends PluginBase {
 
       .search-wrapper {
         position: relative;
+        margin-bottom: 0.75rem;
       }
 
       .search-wrapper .material-icons {
@@ -45,16 +46,41 @@ export class PluginList extends PluginBase {
       }
 
       .search-box {
-        padding-left: 2.5rem;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
       }
 
       .no-plugins {
         text-align: center;
-        padding: 2rem;
+        padding: 1.5rem;
         color: rgba(255, 255, 255, 0.6);
         background: rgba(255, 255, 255, 0.03);
         border-radius: 6px;
         border: 1px dashed rgba(255, 255, 255, 0.1);
+      }
+
+      .action-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .action-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .action-button .material-icons {
+        font-size: 1.1rem;
       }
     `
   ];
@@ -104,11 +130,11 @@ export class PluginList extends PluginBase {
 
   renderPluginActions(plugin) {
     return html`
-      <button @click=${() => this.handleUpdate(plugin)}>
+      <button class="action-button" @click=${() => this.handleUpdate(plugin)}>
         <span class="material-icons">update</span>
         Update
       </button>
-      <button @click=${() => this.handleToggle(plugin)}>
+      <button class="action-button" @click=${() => this.handleToggle(plugin)}>
         <span class="material-icons">${plugin.enabled ? 'toggle_off' : 'toggle_on'}</span>
         ${plugin.enabled ? 'Disable' : 'Enable'}
       </button>
