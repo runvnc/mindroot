@@ -7,6 +7,7 @@ from lib.providers.commands import command, command_manager
 from lib.providers import services
 from lib.providers.commands import command_manager
 from lib.db.organize_models import organize_for_display
+from copy import deepcopy
 
 router = APIRouter()
 
@@ -110,14 +111,17 @@ async def get_commands():
     print("retrieving commands")
     #funcs = command_manager.get_functions()
     funcs = command_manager.get_detailed_functions()
+    print("funcs is")
+    print(funcs)
     # we need to clone and remove the 'implementation' key which can't be serialized
-    copy = funcs.copy()
-    for key in copy:
-        del copy[key]['implementation']
+    commands = deepcopy(funcs)
+    
+    for cmd_name, providers_list in commands.items():
+        for provider in providers_list:
+            if 'implementation' in provider:
+                del provider['implementation']
 
-    print("retrieved commands:")
-    print(copy)
-    return copy
+    return commands
 
 @router.get('/services', response_model=List[str])
 async def get_services():
