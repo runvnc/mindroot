@@ -17,7 +17,8 @@ async def say(text="", context=None):
     text - String. The text to say.
 
     Return: No return value. To continue without waiting for user reply, add more commands  
-            in the command array. Otherwise, the system will stop and wait for user reply!
+            in the command array. Otherwise, be sure to issue the task_complete or similar
+            command to indicate that the system should wait for the user reply.
 
     ## Example 1
    
@@ -25,7 +26,8 @@ async def say(text="", context=None):
 
     [
         { "say": { "text": "Hello, user." } },
-        { "say": { "text": "How can I help you today? } }
+        { "say": { "text": "How can I help you today? } },
+        { "task_complete": {} }
     ]
 
     (The system waits for the user reply)
@@ -33,13 +35,25 @@ async def say(text="", context=None):
 
     ## Example 2
 
-    (In this example we wait for the user reply before issuing more commands)
+    (In this example we issue a command and don't wait for the command result)
 
     [
-        { "say": { "text": "Sure, I can run that command" } }
+        { "say": { "text": "Sure, I can run that command" } },
+        { "execute_command": { "cmd": "update_db 3" } },
+        { "task_complete": {} }
     ]
 
-    (The system now waits for the user reply)
+    ## Example 3
+
+    (In this example we issue a command and wait for the result from the system)
+
+    [
+        { "say": { "text": "Sure, I can run that command" } },
+        { "execute_command": { "cmd": "ls -l" } }
+    ]
+
+
+    (The system now returns the command output)
     """
     print("say command called, text = ", text)
     await context.agent_output("new_message", {"content": text,
