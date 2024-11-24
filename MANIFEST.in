@@ -13,3 +13,6 @@ recursive-include src/xingen/coreplugins/admin/templates *
 recursive-include src/xingen/coreplugins/admin/static *
 recursive-include src/xingen/coreplugins/index/static *
 recursive-include src/xingen/coreplugins/index/templates *
+recursive-include src/xingen/coreplugins/home/static *
+recursive-include src/xingen/coreplugins/home/templates *
+
