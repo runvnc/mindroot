@@ -19,6 +19,7 @@ async def say(text="", context=None):
     Return: No return value. To continue without waiting for user reply, add more commands  
             in the command array. Otherwise, be sure to issue the task_complete or similar
             command to indicate that the system should wait for the user reply.
+            If you need the result of another command, do not end with task_complete.
 
     ## Example 1
    
