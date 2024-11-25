@@ -133,7 +133,18 @@ async def load(app=None):
                 # but if there is and we get an importerror, then we need to report that
                 # as an error
                 # so to detect if the file exists we need to import os
-                if os.path.exists(f"{plugin_path}/router.py"):
+                plugin_dir = get_plugin_path(plugin_name)
+                if not plugin_dir:
+                    return
+                    
+                dir_name = os.path.basename(plugin_dir)
+                
+                if category != 'core': 
+                    router_path = os.path.join(plugin_dir, 'src', dir_name, 'router.py')
+                else:
+                    router_path = os.path.join(plugin_dir, 'router.py')
+
+                if os.path.exists(router_path):
                     router_module = importlib.import_module(f"{plugin_path}.router")
                     app.include_router(router_module.router)
                     print(termcolor.colored(
@@ -141,9 +152,9 @@ async def load(app=None):
                         'yellow'
                     ))
                 else:
-                    print(f"No router found for plugin: {plugin_name}")
+                    print(f"No router found for plugin: {plugin_name} at path {plugin_path}/router.py")
 
-            except ImportError as e
+            except ImportError as e:
                 trace = traceback.format_exc()
                 print(termcolor.colored(
                     f"Failed to load router for plugin: {plugin_name}\n{str(e)}\n{trace}",'red'))
