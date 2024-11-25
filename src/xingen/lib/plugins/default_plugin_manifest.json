@@ -1,0 +1,48 @@
+{
+  "plugins": {
+    "core": {
+      "admin": {
+        "enabled": true,
+        "source": "core"
+      },
+      "index": {
+        "enabled": true,
+        "source": "core"
+      },
+      "chat": {
+        "enabled": true,
+        "source": "core"
+      },
+      "agent": {
+        "enabled": true,
+        "source": "core"
+      },
+      "jwt_auth": {
+        "enabled": true,
+        "source": "core"
+      },
+      "home": {
+        "enabled": true,
+        "source": "core"
+      },
+      "login": {
+        "enabled": false,
+        "source": "core"
+      },
+      "persona": {
+        "enabled": true,
+        "source": "core"
+      },
+      "startup": {
+        "enabled": true,
+        "source": "core"
+      },
+      "events": {
+        "enabled": true,
+        "source": "core"
+      }
+    },
+    "installed": {
+    }
+  }
+}

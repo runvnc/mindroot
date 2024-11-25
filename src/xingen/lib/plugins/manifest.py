@@ -57,21 +57,11 @@ def update_plugin_manifest(plugin_name, source, source_path, remote_source=None,
 
 def create_default_plugin_manifest():
     """Create a new default manifest file."""
-    manifest = {
-        'plugins': {
-            'core': {
-                'chat': {'enabled': True, 'source': 'core'},
-                'agent': {'enabled': True, 'source': 'core'},
-                'admin': {'enabled': True, 'source': 'core'},
-                'index': {'enabled': True, 'source': 'core'}
-            },
-            'installed': {}
-        },
-        'indices': {
-            'installed': {}
-        }
-    }
-    save_plugin_manifest(manifest)
+    # read from default_plugin_manifest.json in same dir as this file
+    default_manifest_path = os.path.join(os.path.dirname(__file__), 'default_plugin_manifest.json')
+    with open(default_manifest_path, 'r') as f:
+        default_manifest = json.load(f)
+    save_plugin_manifest(default_manifest)
 
 def toggle_plugin_state(plugin_name, enabled):
     """Toggle a plugin's enabled state.
