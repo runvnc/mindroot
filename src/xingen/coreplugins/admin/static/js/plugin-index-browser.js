@@ -105,14 +105,27 @@ export class PluginIndexBrowser extends PluginBase {
   }
 
   async handleInstall(plugin) {
-    try {
-      await this.apiCall('/plugin-manager/install-local-plugin', 'POST', {
-        plugin: plugin.name
-      });
-      // Dispatch event for parent components to refresh their lists
-      this.dispatch('plugin-installed', { plugin });
-    } catch (error) {
-      alert(`Failed to install plugin ${plugin.name}: ${error.message}`);
+    if (plugin.source === 'github') {
+      try {
+        console.log('Installing plugin from GitHub:', {plugin})
+        await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
+          plugin: plugin.name,
+          url: plugin.source_path
+        });
+        alert('Plugin installed successfully from GitHub');
+      } catch (error) {
+        alert(`Failed to install plugin from GitHub: ${error.message}`);
+      }
+    } else {
+      try {
+        await this.apiCall('/plugin-manager/install-local-plugin', 'POST', {
+          plugin: plugin.name
+        });
+        // Dispatch event for parent components to refresh their lists
+        this.dispatch('plugin-installed', { plugin });
+      } catch (error) {
+        alert(`Failed to install plugin ${plugin.name}: ${error.message}`);
+      }
     }
   }
 

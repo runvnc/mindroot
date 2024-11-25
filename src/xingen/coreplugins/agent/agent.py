@@ -19,6 +19,9 @@ import pytz
 import traceback
 from lib.logging.logfiles import logger
 
+import .init_models
+
+
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
 

@@ -25,7 +25,8 @@ def download_github_files(repo_path, tag=None):
     repo = repo_path.split("/")[1]
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, 'repo.zip')
-    
+
+    print(f"Github install: Downloading {download_url} to {zip_path}")
     try:
         response = requests.get(download_url)
         response.raise_for_status()
