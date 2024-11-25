@@ -35,7 +35,8 @@ dependencies = [
     "pydantic",
     "setuptools",
     "requests",
-    "aiohttp"
+    "aiohttp", # now ad python image library
+    "Pillow"
 ]
 
 
