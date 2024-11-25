@@ -835,8 +835,76 @@ chat-message:first-of-type .outer-msg.without-avatar {
   display: flex;
 }
 
-td {
-  padding: 5px;
-  border: 1px solid #333;
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1a1a1a;
 }
+
+thead tr {
+    background-color: #2c5282;  /* Nice deep blue header */
+    color: #ffffff;
+    text-align: left;
+    font-weight: 600;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+tbody tr {
+    border-bottom: 1px solid #2d2d2d;
+    transition: all 0.2s ease;
+}
+
+/* Zebra striping for rows */
+tbody tr:nth-of-type(even) {
+    background-color: #242424;
+}
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #2c5282;
+}
+
+/* Hover effect */
+tbody tr:hover {
+    background-color: #2d3748;
+    color: #ffffff;
+    transform: scale(1.002);
+}
+
+/* Optional: Add some subtle animation for sorting/filtering */
+tbody tr {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Optional: Make it responsive */
+@media screen and (max-width: 600px) {
+    table {
+        font-size: 0.8em;
+    }
+    
+    th, td {
+        padding: 8px 10px;
+    }
+}
+
 
