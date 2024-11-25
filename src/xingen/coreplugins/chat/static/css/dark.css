@@ -834,3 +834,9 @@ chat-message:first-of-type .outer-msg.without-avatar {
 .preview-thumbnail:hover .remove-image {
   display: flex;
 }
+
+td {
+  padding: 5px;
+  border: 1px solid #333;
+}
+
