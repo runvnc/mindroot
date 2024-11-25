@@ -46,6 +46,15 @@ async def list_indices():
     """List all available indices"""
     try:
         indices = []
+        #if there are no indices, copy the default.json file from the SCRIPT dir to the indices folder
+        if not any(INDEX_DIR.glob('*.json')):
+            this_script_path = Path(__file__).parent
+            default_index_path = this_script_path / 'default.json'
+        with open(default_index_path, 'r') as f:
+            default_index_data = json.load(f)
+            with open(INDEX_DIR / 'default.json', 'w') as f:
+                json.dump(default_index_data, f, indent=2)
+
         for file in INDEX_DIR.glob('*.json'):
             with open(file, 'r') as f:
                 index_data = json.load(f)

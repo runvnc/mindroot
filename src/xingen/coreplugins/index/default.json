@@ -1,0 +1,56 @@
+{
+  "name": "default",
+  "description": "Default collection of commonly used plugins and agents",
+  "version": "1.0.0",
+  "url": "https://github.com/runvnc/xingen-index-default",
+  "trusted": true,
+  "created_at": "2024-02-23T10:00:00Z",
+  "plugins": [
+    {
+      "name": "Simple Google search",
+      "version": "1.0.0",
+      "description": "Simple Google search functionality",
+      "source": "github",
+      "github_url": "runvnc/ah_google",
+      "commands": ["google", "fetch_webpage"],
+      "services": [],
+      "dependencies": []
+    },
+    {
+      "name": "Think (Chain-of-Thought)",
+      "version": "0.0.1",
+      "description": "Chain of thought reasoning capability",
+      "source": "local",
+      "source_path": "/xfiles/plugins_ah/ah_think",
+      "commands": ["think"],
+      "services": [],
+      "dependencies": []
+    },
+    {
+      "name": "Look at PDF/Image",
+      "version": "0.0.1",
+      "description": "PDF and image examination tools",
+      "source": "local",
+      "source_path": "/xfiles/plugins_ah/ah_look_at",
+      "commands": ["examine_pdf", "examine_image"],
+      "services": [],
+      "dependencies": []
+    }
+  ],
+  "agents": [
+    {
+      "name": "ResearchAssistant",
+      "version": "1.0.0",
+      "description": "Research assistant with web search and document analysis capabilities",
+      "required_commands": ["google", "fetch_webpage", "think", "examine_pdf", "examine_image"],
+      "required_services": []
+    },
+    {
+      "name": "DocumentAnalyst",
+      "version": "1.0.0",
+      "description": "Specialized in analyzing documents and images",
+      "required_commands": ["think", "examine_pdf", "examine_image"],
+      "required_services": []
+    }
+  ]
+}
