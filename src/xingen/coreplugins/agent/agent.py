@@ -19,7 +19,7 @@ import pytz
 import traceback
 from lib.logging.logfiles import logger
 
-import .init_models
+from .init_models import *
 
 
 error_result = """

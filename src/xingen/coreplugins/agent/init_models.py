@@ -8,19 +8,14 @@ def init_models_and_providers():
     import json
     from pathlib import Path
     script_path = Path(__file__).parent
-    models_path = Path("data/models")
-    models_file = models_path / "models.json"
-    providers_file = models_path / "providers.json"
+    models_path = Path("data")
     if not models_path.exists():
         os.mkdir(models_path)
-    if not models_file.exists():
-        shutil.copy(script_path / "models.default.json", models_file)
-    if not providers_file.exists():
-        shutil.copy(script_path / "providers.default.json", providers_file)
-    with open(models_file) as f:
-        models = json.load(f)
-    with open(providers_file) as f:
-        providers = json.load(f)
-    return models, providers
+ 
+    for file in script_path.glob("*.default.json"):
+        dest = models_path / file.name.replace(".default.json", ".json")
+        if not dest.exists():
+            shutil.copy(file, dest)
+
 
 init_models_and_providers()
