@@ -128,15 +128,25 @@ async def load(app=None):
 
             # Load router if exists
             try:
-                router_module = importlib.import_module(f"{plugin_path}.router")
-                app.include_router(router_module.router)
-                print(termcolor.colored(
-                    f"Included router for plugin: {plugin_name}",
-                    'yellow'
-                ))
-            except ImportError:
-                print(f"No router found for plugin: {plugin_name}")
+                # we need to see if ther router.py actually exists
+                # because if not this isn't an error, it just means there is no router
+                # but if there is and we get an importerror, then we need to report that
+                # as an error
+                # so to detect if the file exists we need to import os
+                if os.path.exists(f"{plugin_path}/router.py"):
+                    router_module = importlib.import_module(f"{plugin_path}.router")
+                    app.include_router(router_module.router)
+                    print(termcolor.colored(
+                        f"Included router for plugin: {plugin_name}",
+                        'yellow'
+                    ))
+                else:
+                    print(f"No router found for plugin: {plugin_name}")
 
+            except ImportError as e
+                trace = traceback.format_exc()
+                print(termcolor.colored(
+                    f"Failed to load router for plugin: {plugin_name}\n{str(e)}\n{trace}",'red'))
             # Mount static files
             mount_static_files(app, plugin_name, category)
 
