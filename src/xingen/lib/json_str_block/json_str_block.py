@@ -70,7 +70,7 @@ def replace_raw_blocks(jsonish):
                 ensure_json(final_string)
                 return final_string
             except Exception as e:
-                return json.dumps(final_string)
+                return final_string
     return final_string
 
 

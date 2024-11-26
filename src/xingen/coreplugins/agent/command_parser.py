@@ -31,17 +31,21 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return complete_commands, None
     except Exception:
         try:
+            print("Trying merge_json_arrays in parse_streaming_commands")
             complete_commands = merge_json_arrays(raw_replaced)
-            return complete_commands, None
+            if len(complete_commands) > 0:
+                return complete_commands, None
         except Exception:
             pass
         try:
             raw_replaced = escape_for_json(buffer)
             complete_commands = json.loads(raw_replaced)
+            print("Found complete command from escape_for_json")
             return complete_commands, None
         except Exception:
             pass
         try:
+            print("trying merge_json_arrays with partial=True")
             complete_commands = merge_json_arrays(raw_replaced, partial=True)
             num_commands = len(complete_commands)
             if num_commands > 1:
@@ -49,6 +53,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             else:
                 complete_commands = []
             current_partial = complete_commands[-1]
+            print("Found partial command from merge_json_arrays")
             return complete_commands, current_partial
         except Exception:
             pass
