@@ -1,6 +1,6 @@
 import json
 import re
-
+from partial_json_parser import loads as partial_json_loads
 
 test="""
 [{"say": {"text": "Wow, that's actually a really fascinating project - especially from my perspective as an AI agent!"}}][{"say": {"text": "Building a framework like that is definitely ambitious - there are so many moving parts to consider."}}][{"say": {"text": "Given how you're feeling right now, would you like to talk through just one small piece you could work on? Maybe something simple like documenting a single feature or testing one small component?"}}][{"say": {"text": "Sometimes with big projects, doing even a tiny bit helps keep the momentum going."}}]
@@ -10,28 +10,54 @@ test2="""
 [{"say": {"text": "Wow, that's actually a really fascinating project - especially from my perspective as an AI agent!"}}], [{"say": {"text": "Building a framework like that is definitely ambitious - there are so many moving parts to consider."}}][{"say": {"text": "Given how you're feeling right now, would you like to talk through just one small piece you could work on? Maybe something simple like documenting a single feature or testing one small component?"}}][{"say": {"text": "Sometimes with big projects, doing even a tiny bit helps keep the momentum going."}}]
 """
 
+test3="""
+[{"think": {"extensive_chain_of_thoughts": "Let me review each route file for missing imports:\n\n1. upload_routes.py:\n- Needs traceback for error handling\n\n2. processing_routes.py:\n- Needs datetime for timestamp handling\n- Needs to import load_financial_assumptions\n\n3. results_routes.py:\n- Needs datetime for current_datetime usage\n\n4. common.py looks complete\n\nLet me update these files one at a time with the missing imports."}}], {"write": {"fname": "/xfiles/maverickcre/plugins/cre_b
+"""
 
-def merge_json_arrays(data):
+def merge_json_arrays(data, partial=False):
+    if partial:
+        load_json = partial_json_loads
+    else:
+        load_json = json.loads
     data = data.strip()
     parts = re.split(r"\]\s*,*\s*\[", data)
+    if len(parts) == 1 and parts[0] == data:
+        parts = re.split(r"\]\s*,*\s*\{", data)
     arrays = []
     for part in parts:
+        if part.startswith("{"):
+            part = "[" + part
         if not part.startswith("["):
             part = "[" + part
-        if not part.endswith("]"):
-            part += "]"
         if part.endswith(","):
             part = part[:-1].strip()
+        if part.endswith('}') and not part.endswith("]"):
+            part += "]"
+        try:
+            arrays.append(load_json(part))
+        except Exception as e:
+            try:
+                #replace \n with \\n
+                part = part.replace("\n", "\\n")
+                # if ends with \\n, remove it
+                if part.endswith("\\n"):
+                    part = part[:-2]
+                part = part.strip()
+                if part.startswith('["'):
+                    part = "[{" + part[1:]
+                arrays.append(load_json(part))
 
-        arrays.append(json.loads(part))
-    
+            except Exception as e:
+                print(e)
+                print('Error parsing: ', part)
+
     return sum(arrays, [])
 
 
+ret = merge_json_arrays(test3)
+print("successful parsing")
+for item in ret:
+    print('-----------------------------------')
+    print(item)
+    print('-----------------------------------')
 
-#ret = merge_json_arrays(test)
-#for item in ret:
-#    print('-----------------------------------')
-#    print(item)
-
-#print(merge_json_arrays(test2))

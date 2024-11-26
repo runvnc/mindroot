@@ -31,18 +31,28 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         return complete_commands, None
     except Exception:
         try:
-            print("Failed to parse:\n",raw_replaced)
             complete_commands = merge_json_arrays(raw_replaced)
             return complete_commands, None
         except Exception:
             pass
-
         try:
             raw_replaced = escape_for_json(buffer)
             complete_commands = json.loads(raw_replaced)
             return complete_commands, None
         except Exception:
             pass
+        try:
+            complete_commands = merge_json_arrays(raw_replaced, partial=True)
+            num_commands = len(complete_commands)
+            if num_commands > 1:
+                complete_commands = complete_commands[:num_commands-1]
+            else:
+                complete_commands = []
+            current_partial = complete_commands[-1]
+            return complete_commands, current_partial
+        except Exception:
+            pass
+
         try:
             complete_commands = json_loads(raw_replaced)
             num_commands = len(complete_commands)
