@@ -3,6 +3,7 @@ import re
 from typing import List, Dict, Tuple, Any
 from partial_json_parser import loads, ensure_json
 from lib.json_str_block import replace_raw_blocks
+from lib.utils.parse_json_newlines_partial import json_loads
 from lib.utils.merge_arrays import merge_json_arrays
 from lib.json_escape import escape_for_json
 import sys
@@ -35,8 +36,13 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             return complete_commands, None
         except Exception:
             pass
+
         try:
-            complete_commands = loads(raw_replaced) # escape_for_json
+            raw_replaced = escape_for_json(buffer)
+            complete_commands = json.loads(raw_replaced)
+            return complete_commands, None
+        try:
+            complete_commands = json_loads(buffer)
             num_commands = len(complete_commands)
             if num_commands > 1:
                 complete_commands = complete_commands[:num_commands-1]

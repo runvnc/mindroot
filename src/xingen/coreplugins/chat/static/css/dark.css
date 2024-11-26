@@ -1,5 +1,5 @@
 html, body {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   padding: 5px 5px;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
@@ -23,7 +23,7 @@ p {
 }
 
 input::placeholder, textarea::placeholder {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 
@@ -156,7 +156,7 @@ chat-message:first-of-type .outer-msg.without-avatar {
 }
 
 textarea, .text_lg {
-  background-color: #050510 !important;
+  background-color: #101020 !important;
   color: #f0f0f0 !important;
   width: 90%;
   min-height: 4em;
@@ -183,7 +183,7 @@ textarea, .text_lg {
 }
 
 input, .text_inp {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border-radius: 15px;
   padding: 10px 20px;
@@ -209,7 +209,7 @@ button:hover {
 /* Firefox */
 * {
   scrollbar-width: auto
-  scrollbar-color: #333 #050510;
+  scrollbar-color: #333 #101020;
 }
 
 /* Chrome, Edge, and Safari */
@@ -218,13 +218,13 @@ button:hover {
 }
 
 *::-webkit-scrollbar-track {
-  background: #050510;
+  background: #101020;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #333;
   border-radius: 10px;
-  border: 2px solid #050510;
+  border: 2px solid #101020;
 }
 
 button:hover {
@@ -233,7 +233,7 @@ button:hover {
 
 /* Dropdown styles */
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -247,7 +247,7 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 
@@ -436,7 +436,7 @@ select option, .dropdown option {
 
 /* Dropdown styles */
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -450,11 +450,11 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -468,11 +468,11 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -486,11 +486,11 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -504,7 +504,7 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 
@@ -551,7 +551,7 @@ select option, .dropdown option {
 
 /* Dropdown styles */
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -565,11 +565,11 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -583,7 +583,7 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 
@@ -593,13 +593,13 @@ select option, .dropdown option {
 }
 
 *::-webkit-scrollbar-track {
-  background: #050510;
+  background: #101020;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #333;
   border-radius: 10px;
-  border: 2px solid #050510;
+  border: 2px solid #101020;
 }
 
 button:hover {
@@ -608,7 +608,7 @@ button:hover {
 
 /* Dropdown styles */
 select, .dropdown {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
   border: 1px solid #333;
   border-radius: 5px;
@@ -622,7 +622,7 @@ select:hover, .dropdown:hover {
 }
 
 select option, .dropdown option {
-  background-color: #050510;
+  background-color: #101020;
   color: #f0f0f0;
 }
 
@@ -632,13 +632,13 @@ select option, .dropdown option {
 }
 
 *::-webkit-scrollbar-track {
-  background: #050510;
+  background: #101020;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #333;
   border-radius: 10px;
-  border: 2px solid #050510;
+  border: 2px solid #101020;
 }
 
 button:hover {
@@ -650,7 +650,7 @@ button:hover {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #333 #050510;
+  scrollbar-color: #333 #101020;
 }
 
 /* Chrome, Edge, and Safari */
@@ -659,13 +659,13 @@ button:hover {
 }
 
 *::-webkit-scrollbar-track {
-  background: #050510;
+  background: #101020;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #333;
   border-radius: 10px;
-  border: 2px solid #050510;
+  border: 2px solid #101020;
 }
 
 button:hover {
@@ -677,7 +677,7 @@ button:hover {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #333 #050510;
+  scrollbar-color: #333 #101020;
 }
 
 /* Chrome, Edge, and Safari */
@@ -686,13 +686,13 @@ button:hover {
 }
 
 *::-webkit-scrollbar-track {
-  background: #050510;
+  background: #101020;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: #333;
   border-radius: 10px;
-  border: 2px solid #050510;
+  border: 2px solid #101020;
 }
 
 button:hover {
@@ -793,7 +793,7 @@ chat-message:first-of-type .outer-msg.without-avatar {
   min-height: 0;
   max-height: 100px;
   overflow-y: auto;
-  background-color: #050510;
+  background-color: #101020;
   border: 1px solid #333;
   border-radius: 15px;
   margin-bottom: 8px;

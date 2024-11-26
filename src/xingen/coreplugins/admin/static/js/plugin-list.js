@@ -119,7 +119,8 @@ export class PluginList extends PluginBase {
 
   async handleUpdate(plugin) {
     try {
-      await this.apiCall('/plugin-manager/update-plugin', 'POST', {
+      //await this.apiCall('/plugin-manager/update-plugin', 'POST', {
+      await this.apiCall('/plugin-manager/install-local-plugin', 'POST', {
         plugin: plugin.name
       });
       await this.fetchPlugins();
