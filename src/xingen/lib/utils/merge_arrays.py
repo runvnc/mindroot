@@ -52,7 +52,7 @@ def merge_json_arrays(data, partial=False):
                 print("Error parsing part: ", part)
                 print(e)
 
-    print("returning sum(arrays, [])")
+    print("returning sum(arrays, []):", sum(arrays, []))
     return sum(arrays, [])
 
 

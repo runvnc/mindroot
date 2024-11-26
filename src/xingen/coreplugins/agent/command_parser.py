@@ -7,6 +7,8 @@ from lib.utils.parse_json_newlines_partial import json_loads
 from lib.utils.merge_arrays import merge_json_arrays
 from lib.json_escape import escape_for_json
 import sys
+import traceback
+
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
@@ -46,16 +48,21 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             pass
         try:
             print("trying merge_json_arrays with partial=True")
-            complete_commands = merge_json_arrays(raw_replaced, partial=True)
+            complete_commands = merge_json_arrays(buffer, partial=True)
             num_commands = len(complete_commands)
             if num_commands > 1:
                 complete_commands = complete_commands[:num_commands-1]
+                current_partial = complete_commands[-1]
             else:
                 complete_commands = []
-            current_partial = complete_commands[-1]
+                current_partial = complete_commands[-1]
+            print("complete_commands before assigning current partial:", complete_commands)
             print("Found partial command from merge_json_arrays")
             return complete_commands, current_partial
-        except Exception:
+        except Exception as e:
+            print("Failed to find partial command from merge_json_arrays")
+            print(e)
+            traceback.print_exc()
             pass
 
         try:
@@ -63,9 +70,9 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             num_commands = len(complete_commands)
             if num_commands > 1:
                 complete_commands = complete_commands[:num_commands-1]
+                current_partial = complete_commands[-1]
             else:
-                complete_commands = []
-            current_partial = complete_commands[-1]
+                current_partial = complete_commands[-1]
             return complete_commands, current_partial
         except Exception:
             pass
