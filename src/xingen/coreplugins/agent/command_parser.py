@@ -41,6 +41,19 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             raw_replaced = escape_for_json(buffer)
             complete_commands = json.loads(raw_replaced)
             return complete_commands, None
+        except Exception:
+            pass
+        try:
+            complete_commands = json_loads(raw_replaced)
+            num_commands = len(complete_commands)
+            if num_commands > 1:
+                complete_commands = complete_commands[:num_commands-1]
+            else:
+                complete_commands = []
+            current_partial = complete_commands[-1]
+            return complete_commands, current_partial
+        except Exception:
+            pass
         try:
             complete_commands = json_loads(buffer)
             num_commands = len(complete_commands)
@@ -49,10 +62,6 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             else:
                 complete_commands = []
             current_partial = complete_commands[-1]
-            # print in cyan, successful parsing, show parsed command
-            print("\033[96m", end="")
-            print(f"Successfully parsed command: {complete_commands}")
-            print("\033[0m", end="")
             return complete_commands, current_partial
         except Exception:
             # if ends in ']', then may be end of command list

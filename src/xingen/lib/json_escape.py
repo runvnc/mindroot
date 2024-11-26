@@ -1,6 +1,6 @@
 def escape_for_json(s: str) -> str:
     """
-    Escape a string to make it safe for use as a JSON property value.
+    Escape a string to make it safe for use as a JSON property value or JSON string.
     
     Args:
         s (str): The input string to escape
@@ -29,5 +29,9 @@ def escape_for_json(s: str) -> str:
     result = ''
     for char in s:
         result += escapes.get(char, char)
-        
+
+    # remove any trailing \\n
+    if result[-2:] == '\\n':
+        result = result[:-2]
     return result
+
