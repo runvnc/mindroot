@@ -54,8 +54,8 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 complete_commands = complete_commands[:num_commands-1]
                 current_partial = complete_commands[-1]
             else:
-                complete_commands = []
                 current_partial = complete_commands[-1]
+                complete_commands = []
             print("complete_commands before assigning current partial:", complete_commands)
             print("Found partial command from merge_json_arrays")
             return complete_commands, current_partial
@@ -73,6 +73,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 current_partial = complete_commands[-1]
             else:
                 current_partial = complete_commands[-1]
+                complete_commands = []
             return complete_commands, current_partial
         except Exception:
             pass
