@@ -55,7 +55,7 @@ def replace_raw_blocks(jsonish):
     final_string = re.sub(r'(?<!")""(?!")', '"', final_string)
     # check if parsable as partial json
     try:
-        print("should be json: \n", final_string)
+        #print("should be json: \n", final_string)
         ensure_json(final_string)
     except Exception as e:
         escaped_nl_in_fenced = re.sub(r'```[\s\S]*?```',
