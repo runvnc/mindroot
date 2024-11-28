@@ -275,6 +275,19 @@ class Chat extends BaseEl {
     console.log('Spinner set to true:', this.messages[this.messages.length - 1]);
     console.log(event);
     this.requestUpdate();
+
+
+    console.log("command result (actually running command)", event)
+    const data = JSON.parse(event.data);
+    const handler = commandHandlers[data.command];
+    if (handler) {
+      console.log('handler:', handler)
+      handler(data);
+    } else {
+      console.warn('No handler for command:', data.command)
+    }
+    this.requestUpdate();
+
   }
 
   _cmdResult(event) {
