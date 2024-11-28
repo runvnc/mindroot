@@ -113,12 +113,17 @@ async def load_plugin_templates(page_name, plugins):
             if not plugin_path:
                 print(f'Warning: Could not find path for plugin: {plugin}')
                 continue
-                
+ 
+            # plugin might be name rather than directory
+            # get the last part of the path to check also
+            #
+            last_part = plugin_path.split('/')[-1]
             # Check inject templates
             inject_paths = [
                 os.path.join(plugin_path, 'inject', f'{page_name}.jinja2'),
                 os.path.join(plugin_path, 'src', plugin, 'inject', f'{page_name}.jinja2'),
-                os.path.join(plugin_path, 'src', 'inject', f'{page_name}.jinja2')
+                os.path.join(plugin_path, 'src', 'inject', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', last_part, 'inject', f'{page_name}.jinja2'),
             ]
             
             for path in inject_paths:
@@ -271,4 +276,10 @@ async def render(page_name, context):
         str: Rendered HTML
     """
     plugins = list_enabled(False)
+    # print with white background red text
+    # report details including page name and plugins enabled
+    print("\033[101m" + f"Rendering page {page_name} with plugins enabled:")
+    print(plugins)
+    # reset color
+    print("\033[0m")
     return await render_combined_template(page_name, plugins, context)
