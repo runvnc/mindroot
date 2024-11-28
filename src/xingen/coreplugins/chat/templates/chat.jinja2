@@ -57,6 +57,9 @@
       {% endblock %}
     </div>
 
+    {% block insert %}
+    {% endblock %}
+
     {% block content %}
     <div class="main">
         <chat-ai sessionid="{{ log_id }}" agent_name="{{ agent_name }}"></chat-ai>

@@ -26,7 +26,10 @@ def setup_template_environment():
             inject_dir = os.path.join(plugin_path, 'inject')
             if os.path.exists(inject_dir):
                 template_paths.add(inject_dir)
-                print(f"Added inject path: {inject_dir}")
+                # change color to green background, white text
+                print("\033[92m" + f"Added inject path: {inject_dir}")
+                # reset color
+                print("\033[0m")
 
             # Add parent directories to handle absolute paths
             template_paths.add(os.path.dirname(plugin_path))
@@ -224,7 +227,6 @@ async def render_combined_template(page_name, plugins, context):
         if all_content[block]['override']:
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_override|safe }}}}\n{{% endblock %}}\n'
         else:
-            print("injecting")
             combined_template_str += f'{{% block {block} %}}\n  {{{{ super() }}}}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
     combined_child_template = env.from_string(combined_template_str)
@@ -234,6 +236,12 @@ async def render_combined_template(page_name, plugins, context):
 
     for block, content in all_content.items():
         if 'inject' in content and isinstance(content['inject'], list):
+            # print with a yellow background, black text
+            # report details including page name and content injected
+            print("\033[103m" + f"Injecting into block {block} on page {page_name} with content:")
+            print(content['inject'])
+            # reset color
+            print("\033[0m")
             combined_inject[f'combined_{block}_inject'] = ''.join(content['inject'])
         else:
             combined_inject[f'combined_{block}_inject'] = ''
