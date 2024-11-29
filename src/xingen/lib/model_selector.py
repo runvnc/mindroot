@@ -1,5 +1,5 @@
 import asyncio
-from ..registry import data_access
+from lib.db.registry import data_access
 
 async def select_models(provider=None, model_id=None, local=True, uncensored=False, service_or_command=None, flags=[]):
     type = service_or_command
