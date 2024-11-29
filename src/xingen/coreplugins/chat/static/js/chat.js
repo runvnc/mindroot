@@ -248,7 +248,18 @@ class Chat extends BaseEl {
         this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
       }
     } else {
-      console.log('data.params', data.params)
+      console.log('partial. data.params', data.params)
+      const handler = commandHandlers[data.command];
+      if (handler) {
+        data.event = 'partial'
+        console.log('handler:', handler)
+        handler(data);
+        this.requestUpdate();
+      } else {
+        console.warn('No handler for command:', data.command)
+      }
+
+
       if (typeof(data.params) == 'array') {
         data.params = {"val": data.params}
       } else if (typeof(data.params) == 'string') {
@@ -279,6 +290,7 @@ class Chat extends BaseEl {
 
     console.log("command result (actually running command)", event)
     const data = JSON.parse(event.data);
+    data.event = 'running'
     const handler = commandHandlers[data.command];
     if (handler) {
       console.log('handler:', handler)
@@ -294,6 +306,7 @@ class Chat extends BaseEl {
     console.log("command result", event)
     const data = JSON.parse(event.data);
     const handler = commandHandlers[data.command];
+    data.event = 'result'
     if (handler) {
       handler(data);
     }
