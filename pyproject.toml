@@ -36,7 +36,8 @@ dependencies = [
     "setuptools",
     "requests",
     "aiohttp", # now ad python image library
-    "Pillow"
+    "Pillow",
+    "psutil"
 ]
 
 

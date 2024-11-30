@@ -32,4 +32,5 @@ router.include_router(persona_router)
 from .agent_router import router as agent_router
 router.include_router(agent_router)
 
-
+from .server_router import router as server_router
+router.include_router(server_router, prefix="/admin/server", tags=["server"])

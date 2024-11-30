@@ -5,8 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+from .init_persona import *
 
-print("Loading person lite")
 
 @service()
 async def get_persona_data(persona_name, context=None):
