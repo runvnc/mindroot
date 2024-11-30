@@ -4,6 +4,7 @@ import os
 import psutil
 import subprocess
 import asyncio
+import tempfile
 
 router = APIRouter()
 
@@ -33,26 +34,46 @@ def spawn_restart():
         current_process = psutil.Process()
         original_cmd = current_process.cmdline()
         
-        # Script to wait briefly then restart using the same command
-        script = f"""
+        # Create a temporary script file instead of using -c
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write(f"""
+#!/usr/bin/env python3
+# Temporary restart script for xingen
 import time
 import subprocess
 import sys
+import os
 
 time.sleep(2)  # Wait for old server to fully shutdown
+
 try:
-    cmd = {original_cmd}
+    cmd = {original_cmd!r}
+    print("Restarting xingen with command:", cmd)
     subprocess.run(cmd, check=True)
-except subprocess.CalledProcessError:
+except Exception as e:
+    print(f"Error restarting xingen: {{e}}")
     sys.exit(1)
-"""
+finally:
+    # Clean up this temporary script
+    try:
+        os.unlink(__file__)
+    except:
+        pass
+""")
+        
+        script_path = f.name
+        # Make the script executable
+        os.chmod(script_path, 0o755)
+        
         # Start detached process that will survive parent's exit
         subprocess.Popen(
-            [sys.executable, '-c', script],
+            [sys.executable, script_path],
             start_new_session=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # Let's keep stdout/stderr for debugging
+            stdout=None,
+            stderr=None
         )
+        print(f"Debug - Spawned restart script: {script_path}")
         return True
     except Exception as e:
         print(f"Debug - Error in spawn_restart: {str(e)}")
