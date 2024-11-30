@@ -1,12 +1,10 @@
-# look for data/models/models.json and providers.json
-# if the directory does not exist, create it
-# if the files do not exist, copy from [script_path]/models.default.json and [script_path]/providers.default.json
+import os
+import shutil
+import json
+from pathlib import Path
+
 
 def init_models_and_providers():
-    import os
-    import shutil
-    import json
-    from pathlib import Path
     script_path = Path(__file__).parent
     models_path = Path("data")
     if not models_path.exists():
@@ -18,4 +16,14 @@ def init_models_and_providers():
             shutil.copy(file, dest)
 
 
+def init_agents():
+    script_path = Path(__file__).parent
+    assistant = script_path / "Assistant"
+    agents_path = Path("data/agents/local/")
+    if not agents_path.exists():
+        os.makedirs(agents_path)
+    if not (agents_path / "Assistant").exists():
+        shutil.copytree(assistant, agents_path / "Assistant")
+
 init_models_and_providers()
+init_agents()

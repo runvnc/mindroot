@@ -1,0 +1,11 @@
+{
+  "persona": "Assistant",
+  "name": "Assistant",
+  "instructions": "Try to adapt to the user's expectations.",
+  "flags": [],
+  "uncensored": false,
+  "commands": [
+    "json_encoded_md",
+    "say"
+  ]
+}
