@@ -64,30 +64,52 @@ class AgentForm extends BaseEl {
     }
 
     .commands-category {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      padding: 15px;
     }
 
     .commands-category h4 {
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       color: #f0f0f0;
-      font-size: 1rem;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
     }
 
     .commands-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
     }
 
     .command-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .tooltip {
+    .command-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .command-info {
+      flex: 1;
+      margin-right: 12px;
       position: relative;
-      display: inline-block;
+    }
+
+    .command-name {
+      color: #f0f0f0;
+      font-weight: 500;
     }
 
     .tooltip-text {
@@ -95,18 +117,20 @@ class AgentForm extends BaseEl {
       position: absolute;
       z-index: 1;
       bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      width: 200px;
       background-color: rgba(0, 0, 0, 0.9);
       color: #fff;
-      text-align: center;
-      padding: 5px 10px;
+      text-align: left;
+      padding: 8px 12px;
       border-radius: 6px;
       font-size: 0.9em;
-      white-space: nowrap;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .tooltip:hover .tooltip-text {
+    .command-info:hover .tooltip-text {
       visibility: visible;
     }
 
@@ -182,23 +206,25 @@ class AgentForm extends BaseEl {
     return grouped;
   }
 
-  handleInputChange(event) {
-    const { name, value, type, checked } = event.target;
-    const inputValue = type === 'checkbox' ? checked : value;
-    
-    if (name === 'commands') {
-      if (!Array.isArray(this.agent.commands)) {
-        this.agent.commands = [];
-      }
-      if (checked) {
-        this.agent.commands.push(value);
-      } else {
-        this.agent.commands = this.agent.commands.filter(command => command !== value);
-      }
-      this.agent = { ...this.agent };
-    } else {
-      this.agent = { ...this.agent, [name]: inputValue };
+  handleCommandToggle(commandName, checked) {
+    if (!Array.isArray(this.agent.commands)) {
+      this.agent.commands = [];
     }
+    
+    if (checked) {
+      if (!this.agent.commands.includes(commandName)) {
+        this.agent.commands.push(commandName);
+      }
+    } else {
+      this.agent.commands = this.agent.commands.filter(cmd => cmd !== commandName);
+    }
+    
+    this.agent = { ...this.agent };
+  }
+
+  handleInputChange(event) {
+    const { name, value } = event.target;
+    this.agent = { ...this.agent, [name]: value };
   }
 
   validateForm() {
@@ -267,18 +293,18 @@ class AgentForm extends BaseEl {
         <h4>${provider}</h4>
         <div class="commands-grid">
           ${commands.map(command => html`
-            <div class="command-item">
-              <input type="checkbox" 
-                     name="commands" 
-                     value="${command.name}" 
-                     .checked=${this.agent.commands?.includes(command.name)}
-                     @change=${this.handleInputChange} />
-              <div class="tooltip">
-                <span class="command-name">${command.name}</span>
+            <div class="command-item" @click=${() => 
+              this.handleCommandToggle(command.name, !this.agent.commands?.includes(command.name))}>
+              <div class="command-info">
+                <div class="command-name">${command.name}</div>
                 ${command.docstring ? html`
-                  <span class="tooltip-text">${command.docstring}</span>
+                  <div class="tooltip-text">${command.docstring}</div>
                 ` : ''}
               </div>
+              <toggle-switch 
+                .checked=${this.agent.commands?.includes(command.name) || false}
+                @toggle-change=${(e) => this.handleCommandToggle(command.name, e.detail.checked)}>
+              </toggle-switch>
             </div>
           `)}
         </div>
@@ -322,13 +348,7 @@ class AgentForm extends BaseEl {
             <toggle-switch 
               .checked=${this.agent.uncensored || false}
               @toggle-change=${(e) => {
-                this.handleInputChange({
-                  target: {
-                    name: 'uncensored',
-                    checked: e.detail.checked,
-                    type: 'checkbox'
-                  }
-                });
+                this.agent = { ...this.agent, uncensored: e.detail.checked };
               }}></toggle-switch>
           </label>
         </div>
