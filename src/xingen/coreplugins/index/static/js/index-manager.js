@@ -18,15 +18,16 @@ class IndexManager extends BaseEl {
     :host {
       display: block;
       width: 100%;
+      height: 100%;
     }
 
     .index-manager {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
       width: 100%;
       max-width: 1600px;
       margin: 0 auto;
+      height: calc(100vh - 100px);
     }
 
     .section {
@@ -36,8 +37,41 @@ class IndexManager extends BaseEl {
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       gap: 20px;
-      height: calc(100vh - 200px);
-      overflow: hidden;
+      height: 100%;
+      min-height: 0; /* Important for nested flex scrolling */
+    }
+
+    .index-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-height: 0; /* Important for nested flex scrolling */
+    }
+
+    .index-content > * {
+      flex-shrink: 0; /* Prevent children from shrinking */
+    }
+
+    /* Scrollbar styling */
+    .index-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .index-content::-webkit-scrollbar-track {
+      background: rgba(10, 10, 25, 0.95);
+    }
+
+    .index-content::-webkit-scrollbar-thumb {
+      background-color: #333;
+      border-radius: 10px;
+      border: 2px solid rgba(10, 10, 25, 0.95);
+    }
+
+    .index-content::-webkit-scrollbar-thumb:hover {
+      background-color: #444;
     }
   `;
 
