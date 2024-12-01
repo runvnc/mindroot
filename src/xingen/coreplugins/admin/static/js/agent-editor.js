@@ -8,7 +8,6 @@ import './github-import.js';
 class AgentEditor extends BaseEl {
   static properties = {
     agent: { type: Object },
-    scope: { type: String },
     name: { type: String },
     agents: { type: Array },
     newAgent: { type: Boolean },
@@ -54,17 +53,17 @@ class AgentEditor extends BaseEl {
     super();
     this.agent = {};
     this.agents = [];
-    this.scope = 'local';
     this.newAgent = false;
     this.loading = false;
     this.errorMessage = '';
     this.importStatus = '';
+    this.fetchAgents();
   }
 
   async fetchAgents() {
     try {
       this.loading = true;
-      const response = await fetch(`/agents/${this.scope}`);
+      const response = await fetch('/agents/local');
       if (!response.ok) throw new Error('Failed to fetch agents');
       this.agents = await response.json();
     } catch (error) {
@@ -72,11 +71,6 @@ class AgentEditor extends BaseEl {
     } finally {
       this.loading = false;
     }
-  }
-
-  handleScopeChange(e) {
-    this.scope = e.detail;
-    this.fetchAgents();
   }
 
   handleAgentSelected(e) {
@@ -127,21 +121,17 @@ class AgentEditor extends BaseEl {
 
         <agent-list
           .agents=${this.agents}
-          .scope=${this.scope}
           .selectedAgent=${this.agent}
-          @scope-changed=${this.handleScopeChange}
           @agent-selected=${this.handleAgentSelected}
           @new-agent=${this.handleNewAgent}>
         </agent-list>
 
         <indexed-agents
-          .scope=${this.scope}
           @agent-installed=${this.handleAgentInstalled}
           @error=${this.handleError}>
         </indexed-agents>
 
         <github-import
-          .scope=${this.scope}
           @agent-installed=${this.handleAgentInstalled}
           @error=${this.handleError}>
         </github-import>
@@ -149,7 +139,6 @@ class AgentEditor extends BaseEl {
         ${(this.newAgent || this.agent.name) ? html`
           <agent-form
             .agent=${this.agent}
-            .scope=${this.scope}
             .newAgent=${this.newAgent}
             @agent-saved=${this.handleAgentSaved}
             @error=${this.handleError}>

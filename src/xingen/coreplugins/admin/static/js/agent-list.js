@@ -4,7 +4,6 @@ import { BaseEl } from './base.js';
 class AgentList extends BaseEl {
   static properties = {
     agents: { type: Array },
-    scope: { type: String },
     selectedAgent: { type: Object }
   };
 
@@ -12,14 +11,6 @@ class AgentList extends BaseEl {
     :host {
       display: block;
       margin-bottom: 20px;
-    }
-
-    .scope-selector {
-      margin-bottom: 15px;
-    }
-
-    .scope-selector label {
-      margin-right: 15px;
     }
 
     .agent-selector {
@@ -61,16 +52,10 @@ class AgentList extends BaseEl {
     }
   `;
 
-  handleScopeChange(event) {
-    this.dispatchEvent(new CustomEvent('scope-changed', {
-      detail: event.target.value
-    }));
-  }
-
   async handleAgentChange(event) {
     if (event.target.value) {
       try {
-        const response = await fetch(`/agents/${this.scope}/${event.target.value}`);
+        const response = await fetch(`/agents/local/${event.target.value}`);
         if (!response.ok) throw new Error('Failed to fetch agent');
         const agent = await response.json();
         this.dispatchEvent(new CustomEvent('agent-selected', {
@@ -90,19 +75,6 @@ class AgentList extends BaseEl {
 
   _render() {
     return html`
-      <div class="scope-selector">
-        <label>
-          <input type="radio" name="scope" value="local" 
-                 .checked=${this.scope === 'local'} 
-                 @change=${this.handleScopeChange} /> Local
-        </label>
-        <label>
-          <input type="radio" name="scope" value="shared" 
-                 .checked=${this.scope === 'shared'} 
-                 @change=${this.handleScopeChange} /> Shared
-        </label>
-      </div>
-
       <div class="agent-selector">
         <select @change=${this.handleAgentChange} 
                 .value=${this.selectedAgent?.name || ''}>

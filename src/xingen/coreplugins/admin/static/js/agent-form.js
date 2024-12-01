@@ -5,7 +5,6 @@ import './toggle-switch.js';
 class AgentForm extends BaseEl {
   static properties = {
     agent: { type: Object },
-    scope: { type: String },
     newAgent: { type: Boolean },
     loading: { type: Boolean },
     personas: { type: Array },
@@ -143,7 +142,7 @@ class AgentForm extends BaseEl {
 
   async fetchPersonas() {
     try {
-      const response = await fetch(`/personas/${this.scope}`);
+      const response = await fetch('/personas/local');
       if (!response.ok) throw new Error('Failed to fetch personas');
       this.personas = await response.json();
     } catch (error) {
@@ -232,7 +231,7 @@ class AgentForm extends BaseEl {
     try {
       this.loading = true;
       const method = this.newAgent ? 'POST' : 'PUT';
-      const url = this.newAgent ? `/agents/${this.scope}` : `/agents/${this.scope}/${this.agent.name}`;
+      const url = this.newAgent ? '/agents/local' : `/agents/local/${this.agent.name}`;
       
       const formData = new FormData();
       const agentData = { ...this.agent };
