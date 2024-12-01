@@ -207,25 +207,22 @@ class AgentForm extends BaseEl {
     return grouped;
   }
 
-  handleCommandToggle(commandName, checked) {
-    if (!Array.isArray(this.agent.commands)) {
-      this.agent.commands = [];
-    }
-    
-    if (checked) {
-      if (!this.agent.commands.includes(commandName)) {
-        this.agent.commands.push(commandName);
-      }
-    } else {
-      this.agent.commands = this.agent.commands.filter(cmd => cmd !== commandName);
-    }
-    
-    this.agent = { ...this.agent };
-  }
-
   handleInputChange(event) {
-    const { name, value } = event.target;
-    this.agent = { ...this.agent, [name]: value };
+    const { name, value, type, checked } = event.target;
+    const inputValue = type === 'checkbox' ? checked : value;
+    
+    if (name === 'commands') {
+      if (!Array.isArray(this.agent.commands)) {
+        this.agent.commands = [];
+      }
+      if (checked) {
+        this.agent.commands.push(value);
+      } else {
+        this.agent.commands = this.agent.commands.filter(command => command !== value);
+      }
+    }
+    
+    this.agent = { ...this.agent, [name]: inputValue };
   }
 
   validateForm() {
@@ -294,8 +291,7 @@ class AgentForm extends BaseEl {
         <h4>${provider}</h4>
         <div class="commands-grid">
           ${commands.map(command => html`
-            <div class="command-item" @click=${() => 
-              this.handleCommandToggle(command.name, !this.agent.commands?.includes(command.name))}>
+            <div class="command-item">
               <div class="command-info">
                 <div class="command-name">${command.name}</div>
                 ${command.docstring ? html`
@@ -304,7 +300,14 @@ class AgentForm extends BaseEl {
               </div>
               <toggle-switch 
                 .checked=${this.agent.commands?.includes(command.name) || false}
-                @toggle-change=${(e) => this.handleCommandToggle(command.name, e.detail.checked)}>
+                @toggle-change=${(e) => this.handleInputChange({ 
+                  target: { 
+                    name: 'commands', 
+                    value: command.name, 
+                    type: 'checkbox',
+                    checked: e.detail.checked 
+                  } 
+                })}>
               </toggle-switch>
             </div>
           `)}
@@ -348,9 +351,14 @@ class AgentForm extends BaseEl {
             Uncensored:
             <toggle-switch 
               .checked=${this.agent.uncensored || false}
-              @toggle-change=${(e) => {
-                this.agent = { ...this.agent, uncensored: e.detail.checked };
-              }}></toggle-switch>
+              @toggle-change=${(e) => this.handleInputChange({ 
+                target: { 
+                  name: 'uncensored', 
+                  type: 'checkbox',
+                  checked: e.detail.checked 
+                } 
+              })}>
+            </toggle-switch>
           </label>
         </div>
 

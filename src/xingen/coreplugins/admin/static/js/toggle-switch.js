@@ -3,7 +3,7 @@ import { BaseEl } from './base.js';
 
 class ToggleSwitch extends BaseEl {
   static properties = {
-    checked: { type: Boolean }
+    checked: { type: Boolean, reflect: true }
   };
 
   static styles = css`
@@ -53,19 +53,42 @@ class ToggleSwitch extends BaseEl {
     }
   `;
 
-  render() {
+  constructor() {
+    super();
+    this.checked = false;
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('checked')) {
+      // Ensure the input element's checked state matches the property
+      const input = this.shadowRoot.querySelector('input');
+      if (input && input.checked !== this.checked) {
+        input.checked = this.checked;
+      }
+    }
+  }
+
+  _render() {
     return html`
       <label class="switch">
-        <input type="checkbox" .checked=${this.checked} @change=${this._handleChange}>
+        <input type="checkbox" 
+               ?checked=${this.checked} 
+               @change=${this._handleChange}>
         <span class="slider"></span>
       </label>
     `;
   }
 
   _handleChange(event) {
-    this.checked = event.target.checked;
-    console.log("check is", this.checked)
-    this.dispatch('toggle-change', { checked: this.checked });
+    const newChecked = event.target.checked;
+    if (this.checked !== newChecked) {
+      this.checked = newChecked;
+      this.dispatchEvent(new CustomEvent('toggle-change', { 
+        detail: { checked: this.checked },
+        bubbles: true,
+        composed: true
+      }));
+    }
   }
 }
 
