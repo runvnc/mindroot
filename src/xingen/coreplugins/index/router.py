@@ -43,40 +43,49 @@ class AgentEntry(BaseModel):
 
 async def load_persona_data(persona_name: str) -> dict:
     """Load persona data from local or shared directory"""
-    persona_path = Path('personas/local') / persona_name / 'persona.json'
-    if not persona_path.exists():
-        persona_path = Path('personas/shared') / persona_name / 'persona.json'
-        
-    if not persona_path.exists():
-        return {}
-        
-    with open(persona_path, 'r') as f:
-        return json.load(f)
+    try:
+        persona_path = Path('personas/local') / persona_name / 'persona.json'
+        if not persona_path.exists():
+            persona_path = Path('personas/shared') / persona_name / 'persona.json'
+            
+        if not persona_path.exists():
+            return {}
+            
+        with open(persona_path, 'r') as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail=f"Invalid JSON in persona file: {persona_name}")
 
 async def load_agent_data(agent_name: str) -> dict:
     """Load agent data from local or shared directory"""
-    agent_path = Path('data/agents/local') / agent_name / 'agent.json'
-    if not agent_path.exists():
-        agent_path = Path('data/agents/shared') / agent_name / 'agent.json'
+    try:
+        agent_path = Path('data/agents/local') / agent_name / 'agent.json'
         if not agent_path.exists():
-            raise FileNotFoundError(f'Agent {agent_name} not found')
-    
-    with open(agent_path, 'r') as f:
-        agent_data = json.load(f)
+            agent_path = Path('data/agents/shared') / agent_name / 'agent.json'
+            if not agent_path.exists():
+                raise FileNotFoundError(f'Agent {agent_name} not found')
         
-    # Get the persona data if specified
-    if 'persona' in agent_data:
-        persona_data = await load_persona_data(agent_data['persona'])
-        agent_data['persona'] = persona_data
-        
-    return agent_data
+        with open(agent_path, 'r') as f:
+            agent_data = json.load(f)
+            
+        # Validate required fields
+        if 'name' not in agent_data:
+            raise ValueError(f'Agent {agent_name} missing required field: name')
+            
+        # Get the persona data if specified
+        if 'persona' in agent_data:
+            persona_data = await load_persona_data(agent_data['persona'])
+            agent_data['persona'] = persona_data
+            
+        return agent_data
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail=f"Invalid JSON in agent file: {agent_name}")
 
 @router.get("/index/list-indices")
 async def list_indices():
     """List all available indices"""
     try:
         indices = []
-        #if there are no indices, copy the default.json file from the SCRIPT dir to the indices folder
         if not any(INDEX_DIR.glob('*.json')):
             this_script_path = Path(__file__).parent
             default_index_path = this_script_path / 'default.json'
@@ -87,12 +96,14 @@ async def list_indices():
                     json.dump(default_index_data, f, indent=2)
 
         for file in INDEX_DIR.glob('*.json'):
-            with open(file, 'r') as f:
-                index_data = json.load(f)
-                # Add installed status from manifest
-                manifest = load_plugin_manifest()
-                index_data['installed'] = file.stem in manifest.get('indices', {}).get('installed', {})
-                indices.append(index_data)
+            try:
+                with open(file, 'r') as f:
+                    index_data = json.load(f)
+                    manifest = load_plugin_manifest()
+                    index_data['installed'] = file.stem in manifest.get('indices', {}).get('installed', {})
+                    indices.append(index_data)
+            except json.JSONDecodeError:
+                continue  # Skip invalid JSON files
         return JSONResponse({'success': True, 'data': indices})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -134,7 +145,6 @@ async def update_index(index_name: str, metadata: IndexMetadata):
         with open(file_path, 'r') as f:
             index_data = json.load(f)
 
-        # Update metadata fields
         index_data.update({
             'name': metadata.name,
             'description': metadata.description,
@@ -162,11 +172,9 @@ async def add_plugin(index_name: str, plugin: PluginEntry):
         with open(file_path, 'r') as f:
             index_data = json.load(f)
 
-        # Check if plugin already exists
         if any(p['name'] == plugin.name for p in index_data['plugins']):
             return JSONResponse({'success': False, 'message': 'Plugin already in index'})
 
-        # Add plugin with full metadata
         plugin_data = {
             'name': plugin.name,
             'version': plugin.version,
@@ -201,19 +209,17 @@ async def add_agent(index_name: str, agent: AgentEntry):
             agent_data = await load_agent_data(agent.name)
         except FileNotFoundError as e:
             return JSONResponse({'success': False, 'message': str(e)})
+        except ValueError as e:
+            return JSONResponse({'success': False, 'message': str(e)})
 
-        # Add timestamp
         agent_data['added_at'] = datetime.now().isoformat()
         
-        # Load and update the index file
         with open(file_path, 'r') as f:
             index_data = json.load(f)
 
-        # Check if agent already exists
         if any(a['name'] == agent.name for a in index_data['agents']):
             return JSONResponse({'success': False, 'message': 'Agent already in index'})
 
-        # Add the complete agent data to the index
         index_data['agents'].append(agent_data)
 
         with open(file_path, 'w') as f:
@@ -274,7 +280,6 @@ async def install_index(index_name: str):
         with open(file_path, 'r') as f:
             index_data = json.load(f)
 
-        # Update manifest to track installed index
         manifest = load_plugin_manifest()
         if 'indices' not in manifest:
             manifest['indices'] = {'installed': {}}
