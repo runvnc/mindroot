@@ -117,7 +117,9 @@ class AgentForm extends BaseEl {
       position: absolute;
       z-index: 1;
       left: 0;
-      width: 200px;
+      top: 100%;
+      margin-top: 10px;
+      width: 250px;
       background-color: rgba(0, 0, 0, 0.9);
       color: #fff;
       text-align: left;
@@ -129,30 +131,8 @@ class AgentForm extends BaseEl {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    /* Position the tooltip */
-    .command-info {
-      position: relative;
-    }
-
-    .command-info .tooltip-text {
-      bottom: auto;
-      top: -10px;
-      transform: translateY(-100%);
-    }
-
-    /* If tooltip would be cut off at top, show below instead */
     .command-info:hover .tooltip-text {
       visibility: visible;
-    }
-
-    .command-info .tooltip-text:hover {
-      visibility: hidden;
-    }
-
-    /* JavaScript will add this class when near top of screen */
-    .command-info.show-below .tooltip-text {
-      top: 100%;
-      transform: translateY(10px);
     }
 
     .btn {
@@ -183,29 +163,6 @@ class AgentForm extends BaseEl {
     this.loading = false;
     this.fetchPersonas();
     this.fetchCommands();
-    this.setupTooltipPositioning();
-  }
-
-  setupTooltipPositioning() {
-    // Add scroll event listener to check tooltip positions
-    window.addEventListener('scroll', () => this.updateTooltipPositions(), { passive: true });
-    // Also check on window resize
-    window.addEventListener('resize', () => this.updateTooltipPositions(), { passive: true });
-  }
-
-  updateTooltipPositions() {
-    requestAnimationFrame(() => {
-      const commandInfos = this.shadowRoot.querySelectorAll('.command-info');
-      commandInfos.forEach(info => {
-        const rect = info.getBoundingClientRect();
-        // If the element is in the top 100px of the viewport
-        if (rect.top < 100) {
-          info.classList.add('show-below');
-        } else {
-          info.classList.remove('show-below');
-        }
-      });
-    });
   }
 
   async fetchPersonas() {
@@ -226,8 +183,6 @@ class AgentForm extends BaseEl {
       if (!response.ok) throw new Error('Failed to fetch commands');
       const data = await response.json();
       this.commands = this.organizeCommands(data);
-      // Check tooltip positions after commands are loaded
-      requestAnimationFrame(() => this.updateTooltipPositions());
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
         detail: `Error loading commands: ${error.message}`
