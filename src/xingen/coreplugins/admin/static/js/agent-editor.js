@@ -38,6 +38,11 @@ class AgentEditor extends BaseEl {
         content: " *";
         color: #e57373;
       }
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
     `
   ];
 
@@ -137,6 +142,41 @@ class AgentEditor extends BaseEl {
       }
     } else {
       this.agent = {};
+    }
+  }
+
+  async addToIndex() {
+    if (!this.agent.name) {
+      this.errorMessage = 'Please save the agent first';
+      return;
+    }
+
+    try {
+      this.loading = true;
+      // Get the index name from user
+      const indexName = prompt('Enter the name of the index to add this agent to:');
+      if (!indexName) return;
+
+      const response = await fetch(`/index/add-agent/${indexName}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: this.agent.name,
+          version: this.agent.version || '0.0.1',
+          description: this.agent.description || ''
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        this.importStatus = `Successfully added ${this.agent.name} to index ${indexName}`;
+      } else {
+        throw new Error(result.message || 'Failed to add agent to index');
+      }
+    } catch (error) {
+      this.errorMessage = `Error adding agent to index: ${error.message}`;
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -288,10 +328,15 @@ class AgentEditor extends BaseEl {
               <option value="${agent.name}">${agent.name}</option>
             `)}
           </select>
-          <button class="btn btn-secondary" @click=${this.handleNewAgent}>New Agent</button>
-          <button class="btn btn-secondary" @click=${this.handleScanAndImport}>
-            Scan and Import Agents
-          </button>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" @click=${this.handleNewAgent}>New Agent</button>
+            <button class="btn btn-secondary" @click=${this.handleScanAndImport}>
+              Scan and Import Agents
+            </button>
+            ${!this.newAgent && this.agent.name ? html`
+              <button class="btn btn-primary" @click=${this.addToIndex}>Add to Index</button>
+            ` : ''}
+          </div>
         </div>
 
         ${this.importStatus ? html`

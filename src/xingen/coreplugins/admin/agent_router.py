@@ -17,6 +17,50 @@ class GitHubImportRequest(BaseModel):
     scope: str
     tag: str = None
 
+async def load_persona_data(persona_name: str) -> dict:
+    """Load persona data from local or shared directory"""
+    persona_path = Path('personas/local') / persona_name / 'persona.json'
+    if not persona_path.exists():
+        persona_path = Path('personas/shared') / persona_name / 'persona.json'
+        
+    if not persona_path.exists():
+        return {}
+        
+    with open(persona_path, 'r') as f:
+        return json.load(f)
+
+async def load_agent_data(agent_name: str) -> dict:
+    """Load agent data from local or shared directory"""
+    agent_path = BASE_DIR / 'local' / agent_name / 'agent.json'
+    if not agent_path.exists():
+        agent_path = BASE_DIR / 'shared' / agent_name / 'agent.json'
+        if not agent_path.exists():
+            raise FileNotFoundError(f'Agent {agent_name} not found')
+    
+    with open(agent_path, 'r') as f:
+        agent_data = json.load(f)
+        
+    # Get the persona data if specified
+    if 'persona' in agent_data:
+        persona_data = await load_persona_data(agent_data['persona'])
+        agent_data['persona'] = persona_data
+        
+    return agent_data
+
+@router.get('/agents/full/{scope}/{name}')
+async def get_full_agent_data(scope: str, name: str):
+    """Get complete agent data including persona"""
+    if scope not in ['local', 'shared']:
+        raise HTTPException(status_code=400, detail='Invalid scope')
+    
+    try:
+        agent_data = await load_agent_data(name)
+        return agent_data
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get('/agents/{scope}/{name}')
 def read_agent(scope: str, name: str):
     if scope not in ['local', 'shared']:

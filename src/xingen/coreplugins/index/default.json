@@ -42,6 +42,13 @@
       "source_path": "runvnc/ah_anthropic",
       "version": "0.0.1",
       "name": "Anthropic (Claude)"
+    },
+    {
+      "enabled": true,
+      "source": "github",
+      "source_path": "runvnc/ah_shell",
+      "version": "0.0.1",
+      "name": "Shell"
     }
   ],
   "agents": [
