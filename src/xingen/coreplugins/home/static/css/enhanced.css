@@ -68,6 +68,7 @@ h1 {
     padding: 0.5rem 1rem;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
+    text-decoration: none;
     margin-bottom: 2rem;
     transition: all 0.3s ease;
 }
