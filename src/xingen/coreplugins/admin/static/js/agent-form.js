@@ -161,6 +161,10 @@ class AgentForm extends BaseEl {
     this.personas = [];
     this.commands = {};
     this.loading = false;
+    this.agent = {
+      commands: [],
+      ...this.agent
+    };
     this.fetchPersonas();
     this.fetchCommands();
   }
@@ -209,7 +213,6 @@ class AgentForm extends BaseEl {
 
   handleInputChange(event) {
     const { name, value, type, checked } = event.target;
-    const inputValue = type === 'checkbox' ? checked : value;
     
     if (name === 'commands') {
       if (!Array.isArray(this.agent.commands)) {
@@ -220,8 +223,13 @@ class AgentForm extends BaseEl {
       } else {
         this.agent.commands = this.agent.commands.filter(command => command !== value);
       }
+      // Update the entire agent object WITHOUT overwriting commands
+      this.agent = { ...this.agent };
+      return;
     }
     
+    // Handle all other inputs
+    const inputValue = type === 'checkbox' ? checked : value;
     this.agent = { ...this.agent, [name]: inputValue };
   }
 

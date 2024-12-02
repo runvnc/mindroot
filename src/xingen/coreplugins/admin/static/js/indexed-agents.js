@@ -112,6 +112,7 @@ class IndexedAgents extends BaseEl {
     this.indexedAgents = [];
     this.searchIndexed = '';
     this.loading = false;
+    this.scope = 'local';
     this.fetchIndexedAgents();
   }
 
