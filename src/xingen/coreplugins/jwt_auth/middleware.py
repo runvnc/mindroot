@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
@@ -55,28 +55,58 @@ async def middleware(request: Request, call_next):
                 request.state.user = payload
                 return await call_next(request)
             else:
-                return RedirectResponse(url='/login')
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Invalid or expired token"}
+                )
+
         print("..Did not find token in cookies..")
-        token = await security(request)
+        try:
+            token = await security(request)
+        except HTTPException:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication required"}
+            )
+
         if token:
             payload = decode_token(token.credentials)
-            request.state.user = payload
-            return await call_next(request)
+            if payload:
+                request.state.user = payload
+                return await call_next(request)
+            else:
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Invalid or expired token"}
+                )
 
-        print('No valid token found?')
-        print("Not a public route: ", request.url.path)
-        print('Redirecting to login')
-        return RedirectResponse(url='/login')
-    # catch http exceptions
+        print('No valid token found')
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Authentication required"}
+        )
+
     except HTTPException as e:
         print('HTTPException:', e)
-        return RedirectResponse(url='/login')
+        return JSONResponse(
+            status_code=e.status_code,
+            content={"detail": str(e.detail)}
+        )
+
     except Exception as e:
         print('Error:', e)
-        # print traceback
+        if 'does not exist' in str(e).lower() or 'not found' in str(e).lower():
+            return JSONResponse(
+                status_code=404,
+                content={"detail": f"Resource not found: {str(e)}"}
+            )
+
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=400, detail=f"Error handling request: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal server error: {str(e)}"}
+        )
 
     response = await call_next(request)
     return response
