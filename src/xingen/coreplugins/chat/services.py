@@ -193,6 +193,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     for result in out_results:
                         process_result(result, formatted_results)
                     print("Time to process results: ", time.time() - st_process)
+                    
                     context.chat_log.add_message({"role": "user", "content": formatted_results})
                     results.append(out_results) 
                 else:
