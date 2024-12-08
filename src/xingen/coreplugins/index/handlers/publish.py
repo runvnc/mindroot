@@ -40,7 +40,7 @@ async def publish_index(INDEX_DIR: Path, PUBLISHED_DIR: Path, index_name: str):
                                 zipf.write(file_path, arc_name)
 
         # Return URL path that can be used with the static file handler
-        zip_url = f"/index/published/{zip_filename}"
+        zip_url = f"/published/{zip_filename}"
 
         return JSONResponse({
             'success': True,
@@ -49,3 +49,70 @@ async def publish_index(INDEX_DIR: Path, PUBLISHED_DIR: Path, index_name: str):
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to publish index: {str(e)}")
+
+async def install_index_from_zip(INDEX_DIR: Path, file: UploadFile):
+    """Install an index from a zip file."""
+    if not file.filename.endswith('.zip'):
+        raise HTTPException(status_code=400, detail="File must be a zip archive")
+
+    # Create temporary directory for processing
+    temp_dir = Path("temp_index_install")
+    temp_dir.mkdir(exist_ok=True)
+    
+    try:
+        # Save uploaded file
+        zip_path = temp_dir / file.filename
+        with open(zip_path, 'wb') as f:
+            shutil.copyfileobj(file.file, f)
+
+        # Extract zip contents
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+
+        # Look for index.json in the extracted contents
+        index_files = list(temp_dir.rglob('index.json'))
+        if not index_files:
+            raise HTTPException(status_code=400, detail="No index.json found in zip file")
+
+        # Read the index metadata
+        with open(index_files[0], 'r') as f:
+            index_data = json.load(f)
+
+        index_name = index_data.get('name')
+        if not index_name:
+            raise HTTPException(status_code=400, detail="Invalid index.json: missing name field")
+
+        # Process agents and their personas
+        index_root = index_files[0].parent
+        personas_dir = index_root / 'personas'
+        if personas_dir.exists():
+            for persona_dir in personas_dir.iterdir():
+                if persona_dir.is_dir():
+                    persona_name = persona_dir.name
+                    # Install persona to the correct location
+                    install_persona(persona_dir, persona_name)
+
+        # Move index to final location
+        target_dir = INDEX_DIR / index_name
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        
+        # Create new index directory with index.json
+        target_dir.mkdir(parents=True)
+        shutil.copy2(index_files[0], target_dir / 'index.json')
+
+        # Copy personas directory if it exists
+        if personas_dir.exists():
+            shutil.copytree(personas_dir, target_dir / 'personas', dirs_exist_ok=True)
+
+        return JSONResponse({
+            'success': True,
+            'message': f"Index '{index_name}' installed successfully"
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to install index: {str(e)}")
+    finally:
+        # Clean up temporary directory
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)

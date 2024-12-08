@@ -12,5 +12,6 @@ async def on_load(app):
     for dirs in ['data/context', 'data/chat']:
         os.makedirs(dirs, exist_ok=True)
 
-    await hook_manager.startup(app, context=None)
+    context = { "startup_dir": os.getcwd() }
+    await hook_manager.startup(app, context=context)
 

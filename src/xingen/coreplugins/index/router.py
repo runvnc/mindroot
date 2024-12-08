@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from fastapi import APIRouter, File, UploadFile
-from fastapi.staticfiles import StaticFiles
 from .models import IndexMetadata, PluginEntry, AgentEntry
 from .handlers import (
     list_indices, create_index, update_index,
@@ -19,9 +18,6 @@ PUBLISHED_DIR = Path(ORIGINAL_WORKING_DIR) / 'published_indices'
 # Ensure directories exist
 os.makedirs(INDEX_DIR, exist_ok=True)
 os.makedirs(PUBLISHED_DIR, exist_ok=True)
-
-# Mount published indices directory
-router.mount("/published", StaticFiles(directory=str(PUBLISHED_DIR)), name="published_indices")
 
 @router.get("/index/list-indices")
 async def list_indices_route():
