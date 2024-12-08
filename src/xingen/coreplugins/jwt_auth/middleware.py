@@ -44,9 +44,9 @@ async def middleware(request: Request, call_next):
         else:
             print('Not a public route: ', request.url.path)
             # public_routes is set, iterate and print all
-            print("Printing all public routes: ")
-            for route in public_routes:
-                print('Public route: ', route)
+            #print("Printing all public routes: ")
+            #for route in public_routes:
+            #    print('Public route: ', route)
 
         token = request.cookies.get("access_token")
         if token:
@@ -55,19 +55,19 @@ async def middleware(request: Request, call_next):
                 request.state.user = payload
                 return await call_next(request)
             else:
-                return JSONResponse(
-                    status_code=401,
-                    content={"detail": "Invalid or expired token"}
-                )
+                print("Invalid or expired token, redirecting to login..")
+                return RedirectResponse(url="/login")
+                #return JSONResponse(
+                #    status_code=401,
+                #    content={"detail": "Invalid or expired token"}
+                #)
 
         print("..Did not find token in cookies..")
         try:
             token = await security(request)
-        except HTTPException:
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "Authentication required"}
-            )
+        except HTTPException as e:
+            print('HTTPException: No valid token found: ', e)
+            return RedirectResponse(url="/login")
 
         if token:
             payload = decode_token(token.credentials)
@@ -75,23 +75,15 @@ async def middleware(request: Request, call_next):
                 request.state.user = payload
                 return await call_next(request)
             else:
-                return JSONResponse(
-                    status_code=401,
-                    content={"detail": "Invalid or expired token"}
-                )
+                print("Invalid or expired token, redirecting to login..")
+                return RedirectResponse(url="/login")
 
         print('No valid token found')
-        return JSONResponse(
-            status_code=401,
-            content={"detail": "Authentication required"}
-        )
+        return RedirectResponse(url="/login")
 
     except HTTPException as e:
         print('HTTPException:', e)
-        return JSONResponse(
-            status_code=e.status_code,
-            content={"detail": str(e.detail)}
-        )
+        return RedirectResponse(url="/login")
 
     except Exception as e:
         print('Error:', e)
