@@ -4,6 +4,8 @@ import './index-list.js';
 import './index-metadata.js';
 import './plugin-section.js';
 import './agent-section.js';
+import './components/upload-area.js';
+import './components/publish-button.js';
 
 class IndexManager extends BaseEl {
   static properties = {
@@ -38,7 +40,7 @@ class IndexManager extends BaseEl {
       display: flex;
       gap: 20px;
       height: 100%;
-      min-height: 0; /* Important for nested flex scrolling */
+      min-height: 0;
     }
 
     .index-content {
@@ -48,11 +50,21 @@ class IndexManager extends BaseEl {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      min-height: 0; /* Important for nested flex scrolling */
+      min-height: 0;
     }
 
     .index-content > * {
-      flex-shrink: 0; /* Prevent children from shrinking */
+      flex-shrink: 0;
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
     }
 
     /* Scrollbar styling */
@@ -74,7 +86,6 @@ class IndexManager extends BaseEl {
       background-color: #444;
     }
   `;
-
   constructor() {
     super();
     this.indices = [];
@@ -114,6 +125,9 @@ class IndexManager extends BaseEl {
       if (result.success) {
         const categorized = { core: [], installed: [], available: [] };
         result.data.forEach(plugin => {
+          // Skip local plugins
+          if (plugin.source === 'local') return;
+          
           if (plugin.source === 'core') {
             categorized.core.push(plugin);
           } else if (plugin.state === 'installed') {
@@ -168,9 +182,23 @@ class IndexManager extends BaseEl {
     this.fetchIndices();
   }
 
-  _render() {
+  handleIndexInstalled(e) {
+    this.fetchIndices();
+  }
+
+  handlePublishSuccess(e) {
+    const { message, zipFile } = e.detail;
+    // You could show a notification here if desired
+    console.log(`Index published successfully: ${zipFile}`);
+  }
+
+  render() {
     return html`
       <div class="index-manager">
+        <upload-area
+          @index-installed=${this.handleIndexInstalled}>
+        </upload-area>
+
         <div class="section">
           <index-list 
             .indices=${this.indices}
@@ -182,6 +210,13 @@ class IndexManager extends BaseEl {
 
           <div class="index-content">
             ${this.selectedIndex ? html`
+              <div class="actions-bar">
+                <publish-button
+                  .indexName=${this.selectedIndex.name}
+                  @publish-success=${this.handlePublishSuccess}>
+                </publish-button>
+              </div>
+
               <index-metadata
                 .selectedIndex=${this.selectedIndex}
                 .loading=${this.loading}
