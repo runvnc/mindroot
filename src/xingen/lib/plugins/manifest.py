@@ -27,7 +27,7 @@ def save_plugin_manifest(manifest):
     with open(MANIFEST_FILE, 'w') as f:
         json.dump(manifest, f, indent=2)
 
-def update_plugin_manifest(plugin_name, source, source_path, remote_source=None, version="0.0.1"):
+def update_plugin_manifest(plugin_name, source, source_path, remote_source=None, version="0.0.1", metadata=None):
     """Update or add a plugin entry in the manifest.
     
     Args:
@@ -36,18 +36,29 @@ def update_plugin_manifest(plugin_name, source, source_path, remote_source=None,
         source_path (str): Path to the plugin
         remote_source (str, optional): GitHub repository reference
         version (str, optional): Plugin version
+        metadata (dict, optional): Plugin metadata including commands and services
     """
     manifest = load_plugin_manifest()
     category = 'installed' if source != 'core' else 'core'
+    
+    # Try to read plugin_info.json if metadata not provided
+    if not metadata and source_path:
+        plugin_info_path = os.path.join(source_path, 'plugin_info.json')
+        if os.path.exists(plugin_info_path):
+            try:
+                with open(plugin_info_path, 'r') as f:
+                    metadata = json.load(f)
+            except json.JSONDecodeError:
+                metadata = None
     
     manifest['plugins'][category][plugin_name] = {
         'enabled': True,
         'source': source,
         'source_path': source_path,
         'version': version,
-        'commands': [],
-        'services': [],
-        'dependencies': []
+        'commands': metadata.get('commands', []) if metadata else [],
+        'services': metadata.get('services', []) if metadata else [],
+        'dependencies': metadata.get('dependencies', []) if metadata else []
     }
     
     if remote_source:

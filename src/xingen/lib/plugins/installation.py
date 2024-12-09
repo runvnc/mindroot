@@ -122,8 +122,15 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                not os.path.isfile(os.path.join(source_path, 'pyproject.toml')):
                 raise ValueError(f"Invalid Python project: no setup.py or pyproject.toml found")
             
+            # Try to read plugin_info.json
+            plugin_info = None
+            plugin_info_path = os.path.join(source_path, 'plugin_info.json')
+            if os.path.exists(plugin_info_path):
+                with open(plugin_info_path, 'r') as f:
+                    plugin_info = json.load(f)
+            
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', source_path])
-            update_plugin_manifest(plugin_name, 'local', source_path)
+            update_plugin_manifest(plugin_name, 'local', source_path, metadata=plugin_info)
             
         elif source == 'pypi':
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', plugin_name])
@@ -145,7 +152,8 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                 'github',
                 os.path.abspath(plugin_dir),
                 remote_source=repo_path,
-                version=plugin_info.get('version', '0.0.1')
+                version=plugin_info.get('version', '0.0.1'),
+                metadata=plugin_info
             )
             
         else:
