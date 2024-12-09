@@ -1,5 +1,4 @@
 import json
-import shutil
 from datetime import datetime
 from pathlib import Path
 from fastapi.responses import JSONResponse
@@ -30,17 +29,7 @@ async def add_agent(INDEX_DIR: Path, index_name: str, agent: AgentEntry):
         if any(a['name'] == agent.name for a in index_data['agents']):
             return JSONResponse({'success': False, 'message': 'Agent already in index'})
 
-        # Copy agent directory structure to index
-        agent_source = Path('data/agents/local') / agent.name
-        if not agent_source.exists():
-            agent_source = Path('data/agents/shared') / agent.name
-
-        agent_target = index_dir / 'agents' / agent.name
-        if agent_target.exists():
-            shutil.rmtree(agent_target)
-        shutil.copytree(agent_source, agent_target)
-
-        # If agent has a persona, copy that too
+        # If agent has a persona, copy persona files
         if 'persona' in agent_data and isinstance(agent_data['persona'], dict):
             persona_name = agent_data['persona'].get('name')
             if persona_name:
@@ -51,6 +40,7 @@ async def add_agent(INDEX_DIR: Path, index_name: str, agent: AgentEntry):
                     persona_target = index_dir / 'personas' / persona_name
                     if persona_target.exists():
                         shutil.rmtree(persona_target)
+                    persona_target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copytree(persona_source, persona_target)
 
         index_data['agents'].append(agent_data)
@@ -87,12 +77,8 @@ async def remove_agent(INDEX_DIR: Path, index_name: str, agent_name: str):
                     if not other_agents_with_persona:
                         shutil.rmtree(persona_dir)
 
+        # Remove from index data
         index_data['agents'] = [a for a in index_data['agents'] if a['name'] != agent_name]
-
-        # Remove agent directory
-        agent_dir = index_dir / 'agents' / agent_name
-        if agent_dir.exists():
-            shutil.rmtree(agent_dir)
 
         with open(index_file, 'w') as f:
             json.dump(index_data, f, indent=2)

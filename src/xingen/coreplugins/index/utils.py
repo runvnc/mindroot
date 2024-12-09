@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 from fastapi import HTTPException
 
@@ -44,8 +45,6 @@ async def load_agent_data(agent_name: str) -> dict:
 
 def ensure_index_structure(index_dir: Path) -> None:
     """Ensure index directory has the required structure"""
-    (index_dir / 'plugins').mkdir(exist_ok=True)
-    (index_dir / 'agents').mkdir(exist_ok=True)
     (index_dir / 'personas').mkdir(exist_ok=True)
 
 def install_persona(source_dir: Path, persona_name: str) -> None:
