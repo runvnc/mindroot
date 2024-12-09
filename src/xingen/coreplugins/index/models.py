@@ -15,6 +15,7 @@ class PluginEntry(BaseModel):
     source: str
     source_path: Optional[str] = None
     github_url: Optional[str] = None
+    remote_source: Optional[str] = None  # Added this field
     commands: List[str] = []
     services: List[str] = []
     dependencies: List[str] = []
