@@ -3,8 +3,22 @@ from .providers.commands import command_manager
 import os
 import json
 from .chatlog import ChatLog
+from typing import TypeVar, Type, Protocol, runtime_checkable
+
+@runtime_checkable
+class BaseService(Protocol):
+    """Base protocol for all services"""
+    pass
+
+class BaseCommandSet(Protocol):
+    """Base protocol for all command sets"""
+    pass
+
+ServiceT = TypeVar('ServiceT', bound=BaseService)
+CommandSetT = TypeVar('CommandSetT', bound=BaseCommandSet)
 
 class ChatContext:
+
     def __init__(self, command_manager, service_manager, user='testuser'):
         self.command_manager = command_manager
         self.service_manager = service_manager
@@ -21,6 +35,12 @@ class ChatContext:
         self.data['current_dir'] = f'data/users/{user}'
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
+
+    def proto(self, protocol_type: Type[ServiceT]) -> ServiceT:
+        return self._providers[protocol_type]
+
+    def cmds(self, command_set: Type[CommandSetT]) -> CommandSetT:
+        return self._commands[command_set]
 
     def save_context(self):
         if not self.log_id:
