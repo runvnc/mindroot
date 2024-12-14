@@ -79,21 +79,29 @@ class ActionComponent extends BaseEl {
     if (params.val) {
       params = params.val
     }
+    let dontTruncate = false;
+    let format_;
+    if (funcName != 'write') {
+      format_ = (str) => {
+        return str
+      }
+    } else {
+      format_ = (str) => {
+        return str.split('\n')[0].slice(0, 160)
+      }
+    }
     if (Array.isArray(params)) {
       for (let item of params) {
-        paramshtml += `<span class="param_value">(${item}), </span> `;
+        paramshtml += `<span class="param_value">(${format_(item)}), </span> `;
       }
     } else if (typeof(params) == 'object') {
       console.log('in action.js params is:',params)
       for (var key in params) {
         paramshtml += `<span class="param_name">${key}:</span> `;
-        paramshtml += `<span class="param_value">${params[key]}</span>  `;
+        paramshtml += `<span class="param_value">${format_(params[key])}</span>  `;
       }
     } else {
-      paramshtml += `<span class="param_value">[${params}]</span> `;
-    }
-    if (false && paramshtml.length > 50) {
-      paramshtml = paramshtml.slice(0, 50) + '...'
+      paramshtml += `<span class="param_value">[${format_(params)}]</span> `;
     }
     console.log('paramshtml', paramshtml)
     let res = '';
@@ -126,11 +134,13 @@ class ActionComponent extends BaseEl {
     }
 
     return html`
-    <details class="animated-element" style="position: relative; max-width: 800px;">
-      <summary class="fn_name" style="display:contents">⚡ ${funcName}</summary>
-       <div class="av"></div>
+    <details class="animated-element-x" style="position: relative; max-width: 800px;" open >
+      <!-- we need to make sure it's open by default so we will set property to true -->
+      <summary class="fn_name" style="display:contents"  >⚡ ${funcName}</summary>
+      <div class="av-x"></div>
       <div class="action" style="display: contents;" >
         ⚡  <span class="fn_name"> ${unsafeHTML(paramshtml)}
+        <div style="height: 15px; display: block">&nbsp;</div>
         ${res}
       </div> 
     </details>
