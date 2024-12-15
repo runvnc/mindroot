@@ -156,11 +156,30 @@ window.initializeCodeCopyButtons = (() => {
 
   // Main process function that will be exported
   const processCodeElements = () => {
-    // Process main document
+    // Ensure we process both document and all chat-message elements
     processRoot(document);
 
-    // Process all existing custom elements with shadow roots
+    // Find all chat-message elements and process their shadow roots
+    const chatMessages = document.querySelectorAll('chat-message');
+    chatMessages.forEach(msg => {
+      if (msg.shadowRoot) {
+        processRoot(msg.shadowRoot);
+      }
+    });
+
+    // Process all custom elements with shadow roots
     document.querySelectorAll('*').forEach(processElement);
+
+    // Add a small delay and process again to catch any late-initializing elements
+    setTimeout(() => {
+      processRoot(document);
+      chatMessages.forEach(msg => {
+        if (msg.shadowRoot) {
+          processRoot(msg.shadowRoot);
+        }
+      });
+      document.querySelectorAll('*').forEach(processElement);
+    }, 100);
   };
 
   // Return the process function for external use

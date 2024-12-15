@@ -142,6 +142,8 @@ class Chat extends BaseEl {
             continue
           } catch (e) {
             this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
+            window.initializeCodeCopyButtons();
+
           }
         } else {
           if (part.type == 'image') {
@@ -156,12 +158,14 @@ class Chat extends BaseEl {
             if (cmd.json_encoded_md) md =  tryParse(cmd.json_encoded_md.markdown)
             if (md) {
               this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
+              window.initializeCodeCopyButtons();
               console.log("Added message:", md)
             } 
           }
         }
       }
     }
+    window.initializeCodeCopyButtons();
   }
 
   _addMessage(event) {
@@ -302,6 +306,8 @@ class Chat extends BaseEl {
     } else {
       console.warn('No handler for command:', data.command)
     }
+    window.initializeCodeCopyButtons();
+
     this.requestUpdate();
 
   }
@@ -318,6 +324,8 @@ class Chat extends BaseEl {
       msg.spinning = 'no'
       console.log('Spinner set to false:', msg);
     }
+    window.initializeCodeCopyButtons();
+
     this.requestUpdate();
   }
 
