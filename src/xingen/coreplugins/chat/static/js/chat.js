@@ -2,6 +2,7 @@ import { LitElement, html, css } from './lit-core.min.js';
 import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
 import { Marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 import { BaseEl } from './base.js';
+import { throttle } from './throttle.js';
 import './action.js';
 import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
@@ -83,6 +84,7 @@ class Chat extends BaseEl {
     window.userScrolling = false;
     console.log('Chat component created');
     console.log(this);
+    //this.requestUpdate = throttle(this.requestUpdate, 500)
   }
 
   shouldShowAvatar(sender) {
@@ -96,8 +98,9 @@ class Chat extends BaseEl {
     console.log('sessionid: ', this.sessionid);
     this.sse = new EventSource(`/chat/${this.sessionid}/events`);
     // this.sse.addEventListener('new_message', this._aiMessage.bind(this));
+    const thisPartial = this._partialCmd.bind(this)
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', this._partialCmd.bind(this));
+    this.sse.addEventListener('partial_command', throttle(thisPartial, 20) ) //  this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
     this.sse.addEventListener('finished_chat', this._finished.bind(this));
