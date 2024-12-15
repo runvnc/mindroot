@@ -78,6 +78,10 @@ h1 {
     transform: translateY(-2px);
 }
 
+.admin-link:visited {
+  color: #ddd;
+}
+
 h2 {
     font-size: 1.5rem;
     font-weight: 500;

@@ -308,3 +308,7 @@ h2, h3, h4 {
         grid-template-columns: 1fr;
     }
 }
+
+.admin-link, .admin-link:visited {
+  color: #ddd;
+}
