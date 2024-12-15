@@ -280,6 +280,7 @@ class Chat extends BaseEl {
     }
     this.requestUpdate();
     this._scrollToBottom()
+    window.initializeCodeCopyButtons();
   }
 
   _runningCmd(event) {

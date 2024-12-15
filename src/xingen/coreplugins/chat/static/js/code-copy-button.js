@@ -1,12 +1,13 @@
-(() => {
+// Initialize copy button functionality and expose process function
+window.initializeCodeCopyButtons = (() => {
   // Style template that will be injected into both main document and shadow roots
   const styleTemplate = `
-    .code-copy-button {
+    pre > .code-copy-button {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
+      top: 4px;
+      right: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
       color: #fff;
       background-color: #2d2d2d;
       border: none;
@@ -16,18 +17,19 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      z-index: 1000;
     }
 
-    .code-copy-button:hover {
+    pre > .code-copy-button:hover {
       background-color: #404040;
     }
 
-    .code-copy-button:active {
+    pre > .code-copy-button:active {
       transform: scale(0.95);
     }
 
-    .code-copy-button.success {
+    pre > .code-copy-button.success {
       background-color: #2ea043;
     }
 
@@ -35,20 +37,29 @@
       position: relative;
     }
 
-    pre:hover .code-copy-button {
+    pre:hover > .code-copy-button {
       opacity: 1;
     }
   `;
 
   // Add styles to a root (document or shadow)
   const addStylesToRoot = (root) => {
+    // Check if styles already exist
+    if (root.querySelector('style[data-copy-button-style]')) {
+      return;
+    }
     const style = document.createElement('style');
+    style.setAttribute('data-copy-button-style', 'true');
     style.textContent = styleTemplate;
-    root.appendChild(style);
+    if (root === document) {
+      document.head.appendChild(style);
+    } else {
+      root.appendChild(style);
+    }
   };
 
   // Add initial styles to main document
-  addStylesToRoot(document.head);
+  addStylesToRoot(document);
 
   // Helper function to check if element already has a copy button
   const hasCopyButton = (element) => {
@@ -62,7 +73,7 @@
     const button = document.createElement('button');
     button.className = 'code-copy-button';
     button.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
       </svg>
@@ -104,7 +115,7 @@
         setTimeout(() => {
           copyButton.classList.remove('success');
           copyButton.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
@@ -117,33 +128,10 @@
     pre.appendChild(copyButton);
   };
 
-  // Throttle function
-  const throttle = (func, limit) => {
-    let inThrottle;
-    let lastFunc;
-    let lastRan;
-
-    return function(...args) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        lastRan = Date.now();
-        inThrottle = true;
-      } else {
-        clearTimeout(lastFunc);
-        lastFunc = setTimeout(() => {
-          if (Date.now() - lastRan >= limit) {
-            func.apply(this, args);
-            lastRan = Date.now();
-          }
-        }, limit - (Date.now() - lastRan));
-      }
-    };
-  };
-
   // Process all code elements in a root (document or shadow)
   const processRoot = (root) => {
     // Add styles if this is a shadow root
-    if (root instanceof ShadowRoot && !root.querySelector('style')) {
+    if (root instanceof ShadowRoot && !root.querySelector('style[data-copy-button-style]')) {
       addStylesToRoot(root);
     }
     
@@ -166,7 +154,7 @@
     });
   };
 
-  // Main process function
+  // Main process function that will be exported
   const processCodeElements = () => {
     // Process main document
     processRoot(document);
@@ -175,40 +163,6 @@
     document.querySelectorAll('*').forEach(processElement);
   };
 
-  // Throttled version of process function
-  const throttledProcessCodeElements = throttle(processCodeElements, 500);
-
-  // Process all existing code elements initially
-  processCodeElements();
-
-  // Watch for dynamically added elements and shadow DOM changes
-  const observer = new MutationObserver((mutations) => {
-    let shouldProcess = false;
-    
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList') {
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === 1) { // Element node
-            if (node.matches('code') || 
-                node.querySelector('code') || 
-                node.shadowRoot || 
-                node.querySelector('*[shadowroot]')) {
-              shouldProcess = true;
-              break;
-            }
-          }
-        }
-      }
-      if (shouldProcess) break;
-    }
-
-    if (shouldProcess) {
-      throttledProcessCodeElements();
-    }
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  // Return the process function for external use
+  return processCodeElements;
 })();
