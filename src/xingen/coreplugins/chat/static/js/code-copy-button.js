@@ -154,9 +154,21 @@ window.initializeCodeCopyButtons = (() => {
     });
   };
 
+  // Process action components specifically
+  const processActionComponents = () => {
+    document.querySelectorAll('action-component').forEach(action => {
+      if (action.shadowRoot) {
+        // Add a small delay to ensure the write command content is rendered
+        setTimeout(() => {
+          processRoot(action.shadowRoot);
+        }, 50);
+      }
+    });
+  };
+
   // Main process function that will be exported
   const processCodeElements = () => {
-    // Ensure we process both document and all chat-message elements
+    // Process regular elements
     processRoot(document);
 
     // Find all chat-message elements and process their shadow roots
@@ -166,6 +178,9 @@ window.initializeCodeCopyButtons = (() => {
         processRoot(msg.shadowRoot);
       }
     });
+
+    // Process action components specifically
+    processActionComponents();
 
     // Process all custom elements with shadow roots
     document.querySelectorAll('*').forEach(processElement);
@@ -178,6 +193,7 @@ window.initializeCodeCopyButtons = (() => {
           processRoot(msg.shadowRoot);
         }
       });
+      processActionComponents(); // Process action components again after delay
       document.querySelectorAll('*').forEach(processElement);
     }, 100);
   };
