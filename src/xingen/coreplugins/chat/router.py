@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
+from lib.providers.services import service, service_manager
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
 from lib.templates import render
 from lib.plugins import list_enabled
@@ -81,7 +82,14 @@ async def chat_history(log_id: str):
 async def chat_history(request: Request, agent_name: str, log_id: str):
     plugins = list_enabled()
     user = request.state.user
-    html = await render('chat', {"log_id": log_id, "agent_name": agent_name, "user": user})
+    agent = await service_manager.get_agent_data(agent_name)  
+    persona = agent['persona']['name']
+    print("persona is:", persona) 
+    html = await render('chat', {"log_id": log_id, "agent_name": agent_name, "user": user,
+                                 "persona": persona })
     return HTMLResponse(html)
 
+# use starlette staticfiles to mount ./imgs
+    app.mount("/published", StaticFiles(directory=str(published_dir)), name="published_indices")
+ 
 

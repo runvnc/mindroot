@@ -911,4 +911,12 @@ tbody tr {
     }
 }
 
+.bigavatar {
+  width: 180px;
+}
+
+.minilogo {
+  margin-top: -30px;
+  width: 32px;
+}
 

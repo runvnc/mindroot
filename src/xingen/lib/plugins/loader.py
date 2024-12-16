@@ -44,6 +44,8 @@ def mount_static_files(app, plugin_name, category):
     
     if category != 'core': 
         static_path = os.path.join(plugin_dir, 'src', dir_name, 'static')
+        if not os.path.exists(static_path):
+            static_path = os.path.join(plugin_dir, 'static')
     else:
         static_path = os.path.join(plugin_dir, 'static')
 
@@ -56,6 +58,11 @@ def mount_static_files(app, plugin_name, category):
         print(termcolor.colored(
             f"Mounted static files for plugin: {plugin_name} at {static_path}", 
             'green'
+        ))
+    else:
+        print(termcolor.colored(
+            f"No static files found for plugin: {plugin_name}. Searched in {static_path}",
+            'yellow'
         ))
 
 async def load(app=None):

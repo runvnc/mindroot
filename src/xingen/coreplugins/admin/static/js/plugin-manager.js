@@ -97,6 +97,22 @@ class PluginManager extends BaseEl {
       <div class="plugin-manager">
         <section class="section">
           <div class="section-title">
+            <span class="material-icons">store</span>
+            Plugin Indices
+          </div>
+          <plugin-index-browser></plugin-index-browser>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <span class="material-icons">build</span>
+            Advanced Installation
+          </div>
+          <plugin-advanced-install></plugin-advanced-install>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
             <span class="material-icons">extension</span>
             Installed Plugins
           </div>
@@ -111,21 +127,6 @@ class PluginManager extends BaseEl {
           <plugin-list category="installed"></plugin-list>
         </section>
 
-        <section class="section">
-          <div class="section-title">
-            <span class="material-icons">store</span>
-            Plugin Indices
-          </div>
-          <plugin-index-browser></plugin-index-browser>
-        </section>
-
-        <section class="section">
-          <div class="section-title">
-            <span class="material-icons">build</span>
-            Advanced Installation
-          </div>
-          <plugin-advanced-install></plugin-advanced-install>
-        </section>
       </div>
     `;
   }

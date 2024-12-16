@@ -129,6 +129,9 @@ class Chat extends BaseEl {
     // output data in cyan also
     console.log('%cHistory loaded:', 'color: cyan', data)
     for (let msg of data) {
+      if (msg.role == 'assistant') {
+        console.log({msg})
+      }
       for (let part of msg.content) {
         console.log({part})
         if (!part.text) continue
