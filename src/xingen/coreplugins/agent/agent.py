@@ -35,7 +35,7 @@ Common causes:
 
 ...
 
-{ "json_encoded_markdown": { "markdown": START_RAW
+{ "json_encoded_md": { "markdown": START_RAW
 The moon, so bright
 It's shining light
 Like a pizza pie
@@ -264,7 +264,9 @@ class Agent:
                         try:
                             cmd_name = next(iter(cmd))
                         except Exception as e:
-                            continue
+                            print("next iter failed. cmd is")
+                            print(cmd)
+                            break
                         if isinstance(cmd, str):
                             print("\033[91m" + "Invalid command format, expected object, trying to parse anyway" + "\033[0m")
                             print("\033[91m" + str(cmd) + "\033[0m")
