@@ -12,11 +12,16 @@ async def list_indices(INDEX_DIR: Path):
     """List all available indices"""
     try:
         indices = []
-        # Check for index directories instead of just json files
-        if not any(p for p in INDEX_DIR.iterdir() if p.is_dir()):
+        
+        # Check if index directory exists and has content
+        if not INDEX_DIR.exists() or not any(INDEX_DIR.glob('*')):
+            # If INDEX_DIR exists but is empty, remove it first
+            if INDEX_DIR.exists():
+                shutil.rmtree(INDEX_DIR)
+                
+            # Copy default indices
             this_script_path = Path(__file__).parent.parent
             default_indices_path = this_script_path / 'indices'
-
             shutil.copytree(default_indices_path, INDEX_DIR)
 
         # List all index directories

@@ -261,7 +261,10 @@ class Agent:
                 for i in range(num_processed, len(commands)):
                     try:
                         cmd = commands[i]
-                        cmd_name = next(iter(cmd))
+                        try:
+                            cmd_name = next(iter(cmd))
+                        except Exception as e:
+                            continue
                         if isinstance(cmd, str):
                             print("\033[91m" + "Invalid command format, expected object, trying to parse anyway" + "\033[0m")
                             print("\033[91m" + str(cmd) + "\033[0m")

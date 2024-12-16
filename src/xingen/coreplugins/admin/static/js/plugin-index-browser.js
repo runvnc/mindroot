@@ -110,7 +110,7 @@ export class PluginIndexBrowser extends PluginBase {
         console.log('Installing plugin from GitHub:', {plugin})
         await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
           plugin: plugin.name,
-          url: plugin.source_path
+          url: plugin.github_url
         });
         alert('Plugin installed successfully from GitHub');
       } catch (error) {

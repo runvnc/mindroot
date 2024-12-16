@@ -19,7 +19,8 @@ class PluginRequest(BaseModel):
 
 class GitHubPluginRequest(BaseModel):
     plugin: str
-    url: str
+    url: Optional[str] = None
+    github_url: Optional[str] = None
 
 class TogglePluginRequest(BaseModel):
     plugin: str
@@ -118,7 +119,9 @@ async def install_local_plugin(request: PluginRequest):
 @router.post("/install-x-github-plugin")
 async def install_github_plugin(request: GitHubPluginRequest):
     try:
-        success = plugin_install('test', source='github', source_path=request.url)
+        print("Request:", request)
+        url = request.url or request.github_url
+        success = plugin_install('test', source='github', source_path=url)
         if success:
             return {"success": True, "message": "Plugin installed successfully from GitHub"}
         else:
