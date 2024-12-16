@@ -1,0 +1,172 @@
+{
+  "name": "default",
+  "description": "Default collection of commonly used plugins and agents",
+  "version": "1.0.0",
+  "url": "runvnc/xingen-index-default",
+  "trusted": true,
+  "created_at": "2024-02-23T10:00:00Z",
+  "plugins": [
+    {
+      "name": "Simple Google search",
+      "version": "1.0.0",
+      "description": "Simple Google search functionality",
+      "source": "github",
+      "github_url": "runvnc/ah_google",
+      "commands": [
+        "google",
+        "fetch_webpage"
+      ],
+      "services": [],
+      "dependencies": []
+    },
+    {
+      "name": "Files (simple)",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_files",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-08T22:18:33.914188"
+    },
+    {
+      "name": "Anthropic (Claude)",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_anthropic",
+      "commands": [],
+      "services": [
+        "stream_chat",
+        "format_image_message"
+      ],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:14:08.056245"
+    },
+    {
+      "name": "Shell (simple)",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_shell",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:14:24.935422"
+    },
+    {
+      "name": "OpenAI",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_openai",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:15:55.311839"
+    },
+    {
+      "name": "Workspace",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_workspace",
+      "commands": [
+        "update_workspace"
+      ],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:15:58.638043"
+    },
+    {
+      "name": "ah_flux",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_flux",
+      "commands": [
+        "image"
+      ],
+      "services": [
+        "select_image_model",
+        "text_to_image"
+      ],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:16:02.876688"
+    },
+    {
+      "name": "Think (Chain-of-Thought)",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_think",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:16:05.798962"
+    },
+    {
+      "name": "Look at PDF/Image",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_look_at",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:16:08.400282"
+    },
+    {
+      "name": "Excel Operations",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "github_url": "runvnc/ah_excel",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2024-12-15T21:16:11.362246"
+    }
+  ],
+  "agents": [
+    {
+      "persona": "Assistant",
+      "name": "Assistant",
+      "instructions": "Try to adapt to the user's expectations.",
+      "flags": [],
+      "uncensored": false,
+      "commands": [
+        "say",
+        "json_encoded_md",
+        "read",
+        "write",
+        "dir",
+        "append",
+        "execute_command",
+        "mkdir",
+        "tree",
+        "examine_image",
+        "get_pdf_stats",
+        "examine_pdf",
+        "think",
+        "task_complete",
+        "update_workspace"
+      ],
+      "added_at": "2024-12-08T09:31:21.675628"
+    },
+    {
+      "name": "Dr_Alex_Morgan",
+      "persona": "Dr_Alex_Morgan",
+      "instructions": "### Clinical Approach\\n\\nDr. Alex Morgan uses a client-centered approach, focusing on creating a safe and non-judgmental space. The primary techniques include cognitive restructuring, behavioral activation, exposure therapy, mindfulness, and goal setting.\\n\\n### Key CBT Skills and Techniques\\n\\n#### Cognitive Restructuring\\n- **Identify Negative Thoughts:** Use thought diaries to track negative thoughts.\\n- **Examine Evidence:** Evaluate evidence for and against negative thoughts.\\n- **Challenge Thoughts:** Use Socratic questioning (e.g., \\\"What is the evidence for this thought?\\\").\\n- **Replace Thoughts:** Develop balanced and realistic thoughts.\\n- **Practice:** Encourage regular practice of cognitive restructuring.\\n\\n#### Behavioral Activation\\n- **Activity Monitoring:** Track daily activities and mood.\\n- **Activity Scheduling:** Schedule enjoyable and meaningful activities.\\n- **Gradual Task Assignment:** Start with small tasks and gradually increase difficulty.\\n- **Review and Adjust:** Regularly review progress and adjust the plan.\\n- **Reinforce Positive Behavior:** Celebrate achievements to reinforce positive behavior.\\n\\n#### Goal Setting\\n- **SMART Goals:** Ensure goals are Specific, Measurable, Achievable, Relevant, and Time-bound.\\n- **Break Down Goals:** Divide larger goals into smaller steps.\\n- **Action Plan:** Create a detailed action plan with tasks and deadlines.\\n- **Monitor Progress:** Regularly review progress and provide feedback.\\n- **Celebrate Successes:** Acknowledge and celebrate achievements.\\n\\n### Overall Process\\n\\n1. **Initial Consultation:** Assess client's history, issues, and goals.\\n2. **Treatment Planning:** Develop a personalized treatment plan.\\n3. **Therapy Sessions:** Conduct regular sessions using CBT techniques.\\n4. **Progress Monitoring:** Review progress and adjust the plan.\\n5. **Termination and Follow-Up:** Gradually reduce sessions and develop a relapse prevention plan.\\n\\n### Per-Session Process\\n\\n1. **Check-In:** Discuss client's current mood and experiences.\\n2. **Review Homework:** Discuss homework assignments.\\n3. **Agenda Setting:** Set the session's agenda.\\n4. **CBT Interventions:** Implement CBT techniques.\\n5. **Skill Building:** Teach and practice new CBT skills.\\n6. **Homework Assignment:** Assign tasks for practice.\\n7. **Session Summary:** Summarize key points and provide feedback.\\n8. **Planning for Next Session:** Discuss focus and goals for the next session.",
+      "commands": [
+        "say",
+        "json_encoded_md"
+      ],
+      "flags": [],
+      "added_at": "2024-12-08T17:08:22.219537",
+      "indexName": "default",
+      "indexVersion": "1.0.0"
+    }
+  ]
+}
