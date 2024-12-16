@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from ..models import IndexMetadata
 from ..utils import ensure_index_structure
 from lib.plugins import load_plugin_manifest
+import shutil
 
 async def list_indices(INDEX_DIR: Path):
     """List all available indices"""
@@ -14,16 +15,9 @@ async def list_indices(INDEX_DIR: Path):
         # Check for index directories instead of just json files
         if not any(p for p in INDEX_DIR.iterdir() if p.is_dir()):
             this_script_path = Path(__file__).parent.parent
-            default_index_path = this_script_path / 'default.json'
+            default_indices_path = this_script_path / 'indices'
 
-            # Create default index directory and copy default.json
-            default_dir = INDEX_DIR / 'default'
-            default_dir.mkdir(exist_ok=True)
-            
-            with open(default_index_path, 'r') as f:
-                default_index_data = json.load(f)
-                with open(default_dir / 'index.json', 'w') as f:
-                    json.dump(default_index_data, f, indent=2)
+            shutil.copytree(default_indices_path, INDEX_DIR)
 
         # List all index directories
         for index_dir in INDEX_DIR.iterdir():
