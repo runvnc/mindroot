@@ -195,18 +195,6 @@ input, .text_inp {
   transition: background-color 0.3s ease;
 }
 
-/*
-button, .btn {
-/* style buttons with contemporary look and dark theme */ 
-  background-color: #333;
-  color: #f0f0f0;
-  padding: 2px 15px;
-  margin: 2px;
-  transition: background-color 0.3s ease;
-
-}
-*/
-
 /* Modern New Chat Button Styling */
 button, .btn {
   /* Base styling */
@@ -219,6 +207,7 @@ button, .btn {
   cursor: pointer;
   display: flex;
   align-items: center;
+  text-decoration: none;
   gap: 8px;
   transition: all 0.2s ease-in-out;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -231,11 +220,19 @@ button, .btn {
   font-weight: 400;
 }
 
+.new-chat-btn {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+
 /* Hover effect */
-button, .btn:hover {
+button, .btn:hover, .new-chat-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   background: linear-gradient(145deg, #5a6eff, #3e51f3);
+  cursor: pointer;
 }
 
 /* Active/Click state */

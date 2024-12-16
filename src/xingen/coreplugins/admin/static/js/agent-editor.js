@@ -66,6 +66,7 @@ class AgentEditor extends BaseEl {
       const response = await fetch('/agents/local');
       if (!response.ok) throw new Error('Failed to fetch agents');
       this.agents = await response.json();
+      console.log({agents: this.agents})
     } catch (error) {
       this.errorMessage = `Error loading agents: ${error.message}`;
     } finally {
@@ -126,6 +127,15 @@ class AgentEditor extends BaseEl {
           @new-agent=${this.handleNewAgent}>
         </agent-list>
 
+        ${(this.newAgent || this.agent.name) ? html`
+          <agent-form
+            .agent=${this.agent}
+            .newAgent=${this.newAgent}
+            @agent-saved=${this.handleAgentSaved}
+            @error=${this.handleError}>
+          </agent-form>
+        ` : ''}
+
         <indexed-agents
           @agent-installed=${this.handleAgentInstalled}
           @error=${this.handleError}>
@@ -136,14 +146,8 @@ class AgentEditor extends BaseEl {
           @error=${this.handleError}>
         </github-import>
 
-        ${(this.newAgent || this.agent.name) ? html`
-          <agent-form
-            .agent=${this.agent}
-            .newAgent=${this.newAgent}
-            @agent-saved=${this.handleAgentSaved}
-            @error=${this.handleError}>
-          </agent-form>
-        ` : ''}
+
+
       </div>
     `;
   }

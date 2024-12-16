@@ -191,18 +191,56 @@ input, .text_inp {
   transition: background-color 0.3s ease;
 }
 
+/* Modern New Chat Button Styling */
 button, .btn {
-/* style buttons with contemporary look and dark theme */ 
-  background-color: #333;
-  color: #f0f0f0;
-  padding: 2px 15px;
-  margin: 2px;
-  transition: background-color 0.3s ease;
+  /* Base styling */
+  background: linear-gradient(145deg, #4a5eff, #2e41e3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-button:hover {
-  background-color: #555;
+/* Plus icon before text */
+.new-chat-btn::before {
+  content: "+";
+  font-size: 1.2em;
+  font-weight: 400;
 }
+
+.new-chat-btn {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+/* Hover effect */
+button, .btn:hover, .new-chat-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, #5a6eff, #3e51f3);
+  cursor: pointer;
+}
+
+/* Active/Click state */
+button, .btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus state for accessibility */
+button, .btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 94, 255, 0.3);
+}
+
 
 /* Custom scrollbar styles */
 
