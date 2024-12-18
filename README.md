@@ -4,26 +4,26 @@ Mindroot
 
 ![Mindroot](src/mindroot/coreplugins/chat/static/mindroot_logo.png)
 
-[![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
+[![PyPI](https://img.shields.io/pypi/v/mindroot)](https://pypi.org/project/mindroot/)
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
 
-XinGen is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
+Mindroot is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
 
 Installation
 ------------
 
-You can install XinGen using pip:
+You can install Mindroot using pip:
 
 ```bash
-pip install xingen
+pip install mindroot
 ```
 
 For development, you can install the package in editable mode:
 
 ```bash
-git clone https://github.com/xingen/xingen.git
-cd xingen
+git clone https://github.com/mindroot/mindroot.git
+cd mindroot
 pip install -e .
 ```
 
@@ -45,11 +45,11 @@ Key Features:
 Core Concepts Overview
 ----------------------
 
-XinGen revolves around several key concepts:
+mindroot revolves around several key concepts:
 
 1. **Open Public Registry**: A flexible system for indexing and sharing plugins, agents, personas, and potentially models. It can be customized or replaced with user-specific registries.
 
-2. **Plugins**: Extend the functionality of XinGen, providing new features, services, or integrations.
+2. **Plugins**: Extend the functionality of mindroot, providing new features, services, or integrations.
 
 3. **Agents and Personas**: AI agents with defined capabilities and customizable personalities.
 
