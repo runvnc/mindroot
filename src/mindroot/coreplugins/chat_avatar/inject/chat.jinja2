@@ -1,0 +1,20 @@
+  {% block pre_content %}
+ 
+  <a href="/" target="_blank"><img class="minilogo" src="/home/static/imgs/logo.png"/></a>
+        <h3>{{ agent_name }}</h3>
+        
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <img class="bigavatar" onerror="this.style.display='none'"
+             src="/chat/personas/{{ persona }}/avatar.png" alt="avatar">
+
+        <div class="spacer"></div>
+
+        <a target="_blank" href="/agent/{{ agent_name }}" style="text-decoration: none;">
+          <button class="new-chat-btn btn">New Chat<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" style="display:inline" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M10 3.5a.5.5 0 0 0-.5-.5H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6.5a.5.5 0 0 0-1 0V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h6.5a.5.5 0 0 0 0-1z"/>
+              <path fill-rule="evenodd" d="M13.354 2.354a.5.5 0 0 1 0 .708l-8 8a.5.5 0 0 1-.708-.708l8-8a.5.5 0 0 1 .708 0z"/>
+          </button>
+        </a>
+
+{% endblock %}
