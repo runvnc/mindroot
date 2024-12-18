@@ -20,5 +20,5 @@ recursive-include src/mindroot/coreplugins/index *
 recursive-include src/mindroot/coreplugins/agent *
 recursive-include src/mindroot/coreplugins/persona *
 recursive-include src/mindroot/coreplugins/login *
-
+recursive-include src/mindroot/lib/plugins *.json
 
