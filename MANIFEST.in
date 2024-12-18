@@ -9,6 +9,7 @@ prune src/ah/models
 recursive-include src/mindroot/coreplugins/agent *.j2
 recursive-include src/mindroot/coreplugins/chat/templates *
 recursive-include src/mindroot/coreplugins/chat/static *
+recursive-include src/mindroot/coreplugins/chat_avatar/inject *
 recursive-include src/mindroot/coreplugins/admin/templates *
 recursive-include src/mindroot/coreplugins/admin/static *
 recursive-include src/mindroot/coreplugins/index/static *

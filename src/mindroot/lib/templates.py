@@ -114,6 +114,7 @@ async def load_plugin_templates(page_name, plugins):
                 print(f'Warning: Could not find path for plugin: {plugin}')
                 continue
  
+            print(f"Loading templates from plugin: {plugin}, path: {plugin_path}")
             # plugin might be name rather than directory
             # get the last part of the path to check also
             #
@@ -132,6 +133,8 @@ async def load_plugin_templates(page_name, plugins):
                         print(f"Found inject template at: {path}")
                         templates.append({'type': 'inject', 'template': env.from_string(f.read())})
                         break
+                else:
+                    print(f"Inject template not found at: {path}")
             
             # Check override templates
             override_paths = [
