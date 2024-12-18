@@ -7,6 +7,7 @@ from .lib import plugins
 import asyncio
 import uvicorn
 from termcolor import colored
+import socket
 
 def get_project_root():
     return Path(__file__).parent
@@ -39,7 +40,6 @@ async def setup_app():
     global app, templates
     app = FastAPI()
     
-    
     root = get_project_root()
     app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory=str(root / "imgs")), name="imgs")
@@ -48,10 +48,32 @@ async def setup_app():
 
     return app
 
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(('0.0.0.0', port))
+            return False
+        except socket.error:
+            return True
+
+def find_available_port(start_port=8010, max_attempts=100):
+    port = start_port
+    while port < start_port + max_attempts:
+        if not is_port_in_use(port):
+            return port
+        port += 1
+    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
+
 def main():
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(setup_app())
-    uvicorn.run(app, host="0.0.0.0", port=8010, lifespan="on")
+    
+    try:
+        port = find_available_port()
+        print(colored(f"Starting server on port {port}", "green"))
+        uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on")
+    except Exception as e:
+        print(colored(f"Error starting server: {str(e)}", "red"))
 
 if __name__ == "__main__":
     main()

@@ -100,7 +100,7 @@ class Chat extends BaseEl {
     // this.sse.addEventListener('new_message', this._aiMessage.bind(this));
     const thisPartial = this._partialCmd.bind(this)
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', throttle(thisPartial, 20) ) //  this._partialCmd.bind(this));
+    this.sse.addEventListener('partial_command', thisPartial);// throttle(thisPartial, 2) ) //  this._partialCmd.bind(this));
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
     this.sse.addEventListener('finished_chat', this._finished.bind(this));

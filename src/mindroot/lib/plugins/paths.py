@@ -29,8 +29,8 @@ def _find_core_plugin_path(plugin_name):
         
     # Try to find installed package
     try:
-        import xingen
-        pkg_path = os.path.dirname(xingen.__file__)
+        import mindroot
+        pkg_path = os.path.dirname(mindroot.__file__)
         installed_path = os.path.join(pkg_path, 'coreplugins', plugin_name)
         if os.path.exists(installed_path):
             print(f"Found core plugin {plugin_name} in installed path: {installed_path}")
@@ -41,7 +41,7 @@ def _find_core_plugin_path(plugin_name):
     # Try site-packages directly
     for path in sys.path:
         if 'site-packages' in path or 'dist-packages' in path:
-            potential_path = os.path.join(path, 'xingen', 'coreplugins', plugin_name)
+            potential_path = os.path.join(path, 'mindroot', 'coreplugins', plugin_name)
             if os.path.exists(potential_path):
                 print(f"Found core plugin {plugin_name} in site-packages: {potential_path}")
                 return potential_path

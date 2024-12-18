@@ -237,7 +237,7 @@ async def subscribe_to_agent_messages(session_id: str, context=None):
         try:
             while True:
                 data = await queue.get()
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.005)
                 print('.', end='', flush=True)
                 yield data
         except asyncio.CancelledError:
