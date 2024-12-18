@@ -1,8 +1,8 @@
 
-XinGen
+Mindroot
 ======
 
-![XinGen](src/xingen/coreplugins/chat/static/mindroot.png)
+![XinGen](src/mindroot/coreplugins/chat/static/mindroot.png)
 
 [![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
 
