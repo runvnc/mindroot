@@ -14,7 +14,7 @@
         "source": "core"
       },
       "chat_avatar": {
-        "enabled": false,
+        "enabled": true,
         "source": "core"
       }, 
       "agent": {
