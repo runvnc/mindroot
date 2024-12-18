@@ -2,7 +2,7 @@
 Mindroot
 ======
 
-![XinGen](src/mindroot/coreplugins/chat/static/mindroot.png)
+![Mindroot](src/mindroot/coreplugins/chat/static/mindroot_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/v/xingen)](https://pypi.org/project/xingen/)
 
