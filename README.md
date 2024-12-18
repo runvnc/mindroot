@@ -1,19 +1,16 @@
 
 Mindroot
-======
-
-![Mindroot](src/mindroot/coreplugins/chat/static/mindroot_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/v/mindroot)](https://pypi.org/project/mindroot/)
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
 
-mindroot is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
+Mindroot is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
 
 Installation
 ------------
 
-You can install mindroot using pip:
+You can install Mindroot using pip:
 
 ```bash
 pip install mindroot
