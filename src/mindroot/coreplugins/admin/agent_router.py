@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import json
 from .agent_importer import scan_and_import_agents, import_github_agent
-from .persona_handler import handle_persona_import
+from .persona_handler import handle_persona_import, import_persona_from_index
 
 router = APIRouter()
 
@@ -87,16 +87,21 @@ def create_agent(scope: str, agent: str = Form(...)):
         agent_data = json.loads(agent)
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
-        
+
+       
         agent_name = agent_data.get('name')
         if not agent_name:
             raise HTTPException(status_code=400, detail='Agent name is required')
-            
-        # Handle persona if present
+
+        if agent_data["indexName"] is not None:
+            print("Import agent from index: " + agent_data["indexName"])
+            import_persona_from_index(agent_data["indexName"], agent_data['persona'])
+
         if 'persona' in agent_data:
             # This will either return the persona name or handle the import
             # and return the name
             persona_name = handle_persona_import(agent_data['persona'], scope)
+ 
             agent_data['persona'] = persona_name
             
         agent_path = BASE_DIR / scope / agent_name / 'agent.json'
@@ -109,7 +114,8 @@ def create_agent(scope: str, agent: str = Form(...)):
             
         return {'status': 'success'}
     except Exception as e:
-        raise HTTPException(status_code=500, detail='Internal server error ' + str(e))
+        trace = traceback.format_exc()
+        raise HTTPException(status_code=500, detail='Internal server error ' + str(e) + "\n" + trace)
 
 @router.put('/agents/{scope}/{name}')
 def update_agent(scope: str, name: str, agent: str = Form(...)):

@@ -2,10 +2,28 @@ from pathlib import Path
 import json
 import logging
 from fastapi import HTTPException
+import shutil
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def import_persona_from_index(index: str, persona: str):
+    """Import a persona from the persona index.
+    Args:
+        index: Path to the persona index file
+        persona: Name of the persona to import
+    """
+    print("import_persona_from_index")
+    print("index = ", index)
+    print("persona = ", persona)
+    # copy dir from indices/{index}/personas/{persona}
+    # to personas/local/{persona}
+    index_path = Path('indices') / index / 'personas' / persona
+    persona_path = Path('personas') / 'local' / persona
+    shutil.copytree(index_path, persona_path)
+    logger.info(f"Successfully imported persona '{persona}' from index '{index}'")
+    print("Successfully imported persona", persona, "from index", index)
+
 
 def handle_persona_import(persona_data: dict, scope: str) -> str:
     """Handle importing a persona from embedded data in agent configuration.
