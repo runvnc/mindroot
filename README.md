@@ -25,6 +25,24 @@ cd mindroot
 pip install -e .
 ```
 
+Starting the Server
+-------------------
+
+Go to the directory with the virtual environment and run:
+
+```bash 
+mindroot
+```
+
+or if you want to start the server on a different port:
+```bash
+mindroot -p 8001
+```
+
+Note that you will always need to start from that working directory if you want your
+settings to be preserved.
+
+
 Installing Plugins
 ------------------
 
