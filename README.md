@@ -12,6 +12,7 @@ Installation
 
 You can install Mindroot using pip:
 
+(You probably want to create a virtual environment first: `python -m venv venv` and `source venv/bin/activate`)
 ```bash
 pip install mindroot
 ```
@@ -24,8 +25,39 @@ cd mindroot
 pip install -e .
 ```
 
+Installing Plugins
+------------------
+
+Most of the commands are in plugins that you have to install.
+Go to the /admin page and find the Plugins section
+Click on the 'default' Index
+It should show a list of Plugins
+I suggest installing all of them.
+
+The first would be either Anthropic (recommended) or OpenAI
+
+*Important: You will need either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set in your environment variables.*
+
+To install a plugin just click the Install button and wait 10-20 seconds and you will see a confirmation pop up.
+
+**Important: You will need to restart the server to see the changes.**
+
+For now I recommend not using the Server control section on the Admin page but rather just
+hit Control-C in the terminal and then run `mindroot` again.
+
+
+Adding Commands to Agents
+-------------------------
+
+Go to Admin -> Agents
+Select an agent from the drop down, such as Assistant
+
+There are toggle switches for all of the commands. I recommend avoiding the 'replace_' commands
+in files for now because they are not reliable.
+
 
 Key Features:
+-------------
 
 - Public registry for sharing and finding plugins, agents, personas, models, and knowledgebases
   - https://registry.agenthost.org (work in progress)
