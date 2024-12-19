@@ -128,8 +128,8 @@ class ServerControl extends BaseEl {
         this.status = result.message;
         this.method = result.method;
         
-        // For PM2 and xingen methods, we'll reload after a delay
-        if (result.method === 'pm2' || result.method === 'xingen') {
+        // For PM2 and mindroot methods, we'll reload after a delay
+        if (result.method === 'pm2' || result.method === 'mindroot') {
           setTimeout(() => {
             this.status = 'Attempting to reconnect...';
             window.location.reload();

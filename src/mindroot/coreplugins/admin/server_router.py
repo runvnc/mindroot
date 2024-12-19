@@ -17,11 +17,11 @@ def get_start_method():
         print("Debug - Current process command line: ", cmdline)
         
         # Look for 'xingen' in our own command line
-        if 'xingen' in cmdline_str:
+        if 'mindroot' in cmdline_str:
             # Check if we're under PM2 by environment or parent process tree
             if 'PM2_HOME' in os.environ or any('pm2' in p.name().lower() for p in current_process.parents()):
                 return 'pm2'
-            return 'xingen'
+            return 'mindroot'
             
         return 'unknown'
     except Exception as e:
@@ -44,14 +44,14 @@ import subprocess
 import sys
 import os
 
-time.sleep(2)  # Wait for old server to fully shutdown
+time.sleep(2.5)  # Wait for old server to fully shutdown
 
 try:
     cmd = {original_cmd!r}
-    print("Restarting xingen with command:", cmd)
+    print("Restarting mindroot with command:", cmd)
     subprocess.run(cmd, check=True)
 except Exception as e:
-    print(f"Error restarting xingen: {{e}}")
+    print(f"Error restarting mindroot: {{e}}")
     sys.exit(1)
 finally:
     # Clean up this temporary script
@@ -91,7 +91,7 @@ async def restart_server():
         if method == 'pm2':
             # PM2 will handle the restart automatically
             message = "Server stopping - PM2 will automatically restart it"
-        elif method == 'xingen':
+        elif method == 'mindroot':
             # Spawn process to restart server
             if spawn_restart():
                 message = "Server stopping - restart process initiated"

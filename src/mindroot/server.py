@@ -8,6 +8,13 @@ import asyncio
 import uvicorn
 from termcolor import colored
 import socket
+# actually need a good way to part commmand line args
+
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(description="Run the server")
+    parser.add_argument("-p", "--port", type=int, help="Port to run the server on")
+    return parser.parse_args()
 
 def get_project_root():
     return Path(__file__).parent
@@ -69,7 +76,11 @@ def main():
     app = loop.run_until_complete(setup_app())
     
     try:
-        port = find_available_port()
+        port = 8010
+        cmd_args = parse_args()
+        if cmd_args.port:
+            port = cmd_args.port
+
         print(colored(f"Starting server on port {port}", "green"))
         uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on")
     except Exception as e:

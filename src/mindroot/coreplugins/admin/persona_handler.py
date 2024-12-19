@@ -20,7 +20,9 @@ def import_persona_from_index(index: str, persona: str):
     # to personas/local/{persona}
     index_path = Path('indices') / index / 'personas' / persona
     persona_path = Path('personas') / 'local' / persona
+    print("Copying persona from", index_path, "to", persona_path)
     shutil.copytree(index_path, persona_path)
+    
     logger.info(f"Successfully imported persona '{persona}' from index '{index}'")
     print("Successfully imported persona", persona, "from index", index)
 

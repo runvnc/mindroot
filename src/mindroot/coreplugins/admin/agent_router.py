@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 from .agent_importer import scan_and_import_agents, import_github_agent
 from .persona_handler import handle_persona_import, import_persona_from_index
+import traceback
 
 router = APIRouter()
 
