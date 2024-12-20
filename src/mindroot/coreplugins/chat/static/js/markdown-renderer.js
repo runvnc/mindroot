@@ -7,23 +7,23 @@ class MarkdownRenderer {
         // Configure marked with custom renderer
         const renderer = {
             code: (code, language) => {
+                let text = code.text
                 try {                    
                     console.log('Highlighting code:', code);
-                    let text = code.text
                     const lang = code.lang
                     if (!lang) {
                       const result = hljs.highlightAuto(text)
                       return `<pre><code class="hljs">${result.value}</code></pre>`;
                     } else if (lang == 'math') {
-                      text = katex.renderToString(text), { throwOnError: false, displayMode: true }
+                      text = katex.renderToString(text), { throwOnError: true, displayMode: false }
                       return `<p>${text}</p>`;
                     } else {
-                      const result = hljs.highlight(lang, code);
+                      const result = hljs.highlight(lang, text);
                       return `<pre><code class="hljs">${result.value}</code></pre>`;
                     }
                 } catch (e) {
                     console.warn('Highlighting failed:', e);
-                    return `<p>${text}</p>`;
+                    return ''// `<p>${text}</p>`;
                 }
             }
         };
