@@ -77,7 +77,19 @@ async def json_encoded_md(markdown="", context=None):
 
     markdown - String. Insert using RAW mode.
 
-    # Example
+    Note that you can use Katex for math rendering in markdown, but remember to
+    use 'aligned' instead of 'align'. Also, use inline mode instead of
+    display mode, as display mode will not always render correctly.
+
+    Also, IMPORTANT: if you need to do other formatting in math sections such as
+    a list of steps or a table, use the KaTeX formatting for this 
+    rather than trying to add LaTeX in the middle of markdown lists
+    or tables etc.
+
+    Also, you can use HTML in the typical way it is inserted into markdown,
+    including, for example, embedding YouTube videos.
+
+    # Basic Example
 
         { "json_encoded_md":
           { "markdown": START_RAW
@@ -94,6 +106,12 @@ async def json_encoded_md(markdown="", context=None):
     """
     #await context.agent_output("new_message", {"content": markdown,
     #                                        "agent": context.agent['name'] })
+
+zz="""
+Avoid putting LaTeX math expressions directly after list markers (1., -, *) - add some regular text first
+
+    Avoid putting LaTeX math expressions at the very start of a line - add some text before it
+"""
 
 @command()
 async def insert_image(image_url, context=None):

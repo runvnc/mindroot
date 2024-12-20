@@ -8,17 +8,96 @@ import {escapeJsonForHtml} from './property-escape.js'
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
 import { getAccessToken } from './auth.js';
 
-const marked = new Marked(
-  markedHighlight({
-    langPrefix: 'hljs language-',
-    highlight(code, lang, info) {
-      console.log('highlighting code:', code, lang, info)
-      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-      return code;
-      //return hljs.highlight(code, { language }).value;
+// Wait for KaTeX to be loaded
+let katexLoaded = false;
+window.addEventListener('load', () => {
+  if (typeof katex !== 'undefined') {
+    katexLoaded = true;
+    console.log('KaTeX loaded successfully');
+  } else {
+    console.warn('KaTeX not loaded');
+  }
+});
+
+// Custom renderer for marked
+const renderer = {
+  code(code, language) {
+    console.log({code, language})
+    if (true || (language === 'math' && katexLoaded)) {
+      try {
+        if (typeof code !== 'string') {
+          code = code.raw;
+        }
+        return katex.renderToString(code, {
+          throwOnError: false,
+          displayMode: false // true
+        });
+      } catch (e) {
+        console.warn('KaTeX rendering failed:', e);
+        //return `<pre><code class="math">${code}</code></pre>`;
+      }
     }
-  })
-)
+    const highlightedCode = hljs.highlightAuto(code).value
+    /* const highlightedCode = hljs.getLanguage(language) 
+      ? hljs.highlight(code, { language }).value 
+      : hljs.highlight(code, { language: 'plaintext' }).value; */
+    return `<pre><code class="hljs language-${language}">${highlightedCode}</code></pre>`;
+  },
+  paragraph(token) {
+    // Extract text from token object
+    let text;
+    if (typeof token === 'string') {
+      text = token;
+    } else if (token && token.text) {
+      text = token.text;
+    } else if (token && token.raw) {
+      text = token.raw;
+    } else {
+      console.warn('Unhandled token type in paragraph renderer:', token);
+      return '<p></p>';
+    }
+
+    const rendered = katex.renderToString(text, { throwOnError: false });
+    return `<p>${rendered}</p>`;
+
+    // Handle inline math if KaTeX is loaded
+    /* if (katexLoaded) {
+      text = text.replace(/\$([^\$]+?)\$/g, (match, math) => {
+        try {
+          return katex.renderToString(math.trim(), {
+            throwOnError: false,
+            displayMode: false
+          });
+        } catch (e) {
+          console.warn('KaTeX inline rendering failed:', e);
+          return match;
+        }
+      });
+    }
+    return `<p>${text}</p>`;*/
+  }
+};
+
+const marked = new Marked({
+  renderer,
+  extensions: [{
+    name: 'math',
+    level: 'block',
+    start(src) { return src.match(/^\$\$/)?.index; },
+    tokenizer(src) {
+      const match = src.match(/^\$\$([\s\S]+?)\$\$/);
+      if (match) {
+        return {
+          type: 'code',
+          raw: match[0],
+          text: match[1].trim(),
+          lang: 'math'
+        };
+      }
+      return false;
+    }
+  }]
+});
 
 // Global object to store command handlers
 const commandHandlers = {};
@@ -29,38 +108,19 @@ window.registerCommandHandler = function(command, handler) {
 }
 
 function tryParse(markdown) {
+    if (typeof markdown !== 'string') {
+      console.warn('Received non-string markdown in tryParse:', markdown);
+      markdown = String(markdown);
+    }
     try {
       console.log('markdown =', markdown);
-      // Handle code blocks separately
-      const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-      const codeBlocks = [];
-      markdown = markdown.replace(codeBlockRegex, (match, lang, code) => {
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        const highlightedCode = hljs.highlight(code.trim(), { language }).value;
-        const highlightedBlock = `
-${highlightedCode}
-`;
-        codeBlocks.push(highlightedBlock);
-        return `CODEBLOCK${codeBlocks.length - 1}`;
-      });
-      
-      // Parse the markdown
       let parsed = marked.parse(markdown + "\n", { sanitize: false });
-      
-      // Replace code block placeholders
-      codeBlocks.forEach((block, index) => {
-        parsed = parsed.replace(`CODEBLOCK${index}`,
-        `<pre><code>${block}</code></pre>`);
-      });
       return parsed;
     } catch (e) {
-      console.warn(e);
-      return `
-${markdown}
-`;
+      console.warn('Markdown parsing failed:', e);
+      return `<pre><code>${markdown}</code></pre>`;
     }
 }
-
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
@@ -84,7 +144,6 @@ class Chat extends BaseEl {
     window.userScrolling = false;
     console.log('Chat component created');
     console.log(this);
-    //this.requestUpdate = throttle(this.requestUpdate, 500)
   }
 
   shouldShowAvatar(sender) {
@@ -97,10 +156,9 @@ class Chat extends BaseEl {
     console.log('First updated');
     console.log('sessionid: ', this.sessionid);
     this.sse = new EventSource(`/chat/${this.sessionid}/events`);
-    // this.sse.addEventListener('new_message', this._aiMessage.bind(this));
     const thisPartial = this._partialCmd.bind(this)
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', thisPartial);// throttle(thisPartial, 2) ) //  this._partialCmd.bind(this));
+    this.sse.addEventListener('partial_command', thisPartial);
     this.sse.addEventListener('running_command', this._runningCmd.bind(this));
     this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
     this.sse.addEventListener('finished_chat', this._finished.bind(this));
@@ -112,21 +170,32 @@ class Chat extends BaseEl {
       if (this.shadowRoot.querySelector('.chat-log').scrollTop == this.shadowRoot.querySelector('.chat-log').scrollHeight - this.shadowRoot.querySelector('.chat-log').clientHeight) {
         this.userScrolling = false;
         window.userScrolling = false;
-
       } else {
         this.userScrolling = true;
         window.userScrolling = true;
       }
     })
-    this.loadHistory()
+
+    // Check if KaTeX is loaded every 100ms for up to 5 seconds
+    let attempts = 0;
+    const checkKaTeX = setInterval(() => {
+      if (typeof katex !== 'undefined') {
+        katexLoaded = true;
+        console.log('KaTeX loaded successfully');
+        clearInterval(checkKaTeX);
+        this.loadHistory();
+      } else if (attempts++ > 50) {
+        console.warn('KaTeX failed to load after 5 seconds');
+        clearInterval(checkKaTeX);
+        this.loadHistory();
+      }
+    }, 100);
   }
 
   async loadHistory() {
-    // output status message in cyan
     console.log('%cLoading chat history...', 'color: cyan')
     const response = await fetch(`/history/${this.sessionid}`);
     const data = await response.json();
-    // output data in cyan also
     console.log('%cHistory loaded:', 'color: cyan', data)
     for (let msg of data) {
       if (msg.role == 'assistant') {
@@ -146,11 +215,9 @@ class Chat extends BaseEl {
           } catch (e) {
             this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
             window.initializeCodeCopyButtons();
-
           }
         } else {
           if (part.type == 'image') {
-            // TODO: show images
             continue
           }
           const cmds = JSON.parse(part.text);
@@ -158,7 +225,7 @@ class Chat extends BaseEl {
           for (let cmd of cmds) {
             let md = null
             if (cmd.say) md = tryParse(cmd.say.text)
-            if (cmd.json_encoded_md) md =  tryParse(cmd.json_encoded_md.markdown)
+            if (cmd.json_encoded_md) md = tryParse(cmd.json_encoded_md.markdown)
             if (md) {
               this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
               window.initializeCodeCopyButtons();
@@ -199,7 +266,7 @@ class Chat extends BaseEl {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(content )
+        body: JSON.stringify(content)
       });
 
       fetch(request).then(response => {
@@ -221,13 +288,13 @@ class Chat extends BaseEl {
       this._scrollToBottom();
     }, 100)
   }
+
   _finished(event) {
     console.log('Chat finished');
     this.task_id = null
     this.userScrolling = false;
     this._scrollToBottom()
   }
-
 
   _partialCmd(event) {
     console.log('Event received');
@@ -239,7 +306,6 @@ class Chat extends BaseEl {
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
       this.startNewMsg = false
     }
-    //this.messages[this.messages.length - 1].spinning = 'no'
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       if (data.params.text) {
@@ -269,7 +335,6 @@ class Chat extends BaseEl {
         console.warn('No handler for command:', data.command)
       }
 
-
       if (typeof(data.params) == 'array') {
         data.params = {"val": data.params}
       } else if (typeof(data.params) == 'string') {
@@ -298,7 +363,6 @@ class Chat extends BaseEl {
     console.log(event);
     this.requestUpdate();
 
-
     console.log("command result (actually running command)", event)
     const data = JSON.parse(event.data);
     data.event = 'running'
@@ -310,9 +374,7 @@ class Chat extends BaseEl {
       console.warn('No handler for command:', data.command)
     }
     window.initializeCodeCopyButtons();
-
     this.requestUpdate();
-
   }
 
   _cmdResult(event) {
@@ -328,7 +390,6 @@ class Chat extends BaseEl {
       console.log('Spinner set to false:', msg);
     }
     window.initializeCodeCopyButtons();
-
     this.requestUpdate();
   }
 
@@ -380,5 +441,3 @@ class Chat extends BaseEl {
 }
 
 customElements.define('chat-ai', Chat);
-
-//
