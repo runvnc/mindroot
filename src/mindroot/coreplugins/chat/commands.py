@@ -78,8 +78,8 @@ async def json_encoded_md(markdown="", context=None):
     markdown - String. Insert using RAW mode.
 
     Note that you can use Katex for math rendering in markdown, but remember to
-    use 'aligned' instead of 'align'. Also, use inline mode instead of
-    display mode, as display mode will not always render correctly.
+    use 'aligned' instead of 'align'. Always use 'math' code blocks for this.
+    Be careful of limitations with KaTeX such as macros etc.
 
     Also, IMPORTANT: if you need to do other formatting in math sections such as
     a list of steps or a table, use the KaTeX formatting for this 

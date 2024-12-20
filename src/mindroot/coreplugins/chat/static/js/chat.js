@@ -1,103 +1,12 @@
 import { LitElement, html, css } from './lit-core.min.js';
 import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
-import { Marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 import { BaseEl } from './base.js';
 import { throttle } from './throttle.js';
 import './action.js';
-import {escapeJsonForHtml} from './property-escape.js'
-import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
+import { escapeJsonForHtml } from './property-escape.js';
 import { getAccessToken } from './auth.js';
-
-// Wait for KaTeX to be loaded
-let katexLoaded = false;
-window.addEventListener('load', () => {
-  if (typeof katex !== 'undefined') {
-    katexLoaded = true;
-    console.log('KaTeX loaded successfully');
-  } else {
-    console.warn('KaTeX not loaded');
-  }
-});
-
-// Custom renderer for marked
-const renderer = {
-  code(code, language) {
-    console.log({code, language})
-    if (true || (language === 'math' && katexLoaded)) {
-      try {
-        if (typeof code !== 'string') {
-          code = code.raw;
-        }
-        return katex.renderToString(code, {
-          throwOnError: false,
-          displayMode: false // true
-        });
-      } catch (e) {
-        console.warn('KaTeX rendering failed:', e);
-        //return `<pre><code class="math">${code}</code></pre>`;
-      }
-    }
-    const highlightedCode = hljs.highlightAuto(code).value
-    /* const highlightedCode = hljs.getLanguage(language) 
-      ? hljs.highlight(code, { language }).value 
-      : hljs.highlight(code, { language: 'plaintext' }).value; */
-    return `<pre><code class="hljs language-${language}">${highlightedCode}</code></pre>`;
-  },
-  paragraph(token) {
-    // Extract text from token object
-    let text;
-    if (typeof token === 'string') {
-      text = token;
-    } else if (token && token.text) {
-      text = token.text;
-    } else if (token && token.raw) {
-      text = token.raw;
-    } else {
-      console.warn('Unhandled token type in paragraph renderer:', token);
-      return '<p></p>';
-    }
-
-    const rendered = katex.renderToString(text, { throwOnError: false });
-    return `<p>${rendered}</p>`;
-
-    // Handle inline math if KaTeX is loaded
-    /* if (katexLoaded) {
-      text = text.replace(/\$([^\$]+?)\$/g, (match, math) => {
-        try {
-          return katex.renderToString(math.trim(), {
-            throwOnError: false,
-            displayMode: false
-          });
-        } catch (e) {
-          console.warn('KaTeX inline rendering failed:', e);
-          return match;
-        }
-      });
-    }
-    return `<p>${text}</p>`;*/
-  }
-};
-
-const marked = new Marked({
-  renderer,
-  extensions: [{
-    name: 'math',
-    level: 'block',
-    start(src) { return src.match(/^\$\$/)?.index; },
-    tokenizer(src) {
-      const match = src.match(/^\$\$([\s\S]+?)\$\$/);
-      if (match) {
-        return {
-          type: 'code',
-          raw: match[0],
-          text: match[1].trim(),
-          lang: 'math'
-        };
-      }
-      return false;
-    }
-  }]
-});
+import { markdownRenderer } from './markdown-renderer.js';
+import { ChatHistory } from './chat-history.js';
 
 // Global object to store command handlers
 const commandHandlers = {};
@@ -108,19 +17,10 @@ window.registerCommandHandler = function(command, handler) {
 }
 
 function tryParse(markdown) {
-    if (typeof markdown !== 'string') {
-      console.warn('Received non-string markdown in tryParse:', markdown);
-      markdown = String(markdown);
-    }
-    try {
-      console.log('markdown =', markdown);
-      let parsed = marked.parse(markdown + "\n", { sanitize: false });
-      return parsed;
-    } catch (e) {
-      console.warn('Markdown parsing failed:', e);
-      return `<pre><code>${markdown}</code></pre>`;
-    }
+    //return renderMarkdown(markdown)
+    return markdownRenderer.parse(markdown);
 }
+
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
@@ -143,6 +43,7 @@ class Chat extends BaseEl {
     this.lastSender = null;
     window.userScrolling = false;
     console.log('Chat component created');
+    this.history = new ChatHistory(this);
     console.log(this);
   }
 
@@ -167,75 +68,19 @@ class Chat extends BaseEl {
     this.shadowRoot.querySelector('.chat-log').addEventListener('scroll', () => {
       let chatLog = this.shadowRoot.querySelector('.chat-log');
 
-      if (this.shadowRoot.querySelector('.chat-log').scrollTop == this.shadowRoot.querySelector('.chat-log').scrollHeight - this.shadowRoot.querySelector('.chat-log').clientHeight) {
+      if (chatLog.scrollTop == chatLog.scrollHeight - chatLog.clientHeight) {
         this.userScrolling = false;
         window.userScrolling = false;
       } else {
         this.userScrolling = true;
         window.userScrolling = true;
       }
-    })
+    });
 
-    // Check if KaTeX is loaded every 100ms for up to 5 seconds
-    let attempts = 0;
-    const checkKaTeX = setInterval(() => {
-      if (typeof katex !== 'undefined') {
-        katexLoaded = true;
-        console.log('KaTeX loaded successfully');
-        clearInterval(checkKaTeX);
-        this.loadHistory();
-      } else if (attempts++ > 50) {
-        console.warn('KaTeX failed to load after 5 seconds');
-        clearInterval(checkKaTeX);
-        this.loadHistory();
-      }
+    // Load history after a short delay to ensure components are ready
+    setTimeout(() => {
+      this.history.loadHistory();
     }, 100);
-  }
-
-  async loadHistory() {
-    console.log('%cLoading chat history...', 'color: cyan')
-    const response = await fetch(`/history/${this.sessionid}`);
-    const data = await response.json();
-    console.log('%cHistory loaded:', 'color: cyan', data)
-    for (let msg of data) {
-      if (msg.role == 'assistant') {
-        console.log({msg})
-      }
-      for (let part of msg.content) {
-        console.log({part})
-        if (!part.text) continue
-        if (part.text.startsWith('[SYSTEM]') || part.text.startsWith('SYSTEM]')) {
-          continue
-        }
-        if (part.text.startsWith('SYSTEM')) continue
-        if (msg.role == 'user') {
-          try {
-            const cmds = JSON.parse(part.text);
-            continue
-          } catch (e) {
-            this.messages = [...this.messages, { content: part.text, sender:'user', persona: msg.persona }];
-            window.initializeCodeCopyButtons();
-          }
-        } else {
-          if (part.type == 'image') {
-            continue
-          }
-          const cmds = JSON.parse(part.text);
-          console.log('cmd:', cmds)
-          for (let cmd of cmds) {
-            let md = null
-            if (cmd.say) md = tryParse(cmd.say.text)
-            if (cmd.json_encoded_md) md = tryParse(cmd.json_encoded_md.markdown)
-            if (md) {
-              this.messages = [...this.messages, { content: md, sender:'ai', persona: msg.persona }];
-              window.initializeCodeCopyButtons();
-              console.log("Added message:", md)
-            } 
-          }
-        }
-      }
-    }
-    window.initializeCodeCopyButtons();
   }
 
   _addMessage(event) {
@@ -316,9 +161,9 @@ class Chat extends BaseEl {
         this.msgSoFar = data.params
       }
       try {
-        this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar+'');
+        this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar);
       } catch (e) {
-        console.error("Marked: could not parse:", e)
+        console.error("Could not parse markdown:", e)
         console.log('msgSoFar:')
         console.log(this.msgSoFar)
         this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
