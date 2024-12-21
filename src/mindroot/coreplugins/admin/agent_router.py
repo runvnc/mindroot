@@ -94,7 +94,7 @@ def create_agent(scope: str, agent: str = Form(...)):
         if not agent_name:
             raise HTTPException(status_code=400, detail='Agent name is required')
 
-        if agent_data["indexName"] is not None:
+        if "indexName" in agent_data and agent_data["indexName"] is not None:
             print("Import agent from index: " + agent_data["indexName"])
             import_persona_from_index(agent_data["indexName"], agent_data['persona'])
 
