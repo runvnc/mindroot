@@ -144,6 +144,7 @@ class Chat extends BaseEl {
   _partialCmd(event) {
     console.log('Event received');
     console.log(event);
+    let content = null
     const data = JSON.parse(event.data);
     console.log("data:", data)
     if (this.messages[this.messages.length - 1].sender != 'ai' || this.startNewMsg) {
@@ -174,7 +175,7 @@ class Chat extends BaseEl {
       if (handler) {
         data.event = 'partial'
         console.log('handler:', handler)
-        handler(data);
+        content = handler(data);
         this.requestUpdate();
       } else {
         console.warn('No handler for command:', data.command)
@@ -189,11 +190,14 @@ class Chat extends BaseEl {
       }
       const paramStr = JSON.stringify(data.params)
       const escaped = escapeJsonForHtml(paramStr)
-
-      this.messages[this.messages.length - 1].content = `
-        <action-component funcName="${data.command}" params="${escaped}" 
-                          result="">
-        </action-component>`;
+      if (content) {
+        this.messages[this.messages.length - 1].content = content
+      } else {
+        this.messages[this.messages.length - 1].content = `
+         <action-component funcName="${data.command}" params="${escaped}" 
+                             result="">
+          </action-component>`;
+      }
     }
     this.requestUpdate();
     this._scrollToBottom()
