@@ -17,7 +17,8 @@ def parse_args():
     return parser.parse_args()
 
 def get_project_root():
-    return Path(__file__).parent
+    return Path(os.getcwd())
+    #return Path(__file__).parent
 
 def create_directories():
     root = get_project_root()
@@ -48,10 +49,9 @@ async def setup_app():
     app = FastAPI()
     
     root = get_project_root()
-    app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
-    app.mount("/imgs", StaticFiles(directory=str(root / "imgs")), name="imgs")
-
     await plugins.load(app=app)
+    app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
+    app.mount("/imgs", StaticFiles(directory=str(root / "imgs"), follow_symlink=True), name="imgs")
 
     return app
 
