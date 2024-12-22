@@ -25,6 +25,11 @@ cd mindroot
 pip install -e .
 ```
 
+Configuration
+-------------
+
+You will need to set environment variables like JWT_SECRET_KEY (anything you want) and LLM provider keys etc.
+
 Starting the Server
 -------------------
 
