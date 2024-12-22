@@ -10,8 +10,7 @@
   {% endblock %}
 
   {% block head_styles %}
-  <link rel="stylesheet" href="/chat/static/css/reset.css">
-  <link rel="stylesheet" href="/chat/static/css/default.css">
+  <link rel="stylesheet" href="/chat/static/css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
   {% endblock %}
@@ -26,6 +25,7 @@
   <script type="module" src="/chat/static/js/action.js"></script>
   <script type="module" src="/chat/static/js/chat.js"></script>
   <script type="module" src="/chat/static/js/plugin-toggle.js"></script>
+  <script type="module" src="/chat/static/js/mobile-menu.js"></script>
   {% endblock %}
 
   {% block head_favicon %}
@@ -47,6 +47,9 @@
   </script>
   {% endblock %}
  
+  <button class="hamburger-menu">☰</button>
+  <div class="menu-overlay"></div>
+
   <div class="page-container">
     <div class="left-side">
       {% block pre_content %}

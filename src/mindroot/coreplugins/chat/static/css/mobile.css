@@ -1,0 +1,149 @@
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+  .page-container {
+    position: relative;
+  }
+  
+  .left-side {
+    position: fixed;
+    left: -280px; /* Start off-screen */
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    background: #101020;
+    z-index: 1000;
+    transition: transform 0.3s ease-out;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+    padding: 20px;
+    padding-top: 70px; /* Added extra padding for the hamburger menu */
+    overflow-y: auto;
+  }
+  
+  .left-side.active {
+    transform: translateX(280px);
+  }
+  
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.3s ease-out;
+    opacity: 0;
+  }
+  
+  .menu-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+  
+  .hamburger-menu {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    padding: 10px 15px;
+    background: linear-gradient(145deg, #4a5eff, #2e41e3);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.5em;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .hamburger-menu:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    background: linear-gradient(145deg, #5a6eff, #3e51f3);
+  }
+
+  .hamburger-menu:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  /* Adjust main content when menu is open */
+  .main {
+    transition: transform 0.3s ease-out;
+  }
+
+  .menu-active .main {
+    transform: translateX(280px);
+  }
+
+  /* Hide hamburger when menu is open */
+  .menu-active .hamburger-menu {
+    display: none;
+  }
+
+  /* Additional mobile optimizations */
+  .chat-log {
+    padding-right: 8px;
+  }
+
+  chat-message {
+    max-width: 85%;
+  }
+
+  /* Responsive image handling */
+  chat-message img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: 10px 0;
+  }
+
+  /* Special handling for hover-zoom images */
+  chat-message .hover-zoom {
+    max-width: 100%;
+    height: auto;
+  }
+
+  chat-message .hover-zoom:hover {
+    transform: none; /* Disable the zoom on mobile */
+    cursor: pointer; /* Indicate it's tappable */
+  }
+
+  /* Handle message container width */
+  .message-container {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Ensure content doesn't overflow */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Adjust message padding for better image fit */
+  .msg-ai, .msg-user {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+  }
+
+  /* Ensure images in markdown content are also responsive */
+  .message p img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+}
+
+/* Larger tablets and desktop adjustments */
+@media screen and (min-width: 769px) {
+  .hamburger-menu, .menu-overlay {
+    display: none;
+  }
+}

@@ -8,7 +8,7 @@ export class BaseEl extends LitElement {
 
   constructor() {
     super();
-    this.theme = window.theme ? window.theme : 'default'
+    this.theme = window.theme ? window.theme : 'main' // default
   }
 
   /**
@@ -40,6 +40,7 @@ export class BaseEl extends LitElement {
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
       <link rel="stylesheet" href="/chat/static/css/${this.theme}.css">
       <link rel="stylesheet" href="/chat/static/css/admin-custom.css">
+      <link rel="stylesheet" href="/chat/static/css/mobile.css">
       ${this._render()}
     `;
   }

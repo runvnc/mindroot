@@ -1,0 +1,4 @@
+/* Import base styles */
+@import url('reset.css');
+@import url('default.css');
+@import url('mobile.css');
