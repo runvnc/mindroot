@@ -73,7 +73,12 @@ class ProviderManager:
         if preferred_models is not None:
             if len(preferred_models) > 0:
                 print("preferred models:", preferred_models)
-                preferred_provider = preferred_models[0]['provider']
+                try:
+                    preferred_provider = preferred_models[0]['provider']
+                except KeyError:
+                    print("provider key not found in preferred model")
+                    print("preferred model:", preferred)
+                    preferred_provider = None
 
         function_info = None
 
