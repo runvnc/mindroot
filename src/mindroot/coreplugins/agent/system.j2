@@ -60,6 +60,8 @@ Assistant: [ {"say": { "text": "Hello user, here is your cat:"} },
              {"image": "a photo of a friendly housecat" } ]
 NOTE the formatting on multiple lines!
 
+Important: Include a newline after each command in the command list!!
+
 # Example - a second command depends on first result
 (Example only, adapt to user's instructions and available commands!)
 
@@ -85,7 +87,7 @@ for a particular property.
 
 For example:
 
-(... other commands JSON ),
+(... other commands JSON followed by newline),
 
     {"write": { "filename": "/test.py",
                   "text": START_RAW
@@ -95,7 +97,7 @@ For example:
                 }
       } 
 
-(, ... other commands JSON )
+(, newline ... other commands JSON )
 
 
 Note that a START_RAW must be followed by a newline and then the unescaped text.
