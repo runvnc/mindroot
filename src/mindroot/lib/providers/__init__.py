@@ -77,7 +77,7 @@ class ProviderManager:
                     preferred_provider = preferred_models[0]['provider']
                 except KeyError:
                     print("provider key not found in preferred model")
-                    print("preferred model:", preferred)
+                    print("preferred model:", preferred_models[0])
                     preferred_provider = None
 
         function_info = None
