@@ -30,10 +30,21 @@ def replace_raw_blocks(jsonish):
     print("found lines: ", lines)
     print("__________________")
 
-    for line in lines:
-        if "START_RAW" in line and "END_RAW" in line:
-            # replace \\n with \n
-            line = line.replace("\\n", "\n")
+    lines_ = []
+    for line_ in lines:
+        if "START_RAW" in line_:
+            all = line_.split("\\n")
+            for a in all:
+                lines_.append(a)
+        elif "END_RAW" in line_:
+            all = line_.split("\\n")
+            for a in all:
+                lines_.append(a)
+        else:
+            lines_.append(line_)
+
+    print("now lines_: ", lines_)
+    for line in lines_:
         if in_raw:
             if "END_RAW" in line:
                 line = line.replace("\\nEND_RAW\n\"", "")
@@ -63,9 +74,14 @@ def replace_raw_blocks(jsonish):
         final_string += json.dumps(raw_string)
 
     final_string = re.sub(r'(?<!")""(?!")', '"', final_string)
+    if "START_RAW" in final_string:
+        print("replace START_RAW")
+        final_string = final_string.replace("START_RAW", "\"")
+    else:
+        print('did not find START_RAW')
     # check if parsable as partial json
     try:
-        #print("should be json: \n", final_string)
+        print("should be json: \n", final_string)
         ensure_json(final_string)
     except Exception as e:
         escaped_nl_in_fenced = re.sub(r'```[\s\S]*?```',
