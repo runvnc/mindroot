@@ -29,10 +29,11 @@ def replace_raw_blocks(jsonish):
     print("__________________-")
     print("found lines: ", lines)
     print("__________________")
-    if len(lines) == 1 and "START_RAW" in lines[0]:
-        print("START_RAW with only 1 line")
 
     for line in lines:
+        if "START_RAW" in line and "END_RAW" in line:
+            # replace \\n with \n
+            line = line.replace("\\n", "\n")
         if in_raw:
             if "END_RAW" in line:
                 line = line.replace("\\nEND_RAW\n\"", "")
