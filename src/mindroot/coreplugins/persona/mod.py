@@ -73,7 +73,11 @@ async def pic_of_me(prompt="", context=None):
     """
     persona = context.agent['persona']
     print("persona:", persona)
-    img = await context.text_to_image(prompt + ', ' + persona['appearance'], 'split-view, diptych, side-by-side, 2girl, 2boy')
+    negative_appearance = 'split-view, diptych, side-by-side, 2girl, 2boy'
+    if 'negative_appearance' in persona:
+        negative_appearance = persona['negative_appearance']
+
+    img = await context.text_to_image(prompt + ', ' + persona['appearance'], negative_appearance)
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     try:

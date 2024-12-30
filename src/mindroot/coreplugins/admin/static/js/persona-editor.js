@@ -144,6 +144,10 @@ class PersonaEditor extends BaseEl {
           <textarea  class="text_lg" name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
         </label>
         <label>
+          Negative Appearance (for negative prompt in image generator):
+          <textarea  class="text_lg" name="negative_appearance" .value=${this.persona.negative_appearance || ''} @input=${this.handleInputChange}></textarea>
+        </label>
+        <label>
           Moderated:
           <toggle-switch .checked=${this.persona.moderated || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'moderated', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
         </label>
