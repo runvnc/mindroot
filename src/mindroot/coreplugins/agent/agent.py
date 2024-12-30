@@ -307,11 +307,14 @@ class Agent:
         # getting false positive on this check
         if len(full_cmds) == 0:
             print("\033[91m" + "No results and parse failed" + "\033[0m")
+            
             try:
                 buffer = replace_raw_blocks(buffer)
                 parse_ok = json.loads(buffer)
                 parse_fail_reason = ""
             except JSONDecodeError as e:
+                print("final parse fail")
+                print(buffer)
                 parse_fail_reason = str(e)
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
             results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason })

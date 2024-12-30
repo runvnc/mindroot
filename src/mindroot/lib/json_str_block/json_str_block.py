@@ -25,10 +25,18 @@ def replace_raw_blocks(jsonish):
     final_string = ""
     in_raw = False
     raw_string = ""
-    for line in jsonish.split("\n"):
+    lines = jsonish.split("\n")
+    print("__________________-")
+    print("found lines: ", lines)
+    print("__________________")
+    if len(lines) == 1 and "START_RAW" in lines[0]:
+        print("START_RAW with only 1 line")
+
+    for line in lines:
         if in_raw:
             if "END_RAW" in line:
-                line = line.replace("\nEND_RAW\n\"", "") 
+                line = line.replace("\\nEND_RAW\n\"", "")
+                line = line.replace("\nEND_RAW\n\"", "")
                 line = line.replace("\nEND_RAW\"", "")
                 line = line.replace("\nEND_RAW", "")
                 line = line.replace("END_RAW\"", "")
@@ -41,6 +49,7 @@ def replace_raw_blocks(jsonish):
             if "START_RAW" in line:
                 in_raw = True
                 raw_string = ""
+                line = line.replace("\"START_RAW\\n", "") 
                 line = line.replace("\"START_RAW\n", "")
                 line = line.replace("\"START_RAW", "")
                 line = line.replace("START_RAW \n", "")
