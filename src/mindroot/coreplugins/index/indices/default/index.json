@@ -127,6 +127,69 @@
       "services": [],
       "dependencies": [],
       "added_at": "2024-12-15T21:16:11.362246"
+    },
+    {
+      "name": "SwapFace",
+      "enabled": true,
+      "source": "github",
+      "version": "1.0.1",
+      "commands": [],
+      "services": [
+        "swap_face"
+      ],
+      "dependencies": [],
+      "remote_source": "runvnc/ah_swapface"
+    },
+    {
+      "name": "History",
+      "enabled": true,
+      "source": "github",
+      "version": "1.0.0",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "remote_source": "runvnc/ah_history"
+    },
+    {
+      "name": "OpenRouter",
+      "enabled": false,
+      "source": "github",
+      "version": "1.0.0",
+      "commands": [],
+      "services": [
+        "stream_chat"
+      ],
+      "dependencies": [],
+      "remote_source": "runvnc/ah_openrouter"
+    },
+    {
+      "name": "RunPod SD",
+      "enabled": false,
+      "source": "github",
+      "version": "1.0.0",
+      "commands": [
+        "image"
+      ],
+      "services": [
+        "text_to_image",
+        "select_image_model"
+      ],
+      "dependencies": [],
+      "remote_source": "runvnc/ah_runpod_sd"
+    },
+    {
+      "name": "Google Gemini",
+      "enabled": true,
+      "source": "github",
+      "version": "1.0.0",
+      "commands": [],
+      "services": [
+        "stream_chat",
+        "format_image_message",
+        "get_image_dimensions"
+      ],
+      "dependencies": [],
+      "remote_source": "runvnc/mr_gemini"
     }
   ],
   "agents": [
