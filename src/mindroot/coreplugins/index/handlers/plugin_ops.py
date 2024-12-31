@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 async def get_installed_plugin_metadata(plugin_name: str) -> dict:
     """Get metadata from main plugin manifest"""
     try:
-        # Read the main plugin manifest
-        manifest_path = Path('/xfiles/xintest5/plugin_manifest.json')
+        manifest_path = Path('plugin_manifest.json')
         logger.debug(f"Reading main plugin manifest from: {manifest_path}")
         
         if not manifest_path.exists():
@@ -24,6 +23,7 @@ async def get_installed_plugin_metadata(plugin_name: str) -> dict:
 
         # Find the plugin in the installed plugins section
         installed_plugins = manifest_data.get('plugins', {}).get('installed', {})
+        print("installed_plugins", installed_plugins)
         plugin_data = installed_plugins.get(plugin_name)
 
         if not plugin_data:
@@ -50,7 +50,6 @@ async def create_distributable_entry(plugin: PluginEntry) -> dict:
         # Get the remote_source from plugin data
         if not plugin.remote_source and plugin.source_path:
             # Extract from source_path if needed
-            # e.g. /xfiles/xintest5/local/plugins/ah_files/ah_files -> ah_files
             plugin_id = Path(plugin.source_path).parent.name
             remote_source = f"runvnc/{plugin_id}"
         else:
