@@ -6,8 +6,8 @@ class UserBase(BaseModel):
     """Base user data that's safe to expose"""
     username: str = Field(..., min_length=3, max_length=32)
     email: EmailStr
-    created_at: datetime
-    last_login: Optional[datetime] = None
+    created_at: str
+    last_login: Optional[str] = None
 
 class UserAuth(UserBase):
     """User data including auth-sensitive fields"""
