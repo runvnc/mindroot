@@ -1,13 +1,18 @@
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from lib.route_decorators import public_route
 from lib.templates import render
 from lib.providers.services import service_manager
 from mindroot.coreplugins.user_service.models import UserCreate
 from fastapi import Form
 from typing import Optional
+import os
 
 router = APIRouter()
+
+#this_path = os.path.dirname(os.path.realpath(__file__))
+#templates = Jinja2Templates(directory=os.path.join(this_path, "templates"))
 
 @router.get("/signup", response_class=HTMLResponse)
 @public_route()
