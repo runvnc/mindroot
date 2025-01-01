@@ -21,14 +21,19 @@ async def login_page(request: Request, error: Optional[str] = None, message: Opt
 @public_route()
 async def login(request: Request, username: str = Form(...), password: str = Form(...)):
     try:
-        print("Login attempt for user:", username)
-        print("Password:", password)
-        # Verify credentials
+        # First verify credentials
         if await service_manager.verify_user(username, password):
             # Get user data
             user_data = await service_manager.get_user_data(username)
             
             if user_data:
+                # Check if email is verified
+                if not user_data.email_verified:
+                    return RedirectResponse(
+                        url="/login?error=Please+verify+your+email+before+logging+in",
+                        status_code=303
+                    )
+                
                 # Create access token
                 access_token = create_access_token(data={"sub": username, **user_data.dict()})
                 

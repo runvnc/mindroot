@@ -8,10 +8,13 @@ class UserBase(BaseModel):
     email: EmailStr
     created_at: str
     last_login: Optional[str] = None
+    email_verified: bool = False
 
 class UserAuth(UserBase):
     """User data including auth-sensitive fields"""
     password_hash: str
+    verification_token: Optional[str] = None
+    verification_expires: Optional[str] = None
 
 class UserCreate(BaseModel):
     """Data required to create a new user"""

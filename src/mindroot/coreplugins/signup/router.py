@@ -11,9 +11,6 @@ import os
 
 router = APIRouter()
 
-#this_path = os.path.dirname(os.path.realpath(__file__))
-#templates = Jinja2Templates(directory=os.path.join(this_path, "templates"))
-
 @router.get("/signup", response_class=HTMLResponse)
 @public_route()
 async def signup_page(request: Request, error: Optional[str] = None):
@@ -48,9 +45,9 @@ async def handle_signup(
         # Get user service and create user
         await service_manager.create_user(user_data)
         
-        # Redirect to login
+        # Redirect to login with verification message
         return RedirectResponse(
-            url="/login?message=Account+created+successfully",
+            url="/login?message=Account+created+successfully.+Please+check+your+email+to+verify+your+account.",
             status_code=303
         )
         
@@ -65,5 +62,25 @@ async def handle_signup(
         print(f"Error in signup: {e}")
         return RedirectResponse(
             url=f"/signup?error=An+unexpected+error+occurred",
+            status_code=303
+        )
+
+@router.get("/verify-email")
+@public_route()
+async def verify_email(token: str):
+    try:
+        if await service_manager.verify_email(token):
+            return RedirectResponse(
+                url="/login?message=Email+verified+successfully.+You+can+now+log+in.",
+                status_code=303
+            )
+        return RedirectResponse(
+            url="/login?error=Invalid+or+expired+verification+link",
+            status_code=303
+        )
+    except Exception as e:
+        print(f"Error in email verification: {e}")
+        return RedirectResponse(
+            url="/login?error=An+unexpected+error+occurred",
             status_code=303
         )
