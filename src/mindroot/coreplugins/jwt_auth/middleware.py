@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
 from lib.route_decorators import public_routes, public_route
+from lib.providers.services import service_manager
 import os
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", None)
@@ -43,27 +44,35 @@ async def middleware(request: Request, call_next):
             return await call_next(request)
         else:
             print('Not a public route: ', request.url.path)
-            # public_routes is set, iterate and print all
-            #print("Printing all public routes: ")
-            #for route in public_routes:
-            #    print('Public route: ', route)
 
+        # Check for token in cookies first
         token = request.cookies.get("access_token")
         if token:
             payload = decode_token(token)
             if payload:
-                request.state.user = payload
-                return await call_next(request)
+                # Get username from token
+                username = payload['sub']
+                
+                user_data = await service_manager.get_user_data(username)
+                
+                if user_data:
+                    # Set both JWT payload and user data
+                    request.state.user = {
+                        "username": username,
+                        "token_data": payload,
+                        **user_data
+                    }
+                    return await call_next(request)
+                else:
+                    print("User data not found, redirecting to login..")
+                    return RedirectResponse(url="/login")
             else:
                 print("Invalid or expired token, redirecting to login..")
                 return RedirectResponse(url="/login")
-                #return JSONResponse(
-                #    status_code=401,
-                #    content={"detail": "Invalid or expired token"}
-                #)
 
         print("..Did not find token in cookies..")
         try:
+            # Try bearer token
             token = await security(request)
         except HTTPException as e:
             print('HTTPException: No valid token found: ', e)
@@ -72,8 +81,19 @@ async def middleware(request: Request, call_next):
         if token:
             payload = decode_token(token.credentials)
             if payload:
-                request.state.user = payload
-                return await call_next(request)
+                username = payload['sub']
+                user_data = await service_manager.get_user_data(username)
+                
+                if user_data:
+                    request.state.user = {
+                        "username": username,
+                        "token_data": payload,
+                        **user_data
+                    }
+                    return await call_next(request)
+                else:
+                    print("User data not found, redirecting to login..")
+                    return RedirectResponse(url="/login")
             else:
                 print("Invalid or expired token, redirecting to login..")
                 return RedirectResponse(url="/login")
