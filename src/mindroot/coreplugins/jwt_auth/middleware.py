@@ -54,14 +54,14 @@ async def middleware(request: Request, call_next):
                 username = payload['sub']
                 
                 user_data = await service_manager.get_user_data(username)
-                
+                request.state.user = user_data 
                 if user_data:
                     # Set both JWT payload and user data
-                    request.state.user = {
-                        "username": username,
-                        "token_data": payload,
-                        **user_data
-                    }
+                    #request.state.user = {
+                    #    "username": username,
+                    #    "token_data": payload,
+                    #    **user_data
+                    #}
                     return await call_next(request)
                 else:
                     print("User data not found, redirecting to login..")
