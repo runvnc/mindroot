@@ -21,7 +21,8 @@ async def login_page(request: Request, error: Optional[str] = None, message: Opt
 @public_route()
 async def login(request: Request, username: str = Form(...), password: str = Form(...)):
     try:
-        
+        print("Login attempt for user:", username)
+        print("Password:", password)
         # Verify credentials
         if await service_manager.verify_user(username, password):
             # Get user data

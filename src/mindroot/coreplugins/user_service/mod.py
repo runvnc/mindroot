@@ -4,8 +4,8 @@ from .models import UserAuth, UserCreate, UserBase
 import bcrypt
 import json
 import os
-from datetime import datetime
 from typing import Optional
+from datetime import datetime, timezone
 
 USER_DATA_ROOT = "data/users"
 
@@ -23,7 +23,6 @@ async def create_user(user_data: UserCreate, context=None) -> UserBase:
         
     # Create user directory
     os.makedirs(user_dir)
-    
     # Create auth data
     now = datetime.utcnow()
     auth_data = UserAuth(
@@ -60,7 +59,9 @@ async def verify_user(username: str, password: str, context=None) -> bool:
     
     if bcrypt.checkpw(password.encode(), auth_data.password_hash.encode()):
         # Update last login
-        auth_data.last_login = datetime.utcnow()
+        iso_format_utc = datetime.now(timezone.utc).isoformat()
+        
+        auth_data.last_login = iso_format_utc
         with open(auth_file, 'w') as f:
             json.dump(auth_data.dict(), f, indent=2, default=str)
         return True
