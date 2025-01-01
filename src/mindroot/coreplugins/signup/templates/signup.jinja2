@@ -1,69 +1,199 @@
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Sign Up</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MindRoot</title>
+    <link rel="stylesheet" href="/home/static/css/reset.css">
+    <link rel="stylesheet" href="/home/static/css/default.css">
+    <link rel="stylesheet" href="/home/static/css/home.css">
+    <style>
+        .signup-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .signup-card {
+            background: rgb(10, 10, 25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 1rem;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            width: 64px;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            color: #f0f0f0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            line-height: 1.2;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            background: rgb(15, 15, 30);
+            color: #f0f0f0;
+            transition: border-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #357abd;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+            color: #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .requirements {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.2rem;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo-container">
+            <img src="/home/static/imgs/logo.png" alt="MindRoot Logo" class="logo">
+            <h1>Create Your MindRoot Account</h1>
+        </div>
+
+        <div class="signup-card">
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/signup">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required 
+                           minlength="3" maxlength="32" pattern="^[a-zA-Z0-9_]+$">
+                    <div class="requirements">3-32 characters, letters, numbers, and underscores only</div>
                 </div>
-                <div class="card-body">
-                    {% if error %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ error }}
-                    </div>
-                    {% endif %}
-                    
-                    <form method="POST" action="/signup">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" 
-                                   required minlength="3" maxlength="32" pattern="^[a-zA-Z0-9_]+$">
-                            <div class="form-text">Only letters, numbers, and underscores allowed</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" 
-                                   required minlength="8">
-                            <div class="form-text">Minimum 8 characters</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password_confirm" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirm" 
-                                   name="password_confirm" required minlength="8">
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Sign Up</button>
-                        </div>
-                    </form>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
                 </div>
-                <div class="card-footer text-center">
-                    Already have an account? <a href="/login">Login here</a>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required minlength="8">
+                    <div class="requirements">Minimum 8 characters</div>
                 </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Confirm Password</label>
+                    <input type="password" id="password_confirm" name="password_confirm" required minlength="8">
+                </div>
+
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+
+            <div class="login-link">
+                Already have an account? <a href="/login">Login here</a>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const password = document.getElementById('password');
-    const passwordConfirm = document.getElementById('password_confirm');
-    
-    form.addEventListener('submit', function(e) {
-        if (password.value !== passwordConfirm.value) {
-            e.preventDefault();
-            alert('Passwords do not match!');
-        }
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const password = document.getElementById('password');
+        const passwordConfirm = document.getElementById('password_confirm');
+        
+        form.addEventListener('submit', function(e) {
+            if (password.value !== passwordConfirm.value) {
+                e.preventDefault();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'Passwords do not match!';
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                // Remove error message after 3 seconds
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 3000);
+            }
+        });
     });
-});
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>
