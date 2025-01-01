@@ -14,15 +14,35 @@ SMTP_PASS=your-app-password
 SMTP_FROM="MindRoot <noreply@yourdomain.com>"
 ```
 
-### Gmail Setup
+### Provider Options
 
-If using Gmail:
+#### Gmail
 1. Enable 2-factor authentication
 2. Generate an App Password:
    - Go to Google Account settings
    - Security > 2-Step Verification > App passwords
    - Create new app password
    - Use this as your SMTP_PASS
+
+#### Google Workspace (Custom Domain)
+1. Use your domain email (e.g., contact@yourbusiness.com)
+2. SMTP settings:
+   ```bash
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=contact@yourbusiness.com
+   SMTP_PASS=your-app-password  # Generated same way as Gmail
+   SMTP_FROM="Your Business <contact@yourbusiness.com>"
+   ```
+
+#### Other Email Providers
+Works with any SMTP provider, examples:
+- Microsoft 365
+- Amazon SES
+- SendGrid SMTP
+- Custom mail server
+
+Just use the appropriate SMTP settings provided by your email service.
 
 ## Usage
 
@@ -47,6 +67,8 @@ await service_manager.send_email(EmailMessage(
 - Automatic plain text version generation from HTML
 - Error handling and logging
 - Support for all SMTP providers
+- Custom domain support
+- Business email integration
 
 ## Security
 
@@ -54,3 +76,23 @@ await service_manager.send_email(EmailMessage(
 - Supports app-specific passwords
 - Environment variable configuration
 - No hardcoded credentials
+
+## Common SMTP Settings
+
+### Microsoft 365
+```bash
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+```
+
+### Amazon SES
+```bash
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com  # Region specific
+SMTP_PORT=587
+```
+
+### SendGrid
+```bash
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+```
