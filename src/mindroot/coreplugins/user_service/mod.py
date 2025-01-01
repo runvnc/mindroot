@@ -10,7 +10,7 @@ from typing import Optional
 USER_DATA_ROOT = "data/users"
 
 @service()
-async def create_user(user_data: UserCreate) -> UserBase:
+async def create_user(user_data: UserCreate, context=None) -> UserBase:
     """Create new user directory and auth file"""
     user_dir = os.path.join(USER_DATA_ROOT, user_data.username)
     
@@ -48,7 +48,7 @@ async def create_user(user_data: UserCreate) -> UserBase:
     return UserBase(**auth_data.dict())
 
 @service()
-async def verify_user(username: str, password: str) -> bool:
+async def verify_user(username: str, password: str, context=None) -> bool:
     """Verify user credentials and update last login"""
     auth_file = os.path.join(USER_DATA_ROOT, username, "auth.json")
     
@@ -67,7 +67,7 @@ async def verify_user(username: str, password: str) -> bool:
     return False
 
 @service()
-async def get_user_data(username: str) -> Optional[UserBase]:
+async def get_user_data(username: str, context=None) -> Optional[UserBase]:
     """Get user data excluding sensitive info"""
     auth_file = os.path.join(USER_DATA_ROOT, username, "auth.json")
     if not os.path.exists(auth_file):
@@ -80,7 +80,7 @@ async def get_user_data(username: str) -> Optional[UserBase]:
     return UserBase(**auth_data.dict())
 
 @service()
-async def list_users() -> list[str]:
+async def list_users(context=None) -> list[str]:
     """List all usernames"""
     if not os.path.exists(USER_DATA_ROOT):
         return []
