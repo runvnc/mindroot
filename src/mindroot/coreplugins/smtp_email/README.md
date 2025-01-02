@@ -12,6 +12,9 @@ SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM="MindRoot <noreply@yourdomain.com>"
+
+REQUIRE_EMAIL_VERIFY=true
+
 ```
 
 ### Provider Options
