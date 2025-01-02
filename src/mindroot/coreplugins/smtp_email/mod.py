@@ -26,7 +26,7 @@ class EmailMessage(BaseModel):
     html: bool = True
 
 @service()
-async def send_email(message: EmailMessage) -> bool:
+async def send_email(message: EmailMessage, context=None) -> bool:
     """Send an email using SMTP
     
     Args:
