@@ -37,7 +37,8 @@ dependencies = [
     "requests",
     "aiohttp", # now ad python image library
     "Pillow",
-    "psutil"
+    "psutil",
+    "aiosmtplib"
 ]
 
 

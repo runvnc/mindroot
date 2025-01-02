@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
+REQUIRE_EMAIL_VERIFY = os.environ.get("REQUIRE_EMAIL_VERIFY", "false").lower() == "true"
+
 # Get SMTP settings from environment
 SMTP_HOST = os.environ.get("SMTP_HOST")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
@@ -13,7 +15,7 @@ SMTP_PASS = os.environ.get("SMTP_PASS")
 SMTP_FROM = os.environ.get("SMTP_FROM")
 
 # Validate required settings
-if not all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM]):
+if REQUIRE_EMAIL_VERIFY and  (not all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM]) ) :
     raise ValueError("Missing required SMTP environment variables")
 
 class EmailMessage(BaseModel):
