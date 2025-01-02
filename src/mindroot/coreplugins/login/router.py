@@ -5,8 +5,10 @@ from lib.templates import render
 from lib.providers.services import service_manager
 from mindroot.coreplugins.jwt_auth.middleware import create_access_token
 from typing import Optional
+import os
 
 router = APIRouter()
+REQUIRE_EMAIL_VERIFY = os.environ.get('REQUIRE_EMAIL_VERIFY', '').lower() == 'true'
 
 @router.get("/login", response_class=HTMLResponse)
 @public_route()
@@ -27,8 +29,8 @@ async def login(request: Request, username: str = Form(...), password: str = For
             user_data = await service_manager.get_user_data(username)
             
             if user_data:
-                # Check if email is verified
-                if not user_data.email_verified:
+                # Check if email verification is required and not verified
+                if REQUIRE_EMAIL_VERIFY and not user_data.email_verified:
                     return RedirectResponse(
                         url="/login?error=Please+verify+your+email+before+logging+in",
                         status_code=303

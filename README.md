@@ -30,6 +30,10 @@ Configuration
 
 You will need to set environment variables like JWT_SECRET_KEY (anything you want) and LLM provider keys etc.
 
+To enable email verification: env. variable REQUIRE_EMAIL_VERIFY=true
+
+See [SMTP core plugin readme](src/mindroot/coreplugins/smtp_email/README.md)
+
 Starting the Server
 -------------------
 
@@ -51,7 +55,7 @@ settings to be preserved.
 Installing Plugins
 ------------------
 
-Most of the commands are in plugins that you have to install.
+Most of the commands or services are in plugins that you have to install.
 Go to the /admin page and find the Plugins section
 Click on the 'default' Index
 It should show a list of Plugins
@@ -67,6 +71,12 @@ To install a plugin just click the Install button and wait 10-20 seconds and you
 
 For now I recommend not using the Server control section on the Admin page but rather just
 hit Control-C in the terminal and then run `mindroot` again.
+
+
+Developers: Creating Plugins and Tool Commands etc.
+---------------------------------------------------
+
+See the [Plugin Documentation](plugins.md)
 
 
 Adding Commands to Agents

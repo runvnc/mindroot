@@ -11,6 +11,7 @@ from typing import Optional
 import secrets
 
 USER_DATA_ROOT = "data/users"
+REQUIRE_EMAIL_VERIFY = os.environ.get('REQUIRE_EMAIL_VERIFY', '').lower() == 'true'
 
 @service()
 async def create_user(user_data: UserCreate) -> UserBase:
@@ -27,9 +28,35 @@ async def create_user(user_data: UserCreate) -> UserBase:
     # Create user directory
     os.makedirs(user_dir)
     
-    # Generate verification token
-    verification_token = secrets.token_urlsafe(32)
-    verification_expires = (datetime.utcnow() + timedelta(hours=24)).isoformat()
+    # Handle verification based on configuration
+    if REQUIRE_EMAIL_VERIFY:
+        verification_token = secrets.token_urlsafe(32)
+        verification_expires = (datetime.utcnow() + timedelta(hours=24)).isoformat()
+        email_verified = False
+        
+        # Send verification email
+        verification_url = f"http://localhost:8011/verify-email?token={verification_token}"
+        email_html = f"""
+        <h1>Welcome to MindRoot!</h1>
+        <p>Please verify your email address by clicking the link below:</p>
+        <p><a href="{verification_url}">{verification_url}</a></p>
+        <p>This link will expire in 24 hours.</p>
+        <br>
+        <p>If you did not create this account, please ignore this email.</p>
+        """
+        
+        try:
+            await service_manager.send_email(EmailMessage(
+                to=user_data.email,
+                subject="Verify Your MindRoot Account",
+                body=email_html
+            ))
+        except Exception as e:
+            print(f"Warning: Could not send verification email: {e}")
+    else:
+        verification_token = None
+        verification_expires = None
+        email_verified = True
     
     # Create auth data
     now = datetime.utcnow().isoformat()
@@ -39,7 +66,7 @@ async def create_user(user_data: UserCreate) -> UserBase:
         password_hash=bcrypt.hashpw(user_data.password.encode(), bcrypt.gensalt()).decode(),
         created_at=now,
         last_login=None,
-        email_verified=False,
+        email_verified=email_verified,
         verification_token=verification_token,
         verification_expires=verification_expires
     )
@@ -53,23 +80,6 @@ async def create_user(user_data: UserCreate) -> UserBase:
         json.dump({}, f)
     with open(os.path.join(user_dir, "workspace.json"), 'w') as f:
         json.dump({}, f)
-    
-    # Send verification email
-    verification_url = f"http://localhost:8011/verify-email?token={verification_token}"
-    email_html = f"""
-    <h1>Welcome to MindRoot!</h1>
-    <p>Please verify your email address by clicking the link below:</p>
-    <p><a href="{verification_url}">{verification_url}</a></p>
-    <p>This link will expire in 24 hours.</p>
-    <br>
-    <p>If you did not create this account, please ignore this email.</p>
-    """
-    
-    await service_manager.send_email(EmailMessage(
-        to=user_data.email,
-        subject="Verify Your MindRoot Account",
-        body=email_html
-    ))
     
     # Return safe user data
     return UserBase(**auth_data.dict())
@@ -109,6 +119,9 @@ async def get_user_data(username: str) -> Optional[UserBase]:
 @service()
 async def verify_email(token: str) -> bool:
     """Verify a user's email using their verification token"""
+    if not REQUIRE_EMAIL_VERIFY:
+        return True
+        
     # Search through user directories for matching token
     for username in os.listdir(USER_DATA_ROOT):
         auth_file = os.path.join(USER_DATA_ROOT, username, "auth.json")
