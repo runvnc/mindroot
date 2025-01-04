@@ -141,7 +141,7 @@ async def load_plugin_templates(page_name, plugins):
                 os.path.join(plugin_path, 'override', f'{page_name}.jinja2'),
                 os.path.join(plugin_path, 'src', plugin, 'override', f'{page_name}.jinja2'),
                 os.path.join(plugin_path, 'src', 'override', f'{page_name}.jinja2')
-                os.path.join(plugin_path, 'src', last_part, 'override', f'{page_name}.jinja2'), 
+                os.path.join(plugin_path, 'src', last_part, 'override', f'{page_name}.jinja2')
             ]
             
             for path in override_paths:
