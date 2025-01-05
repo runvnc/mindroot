@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "0.4.4"
+version = "0.4.5"
 description = "An agent framework using LLMs"
 authors = [{name = "Jason Livesay", email = "runvnc@gmail.com"}]
 readme = "README.md"
