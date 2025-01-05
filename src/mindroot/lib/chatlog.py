@@ -2,6 +2,7 @@ import os
 import json
 from typing import List, Dict
 import sys
+import traceback
 
 class ChatLog:
     def __init__(self, log_id=0, agent=None, context_length: int = 4096):
@@ -87,6 +88,12 @@ class ChatLog:
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
         with open(log_file, 'w') as f:
             json.dump(self._get_log_data(), f, indent=2)
+        # change to blinking text with ANSI attributes
+        print('\033[5m\033[1m\033[31m')
+        print('saved log')
+        traceback.print_stack()
+        print('\033[0m')
+        
 
     def load_log(self, log_id = None) -> None:
         if log_id is None:

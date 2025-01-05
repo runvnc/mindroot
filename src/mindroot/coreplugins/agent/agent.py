@@ -350,7 +350,10 @@ class Agent:
         self.context = context
         messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
         logger.info("Messages for chat", extra={"messages": messages})
-        
+
+        json_messages = json.dumps(messages)
+        new_messages = json.loads(json_messages)
+
         if os.environ.get("AH_DEFAULT_MAX_TOKENS"):
             max_tokens = int(os.environ.get("AH_DEFAULT_MAX_TOKENS"))
         try:
