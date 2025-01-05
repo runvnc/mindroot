@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "0.4.1"
+version = "0.4.2"
 description = "An agent framework using LLMs"
 authors = [{name = "Jason Livesay", email = "runvnc@gmail.com"}]
 readme = "README.md"
@@ -39,7 +39,8 @@ dependencies = [
     "Pillow",
     "psutil",
     "aiosmtplib",
-    "pydantic[email]"
+    "pydantic[email]",
+    "bcrypt"
 ]
 
 
