@@ -1,0 +1,776 @@
+html, body {
+  background-color: #050510;
+  color: #f0f0f0;
+  padding: 5px 5px;
+  font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2px;
+  margin: 2px;
+}
+
+input, textarea {
+  background-color: #050510;
+  color: #f0f0f0;
+  margin: 2px 2px;
+  font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+dialog, div, form {
+  background-color: #050510;
+}
+
+p {
+  padding: 2px 10px;
+  margin: 2px 2px;
+}
+
+input::placeholder, textarea::placeholder {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+.send_msg {
+  display: inline-block;
+}
+
+.page-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0;
+    overflow-y: hidden;
+}
+
+.hover-zoom {
+  transition: transform 0.1s ease;
+}
+
+.hover-zoom:hover {
+  
+  transform: translateX(100px) scale(6);
+  z-index: 1;
+}
+
+
+.chat-log {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: 16px;
+}
+
+chat-ai {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+chat-form {
+  flex-shrink: 0;
+  margin: 0;
+  display: flex;
+  padding: 0;
+}
+
+.chat-entry {
+  display: flex;
+  width: 100%;
+}
+
+chat-message {
+  max-width: 69%;
+  padding: 8px 8px;
+  margin: 5px 0;
+  display: block;
+  background-color: transparent;
+}
+
+.outer-msg {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+img.avatar {
+  height: 48px;
+  display: none;
+  margin-right: 10px;
+}
+
+chat-message[show-avatar] img.avatar {
+  display: inline-block;
+  margin-top: 16px;
+}
+
+chat-message .outer-msg.without-avatar {
+  margin-top: -8px; /* Reduce top margin for messages without avatars */
+}
+
+chat-message:first-of-type .outer-msg.without-avatar {
+  margin-top: 0; /* Reset top margin for the first message */
+}.message {
+  padding: 5px 5px;
+  margin: 0;
+  background-color:  transparent;
+}
+
+.user {
+  align-self: flex-end;
+}
+
+.msg-user {
+  background-color: #333;
+  border-radius: 30px; 
+  box-sizing: border-box;
+  padding: 4px 14px;
+}
+
+.ai {
+  align-self: flex-start;
+}
+
+.msg-ai {
+  /* background-color: #080808; */
+  border: 1px solid #181818;
+  border-radius: 30px;
+}
+
+.msg-ai:first-child {
+  display: flex;
+  /* align/justfiy to top */  
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.spacer {
+  height: 0.5em;
+  display: block;
+  background-color: transparent;
+}
+
+textarea, .text_lg {
+  background-color: #050510 !important;
+  color: #f0f0f0 !important;
+  width: 90%;
+  min-height: 4em;
+  max-height: 500px; /* Maximum height before scrolling */
+  overflow-y: auto; /* Allows the textarea to expand as the user types */
+  scrollbar-width: none;
+  padding: 10px;
+  border-radius: 15px;
+  flex-shrink: 0;
+  height: 4em;
+}
+
+.text_lg {
+  height: 35vh;
+  scrollbar-width: thin;
+}
+
+input, .text_inp {
+  background-color: #050510;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+button, .btn {
+/* style buttons with contemporary look and dark theme */ 
+  background-color: #333;
+  color: #f0f0f0;
+  padding: 2px 15px;
+  margin: 2px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: auto
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Custom file input styles */
+.custom-file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 200px;
+  height: 40px;
+  overflow: hidden;
+  background-color: #333;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Settings Editor Styles */
+.settings-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 90%;
+  margin: auto;
+}
+
+.settings-editor label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.settings-editor button {
+  width: 50%;
+  max-width: 200px;
+}
+
+.settings-editor ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.settings-editor li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.settings-editor li button {
+  background-color: #ff4d4d;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.settings-editor li button:hover {
+  background-color: #ff1a1a;
+}
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Settings Editor Styles */
+.settings-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 90%;
+  margin: auto;
+}
+
+.settings-editor label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.settings-editor button {
+  width: 50%;
+  max-width: 200px;
+}
+
+.settings-editor ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.settings-editor li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.settings-editor li button {
+  background-color: #ff4d4d;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.settings-editor li button:hover {
+  background-color: #ff1a1a;
+}
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Custom file input styles */
+.custom-file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 200px;
+  height: 40px;
+  overflow: hidden;
+  background-color: #333;
+  color: #f0f0f0;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-file-input input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.custom-file-input .file-label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.custom-file-input:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Dropdown styles */
+select, .dropdown {
+  background-color: #050510;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+select:hover, .dropdown:hover {
+  background-color: #333;
+}
+
+select option, .dropdown option {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Custom scrollbar styles */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #050510;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #050510;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+  border: 2px solid #050510;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+.param_name { font-weight: bold; }
+.param_value { color: yellow; }
+
+.fn_result, .code-result { 
+  white-space: normal !important;
+  word-break: break-word !important;
+  font-family: monospace !important;
+ /* text-wrap: wrap !important; */
+}
+
+.fn_name {
+  cursor: pointer;
+}
+
+.one_line_result {
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* .action { border: 2px solid teal; border-radius: 5px; } */
+
+code {
+  max-width: 85%;
+  font-family: monospace;
+}
+
+form.persona {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 90%;
+  margin: auto;
+}
+
+.persona label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.persona button {
+  width: 50%;
+  max-width: 200px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner.show { display: inline-block; } .spinner:not(.show) { display: none; }
+
+chat-message {
+  display: block;
+  margin-bottom: 2px; /* Default spacing between messages */
+  margin-top: 0px;
+}
+
+chat-message .outer-msg.without-avatar {
+  margin-top: -8px; /* Reduce top margin for messages without avatars */
+  margin-bottom: 0px;
+}
+
+chat-message:first-of-type .outer-msg.without-avatar {
+  margin-top: 0; /* Reset top margin for the first message */
+}
