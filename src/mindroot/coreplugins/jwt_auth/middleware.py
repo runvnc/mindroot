@@ -42,6 +42,7 @@ async def middleware(request: Request, call_next):
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
+        elif request.url.path.startswith('/static/'):
         else:
             print('Not a public route: ', request.url.path)
 
