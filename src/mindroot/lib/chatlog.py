@@ -71,7 +71,7 @@ class ChatLog:
         recent_messages = []
         total_length = 0
         #print('returning all messages', self.messages)
-        return self.messages
+        return self.messages.copy()
 
         #for message in self.messages:
         #    message_length = self._calculate_message_length(message)

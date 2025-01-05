@@ -42,6 +42,15 @@ class ChatContext:
     def cmds(self, command_set: Type[CommandSetT]) -> CommandSetT:
         return self._commands[command_set]
 
+
+    def save_context_data(self):
+        context_file = f'data/context/context_{self.log_id}.json'
+        with open(context_file, 'r') as f:
+            context_data = json.load(f)
+            context_data['data'] = self.data
+        with open(context_file, 'w') as f:
+            json.dump(context_data, f, indent=2)
+
     def save_context(self):
         if not self.log_id:
             raise ValueError("log_id is not set for the context.")

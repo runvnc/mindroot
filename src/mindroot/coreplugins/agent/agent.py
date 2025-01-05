@@ -356,12 +356,12 @@ class Agent:
         try:
             tmp_data = { "messages": messages }
             tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
-            messages = tmp_data['messages']
+            new_messages = tmp_data['messages']
         except Exception as e:
             logger.error("Error filtering messages")
             logger.error(str(e))
 
-        if messages[0]['role'] != 'system':
+        if new_messages[0]['role'] != 'system':
             logger.error("First message is not a system message")
             print("\033[91mFirst message is not a system message\033[0m")
             return None, None
@@ -369,7 +369,7 @@ class Agent:
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
-                                        messages=messages)
+                                        messages=new_messages)
 
         ret, full_cmds = await self.parse_cmd_stream(stream, context)
         logger.debug("System message was:")
