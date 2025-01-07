@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
-from lib.route_decorators import public_routes, public_route
+from lib.route_decorators import public_routes, public_route, public_static
 from lib.providers.services import service_manager
 import os
 
@@ -42,7 +42,7 @@ async def middleware(request: Request, call_next):
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
-        elif '/static/' in request.url.path:
+        elif any([request.url.path.startswith(path) for path in public_static]):
             return await call_next(request)
         else:
             print('Not a public route: ', request.url.path)

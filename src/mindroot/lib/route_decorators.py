@@ -5,6 +5,8 @@ from functools import wraps
 app = FastAPI()
 public_routes: Set[str] = set()
 
+public_static: Set[str] = set()
+
 def public_route():
     # include route path/function name
     print("public_route decorator called", public_routes)
@@ -22,4 +24,5 @@ def public_route():
         return wrapper
     return decorator
 
-
+def add_public_static(path_start):
+    public_static.add(path_start)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from lib.route_decorators import public_route
+from lib.route_decorators import public_route, add_public_static
 from lib.templates import render
 from lib.providers.services import service_manager
 from mindroot.coreplugins.user_service.models import UserCreate
@@ -18,6 +18,8 @@ async def signup_page(request: Request, error: Optional[str] = None):
         "request": request,
         "error": error
     })
+
+add_public_static( "/signup/static/")
 
 @router.post("/signup")
 @public_route()
