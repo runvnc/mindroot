@@ -1,5 +1,6 @@
 import { LitElement, html, css } from './lit-core.min.js'
 import {BaseEl} from './base.js'
+import {isMobile} from './ismobile.js'
 
 class ChatForm extends BaseEl {
   static properties = {
@@ -180,7 +181,7 @@ class ChatForm extends BaseEl {
           <textarea id="inp_message" class="message-input"
             rows="4" 
             @keydown=${(e) => {
-              if (e.key === 'Enter') {
+              if (!isMobile() && e.key === 'Enter') {
                 if (!e.shiftKey) {
                   e.preventDefault();
                   this._send();
