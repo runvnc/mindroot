@@ -17,8 +17,7 @@ class ChatForm extends BaseEl {
         resize: none;
         overflow-y: hidden;
         box-sizing: border-box;
-        flex: 1;
-        width: auto;
+        width: 93%;
       }
       .stop-button {
         color: white;
@@ -73,13 +72,12 @@ class ChatForm extends BaseEl {
       .upload-container {
         display: flex;
         align-items: center;
-        gap: 2px;
-        flex: 1;
+        gap: 8px;
       }
       .upload-button {
         background: none;
         border: none;
-        padding: 0;
+        padding: 8px;
         cursor: pointer;
         color: inherit;
       }
@@ -143,18 +141,6 @@ class ChatForm extends BaseEl {
     //e.target.value = '' // Reset file input
   }
 
-  _resizeTextarea() {
-    const textarea = this.messageEl;
-    // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    // Set the height to the scrollHeight
-    const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640); // 3em to 40em
-    textarea.style.height = `${newHeight}px`;
-    this.requestUpdate();
-    console.log('resize')
-  }
-
-
   async _processImage(file) {
     if (this.isLoading) return
 
@@ -193,7 +179,7 @@ class ChatForm extends BaseEl {
         preview.className = 'preview-thumbnail'
         preview.innerHTML = `
           <img src="${imageData}" alt="preview">
-          <button class="remove-image" data-index="${index}">\u00d7</button>
+          <button class="remove-image" data-index="${index}">×</button>
         `
         preview.querySelector('img').addEventListener('click', () => this._showFullImage(imageData))
         preview.querySelector('.remove-image').addEventListener('click', () => this._removeImage(index))
