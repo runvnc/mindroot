@@ -190,6 +190,33 @@
       ],
       "dependencies": [],
       "remote_source": "runvnc/mr_gemini"
+    },
+    {
+      "name": "Session Data",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "remote_source": "runvnc/ah_session_data",
+      "commands": [
+        "session_data_update",
+        "session_data_del",
+        "session_data_list_add",
+        "session_data_list_del"
+      ],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:45.856991"
+    },
+    {
+      "name": "HUD (Session Data)",
+      "version": "1.0.0",
+      "description": "",
+      "source": "github",
+      "remote_source": "runvnc/mr_hud",
+      "commands": [],
+      "services": [],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:52.839951"
     }
   ],
   "agents": [
