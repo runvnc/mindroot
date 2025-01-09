@@ -37,15 +37,15 @@
         "enabled": true,
         "source": "core"
       },
-      "startup": {
-        "enabled": true,
-        "source": "core"
-      },
       "events": {
         "enabled": true,
         "source": "core"
       },
       "user_service": {
+        "enabled": true,
+        "source": "core"
+      },
+      "startup": {
         "enabled": true,
         "source": "core"
       }

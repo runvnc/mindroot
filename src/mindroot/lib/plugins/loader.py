@@ -94,6 +94,12 @@ async def load(app=None):
     enabled_plugins = list_enabled()
     failed_plugins = []
 
+    enabled_plugins = [plugin for plugin in enabled_plugins if plugin[0] != 'startup']
+    enabled_plugins.append(('startup', 'core'))
+
+    print("Enabled plugins:")
+    print(enabled_plugins)
+
     for plugin_name, category in enabled_plugins:
         try:
             # Get plugin import path

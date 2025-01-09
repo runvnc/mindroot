@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Set
 
 class UserBase(BaseModel):
     """Base user data that's safe to expose"""
@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     created_at: str
     last_login: Optional[str] = None
     email_verified: bool = False
+    roles: List[str] = Field(default_factory=lambda: ["user"])  # Default role is 'user'
 
 class UserAuth(UserBase):
     """User data including auth-sensitive fields"""

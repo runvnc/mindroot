@@ -1,20 +1,19 @@
 from lib.providers.services import service
-from lib.providers.commands import command
 from .models import UserAuth, UserCreate, UserBase
-from mindroot.coreplugins.smtp_email.mod import EmailMessage
-from lib.providers.services import service_manager
+from .email_service import send_verification_email, setup_verification
+from .role_service import has_role, add_role, remove_role, get_user_roles
+#from .admin_init import initialize_admin
 import bcrypt
 import json
 import os
-from datetime import datetime, timedelta
-from typing import Optional
-import secrets
+from datetime import datetime
+from typing import Optional, List 
 
 USER_DATA_ROOT = "data/users"
-REQUIRE_EMAIL_VERIFY = os.environ.get('REQUIRE_EMAIL_VERIFY', '').lower() == 'true'
+
 
 @service()
-async def create_user(user_data: UserCreate, context=None) -> UserBase:
+async def create_user(user_data: UserCreate, roles: List[str] = None, skip_verification: bool = False, context=None) -> UserBase:
     """Create new user directory and auth file"""
     user_dir = os.path.join(USER_DATA_ROOT, user_data.username)
     
@@ -28,35 +27,17 @@ async def create_user(user_data: UserCreate, context=None) -> UserBase:
     # Create user directory
     os.makedirs(user_dir)
     
-    # Handle verification based on configuration
-    if REQUIRE_EMAIL_VERIFY:
-        verification_token = secrets.token_urlsafe(32)
-        verification_expires = (datetime.utcnow() + timedelta(hours=24)).isoformat()
-        email_verified = False
-        
-        # Send verification email
-        verification_url = f"http://localhost:8011/verify-email?token={verification_token}"
-        email_html = f"""
-        <h1>Welcome to MindRoot!</h1>
-        <p>Please verify your email address by clicking the link below:</p>
-        <p><a href="{verification_url}">{verification_url}</a></p>
-        <p>This link will expire in 24 hours.</p>
-        <br>
-        <p>If you did not create this account, please ignore this email.</p>
-        """
-        
-        try:
-            await service_manager.send_email(EmailMessage(
-                to=user_data.email,
-                subject="Verify Your MindRoot Account",
-                body=email_html
-            ))
-        except Exception as e:
-            print(f"Warning: Could not send verification email: {e}")
+    # Handle verification
+    verification_token, verification_expires, email_verified = setup_verification()
+    
+    if verification_token and not skip_verification:
+        await send_verification_email(user_data.email, verification_token)
+    
+    # Setup roles (always include 'user' role)
+    if roles is None:
+        roles = ["user"]
     else:
-        verification_token = None
-        verification_expires = None
-        email_verified = True
+        roles.append("user")
     
     # Create auth data
     now = datetime.utcnow().isoformat()
@@ -68,7 +49,8 @@ async def create_user(user_data: UserCreate, context=None) -> UserBase:
         last_login=None,
         email_verified=email_verified,
         verification_token=verification_token,
-        verification_expires=verification_expires
+        verification_expires=verification_expires,
+        roles=roles
     )
     
     # Save auth data
@@ -103,6 +85,7 @@ async def verify_user(username: str, password: str, context=None) -> bool:
         return True
     return False
 
+
 @service()
 async def get_user_data(username: str, context=None) -> Optional[UserBase]:
     """Get user data excluding sensitive info"""
@@ -119,7 +102,7 @@ async def get_user_data(username: str, context=None) -> Optional[UserBase]:
 @service()
 async def verify_email(token: str, context=None) -> bool:
     """Verify a user's email using their verification token"""
-    if not REQUIRE_EMAIL_VERIFY:
+    if not os.environ.get('REQUIRE_EMAIL_VERIFY', '').lower() == 'true':
         return True
         
     # Search through user directories for matching token
@@ -146,31 +129,9 @@ async def verify_email(token: str, context=None) -> bool:
     return False
 
 @service()
-async def list_users(context=None) -> list[str]:
+async def list_users( context=None ) -> list[str]:
     """List all usernames"""
     if not os.path.exists(USER_DATA_ROOT):
         return []
     return [d for d in os.listdir(USER_DATA_ROOT) 
             if os.path.isdir(os.path.join(USER_DATA_ROOT, d))]
-
-# Also expose some functions as commands for admin use
-@command()
-async def list_users_command(params, context=None):
-    """List all users in the system.
-    
-    Example:
-    { "list_users_command": {} }
-    """
-    return await list_users()
-
-@command()
-async def get_user_command(params, context=None):
-    """Get user data for a specific user.
-    
-    Example:
-    { "get_user_command": { "username": "testuser" } }
-    """
-    username = params.get("username")
-    if not username:
-        raise ValueError("Username parameter required")
-    return await get_user_data(username)
