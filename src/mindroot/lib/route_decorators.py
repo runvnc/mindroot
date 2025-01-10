@@ -37,7 +37,7 @@ def requires_any_role(*roles: str):
         if not request.state.user:
             raise HTTPException(status_code=401, detail="Not authenticated")
         
-        user_roles = request.state.user.get('roles', [])
+        user_roles = request.state.user.roles
         if not any(role in user_roles for role in roles):
             raise HTTPException(
                 status_code=403,
@@ -51,7 +51,7 @@ def requires_all_roles(*roles: str):
         if not request.state.user:
             raise HTTPException(status_code=401, detail="Not authenticated")
         
-        user_roles = request.state.user.get('roles', [])
+        user_roles = request.state.user.roles
         missing_roles = [role for role in roles if role not in user_roles]
         if missing_roles:
             raise HTTPException(
