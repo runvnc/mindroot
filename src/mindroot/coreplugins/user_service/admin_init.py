@@ -106,11 +106,18 @@ async def initialize_admin(user_data_root: str, app) -> Tuple[Optional[str], Opt
         email=os.environ.get('ADMIN_EMAIL', 'admin@admin.com')
     )
     
-    # Create with admin and verified roles (user role is added automatically)
-    await create_user(
-        user_data,
-        roles=["admin", "verified"],
-        skip_verification=True  # Admin is automatically verified
-    )
-    
+    try:
+        await create_user(
+            user_data,
+            roles=["admin", "verified"],
+            skip_verification=True  # Admin is automatically verified
+        )
+    except Exception as e:
+    # if it has 'exists' in the error message, then it's a duplicate user
+        if 'exists' in str(e):
+            print("Admin user already exists")
+            pass
+        else:
+            raise e
+            
     return username, password
