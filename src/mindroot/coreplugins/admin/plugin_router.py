@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import json
-from lib.route_decorators import requires_role
 from lib import plugins
 
 router = APIRouter()
@@ -9,7 +8,6 @@ router = APIRouter()
 class PluginUpdateRequest(BaseModel):
     plugins: dict
 
-@requires_role('admin')
 @router.post("/update-plugins")
 def update_plugins(request: PluginUpdateRequest):
     try:
@@ -29,7 +27,6 @@ def update_plugins(request: PluginUpdateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@requires_role('admin')
 @router.get("/get-plugins")
 async def get_plugins():
     try:

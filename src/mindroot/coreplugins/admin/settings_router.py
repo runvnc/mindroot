@@ -8,7 +8,6 @@ from lib.providers import services
 from lib.providers.commands import command_manager
 from lib.db.organize_models import organize_for_display
 from copy import deepcopy
-from lib.route_decorators import requires_role
 
 router = APIRouter()
 
@@ -57,12 +56,10 @@ class Setting(BaseModel):
     flag: str
     model: str
 
-@requires_role('admin')
 @router.get('/settings', response_model=List[Dict])
 async def get_settings():
     return read_settings()
 
-@requires_role('admin')
 @router.post('/settings')
 async def save_settings(request: Request):
     try:
@@ -83,7 +80,6 @@ async def save_settings(request: Request):
         print(f"Error processing request: {str(e)}")
         raise HTTPException(status_code=422, detail=str(e))
 
-@requires_role('admin')
 @router.put('/settings/{setting_id}', response_model=Dict)
 async def update_setting(setting_id: int, updated_setting: Dict):
     settings = read_settings()
@@ -93,7 +89,6 @@ async def update_setting(setting_id: int, updated_setting: Dict):
     write_settings(settings)
     return updated_setting
 
-@requires_role('admin')
 @router.delete('/settings/{setting_id}', response_model=Dict)
 async def delete_setting(setting_id: int):
     settings = read_settings()
@@ -103,17 +98,14 @@ async def delete_setting(setting_id: int):
     write_settings(settings)
     return deleted_setting
 
-@requires_role('admin')
 @router.get('/models', response_model=List[Dict])
 async def get_models():
     return read_models()
 
-@requires_role('admin')
 @router.get('/providers', response_model=List[Dict])
 async def get_providers():
     return read_providers()
 
-@requires_role('admin')
 @router.get('/commands', response_model=Dict)
 async def get_commands():
     print("retrieving commands")
@@ -131,12 +123,10 @@ async def get_commands():
 
     return commands
 
-@requires_role('admin')
 @router.get('/services', response_model=List[str])
 async def get_services():
     return service_manager.get_functions()
 
-@requires_role('admin')
 @router.get('/organized_models', response_model=List[Dict])
 async def get_organized_models():
     models = read_models()
@@ -144,7 +134,6 @@ async def get_organized_models():
     equivalent_flags = read_equivalent_flags()
     return organize_for_display(models, providers, equivalent_flags)
 
-@requires_role('admin')
 @router.get('/equivalent_flags', response_model=List[List[str]])
 async def get_equivalent_flags():
     return read_equivalent_flags()
