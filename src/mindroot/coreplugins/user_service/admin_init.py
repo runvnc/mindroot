@@ -21,7 +21,7 @@ created_admin = {}
 
 @hook()
 async def startup(app, context):
-    admin_user, admin_pass = await initialize_admin(USER_DATA_ROOT)
+    admin_user, admin_pass = await initialize_admin(USER_DATA_ROOT, app)
     if admin_user:
         created_admin["username"] = admin_user
         created_admin["password"] = admin_pass
@@ -55,33 +55,50 @@ async def check_for_admin(user_data_root: str) -> bool:
     return False
 
 @service()
-async def initialize_admin(user_data_root: str) -> Tuple[Optional[str], Optional[str]]:
+async def initialize_admin(user_data_root: str, app) -> Tuple[Optional[str], Optional[str]]:
     """Check for and create admin user if needed.
     Returns tuple of (username, password) if created, (None, None) if admin exists.
     
     This should be called during system startup to ensure at least one admin exists.
     The admin user will have 'admin', 'verified', and 'user' roles.
     """
-    # Check if admin already exists
-    if await check_for_admin(user_data_root):
-        return None, None
+
+    args = app.state.cmd_args
+    print("args", args)
+
+    username = None
+    password = None
+
+    admin_user = None
+    admin_pass = None
+
+    if args.admin_user:
+        admin_user = args.admin_user
+        admin_pass = args.admin_password
+
+    if admin_user and admin_pass:
+        username = admin_user
+        password = admin_pass
+    else: 
+        if await check_for_admin(user_data_root):
+            return None, None
+    
+        # Check environment variables first
+        env_user = os.environ.get('ADMIN_USER')
+        env_pass = os.environ.get('ADMIN_PASS')
         
-    # Check environment variables first
-    env_user = os.environ.get('ADMIN_USER')
-    env_pass = os.environ.get('ADMIN_PASS')
-    
-    # If no admin exists, either use env credentials or generate new ones
-    username = env_user
-    password = env_pass
-    
-    if not (username and password):
-        username, password = generate_random_credentials()
-        print("\n" + "="*50)
-        print("INITIAL ADMIN CREDENTIALS GENERATED:")
-        print(f"Username: {username}")
-        print(f"Password: {password}")
-        print("="*50 + "\n")
-    
+        # If no admin exists, either use env credentials or generate new ones
+        username = env_user
+        password = env_pass
+        
+        if not (username and password):
+            username, password = generate_random_credentials()
+            print("\n" + "="*50)
+            print("INITIAL ADMIN CREDENTIALS GENERATED:")
+            print(f"Username: {username}")
+            print(f"Password: {password}")
+            print("="*50 + "\n")
+        
     # Create admin user with appropriate roles
     user_data = UserCreate(
         username=username,

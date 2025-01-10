@@ -14,6 +14,9 @@ def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description="Run the server")
     parser.add_argument("-p", "--port", type=int, help="Port to run the server on")
+    # need to include optional admin-user and admin-password
+    parser.add_argument("-u", "--admin-user", type=str, help="Admin username")
+    parser.add_argument("-pw", "--admin-password", type=str, help="Admin password")
     return parser.parse_args()
 
 def get_project_root():
@@ -44,9 +47,9 @@ mimetypes.add_type("application/javascript", ".js", True)
 app = None
 templates = None
 
-async def setup_app():
+async def setup_app(app_):
     global app, templates
-    app = FastAPI()
+    app = app_
     
     root = get_project_root()
     await plugins.load(app=app)
@@ -72,15 +75,24 @@ def find_available_port(start_port=8010, max_attempts=100):
     raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
 
 def main():
+    global app
+
+    cmd_args = parse_args()
+    # save ALL parsed args in app state
+    port = 8010
+    if cmd_args.port:
+        port = cmd_args.port
+    else:
+        cmd_args.port = port
+    
+    app = FastAPI()
+ 
+    app.state.cmd_args = cmd_args
+
     loop = asyncio.get_event_loop()
-    app = loop.run_until_complete(setup_app())
+    loop.run_until_complete(setup_app(app))
     
     try:
-        port = 8010
-        cmd_args = parse_args()
-        if cmd_args.port:
-            port = cmd_args.port
-
         print(colored(f"Starting server on port {port}", "green"))
         uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on")
     except Exception as e:
