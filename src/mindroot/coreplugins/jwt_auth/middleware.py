@@ -5,7 +5,6 @@ import jwt
 from datetime import datetime, timedelta
 from lib.route_decorators import public_routes, public_route, public_static
 from lib.providers.services import service_manager
-from .role_checks import check_route_roles
 import os
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", None)
@@ -59,17 +58,7 @@ async def middleware(request: Request, call_next):
                 user_data = await service_manager.get_user_data(username)
                 request.state.user = user_data 
                 if user_data:
-                    # Check role requirements
-                    try:
-                        check_route_roles(request, request.url.path)
-                        return await call_next(request)
-                    except HTTPException as e:
-                        if e.status_code == 403:
-                            return JSONResponse(
-                                status_code=403,
-                                content={"detail": str(e.detail)}
-                            )
-                        raise
+                    return await call_next(request)
                 else:
                     print("User data not found, redirecting to login..")
                     return RedirectResponse(url="/login")
@@ -97,17 +86,7 @@ async def middleware(request: Request, call_next):
                         "token_data": payload,
                         **user_data
                     }
-                    # Check role requirements
-                    try:
-                        check_route_roles(request, request.url.path)
-                        return await call_next(request)
-                    except HTTPException as e:
-                        if e.status_code == 403:
-                            return JSONResponse(
-                                status_code=403,
-                                content={"detail": str(e.detail)}
-                            )
-                        raise
+                    return await call_next(request)
                 else:
                     print("User data not found, redirecting to login..")
                     return RedirectResponse(url="/login")

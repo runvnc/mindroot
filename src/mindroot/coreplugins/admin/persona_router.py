@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import shutil
 import traceback
+from lib.route_decorators import requires_role
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ shared_dir = BASE_DIR / "shared"
 local_dir.mkdir(parents=True, exist_ok=True)
 shared_dir.mkdir(parents=True, exist_ok=True)
 
-
+@requires_role('admin')
 @router.get('/personas/{scope}/{name}')
 def read_persona(scope: str, name: str):
     if scope not in ['local', 'shared']:
@@ -26,6 +27,8 @@ def read_persona(scope: str, name: str):
         persona['moderated'] = False
     return persona
 
+
+@requires_role('admin')
 @router.get('/personas/{scope}')
 def list_personas(scope: str):
     if scope not in ['local', 'shared']:
@@ -35,6 +38,7 @@ def list_personas(scope: str):
     print(f"Read personas from dir {scope_dir}: {personas}")
     return [{'name': name} for name in personas]
 
+@requires_role('admin')
 @router.post('/personas/{scope}')
 def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
     try:
@@ -89,7 +93,7 @@ def create_persona(scope: str, persona: str = Form(...), faceref: UploadFile = F
         print("Error in create_persona")
         raise HTTPException(status_code=500, detail='Internal server error ' + str(e))
 
-                
+@requires_role('admin')
 @router.put('/personas/{scope}/{name}')
 def update_persona(scope: str, name:str, persona: str = Form(...), faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
      

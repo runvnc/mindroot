@@ -4,11 +4,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.plugins import list_enabled
 from lib.templates import render
 from .plugin_manager import router as plugin_manager_router
+from lib.route_decorators import requires_role
 
 router = APIRouter()
 
 router.include_router(plugin_manager_router, prefix="/plugin-manager", tags=["plugin-manager"])
 
+@requires_role("admin")
 @router.get("/admin", response_class=HTMLResponse)
 async def get_admin_html():
     log_id = nanoid.generate()

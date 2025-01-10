@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import traceback
 import os
 import json
+from lib.route_decorators import requires_role
 from typing import List, Optional
 from lib.plugins import (
     load_plugin_manifest, update_plugin_manifest, plugin_install,
@@ -36,6 +37,7 @@ class PluginMetadata(BaseModel):
     services: Optional[List[str]] = None
     dependencies: Optional[List[str]] = None
 
+@requires_role("admin")
 @router.get("/get-all-plugins")
 async def get_all_plugins():
     try:
@@ -71,6 +73,8 @@ async def get_all_plugins():
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error fetching plugins: {str(e)}\n\n{trace}"}
 
+
+@requires_role("admin")
 @router.post("/scan-directory")
 async def scan_directory(request: DirectoryRequest):
     try:
@@ -98,6 +102,7 @@ async def scan_directory(request: DirectoryRequest):
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error during scan: {str(e)}\n\n{trace}"}
 
+@requires_role("admin")
 @router.post("/install-local-plugin")
 async def install_local_plugin(request: PluginRequest):
     try:
@@ -116,6 +121,8 @@ async def install_local_plugin(request: PluginRequest):
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error installing plugin: {str(e)}\n\n{trace}"}
 
+
+@requires_role("admin")
 @router.post("/install-x-github-plugin")
 async def install_github_plugin(request: GitHubPluginRequest):
     try:
@@ -130,6 +137,7 @@ async def install_github_plugin(request: GitHubPluginRequest):
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error installing from GitHub: {str(e)}\n\n{trace}"}
 
+@requires_role("admin")
 @router.post("/install-from-index")
 async def install_from_index(request: InstallFromIndexRequest):
     try:
@@ -182,6 +190,8 @@ async def install_from_index(request: InstallFromIndexRequest):
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error installing from index: {str(e)}\n\n{trace}"}
 
+
+@requires_role("admin")
 @router.post("/toggle-plugin")
 async def toggle_plugin(request: TogglePluginRequest):
     try:
