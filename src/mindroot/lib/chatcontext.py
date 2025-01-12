@@ -19,13 +19,14 @@ CommandSetT = TypeVar('CommandSetT', bound=BaseCommandSet)
 
 class ChatContext:
 
-    def __init__(self, command_manager, service_manager, user='testuser'):
-        self.command_manager = command_manager
-        self.service_manager = service_manager
+    def __init__(self, command_manager_=None, service_manager_=None, user='testuser'):
+        self.command_manager = command_manager_ if command_manager_ is not None else command_manager
+        self.service_manager = service_manager if service_manager_ is not None else service_manager
         self._commands = command_manager.functions
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
+        self.startup_dir = os.getcwd()
         self.flags = []
 
         self.data = {}

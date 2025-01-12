@@ -1,5 +1,6 @@
 from lib.providers.hooks import hook, hook_manager
 from lib.route_decorators import public_route, public_routes
+from lib.chatcontext import ChatContext
 from starlette.routing import Mount
 import termcolor
 import os
@@ -12,6 +13,6 @@ async def on_load(app):
     for dirs in ['data/context', 'data/chat']:
         os.makedirs(dirs, exist_ok=True)
 
-    context = { "startup_dir": os.getcwd() }
+    context = ChatContext()
     await hook_manager.startup(app, context=context)
 

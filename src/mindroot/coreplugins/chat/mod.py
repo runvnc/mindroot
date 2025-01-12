@@ -6,7 +6,7 @@ from pathlib import Path
 
 @hook()
 async def startup(app, context):
-    startup_dir = context.get('startup_dir', os.getcwd())
+    startup_dir = context.startup_dir
     imgs_dir = Path(startup_dir) / 'imgs'
     os.makedirs(imgs_dir, exist_ok=True)
     

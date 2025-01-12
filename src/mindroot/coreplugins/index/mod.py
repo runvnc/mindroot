@@ -7,7 +7,7 @@ print("--- Index Plugin Startup ---")
 
 @hook()
 async def startup(app, context):
-    startup_dir = context.get('startup_dir', os.getcwd())
+    startup_dir = context.startup_dir
     published_dir = Path(startup_dir) / 'published_indices'
     os.makedirs(published_dir, exist_ok=True)
     

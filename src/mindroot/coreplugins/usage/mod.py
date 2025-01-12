@@ -49,8 +49,6 @@ async def register_cost_type(plugin_id: str, cost_type_id: str,
             'tokens'
         )
     """
-    if not context or not context.get('is_plugin', False):
-        raise ValueError("Only plugins can register cost types")
         
     _tracker.get_registry().register(cost_type_id, description, unit)
 
