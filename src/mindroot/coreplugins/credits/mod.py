@@ -3,6 +3,7 @@ from typing import Optional, Dict
 from pathlib import Path
 from lib.providers.services import service
 from lib.providers.commands import command
+from lib.providers.hooks import hook
 from .models import CreditTransaction, CreditRatioConfig
 from .storage import CreditStorage
 from .ledger import CreditLedger, InsufficientCreditsError
@@ -30,6 +31,12 @@ async def init_credit_system(base_path: str):
     await register_usage_handler(_usage_handler)
     
     return _ledger
+
+@hook()
+async def startup():
+    """Startup tasks"""
+    await init_credit_system(Path.cwd() / 'data' / 'credits')
+
 
 @service()
 async def allocate_credits(username: str, amount: float,

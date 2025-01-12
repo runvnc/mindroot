@@ -3,6 +3,7 @@ from typing import Optional, Dict
 from pathlib import Path
 from lib.providers.services import service
 from lib.providers.commands import command
+from lib.providers.hooks import hook
 from .models import UsageEvent
 from .storage import UsageStorage
 from .handlers import UsageTracker
@@ -22,6 +23,11 @@ def init_usage_tracking(base_path: str):
     _report = UsageReport(_tracker)
     
     return _tracker
+
+@hook()
+async def startup():
+    await init_usage_tracking(str(Path.cwd()))
+
 
 @service()
 async def register_cost_type(plugin_id: str, cost_type_id: str, 
