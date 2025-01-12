@@ -14,7 +14,7 @@ _storage = None
 _tracker = None
 _report = None
 
-def init_usage_tracking(base_path: str):
+async def init_usage_tracking(base_path: str):
     """Initialize the usage tracking system"""
     global _storage, _tracker, _report
     
