@@ -1,0 +1,17 @@
+{
+    "name": "Usage Tracking",
+    "version": "1.0.0",
+    "description": "Core plugin for tracking and reporting usage and costs across plugins",
+    "services": [
+        "register_cost_type",
+        "track_usage",
+        "register_usage_handler",
+        "get_cost_config",
+        "set_cost"
+    ],
+    "commands": [
+        "get_usage_report",
+        "get_cost_summary",
+        "get_daily_costs"
+    ]
+}
