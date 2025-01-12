@@ -7,8 +7,9 @@ from lib.auth import require_admin
 from .handlers import UsageTracker
 from .reporting import UsageReport
 from .mod import _tracker, _report
+from lib.route_decorators import requires_role
 
-router = APIRouter()
+router = APIRouter( dependencies=[requires_role('admin')] )
 
 @router.get("/admin/usage")
 @require_admin

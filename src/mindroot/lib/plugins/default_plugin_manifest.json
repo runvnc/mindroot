@@ -45,6 +45,14 @@
         "enabled": true,
         "source": "core"
       },
+      "usage": {
+          "enabled": true,
+          "source": "core"
+      },
+      "credits": {
+          "enabled": true,
+          "source": "core"
+      },
       "startup": {
         "enabled": true,
         "source": "core"
