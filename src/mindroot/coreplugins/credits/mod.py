@@ -33,7 +33,7 @@ async def init_credit_system(base_path: str):
     return _ledger
 
 @hook()
-async def startup():
+async def startup(context=None):
     """Startup tasks"""
     await init_credit_system(Path.cwd() / 'data' / 'credits')
 

@@ -25,7 +25,7 @@ def init_usage_tracking(base_path: str):
     return _tracker
 
 @hook()
-async def startup():
+async def startup(context=None):
     await init_usage_tracking(str(Path.cwd()))
 
 

@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from datetime import date
 from typing import Optional
 from lib.templates import render
-from lib.auth import require_admin
 from .handlers import UsageTracker
 from .reporting import UsageReport
 from .mod import _tracker, _report
@@ -12,7 +11,6 @@ from lib.route_decorators import requires_role
 router = APIRouter( dependencies=[requires_role('admin')] )
 
 @router.get("/admin/usage")
-@require_admin
 async def usage_admin(request: Request):
     """Admin interface for usage tracking configuration"""
     registry = _tracker.get_registry()
@@ -27,7 +25,6 @@ async def usage_admin(request: Request):
     return HTMLResponse(html)
 
 @router.post("/api/admin/usage/costs")
-@require_admin
 async def update_costs(request: Request):
     """Update cost configuration"""
     try:
@@ -46,7 +43,6 @@ async def update_costs(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/usage/report/{username}")
-@require_admin
 async def get_user_report(username: str, 
                         start_date: Optional[str] = None,
                         end_date: Optional[str] = None):
@@ -62,7 +58,6 @@ async def get_user_report(username: str,
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/usage/summary/{username}")
-@require_admin
 async def get_user_summary(username: str,
                          start_date: Optional[str] = None,
                          end_date: Optional[str] = None):

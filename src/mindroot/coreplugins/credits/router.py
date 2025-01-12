@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from datetime import date
 from typing import Optional
 from lib.templates import render
-from lib.auth import require_admin
 from .models import CreditTransaction
 from .ledger import CreditLedger, InsufficientCreditsError
 from .mod import (_ledger, _ratio_config, allocate_credits, 
@@ -12,7 +11,6 @@ from .mod import (_ledger, _ratio_config, allocate_credits,
 router = APIRouter()
 
 @router.get("/admin/credits")
-@require_admin
 async def credits_admin(request: Request):
     """Admin interface for credit management"""
     template_data = {
@@ -23,7 +21,6 @@ async def credits_admin(request: Request):
     return HTMLResponse(html)
 
 @router.get("/admin/credits/ratios")
-@require_admin
 async def credits_ratio_admin(request: Request):
     """Admin interface for credit ratio configuration"""
     template_data = {
@@ -34,7 +31,6 @@ async def credits_ratio_admin(request: Request):
     return HTMLResponse(html)
 
 @router.post("/api/admin/credits/allocate")
-@require_admin
 async def api_allocate_credits(request: Request):
     """Allocate credits to a user"""
     try:
@@ -61,7 +57,6 @@ async def api_allocate_credits(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/api/admin/credits/ratios")
-@require_admin
 async def api_update_ratio(request: Request):
     """Update credit ratio configuration"""
     try:
@@ -82,7 +77,6 @@ async def api_update_ratio(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/credits/report/{username}")
-@require_admin
 async def api_credit_report(username: str,
                            start_date: Optional[str] = None,
                            end_date: Optional[str] = None):
@@ -94,7 +88,6 @@ async def api_credit_report(username: str,
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/credits/estimate")
-@require_admin
 async def api_estimate_credits(plugin_id: str,
                               cost_type_id: str,
                               estimated_cost: float,
