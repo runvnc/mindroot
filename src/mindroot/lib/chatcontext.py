@@ -26,6 +26,7 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
+        self.username = user
         self.startup_dir = os.getcwd()
         self.flags = []
 

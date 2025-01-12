@@ -83,7 +83,7 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
             model_id='gpt-4-1106-preview'
         )
     """
-    if not context or not context.get('username'):
+    if not context or not context.username:
         raise ValueError("Username required in context for usage tracking")
 
     if not _tracker.get_registry().get_info(cost_type_id):
@@ -95,9 +95,9 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
         cost_type_id=cost_type_id,
         quantity=quantity,
         metadata=metadata,
-        username=context['username'],
+        username=context.username,
         model_id=model_id,
-        session_id=context.get('session_id')
+        session_id=context.log_id
     )
     
     await _tracker.track_usage(event)
