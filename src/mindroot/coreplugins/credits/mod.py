@@ -3,7 +3,6 @@ from typing import Optional, Dict
 from pathlib import Path
 from lib.providers.services import service
 from lib.providers.commands import command
-from lib.auth import require_admin
 from .models import CreditTransaction, CreditRatioConfig
 from .storage import CreditStorage
 from .ledger import CreditLedger, InsufficientCreditsError
@@ -16,7 +15,7 @@ _ratio_config = None
 _credit_policy = None
 _usage_handler = None
 
-def init_credit_system(base_path: str):
+async def init_credit_system(base_path: str):
     """Initialize the credit system"""
     global _storage, _ledger, _ratio_config, _credit_policy, _usage_handler
     
@@ -33,7 +32,6 @@ def init_credit_system(base_path: str):
     return _ledger
 
 @service()
-@require_admin
 async def allocate_credits(username: str, amount: float,
                           source: str, reference_id: str,
                           metadata: Optional[Dict] = None,
@@ -90,7 +88,6 @@ async def check_credits_available(username: str, required_amount: float,
     }
 
 @service()
-@require_admin
 async def set_credit_ratio(ratio: float, plugin_id: Optional[str] = None,
                           cost_type_id: Optional[str] = None,
                           model_id: Optional[str] = None,
@@ -122,8 +119,6 @@ async def get_credit_ratios(context=None) -> Dict:
     """Get current credit ratio configuration."""
     return _ratio_config.get_config()
 
-@command()
-@require_admin
 async def get_credit_report(username: str,
                            start_date: Optional[str] = None,
                            end_date: Optional[str] = None,
@@ -155,8 +150,6 @@ async def get_credit_report(username: str,
         'transactions': [t.to_dict() for t in transactions]
     }
 
-@command()
-@require_admin
 async def estimate_credits(plugin_id: str, cost_type_id: str,
                          estimated_cost: float,
                          model_id: Optional[str] = None,

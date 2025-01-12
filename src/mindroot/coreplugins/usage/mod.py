@@ -3,7 +3,6 @@ from typing import Optional, Dict
 from pathlib import Path
 from lib.providers.services import service
 from lib.providers.commands import command
-from lib.auth import require_admin
 from .models import UsageEvent
 from .storage import UsageStorage
 from .handlers import UsageTracker
@@ -100,7 +99,6 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
     await _tracker.track_usage(event)
 
 @service()
-@require_admin
 async def register_usage_handler(handler, context=None):
     """Register a new usage handler.
     
@@ -123,7 +121,6 @@ async def get_cost_config(context=None):
     return _tracker.get_cost_config()
 
 @service()
-@require_admin
 async def set_cost(plugin_id: str, cost_type_id: str, unit_cost: float, 
                   model_id: Optional[str] = None, context=None):
     """Set the cost for a specific usage type.
@@ -154,7 +151,6 @@ async def set_cost(plugin_id: str, cost_type_id: str, unit_cost: float,
     _tracker.get_cost_config().set_cost(plugin_id, cost_type_id, unit_cost, model_id)
 
 @command()
-@require_admin
 async def get_usage_report(username: str, start_date: Optional[str] = None,
                           end_date: Optional[str] = None, context=None) -> Dict:
     """Get a detailed usage report for a user.
@@ -178,8 +174,6 @@ async def get_usage_report(username: str, start_date: Optional[str] = None,
     
     return await _report.get_user_report(username, start, end)
 
-@command()
-@require_admin
 async def get_cost_summary(username: str, start_date: Optional[str] = None,
                           end_date: Optional[str] = None, context=None) -> Dict:
     """Get a cost summary for a user.
@@ -202,8 +196,6 @@ async def get_cost_summary(username: str, start_date: Optional[str] = None,
     
     return await _report.get_cost_summary(username, start, end)
 
-@command()
-@require_admin
 async def get_daily_costs(username: str, start_date: Optional[str] = None,
                          end_date: Optional[str] = None, context=None) -> Dict:
     """Get daily cost breakdown for a user.
