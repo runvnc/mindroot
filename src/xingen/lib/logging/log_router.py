@@ -73,7 +73,10 @@ async def get_logs_page():
                 <input type="text" id="searchStr" name="search" placeholder="Search string">
             </label>
             
-            
+            <label for="searchStr">Exclude:
+                <input type="text" id="excludeStr" name="exclude" placeholder="Exclude string">
+            </label>
+             
             <button type="submit">Fetch Logs</button>
         </form>
         
@@ -109,7 +112,12 @@ async def get_logs_page():
                 if (document.getElementById('searchStr').value) {
                     searchStr = document.getElementById('searchStr').value;
                 }
-                const response = await fetch(`/api/logs?start=${startTime}&end=${endTime}&search_str=${searchStr}`)
+                let excludeStr = null;
+                if (document.getElementById('excludeStr').value) {
+                    excludeStr = document.getElementById('excludeStr').value;
+                }
+
+                const response = await fetch(`/api/logs?start=${startTime}&end=${endTime}&search_str=${searchStr}&exclude_str=${excludeStr}`)
                 const logs = await response.json();
                 console.log(logs);
             }
@@ -128,16 +136,18 @@ async def api_logs(
     end: str = Query(..., description="End time (ISO format)"),
     limit: int = Query(1000, description="Maximum number of logs to return"),
     search_str: str = Query(None, description="Search string"),
+    exclude_str: str = Query(None, text="Exclude text"),
     cursor: str = Query(None, description="Cursor for pagination")
 ):
     start_time = datetime.fromisoformat(start)
     end_time = datetime.fromisoformat(end)
     cursor_time = datetime.fromisoformat(cursor) if cursor else None
     search_str = search_str.strip() if search_str else None
+    exclude_str = exclude_str.strip() if exclude_str else None
     if search_str == 'null':
         search_str = None
 
-    logs, next_cursor = await get_logs(start_time, end_time, search_str, limit, cursor_time)
+    logs, next_cursor = await get_logs(start_time, end_time, search_str, exclude_str, limit, cursor_time)
 
     return {
         "logs": logs,

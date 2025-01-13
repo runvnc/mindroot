@@ -40,7 +40,7 @@ def get_log_files(start_time, end_time):
         current_time += timedelta(hours=1)
     return files_to_read
 
-async def get_logs(start_time, end_time, search_str=None, limit=30000, cursor=None):
+async def get_logs(start_time, end_time, search_str=None, exclude_str=None, limit=30000, cursor=None):
     # Ensure start_time and end_time are naive
     start_time = start_time.replace(tzinfo=None)
     end_time = end_time.replace(tzinfo=None)
@@ -58,6 +58,8 @@ async def get_logs(start_time, end_time, search_str=None, limit=30000, cursor=No
         with open(file, 'r') as f:
             for line in f:
                 if search_str is not None and search_str not in line:
+                    continue
+                if exclude_str is not None and exclude_str in line:
                     continue
                 log_entry = json.loads(line)
                 log_time = datetime.fromisoformat(log_entry['time']).replace(tzinfo=None)
