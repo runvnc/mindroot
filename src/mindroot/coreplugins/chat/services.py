@@ -102,8 +102,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         print(context) 
         agent_ = agent.Agent(agent=context.agent)
         if user is not None:
-            for key in user.dict():
-                context.data[key] = user.dict()[key]
+            if hasattr(user, "dict"):
+                user = user.dict()
+            for key in user.keys():
+                context.data[key] = user[key]
 
         tmp_data = { "message": message }
         tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)

@@ -81,7 +81,7 @@ async def scan_directory(request: DirectoryRequest):
         
         discovered_plugins = discover_plugins(directory)
         manifest = load_plugin_manifest()
-        
+        print("discoverd_plugins", discovered_plugins)
         # Update installed plugins from discovered ones
         for plugin_name, plugin_info in discovered_plugins.items():
             plugin_info['source'] = 'local'
@@ -91,6 +91,7 @@ async def scan_directory(request: DirectoryRequest):
                 "commands": plugin_info.get('commands', []),
                 "services": plugin_info.get('services', [])
             }
+            print(plugin_info)
             manifest['plugins']['installed'][plugin_name] = plugin_info
 
         save_plugin_manifest(manifest)

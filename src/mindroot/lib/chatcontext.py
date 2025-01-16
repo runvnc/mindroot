@@ -26,7 +26,13 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
-        self.username = user
+        if isinstance(user, str):
+            self.username = user
+        elif isinstance(user, dict):
+            self.username = user.get('username')
+        elif hasattr(user, 'to_dict'):
+            self.username = user.to_dict().get('username')
+
         self.startup_dir = os.getcwd()
         self.flags = []
 
@@ -70,6 +76,8 @@ class ChatContext:
             context_data['agent_name'] = self.agent_name
         if 'agent_name' not in context_data:
             raise ValueError("Tried to save chat context, but agent name not found in context")
+        print("-"*80)
+        print("Context data:\n\n", context_data)
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
         print("Saved context to:", context_file)
