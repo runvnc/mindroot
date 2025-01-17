@@ -54,7 +54,9 @@ def merge_json_arrays(data, partial=False):
                 #print(e)
 
     #print("returning sum(arrays, []):", sum(arrays, []))
-    return sum(arrays, [])
+    #ret = sum(arrays, [])
+    ret = list(chain.from_iterable(arrays))
+    return ret
 
 
 #ret = merge_json_arrays(test3, False)
