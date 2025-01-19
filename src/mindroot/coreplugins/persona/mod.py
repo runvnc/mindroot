@@ -68,7 +68,9 @@ async def pic_of_me(prompt="", context=None):
 
     Example:
 
-    { "pic_of_me": { "prompt": "[in third person: image composition, taken from angle, where they are, what they are doing, details of appearance, details of scene, camera settings, etc. etc.]" } }
+    { 
+    "pic_of_me": { "prompt": 
+        "(in third person: image composition, taken from angle, where they are, what they are doing, details of appearance, details of scene, camera settings, etc. etc.)" } }
 
     """
     persona = context.agent['persona']
@@ -77,7 +79,7 @@ async def pic_of_me(prompt="", context=None):
     if 'negative_appearance' in persona:
         negative_appearance = persona['negative_appearance']
 
-    img = await context.text_to_image(prompt + ', ' + persona['appearance'], negative_appearance)
+    img = await context.text_to_image(prompt + ', ' + persona['appearance'], negative_appearance, cfg=12)
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     try:

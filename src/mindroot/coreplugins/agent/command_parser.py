@@ -142,11 +142,24 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             # if ends in ']', then may be end of command list
             #if it failed to parse, write buffer that failed to debug in orange text
             if buffer[-1] == ']':
-                print("\033[93m", end="")
-                print(f"Failed to parse buffer even with escaping: {buffer}")
-                print("\033[0m", end="")
-                pass
-            pass
+                # try one more thing: there might be an extra } before the ]
+                buffer = buffer[:-2] + "]"
+                try:
+                    complete_commands = json_loads(buffer)
+                    num_commands = len(complete_commands)
+                    if num_commands > 1:
+                        current_partial = complete_commands[-1]
+                        complete_commands = complete_commands[:num_commands-1]
+                    else:
+                        current_partial = complete_commands[-1]
+                        complete_commands = []
+                    print(7)
+                    return complete_commands, current_partial
+                except Exception:
+                    print("\033[93m", end="")
+                    print(f"Failed to parse buffer even with escaping: {buffer}")
+                    print("\033[0m", end="")
+                    pass
         try:
             parsed_data = loads(raw_replaced)
             num_commands = len(parsed_data)

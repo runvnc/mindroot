@@ -21,11 +21,17 @@ async def init_usage_tracking(base_path: str):
     _storage = UsageStorage(base_path)
     _tracker = UsageTracker(_storage)
     _report = UsageReport(_tracker)
-    
-    return _tracker
+    print("Usage tracking initialized")
+    print("_tracker is ", _tracker)
+    return (_tracker, _storage, _report)
 
 @hook()
 async def startup(app, context=None):
+    # need to attach the tracker to the app
+    _tracker, _storage, _report = await init_usage_tracking(str(Path.cwd()))
+    app.state._tracker = _tracker
+    app.state._storage = _storage
+    app.state._report = _report
     await init_usage_tracking(str(Path.cwd()))
 
 

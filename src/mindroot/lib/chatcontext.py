@@ -19,7 +19,10 @@ CommandSetT = TypeVar('CommandSetT', bound=BaseCommandSet)
 
 class ChatContext:
 
-    def __init__(self, command_manager_=None, service_manager_=None, user='testuser'):
+    def __init__(self, command_manager_=None, service_manager_=None, user):
+        # require a user
+        if not user:
+            raise ValueError("User is required to create a chat context")
         self.command_manager = command_manager_ if command_manager_ is not None else command_manager
         self.service_manager = service_manager if service_manager_ is not None else service_manager
         self._commands = command_manager.functions

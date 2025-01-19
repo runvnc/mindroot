@@ -13,6 +13,7 @@ router = APIRouter( dependencies=[requires_role('admin')] )
 @router.get("/admin/usage")
 async def usage_admin(request: Request):
     """Admin interface for usage tracking configuration"""
+    _tracker = request.app.state._tracker
     registry = _tracker.get_registry()
     cost_config = _tracker.get_cost_config()
     
@@ -21,13 +22,15 @@ async def usage_admin(request: Request):
         "current_costs": cost_config.get_all_costs()
     }
     
-    html = await render('admin/usage.jinja2', template_data)
+    html = await render('usage', template_data)
     return HTMLResponse(html)
 
 @router.post("/api/admin/usage/costs")
 async def update_costs(request: Request):
     """Update cost configuration"""
     try:
+        _tracker = request.app.state._tracker
+
         data = await request.json()
         plugin_id = data.get('plugin_id')
         cost_type_id = data.get('cost_type_id')
@@ -43,11 +46,14 @@ async def update_costs(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/usage/report/{username}")
-async def get_user_report(username: str, 
+async def get_user_report(
+                        request: Request,
+                        username: str, 
                         start_date: Optional[str] = None,
                         end_date: Optional[str] = None):
     """Get usage report for a specific user"""
     try:
+        _report = request.app.state._report
         start = date.fromisoformat(start_date) if start_date else None
         end = date.fromisoformat(end_date) if end_date else None
         
@@ -58,11 +64,14 @@ async def get_user_report(username: str,
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/api/admin/usage/summary/{username}")
-async def get_user_summary(username: str,
+async def get_user_summary(
+                         request: Request,
+                         username: str,
                          start_date: Optional[str] = None,
                          end_date: Optional[str] = None):
     """Get cost summary for a specific user"""
     try:
+        _report = request.app.state._report
         start = date.fromisoformat(start_date) if start_date else None
         end = date.fromisoformat(end_date) if end_date else None
         

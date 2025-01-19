@@ -91,7 +91,15 @@ def process_result(result, formatted_results):
     return formatted_results
 
 @service()
-async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user):
+    # require a user
+    if not user:
+        # check context
+        if not context.username:
+            raise Exception("User required")
+        else:
+            user = context.username
+
     try:
         if type(message) is list:
             message = [m.dict() for m in message]

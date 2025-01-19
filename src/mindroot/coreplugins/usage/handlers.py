@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from .models import UsageEvent, CostTypeRegistry, CostConfig
 from .storage import UsageStorage
+# we need a good library for ANSI colors etc. that allows
+# 256 colors
+import colorama
 
 # need date
 from datetime import date
@@ -17,6 +20,7 @@ class FileSystemHandler(UsageHandler):
         self.storage = storage
 
     async def handle_usage(self, event: UsageEvent, cost: float):
+        print(colorama.Fore.YELLOW + colorama.Back.BLUE + f"Event: {event}, Cost: {cost}")
         await self.storage.store_event(event, cost)
 
 class UsageTracker:

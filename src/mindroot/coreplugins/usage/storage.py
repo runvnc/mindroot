@@ -31,6 +31,7 @@ class UsageStorage:
         """Iterate through date files for a user within date range"""
         user_dir = self._get_user_dir(username)
         if not user_dir.exists():
+            print("Warning: Usage: User directory does not exist for user ", username, "user dir is: ", user_dir)
             return
 
         for file_path in sorted(user_dir.glob("usage_*.jsonl")):
@@ -51,6 +52,7 @@ class UsageStorage:
         
         for file_path in self._iter_date_files(username, start_date, end_date):
             try:
+                print("get_usage Found file", file_path)
                 with open(file_path, 'r') as f:
                     for line in f:
                         record = json.loads(line)
