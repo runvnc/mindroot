@@ -56,7 +56,7 @@ async def cancel_chat(log_id: str, task_id: str):
 @router.post("/chat/{log_id}/send")
 async def send_message(request: Request, log_id: str, message_parts: List[MessageParts] ):
     user = request.state.user
-
+    print("send_message, user = ", user)
     task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))
     
     task_id = nanoid.generate()
@@ -66,11 +66,12 @@ async def send_message(request: Request, log_id: str, message_parts: List[Messag
     return {"status": "ok", "task_id": task_id}
 
 @router.get("/agent/{agent_name}", response_class=HTMLResponse)
-async def get_chat_html(agent_name: str):
+async def get_chat_html(request: Request, agent_name: str):
+    user = request.state.user
     log_id = nanoid.generate()
     plugins = list_enabled()
     print(f"Init chat with {agent_name}")
-    await init_chat_session(agent_name, log_id)
+    await init_chat_session(user, agent_name, log_id)
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
 @router.get("/history/{agent_name}/{log_id}")

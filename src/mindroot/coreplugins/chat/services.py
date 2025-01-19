@@ -22,14 +22,14 @@ import base64
 sse_clients = {}
 
 @service()
-async def init_chat_session(agent_name: str, log_id: str):
+async def init_chat_session(user:str, agent_name: str, log_id: str):
     if agent_name is None or agent_name == "" or log_id is None or log_id == "":
         print("Invalid agent_name or log_id")
         print("agent_name: ", agent_name)
         print("log_id: ", log_id)
         raise Exception("Invalid agent_name or log_id")
 
-    context = ChatContext(command_manager, service_manager)
+    context = ChatContext(command_manager, service_manager, user)
     context.agent_name = agent_name
     context.name = agent_name
     context.log_id = log_id
@@ -91,14 +91,16 @@ def process_result(result, formatted_results):
     return formatted_results
 
 @service()
-async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user):
+async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
     # require a user
     if not user:
         # check context
         if not context.username:
             raise Exception("User required")
         else:
-            user = context.username
+            user = {"user": context.username }
+    else:
+        user = user.dict()
 
     try:
         if type(message) is list:
@@ -109,7 +111,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             return []
 
         print("send_message_to_agent: ", session_id, message, max_iterations)
-        context = ChatContext(command_manager, service_manager)
+        context = ChatContext(command_manager, service_manager, user)
 
         await context.load_context(session_id)
         print(context) 
