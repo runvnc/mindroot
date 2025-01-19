@@ -100,8 +100,8 @@ class ChatContext:
             self.agent = await service_manager.get_agent_data(self.agent_name, self)
             self.flags = self.agent.get('flags', [])
             self.data['log_id'] = log_id
+            print("loading chat log for id:", log_id, "agent name is:", self.agent_name)
             self.chat_log = ChatLog(log_id=log_id, agent=self.agent_name)
-
             self.uncensored = True
         else:
             print("Context file not found for id:", log_id)

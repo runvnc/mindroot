@@ -73,9 +73,9 @@ async def get_chat_html(agent_name: str):
     await init_chat_session(agent_name, log_id)
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
-@router.get("/history/{log_id}")
-async def chat_history(log_id: str):
-    history = await get_chat_history(log_id)
+@router.get("/history/{agent_name}/{log_id}")
+async def chat_history(agent_name: str, log_id: str):
+    history = await get_chat_history(agent_name, log_id)
     return history
 
 @router.get("/session/{agent_name}/{log_id}")

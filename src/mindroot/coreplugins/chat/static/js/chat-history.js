@@ -1,4 +1,5 @@
 import { markdownRenderer } from './markdown-renderer.js';
+import { removeCmdPrefix } from './cmdprefixes.js';
 
 export class ChatHistory {
     constructor(chat) {
@@ -8,7 +9,7 @@ export class ChatHistory {
     async loadHistory() {
         console.log('%cLoading chat history...', 'color: cyan');
         try {
-            const response = await fetch(`/history/${this.chat.sessionid}`);
+            const response = await fetch(`/history/${window.agent_name}/${this.chat.sessionid}`);
             const data = await response.json();
             console.log('%cHistory loaded:', 'color: cyan', data);
             
@@ -41,6 +42,11 @@ export class ChatHistory {
     }
 
     _processUserMessage(part, persona) {
+        if (typeof part === 'string') {
+            part = { text: part };
+        }
+     
+        part.text = removeCmdPrefix(part.text)
         try {
             JSON.parse(part.text); // If this succeeds, it's a command, skip it
         } catch (e) {

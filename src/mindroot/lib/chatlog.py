@@ -101,5 +101,8 @@ class ChatLog:
                 log_data = json.load(f)
                 self.agent = log_data.get('agent')
                 self.messages = log_data.get('messages', [])
+            print("Loaded log file at ", log_file)
+            print("Message length: ", len(self.messages))
         else:
+            print("Could not find log file at ", log_file)
             self.messages = []

@@ -41,13 +41,18 @@ async def init_chat_session(agent_name: str, log_id: str):
     return log_id
 
 @service()
-async def get_chat_history(session_id: str):
-    context = ChatContext(command_manager, service_manager)
-    await context.load_context(session_id)
-    agent = await service_manager.get_agent_data(context.agent_name)
+async def get_chat_history(agent_name: str, session_id: str):
+    print("-----------------")
+    print("get_chat_history: ", agent_name, session_id)
+    #context = ChatContext(command_manager, service_manager)
+    #await context.load_context(session_id)
+    agent = await service_manager.get_agent_data(agent_name)
     
     persona = agent['persona']['name']
-    messages = context.chat_log.get_recent()
+    chat_log = ChatLog(log_id=session_id, agent=agent_name)
+    print("Got chat chat log")
+    messages = chat_log.get_recent()
+    print("messages length: ", len(messages))
     for message in messages:
         if message['role'] == 'user':
             message['persona'] = 'user'
