@@ -1,4 +1,4 @@
-from mindroot.coreplugins.smtp_email.mod import EmailMessage
+#from mindroot.coreplugins.email.mod import EmailMessage
 from lib.providers.services import service_manager
 from datetime import datetime, timedelta
 import secrets
@@ -17,13 +17,14 @@ async def send_verification_email(email: str, verification_token: str):
     <br>
     <p>If you did not create this account, please ignore this email.</p>
     """
-    
+    print("Not implemented")
+    return False   
     try:
-        await service_manager.send_email(EmailMessage(
-            to=email,
-            subject="Verify Your MindRoot Account",
-            body=email_html
-        ))
+        #await service_manager.send_email(EmailMessage(
+        #    to=email,
+        #    subject="Verify Your MindRoot Account",
+        #    body=email_html
+        #))
         return True
     except Exception as e:
         print(f"Warning: Could not send verification email: {e}")
