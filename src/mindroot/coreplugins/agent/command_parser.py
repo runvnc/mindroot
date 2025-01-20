@@ -93,6 +93,21 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             print("buffer:", buffer)
             pass
 
+        try:
+            complete_commands = json.loads(buffer)
+            num_commands = len(complete_commands)
+            print(4.5)
+
+            print("parsed, num complete commands:", num_commands)
+            if len(complete_commands) > 0:
+                return complete_commands, None
+ 
+            return complete_commands, current_partial
+        except Exception as e:
+            print("Failed to parse using loads")
+            print(e)
+            print("buffer:", buffer)
+            pass
 
         try:
             complete_commands = merge_json_arrays(raw_replaced, partial=True)
