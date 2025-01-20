@@ -68,6 +68,7 @@ export class ChatHistory {
             for (let cmd of cmds) {
                 let markdown = null;
                 if (cmd.say) {
+                    if (cmd.say.text == undefined) cmd.say = { text: cmd.say }
                     markdown = markdownRenderer.parse(cmd.say.text);
                 }
                 if (cmd.json_encoded_md) {
