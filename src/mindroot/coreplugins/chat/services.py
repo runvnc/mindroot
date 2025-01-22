@@ -100,7 +100,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         else:
             user = {"user": context.username }
     else:
-        user = user.dict()
+        if hasattr(user, "dict"):
+            user = user.dict()
 
     try:
         if type(message) is list:
@@ -117,8 +118,6 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         print(context) 
         agent_ = agent.Agent(agent=context.agent)
         if user is not None:
-            if hasattr(user, "dict"):
-                user = user.dict()
             for key in user.keys():
                 context.data[key] = user[key]
 

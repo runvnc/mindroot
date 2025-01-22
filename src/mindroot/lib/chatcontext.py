@@ -38,6 +38,7 @@ class ChatContext:
 
         self.startup_dir = os.getcwd()
         self.flags = []
+        self.app = None
 
         self.data = {}
         self.agent_name = None
@@ -59,6 +60,7 @@ class ChatContext:
         with open(context_file, 'r') as f:
             context_data = json.load(f)
             context_data['data'] = self.data
+        
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
 

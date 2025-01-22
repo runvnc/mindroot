@@ -14,5 +14,6 @@ async def on_load(app):
         os.makedirs(dirs, exist_ok=True)
 
     context = ChatContext(user='startup')
+    context.app = app
     await hook_manager.startup(app, context=context)
 

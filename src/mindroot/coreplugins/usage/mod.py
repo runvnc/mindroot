@@ -32,7 +32,6 @@ async def startup(app, context=None):
     app.state._tracker = _tracker
     app.state._storage = _storage
     app.state._report = _report
-    await init_usage_tracking(str(Path.cwd()))
 
 
 @service()
@@ -55,7 +54,7 @@ async def register_cost_type(plugin_id: str, cost_type_id: str,
             'tokens'
         )
     """
-        
+    _tracker = context.app.state._tracker
     _tracker.get_registry().register(cost_type_id, description, unit)
 
 @service()
@@ -65,11 +64,12 @@ async def get_cost_types(context=None):
     Returns:
         Dict mapping cost_type_id to CostTypeInfo
     """
+    _tracker = context.app.state._tracker
     return _tracker.get_registry().list_types()
 
 @service()
 async def track_usage(plugin_id: str, cost_type_id: str, quantity: float, 
-                     metadata: dict, context=None, model_id: Optional[str] = None):
+                      metadata: dict, context=None, model_id: Optional[str] = None):
     """Track usage for a plugin.
     
     Args:
@@ -89,6 +89,8 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
             model_id='gpt-4-1106-preview'
         )
     """
+    x = """
+    _tracker = context.app.state._tracker
     if not context or not context.username:
         raise ValueError("Username required in context for usage tracking")
 
@@ -107,6 +109,8 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
     )
     
     await _tracker.track_usage(event)
+    """
+    return
 
 @service()
 async def register_usage_handler(handler, context=None):
@@ -119,7 +123,7 @@ async def register_usage_handler(handler, context=None):
         handler: Instance of UsageHandler
         context: Request context (must have admin privileges)
     """
-    _tracker.add_handler(handler)
+    #_tracker.add_handler(handler)
 
 @service()
 async def get_cost_config(context=None):
@@ -128,6 +132,7 @@ async def get_cost_config(context=None):
     Returns:
         CostConfig instance containing all configured costs
     """
+    _tracker = context.app.state._tracker
     return _tracker.get_cost_config()
 
 @service()
@@ -152,6 +157,7 @@ async def set_cost(plugin_id: str, cost_type_id: str, unit_cost: float,
         # Set model-specific cost
         await set_cost('gpt4', 'gpt4.input_tokens', 0.0003, 'gpt-4-1106-preview')
     """
+    _tracker = context.app.state._tracker
     if not _tracker.get_registry().get_info(cost_type_id):
         raise ValueError(f"Unknown cost type: {cost_type_id}")
         
@@ -179,6 +185,7 @@ async def get_usage_report(username: str, start_date: Optional[str] = None,
     Example:
         report = await get_usage_report('user123', '2025-01-01', '2025-01-31')
     """
+    _report = context.app.state._report
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
     
@@ -201,6 +208,7 @@ async def get_cost_summary(username: str, start_date: Optional[str] = None,
     Example:
         summary = await get_cost_summary('user123', '2025-01-01', '2025-01-31')
     """
+    _report = context.app.state._report
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
     
@@ -221,7 +229,9 @@ async def get_daily_costs(username: str, start_date: Optional[str] = None,
     Example:
         daily = await get_daily_costs('user123', '2025-01-01', '2025-01-31')
     """
+    _report = context.app.state._report
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
     
     return await _report.get_daily_costs(username, start, end)
+    
