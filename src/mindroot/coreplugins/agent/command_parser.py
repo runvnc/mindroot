@@ -23,9 +23,13 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     complete_commands = []
     current_partial = None
 
+    if "<<CUT_HERE>>" in buffer:
+        buffer = buffer[buffer.find("<<CUT_HERE>>")+12:] + ' '
+
     if not buffer.strip():
         return [], None
-    
+   
+    # if <<CUT_HERE>> is found, then remove the text before it
     try:
         raw_replaced = replace_raw_blocks(buffer)
         #raw_replaced = escape_for_json(raw_replaced)

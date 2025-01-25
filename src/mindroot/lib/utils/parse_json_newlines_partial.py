@@ -20,6 +20,6 @@ def json_loads(content: str):
         return parsed
             
     except Exception as e:
-        print(f"Error processing file {filename}: {e}")
+        print(f"Error in json_loads: {e}")
         return None
 

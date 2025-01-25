@@ -45,7 +45,7 @@ def merge_json_arrays(data, partial=False):
                 if part.endswith("\\n"):
                     part = part[:-2]
                 part = part.strip()
-                if part.startswith('["'):
+                if not part.startswith('[{') and part.startswith('["'):
                     part = "[{" + part[1:]
                 arrays.append(load_json(part))
             except Exception as e:

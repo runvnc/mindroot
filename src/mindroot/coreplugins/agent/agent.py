@@ -135,6 +135,10 @@ class Agent:
             print("\033[91mConversation is finished, not executing command\033[0m")
             return None
 
+        if cmd_name == "reasoning":
+            logger.info("Skipping reasoning command")
+            return None
+
         logger.info("Command execution: {command}", command=cmd_name)
         logger.debug("Command details: {details}", details={
             "command": cmd_name,
