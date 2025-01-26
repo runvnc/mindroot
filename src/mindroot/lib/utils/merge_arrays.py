@@ -15,12 +15,12 @@ test3="""
 """
 
 def merge_json_arrays(data, partial=False):
-    print("merge_json_arrays, partial=", partial)
+    #print("merge_json_arrays, partial=", partial)
     if partial:
         load_json = partial_json_loads
-        #print("load_json is partial_json_loads")
+        ##print("load_json is partial_json_loads")
     else:
-        #print("load_json is json.loads")
+        ##print("load_json is json.loads")
         load_json = json.loads
     data = data.strip()
     parts = re.split(r"\]\s*,*\s*\[", data)
@@ -50,19 +50,19 @@ def merge_json_arrays(data, partial=False):
                 arrays.append(load_json(part))
             except Exception as e:
                 pass
-                #print("Error parsing part: ", part)
-                #print(e)
+                ##print("Error parsing part: ", part)
+                ##print(e)
 
-    #print("returning sum(arrays, []):", sum(arrays, []))
+    ##print("returning sum(arrays, []):", sum(arrays, []))
     #ret = sum(arrays, [])
     ret = list(chain.from_iterable(arrays))
     return ret
 
 
 #ret = merge_json_arrays(test3, False)
-#print("successful parsing")
+##print("successful parsing")
 #for item in ret:
-#    print('-----------------------------------')
-#    print(item)
-#    print('-----------------------------------')
+#    #print('-----------------------------------')
+#    #print(item)
+#    #print('-----------------------------------')
 

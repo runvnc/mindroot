@@ -9,11 +9,11 @@ from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
-from lib.chatcontext import ChatContext
+from lib.chatcontext import get_context
 from typing import List
 from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
-
+from lib.utils.debug import debug_box
 router = APIRouter()
 
 # Global dictionary to store tasks
@@ -21,13 +21,12 @@ tasks = {}
 
 @router.post("/chat/{log_id}/{task_id}/cancel")
 async def cancel_chat(request: Request, log_id: str, task_id: str):
+    debug_box("cancel_chat")
     print("Trying to cancel task", task_id)
     user = request.state.user.username
-    context = ChatContext(command_manager, service_manager, user) 
-    await context.load_context(log_id)
+    context = await get_context(log_id, user)
+    debug_box(str(context))
     context.data['finished_conversation'] = True
-    await context.save_context()
-    print("Trying to cancel task", task_id)
     #if task_id in tasks:
     #    task = tasks[task_id]
     #    await asyncio.sleep(0.75)
@@ -36,6 +35,20 @@ async def cancel_chat(request: Request, log_id: str, task_id: str):
     return {"status": "ok", "message": "Task cancelled successfully"}
     #else:
     #    raise HTTPException(status_code=404, detail="Task not found")
+
+@router.get("/context1/{log_id}")
+async def context1(request: Request, log_id: str):
+    user = request.state.user.username
+    context = await get_context(log_id, user)
+    print(context)
+    return "ok"
+
+@router.get("/context2/{log_id}")
+async def context2(request: Request, log_id: str):
+    user = request.state.user.username
+    context = await get_context(log_id, user)
+    print(context)
+    return "ok"
 
 
 # need to serve persona images from ./personas/local/[persona_name]/avatar.png
@@ -66,10 +79,14 @@ async def chat_events(log_id: str):
 @router.post("/chat/{log_id}/send")
 async def send_message(request: Request, log_id: str, message_parts: List[MessageParts] ):
     user = request.state.user
-    print("send_message, user = ", user)
+    debug_box("send_message")
 
-    task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))
-    
+    context = await get_context(log_id, user.username)
+    debug_box(str(context))
+    #context = ChatContext(command_manager, service_manager, user=user.user)
+    task = asyncio.create_task(send_message_to_agent(log_id, message_parts, context=context, user=user))
+    #task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))
+     
     task_id = nanoid.generate()
     
     tasks[task_id] = task

@@ -18,7 +18,7 @@ from datetime import datetime
 import pytz
 import traceback
 from lib.logging.logfiles import logger
-
+from lib.utils.debug import debug_box
 from .init_models import *
 
 
@@ -243,9 +243,10 @@ class Agent:
 
         num_processed = 0
         parse_failed = False
+        debug_box("Parsing command stream")
+        debug_box(str(context))
         
         async for part in stream:
-
             buffer += part
             logger.debug(f"Current buffer: ||{buffer}||")
 
@@ -263,7 +264,8 @@ class Agent:
 
             if 'finished_conversation' in context.data and context.data['finished_conversation']:
                 logger.warning("Conversation is finished or halted, exiting stream parsing")
-                print("\033[91mConversation is finished or halted, exiting stream parsing\033[0m")
+                debug_box(f"""Conversation is finished or halted, exiting stream""")
+                debug_box(str(context))
                 # stream is actually a generator
                 if partial_cmd is not None:
                     cmd_name = next(iter(partial_cmd))

@@ -5,6 +5,17 @@ import json
 from .chatlog import ChatLog
 from typing import TypeVar, Type, Protocol, runtime_checkable
 
+contexts = {}
+
+async def get_context(log_id, user):
+    if log_id in contexts:
+        return contexts[log_id]
+    else:
+        context = ChatContext(command_manager_=command_manager, service_manager_=service_manager, user=user)
+        await context.load_context(log_id)
+        contexts[log_id] = context
+        return context
+
 @runtime_checkable
 class BaseService(Protocol):
     """Base protocol for all services"""

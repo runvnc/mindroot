@@ -112,9 +112,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             return []
 
         print("send_message_to_agent: ", session_id, message, max_iterations)
-        context = ChatContext(command_manager, service_manager, user)
+        if context is None:
+            context = ChatContext(command_manager, service_manager, user)
+            await context.load_context(session_id)
 
-        await context.load_context(session_id)
         print(context) 
         agent_ = agent.Agent(agent=context.agent)
         if user is not None:
