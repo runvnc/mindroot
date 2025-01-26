@@ -9,13 +9,33 @@ from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
+from lib.chatcontext import ChatContext
 from typing import List
-
+from lib.providers.services import service, service_manager
+from lib.providers.commands import command_manager
 
 router = APIRouter()
 
 # Global dictionary to store tasks
 tasks = {}
+
+@router.post("/chat/{log_id}/{task_id}/cancel")
+async def cancel_chat(request: Request, log_id: str, task_id: str):
+    print("Trying to cancel task", task_id)
+    user = request.state.user.username
+    context = ChatContext(command_manager, service_manager, user) 
+    await context.load_context(log_id)
+    context.data['finished_conversation'] = True
+    await context.save_context()
+    print("Trying to cancel task", task_id)
+    #if task_id in tasks:
+    #    task = tasks[task_id]
+    #    await asyncio.sleep(0.75)
+    #    task.cancel()
+    #    del tasks[task_id]
+    return {"status": "ok", "message": "Task cancelled successfully"}
+    #else:
+    #    raise HTTPException(status_code=404, detail="Task not found")
 
 
 # need to serve persona images from ./personas/local/[persona_name]/avatar.png
@@ -42,21 +62,12 @@ async def get_persona_avatar(persona_name: str):
 async def chat_events(log_id: str):
     return EventSourceResponse(await subscribe_to_agent_messages(log_id))
 
-@router.post("/chat/{log_id}/{task_id}/cancel")
-async def cancel_chat(log_id: str, task_id: str):
-    if task_id in tasks:
-        task = tasks[task_id]
-        task.cancel()
-        del tasks[task_id]
-        return {"status": "ok", "message": "Task cancelled successfully"}
-    else:
-        raise HTTPException(status_code=404, detail="Task not found")
-
 
 @router.post("/chat/{log_id}/send")
 async def send_message(request: Request, log_id: str, message_parts: List[MessageParts] ):
     user = request.state.user
     print("send_message, user = ", user)
+
     task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))
     
     task_id = nanoid.generate()

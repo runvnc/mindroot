@@ -87,7 +87,7 @@ async def verify_user(username: str, password: str, context=None) -> bool:
 
 
 @service()
-async def get_user_data(username: str, context=None) -> Optional[UserBase]:
+async def get_user_data(username: str, include_email=False, context=None) -> Optional[UserBase]:
     """Get user data excluding sensitive info"""
     auth_file = os.path.join(USER_DATA_ROOT, username, "auth.json")
     if not os.path.exists(auth_file):
@@ -95,8 +95,10 @@ async def get_user_data(username: str, context=None) -> Optional[UserBase]:
         
     with open(auth_file, 'r') as f:
         auth_data = UserAuth(**json.load(f))
+
+    if not include_email:
+        auth_data.email = None
     
-    # Return safe user data
     return UserBase(**auth_data.dict())
 
 @service()

@@ -5,7 +5,7 @@ from typing import Optional, List, Set
 class UserBase(BaseModel):
     """Base user data that's safe to expose"""
     username: str = Field(..., min_length=3, max_length=32)
-    email: EmailStr
+    email: Optional[EmailStr]
     created_at: str
     last_login: Optional[str] = None
     email_verified: bool = False

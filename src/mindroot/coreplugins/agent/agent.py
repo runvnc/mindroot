@@ -245,6 +245,7 @@ class Agent:
         parse_failed = False
         
         async for part in stream:
+
             buffer += part
             logger.debug(f"Current buffer: ||{buffer}||")
 
@@ -259,6 +260,24 @@ class Agent:
                 commands = [commands]
 
             logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
+
+            if 'finished_conversation' in context.data and context.data['finished_conversation']:
+                logger.warning("Conversation is finished or halted, exiting stream parsing")
+                print("\033[91mConversation is finished or halted, exiting stream parsing\033[0m")
+                # stream is actually a generator
+                if partial_cmd is not None:
+                    cmd_name = next(iter(partial_cmd))
+                    if cmd_name in ["say", "json_encoded_md", "think"]:
+                        context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd[cmd_name])})
+                    else:
+                        context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd) + "(Interrupted)"})
+                try:
+                    stream.close()
+                except Exception as e:
+                    print("\033[91mError closing stream\033[0m")
+
+                return results, full_cmds
+
 
             if len(commands) > num_processed:
                 logger.debug("New command(s) found")

@@ -86,12 +86,12 @@ In this case you can use special delimiters STAR_RAW and END_RAW to output the r
 for a particular property.
 Important Note: In the RAW text sections, no escaping is used.
 
-For example:
+For example (example only! check available commands and parameters carefully):
 
 (... other commands JSON followed by newline),
 
-    {"write": { "filename": "/test.py",
-                  "text": START_RAW
+    {"write": { "fname": "/test.py",
+                "text": START_RAW
     def foo():
         print('hello world')
     END_RAW

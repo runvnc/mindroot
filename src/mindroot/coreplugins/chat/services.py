@@ -121,6 +121,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             for key in user.keys():
                 context.data[key] = user[key]
 
+        context.data['finished_conversation'] = False
+
         tmp_data = { "message": message }
         tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
         message = tmp_data['message']

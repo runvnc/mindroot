@@ -223,6 +223,24 @@ class ChatForm extends BaseEl {
     new ResizeObserver(() => this._resizeTextarea()).observe(this.messageEl);
   }
 
+  async _cancelChat() {
+    if (this.taskid) {
+      const response = await fetch(`/chat/${window.log_id}/${this.taskid}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ task_id: this.taskid }),
+      })
+      const data = await response.json()
+      console.log('Chat cancelled:', data)
+      this.taskid = null
+      setTimeout(() => {
+       this.requestUpdate()
+      },500)
+    }
+  }
+
 
   async _send(event) {
     if (this.isLoading) return
