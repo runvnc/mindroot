@@ -60,20 +60,28 @@
                     <th>Plugin</th>
                     <th>Cost Type</th>
                     <th>Unit</th>
-                    <th>Cost per Unit</th>
+                    <th>Default Cost</th>
+                    <th>Model-Specific Costs</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for plugin_id, costs in current_costs.items() %}
-                    {% for cost_type_id, unit_cost in costs.items() %}
+                {% for plugin_id, plugin_costs in current_costs.items() %}
+                    {% for cost_type_id, cost_info in plugin_costs.items() %}
                         <tr>
                             <td>{{ plugin_id }}</td>
                             <td>{{ cost_type_id }}</td>
-                            <td>{{ cost_types[cost_type_id].unit }}</td>
-                            <td>${{ "%.4f"|format(unit_cost) }}</td>
+                            <td>{{ cost_types[cost_type_id].unit if cost_type_id in cost_types else 'unknown' }}</td>
+                            <td>${{ "%.6f"|format(cost_info.get('default', 0)) }}</td>
                             <td>
-                                <button onclick="editCost('{{ plugin_id }}', '{{ cost_type_id }}', {{ unit_cost }})">
+                                {% if cost_info.get('model_specific') %}
+                                    {% for model_id, model_cost in cost_info['model_specific'].items() %}
+                                        {{ model_id }}: ${{ "%.6f"|format(model_cost) }}<br>
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button onclick="editCost('{{ plugin_id }}', '{{ cost_type_id }}', {{ cost_info.get('default', 0) }})">
                                     Edit
                                 </button>
                             </td>
@@ -97,8 +105,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="unitCost">Cost per Unit</label>
-                <input type="number" id="unitCost" name="unit_cost" step="0.0001" required>
+                <label for="unitCost">Default Cost per Unit</label>
+                <input type="number" id="unitCost" name="unit_cost" step="0.000001" required>
+            </div>
+            <div class="form-group">
+                <label for="modelId">Model ID (optional)</label>
+                <input type="text" id="modelId" name="model_id">
             </div>
             <button type="submit" class="btn btn-primary">Update Cost</button>
         </form>
@@ -145,7 +157,8 @@ async function updateCost(event) {
     const data = {
         plugin_id: form.plugin_id.value,
         cost_type_id: form.cost_type_id.value,
-        unit_cost: parseFloat(form.unit_cost.value)
+        unit_cost: parseFloat(form.unit_cost.value),
+        model_id: form.model_id.value || null
     };
 
     try {
@@ -173,6 +186,7 @@ function editCost(pluginId, costTypeId, unitCost) {
     document.getElementById('pluginId').value = pluginId;
     document.getElementById('costTypeId').value = costTypeId;
     document.getElementById('unitCost').value = unitCost;
+    document.getElementById('modelId').value = '';
 }
 
 async function generateReport(event) {

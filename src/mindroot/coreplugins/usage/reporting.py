@@ -1,17 +1,17 @@
 from datetime import date, datetime
-from typing import List, Dict, Optional
-from .handlers import UsageTracker
+from typing import Dict, Optional
+from .storage import UsageStorage
 
 class UsageReport:
-    def __init__(self, tracker: UsageTracker):
-        self._tracker = tracker
+    def __init__(self, storage: UsageStorage):
+        self.storage = storage
 
     async def get_user_report(self, username: str,
                             start_date: Optional[date] = None,
                             end_date: Optional[date] = None) -> Dict:
         """Generate a complete usage report for a user"""
-        usage_records = await self._tracker.get_usage(username, start_date, end_date)
-        total_cost = await self._tracker.get_total_cost(username, start_date, end_date)
+        usage_records = await self.storage.get_usage(username, start_date, end_date)
+        total_cost = await self.storage.get_total_cost(username, start_date, end_date)
 
         # Group by plugin, cost type, and model
         grouped_usage = {}
@@ -52,8 +52,8 @@ class UsageReport:
                              start_date: Optional[date] = None,
                              end_date: Optional[date] = None) -> Dict:
         """Generate a simplified cost summary for a user"""
-        usage_records = await self._tracker.get_usage(username, start_date, end_date)
-        total_cost = await self._tracker.get_total_cost(username, start_date, end_date)
+        usage_records = await self.storage.get_usage(username, start_date, end_date)
+        total_cost = await self.storage.get_total_cost(username, start_date, end_date)
 
         # Summarize by plugin and model
         plugin_costs = {}
@@ -82,7 +82,7 @@ class UsageReport:
                             start_date: Optional[date] = None,
                             end_date: Optional[date] = None) -> Dict:
         """Generate daily cost breakdown for a user"""
-        usage_records = await self._tracker.get_usage(username, start_date, end_date)
+        usage_records = await self.storage.get_usage(username, start_date, end_date)
 
         # Group by date, plugin, and model
         daily_costs = {}
