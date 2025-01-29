@@ -7,6 +7,7 @@ from .models import UsageEvent
 from .storage import UsageStorage
 from .handlers import UsageTracker
 from .reporting import UsageReport
+from lib.providers.hooks import hook, hook_manager
 
 def get_base_path() -> str:
     return str(Path.cwd())
@@ -50,6 +51,15 @@ async def track_usage(plugin_id: str, cost_type_id: str, quantity: float,
     )
     
     await tracker.track_usage(event)
+    
+    # Publish usage event for other plugins (like credits) to handle
+    await hook_manager.handle_usage(
+                  plugin_id=plugin_id,
+                  cost_type_id=cost_type_id,
+                  quantity=quantity,
+                  metadata=metadata,
+                  context=context,
+                  model_id=model_id)
 
 @service()
 async def set_cost(plugin_id: str, cost_type_id: str, unit_cost: float, 

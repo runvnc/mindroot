@@ -6,37 +6,53 @@ from lib.providers.commands import command
 from lib.providers.hooks import hook
 from .models import CreditTransaction, CreditRatioConfig
 from .storage import CreditStorage
-from .ledger import CreditLedger, InsufficientCreditsError
+from .ledger import CreditLedger
 from .conversion import CreditUsageHandler, CreditPolicy
 
-# Initialize global instances
-_storage = None
-_ledger = None
-_ratio_config = None
-_credit_policy = None
+# Global handler for usage tracking
 _usage_handler = None
 
-async def init_credit_system(base_path: str):
-    """Initialize the credit system"""
-    global _storage, _ledger, _ratio_config, _credit_policy, _usage_handler
-    
-    _storage = CreditStorage(base_path)
-    _ledger = CreditLedger(_storage)
-    _ratio_config = CreditRatioConfig()
-    _credit_policy = CreditPolicy(_ledger, _ratio_config)
-    _usage_handler = CreditUsageHandler(_ledger, _ratio_config)
-    
-    # Register the credit usage handler with the usage tracking system
-    from mindroot.coreplugins.usage.mod import register_usage_handler
-    await register_usage_handler(_usage_handler)
-    
-    return _ledger
+class CreditsPlugin:
+    def __init__(self, base_path: str):
+        self.base_path = base_path
+
+    def create_components(self):
+        """Create fresh instances of all credit system components"""
+        storage = CreditStorage(self.base_path)
+        ratio_config = CreditRatioConfig(self.base_path)
+        ledger = CreditLedger(storage)
+        credit_policy = CreditPolicy(ledger, ratio_config, self.base_path)
+        usage_handler = CreditUsageHandler(ledger, ratio_config, self.base_path)
+        return storage, ledger, ratio_config, credit_policy, usage_handler
+
+def get_base_path(context) -> str:
+    """Get the base path for credit data storage"""
+    return str(Path.cwd() / 'data' / 'credits')
 
 @hook()
 async def startup(app, context=None):
     """Startup tasks"""
-    await init_credit_system(Path.cwd() / 'data' / 'credits')
+    # Initialize components
+    plugin = CreditsPlugin(get_base_path(context))
+    _, _, _, _, usage_handler = plugin.create_components()
+    
+    # Store usage handler globally for the handle_usage service
+    global _usage_handler
+    _usage_handler = usage_handler
 
+
+@hook()
+async def handle_usage(plugin_id: str, cost_type_id: str, quantity: float,
+                    metadata: dict, context=None, model_id: Optional[str] = None):
+    """Handle usage tracking for credits system.
+    This service is called by the usage plugin after tracking usage.
+    """
+    global _usage_handler
+    if not _usage_handler:
+        raise RuntimeError("Credits plugin not properly initialized")
+    
+    await _usage_handler.handle_usage(plugin_id, cost_type_id, quantity,
+                                    metadata, context, model_id)
 
 @service()
 async def allocate_credits(username: str, amount: float,
@@ -65,7 +81,9 @@ async def allocate_credits(username: str, amount: float,
             {'payment_method': 'stripe'}
         )
     """
-    return await _ledger.record_allocation(
+    plugin = CreditsPlugin(get_base_path(context))
+    _, ledger, _, _, _ = plugin.create_components()
+    return await ledger.record_allocation(
         username, amount, source, reference_id, metadata
     )
 
@@ -76,7 +94,9 @@ async def get_credit_balance(username: str, context=None) -> float:
     Example:
         balance = await get_credit_balance('user123')
     """
-    return await _ledger.get_balance(username)
+    plugin = CreditsPlugin(get_base_path(context))
+    _, ledger, _, _, _ = plugin.create_components()
+    return await ledger.get_balance(username)
 
 @service()
 async def check_credits_available(username: str, required_amount: float,
@@ -86,7 +106,10 @@ async def check_credits_available(username: str, required_amount: float,
     Returns:
         Dict with 'has_sufficient' and 'current_balance' keys
     """
-    has_sufficient, balance = await _ledger.check_credits_available(
+    plugin = CreditsPlugin(get_base_path(context))
+    _, ledger, _, _, _ = plugin.create_components()
+    
+    has_sufficient, balance = await ledger.check_credits_available(
         username, required_amount
     )
     return {
@@ -119,13 +142,18 @@ async def set_credit_ratio(ratio: float, plugin_id: Optional[str] = None,
             model_id='gpt-4-1106-preview'
         )
     """
-    _ratio_config.set_ratio(ratio, plugin_id, cost_type_id, model_id)
+    plugin = CreditsPlugin(get_base_path(context))
+    _, _, ratio_config, _, _ = plugin.create_components()
+    await ratio_config.set_ratio(ratio, plugin_id, cost_type_id, model_id)
 
 @service()
 async def get_credit_ratios(context=None) -> Dict:
     """Get current credit ratio configuration."""
-    return _ratio_config.get_config()
+    plugin = CreditsPlugin(get_base_path(context))
+    _, _, ratio_config, _, _ = plugin.create_components()
+    return await ratio_config.get_config()
 
+@service()
 async def get_credit_report(username: str,
                            start_date: Optional[str] = None,
                            end_date: Optional[str] = None,
@@ -146,9 +174,11 @@ async def get_credit_report(username: str,
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
     
-    transactions = await _ledger.get_transactions(username, start, end)
-    summary = await _ledger.get_usage_summary(username, start, end)
-    current_balance = await _ledger.get_balance(username)
+    plugin = CreditsPlugin(get_base_path(context))
+    _, ledger, _, _, _ = plugin.create_components()
+    transactions = await ledger.get_transactions(username, start, end)
+    summary = await ledger.get_usage_summary(username, start, end)
+    current_balance = await ledger.get_balance(username)
     
     return {
         'username': username,
@@ -157,6 +187,7 @@ async def get_credit_report(username: str,
         'transactions': [t.to_dict() for t in transactions]
     }
 
+@service()
 async def estimate_credits(plugin_id: str, cost_type_id: str,
                          estimated_cost: float,
                          model_id: Optional[str] = None,
@@ -171,7 +202,9 @@ async def estimate_credits(plugin_id: str, cost_type_id: str,
             'gpt-4-1106-preview'
         )
     """
-    credits = _credit_policy.estimate_credits_needed(
+    plugin = CreditsPlugin(get_base_path(context))
+    _, _, _, credit_policy, _ = plugin.create_components()
+    credits = await credit_policy.estimate_credits_needed(
         plugin_id, cost_type_id, estimated_cost, model_id
     )
     

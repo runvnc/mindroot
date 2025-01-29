@@ -2,41 +2,60 @@ from typing import Dict, Optional
 from datetime import datetime
 from .models import CreditRatioConfig
 from .ledger import CreditLedger, InsufficientCreditsError
-from mindroot.coreplugins.usage.models import UsageEvent
-from mindroot.coreplugins.usage.handlers import UsageHandler
+from mindroot.coreplugins.usage.models import UsageEvent 
 
-class CreditUsageHandler(UsageHandler):
+class CreditUsageHandler:
     """Converts usage costs to credits and records credit transactions."""
-    
-    def __init__(self, ledger: CreditLedger, ratio_config: CreditRatioConfig):
+
+    def __init__(self, ledger: CreditLedger, ratio_config: CreditRatioConfig, base_path: str):
         self.ledger = ledger
         self.ratio_config = ratio_config
+        self.base_path = base_path
 
-    def _calculate_credit_cost(self, event: UsageEvent, monetary_cost: float) -> float:
+    async def _calculate_credit_cost(self, event: UsageEvent, monetary_cost: float) -> float:
         """Convert monetary cost to credit cost using configured ratios"""
-        ratio = self.ratio_config.get_ratio(
+        ratio = await self.ratio_config.get_ratio(
             plugin_id=event.plugin_id,
             cost_type_id=event.cost_type_id,
             model_id=event.model_id
         )
         return monetary_cost * ratio
 
-    async def handle_usage(self, event: UsageEvent, monetary_cost: float):
+    async def handle_usage(self, plugin_id: str, cost_type_id: str, quantity: float, 
+                         metadata: dict, context=None, model_id: Optional[str] = None) -> None:
         """Handle a usage event by converting cost to credits and recording transaction"""
-        credit_cost = self._calculate_credit_cost(event, monetary_cost)
+        event = UsageEvent(
+            timestamp=datetime.now(),
+            plugin_id=plugin_id,
+            cost_type_id=cost_type_id,
+            quantity=quantity,
+            metadata=metadata,
+            username=context.username,
+            model_id=model_id,
+            session_id=context.log_id
+        )
+
+        # Get cost from usage tracker
+        from mindroot.coreplugins.usage.storage import UsageStorage
+        from mindroot.coreplugins.usage.handlers import UsageTracker
+        storage = UsageStorage(self.base_path)
+        tracker = UsageTracker(storage)
+        monetary_cost = await tracker.get_cost(plugin_id, cost_type_id, model_id) * quantity
+
+        credit_cost = await self._calculate_credit_cost(event, monetary_cost)
         
         try:
             await self.ledger.record_usage(
                 username=event.username,
                 amount=credit_cost,
                 source='usage_deduction',
-                reference_id=event.request_id,
+                reference_id=event.session_id,
                 metadata={
                     'plugin_id': event.plugin_id,
                     'cost_type_id': event.cost_type_id,
                     'model_id': event.model_id,
                     'monetary_cost': monetary_cost,
-                    'credit_ratio': credit_cost / monetary_cost,
+                    'credit_ratio': credit_cost / monetary_cost if monetary_cost else 0,
                     'quantity': event.quantity,
                     'original_metadata': event.metadata
                 }
@@ -49,7 +68,7 @@ class CreditUsageHandler(UsageHandler):
 class CreditPolicy:
     """Encapsulates credit-related business rules and policies"""
     
-    def __init__(self, ledger: CreditLedger, ratio_config: CreditRatioConfig):
+    def __init__(self, ledger: CreditLedger, ratio_config: CreditRatioConfig, base_path: str):
         self.ledger = ledger
         self.ratio_config = ratio_config
 
@@ -60,7 +79,7 @@ class CreditPolicy:
                                     model_id: Optional[str] = None) -> bool:
         """Check if an operation should be allowed based on estimated cost"""
         # Convert monetary cost to credits
-        ratio = self.ratio_config.get_ratio(plugin_id, cost_type_id, model_id)
+        ratio = await self.ratio_config.get_ratio(plugin_id, cost_type_id, model_id)
         estimated_credits = estimated_cost * ratio
         
         # Check if user has sufficient credits
@@ -80,10 +99,10 @@ class CreditPolicy:
             'can_use_services': current_balance > 0
         }
 
-    def estimate_credits_needed(self, plugin_id: str,
-                              cost_type_id: str,
-                              estimated_cost: float,
-                              model_id: Optional[str] = None) -> float:
+    async def estimate_credits_needed(self, plugin_id: str,
+                                   cost_type_id: str,
+                                   estimated_cost: float,
+                                   model_id: Optional[str] = None) -> float:
         """Estimate credits needed for an operation"""
-        ratio = self.ratio_config.get_ratio(plugin_id, cost_type_id, model_id)
+        ratio = await self.ratio_config.get_ratio(plugin_id, cost_type_id, model_id)
         return estimated_cost * ratio

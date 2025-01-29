@@ -1,51 +1,83 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
-from datetime import date
-from typing import Optional
+from datetime import date, datetime
+from typing import Optional, Dict, Any
 from lib.templates import render
 from .models import CreditTransaction
-from .ledger import CreditLedger, InsufficientCreditsError
-from .mod import (_ledger, _ratio_config, allocate_credits, 
-                 get_credit_report, estimate_credits)
+from .mod import (
+    allocate_credits,
+    get_credit_report,
+    estimate_credits,
+    get_credit_ratios,
+    set_credit_ratio
+)
+
+# Define common error responses
+INVALID_REQUEST = HTTPException(status_code=400, detail="Invalid request parameters")
+INSUFFICIENT_CREDITS = HTTPException(status_code=402, detail="Insufficient credits")
+SERVER_ERROR = HTTPException(status_code=500, detail="Internal server error")
 
 router = APIRouter()
 
 @router.get("/admin/credits")
 async def credits_admin(request: Request):
     """Admin interface for credit management"""
-    template_data = {
-        "credit_ratios": _ratio_config.get_config()
-    }
-    
-    html = await render('admin/credits.jinja2', template_data)
-    return HTMLResponse(html)
+    try:
+        credit_ratios = await get_credit_ratios(context=request)
+        template_data = {
+            "credit_ratios": credit_ratios
+        }
+        
+        html = await render('admin/credits.jinja2', template_data)
+        return HTMLResponse(html)
+    except Exception as e:
+        raise SERVER_ERROR
 
 @router.get("/admin/credits/ratios")
 async def credits_ratio_admin(request: Request):
     """Admin interface for credit ratio configuration"""
-    template_data = {
-        "credit_ratios": _ratio_config.get_config()
-    }
-    
-    html = await render('admin/credit_ratios.jinja2', template_data)
-    return HTMLResponse(html)
+    try:
+        credit_ratios = await get_credit_ratios(context=request)
+        template_data = {
+            "credit_ratios": credit_ratios
+        }
+        
+        html = await render('admin/credit_ratios.jinja2', template_data)
+        return HTMLResponse(html)
+    except Exception as e:
+        raise SERVER_ERROR
 
 @router.post("/api/admin/credits/allocate")
 async def api_allocate_credits(request: Request):
-    """Allocate credits to a user"""
+    """Allocate credits to a user
+    
+    Request body:
+    {
+        "username": str,
+        "amount": float,
+        "source": str,
+        "reference_id": str,
+        "metadata": dict (optional)
+    }
+    """
     try:
         data = await request.json()
         username = data.get('username')
-        amount = float(data.get('amount', 0))
+        try:
+            amount = float(data.get('amount', 0))
+        except (TypeError, ValueError):
+            raise INVALID_REQUEST
+            
         source = data.get('source', 'admin_grant')
         reference_id = data.get('reference_id')
         metadata = data.get('metadata', {})
         
         if not all([username, amount > 0, reference_id]):
-            raise HTTPException(status_code=400, detail="Missing required fields")
+            raise INVALID_REQUEST
         
         new_balance = await allocate_credits(
-            username, amount, source, reference_id, metadata
+            username, amount, source, reference_id, metadata,
+            context=request
         )
         
         return JSONResponse({
@@ -53,50 +85,92 @@ async def api_allocate_credits(request: Request):
             "new_balance": new_balance
         })
         
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise SERVER_ERROR
 
 @router.post("/api/admin/credits/ratios")
 async def api_update_ratio(request: Request):
-    """Update credit ratio configuration"""
+    """Update credit ratio configuration
+    
+    Request body:
+    {
+        "ratio": float,
+        "plugin_id": str (optional),
+        "cost_type_id": str (optional),
+        "model_id": str (optional)
+    }
+    """
     try:
         data = await request.json()
-        ratio = float(data.get('ratio', 0))
+        try:
+            ratio = float(data.get('ratio', 0))
+        except (TypeError, ValueError):
+            raise INVALID_REQUEST
+            
         plugin_id = data.get('plugin_id')
         cost_type_id = data.get('cost_type_id')
         model_id = data.get('model_id')
         
         if ratio <= 0:
-            raise HTTPException(status_code=400, detail="Ratio must be positive")
+            raise INVALID_REQUEST
         
-        _ratio_config.set_ratio(ratio, plugin_id, cost_type_id, model_id)
+        await set_credit_ratio(
+            ratio, plugin_id, cost_type_id, model_id,
+            context=request
+        )
         
         return JSONResponse({"status": "success"})
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise INVALID_REQUEST
+    except Exception as e:
+        raise SERVER_ERROR
 
 @router.get("/api/admin/credits/report/{username}")
 async def api_credit_report(username: str,
-                           start_date: Optional[str] = None,
-                           end_date: Optional[str] = None):
-    """Get credit report for a user"""
+                          start_date: Optional[str] = None,
+                          end_date: Optional[str] = None,
+                          request: Request = None):
+    """Get credit report for a user
+    
+    Path parameters:
+        username: str - Username to get report for
+    
+    Query parameters:
+        start_date: Optional[str] - Start date in YYYY-MM-DD format
+        end_date: Optional[str] - End date in YYYY-MM-DD format
+    """
     try:
-        report = await get_credit_report(username, start_date, end_date)
+        report = await get_credit_report(
+            username, start_date, end_date,
+            context=request
+        )
         return JSONResponse(report)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise SERVER_ERROR
 
 @router.get("/api/admin/credits/estimate")
 async def api_estimate_credits(plugin_id: str,
-                              cost_type_id: str,
-                              estimated_cost: float,
-                              model_id: Optional[str] = None):
-    """Estimate credits needed for an operation"""
+                             cost_type_id: str,
+                             estimated_cost: float,
+                             model_id: Optional[str] = None,
+                             request: Request = None):
+    """Estimate credits needed for an operation
+    
+    Query parameters:
+        plugin_id: str - Plugin identifier
+        cost_type_id: str - Cost type identifier
+        estimated_cost: float - Estimated cost in base currency
+        model_id: Optional[str] - Model identifier
+    """
     try:
+        if not all([plugin_id, cost_type_id]) or estimated_cost <= 0:
+            raise INVALID_REQUEST
+            
         estimate = await estimate_credits(
-            plugin_id, cost_type_id, estimated_cost, model_id
+            plugin_id, cost_type_id, estimated_cost, model_id,
+            context=request
         )
         return JSONResponse(estimate)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise SERVER_ERROR
