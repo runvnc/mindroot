@@ -17,7 +17,7 @@ Typical usage:
 """
 
 # Import main functionality from submodules
-from .loader import load
+from .loader import pre_load, load
 from .installation import (
     plugin_install,
     plugin_update,
@@ -36,6 +36,7 @@ from .paths import get_plugin_path, get_plugin_import_path
 
 # Export main functionality
 __all__ = [
+    'pre_load',
     'load',
     'plugin_install',
     'plugin_update',

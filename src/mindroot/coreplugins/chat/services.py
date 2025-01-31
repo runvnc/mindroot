@@ -22,21 +22,22 @@ import base64
 sse_clients = {}
 
 @service()
-async def init_chat_session(user:str, agent_name: str, log_id: str):
+async def init_chat_session(user:str, agent_name: str, log_id: str, context=None):
     if agent_name is None or agent_name == "" or log_id is None or log_id == "":
         print("Invalid agent_name or log_id")
         print("agent_name: ", agent_name)
         print("log_id: ", log_id)
         raise Exception("Invalid agent_name or log_id")
 
-    context = ChatContext(command_manager, service_manager, user)
-    context.agent_name = agent_name
-    context.name = agent_name
-    context.log_id = log_id
-    context.agent = await service_manager.get_agent_data(agent_name)
-    context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
-    print("context.agent_name: ", context.agent_name)
-    context.save_context()
+    if context is None:
+        context = ChatContext(command_manager, service_manager, user)
+        context.agent_name = agent_name
+        context.name = agent_name
+        context.log_id = log_id
+        context.agent = await service_manager.get_agent_data(agent_name)
+        context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
+        print("context.agent_name: ", context.agent_name)
+        context.save_context()
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
     return log_id
 

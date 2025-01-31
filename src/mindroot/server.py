@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 import os
 from pathlib import Path
 from .lib import plugins
+from .lib.utils.debug import debug_box
 import asyncio
 import uvicorn
 from termcolor import colored
@@ -47,7 +48,7 @@ mimetypes.add_type("application/javascript", ".js", True)
 app = None
 templates = None
 
-async def setup_app(app_):
+async def setup_app_internal(app_):
     global app, templates
     app = app_
     
@@ -74,6 +75,7 @@ def find_available_port(start_port=8010, max_attempts=100):
         port += 1
     raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
 
+
 def main():
     global app
 
@@ -83,15 +85,23 @@ def main():
     if cmd_args.port:
         port = cmd_args.port
     else:
-        cmd_args.port = port
-    
+        cmd_args.port = port 
+  
     app = FastAPI()
- 
     app.state.cmd_args = cmd_args
 
+    debug_box("pre_load")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(setup_app(app))
-    
+    loop.run_until_complete(plugins.pre_load(app)) # middleware
+
+    debug_box("finished with pre_load, now calling uvicorn.run")
+
+    @app.on_event("startup")
+    async def setup_app():
+        global app
+        await setup_app_internal(app)
+        print(colored("Plugin setup complete", "green"))
+
     try:
         print(colored(f"Starting server on port {port}", "green"))
         uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on")

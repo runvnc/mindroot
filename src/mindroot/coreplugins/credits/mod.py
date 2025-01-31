@@ -50,7 +50,8 @@ async def handle_usage(plugin_id: str, cost_type_id: str, quantity: float,
     global _usage_handler
     if not _usage_handler:
         raise RuntimeError("Credits plugin not properly initialized")
-    
+    print(cost_type_id) 
+    print("quantity:", quantity)
     await _usage_handler.handle_usage(plugin_id, cost_type_id, quantity,
                                     metadata, context, model_id)
 
