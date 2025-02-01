@@ -9,6 +9,9 @@ from lib.json_escape import escape_for_json
 import sys
 import traceback
 
+# TODO: clean up, just use normal tool calling (never lol),
+# or maybe we can use this code as the kernel of a niche horror
+# film targeted at engineers
 
 def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     """
