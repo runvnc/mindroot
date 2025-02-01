@@ -93,7 +93,7 @@ For example (example only! check available commands and parameters carefully):
     {"write": { "fname": "/test.py",
                 "text": START_RAW
     def foo():
-        print('hello world')
+        print("hello world")
     END_RAW
                 }
       } 
@@ -110,7 +110,7 @@ User: Please write a short poem about the moon in a markdown block.
 Assistant: [ { "json_encoded_md": { "markdown": START_RAW
 The moon, so bright
 It's shining light
-Like a pizza pie
+Like a "pizza pie"
 In the sky
 END_RAW
 } } ]
@@ -129,7 +129,7 @@ Note that outside of RAW blocks, you must follow JSON rules such as escaping new
 
 NOTE: For commands that require filename, always use absolute paths if possible.
 
-Remember, RAW JSON, not wrapped in markdown.
+Remember, plain JSON, not wrapped in markdown.
 
 # Available commands
 
@@ -158,4 +158,7 @@ code block. Use 'say' command for commentary.
 WAIT for the results before proceeding! Don't issue commmands that depend on the output of previous ones,
 that doesn't make sense. If you are not sure how the system works, you can issue a single commmand at 
 at time (but keep in mind that rhetorical commands like say() will just stop after that).
+
+Reminder again: do not escape text inside of START_RAW and END_RAW blocks!! 
+For example, in that section (only), you MUST use " instead of \"
 
