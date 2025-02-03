@@ -5,12 +5,15 @@ from typing import List, Dict, Optional, Iterator, Any
 import aiofiles
 import asyncio
 from .models import UsageEvent
+from loguru import logger
+import traceback
 
 class UsageStorage:
     def __init__(self, base_path: str):
         self.base_path = Path(base_path)
         self.config_path = self.base_path / 'config' / 'usage'
         self.data_path = self.base_path / 'data' / 'usage'
+        logger.info(f"Usage storage initialized at {self.base_path}")
         self._ensure_paths()
 
     def _ensure_paths(self):
@@ -32,6 +35,7 @@ class UsageStorage:
                 content = await f.read()
                 return json.loads(content)
         except (FileNotFoundError, json.JSONDecodeError):
+            logger.error(f"Failed to read JSON from {path}")
             return default
 
     async def load_cost_types(self) -> Dict:
@@ -46,7 +50,11 @@ class UsageStorage:
 
     async def load_costs(self) -> Dict:
         """Load cost configurations"""
-        return await self._read_json(self.config_path / 'costs.json', {})
+        trace = traceback.format_stack()
+        logger.info(f"Loading costs from {self.config_path} - {trace}")
+        costs = await self._read_json(self.config_path / 'costs.json', {})
+        logger.info(f"Loaded cost configurations: {costs}")
+        return costs
 
     async def save_cost(self, plugin_id: str, cost_type_id: str, unit_cost: float, model_id: Optional[str] = None):
         """Save a cost configuration"""

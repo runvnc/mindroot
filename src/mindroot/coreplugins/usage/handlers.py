@@ -1,6 +1,8 @@
 from typing import Optional
 from .models import UsageEvent
 from .storage import UsageStorage
+from loguru import logger
+import traceback
 
 class UsageTracker:
     def __init__(self, storage: UsageStorage):
@@ -10,6 +12,7 @@ class UsageTracker:
         """Get the cost for a specific usage type and optional model"""
         costs = await self.storage.load_costs()
         try:
+
             plugin_costs = costs[plugin_id]
             type_costs = plugin_costs[cost_type_id]
             
@@ -20,7 +23,9 @@ class UsageTracker:
             
             # Fall back to default cost
             return type_costs.get('default', 0.0)
-        except (KeyError, TypeError):
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(f"Error getting cost: {e}\n\n{trace}")
             return 0.0
 
     async def track_usage(self, event: UsageEvent):

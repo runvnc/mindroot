@@ -111,3 +111,18 @@ async def get_daily_costs(username: str, start_date: Optional[str] = None,
     end = date.fromisoformat(end_date) if end_date else None
     
     return await report.get_daily_costs(username, start, end)
+
+@service()
+async def get_cost(plugin_id: str, cost_type_id: str, model_id: Optional[str] = None, context=None) -> float:
+    storage = UsageStorage(get_base_path())
+    costs = await storage.load_costs()
+    try:
+        plugin_costs = costs[plugin_id][cost_type_id]
+        # Use model-specific cost if provided
+        if model_id and 'model_specific' in plugin_costs and model_id in plugin_costs['model_specific']:
+            return plugin_costs['model_specific'][model_id]
+        # Otherwise, return the default cost
+        return plugin_costs['default']
+    except KeyError:
+        raise ValueError(f"No cost set for plugin {plugin_id} with cost type {cost_type_id}")
+

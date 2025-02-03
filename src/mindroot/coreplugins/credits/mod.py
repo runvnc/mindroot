@@ -4,6 +4,7 @@ from pathlib import Path
 from lib.providers.services import service
 from lib.providers.commands import command
 from lib.providers.hooks import hook
+from lib.utils.debug import debug_box
 from .models import CreditTransaction, CreditRatioConfig
 from .storage import CreditStorage
 from .ledger import CreditLedger
@@ -52,6 +53,7 @@ async def handle_usage(plugin_id: str, cost_type_id: str, quantity: float,
         raise RuntimeError("Credits plugin not properly initialized")
     print(cost_type_id) 
     print("quantity:", quantity)
+    debug_box("Recording credit usage: {} {} {}".format(plugin_id, cost_type_id, quantity))
     await _usage_handler.handle_usage(plugin_id, cost_type_id, quantity,
                                     metadata, context, model_id)
 

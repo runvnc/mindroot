@@ -3,7 +3,12 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from datetime import date, datetime
 from typing import Optional, Dict, Any
 from lib.templates import render
+from loguru import logger
 from .models import CreditTransaction
+from lib.route_decorators import requires_role
+
+import traceback
+
 from .mod import (
     allocate_credits,
     get_credit_report,
@@ -17,7 +22,7 @@ INVALID_REQUEST = HTTPException(status_code=400, detail="Invalid request paramet
 INSUFFICIENT_CREDITS = HTTPException(status_code=402, detail="Insufficient credits")
 SERVER_ERROR = HTTPException(status_code=500, detail="Internal server error")
 
-router = APIRouter()
+router = APIRouter(dependencies=[requires_role('admin')])
 
 @router.get("/admin/credits")
 async def credits_admin(request: Request):
@@ -28,10 +33,13 @@ async def credits_admin(request: Request):
             "credit_ratios": credit_ratios
         }
         
-        html = await render('admin/credits.jinja2', template_data)
+        html = await render('credits', template_data)
         return HTMLResponse(html)
     except Exception as e:
-        raise SERVER_ERROR
+        trace = traceback.format_exc()
+        logger.error(f"Error in credits_admin: {e}\n\n{trace}")
+        # we need to fix this now to give the actual error message and stack trace
+        raise HTTPException(status_code=500, detail="Internal server error\n\n"+trace)
 
 @router.get("/admin/credits/ratios")
 async def credits_ratio_admin(request: Request):
@@ -42,10 +50,13 @@ async def credits_ratio_admin(request: Request):
             "credit_ratios": credit_ratios
         }
         
-        html = await render('admin/credit_ratios.jinja2', template_data)
+        html = await render('credit_ratios', template_data)
         return HTMLResponse(html)
     except Exception as e:
-        raise SERVER_ERROR
+        trace = traceback.format_exc()
+        logger.error(f"Error in credits_admin: {e}\n\n{trace}")
+        # we need to fix this now to give the actual error message and stack trace
+        raise HTTPException(status_code=500, detail="Internal server error\n\n"+trace)
 
 @router.post("/api/admin/credits/allocate")
 async def api_allocate_credits(request: Request):

@@ -19,6 +19,9 @@ class CreditUsageHandler:
             cost_type_id=event.cost_type_id,
             model_id=event.model_id
         )
+        print("Monetary cost is", monetary_cost)
+        print("Ratio config is", self.ratio_config)
+        print(f"got ratio for {event.plugin_id} and {event.cost_type_id} and {event.model_id} it is {ratio}")
         return monetary_cost * ratio
 
     async def handle_usage(self, plugin_id: str, cost_type_id: str, quantity: float, 
@@ -36,11 +39,13 @@ class CreditUsageHandler:
         )
 
         # Get cost from usage tracker
-        from mindroot.coreplugins.usage.storage import UsageStorage
-        from mindroot.coreplugins.usage.handlers import UsageTracker
-        storage = UsageStorage(self.base_path)
-        tracker = UsageTracker(storage)
-        monetary_cost = await tracker.get_cost(plugin_id, cost_type_id, model_id) * quantity
+        #from mindroot.coreplugins.usage.storage import UsageStorage
+        #from mindroot.coreplugins.usage.handlers import UsageTracker
+
+        #storage = UsageStorage(self.base_path)
+        #tracker = UsageTracker(storage)
+        monetary_cost = await context.get_cost(plugin_id, cost_type_id, model_id) * quantity
+        #monetary_cost = await tracker.get_cost(plugin_id, cost_type_id, model_id) * quantity
 
         credit_cost = await self._calculate_credit_cost(event, monetary_cost)
         
