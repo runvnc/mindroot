@@ -228,6 +228,28 @@
       "services": ["stream_chat"],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
+    },
+    {
+      "name": "User Memory",
+      "version": "1.0.0",
+      "description": "Persistent memory across chat sessions",
+      "source": "github",
+      "remote_source": "runvnc/ah_user_memory",
+      "commands": [],
+      "services": [""],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:52.839951"
+    },
+    {
+      "name": "Personal Journal",
+      "version": "1.0.0",
+      "description": "A journal at /journal which will show up in the system prompt",
+      "source": "github",
+      "remote_source": "runvnc/mr_journal",
+      "commands": [],
+      "services": [""],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:52.839951"
     } 
   ],
   "agents": [
