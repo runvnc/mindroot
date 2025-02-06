@@ -35,14 +35,14 @@ async def init_chat_session(user:str, agent_name: str, log_id: str, context=None
         context.name = agent_name
         context.log_id = log_id
         context.agent = await service_manager.get_agent_data(agent_name)
-        context.chat_log = ChatLog(log_id=log_id, agent=agent_name)
+        context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
         print("context.agent_name: ", context.agent_name)
         context.save_context()
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
     return log_id
 
 @service()
-async def get_chat_history(agent_name: str, session_id: str):
+async def get_chat_history(agent_name: str, session_id: str, user:str):
     print("-----------------")
     print("get_chat_history: ", agent_name, session_id)
     #context = ChatContext(command_manager, service_manager)
@@ -50,7 +50,7 @@ async def get_chat_history(agent_name: str, session_id: str):
     agent = await service_manager.get_agent_data(agent_name)
     
     persona = agent['persona']['name']
-    chat_log = ChatLog(log_id=session_id, agent=agent_name)
+    chat_log = ChatLog(log_id=session_id, agent=agent_name, user=user)
     print("Got chat chat log")
     messages = chat_log.get_recent()
     print("messages length: ", len(messages))

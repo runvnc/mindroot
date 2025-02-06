@@ -5,11 +5,11 @@ import sys
 import traceback
 
 class ChatLog:
-    def __init__(self, log_id=0, agent=None, context_length: int = 4096):
+    def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str):
         self.log_id = log_id
         self.messages = []
         self.agent = agent
-        self.user = context.username
+        self.user = user
         if agent is None or agent == '':
             raise ValueError('Agent must be provided')
         self.context_length = context_length

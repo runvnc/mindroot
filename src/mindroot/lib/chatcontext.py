@@ -78,7 +78,7 @@ class ChatContext:
     def save_context(self):
         if not self.log_id:
             raise ValueError("log_id is not set for the context.")
-        context_file = f'data/context/context_{self.log_id}.json'
+        context_file = f'data/context/{self.username}/context_{self.log_id}.json'
         self.data['log_id'] = self.log_id
         context_data = {
             'data': self.data,
@@ -100,7 +100,7 @@ class ChatContext:
 
     async def load_context(self, log_id):
         self.log_id = log_id
-        context_file = f'data/context/context_{log_id}.json'
+        context_file = f'data/context/{self.username}/context_{log_id}.json'
         if os.path.exists(context_file):
             with open(context_file, 'r') as f:
                 context_data = json.load(f)
@@ -117,7 +117,7 @@ class ChatContext:
             self.flags = self.agent.get('flags', [])
             self.data['log_id'] = log_id
             print("loading chat log for id:", log_id, "agent name is:", self.agent_name)
-            self.chat_log = ChatLog(log_id=log_id, agent=self.agent_name)
+            self.chat_log = ChatLog(log_id=log_id, agent=self.agent_name, user=self.username)
             self.uncensored = True
         else:
             print("Context file not found for id:", log_id)

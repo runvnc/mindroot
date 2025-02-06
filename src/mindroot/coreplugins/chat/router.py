@@ -104,7 +104,8 @@ async def get_chat_html(request: Request, agent_name: str):
 
 @router.get("/history/{agent_name}/{log_id}")
 async def chat_history(agent_name: str, log_id: str):
-    history = await get_chat_history(agent_name, log_id)
+    user = request.state.user.username
+    history = await get_chat_history(agent_name, log_id, user)
     return history
 
 @router.get("/session/{agent_name}/{log_id}")
