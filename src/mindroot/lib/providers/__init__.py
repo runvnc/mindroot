@@ -25,6 +25,7 @@ class ProviderManager:
 
         self.functions[name].append({
             'implementation': implementation,
+            'signature': signature,
             'docstring': docstring,
             'flags': flags,
             'provider': provider
