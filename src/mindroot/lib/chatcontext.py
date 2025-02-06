@@ -40,12 +40,20 @@ class ChatContext:
         self._services = service_manager.functions
         self.response_started = False
         self.uncensored = False
+        if user is None:
+            raise ValueError("User is required to create a chat context. Use SYSTEM if no user")
         if isinstance(user, str):
             self.username = user
         elif isinstance(user, dict):
             self.username = user.get('username')
         elif hasattr(user, 'to_dict'):
             self.username = user.to_dict().get('username')
+        elif hasattr(user, 'username'):
+            self.username = user.username
+        # require a user
+        if self.username is None or self.username == 'None':
+            print({"user": user})
+            raise ValueError("User is required to create a chat context")
 
         self.startup_dir = os.getcwd()
         self.flags = []
@@ -79,6 +87,8 @@ class ChatContext:
         if not self.log_id:
             raise ValueError("log_id is not set for the context.")
         context_file = f'data/context/{self.username}/context_{self.log_id}.json'
+        # make sure directory exists
+        os.makedirs(os.path.dirname(context_file), exist_ok=True)
         self.data['log_id'] = self.log_id
         context_data = {
             'data': self.data,

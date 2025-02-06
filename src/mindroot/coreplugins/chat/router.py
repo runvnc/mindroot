@@ -98,6 +98,7 @@ async def get_chat_html(request: Request, agent_name: str):
     user = request.state.user
     log_id = nanoid.generate()
     plugins = list_enabled()
+    print("Init chat with user", user)
     print(f"Init chat with {agent_name}")
     await init_chat_session(user, agent_name, log_id)
     return RedirectResponse(f"/session/{agent_name}/{log_id}")

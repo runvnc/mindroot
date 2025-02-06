@@ -5,10 +5,20 @@ import sys
 import traceback
 
 class ChatLog:
-    def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str):
+    def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str = None):
         self.log_id = log_id
         self.messages = []
         self.agent = agent
+        if user is None or user == '' or user == 'None':
+            raise ValueError('User must be provided')
+        # make sure user is string
+        if not isinstance(user, str):
+            # does it have a username?
+            if hasattr(user, 'username'):
+                user = user.username
+            else:
+                # throw an error
+                raise ValueError('ChatLog(): user must be a string or have username field')
         self.user = user
         if agent is None or agent == '':
             raise ValueError('Agent must be provided')
