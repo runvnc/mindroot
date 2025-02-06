@@ -18,8 +18,31 @@ import termcolor
 from PIL import Image
 from io import BytesIO
 import base64
-
+import nanoid
 sse_clients = {}
+
+@service()
+async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, context=None):
+    if context is None:
+        if log_id is None:
+            log_id = nanoid.generate()
+        if user is None:
+            raise Exception("chat: run_task: user required")
+        if agent_name is None:
+            raise Exception("chat: run_task: agent_name required")
+        context = ChatContext(command_manager, service_manager, user)
+        context.agent_name = agent_name
+        context.username = user
+        context.name = agent_name
+        context.log_id = log_id
+        context.agent = await service_manager.get_agent_data(agent_name)
+        context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
+    
+    print("run_task: ", instructions, "log_id: ", context.log_id)
+    
+    await init_chat_session(context.username, context.agent_name, context.log_id, context)
+    [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+    return (results, log_id)
 
 @service()
 async def init_chat_session(user:str, agent_name: str, log_id: str, context=None):
@@ -174,8 +197,6 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
                 for cmd in full_cmds:
                     full_results.append(cmd)
-
-
                 out_results = []
                 actual_results = False
                 await asyncio.sleep(0.1)
