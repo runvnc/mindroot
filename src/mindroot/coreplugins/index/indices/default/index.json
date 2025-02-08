@@ -250,7 +250,18 @@
       "services": [""],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
-    } 
+    },
+    {
+      "name": "Google Imagen",
+      "version": "1.0.0",
+      "description": "Imagen image generation via Gemini API",
+      "source": "github",
+      "remote_source": "runvnc/mr_imagen",
+      "commands": [],
+      "services": [""],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:52.839951"
+    }
   ],
   "agents": [
     {
