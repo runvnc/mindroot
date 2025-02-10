@@ -3,6 +3,7 @@ import json
 from typing import List, Dict
 import sys
 import traceback
+from lib.utils.debug import debug_box
 
 class ChatLog:
     def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str = None):
@@ -57,14 +58,18 @@ class ChatLog:
             try:
                 cmd_list = json.loads(self.messages[-1]['content'][0]['text'])
                 if type(cmd_list) != list:
+                    debug_box("1")
                     cmd_list = [cmd_list]
                 new_json = json.loads(message['content'][0]['text'])
                 if type(new_json) != list:
+                    debug_box("2")
                     new_json = [new_json]
                 new_cmd_list = cmd_list + new_json
+                debug_box("3")
                 self.messages[-1]['content'] = [{ 'type': 'text', 'text': json.dumps(new_cmd_list) }]
             except Exception as e:
                 # assume previous mesage was not a command, was a string
+                debug_box("4")
                 new_msg_text = self.messages[-1]['content'][0]['text'] + message['content'][0]['text']
                 self.messages.append({'role': message['role'], 'content': [{'type': 'text', 'text': new_msg_text}]})
                 #print('could not combine commands. probably normal if user message and previous system output', e)
@@ -74,6 +79,7 @@ class ChatLog:
         else:
             if len(self.messages)>0:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
+            debug_box("5")
             self.messages.append(message)
         self.save_log()
 

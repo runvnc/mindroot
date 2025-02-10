@@ -20,7 +20,7 @@ import traceback
 from lib.logging.logfiles import logger
 from lib.utils.debug import debug_box
 from .init_models import *
-
+from lib.chatcontext import ChatContext
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
@@ -412,4 +412,14 @@ class Agent:
         print("\033[0m")
 
         return ret, full_cmds
+
+@service()
+async def run_command(cmd_name, cmd_args, context=None):
+    if context is None:
+        raise Exception("run_command: No context provided")
+        
+    agent = Agent(agent=context.agent)
+    json_cmd = json.dumps({cmd_name: cmd_args})
+    asyncio.create_task(agent.handle_cmds(cmd_name, cmd_args, json_cmd, context=context))
+
 

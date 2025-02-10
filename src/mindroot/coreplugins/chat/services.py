@@ -301,6 +301,10 @@ async def agent_output(event: str, data: dict, context=None):
             await queue.put({"event": event, "data": json.dumps(data)})
 
 @service()
+async def append_message(role: str, content, context=None):
+    await context.chat_log.add_message({"role": role, "content": content})
+
+@service()
 async def partial_command(command: str, chunk: str, params, context=None):
     agent_ = context.agent
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
