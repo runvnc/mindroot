@@ -199,7 +199,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     full_results.append(cmd)
                 out_results = []
                 actual_results = False
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.001)
                 for result in results:
                     if result['result'] is not None:
                         if result['result'] == 'continue':
@@ -248,7 +248,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 print(traceback.format_exc())
                 continue_processing = False
 
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.001)
         print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
 
         await context.finished_chat()
@@ -278,7 +278,7 @@ async def subscribe_to_agent_messages(session_id: str, context=None):
         try:
             while True:
                 data = await queue.get()
-                await asyncio.sleep(0.005)
+                await asyncio.sleep(0.001)
                 print('.', end='', flush=True)
                 yield data
         except asyncio.CancelledError:

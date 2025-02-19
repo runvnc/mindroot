@@ -13,6 +13,7 @@ const commandHandlers = {};
 
 // Function to register command handlers
 window.registerCommandHandler = function(command, handler) {
+  console.log("Registering command handler for", command)
   commandHandlers[command] = handler;
 }
 
@@ -38,6 +39,7 @@ class Chat extends BaseEl {
   constructor(args) {
     super();
     console.log({ args });
+    this.attachShadow({mode: 'open'});
     this.messages = [];
     this.userScrolling = false;
     this.lastSender = null;
@@ -45,6 +47,21 @@ class Chat extends BaseEl {
     console.log('Chat component created');
     this.history = new ChatHistory(this);
     console.log(this);
+  }
+  
+  exposeSubcomponents() {
+    // Get all chat-message elements
+    const messages = this.shadowRoot.querySelectorAll('chat-message');
+    messages.forEach(msg => {
+      if (msg.shadowRoot) {
+        msg.shadowRoot.mode = 'open';
+      }
+    });
+    
+    const chatForm = this.shadowRoot.querySelector('chat-form');
+    if (chatForm && chatForm.shadowRoot) {
+      chatForm.shadowRoot.mode = 'open';
+    }
   }
 
   shouldShowAvatar(sender) {
@@ -171,6 +188,7 @@ class Chat extends BaseEl {
       }
     } else {
       console.log('partial. data.params', data.params)
+      console.log("command is", data.command)
       const handler = commandHandlers[data.command];
       if (handler) {
         data.event = 'partial'
@@ -179,6 +197,7 @@ class Chat extends BaseEl {
         this.requestUpdate();
       } else {
         console.warn('No handler for command:', data.command)
+        console.warn(commandHandlers)
       }
 
       if (typeof(data.params) == 'array') {
@@ -210,7 +229,7 @@ class Chat extends BaseEl {
     this.messages[this.messages.length - 1].spinning = 'yes'
     console.log('Spinner set to true:', this.messages[this.messages.length - 1]);
     console.log(event);
-    this.requestUpdate();
+    //this.requestUpdate();
 
     console.log("command result (actually running command)", event)
     const data = JSON.parse(event.data);
@@ -266,7 +285,9 @@ class Chat extends BaseEl {
     if (isAtBottom || !this.userScrolling) {
       const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
       const lastEl = lastMessageEls[lastMessageEls.length-1];
-      lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      //lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      lastEl.scrollIntoView({ behavior: 'instant', block: 'end' });
+
     } else {
       console.log('Not scrolling to bottom')
     }

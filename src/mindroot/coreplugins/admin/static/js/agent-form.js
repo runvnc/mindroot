@@ -49,6 +49,7 @@ class AgentForm extends BaseEl {
       border-radius: 6px;
       color: #f0f0f0;
       font-size: 0.95rem;
+      min-height: 40vh;
     }
 
     input[type="text"]:focus,
@@ -163,10 +164,23 @@ class AgentForm extends BaseEl {
     this.loading = false;
     this.agent = {
       commands: [],
-      ...this.agent
+      name: '',
+      persona: ''
     };
     this.fetchPersonas();
     this.fetchCommands();
+  }
+
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    if (changedProperties.has('agent')) {
+      console.log('Agent updated:', this.agent);
+      // Force select element to update
+      const select = this.shadowRoot.querySelector('select[name="persona"]');
+      if (select && this.agent.persona) {
+        select.value = this.agent.persona;
+      }
+    }
   }
 
   async fetchPersonas() {
@@ -174,6 +188,8 @@ class AgentForm extends BaseEl {
       const response = await fetch('/personas/local');
       if (!response.ok) throw new Error('Failed to fetch personas');
       this.personas = await response.json();
+      console.log('Fetched personas:', this.personas);
+      console.log('Current agent persona:', this.agent.persona);
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
         detail: `Error loading personas: ${error.message}`
@@ -255,7 +271,7 @@ class AgentForm extends BaseEl {
     return true;
   }
 
-  async handleSubmit(event) {
+  async handleSubmit(event) {  // Complete replacement of method
     event.preventDefault();
     
     if (!this.validateForm()) return;
@@ -279,10 +295,17 @@ class AgentForm extends BaseEl {
         body: formData
       });
 
-      if (!response.ok) throw new Error('Failed to save agent');
-      
+      if (!response.ok) {
+        throw new Error('Failed to save agent');
+      }
+
+      // Get the saved agent data from response and update local state
+      const savedAgent = await response.json();
+      // Update our local agent with the server data
+      this.agent = savedAgent;
+
       this.dispatchEvent(new CustomEvent('agent-saved', {
-        detail: this.agent
+        detail: savedAgent
       }));
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
@@ -337,11 +360,11 @@ class AgentForm extends BaseEl {
         <div class="form-group">
           <label class="required">Persona:</label>
           <select name="persona" 
-                  .value=${this.agent.persona || ''} 
-                  @input=${this.handleInputChange}>
+                  value=${this.agent.persona || ''}
+                  @change=${this.handleInputChange}>
             <option value="">Select a persona</option>
             ${this.personas.map(persona => html`
-              <option value="${persona.name}">${persona.name}</option>
+              <option value="${persona.name}" ?selected=${persona.name === this.agent.persona}>${persona.name}</option>
             `)}
           </select>
         </div>
@@ -349,7 +372,6 @@ class AgentForm extends BaseEl {
         <div class="form-group">
           <label class="required">Instructions:</label>
           <textarea name="instructions" 
-                    rows="20" 
                     .value=${this.agent.instructions || ''} 
                     @input=${this.handleInputChange}></textarea>
         </div>

@@ -71,6 +71,7 @@ def get_plugin_path(plugin_name):
                     return plugin_info['source_path']
                 print(f"Warning: Plugin path does not exist: {plugin_info['source_path']}")
             else:
+                print(f"Calling find_spec to get plugin path for {plugin_name}")
                 spec = find_spec(plugin_name)
                 if spec:
                     return spec.origin

@@ -15,8 +15,108 @@ class PersonaEditor extends BaseEl {
 
   static styles = [
     css`
+      :host {
+        display: block;
+        margin-top: 20px;
+      }
+
+      .persona-editor {
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .persona-selector {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .scope-selector {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+      }
+
+      .scope-selector label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #f0f0f0;
+        cursor: pointer;
+      }
+
+      select {
+        flex: 1;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        color: #f0f0f0;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #f0f0f0;
+        font-weight: 500;
+      }
+
       .file-upload-container {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+      }
+
+      .file-upload-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #f0f0f0;
+        font-weight: 500;
+      }
+
+      .file-name {
+        display: block;
+        margin-top: 8px;
+        color: #4a9eff;
+        font-size: 0.9em;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        background: #4a9eff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn:hover {
+        background: #3d8ae0;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f0f0f0;
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
       }
     `
   ];
@@ -113,44 +213,49 @@ class PersonaEditor extends BaseEl {
 
   _render() {
     return html`
-      <div>
-        <label>
-          <input type="radio" name="scope" value="local" .checked=${this.scope === 'local'} @change=${this.handleScopeChange} /> Local
-        </label>
-        <label>
-          <input type="radio" name="scope" value="shared" .checked=${this.scope === 'shared'} @change=${this.handleScopeChange} /> Shared
-        </label>
-        <select @change=${this.handlePersonaChange} .value=${this.name || ''} ?disabled=${this.newPersona}>
-          <option value="">Select a persona</option>
-          ${this.personas.map(persona => html`<option value="${persona.name}">${persona.name}</option>`) }
-        </select>
-        <button @click=${this.handleNewPersona}>New Persona</button>
-      </div>
-      <form @submit=${this.handleSubmit} class="persona">
-        <label>
-          Name:
-          <input class="text_inp" type="text" name="name" .value=${this.persona.name || ''} @input=${this.handleInputChange} />
-        </label>
-        <label>
-          Description:
-          <textarea class="text_lg" name="description" .value=${this.persona.description || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
-          Speech Patterns:
-          <textarea class="text_lg"  name="speech_patterns" .value=${this.persona.speech_patterns || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
-          Appearance:
-          <textarea  class="text_lg" name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
-        </label>
-        <label>
-          Negative Appearance (for negative prompt in image generator):
-          <textarea  class="text_lg" name="negative_appearance" .value=${this.persona.negative_appearance || ''} @input=${this.handleInputChange}></textarea>
-        </label>
+      <div class="persona-editor">
+        <div class="persona-selector">
+          <div class="scope-selector">
+            <label>
+              <input type="radio" name="scope" value="local" .checked=${this.scope === 'local'} @change=${this.handleScopeChange} /> Local
+            </label>
+            <label>
+              <input type="radio" name="scope" value="shared" .checked=${this.scope === 'shared'} @change=${this.handleScopeChange} /> Shared
+            </label>
+          </div>
+          <select @change=${this.handlePersonaChange} .value=${this.name || ''} ?disabled=${this.newPersona}>
+            <option value="">Select a persona</option>
+            ${this.personas.map(persona => html`<option value="${persona.name}">${persona.name}</option>`) }
+          </select>
+          <button class="btn btn-secondary" @click=${this.handleNewPersona}>New Persona</button>
+        </div>
+        <form @submit=${this.handleSubmit} class="persona">
+          <div class="form-group">
+            <label>Name:</label>
+            <input class="text_inp" type="text" name="name" .value=${this.persona.name || ''} @input=${this.handleInputChange} />
+          </div>
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea class="text_lg" name="description" .value=${this.persona.description || ''} @input=${this.handleInputChange}></textarea>
+          </div>
+          <div class="form-group">
+            <label>Speech Patterns:</label>
+            <textarea class="text_lg" name="speech_patterns" .value=${this.persona.speech_patterns || ''} @input=${this.handleInputChange}></textarea>
+          </div>
+          <div class="form-group">
+            <label>Appearance:</label>
+            <textarea class="text_lg" name="appearance" .value=${this.persona.appearance || ''} @input=${this.handleInputChange}></textarea>
+          </div>
+          <div class="form-group">
+            <label>Negative Appearance:</label>
+            <textarea class="text_lg" name="negative_appearance" .value=${this.persona.negative_appearance || ''} @input=${this.handleInputChange}></textarea>
+          </div>
+          <div class="form-group">
         <label>
           Moderated:
           <toggle-switch .checked=${this.persona.moderated || false} @toggle-change=${(e) => this.handleInputChange({ target: { name: 'moderated', value: e.detail.checked, type: 'checkbox' } })}></toggle-switch>
         </label>
+          </div>
         <div class="file-upload-container">
           <label class="file-upload-label" for="faceref">Choose Face Reference Image</label>
           <input id="faceref" type="file" name="faceref" @change=${this.handleFileChange} />
@@ -161,8 +266,9 @@ class PersonaEditor extends BaseEl {
           <input id="avatar" type="file" name="avatar" @change=${this.handleFileChange} />
           <span class="file-name">${this.avatarFileName}</span>
         </div>
-        <button  class="btn" type="submit">Save</button>
+        <button class="btn" type="submit">Save Persona</button>
       </form>
+      </div>
     `;
   }
 }

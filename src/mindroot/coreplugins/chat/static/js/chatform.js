@@ -243,10 +243,11 @@ class ChatForm extends BaseEl {
 
 
   async _send(event) {
+    console.log("in _send")
     if (this.isLoading) return
     
     const messageContent = []
-    
+    console.log("..")
     if (this.messageEl.value.trim()) {
       messageContent.push({
         type: 'text',
@@ -260,7 +261,8 @@ class ChatForm extends BaseEl {
         data: imageData
       })
     }
-    
+   
+    console.log({messageContent})
     if (messageContent.length === 0) return
     
     const ev_ = {
@@ -291,6 +293,7 @@ class ChatForm extends BaseEl {
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/>
               </svg>
             </label>
+            <div id="chat-insert-left"></div>
             <textarea id="inp_message" class="message-input"
               rows="4" 
               @keydown=${(e) => {
@@ -304,11 +307,17 @@ class ChatForm extends BaseEl {
             ></textarea>
           </div>
         </div>
+        <div id="chat-right-insert" style="display:none"></div>
+        <button type="button" @click=${this._send} class="send_msg">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-2xl"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.1918 8.90615C15.6381 8.45983 16.3618 8.45983 16.8081 8.90615L21.9509 14.049C22.3972 14.4953 22.3972 15.2189 21.9509 15.6652C21.5046 16.1116 20.781 16.1116 20.3347 15.6652L17.1428 12.4734V22.2857C17.1428 22.9169 16.6311 23.4286 15.9999 23.4286C15.3688 23.4286 14.8571 22.9169 14.8571 22.2857V12.4734L11.6652 15.6652C11.2189 16.1116 10.4953 16.1116 10.049 15.6652C9.60265 15.2189 9.60265 14.4953 10.049 14.049L15.1918 8.90615Z" fill="currentColor"></path></svg>
+        </button>
+
+        <!--
         <button type="button" @click=${this._send} class="send_msg">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M11.354 8.354a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.708.708L10.293 8l-6.647 6.646a.5.5 0 0 0 .708.708l7-7a.5.5 0 0 0 0-.708z"/>
           </svg>    
-        </button>
+        </button> -->
         ${this.taskid ? html`
           <button type="button" @click=${this._cancelChat} class="stop-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
