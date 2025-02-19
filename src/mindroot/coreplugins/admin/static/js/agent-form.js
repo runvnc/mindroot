@@ -49,6 +49,9 @@ class AgentForm extends BaseEl {
       border-radius: 6px;
       color: #f0f0f0;
       font-size: 0.95rem;
+    }
+
+    textarea {
       min-height: 40vh;
     }
 

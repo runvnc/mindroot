@@ -123,6 +123,7 @@ class PersonaEditor extends BaseEl {
 
   constructor() {
     super();
+    this.attachShadow({mode: 'open'});
     this.persona = {};
     this.personas = [];
     this.scope = 'local';
@@ -266,7 +267,7 @@ class PersonaEditor extends BaseEl {
           <input id="avatar" type="file" name="avatar" @change=${this.handleFileChange} />
           <span class="file-name">${this.avatarFileName}</span>
         </div>
-        <button class="btn" type="submit">Save Persona</button>
+        <button class="btn" type="submit" id="save-persona">Save Persona</button>
       </form>
       </div>
     `;
