@@ -3,7 +3,7 @@ import json
 from typing import List, Dict
 import sys
 import traceback
-from lib.utils.debug import debug_box
+from mindroot.lib.utils.debug import debug_box
 
 class ChatLog:
     def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str = None):

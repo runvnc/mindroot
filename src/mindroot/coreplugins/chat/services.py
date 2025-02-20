@@ -1,5 +1,6 @@
 from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
+from lib.providers.hooks import hook
 from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
 from lib.chatlog import ChatLog
@@ -268,8 +269,9 @@ def add_current_time(data: dict, context=None) -> dict:
 async def finished_chat(context=None):
     await context.agent_output("finished_chat", { "persona": context.agent['persona']['name'] })
 
-@service()
+@hook()
 async def quit(context=None):
+    print("Chat service is quitting..")
     # Close all existing SSE connections
     for session_id, queues in sse_clients.items():
         for queue in queues.copy():  # Use copy to avoid modification during iteration
@@ -283,7 +285,7 @@ async def quit(context=None):
     
     # Give clients a moment to receive the close message
     await asyncio.sleep(1)
-    
+    print("Chat service finished.") 
     return {"status": "shutdown_complete"}
 
 @service()
