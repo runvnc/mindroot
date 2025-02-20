@@ -269,6 +269,24 @@ async def finished_chat(context=None):
     await context.agent_output("finished_chat", { "persona": context.agent['persona']['name'] })
 
 @service()
+async def quit(context=None):
+    # Close all existing SSE connections
+    for session_id, queues in sse_clients.items():
+        for queue in queues.copy():  # Use copy to avoid modification during iteration
+            try:
+                await queue.put({'event': 'close', 'data': 'Server shutting down'})
+            except:
+                pass
+    
+    # Clear the global sse_clients
+    sse_clients.clear()
+    
+    # Give clients a moment to receive the close message
+    await asyncio.sleep(1)
+    
+    return {"status": "shutdown_complete"}
+
+@service()
 async def subscribe_to_agent_messages(session_id: str, context=None):
     async def event_generator():
         queue = asyncio.Queue()

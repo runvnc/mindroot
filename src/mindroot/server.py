@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 import os
 from pathlib import Path
 from .lib import plugins
+from .lib.providers.hooks import hook_manager
 from .lib.utils.debug import debug_box
 import asyncio
 import uvicorn
@@ -101,6 +102,14 @@ def main():
         global app
         await setup_app_internal(app)
         print(colored("Plugin setup complete", "green"))
+
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        print("Shutting down MindRoot")
+        context = ChatContext(user='shutdown')
+        context.app = app
+        await hook_manager.quit(context=context)
+
 
     try:
         print(colored(f"Starting server on port {port}", "green"))
