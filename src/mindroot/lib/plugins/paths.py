@@ -58,6 +58,7 @@ def get_plugin_path(plugin_name):
     Returns:
         str: Absolute path to the plugin directory or None if not found
     """
+    print(f"Get plugin path: {plugin_name}")
     manifest = load_plugin_manifest()
     for category in manifest['plugins']:
         if plugin_name in manifest['plugins'][category]:

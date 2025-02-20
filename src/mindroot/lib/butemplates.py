@@ -200,7 +200,27 @@ async def render_combined_template(page_name, plugins, context):
     Returns:
         str: Rendered HTML
     """
-    parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    print("plugins:", plugins)
+    parent_template_path = await find_parent_template(page_name, plugins)
+    
+    print("\033[92m" + "----------------------------------")
+    print("parent_template_path", parent_template_path)
+    print("page name", page_name, "plugins:", plugins, "context:", context)
+    print("\033[0m")
+    
+    if parent_template_path:
+        try:
+            parent_template = env.get_template(parent_template_path)
+        except Exception as e:
+            print(f"Error loading template {parent_template_path}: {e}")
+            print(f"Template search paths: {[l.searchpath for l in env.loader.loaders]}")
+            raise
+    else:
+        default_path = f'templates/{page_name}.jinja2'
+        if not os.path.exists(default_path):
+            raise FileNotFoundError(f"Template not found: {page_name}")
+        parent_template = env.get_template(default_path)
+
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}

@@ -5,12 +5,12 @@ import './toggle-switch.js';
 class PersonaEditor extends BaseEl {
   static properties = {
     persona: { type: Object },
-    scope: { type: String },
-    name: { type: String },
-    personas: { type: Array },
-    newPersona: { type: Boolean },
-    facerefFileName: { type: String },
-    avatarFileName: { type: String }
+    scope: { type: String, reflect: true },
+    name: { type: String, reflect: true },
+    personas: { type: Array, reflect: true },
+    newPersona: { type: Boolean, reflect: true },
+    facerefFileName: { type: String, reflect: true },
+    avatarFileName: { type: String, reflect: true }
   };
 
   static styles = [
