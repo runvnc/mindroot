@@ -79,7 +79,7 @@ async def pic_of_me(prompt="", context=None):
     if 'negative_appearance' in persona:
         negative_appearance = persona['negative_appearance']
 
-    img = await context.text_to_image(f"({prompt:1.25})" + persona['appearance'], negative_appearance, cfg=12)
+    img = await context.text_to_image(f"({prompt}:1.25), " + persona['appearance'], negative_appearance, cfg=12)
     print("img = ", img)
     img_dir = os.path.dirname(persona['face_ref_image_path'])
     try:

@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from datetime import datetime, timedelta
 from lib.route_decorators import public_routes, public_route, public_static
+from coreplugins.api_keys import api_key_manager
 from lib.providers.services import service_manager
 import os
 
@@ -39,6 +40,24 @@ async def middleware(request: Request, call_next):
     try:
         print('-------------------------- auth middleware ----------------------------')
         print('Request URL:', request.url.path)
+
+        # Check for API key in query parameters
+        api_key = request.query_params.get('api_key')
+        if api_key:
+            print('Found API key in query parameters')
+            key_data = api_key_manager.validate_key(api_key)
+            if key_data:
+                username = key_data['username']
+                user_data = await service_manager.get_user_data(username)
+                if user_data:
+                    request.state.user = user_data
+                    return await call_next(request)
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Invalid API key"
+                )
+
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
