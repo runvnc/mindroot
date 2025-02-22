@@ -58,6 +58,8 @@ class APIKeyManager:
         Returns:
             Dict containing the key details if valid, None otherwise
         """
+        print(f"Validating key: {api_key}")
+        print("My keys are", self.keys)
         return self.keys.get(api_key)
 
     def delete_key(self, api_key: str) -> bool:

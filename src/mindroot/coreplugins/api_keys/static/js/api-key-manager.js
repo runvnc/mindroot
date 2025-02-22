@@ -5,8 +5,7 @@ class ApiKeyManager extends BaseEl {
   static properties = {
     apiKeys: { type: Array },
     loading: { type: Boolean },
-    selectedUser: { type: String },
-    users: { type: Array }
+    selectedUser: { type: String }
   }
 
   static styles = css`
@@ -110,7 +109,6 @@ class ApiKeyManager extends BaseEl {
     this.apiKeys = [];
     this.loading = false;
     this.selectedUser = '';
-    this.users = [];
     this.fetchInitialData();
   }
 
@@ -118,7 +116,6 @@ class ApiKeyManager extends BaseEl {
     this.loading = true;
     await Promise.all([
       this.fetchApiKeys(),
-      this.fetchUsers()
     ]);
     this.loading = false;
   }
@@ -132,18 +129,6 @@ class ApiKeyManager extends BaseEl {
       }
     } catch (error) {
       console.error('Error fetching API keys:', error);
-    }
-  }
-
-  async fetchUsers() {
-    try {
-      const response = await fetch('/users/list');
-      const result = await response.json();
-      if (result.success) {
-        this.users = result.data;
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
     }
   }
 
@@ -195,12 +180,10 @@ class ApiKeyManager extends BaseEl {
       <div class="api-key-manager">
         <div class="section">
           <div class="actions">
-            <select class="user-select">
-              <option value="">Select User</option>
-              ${this.users.map(user => html`
-                <option value=${user.username}>${user.username}</option>
-              `)}
-            </select>
+            <input type="text"
+                   class="user-select"
+                   placeholder="user"
+            >
             <input 
               type="text" 
               class="description-input" 

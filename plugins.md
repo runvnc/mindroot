@@ -75,7 +75,8 @@ router = APIRouter()
 @router.get("/endpoint")
 async def handler(request: Request):
     # Templates must be in templates/[page_name].jinja2
-    html = await render('page_name', {"context": "data"})
+    user = request.state.user.username
+    html = await render('page_name', {"context": "data", "user": user })
     return HTMLResponse(html)
 ```
 
@@ -117,6 +118,7 @@ The main chat template (mindroot/coreplugins/chat/templates/chat.jinja2) provide
 #### Template Override Example
 ```jinja2
 {# override/chat.jinja2 - Will replace entire pre_content block #}
+
 {% block pre_content %}
     <div class="custom-sidebar">
         <h2>Custom Sidebar</h2>
@@ -186,6 +188,27 @@ Key points about commands:
 - Should handle errors gracefully
 - Can return data that the AI can use
 - Must be enabled per-agent in admin interface
+
+## setup.py and plugin install
+
+IMPORTANT: **setup.py must handle install/inclusion of any files in subdirs, e.g. `static/`, `templates/`, `inject/`**
+
+Example:
+
+```shell
+...
+    package_data={
+        "mr_pkg1": [
+            "static/js/*.js",
+            "static/*.js"
+            "inject/*.jinja2",
+            "override/*.jinja2"
+        ],
+    },
+ ...
+
+```
+
 
 ## Plugin Integration Points
 
