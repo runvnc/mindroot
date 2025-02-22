@@ -11,6 +11,8 @@ import asyncio
 import uvicorn
 from termcolor import colored
 import socket
+from fastapi.middleware.cors import CORSMiddleware
+
 # actually need a good way to part commmand line args
 
 def parse_args():
@@ -90,6 +92,12 @@ def main():
         cmd_args.port = port 
   
     app = FastAPI()
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"]  # This one line is all you need to allow all origins
+    )
+
     app.state.cmd_args = cmd_args
 
     debug_box("pre_load")
