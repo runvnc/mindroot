@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
@@ -12,8 +12,8 @@ import uvicorn
 from termcolor import colored
 import socket
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
-# actually need a good way to part commmand line args
 
 def parse_args():
     import argparse
@@ -79,6 +79,35 @@ def find_available_port(start_port=8010, max_attempts=100):
         port += 1
     raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
 
+class HeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # First get the response from other middleware and routes
+        response = await call_next(request)
+
+        if "Content-Security-Policy" in response.headers:
+            del response.headers["Content-Security-Policy"]
+
+        response.headers['Content-Security-Policy'] = "frame-ancestors *"
+       
+        if 'Access-Control-Allow-Origin' in response.headers:
+            del response.headers['Access-Control-Allow-Origin']
+        # Additional headers for better cross-origin support
+        response.headers['Access-Control-Allow-Origin'] = '*'  # Or your specific origin
+
+        if 'Access-Control-Allow-Headers' in response.headers:
+            del response.headers['Access-Control-Allow-Headers']
+
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+
+        # Remove the X-Frame-Options header if it exists
+        if 'X-Frame-Options' in response.headers:
+            del response.headers['X-Frame-Options']
+        
+        
+        print(dict(response.headers))
+        
+        return response
+
 
 def main():
     global app
@@ -93,10 +122,10 @@ def main():
   
     app = FastAPI()
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"]  # This one line is all you need to allow all origins
-    )
+    #app.add_middleware(
+    #    CORSMiddleware,
+    #    allow_origins=["*"]  # This one line is all you need to allow all origins
+    #)
 
     app.state.cmd_args = cmd_args
 
@@ -105,12 +134,6 @@ def main():
     loop.run_until_complete(plugins.pre_load(app)) # middleware
 
     debug_box("finished with pre_load, now calling uvicorn.run")
-
-    @app.middleware("http")
-    async def remove_frame_header(request, call_next):
-        response = await call_next(request)
-        del response.headers["X-Frame-Options"]
-        return response
 
     @app.on_event("startup")
     async def setup_app():
@@ -122,6 +145,17 @@ def main():
     async def shutdown_event():
         print("Shutting down MindRoot")
         hook_manager.eject()
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Replace with your specific origins for production
+        allow_credentials=True,
+        allow_methods=["*"],  # Or specify: ["GET", "POST", "PUT", "DELETE", etc.]
+        allow_headers=["*"],  # Or specify required headers
+        expose_headers=["*"]  # Headers that browsers are allowed to access
+    )
+
+    app.add_middleware(HeaderMiddleware)
 
     try:
         print(colored(f"Starting server on port {port}", "green"))
