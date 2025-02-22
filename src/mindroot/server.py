@@ -109,7 +109,7 @@ def main():
     @app.middleware("http")
     async def remove_frame_header(request, call_next):
         response = await call_next(request)
-        response.headers["X-Frame-Options"] = "ALLOWALL"
+        response.headers.pop("X-Frame-Options", None)
         return response
 
     @app.on_event("startup")
