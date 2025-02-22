@@ -25,6 +25,10 @@
         "enabled": true,
         "source": "core"
       },
+      "api_keys": {
+        "enabled": true,
+        "source": "core"
+      }, 
       "home": {
         "enabled": true,
         "source": "core"
