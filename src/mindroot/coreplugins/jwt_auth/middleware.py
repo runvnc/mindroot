@@ -64,7 +64,8 @@ async def middleware(request: Request, call_next):
                         key="access_token",
                         value=token,
                         httponly=True,
-                        samesite='Lax',  # Adjust to 'None' if needed for cross-origin
+                        partitioned=True,
+                        samesite='None',  # Adjust to 'None' if needed for cross-origin
                         secure=True  # Assuming HTTPS is used
                     )
                     return response

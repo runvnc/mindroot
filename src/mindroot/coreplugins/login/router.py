@@ -48,7 +48,7 @@ async def login(request: Request, username: str = Form(...), password: str = For
                     value=access_token,
                     max_age=604800,  # 1 week
                     httponly=True,   # Prevent JavaScript access
-                    samesite="lax"  # CSRF protection
+                    samesite="None"  # CSRF protection
                 )
                 
                 return response
