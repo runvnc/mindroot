@@ -106,6 +106,12 @@ def main():
 
     debug_box("finished with pre_load, now calling uvicorn.run")
 
+    @app.middleware("http")
+    async def remove_frame_header(request, call_next):
+        response = await call_next(request)
+        response.headers.remove("X-Frame-Options", None)
+        return response
+
     @app.on_event("startup")
     async def setup_app():
         global app
