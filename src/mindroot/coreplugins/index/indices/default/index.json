@@ -225,7 +225,9 @@
       "source": "github",
       "github_url": "runvnc/mr_deepseek",
       "commands": [],
-      "services": ["stream_chat"],
+      "services": [
+        "stream_chat"
+      ],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
     },
@@ -236,7 +238,9 @@
       "source": "github",
       "github_url": "runvnc/ah_user_memory",
       "commands": [],
-      "services": [""],
+      "services": [
+        ""
+      ],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
     },
@@ -247,7 +251,9 @@
       "source": "github",
       "github_url": "runvnc/mr_journal",
       "commands": [],
-      "services": [""],
+      "services": [
+        ""
+      ],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
     },
@@ -258,7 +264,9 @@
       "source": "github",
       "github_url": "runvnc/mr_imagen",
       "commands": [],
-      "services": [""],
+      "services": [
+        ""
+      ],
       "dependencies": [],
       "added_at": "2025-01-07T21:42:52.839951"
     }
