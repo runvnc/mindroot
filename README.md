@@ -1,4 +1,24 @@
 
+# Table of Contents
+- [Gallery](#gallery)
+  - [Admin Interface](#admin-interface)
+  - [Plugin Management](#plugin-management)
+  - [3D Graph Visualization](#3d-graph-visualization)
+  - [Chain Rule Explanation](#chain-rule-explanation)
+  - [Character Generation](#character-generation)
+  - [Fantasy Character Creation](#fantasy-character-creation)
+  - [Morgan's Method](#morgans-method)
+  - [Heygen Integration Demo](#heygen-integration-demo)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Starting the Server](#starting-the-server)
+- [Installing Plugins](#installing-plugins)
+- [Developers: Creating Plugins and Tool Commands etc.](#developers-creating-plugins-and-tool-commands-etc)
+- [Adding Commands to Agents](#adding-commands-to-agents)
+- [Key Features](#key-features)
+
+
+
 Mindroot
 
 ## Gallery
@@ -131,22 +151,3 @@ Key Features:
 - Easily customizable UI built on Jinja2 and Lit Web Components
 - Support for both local and remote AI services
 - RAG: easily share, find and use pre-generated embeddings and documents for topic knowledgebases
-
-Core Concepts Overview
-----------------------
-
-mindroot revolves around several key concepts:
-
-1. **Open Public Registry**: A flexible system for indexing and sharing plugins, agents, personas, and potentially models. It can be customized or replaced with user-specific registries.
-
-2. **Plugins**: Extend the functionality of mindroot, providing new features, services, or integrations.
-
-3. **Agents and Personas**: AI agents with defined capabilities and customizable personalities.
-
-4. **Services and Providers**: Backend services that power agent capabilities, with support for swapping between local and remote implementations.
-
-5. **Intelligent Service Management**: The system automatically determines and installs required services based on agent definitions.
-
-6. **UI Customization**: Easily modifiable user interface through theme overrides and injections.
-
-7. **RAG and Knowledgebases**: The community can easily share and search for topic embeddings and document sets rather than everyone rebuilding them per topic.
