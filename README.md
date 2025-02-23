@@ -1,6 +1,25 @@
 
 Mindroot
 
+## Gallery
+
+### 3D Graph Visualization
+![3D Graph Demo](3dgraph.gif)
+
+### Chain Rule Explanation
+![Chain Rule Demo](chainrule.gif)
+
+### Character Generation
+![Character Generation](char4.gif)
+
+### Fantasy Character Creation
+![Fantasy Character](fantasychar.gif)
+
+### Morgan's Method
+![Morgan's Method](morgan1.gif)
+
+---
+
 [![PyPI](https://img.shields.io/pypi/v/mindroot)](https://pypi.org/project/mindroot/)
 
 **Note: some of the following is a work in progress and not yet functional. A few of them aren't really started.**
