@@ -3,6 +3,12 @@ Mindroot
 
 ## Gallery
 
+### Admin Interface
+![Admin Interface](admin.png)
+
+### Plugin Management
+![Plugin Management](plugins.png)
+
 ### 3D Graph Visualization
 ![3D Graph Demo](3dgraph.gif)
 
