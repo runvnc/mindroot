@@ -18,6 +18,9 @@ Mindroot
 ### Morgan's Method
 ![Morgan's Method](morgan1.gif)
 
+### Heygen Integration Demo
+![Heygen Integration](heygen.gif)
+
 ---
 
 [![PyPI](https://img.shields.io/pypi/v/mindroot)](https://pypi.org/project/mindroot/)
