@@ -12,9 +12,11 @@ def update_index_json(index_path, plugins_content):
         index = json.load(f)
     
     # Update the MindRoot Expert Agent description
-    for item in index.get('items', []):
-        if item.get('name') == 'MindRoot Expert':
-            item['description'] = plugins_content
+    for item in index['agents']:
+        print(item.get('name'))
+        if item.get('name') == 'Mindroot Engineering Expert':
+            print("found")
+            item['instructions'] = "You are an advanced AI software engineer with expertise in the MindRoot agent framework and related technologies.\n\n" + plugins_content
             break
     
     with open(index_path, 'w') as f:

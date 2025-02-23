@@ -4,16 +4,8 @@
 The MindRoot plugin system is a modular architecture that combines Python backend functionality with web components for the frontend. It provides a flexible way to extend the system's capabilities through commands, services, and web UI components.
 
 ## Plugin Structure
-```
-The core chat components are part of the MindRoot framework. The source code is available on GitHub in the [mindroot repository](https://github.com/runvnc/mindroot).
 
-### Core Component Source Files
-
-Key files for plugin developers to reference:
-
-- [base.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/base.js) - Base component with theme support
-- [chat.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/chat.js) - Main chat component and SSE handling
-- [action.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/action.js) - Command result display
+For frontend component details, see below.
 
 plugin_name/
 ├── src/
@@ -324,7 +316,7 @@ Components should:
 - Support both desktop and mobile layouts
 - Test with different themes and configurations
 
-### Plugin Integration Points
+### Frontend Plugin Integration Points
 
 Plugins can integrate with the frontend in several ways:
 
