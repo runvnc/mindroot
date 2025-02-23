@@ -5,16 +5,6 @@ The MindRoot plugin system is a modular architecture that combines Python backen
 
 ## Plugin Structure
 ```
-The core chat components are part of the MindRoot framework. The source code is available on GitHub in the [mindroot repository](https://github.com/runvnc/mindroot).
-
-### Core Component Source Files
-
-Key files for plugin developers to reference:
-
-- [base.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/base.js) - Base component with theme support
-- [chat.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/chat.js) - Main chat component and SSE handling
-- [action.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/action.js) - Command result display
-
 plugin_name/
 ├── src/
 │   └── plugin_name/
@@ -98,8 +88,8 @@ The main chat template (mindroot/coreplugins/chat/templates/chat.jinja2) provide
 ```jinja2
 {% block head_meta %}      {# Meta tags, charset, viewport #}
 {% block title %}          {# Page title #}
-{% block head_styles %}    {# CSS includes (must include <link> or <style> tag) #}
-{% block head_scripts %}   {# JavaScript includes (must include <script> tags ) #}
+{% block head_styles %}    {# CSS includes #}
+{% block head_scripts %}   {# JavaScript includes #}
 {% block head_favicon %}   {# Favicon definitions #}
 {% block head_extra %}     {# Additional head content #}
 ```
@@ -165,8 +155,6 @@ Web components are especially recommended when:
   - CSS
   - Images
   - Bundled applications
-
-For detailed frontend development guidelines, see [frontend.md](frontend.md).
 
 ## Tool Commands
 
@@ -282,57 +270,3 @@ Example:
    - Use CSS variables for theming
    - Respect existing style patterns
    - Consider dark/light mode support
-
-
-## AI System Integration
-
-Plugins can integrate with the AI system through:
-
-1. **Commands**
-   - Return structured data for UI rendering
-   - Support streaming/partial results
-   - Access conversation context
-   - Handle file operations and external services
-
-2. **Context Management**
-   - Store plugin-specific data in context
-   - Access user session information
-   - Share state between commands
-   - Maintain conversation history
-
-3. **Event System**
-   - Send SSE events from commands
-   - Update UI in real-time
-   - Stream command results
-   - Handle long-running operations
-
-## Pipeline System
-
-MindRoot includes a pipeline system for processing data at different stages. Pipes allow plugins to modify or transform data as it flows through the system.
-
-### Pipe Decorator
-
-```python
-from lib.pipelines.pipe import pipe
-
-@pipe(name='filter_messages', priority=8)
-def my_pipeline(data: dict, context=None) -> dict:
-    # Modify or process data
-    return data
-```
-
-### Pipeline Stages
-- pre_process_msg - Before message processing
-- process_results - After command execution
-- Custom stages as needed
-
-### Priority System
-- Higher numbers run earlier
-- Lower numbers run later
-- Use priority to control execution order
-
-Example use cases:
-- Transform message content
-- Add context information
-- Filter or modify results
-- Integrate with external systems
