@@ -92,6 +92,7 @@ async def middleware(request: Request, call_next):
         # Check for token in cookies first
         token = request.cookies.get("access_token")
         if token:
+            print("Trying to decode token..")
             payload = decode_token(token)
             if payload:
                 # Get username from token
@@ -107,10 +108,10 @@ async def middleware(request: Request, call_next):
             else:
                 print("Invalid or expired token, redirecting to login..")
                 return RedirectResponse(url="/login")
-
-        print("..Did not find token in cookies..")
+        else:
+            print("..Did not find token in cookies..")
         try:
-            # Try bearer token
+            print("Trying bearer token..")
             token = await security(request)
         except HTTPException as e:
             print('HTTPException: No valid token found: ', e)
