@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/admin/static/css/reset.css">
   <link rel="stylesheet" href="/admin/static/css/default.css">
   <link rel="stylesheet" href="/admin/static/css/admin-custom.css">
+  <link rel="stylesheet" href="/admin/static/css/detailstabs.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -105,7 +106,97 @@
         <server-control theme="dark"></server-control>
       </div>
     </details>
+
   {% endblock %}
+
+  {% block content_end %}
+
+  {% endblock %}
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    const detailsElements = document.querySelectorAll('details');
+    
+    if (detailsElements.length === 0) return;
+    
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'tab-container';
+    
+    const tabNav = document.createElement('div');
+    tabNav.className = 'tab-nav';
+    const tabContents = document.createElement('div');
+    tabContents.className = 'tab-contents';
+    
+    detailsElements.forEach((details, index) => {
+        const summary = details.querySelector('summary');
+        const content = details.cloneNode(true);
+        content.removeChild(content.querySelector('summary'));
+        
+        // Create tab button with exact span structure
+        const tabButton = document.createElement('button');
+        tabButton.className = 'tab-button';
+        
+        // Get the original spans
+        const originalIcon = summary.querySelector('.material-icons');
+        const originalText = summary.querySelector('span:not(.material-icons)');
+        
+        // Create icon span
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'material-icons';
+        iconSpan.textContent = originalIcon ? originalIcon.textContent : '';
+        
+        // Create text span
+        const textSpan = document.createElement('span');
+        // Clean up the text content by removing any material-icons class text
+        let textContent = originalText ? 
+            originalText.textContent.trim() : 
+            summary.textContent.replace('material-icons', '').trim();
+        textSpan.textContent = textContent;
+        
+        // Add spans to button in correct order
+        tabButton.appendChild(iconSpan);
+        tabButton.appendChild(textSpan);
+        
+        tabButton.setAttribute('role', 'tab');
+        tabButton.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        tabButton.setAttribute('aria-controls', `tab-${index}`);
+        if (index === 0) tabButton.classList.add('active');
+        
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-content';
+        tabContent.id = `tab-${index}`;
+        tabContent.setAttribute('role', 'tabpanel');
+        tabContent.innerHTML = content.innerHTML;
+        if (index === 0) tabContent.classList.add('active');
+        
+        tabButton.addEventListener('click', () => {
+            tabNav.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            tabContents.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            tabButton.classList.add('active');
+            tabButton.setAttribute('aria-selected', 'true');
+            tabContent.classList.add('active');
+        });
+        
+        tabNav.appendChild(tabButton);
+        tabContents.appendChild(tabContent);
+    });
+    
+    tabContainer.appendChild(tabNav);
+    tabContainer.appendChild(tabContents);
+    
+    detailsElements[0].parentNode.replaceChild(tabContainer, detailsElements[0]);
+    for (let i = 1; i < detailsElements.length; i++) {
+        detailsElements[i].remove();
+    }
+});
+
+</script>
   </div>
 
   {% block footer %}
