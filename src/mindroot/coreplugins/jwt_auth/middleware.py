@@ -102,8 +102,8 @@ async def middleware(request: Request, call_next):
             print('Not a public route: ', request.url.path)
 
         # Check for token in cookies first
-        #token = request.cookies.get("access_token")
-        token = None
+        token = request.cookies.get("access_token")
+        #token = None
         if token:
             print("Trying to decode token..")
             payload = decode_token(token)
