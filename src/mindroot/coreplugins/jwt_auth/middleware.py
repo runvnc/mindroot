@@ -76,6 +76,8 @@ async def middleware(request: Request, call_next):
                     status_code=403,
                     content={"detail": "Invalid API key"}
                 )
+        if request.url.path.startswith("/imgs/"):
+            return await call_next(request)
         try:
             path_parts = request.url.path.split('/')
             # filter empty "" strings
@@ -85,7 +87,7 @@ async def middleware(request: Request, call_next):
             static_part = path_parts[1]
             filename = path_parts[-1]
             print(f"Checking for static file: {plugin_name} {static_part} {filename}")
-            if static_part == 'static' or plugin_name="imgs":
+            if static_part == 'static':
                 if filename.endswith('.js') or filename.endswith('.css') or filename.endswith('.png') or filename.endswith('.mp4'):
                     print('Static file requested:', filename)
                     return await call_next(request)
