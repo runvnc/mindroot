@@ -1,5 +1,6 @@
 import { markdownRenderer } from './markdown-renderer.js';
 import { removeCmdPrefix } from './cmdprefixes.js';
+import { authenticatedFetch } from './authfetch.js';
 
 export class ChatHistory {
     constructor(chat) {
@@ -9,7 +10,7 @@ export class ChatHistory {
     async loadHistory() {
         console.log('%cLoading chat history...', 'color: cyan');
         try {
-            const response = await fetch(`/history/${window.agent_name}/${this.chat.sessionid}`);
+            const response = await authenticatedFetch(`/history/${window.agent_name}/${this.chat.sessionid}`);
             const data = await response.json();
             console.log('%cHistory loaded:', 'color: cyan', data);
             

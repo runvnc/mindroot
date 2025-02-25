@@ -708,6 +708,7 @@ async def read(fname, context=None):
 
 Key points about commands:
 - Must be async functions
+- Individual parameters must be specified in the signature, not a generic 'params'
 - Should include detailed docstrings with examples
 - Can access context parameter for session data
 - Should handle errors gracefully

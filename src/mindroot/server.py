@@ -40,6 +40,7 @@ def create_directories():
         "personas",
         "personas/local",
         "personas/shared",
+        "data/sessions"
     ]
     for directory in directories:
         (root / directory).mkdir(parents=True, exist_ok=True)

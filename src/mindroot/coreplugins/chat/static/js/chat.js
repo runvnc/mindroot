@@ -7,8 +7,9 @@ import { escapeJsonForHtml } from './property-escape.js';
 import { getAccessToken } from './auth.js';
 import { markdownRenderer } from './markdown-renderer.js';
 import { ChatHistory } from './chat-history.js';
+import { authenticatedFetch } from './authfetch.js';
+import { SSE } from './sse.js';
 
-// Global object to store command handlers
 const commandHandlers = {};
 
 // Function to register command handlers
@@ -73,7 +74,17 @@ class Chat extends BaseEl {
   firstUpdated() {
     console.log('First updated');
     console.log('sessionid: ', this.sessionid);
-    this.sse = new EventSource(`/chat/${this.sessionid}/events`);
+    if (window.access_token) {
+      this.sse = new SSE(`/chat/${this.sessionid}/events`, {
+      headers: {
+        'Authorization': `Bearer ${window.access_token}`
+      }
+     });
+     this.sse.stream();
+    } else {
+      this.sse = new EventSource(`/chat/${this.sessionid}/events`);
+    }
+  
     const thisPartial = this._partialCmd.bind(this)
     this.sse.addEventListener('image', this._imageMsg.bind(this));
     this.sse.addEventListener('partial_command', thisPartial);
@@ -131,7 +142,7 @@ class Chat extends BaseEl {
         body: JSON.stringify(content)
       });
 
-      fetch(request).then(response => {
+      authenticatedFetch(request).then(response => {
         return response.json();
       }).then(data => {
           console.log(data);

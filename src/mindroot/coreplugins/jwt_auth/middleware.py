@@ -7,6 +7,8 @@ from lib.route_decorators import public_routes, public_route, public_static
 from coreplugins.api_keys import api_key_manager
 from lib.providers.services import service_manager
 import os
+from lib.session_files import load_session_data
+from lib.utils.debug import debug_box
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", None)
 
@@ -40,6 +42,8 @@ async def middleware(request: Request, call_next):
     try:
         print('-------------------------- auth middleware ----------------------------')
         print('Request URL:', request.url.path)
+        if request.url.path.endswith('events'):
+            debug_box("events:" + request.url.path)
 
         # Check for API key in query parameters
         api_key = request.query_params.get('api_key')
@@ -54,19 +58,11 @@ async def middleware(request: Request, call_next):
 
                 if user_data:
                     request.state.user = user_data
-                    
                     # Create JWT token for persistent session
                     token = create_access_token({"sub": username})
-                    
+                    request.state.access_token = token
                     # Get response and set cookie
                     response = await call_next(request)
-                    response.set_cookie(
-                        key="access_token",
-                        value=token,
-                        httponly=True,
-                        samesite='None',  # Adjust to 'None' if needed for cross-origin
-                        secure=True  # Assuming HTTPS is used
-                    )
                     return response
                 else:
                     print(f"User {username} for key {api_key} not found")
@@ -80,7 +76,23 @@ async def middleware(request: Request, call_next):
                     status_code=403,
                     content={"detail": "Invalid API key"}
                 )
-
+        try:
+            path_parts = request.url.path.split('/')
+            # filter empty "" strings
+            path_parts = list(filter(None, path_parts))
+            print(f"Request path split is {path_parts}")
+            plugin_name = path_parts[0]
+            static_part = path_parts[1]
+            filename = path_parts[-1]
+            print(f"Checking for static file: {plugin_name} {static_part} {filename}")
+            if static_part == 'static':
+                if filename.endswith('.js') or filename.endswith('.css') or filename.endswith('.png') or filename.endswith('.mp4'):
+                    print('Static file requested:', filename)
+                    return await call_next(request)
+        except Exception as e:
+            print("Error checking for static file", e)
+            pass
+        print("Did not find static file")
         if request.url.path in public_routes:
             print('Public route: ', request.url.path)
             return await call_next(request)
@@ -90,7 +102,8 @@ async def middleware(request: Request, call_next):
             print('Not a public route: ', request.url.path)
 
         # Check for token in cookies first
-        token = request.cookies.get("access_token")
+        #token = request.cookies.get("access_token")
+        token = None
         if token:
             print("Trying to decode token..")
             payload = decode_token(token)
@@ -114,21 +127,31 @@ async def middleware(request: Request, call_next):
             print("Trying bearer token..")
             token = await security(request)
         except HTTPException as e:
-            print('HTTPException: No valid token found: ', e)
-            return RedirectResponse(url="/login")
+            print('Bearer header: No valid token found: ', e)
+            print("Trying session context..")
+            try:
+                session_id = request.url.path.split('/')[-1]
+                token = await load_session_data(session_id, "access_token")
+                if token:
+                    print("Retrieved token from session file")
+                    print(token)
+                else:
+                    print("No token found in session file")
+            except Exception as e:
+                print("Error loading session data")
+                print(e)
 
         if token:
-            payload = decode_token(token.credentials)
+            if hasattr(token, 'credentials'):
+                payload = decode_token(token.credentials)
+            else:
+                payload = decode_token(token)
             if payload:
                 username = payload['sub']
                 user_data = await service_manager.get_user_data(username)
                 
                 if user_data:
-                    request.state.user = {
-                        "username": username,
-                        "token_data": payload,
-                        **user_data
-                    }
+                    request.state.user = user_data
                     return await call_next(request)
                 else:
                     print("User data not found, redirecting to login..")

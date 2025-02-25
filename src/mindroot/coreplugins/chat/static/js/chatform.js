@@ -1,6 +1,8 @@
 import { LitElement, html, css } from './lit-core.min.js'
 import {BaseEl} from './base.js'
 import {isMobile} from './ismobile.js'
+import { authenticatedFetch } from './authfetch.js';
+
 
 class ChatForm extends BaseEl {
   static properties = {
@@ -13,12 +15,18 @@ class ChatForm extends BaseEl {
     css`
       .message-input {
         min-height: 3em;
+        border-radius: 0;
+        border: none;
         max-height: 40em;
         resize: none;
         overflow-y: hidden;
         box-sizing: border-box;
         flex: 1;
         width: auto;
+      }
+      button {
+        border-radius: 0;
+        border: none;
       }
       .stop-button {
         color: white;
@@ -225,7 +233,7 @@ class ChatForm extends BaseEl {
 
   async _cancelChat() {
     if (this.taskid) {
-      const response = await fetch(`/chat/${window.log_id}/${this.taskid}/cancel`, {
+      const response = await authenticatedFetch(`/chat/${window.log_id}/${this.taskid}/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -281,6 +289,8 @@ class ChatForm extends BaseEl {
 
   _render() {
     return html`
+      <div id="chat-insert-top"></div>
+
       <div class="chat-entry flex py-2 ${this.isLoading ? 'loading' : ''}">
         <div class="message-container">
           <div class="image-preview-container"></div>
@@ -293,7 +303,7 @@ class ChatForm extends BaseEl {
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/>
               </svg>
             </label>
-            <div id="chat-insert-left"></div>
+          </div>
             <textarea id="inp_message" class="message-input"
               rows="4" 
               @keydown=${(e) => {
@@ -305,7 +315,7 @@ class ChatForm extends BaseEl {
               @paste=${this._handlePaste}
               required
             ></textarea>
-          </div>
+
         </div>
         <div id="chat-right-insert" style="display:none"></div>
         <button type="button" @click=${this._send} class="send_msg">

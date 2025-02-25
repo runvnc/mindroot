@@ -39,12 +39,17 @@
 <body>
   {% block body_init %}
   <script>
+    // print a big colorful header annoucing data init section
+    console.log("%cData Init Section", "color: white; background-color: green; font-size: 24px; padding: 10px;");
     window.theme = 'default';
     console.log("Init.");
     console.log("Log ID: {{ log_id }}");
     window.log_id = "{{ log_id }}";
     window.agent_name = "{{ agent_name }}";
     window.persona = "{{ persona }}";
+    window.access_token = "{{ access_token }}";
+    console.log("agent_name: " + window.agent_name);
+    console.log("access_token: " + window.access_token);
   </script>
   {% endblock %}
  

@@ -9,11 +9,13 @@ from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
-from lib.chatcontext import get_context
+from lib.chatcontext import get_context, ChatContext
 from typing import List
 from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
 from lib.utils.debug import debug_box
+from lib.session_files import load_session_data, save_session_data
+
 router = APIRouter()
 
 # Global dictionary to store tasks
@@ -101,6 +103,16 @@ async def get_chat_html(request: Request, agent_name: str):
     print("Init chat with user", user)
     print(f"Init chat with {agent_name}")
     await init_chat_session(user, agent_name, log_id)
+
+    if hasattr(request.state, "access_token"):
+        debug_box("Access token found in request state, saving to session file")
+        access_token = request.state.access_token
+        await save_session_data(log_id, "access_token", access_token)
+        print("..")
+        debug_box("Access token saved to session file")
+    else:
+        debug_box("No access token found in request state")
+        
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
 @router.get("/history/{agent_name}/{log_id}")
@@ -115,9 +127,18 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
     user = request.state.user
     agent = await service_manager.get_agent_data(agent_name)  
     persona = agent['persona']['name']
-    print("persona is:", persona) 
-    html = await render('chat', {"log_id": log_id, "agent_name": agent_name, "user": user,
-                                 "persona": persona })
+    print("persona is:", persona)
+    auth_token = None
+    try:
+        auth_token = await load_session_data(log_id, "access_token")
+    except:
+        pass
+    chat_data = {"log_id": log_id, "agent_name": agent_name, "user": user, "persona": persona }
+
+    if auth_token is not None:
+        chat_data["access_token"] = auth_token
+
+    html = await render('chat', chat_data)
     return HTMLResponse(html)
 
 # use starlette staticfiles to mount ./imgs

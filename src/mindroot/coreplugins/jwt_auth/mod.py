@@ -1,7 +1,7 @@
 from lib.providers.hooks import hook
 from lib.route_decorators import public_route, public_routes
 from starlette.routing import Mount
-
+import json
 print("---  Hello from JWT mod ---")
 
 @hook()
@@ -22,4 +22,5 @@ async def startup(app, context):
             public_routes.add(route.path)
         else:
             print(f"Skipping private route: {route}")
-    
+
+

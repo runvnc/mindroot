@@ -4,15 +4,20 @@ import os
 import json
 from .chatlog import ChatLog
 from typing import TypeVar, Type, Protocol, runtime_checkable
+from .utils.debug import debug_box
 
 contexts = {}
 
 async def get_context(log_id, user):
     if log_id in contexts:
+        debug_box("Returning existing context")
         return contexts[log_id]
     else:
+        debug_box(f"Creating new context.. user is: {user}")
         context = ChatContext(command_manager_=command_manager, service_manager_=service_manager, user=user)
+        debug_box(f"Loading context data for log_id: {log_id} and user: {user}")
         await context.load_context(log_id)
+        debug_box("Context loaded")
         contexts[log_id] = context
         return context
 
@@ -30,7 +35,7 @@ CommandSetT = TypeVar('CommandSetT', bound=BaseCommandSet)
 
 class ChatContext:
 
-    def __init__(self, command_manager_=None, service_manager_=None, user=None):
+    def __init__(self, command_manager_=None, service_manager_=None, user=None, log_id=None):
         # require a user
         if not user:
             raise ValueError("User is required to create a chat context")
@@ -63,6 +68,8 @@ class ChatContext:
         self.agent_name = None
         self.name = None
         self.log_id = None
+        if log_id is not None:
+            self.log_id = log_id
         self.data['current_dir'] = f'data/users/{user}'
         if os.environ.get("AH_UNCENSORED"):
             self.uncensored = True
@@ -90,6 +97,7 @@ class ChatContext:
         # make sure directory exists
         os.makedirs(os.path.dirname(context_file), exist_ok=True)
         self.data['log_id'] = self.log_id
+
         context_data = {
             'data': self.data,
             'chat_log': self.chat_log._get_log_data(),

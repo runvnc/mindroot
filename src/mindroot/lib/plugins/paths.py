@@ -24,7 +24,7 @@ def _find_core_plugin_path(plugin_name):
     # Try development path first
     dev_path = os.path.join(_get_project_root(), 'coreplugins', plugin_name)
     if os.path.exists(dev_path):
-        print(f"Found core plugin {plugin_name} in development path: {dev_path}")
+        #print(f"Found core plugin {plugin_name} in development path: {dev_path}")
         return dev_path
         
     # Try to find installed package
@@ -58,7 +58,7 @@ def get_plugin_path(plugin_name):
     Returns:
         str: Absolute path to the plugin directory or None if not found
     """
-    print(f"Get plugin path: {plugin_name}")
+    #print(f"Get plugin path: {plugin_name}")
     manifest = load_plugin_manifest()
     for category in manifest['plugins']:
         if plugin_name in manifest['plugins'][category]:
