@@ -35,7 +35,7 @@ class ChatForm extends BaseEl {
         padding: 8px;
         margin-left: 5px;
         cursor: pointer;
-        height: 50px;
+        height: 80px;
       }
       .stop-button svg {
         width: 24px;
