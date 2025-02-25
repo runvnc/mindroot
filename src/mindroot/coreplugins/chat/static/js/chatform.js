@@ -27,6 +27,7 @@ class ChatForm extends BaseEl {
       button {
         border-radius: 0;
         border: none;
+        height: 50px;
       }
       .stop-button {
         color: white;
@@ -34,6 +35,7 @@ class ChatForm extends BaseEl {
         padding: 8px;
         margin-left: 5px;
         cursor: pointer;
+        height: 50px;
       }
       .stop-button svg {
         width: 24px;
@@ -117,6 +119,12 @@ class ChatForm extends BaseEl {
         max-width: 90%;
         max-height: 90%;
         object-fit: contain;
+      }
+      .message-input {
+        height: 50px !important;
+      }
+      .message-container {
+        height: 85px;
       }
     `
   ]
@@ -304,8 +312,7 @@ class ChatForm extends BaseEl {
               </svg>
             </label>
           </div>
-            <textarea id="inp_message" class="message-input"
-              rows="4" 
+            <textarea id="inp_message" class="message-input"              
               @keydown=${(e) => {
                 if (!isMobile() && e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()

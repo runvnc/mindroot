@@ -118,7 +118,7 @@ def process_result(result, formatted_results):
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
     if os.environ.get("MR_MAX_ITERATIONS") is not None:
-        max_iterations = os.environ.get("MR_MAX_ITERATIONS")
+        max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
         print("send_message_to_agent: ", session_id, message, max_iterations)
     if not user:
         # check context
