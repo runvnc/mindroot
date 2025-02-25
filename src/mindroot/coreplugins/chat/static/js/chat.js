@@ -297,7 +297,11 @@ class Chat extends BaseEl {
       const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
       const lastEl = lastMessageEls[lastMessageEls.length-1];
       //lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      lastEl.scrollIntoView({ behavior: 'instant', block: 'end' });
+      if (window.access_token && window.access_token.length > 20) {
+        console.log('this is an embed probably, not scrolling messages')
+      } else {
+        lastEl.scrollIntoView({ behavior: 'instant', block: 'end' });
+      }
 
     } else {
       console.log('Not scrolling to bottom')

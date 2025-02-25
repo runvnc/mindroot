@@ -27,7 +27,7 @@ class ChatForm extends BaseEl {
       button {
         border-radius: 0;
         border: none;
-        height: 50px;
+        height: 80px;
       }
       .stop-button {
         color: white;
@@ -121,7 +121,7 @@ class ChatForm extends BaseEl {
         object-fit: contain;
       }
       .message-input {
-        height: 50px !important;
+        height: 80px !important;
       }
       .message-container {
         height: 85px;
