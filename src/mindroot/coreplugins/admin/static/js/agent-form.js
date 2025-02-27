@@ -162,6 +162,7 @@ class AgentForm extends BaseEl {
 
   constructor() {
     super();
+    this.attachShadow({mode: 'open'});
     this.personas = [];
     this.commands = {};
     this.loading = false;
@@ -400,9 +401,11 @@ class AgentForm extends BaseEl {
           ${this.renderCommands()}
         </div>
 
+        <div class="agent-insert-end"></div>
         <button class="btn" type="submit" ?disabled=${this.loading}>
           ${this.loading ? 'Saving...' : 'Save'}
         </button>
+        
       </form>
     `;
   }

@@ -16,18 +16,26 @@ class ChatForm extends BaseEl {
       .message-input {
         min-height: 3em;
         border-radius: 0;
-        border: none;
+        border: 1px solid #444;
         max-height: 40em;
         resize: none;
         overflow-y: hidden;
         box-sizing: border-box;
-        flex: 1;
+        flex: 9;
         width: auto;
+        height: 80px !important;
+        flex-shrink: 1;
       }
+      .message-container {
+        height: 85px;
+        display: flex;
+      }
+
       button {
         border-radius: 0;
         border: none;
         height: 80px;
+        flex: 0 0 50px;
       }
       .stop-button {
         color: white;
@@ -84,7 +92,8 @@ class ChatForm extends BaseEl {
         display: flex;
         align-items: center;
         gap: 2px;
-        flex: 1;
+        flex: 0 0 70px;
+        width: 70px;
       }
       .upload-button {
         background: none;
@@ -119,12 +128,6 @@ class ChatForm extends BaseEl {
         max-width: 90%;
         max-height: 90%;
         object-fit: contain;
-      }
-      .message-input {
-        height: 80px !important;
-      }
-      .message-container {
-        height: 85px;
       }
     `
   ]
@@ -312,7 +315,7 @@ class ChatForm extends BaseEl {
               </svg>
             </label>
           </div>
-            <textarea id="inp_message" class="message-input"              
+            <textarea id="inp_message" class="message-input"
               @keydown=${(e) => {
                 if (!isMobile() && e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()

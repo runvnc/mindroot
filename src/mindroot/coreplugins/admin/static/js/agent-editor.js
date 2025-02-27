@@ -7,13 +7,13 @@ import './github-import.js';
 
 class AgentEditor extends BaseEl {
   static properties = {
-    agent: { type: Object },
-    name: { type: String },
-    agents: { type: Array },
-    newAgent: { type: Boolean },
-    loading: { type: Boolean },
-    errorMessage: { type: String },
-    importStatus: { type: String }
+    agent: { type: Object, reflect: true },
+    name: { type: String, reflect: true },
+    agents: { type: Array, reflect: true },
+    newAgent: { type: Boolean, reflect: true},
+    loading: { type: Boolean, reflect: true },
+    errorMessage: { type: String, reflect: true },
+    importStatus: { type: String, reflect: true }
   };
 
   static styles = css`
@@ -53,6 +53,7 @@ class AgentEditor extends BaseEl {
     super();
     this.agent = {};
     this.agents = [];
+    this.attachShadow({ mode: 'open' });
     this.newAgent = false;
     this.loading = false;
     this.errorMessage = '';
@@ -134,7 +135,7 @@ class AgentEditor extends BaseEl {
           @new-agent=${this.handleNewAgent}>
         </agent-list>
 
-        ${(this.newAgent || this.agent.name) ? html`
+        ${(true || this.newAgent || this.agent.name) ? html`
           <agent-form
             .agent=${this.agent}
             .newAgent=${this.newAgent}
@@ -152,8 +153,6 @@ class AgentEditor extends BaseEl {
           @agent-installed=${this.handleAgentInstalled}
           @error=${this.handleError}>
         </github-import>
-
-
 
       </div>
     `;
