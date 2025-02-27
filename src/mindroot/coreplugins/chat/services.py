@@ -186,7 +186,6 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             continue_processing = False
             try:
                 if os.environ.get("DEFAULT_LLM_MODEL") is not None:
-                    print(2)
                     context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
     
                 results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
