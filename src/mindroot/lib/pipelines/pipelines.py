@@ -26,6 +26,8 @@ class PipelineManager:
         if name not in self.pipes:
             print(termcolor.colored(f"Pipeline '{name}' not found", 'red'))
             return data
+        print(termcolor.colored(f"Pipeline '{name}' found", 'yellow'))
+        print(self.pipes[name])
         for pipe_info in self.pipes[name]:
             implementation = pipe_info['implementation']
             print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))

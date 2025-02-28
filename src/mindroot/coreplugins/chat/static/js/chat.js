@@ -29,7 +29,8 @@ class Chat extends BaseEl {
     messages: [],
     agent_name: { type: String },
     task_id: { type: String },
-    lastSender: { type: String }
+    lastSender: { type: String },
+    hideChatLog: { type: Boolean, attribute: 'hide-chat-log' }
   }
 
   static styles = [
@@ -44,6 +45,7 @@ class Chat extends BaseEl {
     this.messages = [];
     this.userScrolling = false;
     this.lastSender = null;
+    this.hideChatLog = false;
     window.userScrolling = false;
     console.log('Chat component created');
     this.history = new ChatHistory(this);
@@ -74,6 +76,10 @@ class Chat extends BaseEl {
   firstUpdated() {
     console.log('First updated');
     console.log('sessionid: ', this.sessionid);
+    if (this.sessionid.includes('log_id')) {
+      console.log("Not on chat page, chat component not connecting to events.")
+      return
+    }
     if (window.access_token) {
       this.sse = new SSE(`/chat/${this.sessionid}/events`, {
       headers: {
@@ -93,17 +99,18 @@ class Chat extends BaseEl {
     this.sse.addEventListener('finished_chat', this._finished.bind(this));
 
     // when the user scrolls in the chat log, stop auto-scrolling to the bottom
-    this.shadowRoot.querySelector('.chat-log').addEventListener('scroll', () => {
-      let chatLog = this.shadowRoot.querySelector('.chat-log');
-
-      if (chatLog.scrollTop == chatLog.scrollHeight - chatLog.clientHeight) {
-        this.userScrolling = false;
-        window.userScrolling = false;
-      } else {
-        this.userScrolling = true;
-        window.userScrolling = true;
-      }
-    });
+    const chatLog = this.shadowRoot.querySelector('.chat-log');
+    if (chatLog) {
+      chatLog.addEventListener('scroll', () => {
+        if (chatLog.scrollTop == chatLog.scrollHeight - chatLog.clientHeight) {
+          this.userScrolling = false;
+          window.userScrolling = false;
+        } else {
+          this.userScrolling = true;
+          window.userScrolling = true;
+        }
+      });
+    }
 
     // Load history after a short delay to ensure components are ready
     setTimeout(() => {
@@ -290,6 +297,8 @@ class Chat extends BaseEl {
 
   _scrollToBottom() {
     const chatLog = this.shadowRoot.querySelector('.chat-log');
+    if (!chatLog) return;
+    
     const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
     console.log({difference, userScrolling: this.userScrolling, windowUserScrolling: window.userScrolling})
     const isAtBottom = difference > -250
@@ -310,7 +319,7 @@ class Chat extends BaseEl {
 
   _render() {
     return html`
-      <div class="chat-log">
+      <div class="chat-log" style="${this.hideChatLog ? 'display: none;' : ''}">
         ${this.messages.map(({ content, sender, persona, spinning }) => {
           const showAvatar = this.shouldShowAvatar(sender);
           return html`
