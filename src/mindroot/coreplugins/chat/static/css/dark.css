@@ -70,6 +70,7 @@ input::placeholder, textarea::placeholder {
 
 chat-ai {
   height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   flex: 1;
