@@ -8,7 +8,8 @@ class ChatForm extends BaseEl {
   static properties = {
     sender: { type: String },
     message: { type: String },
-    taskid: { type: String }
+    taskid: { type: String },
+    autoSizeInput: { type: Boolean, attribute: 'auto-size-input', reflect: true }
   }
   
   static styles = [
@@ -23,7 +24,7 @@ class ChatForm extends BaseEl {
         box-sizing: border-box;
         flex: 9;
         width: auto;
-        height: 80px !important;
+        height: 80px;
         flex-shrink: 1;
       }
       .message-container {
@@ -136,6 +137,7 @@ class ChatForm extends BaseEl {
     super()
     this.sender = 'user'
     this.message = ''
+    this.autoSizeInput = true
     this.taskid = null
     this.selectedImages = []
     this.isLoading = false
@@ -163,14 +165,16 @@ class ChatForm extends BaseEl {
   }
 
   _resizeTextarea() {
-    const textarea = this.messageEl;
-    // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    // Set the height to the scrollHeight
-    const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640); // 3em to 40em
-    textarea.style.height = `${newHeight}px`;
-    this.requestUpdate();
-    console.log('resize')
+    if (this.autoSizeInput) {
+      const textarea = this.messageEl;
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set the height to the scrollHeight
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640); // 3em to 40em
+      textarea.style.height = `${newHeight}px`;
+      this.requestUpdate();
+      console.log('resize')
+    }
   }
 
 

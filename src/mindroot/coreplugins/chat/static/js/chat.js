@@ -30,7 +30,8 @@ class Chat extends BaseEl {
     agent_name: { type: String },
     task_id: { type: String },
     lastSender: { type: String },
-    hideChatLog: { type: Boolean, attribute: 'hide-chat-log' }
+    autoSizeInput: { type: Boolean, attribute: 'auto-size-input', reflect: true },
+    hideChatLog: { type: Boolean, attribute: 'hide-chat-log', reflect: true }
   }
 
   static styles = [
@@ -42,6 +43,7 @@ class Chat extends BaseEl {
     super();
     console.log({ args });
     this.attachShadow({mode: 'open'});
+    this.autoSizeInput = true;
     this.messages = [];
     this.userScrolling = false;
     this.lastSender = null;
@@ -329,7 +331,7 @@ class Chat extends BaseEl {
           `;
         })}
       </div>
-      <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}"></chat-form>
+      <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}" auto-size-input="${this.autoSizeInput}" ></chat-form>
     `;
   }
 }
