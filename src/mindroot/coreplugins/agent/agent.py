@@ -53,7 +53,7 @@ END_RAW
 
 - some characters escaped that did not need to be/invalid
 
-Please adhere to the system JSON command list reponse format carefully.
+Please adhere to the system JSON command list response format carefully.
 """
 
 @service()
