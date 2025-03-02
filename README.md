@@ -24,7 +24,7 @@ Mindroot
 ## Gallery
 
 ### Admin Interface
-![Admin Interface](admin.png)
+![Admin Interface](dash1.png)
 
 ### Plugin Management
 ![Plugin Management](plugins.png)

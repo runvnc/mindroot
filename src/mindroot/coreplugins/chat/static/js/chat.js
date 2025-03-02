@@ -94,11 +94,14 @@ class Chat extends BaseEl {
     }
   
     const thisPartial = this._partialCmd.bind(this)
+    const thisRunning = this._runningCmd.bind(this)
+    const thisResult = this._cmdResult.bind(this)
+    const thisFinished = this._finished.bind(this)
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', thisPartial);
-    this.sse.addEventListener('running_command', this._runningCmd.bind(this));
-    this.sse.addEventListener('command_result', this._cmdResult.bind(this)); 
-    this.sse.addEventListener('finished_chat', this._finished.bind(this));
+    this.sse.addEventListener('partial_command', e => thisPartial(e).catch(console.error));
+    this.sse.addEventListener('running_command', e => thisRunning(e).catch(console.error));
+    this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
+    this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));
 
     // when the user scrolls in the chat log, stop auto-scrolling to the bottom
     const chatLog = this.shadowRoot.querySelector('.chat-log');
@@ -178,7 +181,7 @@ class Chat extends BaseEl {
     this._scrollToBottom()
   }
 
-  _partialCmd(event) {
+  async _partialCmd(event) {
     console.log('Event received');
     console.log(event);
     let content = null
@@ -191,15 +194,27 @@ class Chat extends BaseEl {
     }
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
-      if (data.params.text) {
+      // Check if there's a registered handler for this command
+      const handler = commandHandlers[data.command];
+      if (handler) {
+        data.event = 'partial';
+        console.log('Using registered handler for', data.command);
+        content = await handler(data);
+        this.msgSoFar = null
+      } else if (data.params.text) {
         this.msgSoFar = data.params.text
       } else if (data.params.markdown) {
         this.msgSoFar = data.params.markdown
       } else {
         this.msgSoFar = data.params
       }
+
       try {
-        this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar);
+        if (content) {
+          this.messages[this.messages.length - 1].content = content
+        } else if (this.msgSoFar) {
+          this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar);
+        }
       } catch (e) {
         console.error("Could not parse markdown:", e)
         console.log('msgSoFar:')
@@ -243,21 +258,31 @@ class Chat extends BaseEl {
     window.initializeCodeCopyButtons();
   }
 
-  _runningCmd(event) {
+  async _runningCmd(event) {
     this.startNewMsg = true
     console.log('Running command');
     this.messages[this.messages.length - 1].spinning = 'yes'
     console.log('Spinner set to true:', this.messages[this.messages.length - 1]);
+    
+    // Check if the command is 'say' or 'json_encoded_md' and has a registered handler
+    const data = JSON.parse(event.data);
+    if ((data.command === 'say' || data.command === 'json_encoded_md') && commandHandlers[data.command]) {
+      // Don't show the spinner for these commands if they have handlers
+      this.messages[this.messages.length - 1].spinning = 'no';
+    }
+    
     console.log(event);
     //this.requestUpdate();
 
     console.log("command result (actually running command)", event)
-    const data = JSON.parse(event.data);
     data.event = 'running'
     const handler = commandHandlers[data.command];
     if (handler) {
       console.log('handler:', handler)
-      handler(data);
+      const result = await handler(data);
+      if (result) {
+        this.messages[this.messages.length - 1].content = result
+      }
     } else {
       console.warn('No handler for command:', data.command)
     }
@@ -265,13 +290,13 @@ class Chat extends BaseEl {
     this.requestUpdate();
   }
 
-  _cmdResult(event) {
+  async _cmdResult(event) {
     console.log("command result", event)
     const data = JSON.parse(event.data);
     const handler = commandHandlers[data.command];
     data.event = 'result'
     if (handler) {
-      handler(data);
+      await handler(data);
     }
     for (let msg of this.messages) {
       msg.spinning = 'no'

@@ -166,16 +166,20 @@ class AgentForm extends BaseEl {
     this.personas = [];
     this.commands = {};
     this.loading = false;
+    this.plugins = [];
     this.agent = {
       commands: [],
       name: '',
-      persona: ''
+      persona: '',
+      required_plugins: []
     };
     this.fetchPersonas();
     this.fetchCommands();
+    this.fetchPlugins();
   }
 
   updated(changedProperties) {
+    console.log('Updated with changes:', changedProperties);
     super.updated(changedProperties);
     if (changedProperties.has('agent')) {
       console.log('Agent updated:', this.agent);
@@ -187,6 +191,7 @@ class AgentForm extends BaseEl {
     }
   }
 
+  // Fetch available personas
   async fetchPersonas() {
     try {
       const response = await fetch('/personas/local');
@@ -197,6 +202,21 @@ class AgentForm extends BaseEl {
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
         detail: `Error loading personas: ${error.message}`
+      }));
+    }
+  }
+
+  // Fetch available plugins
+  async fetchPlugins() {
+    try {
+      const response = await fetch('/plugin-manager/get-all-plugins');
+      if (!response.ok) throw new Error('Failed to fetch plugins');
+      const result = await response.json();
+      this.plugins = result.data.filter(plugin => plugin.enabled);
+      console.log('Fetched plugins:', this.plugins);
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('error', {
+        detail: `Error loading plugins: ${error.message}`
       }));
     }
   }
@@ -248,6 +268,20 @@ class AgentForm extends BaseEl {
       return;
     }
     
+    // Handle required_plugins similar to commands
+    if (name === 'required_plugins') {
+      if (!Array.isArray(this.agent.required_plugins)) {
+        this.agent.required_plugins = [];
+      }
+      if (checked) {
+        this.agent.required_plugins.push(value);
+      } else {
+        this.agent.required_plugins = this.agent.required_plugins.filter(plugin => plugin !== value);
+      }
+      this.agent = { ...this.agent };
+      return;
+    }
+    
     // Handle all other inputs
     const inputValue = type === 'checkbox' ? checked : value;
     this.agent = { ...this.agent, [name]: inputValue };
@@ -289,6 +323,10 @@ class AgentForm extends BaseEl {
       const agentData = { ...this.agent };
       agentData.flags = [];
       if (this.agent.uncensored) {
+        // Make sure flags is an array
+        if (!Array.isArray(agentData.flags)) {
+          agentData.flags = [];
+        }
         agentData.flags.push('uncensored');
       }
       
@@ -318,6 +356,50 @@ class AgentForm extends BaseEl {
     } finally {
       this.loading = false;
     }
+  }
+
+  renderRequiredPlugins() {
+    // Ensure required_plugins is always an array
+    if (!this.agent.required_plugins) {
+      this.agent.required_plugins = [];
+    } else if (!Array.isArray(this.agent.required_plugins)) {
+      this.agent.required_plugins = [this.agent.required_plugins];
+    }
+    
+    if (!this.plugins || this.plugins.length === 0) {
+      // Fetch plugins if not already loaded
+      if (!this.pluginsFetched) {
+        this.pluginsFetched = true;
+        this.fetchPlugins();
+      }
+      return html`<div>Loading plugins...</div>`;
+    }
+    
+    return html`
+      <div class="commands-category">
+        <h4>Required Plugins</h4>
+        <div class="commands-grid">
+          ${this.plugins.map(plugin => html`
+            <div class="command-item">
+              <div class="command-info">
+                <div class="command-name">${plugin.name}</div>
+              </div>
+              <toggle-switch 
+                .checked=${this.agent.required_plugins?.includes(plugin.name) || false}
+                @toggle-change=${(e) => this.handleInputChange({ 
+                  target: { 
+                    name: 'required_plugins', 
+                    value: plugin.name, 
+                    type: 'checkbox',
+                    checked: e.detail.checked 
+                  } 
+                })}>
+              </toggle-switch>
+            </div>
+          `)}
+        </div>
+      </div>
+    `;
   }
 
   renderCommands() {
@@ -398,6 +480,11 @@ class AgentForm extends BaseEl {
 
         <div class="form-group commands-section">
           <label>Commands:</label>
+          ${this.renderRequiredPlugins()}
+        </div>
+
+        <div class="form-group commands-section">
+          <label>Available Commands:</label>
           ${this.renderCommands()}
         </div>
 

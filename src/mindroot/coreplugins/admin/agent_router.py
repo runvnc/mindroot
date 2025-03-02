@@ -88,7 +88,6 @@ def create_agent(scope: str, agent: str = Form(...)):
         agent_data = json.loads(agent)
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
-
        
         agent_name = agent_data.get('name')
         if not agent_name:
@@ -104,6 +103,12 @@ def create_agent(scope: str, agent: str = Form(...)):
             persona_name = handle_persona_import(agent_data['persona'], scope)
  
             agent_data['persona'] = persona_name
+            
+        # Ensure required_plugins is present and is a list
+        if 'required_plugins' not in agent_data:
+            agent_data['required_plugins'] = []
+        elif not isinstance(agent_data['required_plugins'], list):
+            agent_data['required_plugins'] = list(agent_data['required_plugins'])
             
         agent_path = BASE_DIR / scope / agent_name / 'agent.json'
         if agent_path.exists():
@@ -124,6 +129,13 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
         agent = json.loads(agent)
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
+            
+        # Ensure required_plugins is present and is a list
+        if 'required_plugins' not in agent:
+            agent['required_plugins'] = []
+        elif not isinstance(agent['required_plugins'], list):
+            agent['required_plugins'] = list(agent['required_plugins'])
+            
         agent_path = BASE_DIR / scope / name / 'agent.json'
         if not agent_path.exists():
             raise HTTPException(status_code=404, detail='Agent not found')

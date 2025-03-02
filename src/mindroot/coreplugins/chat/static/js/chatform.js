@@ -345,7 +345,7 @@ class ChatForm extends BaseEl {
         ${this.taskid ? html`
           <button type="button" @click=${this._cancelChat} class="stop-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-              <rect width="10" height="10" x="3" y="3"/>
+             <!-- <rect width="10" height="10" x="3" y="3"/> -->
             </svg>
           </button>
         ` : ''}

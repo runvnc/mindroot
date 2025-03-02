@@ -55,6 +55,19 @@ async def say(text="", context=None):
 
 
     (The system now returns the command output)
+
+
+    ** Important Note **
+
+    The say() command is a special type of command that stops after it is executed.
+    That means, if you want to continue to do work, such as running another commmand
+    after informing the user about your plans, it is CRITICAL that you place those
+    commands in additional items in the same array.
+
+    Otherwise, the system will stop and wait for the user to respond after each say() command.
+    The say command is different from other commands in this way which would normally
+    return a system acnknowledgement or result, allowing you to continue.
+
     """
     print("say command called, text = ", text)
     await context.agent_output("new_message", {"content": text,

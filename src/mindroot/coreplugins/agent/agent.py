@@ -72,6 +72,10 @@ async def get_agent_data(agent_name, context=None):
     with open(agent_file, 'r') as f:
         agent_data = json.load(f)
 
+    # Ensure required_plugins is present
+    if 'required_plugins' not in agent_data:
+        agent_data['required_plugins'] = []
+
     try:
         agent_data["persona"] = await service_manager.get_persona_data(agent_data["persona"])
     except Exception as e:
@@ -81,6 +85,7 @@ async def get_agent_data(agent_name, context=None):
     agent_data["flags"] = agent_data["flags"]
     agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
     return agent_data
+
 
 
 def find_new_substring(s1, s2):

@@ -26,6 +26,12 @@ You are {{ persona.name }}.
 
 {{ agent.commands }}
 
+{% if agent.required_plugins and agent.required_plugins|length > 0 %}
+## Required Plugins
+
+The following plugins are required for this agent: {{ agent.required_plugins|join(', ') }}
+{% endif %}
+
 ## Speech Patterns
 
 {{ persona.speech_patterns }}
@@ -161,4 +167,3 @@ at time (but keep in mind that rhetorical commands like say() will just stop aft
 
 Reminder again: do not escape text inside of START_RAW and END_RAW blocks!! 
 For example, in that section (only), you MUST use " instead of \"
-

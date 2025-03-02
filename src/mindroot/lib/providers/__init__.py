@@ -45,7 +45,7 @@ class ProviderManager:
         found_context = False
         context = None
         for arg in args:
-            if arg.__class__.__name__ == 'ChatContext':
+            if arg.__class__.__name__ == 'ChatContext' or hasattr(arg, 'agent'):
                 found_context = True
                 context = arg
                 break
@@ -58,6 +58,19 @@ class ProviderManager:
         #print("context is ", context)
         need_model = await uses_models(name)
 
+        # Check if any required plugins implement this command
+        required_plugins = []
+        if context and hasattr(context, 'agent') and context.agent:
+            required_plugins = context.agent.get('required_plugins', [])
+        
+        # If we have required plugins, check if any implement this command
+        if required_plugins and name in self.functions:
+            for plugin in required_plugins:
+                for func_info in self.functions[name]:
+                    if func_info['provider'] == plugin:
+                        function_info = func_info
+                        return await function_info['implementation'](*args, **kwargs)
+        
         if context.__class__.__name__ == 'ChatContext':
             preferred_models = await find_preferred_models(name, context.flags)
             context.data['model'] = None

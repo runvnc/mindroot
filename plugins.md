@@ -145,6 +145,8 @@ The chat system is built on web components using the Lit library. The source cod
 
 ## Chat frontend
 
+To view these files use a fetch web page or curl command.
+
 - [chat.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/chat.js) - Main chat component and SSE handling
 - [action.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/action.js) - Command result display
 - [chatmessage.js](https://github.com/runvnc/mindroot/blob/main/src/mindroot/coreplugins/chat/static/js/chatmessage.js) - Message component
@@ -608,7 +610,7 @@ Plugins can integrate with the frontend in several ways:
 - Images and media
 - Third-party dependencies
 
-All static assets should be placed in the plugin's static/ directory and will be automatically mounted at /static/plugins/plugin_name/.
+All static assets should be placed in the plugin's static/ directory and will be automatically mounted at /[plugin_name]/static.
 
 ### Development Tips
 
