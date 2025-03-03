@@ -1,0 +1,20 @@
+{
+  "name": "Subscriptions",
+  "version": "1.0.0",
+  "description": "Core plugin for subscription management and credit allocation",
+  "services": [
+    "create_subscription_plan",
+    "get_subscription_plans",
+    "get_subscription_plan",
+    "process_subscription_event",
+    "get_user_subscriptions",
+    "cancel_subscription"
+  ],
+  "commands": [
+    "list_subscription_plans",
+    "get_my_subscriptions"
+  ],
+  "dependencies": [
+    "credits"
+  ]
+}

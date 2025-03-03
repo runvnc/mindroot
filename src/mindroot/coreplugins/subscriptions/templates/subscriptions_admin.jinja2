@@ -1,0 +1,326 @@
+{% extends "admin_base.jinja2" %}
+
+{% block title %}Subscription Management{% endblock %}
+
+{% block head_styles %}
+<style>
+  .subscription-plans {
+    margin-bottom: 2rem;
+  }
+  
+  .plan-card {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .plan-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  .plan-price {
+    font-size: 1.1rem;
+  }
+  
+  .plan-description {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .plan-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .plan-detail {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .plan-detail-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.25rem;
+  }
+  
+  .plan-detail-value {
+    font-weight: 500;
+  }
+  
+  .plan-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .new-plan-form {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .btn-primary {
+    background: #4a5af8;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .btn-danger {
+    background: #f85a5a;
+    color: white;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <h1>Subscription Plans</h1>
+  
+  <div class="subscription-plans">
+    {% if plans %}
+      {% for plan in plans %}
+        <div class="plan-card">
+          <div class="plan-header">
+            <div class="plan-title">{{ plan.name }}</div>
+            <div class="plan-price">{{ plan.price }} {{ plan.currency }}/{{ plan.interval }}</div>
+          </div>
+          
+          <div class="plan-description">{{ plan.description }}</div>
+          
+          <div class="plan-details">
+            <div class="plan-detail">
+              <div class="plan-detail-label">Credits Per Cycle</div>
+              <div class="plan-detail-value">{{ plan.credits_per_cycle }}</div>
+            </div>
+            
+            <div class="plan-detail">
+              <div class="plan-detail-label">Status</div>
+              <div class="plan-detail-value">{{ "Active" if plan.active else "Inactive" }}</div>
+            </div>
+            
+            <div class="plan-detail">
+              <div class="plan-detail-label">Plan ID</div>
+              <div class="plan-detail-value">{{ plan.plan_id }}</div>
+            </div>
+          </div>
+          
+          <div class="plan-actions">
+            <button class="btn btn-secondary btn-sm" onclick="editPlan('{{ plan.plan_id }}')">
+              Edit
+            </button>
+            
+            {% if plan.active %}
+              <button class="btn btn-danger btn-sm" onclick="deactivatePlan('{{ plan.plan_id }}')">
+                Deactivate
+              </button>
+            {% else %}
+              <button class="btn btn-primary btn-sm" onclick="activatePlan('{{ plan.plan_id }}')">
+                Activate
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No subscription plans found.</p>
+    {% endif %}
+  </div>
+  
+  <h2>Create New Plan</h2>
+  
+  <div class="new-plan-form">
+    <form id="planForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="name">Plan Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="price">Price</label>
+          <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="currency">Currency</label>
+          <select class="form-control" id="currency" name="currency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="interval">Billing Interval</label>
+          <select class="form-control" id="interval" name="interval">
+            <option value="month">Monthly</option>
+            <option value="year">Yearly</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="credits_per_cycle">Credits Per Cycle</label>
+          <input type="number" class="form-control" id="credits_per_cycle" name="credits_per_cycle" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+          Reset
+        </button>
+        
+        <button type="submit" class="btn btn-primary">
+          Create Plan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const planForm = document.getElementById('planForm');
+    
+    planForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(planForm);
+      const planData = {};
+      
+      for (const [key, value] of formData.entries()) {
+        // Convert numeric values
+        if (key === 'price' || key === 'credits_per_cycle') {
+          planData[key] = parseFloat(value);
+        } else {
+          planData[key] = value;
+        }
+      }
+      
+      try {
+        const response = await fetch('/admin/subscriptions/plans', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(planData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Plan created successfully!');
+          location.reload();
+        } else {
+          alert('Failed to create plan: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error creating plan: ' + error.message);
+      }
+    });
+  });
+  
+  function resetForm() {
+    document.getElementById('planForm').reset();
+  }
+  
+  async function editPlan(planId) {
+    // Implement plan editing functionality
+    alert('Edit plan: ' + planId + '\nThis functionality is not yet implemented.');
+  }
+  
+  async function deactivatePlan(planId) {
+    if (confirm('Are you sure you want to deactivate this plan?')) {
+      try {
+        const response = await fetch(`/admin/subscriptions/plans/${planId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Plan deactivated successfully!');
+          location.reload();
+        } else {
+          alert('Failed to deactivate plan: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error deactivating plan: ' + error.message);
+      }
+    }
+  }
+  
+  async function activatePlan(planId) {
+    // Implement plan activation functionality
+    alert('Activate plan: ' + planId + '\nThis functionality is not yet implemented.');
+  }
+</script>
+{% endblock %}

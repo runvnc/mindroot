@@ -1,0 +1,34 @@
+{% block head_styles %}
+<link rel="stylesheet" href="/subscriptions/static/css/subscriptions.css">
+{% endblock %}
+
+{% block head_scripts %}
+<script type="module" src="/subscriptions/static/js/subscriptions.js"></script>
+{% endblock %}
+
+{% block pre_content %}
+<div class="sidebar-section" id="subscription-section">
+  <details>
+    <summary>
+      <span class="material-icons">card_membership</span>
+      Subscriptions
+    </summary>
+    <div class="details-content">
+      <div id="user-subscriptions"></div>
+      <div id="subscription-plans"></div>
+      
+      <script>
+        // Initialize subscription UI when details are opened
+        document.querySelector('#subscription-section details').addEventListener('toggle', function(e) {
+          if (this.open) {
+            subscriptionManager.initialize().then(() => {
+              subscriptionManager.renderSubscriptionInfo('user-subscriptions');
+              subscriptionManager.renderPlans('subscription-plans');
+            });
+          }
+        });
+      </script>
+    </div>
+  </details>
+</div>
+{% endblock %}

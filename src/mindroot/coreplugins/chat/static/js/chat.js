@@ -186,7 +186,12 @@ class Chat extends BaseEl {
     console.log(event);
     let content = null
     const data = JSON.parse(event.data);
+    data.event = 'partial'
     console.log("data:", data)
+    const handler = commandHandlers[data.command];
+    if (handler) {
+      content = await handler(data);
+    } 
     if (this.messages[this.messages.length - 1].sender != 'ai' || this.startNewMsg) {
       console.log('adding message');
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
@@ -195,11 +200,8 @@ class Chat extends BaseEl {
 
     if (data.command == 'say' || data.command == 'json_encoded_md') {
       // Check if there's a registered handler for this command
-      const handler = commandHandlers[data.command];
       if (handler) {
-        data.event = 'partial';
-        console.log('Using registered handler for', data.command);
-        content = await handler(data);
+        console.log('Used registered handler for', data.command);
         this.msgSoFar = null
       } else if (data.params.text) {
         this.msgSoFar = data.params.text
@@ -224,7 +226,6 @@ class Chat extends BaseEl {
     } else {
       console.log('partial. data.params', data.params)
       console.log("command is", data.command)
-      const handler = commandHandlers[data.command];
       if (handler) {
         data.event = 'partial'
         console.log('handler:', handler)
