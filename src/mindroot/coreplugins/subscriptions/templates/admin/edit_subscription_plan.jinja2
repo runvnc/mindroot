@@ -1,0 +1,312 @@
+{% extends "admin_base.jinja2" %}
+
+{% block title %}Edit Subscription Plan{% endblock %}
+
+{% block head_styles %}
+<style>
+  .admin-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .form-section {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #4a5af8;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+  }
+  
+  .btn-primary {
+    background: #4a5af8;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .feature-item {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .feature-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-header label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .feature-header input[type="checkbox"] {
+    margin-right: 0.5rem;
+  }
+  
+  .feature-value {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+  }
+  
+  .feature-description {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <h1>Edit Subscription Plan</h1>
+  
+  <form id="editPlanForm">
+    <input type="hidden" name="plan_id" value="{{ plan.plan_id }}">
+    
+    <div class="form-section">
+      <h2>Basic Information</h2>
+      
+      <div class="form-group">
+        <label class="form-label" for="name">Plan Name</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ plan.name }}" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required>{{ plan.description }}</textarea>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="price">Price</label>
+          <input type="number" class="form-control" id="price" name="price" step="0.01" value="{{ plan.price }}" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="currency">Currency</label>
+          <select class="form-control" id="currency" name="currency">
+            {% for currency in currencies %}
+              <option value="{{ currency }}" {% if plan.currency == currency %}selected{% endif %}>{{ currency }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="interval">Billing Interval</label>
+          <select class="form-control" id="interval" name="interval">
+            {% for interval in intervals %}
+              <option value="{{ interval }}" {% if plan.interval == interval %}selected{% endif %}>
+                {{ interval|capitalize }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="credits_per_cycle">Credits Per Cycle</label>
+        <input type="number" class="form-control" id="credits_per_cycle" name="credits_per_cycle" 
+               value="{{ plan.credits_per_cycle }}" required>
+        <small>Number of credits allocated each billing cycle</small>
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <h2>Plan Features</h2>
+      <p>Configure the features included in this plan</p>
+      
+      <div id="features-container">
+        {% for feature in features %}
+          <div class="feature-item" data-feature-id="{{ feature.feature_id }}">
+            <div class="feature-header">
+              <label>
+                <input type="checkbox" name="feature_enabled_{{ feature.feature_id }}" 
+                       {% if feature.feature_id in plan.features %}checked{% endif %}>
+                {{ feature.name }}
+              </label>
+            </div>
+            
+            <div class="feature-description">{{ feature.description }}</div>
+            
+            <div class="feature-value" {% if feature.feature_id not in plan.features %}style="display:none"{% endif %}>
+              {% if feature.type == 'boolean' %}
+                <!-- Boolean feature has no value, just enabled/disabled -->
+              {% elif feature.type == 'number' %}
+                <label class="form-label">Value:</label>
+                <input type="number" class="form-control" name="feature_value_{{ feature.feature_id }}" 
+                       value="{{ plan.features[feature.feature_id] if feature.feature_id in plan.features else feature.default_value }}">
+              {% elif feature.type == 'text' %}
+                <label class="form-label">Value:</label>
+                <input type="text" class="form-control" name="feature_value_{{ feature.feature_id }}" 
+                       value="{{ plan.features[feature.feature_id] if feature.feature_id in plan.features else feature.default_value }}">
+              {% elif feature.type == 'select' %}
+                <label class="form-label">Value:</label>
+                <select class="form-control" name="feature_value_{{ feature.feature_id }}">
+                  {% for option in feature.options %}
+                    <option value="{{ option }}" 
+                            {% if feature.feature_id in plan.features and plan.features[feature.feature_id] == option %}selected{% endif %}>
+                      {{ option }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" onclick="location.href='/admin/subscriptions'">
+        Cancel
+      </button>
+      
+      <button type="submit" class="btn btn-primary">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle feature value inputs when checkbox is clicked
+    document.querySelectorAll('.feature-item input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const featureItem = this.closest('.feature-item');
+        const valueContainer = featureItem.querySelector('.feature-value');
+        
+        if (this.checked) {
+          valueContainer.style.display = '';
+        } else {
+          valueContainer.style.display = 'none';
+        }
+      });
+    });
+    
+    // Handle form submission
+    document.getElementById('editPlanForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const planData = {
+        plan_id: formData.get('plan_id'),
+        name: formData.get('name'),
+        description: formData.get('description'),
+        price: parseFloat(formData.get('price')),
+        currency: formData.get('currency'),
+        interval: formData.get('interval'),
+        credits_per_cycle: parseFloat(formData.get('credits_per_cycle')),
+        features: {}
+      };
+      
+      // Process features
+      document.querySelectorAll('.feature-item').forEach(item => {
+        const featureId = item.dataset.featureId;
+        const checkbox = item.querySelector(`input[name="feature_enabled_${featureId}"]`);
+        
+        if (checkbox.checked) {
+          const valueInput = item.querySelector(`[name="feature_value_${featureId}"]`);
+          
+          if (valueInput) {
+            // For number, text, select features
+            planData.features[featureId] = valueInput.type === 'number' ? 
+              parseFloat(valueInput.value) : valueInput.value;
+          } else {
+            // For boolean features
+            planData.features[featureId] = true;
+          }
+        }
+      });
+      
+      try {
+        const response = await fetch(`/admin/subscriptions/plans/${planData.plan_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(planData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Plan updated successfully!');
+          location.href = '/admin/subscriptions';
+        } else {
+          alert('Failed to update plan: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error updating plan: ' + error.message);
+      }
+    });
+  });
+</script>
+{% endblock %}

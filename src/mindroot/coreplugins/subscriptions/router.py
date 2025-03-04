@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Any
 from loguru import logger
 import traceback
 from decimal import Decimal
+import json
 
 from lib.providers.services import service_manager
 
@@ -13,6 +14,18 @@ from .mod import (
     create_subscription_plan,
     get_subscription_plans,
     get_subscription_plan,
+    update_subscription_plan,
+    deactivate_subscription_plan,
+    activate_subscription_plan,
+    get_available_features,
+    create_plan_feature,
+    update_plan_feature,
+    deactivate_plan_feature,
+    activate_plan_feature,
+    get_page_templates,
+    create_page_template,
+    update_page_template,
+    set_default_template,
     process_subscription_event,
     get_user_subscriptions,
     cancel_subscription
@@ -36,19 +49,47 @@ router_public = APIRouter(prefix="/subscriptions")
 async def subscriptions_admin(request: Request):
     """Admin interface for subscription management"""
     try:
-        plans = await get_subscription_plans(context=request)
+        plans = await get_subscription_plans(active_only=False, context=request)
         template_data = {
             "plans": plans
         }
         
-        html = await render('subscriptions_admin', template_data)
+        html = await render('admin/subscriptions_admin', template_data)
         return HTMLResponse(html)
     except Exception as e:
         trace = traceback.format_exc()
         logger.error(f"Error in subscriptions_admin: {e}\n\n{trace}")
         raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
 
-# Admin API routes
+@router_admin.get("/plans/edit/{plan_id}", response_class=HTMLResponse)
+async def edit_plan_admin(plan_id: str, request: Request):
+    """Admin interface for editing a subscription plan"""
+    try:
+        # Get plan details
+        plan = await get_subscription_plan(plan_id, context=request)
+        if not plan:
+            raise NOT_FOUND
+            
+        # Get available features
+        features = await get_available_features(context=request)
+        
+        template_data = {
+            "plan": plan,
+            "features": features,
+            "currencies": ["USD", "EUR", "GBP", "CAD", "AUD"],
+            "intervals": ["month", "year"]
+        }
+        
+        html = await render('admin/edit_subscription_plan', template_data)
+        return HTMLResponse(html)
+    except HTTPException:
+        raise
+    except Exception as e:
+        trace = traceback.format_exc()
+        logger.error(f"Error in edit_plan_admin: {e}\n\n{trace}")
+        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
+
+# Admin API routes - Plans
 
 @router_admin.post("/plans")
 async def api_create_plan(request: Request):
@@ -78,10 +119,8 @@ async def api_update_plan(plan_id: str, request: Request):
     """Update an existing subscription plan"""
     try:
         data = await request.json()
-        # This service needs to be implemented
-        # plan = await update_subscription_plan(plan_id, data, context=request)
-        # For now, we'll return a placeholder
-        return JSONResponse({"status": "success", "message": "Plan updated"})
+        plan = await update_subscription_plan(plan_id, data, context=request)
+        return JSONResponse({"status": "success", "plan": plan})
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -92,14 +131,158 @@ async def api_update_plan(plan_id: str, request: Request):
 async def api_deactivate_plan(plan_id: str, request: Request):
     """Deactivate a subscription plan"""
     try:
-        # This service needs to be implemented
-        # await deactivate_subscription_plan(plan_id, context=request)
-        # For now, we'll return a placeholder
-        return JSONResponse({"status": "success", "message": "Plan deactivated"})
+        result = await deactivate_subscription_plan(plan_id, context=request)
+        return JSONResponse(result)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error deactivating plan: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/plans/{plan_id}/activate")
+async def api_activate_plan(plan_id: str, request: Request):
+    """Activate a subscription plan"""
+    try:
+        result = await activate_subscription_plan(plan_id, context=request)
+        return JSONResponse(result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error activating plan: {e}")
+        raise SERVER_ERROR
+
+# Admin API routes - Features
+
+@router_admin.get("/features/list")
+async def api_get_features(request: Request, active_only: bool = False):
+    """Get all plan features"""
+    try:
+        features = await get_available_features(active_only, context=request)
+        return JSONResponse({"status": "success", "features": features})
+    except Exception as e:
+        logger.error(f"Error getting features: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/features")
+async def api_create_feature(request: Request):
+    """Create a new plan feature"""
+    try:
+        data = await request.json()
+        feature = await create_plan_feature(data, context=request)
+        return JSONResponse({"status": "success", "feature": feature})
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating feature: {e}")
+        raise SERVER_ERROR
+
+@router_admin.get("/features/edit/{feature_id}", response_class=HTMLResponse)
+async def edit_feature_admin(feature_id: str, request: Request):
+    """Admin interface for editing a plan feature"""
+    try:
+        # This would be implemented with a template similar to edit_subscription_plan
+        return HTMLResponse("Feature editing UI not yet implemented")
+    except Exception as e:
+        trace = traceback.format_exc()
+        logger.error(f"Error in edit_feature_admin: {e}\n\n{trace}")
+        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
+
+@router_admin.put("/features/{feature_id}")
+async def api_update_feature(feature_id: str, request: Request):
+    """Update an existing plan feature"""
+    try:
+        data = await request.json()
+        feature = await update_plan_feature(feature_id, data, context=request)
+        return JSONResponse({"status": "success", "feature": feature})
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error updating feature: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/features/{feature_id}/deactivate")
+async def api_deactivate_feature(feature_id: str, request: Request):
+    """Deactivate a plan feature"""
+    try:
+        result = await deactivate_plan_feature(feature_id, context=request)
+        return JSONResponse(result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error deactivating feature: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/features/{feature_id}/activate")
+async def api_activate_feature(feature_id: str, request: Request):
+    """Activate a plan feature"""
+    try:
+        result = await activate_plan_feature(feature_id, context=request)
+        return JSONResponse(result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error activating feature: {e}")
+        raise SERVER_ERROR
+
+# Admin API routes - Templates
+
+@router_admin.get("/templates/list")
+async def api_get_templates(request: Request):
+    """Get all page templates"""
+    try:
+        templates = await get_page_templates(context=request)
+        return JSONResponse({"status": "success", "templates": templates})
+    except Exception as e:
+        logger.error(f"Error getting templates: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/templates")
+async def api_create_template(request: Request):
+    """Create a new page template"""
+    try:
+        data = await request.json()
+        template = await create_page_template(data, context=request)
+        return JSONResponse({"status": "success", "template": template})
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating template: {e}")
+        raise SERVER_ERROR
+
+@router_admin.get("/templates/edit/{template_id}", response_class=HTMLResponse)
+async def edit_template_admin(template_id: str, request: Request):
+    """Admin interface for editing a page template"""
+    try:
+        # This would be implemented with a template similar to edit_subscription_plan
+        return HTMLResponse("Template editing UI not yet implemented")
+    except Exception as e:
+        trace = traceback.format_exc()
+        logger.error(f"Error in edit_template_admin: {e}\n\n{trace}")
+        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
+
+@router_admin.put("/templates/{template_id}")
+async def api_update_template(template_id: str, request: Request):
+    """Update an existing page template"""
+    try:
+        data = await request.json()
+        template = await update_page_template(template_id, data, context=request)
+        return JSONResponse({"status": "success", "template": template})
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error updating template: {e}")
+        raise SERVER_ERROR
+
+@router_admin.post("/templates/{template_id}/set-default")
+async def api_set_default_template(template_id: str, request: Request):
+    """Set a template as the default"""
+    try:
+        result = await set_default_template(template_id, context=request)
+        return JSONResponse(result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error setting default template: {e}")
         raise SERVER_ERROR
 
 # Public API routes
@@ -197,6 +380,29 @@ async def api_cancel_subscription(subscription_id: str, request: Request, at_per
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error cancelling subscription: {e}")
+        raise SERVER_ERROR
+
+@router_public.get("/page", response_class=HTMLResponse)
+async def subscription_page(request: Request):
+    """Public subscription page"""
+    try:
+        # Get active plans
+        plans = await get_subscription_plans(active_only=True, context=request)
+        
+        # Get user's subscriptions if logged in
+        user_subscriptions = []
+        if request.state.user:
+            user_subscriptions = await get_user_subscriptions(request.state.user.username, context=request)
+        
+        template_data = {
+            "plans": plans,
+            "user_subscriptions": user_subscriptions
+        }
+        
+        html = await render('subscription_page', template_data)
+        return HTMLResponse(html)
+    except Exception as e:
+        logger.error(f"Error rendering subscription page: {e}")
         raise SERVER_ERROR
 
 # Combine all routers

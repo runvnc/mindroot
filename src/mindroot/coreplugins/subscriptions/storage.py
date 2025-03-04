@@ -1,17 +1,23 @@
 from pathlib import Path
 import json
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Dict, Optional, Iterator
 import os
-from .models import SubscriptionPlan, UserSubscription
+from .models import SubscriptionPlan, UserSubscription, PlanFeature, PageTemplate
 
 class SubscriptionStorage:
     def __init__(self, base_path: str):
         self.base_path = Path(base_path)
         self.plans_dir = self.base_path / 'plans'
         self.subscriptions_dir = self.base_path / 'subscriptions'
+        self.features_dir = self.base_path / 'features'
+        self.templates_dir = self.base_path / 'templates'
+        
+        # Create directories if they don't exist
         self.plans_dir.mkdir(parents=True, exist_ok=True)
         self.subscriptions_dir.mkdir(parents=True, exist_ok=True)
+        self.features_dir.mkdir(parents=True, exist_ok=True)
+        self.templates_dir.mkdir(parents=True, exist_ok=True)
     
     # Plan management methods
     
@@ -137,3 +143,116 @@ class SubscriptionStorage:
                     continue
         
         return result
+    
+    # Feature management methods
+    
+    async def store_feature(self, feature: PlanFeature) -> None:
+        """Store a plan feature"""
+        feature_file = self.features_dir / f"{feature.feature_id}.json"
+        
+        with open(feature_file, 'w') as f:
+            json.dump(feature.to_dict(), f, indent=2)
+    
+    async def get_feature(self, feature_id: str) -> Optional[PlanFeature]:
+        """Get a plan feature by ID"""
+        feature_file = self.features_dir / f"{feature_id}.json"
+        
+        if not feature_file.exists():
+            return None
+        
+        try:
+            with open(feature_file, 'r') as f:
+                data = json.load(f)
+                return PlanFeature.from_dict(data)
+        except (json.JSONDecodeError, KeyError):
+            return None
+    
+    async def get_all_features(self, active_only: bool = True) -> List[PlanFeature]:
+        """Get all plan features"""
+        features = []
+        
+        for feature_file in self.features_dir.glob('*.json'):
+            try:
+                with open(feature_file, 'r') as f:
+                    data = json.load(f)
+                    feature = PlanFeature.from_dict(data)
+                    
+                    if active_only and not feature.active:
+                        continue
+                        
+                    features.append(feature)
+            except (json.JSONDecodeError, KeyError):
+                continue
+        
+        return sorted(features, key=lambda f: f.display_order)
+    
+    async def update_feature(self, feature: PlanFeature) -> None:
+        """Update a plan feature"""
+        await self.store_feature(feature)
+    
+    # Template management methods
+    
+    async def store_template(self, template: PageTemplate) -> None:
+        """Store a page template"""
+        template_file = self.templates_dir / f"{template.template_id}.json"
+        
+        with open(template_file, 'w') as f:
+            json.dump(template.to_dict(), f, indent=2)
+    
+    async def get_template(self, template_id: str) -> Optional[PageTemplate]:
+        """Get a page template by ID"""
+        template_file = self.templates_dir / f"{template_id}.json"
+        
+        if not template_file.exists():
+            return None
+        
+        try:
+            with open(template_file, 'r') as f:
+                data = json.load(f)
+                return PageTemplate.from_dict(data)
+        except (json.JSONDecodeError, KeyError):
+            return None
+    
+    async def get_all_templates(self) -> List[PageTemplate]:
+        """Get all page templates"""
+        templates = []
+        
+        for template_file in self.templates_dir.glob('*.json'):
+            try:
+                with open(template_file, 'r') as f:
+                    data = json.load(f)
+                    template = PageTemplate.from_dict(data)
+                    templates.append(template)
+            except (json.JSONDecodeError, KeyError):
+                continue
+        
+        return templates
+    
+    async def get_default_template(self) -> Optional[PageTemplate]:
+        """Get the default page template"""
+        templates = await self.get_all_templates()
+        
+        for template in templates:
+            if template.is_default:
+                return template
+        
+        return templates[0] if templates else None
+    
+    async def set_default_template(self, template_id: str) -> bool:
+        """Set a template as the default"""
+        templates = await self.get_all_templates()
+        
+        # First, unset default on all templates
+        for template in templates:
+            if template.is_default:
+                template.is_default = False
+                await self.store_template(template)
+        
+        # Then set the new default
+        template = await self.get_template(template_id)
+        if template:
+            template.is_default = True
+            await self.store_template(template)
+            return True
+        
+        return False

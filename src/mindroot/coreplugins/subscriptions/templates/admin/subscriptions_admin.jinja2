@@ -1,0 +1,1014 @@
+{% extends "admin_base.jinja2" %}
+
+{% block title %}Subscription Management{% endblock %}
+
+{% block head_styles %}
+<style>
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .admin-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+  }
+  
+  .admin-tab {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-right: 1rem;
+    font-weight: 500;
+  }
+  
+  .admin-tab.active {
+    border-bottom-color: #4a5af8;
+    color: #4a5af8;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  .subscription-plans {
+    margin-bottom: 2rem;
+  }
+  
+  .plan-card {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .plan-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  .plan-price {
+    font-size: 1.1rem;
+  }
+  
+  .plan-description {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .plan-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .plan-detail {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .plan-detail-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.25rem;
+  }
+  
+  .plan-detail-value {
+    font-weight: 500;
+  }
+  
+  .plan-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .new-plan-form {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .btn-primary {
+    background: #4a5af8;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .btn-danger {
+    background: #f85a5a;
+    color: white;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Features tab styles */
+  .features-list {
+    margin-bottom: 2rem;
+  }
+  
+  .feature-card {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .feature-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .feature-type {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  .feature-description {
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .feature-options {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .feature-option {
+    display: inline-block;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  /* Templates tab styles */
+  .templates-list {
+    margin-bottom: 2rem;
+  }
+  
+  .template-card {
+    background: rgb(10, 10, 25);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .template-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .template-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .template-description {
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .template-preview {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    max-height: 100px;
+    overflow-y: auto;
+  }
+  
+  .default-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #4a5af8;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <div class="admin-header">
+    <h1>Subscription Management</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="showNewPlanForm()">
+        New Plan
+      </button>
+    </div>
+  </div>
+  
+  <div class="admin-tabs">
+    <div class="admin-tab active" data-tab="plans">Plans</div>
+    <div class="admin-tab" data-tab="features">Features</div>
+    <div class="admin-tab" data-tab="templates">Page Templates</div>
+  </div>
+  
+  <!-- Plans Tab -->
+  <div class="tab-content active" id="plans-tab">
+    <div class="subscription-plans">
+      {% if plans %}
+        {% for plan in plans %}
+          <div class="plan-card">
+            <div class="plan-header">
+              <div class="plan-title">{{ plan.name }}</div>
+              <div class="plan-price">{{ plan.price }} {{ plan.currency }}/{{ plan.interval }}</div>
+            </div>
+            
+            <div class="plan-description">{{ plan.description }}</div>
+            
+            <div class="plan-details">
+              <div class="plan-detail">
+                <div class="plan-detail-label">Credits Per Cycle</div>
+                <div class="plan-detail-value">{{ plan.credits_per_cycle }}</div>
+              </div>
+              
+              <div class="plan-detail">
+                <div class="plan-detail-label">Status</div>
+                <div class="plan-detail-value">{{ "Active" if plan.active else "Inactive" }}</div>
+              </div>
+              
+              <div class="plan-detail">
+                <div class="plan-detail-label">Plan ID</div>
+                <div class="plan-detail-value">{{ plan.plan_id }}</div>
+              </div>
+            </div>
+            
+            <div class="plan-actions">
+              <button class="btn btn-secondary btn-sm" onclick="editPlan('{{ plan.plan_id }}')">
+                Edit
+              </button>
+              
+              {% if plan.active %}
+                <button class="btn btn-danger btn-sm" onclick="deactivatePlan('{{ plan.plan_id }}')">
+                  Deactivate
+                </button>
+              {% else %}
+                <button class="btn btn-primary btn-sm" onclick="activatePlan('{{ plan.plan_id }}')">
+                  Activate
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No subscription plans found.</p>
+      {% endif %}
+    </div>
+    
+    <div id="new-plan-form-container" style="display: none;">
+      <h2>Create New Plan</h2>
+      
+      <div class="new-plan-form">
+        <form id="planForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="name">Plan Name</label>
+              <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="price">Price</label>
+              <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="currency">Currency</label>
+              <select class="form-control" id="currency" name="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="interval">Billing Interval</label>
+              <select class="form-control" id="interval" name="interval">
+                <option value="month">Monthly</option>
+                <option value="year">Yearly</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="credits_per_cycle">Credits Per Cycle</label>
+              <input type="number" class="form-control" id="credits_per_cycle" name="credits_per_cycle" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="hideNewPlanForm()">
+              Cancel
+            </button>
+            
+            <button type="submit" class="btn btn-primary">
+              Create Plan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Features Tab -->
+  <div class="tab-content" id="features-tab">
+    <div class="admin-header">
+      <h2>Plan Features</h2>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showNewFeatureForm()">
+          New Feature
+        </button>
+      </div>
+    </div>
+    
+    <div class="features-list">
+      <!-- Features will be loaded via JavaScript -->
+      <p>Loading features...</p>
+    </div>
+    
+    <div id="new-feature-form-container" style="display: none;">
+      <h3>Create New Feature</h3>
+      
+      <div class="new-plan-form">
+        <form id="featureForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="feature_name">Feature Name</label>
+              <input type="text" class="form-control" id="feature_name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="feature_type">Type</label>
+              <select class="form-control" id="feature_type" name="type" onchange="toggleOptionsField()">
+                <option value="boolean">Boolean (Yes/No)</option>
+                <option value="number">Number</option>
+                <option value="text">Text</option>
+                <option value="select">Select (Options)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="display_order">Display Order</label>
+              <input type="number" class="form-control" id="display_order" name="display_order" value="0">
+            </div>
+            
+            <div class="form-group" id="default_value_container">
+              <label class="form-label" for="default_value">Default Value</label>
+              <input type="text" class="form-control" id="default_value" name="default_value">
+            </div>
+          </div>
+          
+          <div class="form-group" id="options_container" style="display: none;">
+            <label class="form-label" for="options">Options (one per line)</label>
+            <textarea class="form-control" id="options" name="options" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="feature_description">Description</label>
+            <textarea class="form-control" id="feature_description" name="description" rows="2" required></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="hideNewFeatureForm()">
+              Cancel
+            </button>
+            
+            <button type="submit" class="btn btn-primary">
+              Create Feature
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Templates Tab -->
+  <div class="tab-content" id="templates-tab">
+    <div class="admin-header">
+      <h2>Page Templates</h2>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showNewTemplateForm()">
+          New Template
+        </button>
+      </div>
+    </div>
+    
+    <div class="templates-list">
+      <!-- Templates will be loaded via JavaScript -->
+      <p>Loading templates...</p>
+    </div>
+    
+    <div id="new-template-form-container" style="display: none;">
+      <h3>Create New Template</h3>
+      
+      <div class="new-plan-form">
+        <form id="templateForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="template_name">Template Name</label>
+              <input type="text" class="form-control" id="template_name" name="name" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="template_description">Description</label>
+            <textarea class="form-control" id="template_description" name="description" rows="2" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="html_template">HTML Template</label>
+            <textarea class="form-control" id="html_template" name="html_template" rows="10" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="css_template">CSS Template</label>
+            <textarea class="form-control" id="css_template" name="css_template" rows="6" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="js_template">JavaScript Template</label>
+            <textarea class="form-control" id="js_template" name="js_template" rows="6" required></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="hideNewTemplateForm()">
+              Cancel
+            </button>
+            
+            <button type="submit" class="btn btn-primary">
+              Create Template
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  // Tab switching
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.admin-tab');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        const tabId = this.dataset.tab + '-tab';
+        document.getElementById(tabId).classList.add('active');
+        
+        // Load tab-specific data if needed
+        if (this.dataset.tab === 'features' && !featuresLoaded) {
+          loadFeatures();
+          featuresLoaded = true;
+        } else if (this.dataset.tab === 'templates' && !templatesLoaded) {
+          loadTemplates();
+          templatesLoaded = true;
+        }
+      });
+    });
+    
+    // Plan form submission
+    const planForm = document.getElementById('planForm');
+    
+    planForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(planForm);
+      const planData = {};
+      
+      for (const [key, value] of formData.entries()) {
+        // Convert numeric values
+        if (key === 'price' || key === 'credits_per_cycle') {
+          planData[key] = parseFloat(value);
+        } else {
+          planData[key] = value;
+        }
+      }
+      
+      // Add empty features object
+      planData.features = {};
+      
+      try {
+        const response = await fetch('/admin/subscriptions/plans', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(planData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Plan created successfully!');
+          location.reload();
+        } else {
+          alert('Failed to create plan: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error creating plan: ' + error.message);
+      }
+    });
+    
+    // Feature form submission
+    const featureForm = document.getElementById('featureForm');
+    
+    featureForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(featureForm);
+      const featureData = {};
+      
+      for (const [key, value] of formData.entries()) {
+        if (key === 'display_order') {
+          featureData[key] = parseInt(value);
+        } else if (key === 'options') {
+          // Convert options text to array
+          featureData[key] = value.split('\n').filter(opt => opt.trim() !== '');
+        } else {
+          featureData[key] = value;
+        }
+      }
+      
+      // Set default value based on type
+      if (featureData.type === 'boolean') {
+        featureData.default_value = featureData.default_value === 'true';
+      } else if (featureData.type === 'number') {
+        featureData.default_value = parseFloat(featureData.default_value) || 0;
+      }
+      
+      try {
+        const response = await fetch('/admin/subscriptions/features', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(featureData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Feature created successfully!');
+          loadFeatures();
+          hideNewFeatureForm();
+        } else {
+          alert('Failed to create feature: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error creating feature: ' + error.message);
+      }
+    });
+    
+    // Template form submission
+    const templateForm = document.getElementById('templateForm');
+    
+    templateForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(templateForm);
+      const templateData = {};
+      
+      for (const [key, value] of formData.entries()) {
+        templateData[key] = value;
+      }
+      
+      try {
+        const response = await fetch('/admin/subscriptions/templates', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(templateData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Template created successfully!');
+          loadTemplates();
+          hideNewTemplateForm();
+        } else {
+          alert('Failed to create template: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error creating template: ' + error.message);
+      }
+    });
+  });
+  
+  // Track if features and templates have been loaded
+  let featuresLoaded = false;
+  let templatesLoaded = false;
+  
+  // Plan form functions
+  function showNewPlanForm() {
+    document.getElementById('new-plan-form-container').style.display = 'block';
+  }
+  
+  function hideNewPlanForm() {
+    document.getElementById('new-plan-form-container').style.display = 'none';
+    document.getElementById('planForm').reset();
+  }
+  
+  function editPlan(planId) {
+    window.location.href = `/admin/subscriptions/plans/edit/${planId}`;
+  }
+  
+  async function deactivatePlan(planId) {
+    if (confirm('Are you sure you want to deactivate this plan?')) {
+      try {
+        const response = await fetch(`/admin/subscriptions/plans/${planId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Plan deactivated successfully!');
+          location.reload();
+        } else {
+          alert('Failed to deactivate plan: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error deactivating plan: ' + error.message);
+      }
+    }
+  }
+  
+  async function activatePlan(planId) {
+    try {
+      const response = await fetch(`/admin/subscriptions/plans/${planId}/activate`, {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        alert('Plan activated successfully!');
+        location.reload();
+      } else {
+        alert('Failed to activate plan: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error activating plan: ' + error.message);
+    }
+  }
+  
+  // Feature form functions
+  function showNewFeatureForm() {
+    document.getElementById('new-feature-form-container').style.display = 'block';
+  }
+  
+  function hideNewFeatureForm() {
+    document.getElementById('new-feature-form-container').style.display = 'none';
+    document.getElementById('featureForm').reset();
+  }
+  
+  function toggleOptionsField() {
+    const featureType = document.getElementById('feature_type').value;
+    const optionsContainer = document.getElementById('options_container');
+    const defaultValueContainer = document.getElementById('default_value_container');
+    
+    if (featureType === 'select') {
+      optionsContainer.style.display = 'block';
+    } else {
+      optionsContainer.style.display = 'none';
+    }
+    
+    // Update default value field based on type
+    const defaultValueField = document.getElementById('default_value');
+    
+    if (featureType === 'boolean') {
+      defaultValueField.type = 'checkbox';
+    } else if (featureType === 'number') {
+      defaultValueField.type = 'number';
+    } else {
+      defaultValueField.type = 'text';
+    }
+  }
+  
+  async function loadFeatures() {
+    try {
+      const response = await fetch('/admin/subscriptions/features/list');
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        renderFeatures(result.features);
+      } else {
+        document.querySelector('.features-list').innerHTML = 
+          '<p>Error loading features: ' + (result.message || 'Unknown error') + '</p>';
+      }
+    } catch (error) {
+      document.querySelector('.features-list').innerHTML = 
+        '<p>Error loading features: ' + error.message + '</p>';
+    }
+  }
+  
+  function renderFeatures(features) {
+    const featuresContainer = document.querySelector('.features-list');
+    
+    if (!features || features.length === 0) {
+      featuresContainer.innerHTML = '<p>No features defined yet.</p>';
+      return;
+    }
+    
+    let featuresHtml = '';
+    
+    features.forEach(feature => {
+      let optionsHtml = '';
+      
+      if (feature.type === 'select' && feature.options && feature.options.length > 0) {
+        optionsHtml = `
+          <div class="feature-options">
+            ${feature.options.map(option => `
+              <span class="feature-option">${option}</span>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      featuresHtml += `
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-name">${feature.name}</div>
+            <div class="feature-type">${feature.type}</div>
+          </div>
+          
+          <div class="feature-description">${feature.description}</div>
+          
+          <div>
+            <strong>Default:</strong> 
+            ${feature.type === 'boolean' ? 
+              (feature.default_value ? 'Yes' : 'No') : 
+              (feature.default_value !== null ? feature.default_value : 'None')}
+          </div>
+          
+          ${optionsHtml}
+          
+          <div class="plan-actions" style="margin-top: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="editFeature('${feature.feature_id}')">
+              Edit
+            </button>
+            
+            ${feature.active ? 
+              `<button class="btn btn-danger btn-sm" onclick="deactivateFeature('${feature.feature_id}')">
+                Deactivate
+              </button>` : 
+              `<button class="btn btn-primary btn-sm" onclick="activateFeature('${feature.feature_id}')">
+                Activate
+              </button>`
+            }
+          </div>
+        </div>
+      `;
+    });
+    
+    featuresContainer.innerHTML = featuresHtml;
+  }
+  
+  // Template form functions
+  function showNewTemplateForm() {
+    document.getElementById('new-template-form-container').style.display = 'block';
+  }
+  
+  function hideNewTemplateForm() {
+    document.getElementById('new-template-form-container').style.display = 'none';
+    document.getElementById('templateForm').reset();
+  }
+  
+  async function loadTemplates() {
+    try {
+      const response = await fetch('/admin/subscriptions/templates/list');
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        renderTemplates(result.templates);
+      } else {
+        document.querySelector('.templates-list').innerHTML = 
+          '<p>Error loading templates: ' + (result.message || 'Unknown error') + '</p>';
+      }
+    } catch (error) {
+      document.querySelector('.templates-list').innerHTML = 
+        '<p>Error loading templates: ' + error.message + '</p>';
+    }
+  }
+  
+  function renderTemplates(templates) {
+    const templatesContainer = document.querySelector('.templates-list');
+    
+    if (!templates || templates.length === 0) {
+      templatesContainer.innerHTML = '<p>No templates defined yet.</p>';
+      return;
+    }
+    
+    let templatesHtml = '';
+    
+    templates.forEach(template => {
+      templatesHtml += `
+        <div class="template-card">
+          <div class="template-header">
+            <div class="template-name">
+              ${template.name}
+              ${template.is_default ? '<span class="default-badge">Default</span>' : ''}
+            </div>
+          </div>
+          
+          <div class="template-description">${template.description}</div>
+          
+          <div class="template-preview">
+            ${template.html_template.substring(0, 100)}...
+          </div>
+          
+          <div class="plan-actions" style="margin-top: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="editTemplate('${template.template_id}')">
+              Edit
+            </button>
+            
+            ${!template.is_default ? 
+              `<button class="btn btn-primary btn-sm" onclick="setDefaultTemplate('${template.template_id}')">
+                Set as Default
+              </button>` : ''
+            }
+          </div>
+        </div>
+      `;
+    });
+    
+    templatesContainer.innerHTML = templatesHtml;
+  }
+  
+  // Feature management functions
+  function editFeature(featureId) {
+    window.location.href = `/admin/subscriptions/features/edit/${featureId}`;
+  }
+  
+  async function deactivateFeature(featureId) {
+    if (confirm('Are you sure you want to deactivate this feature?')) {
+      try {
+        const response = await fetch(`/admin/subscriptions/features/${featureId}/deactivate`, {
+          method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('Feature deactivated successfully!');
+          loadFeatures();
+        } else {
+          alert('Failed to deactivate feature: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        alert('Error deactivating feature: ' + error.message);
+      }
+    }
+  }
+  
+  async function activateFeature(featureId) {
+    try {
+      const response = await fetch(`/admin/subscriptions/features/${featureId}/activate`, {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        alert('Feature activated successfully!');
+        loadFeatures();
+      } else {
+        alert('Failed to activate feature: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error activating feature: ' + error.message);
+    }
+  }
+  
+  // Template management functions
+  function editTemplate(templateId) {
+    window.location.href = `/admin/subscriptions/templates/edit/${templateId}`;
+  }
+  
+  async function setDefaultTemplate(templateId) {
+    try {
+      const response = await fetch(`/admin/subscriptions/templates/${templateId}/set-default`, {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        alert('Template set as default successfully!');
+        loadTemplates();
+      } else {
+        alert('Failed to set template as default: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error setting template as default: ' + error.message);
+    }
+  }
+</script>
+{% endblock %}

@@ -73,3 +73,55 @@ class UserSubscription:
         data['created_at'] = datetime.fromisoformat(data['created_at'])
         data['updated_at'] = datetime.fromisoformat(data['updated_at'])
         return cls(**data)
+
+@dataclass
+class PlanFeature:
+    feature_id: str
+    name: str
+    description: str
+    type: str  # 'boolean', 'number', 'text', 'select'
+    options: List[str] = field(default_factory=list)  # For 'select' type
+    default_value: Any = None
+    display_order: int = 0
+    active: bool = True
+    
+    def to_dict(self) -> dict:
+        return {
+            'feature_id': self.feature_id,
+            'name': self.name,
+            'description': self.description,
+            'type': self.type,
+            'options': self.options,
+            'default_value': self.default_value,
+            'display_order': self.display_order,
+            'active': self.active
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'PlanFeature':
+        return cls(**data)
+
+@dataclass
+class PageTemplate:
+    template_id: str
+    name: str
+    description: str
+    html_template: str
+    css_template: str
+    js_template: str
+    is_default: bool = False
+    
+    def to_dict(self) -> dict:
+        return {
+            'template_id': self.template_id,
+            'name': self.name,
+            'description': self.description,
+            'html_template': self.html_template,
+            'css_template': self.css_template,
+            'js_template': self.js_template,
+            'is_default': self.is_default
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'PageTemplate':
+        return cls(**data)

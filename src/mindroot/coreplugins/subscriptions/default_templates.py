@@ -1,0 +1,396 @@
+# Default templates for subscription pages
+
+DEFAULT_HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans</title>
+</head>
+<body>
+    <div class="subscription-container">
+        <h1>Choose Your Plan</h1>
+        
+        <div id="plans-container" class="plans-grid"></div>
+        
+        <div id="current-subscription" class="current-subscription"></div>
+    </div>
+    
+    <script>
+        // Plan data from server
+        const plans = {{PLANS_JSON}};
+        const userSubscriptions = {{USER_SUBSCRIPTIONS_JSON}};
+    </script>
+</body>
+</html>
+"""
+
+DEFAULT_CSS_TEMPLATE = """
+/* Default subscription page styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.subscription-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.plan-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.plan-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.plan-name {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+}
+
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+}
+
+.plan-interval {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+.plan-description {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #7f8c8d;
+}
+
+.plan-features {
+    margin-bottom: 2rem;
+    flex-grow: 1;
+}
+
+.feature-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #ecf0f1;
+    display: flex;
+    align-items: center;
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+.feature-icon {
+    margin-right: 0.75rem;
+    color: #2ecc71;
+}
+
+.subscribe-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 100%;
+}
+
+.subscribe-btn:hover {
+    background: #2980b9;
+}
+
+.current-subscription {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.subscription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.subscription-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.subscription-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
+
+.status-inactive {
+    background: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+}
+
+.subscription-details {
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    margin-bottom: 0.75rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #7f8c8d;
+}
+
+.cancel-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.cancel-btn:hover {
+    background: #c0392b;
+}
+
+@media (max-width: 768px) {
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .subscription-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .subscription-status {
+        margin-top: 0.5rem;
+    }
+}
+"""
+
+DEFAULT_JS_TEMPLATE = """
+// Default subscription page JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Render plans
+    renderPlans();
+    
+    // Render current subscription if available
+    if (userSubscriptions && userSubscriptions.length > 0) {
+        renderCurrentSubscription();
+    }
+});
+
+function renderPlans() {
+    const plansContainer = document.getElementById('plans-container');
+    
+    if (!plans || plans.length === 0) {
+        plansContainer.innerHTML = '<p>No subscription plans available.</p>';
+        return;
+    }
+    
+    // Sort plans by price
+    const sortedPlans = [...plans].sort((a, b) => a.price - b.price);
+    
+    let plansHtml = '';
+    
+    sortedPlans.forEach(plan => {
+        const featuresHtml = Object.entries(plan.features || {}).map(([key, value]) => {
+            return `
+                <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span>${key}: ${value}</span>
+                </div>
+            `;
+        }).join('');
+        
+        plansHtml += `
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h2 class="plan-name">${plan.name}</h2>
+                    <div class="plan-price">${plan.price} ${plan.currency}</div>
+                    <div class="plan-interval">per ${plan.interval}</div>
+                </div>
+                
+                <div class="plan-description">${plan.description}</div>
+                
+                <div class="plan-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>${plan.credits_per_cycle} credits per ${plan.interval}</span>
+                    </div>
+                    ${featuresHtml}
+                </div>
+                
+                <button class="subscribe-btn" onclick="subscribe('${plan.plan_id}')">
+                    Subscribe
+                </button>
+            </div>
+        `;
+    });
+    
+    plansContainer.innerHTML = plansHtml;
+}
+
+function renderCurrentSubscription() {
+    const subscriptionContainer = document.getElementById('current-subscription');
+    
+    // Sort subscriptions with active ones first
+    const sortedSubs = [...userSubscriptions].sort((a, b) => {
+        if (a.status === 'active' && b.status !== 'active') return -1;
+        if (a.status !== 'active' && b.status === 'active') return 1;
+        return new Date(b.created_at) - new Date(a.created_at);
+    });
+    
+    const activeSub = sortedSubs.find(sub => 
+        sub.status === 'active' && !sub.cancel_at_period_end
+    );
+    
+    if (!activeSub) {
+        subscriptionContainer.style.display = 'none';
+        return;
+    }
+    
+    // Find the plan details
+    const plan = plans.find(p => p.plan_id === activeSub.plan_id) || {
+        name: 'Unknown Plan',
+        price: 0,
+        currency: 'USD',
+        interval: 'month'
+    };
+    
+    const startDate = new Date(activeSub.current_period_start).toLocaleDateString();
+    const endDate = new Date(activeSub.current_period_end).toLocaleDateString();
+    
+    subscriptionContainer.innerHTML = `
+        <div class="subscription-header">
+            <h2 class="subscription-title">Your Current Subscription</h2>
+            <div class="subscription-status status-active">Active</div>
+        </div>
+        
+        <div class="subscription-details">
+            <div class="detail-item">
+                <span class="detail-label">Plan:</span>
+                <span>${plan.name}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Price:</span>
+                <span>${plan.price} ${plan.currency}/${plan.interval}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Current Period:</span>
+                <span>${startDate} to ${endDate}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Credits Per Cycle:</span>
+                <span>${plan.credits_per_cycle}</span>
+            </div>
+        </div>
+        
+        <button class="cancel-btn" onclick="cancelSubscription('${activeSub.subscription_id}')">
+            Cancel Subscription
+        </button>
+    `;
+}
+
+async function subscribe(planId) {
+    try {
+        const response = await fetch(`/subscriptions/checkout/${planId}`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.url) {
+            window.location.href = data.url;
+        } else {
+            alert('Failed to create checkout: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error creating checkout: ' + error.message);
+    }
+}
+
+async function cancelSubscription(subscriptionId) {
+    if (!confirm('Are you sure you want to cancel your subscription?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/subscriptions/cancel/${subscriptionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ at_period_end: true })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert('Your subscription has been canceled and will end at the current billing period.');
+            location.reload();
+        } else {
+            alert('Failed to cancel subscription: ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error canceling subscription: ' + error.message);
+    }
+}
+"""
