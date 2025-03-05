@@ -124,6 +124,9 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
 @router.get("/session/{agent_name}/{log_id}")
 async def chat_history(request: Request, agent_name: str, log_id: str):
     plugins = list_enabled()
+    if not hasattr(request.state, "user"):
+        return RedirectResponse("/login")
+
     user = request.state.user
     agent = await service_manager.get_agent_data(agent_name)  
     persona = agent['persona']['name']

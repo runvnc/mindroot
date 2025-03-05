@@ -1,16 +1,45 @@
+{% block pre_head %}
 <!DOCTYPE html>
 <html lang="en">
+{% endblock %}  
 <head>
+{% block head_meta %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock %}
+{% block head_title %}
     <title>MindRoot Agent Host</title>
+{% endblock %}
+{% block head_css %}
     <link rel="stylesheet" href="/home/static/css/reset.css">
     <link rel="stylesheet" href="/home/static/css/default.css">
     <link rel="stylesheet" href="/home/static/css/home.css">
     <link rel="stylesheet" href="/home/static/css/enhanced.css">
     <link rel="icon" href="/chat/static/imgs/favicon.ico">
+{% endblock %}
+
+{% block head_css_end %}
+
+<! -- Custom CSS -->
+{% endblock %}
+{% block head_scripts %}
+
+{% endblock %}
+
 </head>
 <body>
+{% block body_start %}
+
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block body_left %}
+{% endblock %}
+
+{% block body_main %}
     <main class="agent-container">
         <img src="/home/static/imgs/logo.png" alt="MindRoot Logo" class="logo">
         
@@ -29,8 +58,20 @@
             {% endfor %}
         </div>
     </main>
+{% endblock %}
+
+{% block body_right %}
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block body_end %}
 
     <script src="/home/js/lit-html/lit-html.js"></script>
     <script src="/home/js/base.js"></script>
+{% endblock %}
 </body>
 </html>
+

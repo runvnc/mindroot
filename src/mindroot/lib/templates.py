@@ -50,7 +50,7 @@ def setup_template_environment(plugins=None):
 
 # Create a Jinja2 environment with multiple template paths
 env = setup_template_environment()
-coreplugins =['admin', 'index', 'chat', 'chat_avatar', 'agent', 'jwt_auth', 'home', 'login', 'persona', 'events', 'user_service', 'usage', 'credits', 'startup']
+coreplugins =['admin', 'index', 'chat', 'chat_avatar', 'agent', 'jwt_auth', 'home', 'login', 'persona', 'events', 'user_service', 'usage', 'subscriptions', 'credits', 'startup']
 parent_env = get_parent_templates_env(coreplugins)
 
 

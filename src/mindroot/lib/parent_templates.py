@@ -55,12 +55,18 @@ def get_parent_templates_env(plugins=None):
             template_paths.append(template_dir)
             
         # Add parent directories to handle absolute paths
-        template_paths.append(os.path.dirname(plugin_path))
-        template_paths.append(os.path.dirname(os.path.dirname(plugin_path)))
+        # if it doesn't already exist in the list
+        if os.path.dirname(plugin_path) not in template_paths:
+            template_paths.append(os.path.dirname(plugin_path))
+        if os.path.dirname(os.path.dirname(plugin_path)) not in template_paths:
+            template_paths.append(os.path.dirname(os.path.dirname(plugin_path)))
     
     # Add default templates directory last
     template_paths.append('templates')
-    
+
+    print("**************************************************************************************")
+    print("Loading templates from:", template_paths)
+
     # Create environment with FirstMatchLoader
     loaders = [FileSystemLoader(path) for path in template_paths]
     env = Environment(loader=FirstMatchLoader(loaders))

@@ -9,9 +9,9 @@ class SubscriptionPlan:
     name: str
     description: str
     price: float
+    credits_per_cycle: float
     currency: str = 'USD'
     interval: str = 'month'  # 'month' or 'year'
-    credits_per_cycle: float
     features: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
     active: bool = True
@@ -22,9 +22,9 @@ class SubscriptionPlan:
             'name': self.name,
             'description': self.description,
             'price': self.price,
+            'credits_per_cycle': self.credits_per_cycle,
             'currency': self.currency,
             'interval': self.interval,
-            'credits_per_cycle': self.credits_per_cycle,
             'features': self.features,
             'metadata': self.metadata,
             'active': self.active
@@ -80,9 +80,9 @@ class PlanFeature:
     name: str
     description: str
     type: str  # 'boolean', 'number', 'text', 'select'
+    display_order: int = 0
     options: List[str] = field(default_factory=list)  # For 'select' type
     default_value: Any = None
-    display_order: int = 0
     active: bool = True
     
     def to_dict(self) -> dict:

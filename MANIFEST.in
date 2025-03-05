@@ -23,6 +23,8 @@ recursive-include src/mindroot/coreplugins/index *
 recursive-include src/mindroot/coreplugins/agent *
 recursive-include src/mindroot/coreplugins/usage *
 recursive-include src/mindroot/coreplugins/credits *
+recursive-include src/mindroot/coreplugins/subscriptions/templates *
+recursive-include src/mindroot/coreplugins/subscriptions *
 recursive-include src/mindroot/coreplugins/persona *
 recursive-include src/mindroot/coreplugins/login *
 recursive-include src/mindroot/coreplugins/api_keys *

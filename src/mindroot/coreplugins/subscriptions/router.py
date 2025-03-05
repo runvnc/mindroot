@@ -402,7 +402,8 @@ async def subscription_page(request: Request):
         html = await render('subscription_page', template_data)
         return HTMLResponse(html)
     except Exception as e:
-        logger.error(f"Error rendering subscription page: {e}")
+        trace = traceback.format_exc()
+        logger.error(f"Error rendering subscription page: {e}\n\n {trace}")
         raise SERVER_ERROR
 
 # Combine all routers
