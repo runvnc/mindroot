@@ -37,9 +37,17 @@ def results_output(results):
     text = ""
     for result in results:
         if 'output' in result['args']:
+            return result['args']['output']
+
+def results_text_output(results):
+    text = ""
+    for result in results:
+        if 'output' in result['args']:
+            return result['args']['output']
             text += result['args']['output'] + "\n"
     text = text.rstrip()
     return text
+
 
 
 @service()

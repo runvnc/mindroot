@@ -146,7 +146,7 @@ async def task_result(output: str, context=None):
 
     Parameters:
 
-    output - String. The output of the task, such as analysis, structured data,
+    output - Array OR Object OR String. The output of the task, such as analysis, structured data,
     report, answer, etc.
 
     IMPORTANT: If the user requests JSON output or provides a schema, you must
@@ -165,9 +165,11 @@ async def task_result(output: str, context=None):
 
     you would output something like this:
 
-    { "task_result": 
-        [{ "address1": "First St.", "state": "TX", "zip: "78573" },
-         { "address2": "Second St.", "state": "TX", "zip: "78001" } ]
+    { "task_result": {
+        "output": [
+            { "address1": "First St.", "state": "TX", "zip: "78573" },
+            { "address2": "Second St.", "state": "TX", "zip: "78001" }
+        ] }
     }
 
     ___
@@ -175,17 +177,22 @@ async def task_result(output: str, context=None):
 
     In the case that the user requested a formatted report:
 
-
     Example:
 
-        { "task_result": START_RAW
+    User: What is the answer to the universe?
+
+    you would output something like this:
+
+        { "task_result":
+            { "output": START_RAW
     ## Answer
     
     The answer is 42.
 
     END_RAW
 
-      }
+            }
+        }
 
     """
     return None
