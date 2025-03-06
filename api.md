@@ -136,22 +136,12 @@ Array
 (
     [0] => Array
         (
-            [SYSTEM] => Note: tool command results follow, not user replies
-            [cmd] => task_result
-            [args] => Array
-                (
-                    [0] => Array
-                        (
-                            [street] => 52343 Main St.
-                            [city] => Portland
-                        )
-
-                )
-
-            [result] => 
+            [street] => 52343 Main St.
+            [city] => Portland
         )
 
 )
+
 ```
 
 ## Prime Numbers Example
