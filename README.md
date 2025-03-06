@@ -15,6 +15,7 @@
 - [Installing Plugins](#installing-plugins)
 - [Developers: Creating Plugins and Tool Commands etc.](#developers-creating-plugins-and-tool-commands-etc)
 - [Adding Commands to Agents](#adding-commands-to-agents)
+- [API Documentation](#api-documentation)
 - [Key Features](#key-features)
 
 
@@ -136,6 +137,13 @@ Select an agent from the drop down, such as Assistant
 There are toggle switches for all of the commands. I recommend avoiding the 'replace_' commands
 in files for now because they are not reliable.
 
+
+API Documentation
+----------------
+
+MindRoot provides a REST API for programmatic interaction with agents. This allows you to integrate AI capabilities into your applications without using the web interface.
+
+For detailed information on available endpoints, authentication, and usage examples, see the [API Documentation](api.md).
 
 Key Features:
 -------------
