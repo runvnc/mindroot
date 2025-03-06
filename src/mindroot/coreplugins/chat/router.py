@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
 from lib.providers.services import service, service_manager
-from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history
+from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history, run_task
 from lib.templates import render
 from lib.plugins import list_enabled
 import nanoid
@@ -15,6 +15,7 @@ from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
 from lib.utils.debug import debug_box
 from lib.session_files import load_session_data, save_session_data
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -146,5 +147,37 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
 
 # use starlette staticfiles to mount ./imgs
     app.mount("/published", StaticFiles(directory=str(published_dir)), name="published_indices")
- 
+
+class TaskRequest(BaseModel):
+    instructions: str
+
+@router.post("/task/{agent_name}")
+async def run_task_route(request: Request, agent_name: str, task_request: TaskRequest = None):
+    """
+    Run a task for an agent with the given instructions.
+    This endpoint allows programmatic interaction with agents without a full chat session.
+    
+    Parameters:
+    - agent_name: The name of the agent to run the task
+    - instructions: The instructions/prompt to send to the agent
+    
+    Returns:
+    - JSON with results and log_id for tracking
+    """
+    
+    user = request.state.user.username
+    
+    instructions = None
+    if task_request is not None:
+        instructions = task_request.instructions
+    
+    if not instructions:
+        return {"status": "error", "message": "No instructions provided"}
+    
+    task_result, full_results, log_id = await run_task(instructions=instructions, agent_name=agent_name, user=user)
+    print(task_result)
+    print(full_results)
+    print(log_id)
+    return {"status": "ok", "results": task_result, "full_results": full_results, "log_id": log_id}
+
 

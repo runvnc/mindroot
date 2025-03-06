@@ -1,0 +1,14 @@
+{% block head %}
+<script type="module" src="/subscriptions/static/js/admin/subscription-manager.js"></script>
+{% endblock %}
+
+{% block content %}
+<details>
+  <summary><span class="material-icons">card_membership</span>
+  <span>Subscription Manager</span>
+  </summary>
+  <div class="details-content">
+    <subscription-manager theme="dark" scope="local"></subscription-manager>
+  </div>
+</details>
+{% endblock %}

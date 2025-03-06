@@ -43,52 +43,6 @@ router_admin = APIRouter(dependencies=[requires_role('admin')], prefix="/admin/s
 # Public routes
 router_public = APIRouter(prefix="/subscriptions")
 
-# Admin UI routes
-
-@router_admin.get("", response_class=HTMLResponse)
-async def subscriptions_admin(request: Request):
-    """Admin interface for subscription management"""
-    try:
-        plans = await get_subscription_plans(active_only=False, context=request)
-        template_data = {
-            "plans": plans
-        }
-        
-        html = await render('admin/subscriptions_admin', template_data)
-        return HTMLResponse(html)
-    except Exception as e:
-        trace = traceback.format_exc()
-        logger.error(f"Error in subscriptions_admin: {e}\n\n{trace}")
-        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
-
-@router_admin.get("/plans/edit/{plan_id}", response_class=HTMLResponse)
-async def edit_plan_admin(plan_id: str, request: Request):
-    """Admin interface for editing a subscription plan"""
-    try:
-        # Get plan details
-        plan = await get_subscription_plan(plan_id, context=request)
-        if not plan:
-            raise NOT_FOUND
-            
-        # Get available features
-        features = await get_available_features(context=request)
-        
-        template_data = {
-            "plan": plan,
-            "features": features,
-            "currencies": ["USD", "EUR", "GBP", "CAD", "AUD"],
-            "intervals": ["month", "year"]
-        }
-        
-        html = await render('admin/edit_subscription_plan', template_data)
-        return HTMLResponse(html)
-    except HTTPException:
-        raise
-    except Exception as e:
-        trace = traceback.format_exc()
-        logger.error(f"Error in edit_plan_admin: {e}\n\n{trace}")
-        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
-
 # Admin API routes - Plans
 
 @router_admin.post("/plans")
@@ -176,17 +130,6 @@ async def api_create_feature(request: Request):
         logger.error(f"Error creating feature: {e}")
         raise SERVER_ERROR
 
-@router_admin.get("/features/edit/{feature_id}", response_class=HTMLResponse)
-async def edit_feature_admin(feature_id: str, request: Request):
-    """Admin interface for editing a plan feature"""
-    try:
-        # This would be implemented with a template similar to edit_subscription_plan
-        return HTMLResponse("Feature editing UI not yet implemented")
-    except Exception as e:
-        trace = traceback.format_exc()
-        logger.error(f"Error in edit_feature_admin: {e}\n\n{trace}")
-        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
-
 @router_admin.put("/features/{feature_id}")
 async def api_update_feature(feature_id: str, request: Request):
     """Update an existing plan feature"""
@@ -248,17 +191,6 @@ async def api_create_template(request: Request):
     except Exception as e:
         logger.error(f"Error creating template: {e}")
         raise SERVER_ERROR
-
-@router_admin.get("/templates/edit/{template_id}", response_class=HTMLResponse)
-async def edit_template_admin(template_id: str, request: Request):
-    """Admin interface for editing a page template"""
-    try:
-        # This would be implemented with a template similar to edit_subscription_plan
-        return HTMLResponse("Template editing UI not yet implemented")
-    except Exception as e:
-        trace = traceback.format_exc()
-        logger.error(f"Error in edit_template_admin: {e}\n\n{trace}")
-        raise HTTPException(status_code=500, detail=f"Internal server error\n\n{trace}")
 
 @router_admin.put("/templates/{template_id}")
 async def api_update_template(template_id: str, request: Request):

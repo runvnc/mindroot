@@ -132,6 +132,41 @@ async def insert_image(image_url, context=None):
 
 
 @command()
+async def task_result(output: str, context=None):
+    """
+    Return the result of a task to the user.
+
+    This should be the final output of a task that the user requested.
+
+    Note: if you have this command defined, you MUST use it at the end of a task.
+    Be sure to include the full output of the task, unless they specified 
+    that they only want a brief or final answer.
+
+    If you do not call this, the task will be repeated.
+
+    Parameters:
+
+    output - String. The output of the task, such as analysis, report, answer, etc.
+
+    Unless otherwise indicated for your model, use the special 
+    RAW format with START_RAW and END_RAW to output raw markdown.
+
+
+    Example:
+
+        { "task_result": START_RAW
+    ## Answer
+    
+    The answer is 42.
+
+    END_RAW
+
+      }
+
+    """
+    return None
+
+@command()
 async def initiate_agent_session(agent_name: str, context=None):
     """
     Initiate a chat session with another agent.

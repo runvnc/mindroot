@@ -8,6 +8,7 @@ from typing import List
 from lib.utils.dataurl import dataurl_to_pil
 from .models import MessageParts
 from coreplugins.agent import agent
+from lib.utils.debug import debug_box
 import os
 import sys
 import colored
@@ -22,8 +23,31 @@ import base64
 import nanoid
 sse_clients = {}
 
+def results_text(results):
+    text = ""
+    for result in results:
+        if 'text' in result['args']:
+            text += result['args']['text'] + "\n"
+        elif 'markdown' in result['args']:
+            text += result['args']['markdown'] + "\n"
+    text = text.rstrip()
+    return text
+
+def results_output(results):
+    text = ""
+    for result in results:
+        if 'output' in result['args']:
+            text += result['args']['output'] + "\n"
+    text = text.rstrip()
+    return text
+
+
 @service()
-async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, context=None):
+async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, retries=3, context=None):
+    """
+    Run a task with the given instructions
+    IMPORTANT NOTE: agent must have the task_result() command enabled.
+    """
     if context is None:
         if log_id is None:
             log_id = nanoid.generate()
@@ -42,8 +66,34 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     print("run_task: ", instructions, "log_id: ", context.log_id)
     
     await init_chat_session(context.username, context.agent_name, context.log_id, context)
-    [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
-    return (results, log_id)
+
+    retried = 0
+
+    msg = """
+        # SYSTEM NOTE
+        
+        This task is being run via API and requires a textual output.
+        You MUST call task_result() with the final output when complete!
+
+    """
+
+    instructions = instructions + msg
+
+    while retried < retries:
+        [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        print('results: ', results)
+        print('full_results',full_results)
+        text = results_output(full_results)
+        if text == "":
+            retried += 1
+            debug_box(f"No output found, retrying task: {retried}")
+            instructions += f"\n\nNot output found (call task_result()!), retrying task: {retried}"
+        else:
+            debug_box(f"Task output found: {text}")
+            break
+
+    return (text, full_results, log_id)
+
 
 @service()
 async def init_chat_session(user:str, agent_name: str, log_id: str, context=None):
