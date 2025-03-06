@@ -125,6 +125,37 @@ php mr_api_example.php --help
 
 ### Example Run and Output
 
+## Simple JSON Example
+
+```bash
+[ /x/testmrapi ] > php mr_api_example.php --trace "Please extract any addresses in the following text into JSON format:  Hello, my name is John and I live at 52343 Main St. in Portland."
+
+Output:
+
+Array
+(
+    [0] => Array
+        (
+            [SYSTEM] => Note: tool command results follow, not user replies
+            [cmd] => task_result
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [street] => 52343 Main St.
+                            [city] => Portland
+                        )
+
+                )
+
+            [result] => 
+        )
+
+)
+```
+
+## Prime Numbers Example
+
 Here's an example of running the script with a request to calculate prime numbers:
 
 ```bash

@@ -146,10 +146,34 @@ async def task_result(output: str, context=None):
 
     Parameters:
 
-    output - String. The output of the task, such as analysis, report, answer, etc.
+    output - String. The output of the task, such as analysis, structured data,
+    report, answer, etc.
+
+    IMPORTANT: If the user requests JSON output or provides a schema, you must
+    output ONLY the data in the format requested. 
 
     Unless otherwise indicated for your model, use the special 
     RAW format with START_RAW and END_RAW to output raw markdown.
+
+    Example:
+
+    User: Please output the addresses from the following document
+        using this format (e.g.): 
+        [{ "address1": "Main St.", "state": "CA", "zip: "90210" }]
+
+        (... document ...)
+
+    you would output something like this:
+
+    { "task_result": 
+        [{ "address1": "First St.", "state": "TX", "zip: "78573" },
+         { "address2": "Second St.", "state": "TX", "zip: "78001" } ]
+    }
+
+    ___
+
+
+    In the case that the user requested a formatted report:
 
 
     Example:
