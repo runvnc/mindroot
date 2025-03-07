@@ -22,6 +22,10 @@ def merge_json_arrays(data, partial=False):
     else:
         ##print("load_json is json.loads")
         load_json = json.loads
+
+    return load_json(data)
+
+    xxx = """
     data = data.strip()
     parts = re.split(r"\]\s*,*\s*\[", data)
     if len(parts) == 1 and parts[0] == data:
@@ -57,7 +61,7 @@ def merge_json_arrays(data, partial=False):
     #ret = sum(arrays, [])
     ret = list(chain.from_iterable(arrays))
     return ret
-
+    """
 
 #ret = merge_json_arrays(test3, False)
 ##print("successful parsing")
