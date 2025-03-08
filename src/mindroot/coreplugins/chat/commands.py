@@ -211,8 +211,8 @@ async def initiate_agent_session(agent_name: str, context=None):
     Return: String. The log_id for the new chat session.
     """
     log_id = nanoid.generate()
- 
-    await init_chat_session(agent_name, log_id)
+    user = context.username if 'username' in context else 'user'
+    await init_chat_session(user, agent_name, log_id)
     
     return log_id
 
