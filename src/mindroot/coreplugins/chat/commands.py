@@ -289,7 +289,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     print('-------------------------------------------------------------------')
     print('===================================================================')
     print(context, context.agent_name)
-    await init_chat_session(context.agent_name, my_sub_log_id)
+    await init_chat_session(context.username, context.agent_name, my_sub_log_id)
     my_sub_context = ChatContext(service_manager, command_manager)
     await my_sub_context.load_context(my_sub_log_id)
     my_sub_context.data['parent_log_id'] = context.log_id
