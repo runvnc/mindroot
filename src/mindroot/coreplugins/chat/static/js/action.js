@@ -29,9 +29,7 @@ class ActionComponent extends BaseEl {
 
   static styles = [
     css`
-    * {
-      display: contents;
-    }
+
 
 @keyframes flash {
   0% { opacity: 0; }
@@ -64,6 +62,34 @@ class ActionComponent extends BaseEl {
     this.result = '';
   }
 
+  _paramsHTML(params) {
+    let paramshtml = '';
+    const format_ = (x) => {
+        // if it is a string then split, otherwise return the object
+        if (typeof(x) == 'string') {
+          return x.split('\n')[0].slice(0, 160)
+        } else {
+          return x
+        }
+      }
+ 
+    if (Array.isArray(params)) {
+      for (let item of params) {
+        paramshtml += `<span class="param_value">(${format_(item)}), </span> `;
+      }
+    } else if (typeof(params) == 'object') {
+      console.log('in action.js params is:',params)
+      for (var key in params) {
+        paramshtml += `<span class="param_name">${key}:</span> `;
+        paramshtml += `<span class="param_value">${format_(params[key])}</span>  `;
+      }
+    } else {
+      paramshtml += `<span class="param_value">[${format_(params)}]</span> `;
+    }
+    return paramshtml;
+  } 
+
+
   _render() {
     let {funcName, params, result} = this;
     params = unescapeHtmlForJson(params)
@@ -90,19 +116,9 @@ class ActionComponent extends BaseEl {
         return str.split('\n')[0].slice(0, 160)
       }
     }
-    if (Array.isArray(params)) {
-      for (let item of params) {
-        paramshtml += `<span class="param_value">(${format_(item)}), </span> `;
-      }
-    } else if (typeof(params) == 'object') {
-      console.log('in action.js params is:',params)
-      for (var key in params) {
-        paramshtml += `<span class="param_name">${key}:</span> `;
-        paramshtml += `<span class="param_value">${format_(params[key])}</span>  `;
-      }
-    } else {
-      paramshtml += `<span class="param_value">[${format_(params)}]</span> `;
-    }
+
+    paramshtml = this._paramsHTML(params)
+
     console.log('paramshtml', paramshtml)
     let res = '';
     if (result != '()' && result != '' && result != undefined) {
@@ -117,7 +133,6 @@ class ActionComponent extends BaseEl {
         </details>`;
       }
     }
-
     if (funcName === 'write') {
       const {fname, text} = params;
       console.log("Displaying file")
@@ -131,6 +146,16 @@ class ActionComponent extends BaseEl {
         console.log(hih)
         res = html`<pre><code>${unsafeHTML(hih)}</code></pre>`;
       }
+    } else {
+      for (var key in params) {
+        if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
+          console.log('rendering markdown', params[key])
+
+          res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]))}</div>`;
+          delete params[key]
+        }
+      }
+      paramshtml = this._paramsHTML(params)
     }
 
     return html`

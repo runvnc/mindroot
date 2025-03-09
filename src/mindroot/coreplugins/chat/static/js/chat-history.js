@@ -1,6 +1,7 @@
 import { markdownRenderer } from './markdown-renderer.js';
 import { removeCmdPrefix } from './cmdprefixes.js';
 import { authenticatedFetch } from './authfetch.js';
+import { escapeJsonForHtml } from './property-escape.js';
 
 export class ChatHistory {
     constructor(chat) {
@@ -17,7 +18,10 @@ export class ChatHistory {
             for (let msg of data) {
                 this._processHistoryMessage(msg);
             }
-            window.initializeCodeCopyButtons();
+            setTimeout( () => { 
+              window.initializeCodeCopyButtons() 
+            }, 3000);
+
         } catch (error) {
             console.error('Error loading history:', error);
         }
@@ -81,7 +85,24 @@ export class ChatHistory {
                         sender: 'ai',
                         persona: persona
                     }];
+                } else {
+                    const funcName = Object.keys(cmd)[0]
+                    const params = cmd[funcName]
+                    const paramStr = JSON.stringify(params)
+                    const escaped = escapeJsonForHtml(paramStr)
+                    console.log({funcName, params, escaped})
+                    const content = `
+                    <action-component funcName="${funcName}" params="${escaped}" 
+                                        result="">
+                      </action-component>`;
+ 
+                    this.chat.messages = [...this.chat.messages, {
+                        content: content,
+                        sender: 'ai',
+                        persona: persona
+                    }];
                 }
+                      
             }
         } catch (e) {
             console.error('Error processing assistant message:', e);

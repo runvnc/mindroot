@@ -60,6 +60,7 @@ class ChatContext:
             print({"user": user})
             raise ValueError("User is required to create a chat context")
 
+        self.user = user
         self.startup_dir = os.getcwd()
         self.flags = []
         self.app = None

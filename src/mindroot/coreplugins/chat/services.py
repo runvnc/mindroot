@@ -203,7 +203,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
         print(context) 
         agent_ = agent.Agent(agent=context.agent)
-        if user is not None:
+        if user is not None and hasattr(user, "keys"):
             for key in user.keys():
                 context.data[key] = user[key]
 

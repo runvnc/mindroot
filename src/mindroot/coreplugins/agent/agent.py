@@ -308,7 +308,8 @@ class Agent:
 
                         result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
-                        sys_header = "Note: tool command results follow, not user replies" 
+                        #sys_header = "Note: tool command results follow, not user replies" 
+                        sys_header = ""
                         full_cmds.append({ "SYSTEM": sys_header, "cmd": cmd_name, "args": cmd_args, "result": result})
                         if result is not None:
                             results.append({"SYSTEM": sys_header, "cmd": cmd_name, "args": { "omitted": "(see command msg.)"}, "result": result})

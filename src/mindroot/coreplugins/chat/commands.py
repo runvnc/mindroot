@@ -195,6 +195,8 @@ async def task_result(output: str, context=None):
         }
 
     """
+    context.data['finished_conversation'] = True
+    context.save_context()
     return None
 
 @command()
@@ -290,7 +292,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     print('===================================================================')
     print(context, context.agent_name)
     await init_chat_session(context.username, context.agent_name, my_sub_log_id)
-    my_sub_context = ChatContext(service_manager, command_manager)
+    my_sub_context = ChatContext(service_manager, command_manager, user=context.user)
     await my_sub_context.load_context(my_sub_log_id)
     my_sub_context.data['parent_log_id'] = context.log_id
     my_sub_log = my_sub_context.chat_log
@@ -313,13 +315,13 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
             raise Exception("Error: 'finished_conversation' key not found in context.data " + str(my_sub_context))
         replies = []
         async with asyncio.timeout(1200.0):
-            [_, replies] = await send_message_to_agent(sub_log_id, first_message)
+            [_, replies] = await send_message_to_agent(sub_log_id, first_message, user=context.user)
         #print replies data for debugging, in magenta
         print(termcolor.colored('replies:', 'magenta', attrs=['bold']))
         print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
         async with asyncio.timeout(1200.0):
-            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}")
+            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}", user=context.username)
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))
@@ -339,7 +341,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
             first_message = json.dumps(my_replies)
             
         print("End of loop")
-        sub_context = ChatContext(service_manager, command_manager)
+        sub_context = ChatContext(service_manager, command_manager, user=context.user)
 
         await sub_context.load_context(sub_log_id)
         await my_sub_context.load_context(my_sub_log_id)

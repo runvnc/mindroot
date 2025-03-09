@@ -39,6 +39,19 @@ class AgentForm extends BaseEl {
       color: #e57373;
     }
 
+    summary::before {
+      content: "▶";
+      display: inline-block;
+      margin-right: 5px;
+      transition: transform 0.2s;
+    }
+
+    details[open] > summary::before { transform: rotate(90deg); }
+
+    details > * :not(summary) {
+      user-select: none;
+    }
+
     input[type="text"],
     select,
     textarea {
@@ -52,7 +65,29 @@ class AgentForm extends BaseEl {
     }
 
     textarea {
-      min-height: 40vh;
+      min-height: 60vh;
+    }
+
+    textarea::-webkit-scrollbar {
+      width: 8px;  /* Medium-thin width */
+    }
+
+    textarea::-webkit-scrollbar-track {
+      background: #222;  /* Dark background */
+    }
+
+    textarea::-webkit-scrollbar-thumb {
+      background: #666;  /* Medium gray scrollbar handle */
+      border-radius: 4px;
+    }
+
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: #999;  /* Lighter on hover */
+    }
+
+    textarea {
+      scrollbar-width: thin;
+      scrollbar-color: #666 #222;
     }
 
     input[type="text"]:focus,
@@ -405,7 +440,8 @@ class AgentForm extends BaseEl {
   renderCommands() {
     return Object.entries(this.commands).map(([provider, commands]) => html`
       <div class="commands-category">
-        <h4>${provider}</h4>
+        <details>
+        <summary>${provider}</summary>
         <div class="commands-grid">
           ${commands.map(command => html`
             <div class="command-item">
@@ -429,6 +465,7 @@ class AgentForm extends BaseEl {
             </div>
           `)}
         </div>
+        </details>
       </div>
     `);
   }
@@ -479,8 +516,10 @@ class AgentForm extends BaseEl {
         </div>
 
         <div class="form-group commands-section">
-          <label>Commands:</label>
-          ${this.renderRequiredPlugins()}
+          <details>
+            <summary>Required Plugins</summary>
+            ${this.renderRequiredPlugins()}
+          </details>
         </div>
 
         <div class="form-group commands-section">
