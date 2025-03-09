@@ -287,6 +287,8 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     Return: String. Contains a concise summary of relevant details of conversation.
     """
     # create a temp chat log for the agent's perspective on this subconversation
+    first_message = f"{first_message}\n\nAdditional Context:\n{contextual_info}"
+
     my_sub_log_id = nanoid.generate()
     print('-------------------------------------------------------------------')
     print('===================================================================')
@@ -297,10 +299,28 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     my_sub_context.data['parent_log_id'] = context.log_id
     my_sub_log = my_sub_context.chat_log
 
-    to_exit = f"Context: {contextual_info}\n\n Conversation exit criteria: {exit_criteria}.\n\n When exit_criteria met, use the exit_conversation() command specifying concise detailed takeaways."
-    init_sub_msg = f"[SYSTEM]: Initiating chat session with [{my_sub_context.agent_name}] taking User role... \n\n" + to_exit
+    init_sub_msg = f"""[SYSTEM]:
+    Initiating chat session between [{my_sub_context.agent_name}] and {agent_name} ...
+    {contextual_info}
+    
+    {agent_name} may execute several commands to achieve the goal.
+
+    The commands and results from {agent_name} will be shown in the User role as "[{agent_name}]:"
+    
+    Conversation exit criteria: {exit_criteria}.
+
+    At each conversation turn, evaluate whether they have completed the task satisfactorily according to 
+    the exit criteria. If not, give them instructions to guide them towards completion.
+
+    If their command parameters or results or statements satsify the exit criteria, use the exit_conversation() command
+    immediately with the detailed takeaways from the output of {agent_name}.
+
+    Important note: do not ever use the converse_with_agent() command from within this conversation.
+    You are already in such a subconversation. Your role now is to judge whether they have completed the 
+    task at each conversation turn and if necessary guide them towards completion.
+    """
     my_sub_log.add_message({"role": "user", "content": init_sub_msg})
-    my_sub_log.add_message({"role": "assistant", "content": f"[{agent_name}]:" + first_message})
+    my_sub_log.add_message({"role": "assistant", "content": f"[{context.agent_name}]:" + first_message})
     
     finished_conversation = False
     my_sub_context.data['finished_conversation'] = False
@@ -321,7 +341,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
         print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
         async with asyncio.timeout(1200.0):
-            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}", user=context.username)
+            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}", user=context.username, context=my_sub_context)
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))

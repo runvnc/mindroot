@@ -29,14 +29,21 @@ class ActionComponent extends BaseEl {
 
   static styles = [
     css`
+:host {
+  display: block;
+}
 
+details {
+  border: none;
+  display: contents;
+}
 
 @keyframes flash {
   0% { opacity: 0; }
   50% { opacity: 0.5; }
   100% { opacity: 0; }
 }
-
+/*
 .animated-element::before {
   content: '';
   display: inline-block;
@@ -47,7 +54,7 @@ class ActionComponent extends BaseEl {
   background: rgba(200,200,200,0.5);
   animation: flash 0.2s;
   pointer-events: none;
-}
+} */
 
 .animated-element {
   /* position: relative; */
@@ -147,12 +154,16 @@ class ActionComponent extends BaseEl {
         res = html`<pre><code>${unsafeHTML(hih)}</code></pre>`;
       }
     } else {
-      for (var key in params) {
-        if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
-          console.log('rendering markdown', params[key])
+      if (typeof(params) == "string") {
+          res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params))}</div>`;
+      } else {
+        for (var key in params) {
+          if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
+            console.log('rendering markdown', params[key])
 
-          res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]))}</div>`;
-          delete params[key]
+            res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]))}</div>`;
+            delete params[key]
+          }
         }
       }
       paramshtml = this._paramsHTML(params)
@@ -161,11 +172,10 @@ class ActionComponent extends BaseEl {
     return html`
     <details class="animated-element-x" style="position: relative; max-width: 800px;" open >
       <!-- we need to make sure it's open by default so we will set property to true -->
-      <summary class="fn_name" style="display:contents"  >⚡ ${funcName}</summary>
+      <summary class="fn_name">⚡ ${funcName}</summary>
       <div class="av-x"></div>
-      <div class="action" style="display: contents;" >
-        ⚡  <span class="fn_name"> ${unsafeHTML(paramshtml)}
-        <div style="height: 15px; display: block">&nbsp;</div>
+      <div class="action">
+        <span class="fn_name"> ${unsafeHTML(paramshtml)}</span>
         ${res}
       </div> 
     </details>
