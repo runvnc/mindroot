@@ -123,7 +123,7 @@ hit Control-C in the terminal and then run `mindroot` again.
 
 # Knowledgebase
 
-Go to `/admin | Plugins | Install from Github | `runvnc/mr_kb`
+Go to `/admin` | Plugins | Install from Github | `runvnc/mr_kb`
 
 Developers: Creating Plugins and Tool Commands etc.
 ---------------------------------------------------
