@@ -318,6 +318,8 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     Important note: do not ever use the converse_with_agent() command from within this conversation.
     You are already in such a subconversation. Your role now is to judge whether they have completed the 
     task at each conversation turn and if necessary guide them towards completion.
+
+    Remember the command list format from your system message!
     """
     my_sub_log.add_message({"role": "user", "content": init_sub_msg})
     my_sub_log.add_message({"role": "assistant", "content": f"[{context.agent_name}]:" + first_message})

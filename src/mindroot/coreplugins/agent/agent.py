@@ -254,7 +254,7 @@ class Agent:
         async for part in stream:
             buffer += part
             logger.debug(f"Current buffer: ||{buffer}||")
-
+       
             if invalid_start_format(buffer):
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
  

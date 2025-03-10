@@ -46,19 +46,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 return complete_commands, None
         except Exception:
             pass
-        try:
-            raw_replaced = buffer.replace("\n", "  ")
-            parsed_data = loads(raw_replaced)
-            num_commands = len(parsed_data)
-            if num_commands > 1:
-                complete_commands = parsed_data[:num_commands-1]
-            else:
-                complete_commands = []
-            current_partial = parsed_data[-1]
-            return complete_commands, current_partial
-        except Exception:
-            pass
-             
+            
         try:
             raw_replaced = escape_for_json(buffer)
             complete_commands = json.loads(raw_replaced)
@@ -194,7 +182,19 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                     #print(f"Failed to parse buffer even with escaping: {buffer}")
                     #print("\033[0m", end="")
                     pass
-                
+        try:
+            raw_replaced = escape_for_json(buffer)
+            parsed_data = loads(raw_replaced)
+            num_commands = len(parsed_data)
+            if num_commands > 1:
+                complete_commands = parsed_data[:num_commands-1]
+            else:
+                complete_commands = []
+            current_partial = parsed_data[-1]
+            return complete_commands, current_partial
+        except Exception:
+            pass
+                 
         try:
             parsed_data = loads(raw_replaced)
             num_commands = len(parsed_data)

@@ -192,7 +192,7 @@ class Chat extends BaseEl {
     if (handler) {
       content = await handler(data);
     } 
-    if (this.messages[this.messages.length - 1].sender != 'ai' || this.startNewMsg) {
+    if (this.messages[this.messages.length - 1]?.sender != 'ai' || this.startNewMsg) {
       console.log('adding message');
       this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
       this.startNewMsg = false
