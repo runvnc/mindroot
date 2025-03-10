@@ -196,6 +196,7 @@ async def task_result(output: str, context=None):
 
     """
     context.data['finished_conversation'] = True
+    context.data['task_result'] = output
     context.save_context()
     return None
 
@@ -342,8 +343,15 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
         print(termcolor.colored('replies:', 'magenta', attrs=['bold']))
         print(termcolor.colored(replies, 'magenta', attrs=['bold']))
 
+        task_output = replies
+        for result in replies:
+            if 'output' in result['args']:
+                task_output = result['args']['output']
+
+        print(termcolor.colored(task_output, 'magenta', attrs=['bold']))
+
         async with asyncio.timeout(1200.0):
-            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(replies)}", user=context.username, context=my_sub_context)
+            [_, my_replies] = await send_message_to_agent(my_sub_log_id, f"[{agent_name}]: {json.dumps(task_output)}", user=context.username, context=my_sub_context)
             # print my_replies data for debugging, in cyan
             print(termcolor.colored('my_replies:', 'cyan', attrs=['bold']))
             print(termcolor.colored(my_replies, 'cyan', attrs=['bold']))

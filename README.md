@@ -121,6 +121,9 @@ To install a plugin just click the Install button and wait 10-20 seconds and you
 For now I recommend not using the Server control section on the Admin page but rather just
 hit Control-C in the terminal and then run `mindroot` again.
 
+# Knowledgebase
+
+Go to `/admin | Plugins | Install from Github | `runvnc/mr_kb`
 
 Developers: Creating Plugins and Tool Commands etc.
 ---------------------------------------------------
