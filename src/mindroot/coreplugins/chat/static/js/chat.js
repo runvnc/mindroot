@@ -267,9 +267,14 @@ class Chat extends BaseEl {
     
     // Check if the command is 'say' or 'json_encoded_md' and has a registered handler
     const data = JSON.parse(event.data);
+    console.log('running command:', data)
     if ((data.command === 'say' || data.command === 'json_encoded_md') && commandHandlers[data.command]) {
       // Don't show the spinner for these commands if they have handlers
       this.messages[this.messages.length - 1].spinning = 'no';
+    }
+
+    if (data.args.markdown.split('\n').length < 3) {
+        this.messages[this.messages.length - 1].content = tryParse(data.args.markdown);
     }
     
     console.log(event);

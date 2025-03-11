@@ -87,7 +87,9 @@ async def pic_of_me(prompt="", context=None):
     except Exception as e:
         print("Error swapping face:", e)
         swapped = img
-    await context.insert_image("/"+swapped)
+    #await context.insert_image("/"+swapped)
+    print("swapped:", swapped)
     obj = { "markdown": f"![pic_of_me](/{swapped})" }
+    #await context.partial_command('json_encoded_md', obj)
     await context.run_command('json_encoded_md', obj)
 

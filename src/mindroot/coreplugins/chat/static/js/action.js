@@ -157,13 +157,21 @@ details {
       if (typeof(params) === "string") {
           res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params))}</div>`;
       } else {
+        const todel = []
         for (var key in params) {
           if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
             console.log('rendering markdown', params[key])
-
-            res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]))}</div>`;
-            delete params[key]
+            try { 
+            res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]+" "))}</div>`;
+            } catch (e) {
+              res = html`<pre><code>${params[key]}</code></pre>`;
+            }
+            todel.push(key)
+            break
           }
+        }
+        for (let key of todel) {
+          delete params[key]
         }
       }
       paramshtml = this._paramsHTML(params)

@@ -80,7 +80,7 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     msg = """
         # SYSTEM NOTE
         
-        This task is being run via API and requires a textual output.
+        This task is being run via API and requires a textual or structured output.
         You MUST call task_result() with the final output when complete!
 
     """
