@@ -405,7 +405,8 @@ class Agent:
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
-                                        messages=new_messages)
+                                        messages=new_messages,
+                                        context=context)
 
         ret, full_cmds = await self.parse_cmd_stream(stream, context)
         logger.debug("System message was:")
