@@ -154,7 +154,7 @@ details {
         res = html`<pre><code>${unsafeHTML(hih)}</code></pre>`;
       }
     } else {
-      if (typeof(params) == "string") {
+      if (typeof(params) === "string") {
           res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params))}</div>`;
       } else {
         for (var key in params) {

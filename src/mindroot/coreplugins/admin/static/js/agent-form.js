@@ -205,6 +205,7 @@ class AgentForm extends BaseEl {
     this.agent = {
       commands: [],
       name: '',
+      thinking_level: 'medium', // Default to medium
       persona: '',
       required_plugins: []
     };
@@ -513,6 +514,26 @@ class AgentForm extends BaseEl {
               })}>
             </toggle-switch>
           </label>
+        </div>
+
+        <div class="form-group reasoning-level-group">
+          <label>Reasoning Effort:</label>
+          <select name="thinking_level" 
+                 value=${this.agent.thinking_level || 'medium'}
+                 @change=${this.handleInputChange}>
+            <option value="low" 
+                   ?selected=${(this.agent.thinking_level || 'medium') === 'low'}>
+              Low
+            </option>
+            <option value="medium" 
+                   ?selected=${(this.agent.thinking_level || 'medium') === 'medium'}>
+              Medium
+            </option>
+            <option value="high" 
+                   ?selected=${(this.agent.thinking_level || 'medium') === 'high'}>
+              High
+            </option>
+          </select>
         </div>
 
         <div class="form-group commands-section">

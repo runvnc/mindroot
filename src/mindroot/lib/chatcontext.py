@@ -133,6 +133,8 @@ class ChatContext:
                 print('agent_name=', self.agent_name)
                 print('context_data', context_data)
             self.agent = await service_manager.get_agent_data(self.agent_name, self)
+            if 'thinking_level' in self.agent:
+                self.data['thinking_level'] = self.agent['thinking_level']
             self.flags = self.agent.get('flags', [])
             self.data['log_id'] = log_id
             print("loading chat log for id:", log_id, "agent name is:", self.agent_name)

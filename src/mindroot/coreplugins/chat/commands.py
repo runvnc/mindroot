@@ -68,6 +68,16 @@ async def say(text="", context=None):
     The say command is different from other commands in this way which would normally
     return a system acnknowledgement or result, allowing you to continue.
 
+
+    ** Note for Reasoning models **
+
+    If you do some reasoning, then end your command list with a comment informing the user
+    about your plans using the say() command, you reasoning will be discarded, and the user
+    will need to request you to continue, and then you will need to repeat the resasoning.
+    Therefore, if you intend to continue, you should issue further commands after this one,
+    or store your reasoning with the think() command, which does return, and will allow 
+    you to continue without waiting for the user.
+
     """
     print("say command called, text = ", text)
     await context.agent_output("new_message", {"content": text,
