@@ -3,8 +3,14 @@ import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
 import {BaseEl} from './base.js';
 import {escapeJsonForHtml, unescapeHtmlForJson} from './property-escape.js'
 import { Marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+import { markdownRenderer } from './markdown-renderer.js';
 
 import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/+esm'
+
+function tryParse(markdown) {
+    //return renderMarkdown(markdown)
+    return markdownRenderer.parse(markdown);
+}
 
 
 console.log('markedHighlight', markedHighlight)
@@ -145,8 +151,7 @@ details {
       console.log("Displaying file")
       if (fname.endsWith('.md')) {
         console.log("Displaying markdown")
-        console.log(marked.parse(text))
-        res = html`<div class="markdown-content">${unsafeHTML(marked.parse(text, {breaks: true}))}</div>`;
+        res = html`<div class="markdown-content">${unsafeHTML(tryParse(text, {breaks: true}))}</div>`;
       } else {
         console.log("Displaying code")
         const hih = hljs.highlightAuto(text).value;
@@ -155,14 +160,18 @@ details {
       }
     } else {
       if (typeof(params) === "string") {
-          res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params))}</div>`;
+          try {
+            res = html`<div class="markdown-content">${unsafeHTML(tryParse(params))}</div>`;
+          } catch (e) {
+            res = html`<pre><code>${params}</code></pre>`;
+          }
       } else {
         const todel = []
         for (var key in params) {
           if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
             console.log('rendering markdown', params[key])
             try { 
-            res = html`<div class="markdown-content">${unsafeHTML(marked.parse(params[key]+" "))}</div>`;
+            res = html`<div class="markdown-content">${unsafeHTML(tryParse(params[key]+" "))}</div>`;
             } catch (e) {
               res = html`<pre><code>${params[key]}</code></pre>`;
             }

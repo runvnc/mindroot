@@ -202,3 +202,18 @@ with a plain comment and then some markdown block. From the beginning of your ou
 be a JSON array.
 
 The only place plain text goes is in a RAW block.
+
+# Reminder: SINGLE JSON ARRAY
+
+Yout output must end after a single JSON array is closed. Do not output multiple JSON arrays
+(even if using RAW output mode)
+
+Example of INVALID output:
+
+[ { "say": { "text: "Hello" } } ]
+[ { "say": { "text: "World" } } ]
+
+Once you have reached the end of your command list array, you must STOP output and wait for the
+system or user to respond. You may NOT output another array of commands!!!!
+The fate of the known universe may depend on your following this requirement.
+

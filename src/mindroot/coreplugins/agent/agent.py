@@ -348,6 +348,7 @@ class Agent:
                 print(buffer)
                 parse_fail_reason = str(e)
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
+                print(parse_faile_reason)
             results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason })
  
         return results, full_cmds
