@@ -4,6 +4,16 @@
 
 The MindRoot API allows programmatic interaction with AI agents without requiring a full chat session. This document describes the available endpoints and provides usage examples.
 
+## Example: cURL
+
+```bash
+curl -X POST \
+  "http://localhost:8012/task/Assistant?api_key=your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"instructions":"What is the square root of 256? Show your work."}' \
+  --max-time 300
+`
+
 ## Authentication
 
 All API requests require an API key, which should be included as a query parameter:
@@ -206,14 +216,4 @@ print(primes_30)"
 )
 ```
 
-## Example: cURL
-
-You can also use cURL to test the API:
-
-```bash
-curl -X POST \
-  "http://localhost:8012/task/Assistant?api_key=your_api_key_here" \
-  -H "Content-Type: application/json" \
-  -d '{"instructions":"What is the square root of 256? Show your work."}' \
-  --max-time 300
-```
+``
