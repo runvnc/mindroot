@@ -83,10 +83,19 @@ class ChatContext:
 
 
     def save_context_data(self):
-        context_file = f'data/context/context_{self.log_id}.json'
-        with open(context_file, 'r') as f:
-            context_data = json.load(f)
-            context_data['data'] = self.data
+        if not self.log_id:
+            raise ValueError("log_id is not set for the context.")
+        context_file = f'data/context/{self.username}/context_{self.log_id}.json'
+        # Make sure directory exists
+        os.makedirs(os.path.dirname(context_file), exist_ok=True)
+        
+        try:
+            with open(context_file, 'r') as f:
+                context_data = json.load(f)
+        except FileNotFoundError:
+            context_data = {}
+            
+        context_data['data'] = self.data
         
         with open(context_file, 'w') as f:
             json.dump(context_data, f, indent=2)
