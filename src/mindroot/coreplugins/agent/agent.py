@@ -49,7 +49,8 @@ END_RAW
 
 - some JSON args with unescaped newlines, etc.
 
-- multiple command lists. Only one command list response is allowed.
+- multiple command lists. Only one command list response is allowed!
+  - This is a frequent cause of parse errors.
 
 - some characters escaped that did not need to be/invalid
 
