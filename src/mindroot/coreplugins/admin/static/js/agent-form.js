@@ -40,7 +40,7 @@ class AgentForm extends BaseEl {
     }
 
     summary::before {
-      content: "▶";
+      content: "\u25b6";
       display: inline-block;
       margin-right: 5px;
       transition: transform 0.2s;
@@ -202,9 +202,11 @@ class AgentForm extends BaseEl {
     this.commands = {};
     this.loading = false;
     this.plugins = [];
+    this.providerMapping = {}; // Map display names to module names
     this.agent = {
       commands: [],
       name: '',
+      preferred_providers: [],
       thinking_level: 'medium', // Default to medium
       persona: '',
       required_plugins: []
@@ -250,6 +252,17 @@ class AgentForm extends BaseEl {
       const result = await response.json();
       this.plugins = result.data.filter(plugin => plugin.enabled);
       console.log('Fetched plugins:', this.plugins);
+      
+      // Add category (module name) for each plugin if available
+      for (const plugin of this.plugins) {
+        // Use category as the provider module name (like ah_anthropic)
+        // Create a truly unique identifier that combines both name and category
+        const uniqueId = `${plugin.name}_${plugin.category || 'unknown'}`.replace(/[^a-zA-Z0-9]/g, '_');
+        console.log(`Plugin: ${plugin.name}, Category: ${plugin.category}, ID: ${uniqueId}`);
+        plugin._uniqueId = uniqueId;
+        plugin._id = plugin.name.replace(/[^a-zA-Z0-9]/g, '_'); // Create a safe ID for the plugin
+      }
+      
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
         detail: `Error loading plugins: ${error.message}`
@@ -280,14 +293,20 @@ class AgentForm extends BaseEl {
       }
       grouped[provider].push({
         name: cmdName,
+        provider,
+        providerName: provider, // Store explicit provider name for later reference
         docstring: cmdInfo.docstring,
-        flags: cmdInfo.flags
+        flags: cmdInfo.flags,
+        uniqueId: `${cmdName}_${provider}`.replace(/[^a-zA-Z0-9]/g, '_')
       });
+      
+      // Create mapping between provider display name and module name
+      this.providerMapping[provider] = provider;
     }
     return grouped;
   }
 
-  handleInputChange(event) {
+  handleInputChange(event) {  
     const { name, value, type, checked } = event.target;
     
     if (name === 'commands') {
@@ -299,6 +318,7 @@ class AgentForm extends BaseEl {
       } else {
         this.agent.commands = this.agent.commands.filter(command => command !== value);
       }
+
       // Update the entire agent object WITHOUT overwriting commands
       this.agent = { ...this.agent };
       return;
@@ -321,6 +341,31 @@ class AgentForm extends BaseEl {
     // Handle all other inputs
     const inputValue = type === 'checkbox' ? checked : value;
     this.agent = { ...this.agent, [name]: inputValue };
+  }
+
+  handlePreferredProviderChange(e) {
+    const { value, checked, id } = e.detail || e.target;
+    console.log(`Preferred provider change: ID=${id || 'unknown'} Value=${value}, Checked=${checked}`);
+    
+    // Ensure preferred_providers is always an array
+    if (!Array.isArray(this.agent.preferred_providers)) {
+      this.agent.preferred_providers = [];
+    }
+    
+    let preferred_providers = [...this.agent.preferred_providers];
+    
+    if (checked) {
+      if (!preferred_providers.includes(value)) {
+        preferred_providers.push(value);
+        console.log(`Added ${value} to preferred_providers: ${preferred_providers.join(', ')}`);
+      }
+    } else {
+      const index = preferred_providers.indexOf(value);
+      if (index !== -1) preferred_providers.splice(index, 1);
+      console.log(`Removed ${value} from preferred_providers: ${preferred_providers.join(', ')}`);
+    }
+    
+    this.agent = { ...this.agent, preferred_providers };
   }
 
   validateForm() {
@@ -415,24 +460,34 @@ class AgentForm extends BaseEl {
       <div class="commands-category">
         <h4>Required Plugins</h4>
         <div class="commands-grid">
-          ${this.plugins.map(plugin => html`
+          ${this.plugins.map(plugin => {
+            // Use provider name (module name) as the value
+            // Create a unique ID for each toggle
+            const providerName = plugin.category || plugin.name;
+            const toggleId = `req_${plugin._uniqueId}`;
+            
+            console.log(`Rendering required plugin: ${plugin.name}, providerName: ${providerName}, toggleId: ${toggleId}`);
+            
+            return html`
             <div class="command-item">
               <div class="command-info">
                 <div class="command-name">${plugin.name}</div>
               </div>
               <toggle-switch 
-                .checked=${this.agent.required_plugins?.includes(plugin.name) || false}
+                .checked=${this.agent.required_plugins?.includes(providerName) || false}
+                id="${toggleId}"
                 @toggle-change=${(e) => this.handleInputChange({ 
                   target: { 
+                    plugin: plugin,
                     name: 'required_plugins', 
-                    value: plugin.name, 
-                    type: 'checkbox',
+                    value: providerName,
+                    type: 'checkbox', 
                     checked: e.detail.checked 
                   } 
                 })}>
               </toggle-switch>
             </div>
-          `)}
+          `;})}
         </div>
       </div>
     `;
@@ -442,33 +497,75 @@ class AgentForm extends BaseEl {
     return Object.entries(this.commands).map(([provider, commands]) => html`
       <div class="commands-category">
         <details>
-        <summary>${provider}</summary>
+          <summary>${provider}</summary>
+          <div class="commands-grid">
+            ${commands.map(command => html`
+              <div class="command-item">
+                <div class="command-info">
+                  <div class="command-name">${command.name}</div>
+                  ${command.docstring ? html`
+                    <div class="tooltip-text">${command.docstring}</div>
+                  ` : ''}
+                </div>
+                <toggle-switch 
+                  .checked=${this.agent.commands?.includes(command.name) || false}
+                  @toggle-change=${(e) => this.handleInputChange({ 
+                    target: {
+                      name: 'commands', 
+                      value: command.name, 
+                      type: 'checkbox',
+                      checked: e.detail.checked 
+                    }
+                  })}>
+                </toggle-switch>
+              </div>
+            `)}
+          </div>
+        </details>
+      </div>
+    `);
+  }
+
+  renderPreferredProviders() {
+    // Ensure preferred_providers is always an array
+    if (!Array.isArray(this.agent.preferred_providers)) {
+      this.agent.preferred_providers = [];
+    }
+    
+    return html`
+      <div class="commands-category">
+        <h4>Preferred Providers</h4>
         <div class="commands-grid">
-          ${commands.map(command => html`
-            <div class="command-item">
+          ${this.plugins.map(plugin => {
+            // Use provider name (module name) as the value
+            // Create a unique ID for each toggle
+            const providerName = plugin.category || plugin.name; 
+            const toggleId = `pref_${plugin._uniqueId}`;
+            
+            console.log(`Rendering preferred plugin: ${plugin.name}, providerName: ${providerName}, toggleId: ${toggleId}`);
+            
+            return html`
+            <div class="command-item" data-provider="${providerName}">
               <div class="command-info">
-                <div class="command-name">${command.name}</div>
-                ${command.docstring ? html`
-                  <div class="tooltip-text">${command.docstring}</div>
-                ` : ''}
+                <div class="command-name">${plugin.name}</div>
               </div>
               <toggle-switch 
-                .checked=${this.agent.commands?.includes(command.name) || false}
-                @toggle-change=${(e) => this.handleInputChange({ 
-                  target: { 
-                    name: 'commands', 
-                    value: command.name, 
-                    type: 'checkbox',
+                .checked=${this.agent.preferred_providers?.includes(providerName) || false}
+                id="${toggleId}"
+                @toggle-change=${(e) => this.handlePreferredProviderChange({ 
+                  detail: {
+                    plugin: plugin,
+                    value: providerName, 
+                    id: toggleId,
                     checked: e.detail.checked 
                   } 
                 })}>
               </toggle-switch>
             </div>
-          `)}
+          `;})}
         </div>
-        </details>
       </div>
-    `);
+    `;
   }
 
   _render() {
@@ -535,6 +632,13 @@ class AgentForm extends BaseEl {
             </option>
           </select>
         </div>
+        
+        <div class="form-group commands-section" style="display:none;">
+          <details>
+            <summary>Preferred Providers</summary>
+            ${this.renderPreferredProviders()}
+          </details>
+        </div> 
 
         <div class="form-group commands-section">
           <details>

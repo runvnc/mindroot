@@ -16,6 +16,7 @@
 - [Developers: Creating Plugins and Tool Commands etc.](#developers-creating-plugins-and-tool-commands-etc)
 - [Adding Commands to Agents](#adding-commands-to-agents)
 - [API Documentation](#api-documentation)
+- Python SDK
 - [Key Features](#key-features)
 
 
@@ -147,6 +148,33 @@ API Documentation
 MindRoot provides a REST API for programmatic interaction with agents. This allows you to integrate AI capabilities into your applications without using the web interface.
 
 For detailed information on available endpoints, authentication, and usage examples, see the [API Documentation](api.md).
+
+Python SDK
+----------
+
+There is also an SDK for Python that interacts with the API. You can install it with pip:
+```bash
+pip install mrsdk
+```
+
+Usage example:
+```python
+from mrsdk import MindRootClient
+
+client = MindRootClient(api_key="your_api_key_here",
+                        base_url="http://localhost:8010")
+
+result = client.run_task(
+    agent_name="Assistant",
+    instructions="What is the square root of 256? Show your work."
+)
+
+print(result["results"])
+```
+
+Further details including how to get a full trace of the agent activity,
+see the repo here: [mrsdk](https://github.com/runvnc/mrsdk)
+
 
 Key Features:
 -------------

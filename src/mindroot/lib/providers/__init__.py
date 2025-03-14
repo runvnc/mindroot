@@ -6,6 +6,7 @@ from typing import List, Dict, Optional
 from ..db.preferences import find_preferred_models
 from ..db.organize_models import uses_models, matching_models
 from ..utils.check_args import *
+from ..utils.debug import debug_box
 import sys
 import nanoid
 from termcolor import colored
@@ -41,6 +42,7 @@ class ProviderManager:
             raise ValueError(f"function '{name}' not found.")
         preferred_models = None
         preferred_provider = None
+        preferred_providers = None
 
         found_context = False
         context = None
@@ -70,7 +72,40 @@ class ProviderManager:
                     if func_info['provider'] == plugin:
                         function_info = func_info
                         return await function_info['implementation'](*args, **kwargs)
+                
+        # Check if agent has preferred_providers list
+        preferred_providers_list = []
+        if context is not None and hasattr(context, 'agent') and context.agent:
+            debug_box(" ----------------- Merry Christmas -----------------")
+            print("got context agent")
+            print(context.agent)
+            # Handle both formats: list (new) and dict (old/command-specific mapping)
+            preferred_providers = context.agent.get('preferred_providers', [])
+            if isinstance(preferred_providers, list):
+                preferred_providers_list = preferred_providers
+            elif isinstance(preferred_providers, dict):
+                # For backward compatibility with command->provider mapping
+                if name in preferred_providers:
+                    preferred_provider = preferred_providers[name]
+                    for func_info in self.functions[name]:
+                        if func_info['provider'] == preferred_provider:
+                            function_info = func_info
+                            return await function_info['implementation'](*args, **kwargs)
+
+        # If we have a list of preferred providers, check if any implement this command
+        if preferred_providers_list and name in self.functions:
+            for func_info in self.functions[name]:
+                if func_info['provider'] in preferred_providers_list:
+                    return await func_info['implementation'](*args, **kwargs)
+
+        if preferred_providers and name in preferred_providers:
+            preferred_provider = preferred_providers[name]
+            for func_info in self.functions[name]:
+                if func_info['provider'] == preferred_provider:
+                    function_info = func_info
+                    return await function_info['implementation'](*args, **kwargs)
         
+
         if context.__class__.__name__ == 'ChatContext':
             preferred_models = await find_preferred_models(name, context.flags)
             context.data['model'] = None

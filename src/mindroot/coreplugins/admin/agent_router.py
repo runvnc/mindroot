@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import json
 from .agent_importer import scan_and_import_agents, import_github_agent
+from lib.providers.commands import command_manager
 from .persona_handler import handle_persona_import, import_persona_from_index
 import traceback
 
@@ -63,6 +64,16 @@ async def get_full_agent_data(scope: str, name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/command-providers')
+def get_command_providers():
+    """Get all available providers for each command"""
+    result = {}
+    for command_name, providers in command_manager.functions.items():
+        result[command_name] = [
+            p['provider'] for p in providers
+        ]
+    return result
+
 @router.get('/agents/{scope}/{name}')
 def read_agent(scope: str, name: str):
     if scope not in ['local', 'shared']:
@@ -110,6 +121,12 @@ def create_agent(scope: str, agent: str = Form(...)):
         elif not isinstance(agent_data['required_plugins'], list):
             agent_data['required_plugins'] = list(agent_data['required_plugins'])
             
+        # Ensure preferred_providers is present and is a list
+        if 'preferred_providers' not in agent_data:
+            agent_data['preferred_providers'] = []
+        elif not isinstance(agent_data['preferred_providers'], list):
+            agent_data['preferred_providers'] = list(agent_data['preferred_providers'])
+            
         agent_path = BASE_DIR / scope / agent_name / 'agent.json'
         if agent_path.exists():
             raise HTTPException(status_code=400, detail='Agent already exists')
@@ -135,6 +152,12 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
             agent['required_plugins'] = []
         elif not isinstance(agent['required_plugins'], list):
             agent['required_plugins'] = list(agent['required_plugins'])
+            
+        # Ensure preferred_providers is present and is a list
+        if 'preferred_providers' not in agent:
+            agent['preferred_providers'] = []
+        elif not isinstance(agent['preferred_providers'], list):
+            agent['preferred_providers'] = list(agent['preferred_providers'])
             
         agent_path = BASE_DIR / scope / name / 'agent.json'
         if not agent_path.exists():
