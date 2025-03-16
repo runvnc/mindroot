@@ -201,7 +201,6 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             context = ChatContext(command_manager, service_manager, user)
             await context.load_context(session_id)
 
-        print(context) 
         agent_ = agent.Agent(agent=context.agent)
         if user is not None and hasattr(user, "keys"):
             for key in user.keys():
@@ -246,7 +245,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 if os.environ.get("DEFAULT_LLM_MODEL") is not None:
                     context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
     
-                results, full_cmds = await agent_.chat_commands(context.current_model, context=context, messages=context.chat_log.get_recent())
+                results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
                 try:
                     tmp_data3 = { "results": full_cmds }
                     tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)

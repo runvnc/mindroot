@@ -244,7 +244,6 @@ class AgentForm extends BaseEl {
     }
   }
 
-  // Fetch available plugins
   async fetchPlugins() {
     try {
       const response = await fetch('/plugin-manager/get-all-plugins');
@@ -255,12 +254,15 @@ class AgentForm extends BaseEl {
       
       // Add category (module name) for each plugin if available
       for (const plugin of this.plugins) {
-        // Use category as the provider module name (like ah_anthropic)
-        // Create a truly unique identifier that combines both name and category
-        const uniqueId = `${plugin.name}_${plugin.category || 'unknown'}`.replace(/[^a-zA-Z0-9]/g, '_');
-        console.log(`Plugin: ${plugin.name}, Category: ${plugin.category}, ID: ${uniqueId}`);
+        let name = plugin.name;
+        if (plugin.source_path) {
+           name = plugin.source_path.split('/').filter(Boolean).pop();
+        } 
+        const uniqueId = name.replace(/[^a-zA-Z0-9]/g, '_');
+        name = uniqueId;
+        plugin.name = name
         plugin._uniqueId = uniqueId;
-        plugin._id = plugin.name.replace(/[^a-zA-Z0-9]/g, '_'); // Create a safe ID for the plugin
+        plugin._id = uniqueId
       }
       
     } catch (error) {
@@ -269,6 +271,7 @@ class AgentForm extends BaseEl {
       }));
     }
   }
+
 
   async fetchCommands() {
     try {
@@ -290,17 +293,17 @@ class AgentForm extends BaseEl {
       const provider = cmdInfo.provider || 'Other';
       if (!grouped[provider]) {
         grouped[provider] = [];
+        this.plugins.push(provider)
       }
       grouped[provider].push({
         name: cmdName,
         provider,
-        providerName: provider, // Store explicit provider name for later reference
+        providerName: provider,
         docstring: cmdInfo.docstring,
         flags: cmdInfo.flags,
         uniqueId: `${cmdName}_${provider}`.replace(/[^a-zA-Z0-9]/g, '_')
       });
       
-      // Create mapping between provider display name and module name
       this.providerMapping[provider] = provider;
     }
     return grouped;
@@ -355,14 +358,14 @@ class AgentForm extends BaseEl {
     let preferred_providers = [...this.agent.preferred_providers];
     
     if (checked) {
-      if (!preferred_providers.includes(value)) {
-        preferred_providers.push(value);
-        console.log(`Added ${value} to preferred_providers: ${preferred_providers.join(', ')}`);
+      if (!preferred_providers.includes(id)) {
+        preferred_providers.push(id);
+        console.log(`Added ${id} to preferred_providers: ${preferred_providers.join(', ')}`);
       }
     } else {
-      const index = preferred_providers.indexOf(value);
+      const index = preferred_providers.indexOf(id);
       if (index !== -1) preferred_providers.splice(index, 1);
-      console.log(`Removed ${value} from preferred_providers: ${preferred_providers.join(', ')}`);
+      console.log(`Removed ${id} from preferred_providers: ${preferred_providers.join(', ')}`);
     }
     
     this.agent = { ...this.agent, preferred_providers };
@@ -440,6 +443,7 @@ class AgentForm extends BaseEl {
   }
 
   renderRequiredPlugins() {
+    return
     // Ensure required_plugins is always an array
     if (!this.agent.required_plugins) {
       this.agent.required_plugins = [];
@@ -531,7 +535,7 @@ class AgentForm extends BaseEl {
     if (!Array.isArray(this.agent.preferred_providers)) {
       this.agent.preferred_providers = [];
     }
-    
+    console.log('Preferred providers:', this.agent.preferred_providers);
     return html`
       <div class="commands-category">
         <h4>Preferred Providers</h4>
@@ -539,24 +543,21 @@ class AgentForm extends BaseEl {
           ${this.plugins.map(plugin => {
             // Use provider name (module name) as the value
             // Create a unique ID for each toggle
-            const providerName = plugin.category || plugin.name; 
-            const toggleId = `pref_${plugin._uniqueId}`;
-            
-            console.log(`Rendering preferred plugin: ${plugin.name}, providerName: ${providerName}, toggleId: ${toggleId}`);
-            
+            const toggleId = `pref_${plugin.name}`
+            console.log(`Rendering preferred provider for plugin: ${plugin.name}`)
             return html`
-            <div class="command-item" data-provider="${providerName}">
+            <div class="command-item" data-provider="${plugin.name}">
               <div class="command-info">
                 <div class="command-name">${plugin.name}</div>
               </div>
               <toggle-switch 
-                .checked=${this.agent.preferred_providers?.includes(providerName) || false}
+                .checked=${this.agent.preferred_providers?.includes(plugin.name) || false}
                 id="${toggleId}"
                 @toggle-change=${(e) => this.handlePreferredProviderChange({ 
                   detail: {
-                    plugin: plugin,
-                    value: providerName, 
-                    id: toggleId,
+                    plugin: plugin.name,
+                    value: plugin.name, 
+                    id: plugin.name,
                     checked: e.detail.checked 
                   } 
                 })}>
@@ -633,14 +634,14 @@ class AgentForm extends BaseEl {
           </select>
         </div>
         
-        <div class="form-group commands-section" style="display:none;">
+        <div class="form-group commands-section">
           <details>
             <summary>Preferred Providers</summary>
             ${this.renderPreferredProviders()}
           </details>
         </div> 
 
-        <div class="form-group commands-section">
+        <div class="form-group commands-section" style="display: none;">
           <details>
             <summary>Required Plugins</summary>
             ${this.renderRequiredPlugins()}

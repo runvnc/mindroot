@@ -33,7 +33,11 @@ class ProviderManager:
         print("registered function: ", name, provider, implementation, signature, docstring, flags)
     
     async def execute(self, name, *args, **kwargs):
-        #print(f"execute: {name} called")
+        if name == "stream_chat":
+            print(f"execute: {name} called")
+            print(f"args: {args}")
+            print(f"kwargs: {kwargs}")
+            print(f"context: {kwargs['context']}")
 
         if check_empty_args(args, kwargs=kwargs):
             raise ValueError(f"function '{name}' called with empty arguments.")
@@ -49,13 +53,18 @@ class ProviderManager:
         for arg in args:
             if arg.__class__.__name__ == 'ChatContext' or hasattr(arg, 'agent'):
                 found_context = True
+                print("found context")
                 context = arg
                 break
-        
+
+        if not found_context and 'context' in kwargs:
+            context = kwargs['context']
+            found_context = True
 
         if not found_context and not ('context' in kwargs):
             kwargs['context'] = self.context
             context = self.context
+            print("using self.context; context is ", context)
 
         #print("context is ", context)
         need_model = await uses_models(name)
@@ -77,13 +86,15 @@ class ProviderManager:
         preferred_providers_list = []
         if context is not None and hasattr(context, 'agent') and context.agent:
             debug_box(" ----------------- Merry Christmas -----------------")
-            print("got context agent")
-            print(context.agent)
+            #debug_box(str(context.agent))
+            debug_box(f"preferred_providers: {context.agent.get('preferred_providers', ['none'])}")
             # Handle both formats: list (new) and dict (old/command-specific mapping)
             preferred_providers = context.agent.get('preferred_providers', [])
             if isinstance(preferred_providers, list):
+                debug_box("preferred_providers is a list")
                 preferred_providers_list = preferred_providers
             elif isinstance(preferred_providers, dict):
+                debug_box("preferred_providers is a dict")
                 # For backward compatibility with command->provider mapping
                 if name in preferred_providers:
                     preferred_provider = preferred_providers[name]
@@ -92,10 +103,30 @@ class ProviderManager:
                             function_info = func_info
                             return await function_info['implementation'](*args, **kwargs)
 
+        if name == "stream_chat" and context is None:
+            raise ValueError("stream_chat, context is None")
+
+        if name == "stream_chat" and context.agent is None:
+            raise ValueError("stream_chat, context.agent is None")
+
+        if name == "stream_chat":
+
+            debug_box("stream_chat called !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            debug_box(f"agent preferred providers: {context.agent.get('preferred_providers',['none'])}")
+            debug_box(f"preferred_providers_list: {preferred_providers_list}")
+            debug_box(f"self.functions[name]: {self.functions[name]}")
+
         # If we have a list of preferred providers, check if any implement this command
         if preferred_providers_list and name in self.functions:
+            if name == "stream_chat":
+                print("name of function:", name)
+                print(f"preferred_providers_list: {preferred_providers_list}")
             for func_info in self.functions[name]:
+                if name == "stream_chat":
+                    print(f"func_info: {func_info}")
                 if func_info['provider'] in preferred_providers_list:
+                    if name == "stream_chat":
+                        print(f"preferred provider {func_info['provider']} found")
                     return await func_info['implementation'](*args, **kwargs)
 
         if preferred_providers and name in preferred_providers:

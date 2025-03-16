@@ -404,6 +404,9 @@ class Agent:
             print("\033[91mFirst message is not a system message\033[0m")
             return None, None
 
+        if not isinstance(context.agent, dict):
+            context.agent = await get_agent_data(context.agent, context=context)
+
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,
