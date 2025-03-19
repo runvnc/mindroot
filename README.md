@@ -49,8 +49,8 @@ Mindroot
 ### Morgan's Method
 ![Morgan's Method](morgan1.gif)
 
-### Heygen Integration Demo
-![Heygen Integration](heygen.gif)
+### Heygen Integration Demos
+![Heygen Integration](heygenscn.png)
 
 ---
 

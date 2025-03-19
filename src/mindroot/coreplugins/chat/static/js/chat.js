@@ -273,7 +273,7 @@ class Chat extends BaseEl {
       this.messages[this.messages.length - 1].spinning = 'no';
     }
 
-    if (data.args.markdown.split('\n').length < 3) {
+    if (data.args?.markdown?.split('\n').length < 3) {
         this.messages[this.messages.length - 1].content = tryParse(data.args.markdown);
     }
     
