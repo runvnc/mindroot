@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "5.3.1"
+version = "5.3.2"
 description = "An agent framework using LLMs"
 authors = [{name = "Jason Livesay", email = "runvnc@gmail.com"}]
 readme = "README.md"
@@ -48,7 +48,7 @@ dependencies = [
 
 
 [project.urls]
-Homepage = "https://github.com/runvncmindroot"
+Homepage = "https://github.com/runvnc/mindroot"
 
 
 [project.scripts]
