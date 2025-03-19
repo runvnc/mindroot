@@ -7,6 +7,7 @@ The MindRoot plugin system is a modular architecture that combines Python backen
 
 For frontend component details, see below.
 
+```shell
 plugin_name/
 ├── src/
 │   └── plugin_name/
