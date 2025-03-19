@@ -5,7 +5,7 @@ import re
 import json
 from json import JSONDecodeError
 from jinja2 import Template
-from lib.providers.commands import command_manager
+from lib.providers.commands import command_manager, command
 from lib.providers.hooks import hook_manager
 from lib.pipelines.pipe import pipeline_manager
 from lib.providers.services import service
@@ -141,10 +141,6 @@ class Agent:
             print("\033[91mConversation is finished, not executing command\033[0m")
             return None
 
-        if cmd_name == "reasoning":
-            logger.info("Skipping reasoning command")
-            return None
-
         logger.info("Command execution: {command}", command=cmd_name)
         logger.debug("Command details: {details}", details={
             "command": cmd_name,
@@ -154,6 +150,10 @@ class Agent:
         context.chat_log.add_message({"role": "assistant", "content": [{"type": "text", 
                                                                        "text": '['+json_cmd+']' }]})
         command_manager.context = context
+
+        if cmd_name == "reasoning":
+            return None
+
         # cmd_args might be a single arg like integer or string, or it may be an array, or an object/dict with named args
         try:
             if isinstance(cmd_args, list):
@@ -435,5 +435,4 @@ async def run_command(cmd_name, cmd_args, context=None):
     agent = Agent(agent=context.agent)
     json_cmd = json.dumps({cmd_name: cmd_args})
     asyncio.create_task(agent.handle_cmds(cmd_name, cmd_args, json_cmd, context=context))
-
 

@@ -683,6 +683,7 @@ Components can interact with the AI system in several ways:
 - Store component-specific state
 - Share data between components
 - Maintain conversation history
+
 ## Tool Commands
 
 Commands are Python functions that can be called by the AI agent. These must be:
@@ -709,6 +710,7 @@ async def read(fname, context=None):
 ```
 
 Key points about commands:
+
 - Must be async functions
 - Individual parameters must be specified in the signature, not a generic 'params'
 - Should include detailed docstrings with examples
@@ -716,6 +718,26 @@ Key points about commands:
 - Should handle errors gracefully
 - Can return data that the AI can use
 - Must be enabled per-agent in admin interface
+
+
+## Reminder: Tool Command Parameters
+
+The individual parameters in your @command function signature must be specifically
+defined.  You may NOT use a single generic `params` or similar. This style
+will NOT work with the system.
+
+Valid:
+```python
+@command()
+async def do_something(first_arg: str, second_thing: string, context=None):
+  ...
+```
+
+The following is completely invalid:
+```python
+async def do_something(params, context=None):
+
+
 
 ## setup.py and plugin install
 

@@ -31,6 +31,9 @@ Mindroot
 ### Plugin Management
 ![Plugin Management](plugins.png)
 
+### Computer Use
+![Computer Use](cu.gif)
+
 ### 3D Graph Visualization
 ![3D Graph Demo](3dgraph.gif)
 
