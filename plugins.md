@@ -48,7 +48,28 @@ from .mod import *
 
 #### Command Registration
 ```python
-from lib.providers.commands import command
+from lib.providers.commands import commandasync def do_something(params, context=None):
+
+
+
+## setup.py and plugin install
+
+IMPORTANT: **setup.py must handle install/inclusion of any files in subdirs, e.g. `static/`, `templates/`, `inject/`**
+
+Example:
+
+```shell
+...
+    package_data={
+        "mr_pkg1": [
+            "static/js/*.js",
+            "static/*.js"
+            "inject/*.jinja2",
+            "override/*.jinja2"
+        ],
+    },
+ ...
+
 
 @command()
 async def my_command(params, context=None):
@@ -737,7 +758,7 @@ async def do_something(first_arg: str, second_thing: string, context=None):
 The following is completely invalid:
 ```python
 async def do_something(params, context=None):
-
+```
 
 
 ## setup.py and plugin install
