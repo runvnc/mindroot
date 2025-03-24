@@ -160,7 +160,7 @@ def main():
 
     try:
         print(colored(f"Starting server on port {port}", "green"))
-        uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on", timeout_keep_alive=300)
+        uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on", timeout_graceful_shutdown=2)
     except Exception as e:
         print(colored(f"Error starting server: {str(e)}", "red"))
 
