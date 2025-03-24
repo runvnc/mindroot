@@ -204,6 +204,19 @@
       "remote_source": "runvnc/ah_runpod_sd"
     },
     {
+      "name": "Browser Use",
+      "version": "1.0.0",
+      "description": "Browser automation for agents",
+      "source": "github",
+      "github_url": "runvnc/mr_browser_use",
+      "commands": [],
+      "services": [
+        ""
+      ],
+      "dependencies": [],
+      "added_at": "2025-01-07T21:42:52.839951"
+    },
+    {
       "name": "Google Gemini",
       "enabled": true,
       "source": "github",
@@ -214,6 +227,7 @@
         "format_image_message",
         "get_image_dimensions"
       ],
+
       "dependencies": [],
       "remote_source": "runvnc/mr_gemini"
     },
