@@ -133,4 +133,8 @@ use the `/task` endpoint, which specifies the `user` message as it's instruction
 field. You do not need to repeat the System message in an API call, and 
 you should make sure there is no conflict in the instructions.
 
+### Report Generation Concept
+
+Please see the bottom of the [API](api.md) document for a recommendation on instructions and schema for 
+formatted reports.
 

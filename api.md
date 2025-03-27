@@ -236,3 +236,38 @@ print(primes_30)"
 ```
 
 ``
+
+## Report Generation Concept
+
+If you are generating a report with the API, one way to do it:
+
+- put the main general purpose instructions for the agent in the Instructions field under Admin | (Select Agent from dropdown)
+
+- add a document to the KB named `report_generation_schema.txt`. It should say:
+
+```
+All report sections should be generated according to the following example:
+
+{ "page_title": "Networking",
+  "heading": "An optional heading for the top of the page goes here",
+  "subheading": "Optional subheading goes here",
+  "markdown_pages": [ "Here is some *markdown*, maximum of 1 page",
+                      "Here is another page of markdown for the same section"
+  ]
+}
+```
+
+- include just the specific query that is particular to the report, such as the user's requested report parameters,
+  in the API `instructions` field
+
+- Then you can use one HTML template to make your report sections attractive, with a common set of fields above.
+
+- Most of the content is just markdown that is rendered to HTML using a markdown rendering library.
+
+- This way you don't need to edit the template for sections unless they are really unusual and require different formatting.
+
+- If possible, the developer should log in to the `/admin` UI and be sure to read the Instructions for that Agent because that will have
+  more emphasis than his prompt, which ideally contains relatively little information that just customizes the report for a 
+  specific case. Also make sure the appropriate KB and tool commands (such as task_result) are enabled.
+
+- If the developer cannot access the UI, then the instructions on the admin screen for agent should probably be blank to avoid conflicts.
