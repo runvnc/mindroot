@@ -4,6 +4,25 @@
 
 The MindRoot API allows programmatic interaction with AI agents without requiring a full chat session. This document describes the available endpoints and provides usage examples.
 
+## Important Notes regarding the admin UI
+
+1. To use an agent with the `/task` endpoint programmatically, you will need
+to make sure the `task_result` command is enabled, and also do NOT enable
+commands like `say` or `json_encoded_md` that will wait for the user to reply,
+because if the agent chooses to use these commands then the task loop
+will halt waiting for input before the agent has finished.
+
+2. The System instructions in the Agent form Instructions field will remain
+in effect when you use the `/task` endpoint, 
+which specifies the `user` message as it's instructions
+field. You do not need to repeat the System Message in an API call, and 
+you should make sure there is no conflict in the instructions.
+You can optionally remove the System message from the admin UI form
+and instead specify all instructions in your API call, 
+but this may not be as effective with some models as having some instructions
+in the System message.
+
+
 ## Example: cURL
 
 ```bash

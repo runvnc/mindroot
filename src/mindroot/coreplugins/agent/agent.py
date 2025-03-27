@@ -259,7 +259,7 @@ class Agent:
             if invalid_start_format(buffer):
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
  
-                results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result})
+                results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result})
                 return results, full_cmds 
  
             commands, partial_cmd = parse_streaming_commands(buffer)
