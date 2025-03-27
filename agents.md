@@ -50,7 +50,7 @@ text of the document is always included in the System message for the agent.
 
 By default, the system will do a typical RAG vector/kb search where your user
 message is matched as closely as possible to snippets of text from the KB.
-It will retrieve several messages and insert them for the agent to select the most
+It will retrieve several snippets and insert them for the agent to select the most
 relevant information.
 
 The vector/kb search can often retrieve the most relevant information from the KB documents,
