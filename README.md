@@ -128,6 +128,12 @@ hit Control-C in the terminal and then run `mindroot` again.
 
 Go to `/admin` | Plugins | Install from Github | `runvnc/mr_kb`
 
+
+# Walkthrough: Custom Agent Using a Knowledgebase
+
+[Walkthrough](agents.md)
+
+
 Developers: Creating Plugins and Tool Commands etc.
 ---------------------------------------------------
 
