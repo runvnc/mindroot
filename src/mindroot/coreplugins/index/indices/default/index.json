@@ -21,7 +21,7 @@
     },
     {
       "name": "Knowledgebase",
-      "version": "1.0.0",i
+      "version": "1.0.0",
       "description": "Knowledgebase with vector search",
       "source": "github",
       "github_url": "runvnc/mr_kb",
