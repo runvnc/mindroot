@@ -3,6 +3,8 @@ import {BaseEl} from './base.js'
 import {isMobile} from './ismobile.js'
 import { authenticatedFetch } from './authfetch.js';
 
+// show in bright orange in the console
+console.log('%cChatForm loaded', 'color: orange; font-weight: bold;')
 
 class ChatForm extends BaseEl {
   static properties = {
@@ -15,41 +17,59 @@ class ChatForm extends BaseEl {
   static styles = [
     css`
       .message-input {
-        min-height: 3em;
+        min-height: 5em;
         border-radius: 0;
         border: 1px solid #444;
         max-height: 40em;
-        resize: none;
         overflow-y: hidden;
         box-sizing: border-box;
         flex: 9;
         width: auto;
-        height: 80px;
+        height: 140px;
         flex-shrink: 1;
+        padding-right: 75px; /* Increased space */
       }
       .message-container {
-        height: 85px;
+        height: 145px;
         display: flex;
+        position: relative;
+        align-items: flex-end;
       }
 
       button {
         border-radius: 0;
         border: none;
-        height: 80px;
-        flex: 0 0 50px;
+        height: 40px;
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        flex-shrink: 0;
+      }
+      
+      .send_msg {
+        position: absolute;
+        right: 21px; /* Original optimal position */
+        margin-right: 5px;
+        bottom: 15px; /* Raised 5px to prevent bottom overlap */
+        /* background: transparent; */
+        background-color: #101020
+
+        border: none; /* 1px solid #444; */
+        border-left: none;
       }
       .stop-button {
+        position: absolute;
+        margin-right: 5px;
+        right: 61px; /* Maintains 40px spacing from send button */
+        bottom: 15px; /* Matches send button exactly */
+        background: #ff4d4d;
         color: white;
         border: none;
-        padding: 8px;
-        margin-left: 5px;
-        cursor: pointer;
-        height: 80px;
       }
-      .stop-button svg {
-        width: 24px;
-        height: 24px;
-      }
+
+
       .image-preview-container {
         display: none;
         margin-bottom: 10px;
@@ -161,22 +181,23 @@ class ChatForm extends BaseEl {
       }
       await this._processImage(file)
     }
-    //e.target.value = '' // Reset file input
   }
 
   _resizeTextarea() {
     if (this.autoSizeInput) {
       const textarea = this.messageEl;
-      // Reset height to auto to get the correct scrollHeight
       textarea.style.height = 'auto';
-      // Set the height to the scrollHeight
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640); // 3em to 40em
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640);
       textarea.style.height = `${newHeight}px`;
-      this.requestUpdate();
-      console.log('resize')
+      
+      const container = this.shadowRoot.querySelector('.message-container');
+      if (container) {
+        container.style.height = (newHeight + 5) + 'px';
+      }
+      
+      this.previousHeight = newHeight;
     }
   }
-
 
   async _processImage(file) {
     if (this.isLoading) return
@@ -242,7 +263,16 @@ class ChatForm extends BaseEl {
   
   firstUpdated() {
     this.messageEl = this.shadowRoot.getElementById('inp_message');
-    this.messageEl.value = '';
+    this.sendButton = this.shadowRoot.querySelector('.send_msg');
+    
+    const observer = new MutationObserver(() => {
+      const stopButton = this.shadowRoot.querySelector('.stop-button');
+      if (stopButton) this._resizeTextarea();
+    });
+    observer.observe(this.shadowRoot, { childList: true, subtree: true });
+    
+    this.messageEl.value = '';   
+    this.messageEl.addEventListener('input', () => this._resizeTextarea());
     new ResizeObserver(() => this._resizeTextarea()).observe(this.messageEl);
   }
 
@@ -263,7 +293,6 @@ class ChatForm extends BaseEl {
       },500)
     }
   }
-
 
   async _send(event) {
     console.log("in _send")
@@ -336,16 +365,10 @@ class ChatForm extends BaseEl {
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-2xl"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.1918 8.90615C15.6381 8.45983 16.3618 8.45983 16.8081 8.90615L21.9509 14.049C22.3972 14.4953 22.3972 15.2189 21.9509 15.6652C21.5046 16.1116 20.781 16.1116 20.3347 15.6652L17.1428 12.4734V22.2857C17.1428 22.9169 16.6311 23.4286 15.9999 23.4286C15.3688 23.4286 14.8571 22.9169 14.8571 22.2857V12.4734L11.6652 15.6652C11.2189 16.1116 10.4953 16.1116 10.049 15.6652C9.60265 15.2189 9.60265 14.4953 10.049 14.049L15.1918 8.90615Z" fill="currentColor"></path></svg>
         </button>
 
-        <!--
-        <button type="button" @click=${this._send} class="send_msg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M11.354 8.354a.5.5 0 0 0 0-.708l-7-7a.5.5 0 0 0-.708.708L10.293 8l-6.647 6.646a.5.5 0 0 0 .708.708l7-7a.5.5 0 0 0 0-.708z"/>
-          </svg>    
-        </button> -->
         ${this.taskid ? html`
           <button type="button" @click=${this._cancelChat} class="stop-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-             <!-- <rect width="10" height="10" x="3" y="3"/> -->
+              <rect width="10" height="10" x="3" y="3"/>
             </svg>
           </button>
         ` : ''}
