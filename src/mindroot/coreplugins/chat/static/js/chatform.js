@@ -188,13 +188,14 @@ class ChatForm extends BaseEl {
       const textarea = this.messageEl;
       textarea.style.height = 'auto';
       const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640);
-      textarea.style.height = `${newHeight}px`;
-      
-      const container = this.shadowRoot.querySelector('.message-container');
-      if (container) {
-        container.style.height = (newHeight + 5) + 'px';
+      if (textarea.clientHeight != newHeight) {
+        console.log("height does not match. current height: ", textarea.style.height, " new height: ", `${newHeight}px`)
+        textarea.style.height = `${newHeight}px`;
       }
-      
+      const container = this.shadowRoot.querySelector('.message-container');
+      if (container && container.clientHeight != (newHeight + 5)) {
+          container.style.height = (newHeight + 5) + 'px';
+      }
       this.previousHeight = newHeight;
     }
   }
