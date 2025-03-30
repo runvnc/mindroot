@@ -56,7 +56,10 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     Run a task with the given instructions
     IMPORTANT NOTE: agent must have the task_result() command enabled.
     """
+
     if context is None:
+        debug_box("Context is none")
+        debug_box("agent_name: " + agent_name)
         if log_id is None:
             log_id = nanoid.generate()
         if user is None:
@@ -70,6 +73,9 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         context.log_id = log_id
         context.agent = await service_manager.get_agent_data(agent_name)
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
+    else:
+        debug_box("Context is not none")
+        print(context)
     
     print("run_task: ", instructions, "log_id: ", context.log_id)
     

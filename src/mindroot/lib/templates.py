@@ -1,4 +1,5 @@
 import os
+import logging
 from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 from .plugins import list_enabled, get_plugin_path
 from .parent_templates import get_parent_templates_env
@@ -106,6 +107,46 @@ async def find_parent_template(page_name, plugins):
                     return alt_path
     return None
 
+async def find_plugin_template(page_name, plugins):
+    """Find a template in a plugin's templates directory.
+    
+    Args:
+        page_name (str): Name of the template page
+        plugins (list): List of enabled plugins
+        
+    Returns:
+        tuple: (template_path, template_obj) if found, (None, None) otherwise
+    """
+    for plugin in plugins:
+        plugin_path = get_plugin_path(plugin)
+        if not plugin_path:
+            print(f'Warning: Could not find path for plugin: {plugin}')
+            continue
+            
+        # Try to find the template in the plugin's templates directory
+        template_paths = [
+            os.path.join(plugin_path, 'templates', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', plugin, 'templates', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', 'templates', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', plugin_path.split('/')[-1], 'templates', f'{page_name}.jinja2'),
+        ]
+        
+        for path in template_paths:
+            if os.path.exists(path):
+                print(f'Found template in plugin: {path}')
+                # Try to get the template from the environment
+                try:
+                    # Convert to relative path from one of our template roots
+                    for loader in env.loader.loaders:
+                        for template_dir in loader.searchpath:
+                            rel_path = os.path.relpath(path, template_dir)
+                            if not rel_path.startswith('..'):
+                                template = env.get_template(rel_path)
+                                return rel_path, template
+                except Exception as e:
+                    print(f'Error loading template: {e}')
+    return None, None
+
 async def load_plugin_templates(page_name, plugins):
     """Load templates from plugins.
     
@@ -196,7 +237,7 @@ async def render_combined_template(page_name, plugins, context):
     Args:
         page_name (str): Name of the template page
         plugins (list): List of enabled plugins
-        context (dict): Template context data
+        context (dict): Template context data (can be None)
         
     Returns:
         str: Rendered HTML
@@ -205,6 +246,9 @@ async def render_combined_template(page_name, plugins, context):
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
+    
+    # Ensure context is a dictionary
+    context = context or {}
 
     print("child_templates", child_templates)
 
@@ -260,12 +304,33 @@ async def render_combined_template(page_name, plugins, context):
 
     return rendered_html
 
+async def render_direct_template(template_path, context):
+    """Render a template directly without combining with a parent template.
+    
+    Args:
+        template_path (str): Path to the template
+        context (dict): Template context data
+        
+    Returns:
+        str: Rendered HTML
+    """
+    # Ensure context is a dictionary
+    context = context or {}
+    
+    try:
+        template = env.get_template(template_path)
+        return template.render(**context)
+    except Exception as e:
+        logging.error(f"Error rendering template {template_path}: {e}")
+        return f"<h1>Error rendering template</h1><p>{str(e)}</p>"
+
 async def render(page_name, context):
     """Render a template with plugin injections and overrides.
+    If no parent template exists, tries to render a template directly from a plugin.
     
     Args:
         page_name (str): Name of the template page
-        context (dict): Template context data
+        context (dict): Template context data (can be None)
         
     Returns:
         str: Rendered HTML
@@ -275,6 +340,21 @@ async def render(page_name, context):
     # report details including page name and plugins enabled
     print("\033[101m" + f"Rendering page {page_name} with plugins enabled:")
     print(plugins)
-    # reset color
     print("\033[0m")
-    return await render_combined_template(page_name, plugins, context)
+    
+    # Ensure context is a dictionary
+    context = context or {}
+    
+    # First try to render with the combined template approach
+    try:
+        parent_env.get_template(f"{page_name}.jinja2")
+        return await render_combined_template(page_name, plugins, context)
+    except Exception as e:
+        print(f"No parent template found for {page_name}, trying direct rendering: {e}")
+        
+        # Try to find and render a template directly from a plugin
+        template_path, _ = await find_plugin_template(page_name, plugins)
+        if template_path:
+            return await render_direct_template(template_path, context)
+        
+        return f"<h1>Template Not Found</h1><p>No template found for '{page_name}'</p>"
