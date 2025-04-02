@@ -350,6 +350,7 @@ class Agent:
                 parse_fail_reason = str(e)
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
                 print(parse_fail_reason)
+                await asyncio.sleep(1)
             results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason })
  
         return results, full_cmds
@@ -391,9 +392,9 @@ class Agent:
             max_tokens = int(os.environ.get("AH_DEFAULT_MAX_TOKENS"))
         try:
             tmp_data = { "messages": new_messages }
-            #debug_box("Filtering messages")
+            debug_box("Filtering messages")
             #debug_box(tmp_data)
-            #tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
+            tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
             new_messages = tmp_data['messages']
         except Exception as e:
             logger.error("Error filtering messages")

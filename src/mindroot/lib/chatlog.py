@@ -124,3 +124,12 @@ class ChatLog:
         else:
             print("Could not find log file at ", log_file)
             self.messages = []
+
+    def delete_log(self) -> None:
+        log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
+        if os.path.exists(log_file):
+            os.remove(log_file)
+            print("Deleted log file at ", log_file)
+        else:
+            print("Could not find log file at ", log_file)
+

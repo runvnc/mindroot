@@ -48,6 +48,7 @@ def results_text_output(results):
     text = text.rstrip()
     return text
 
+    
 
 
 @service()
@@ -151,7 +152,7 @@ async def get_chat_history(agent_name: str, session_id: str, user:str):
 
 def process_result(result, formatted_results):
     print("type of result is ", type(result))
-    if 'result' in result and type(result['result']) is dict and 'type' in result['result'] and result['result']['type'] == 'image': 
+    if 'result' in result and type(result['result']) is dict and 'type' in result['result'] and 'image' in result['result']['type']: 
         print("A")
         img_data = result['result']
         result['result'] = '...'
