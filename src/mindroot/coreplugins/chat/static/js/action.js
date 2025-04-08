@@ -25,6 +25,19 @@ const marked = new Marked(
   })
 )
 
+ const format_ = (x) => {
+      // if it is a string then split, otherwise return the object
+      if (typeof(x) == 'string') {
+        return x.split('\n')[0].slice(0, 160)
+      } else {
+        if (x+"" == "[[object Object]]") {
+          return JSON.stringify(x)
+        } else {
+          return x
+        }
+      }
+    }
+
 
 class ActionComponent extends BaseEl {
   static properties = {
@@ -74,18 +87,22 @@ details {
     //this.params = {};
     this.result = '';
   }
-
+ 
   _paramsHTML(params) {
     let paramshtml = '';
-    const format_ = (x) => {
+/*    const format_ = (x) => {
         // if it is a string then split, otherwise return the object
         if (typeof(x) == 'string') {
           return x.split('\n')[0].slice(0, 160)
         } else {
-          return x
+          if (x+"" == "[[object Object]]") {
+            return JSON.stringify(x)
+          } else {
+            return x
+          }
         }
       }
- 
+ */
     if (Array.isArray(params)) {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${format_(item)}), </span> `;
@@ -119,8 +136,8 @@ details {
       params = params.val
     }
     let dontTruncate = false;
-    let format_;
-    if (funcName != 'write') {
+    //let format_;
+    /* if (funcName != 'write') {
       format_ = (str) => {
         return str
       }
@@ -129,7 +146,7 @@ details {
         return str.split('\n')[0].slice(0, 160)
       }
     }
-
+*/
     paramshtml = this._paramsHTML(params)
 
     console.log('paramshtml', paramshtml)
@@ -146,10 +163,10 @@ details {
         </details>`;
       }
     }
-    if (funcName === 'write') {
+    if (funcName === 'write' || funcName == 'think') {
       const {fname, text} = params;
       console.log("Displaying file")
-      if (fname.endsWith('.md')) {
+      if (fname?.endsWith('.md') || funcName == 'think') {
         console.log("Displaying markdown")
         res = html`<div class="markdown-content">${unsafeHTML(tryParse(text, {breaks: true}))}</div>`;
       } else {

@@ -25,6 +25,9 @@ class ProviderManager:
             return
         else:
             pass
+        if name == 'say':
+            debug_box('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+            print("REGISTER:", name, provider)
         self.functions[name].append({'implementation': implementation, 'docstring': docstring, 'flags': flags, 'provider': provider})
 
     async def execute(self, name, *args, **kwargs):
@@ -216,14 +219,15 @@ class ProviderManager:
         return {name: self.get_docstring(name) for name in self.functions.keys()}
 
     def get_some_docstrings(self, names):
+        debug_box("------------------------->>>>>>>>>>>>>>>>>>>>>>")
+        print("Get some doc strings")
+        print("self.functions", self.functions.keys())
         filtered = []
         for name in names:
             if name not in self.functions:
                 logging.warning(f"agent function '{name}' not found")
             else:
                 filtered.append(name)
-        else:
-            pass
         return {name: self.get_docstring(name) for name in filtered}
 
     def __getattr__(self, name):

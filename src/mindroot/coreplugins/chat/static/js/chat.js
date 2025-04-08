@@ -198,7 +198,9 @@ class Chat extends BaseEl {
       this.startNewMsg = false
     }
 
-    if (data.command == 'say' || data.command == 'json_encoded_md') {
+    if (data.command == 'say' || data.command == 'json_encoded_md' ||
+        data.command == 'wait_for_user_reply' || data.command == 'markdown_await_user' ||
+        data.command == 'tell_and_continue') {
       // Check if there's a registered handler for this command
       if (handler) {
         console.log('Used registered handler for', data.command);

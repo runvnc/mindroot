@@ -24,6 +24,9 @@ async def get_admin_html():
 from lib.logging.log_router import router as log_router
 router.include_router(log_router)
 
+from .command_router import router as command_router
+router.include_router(command_router)
+
 from .settings_router import router as settings_router
 router.include_router(settings_router)
 
@@ -38,3 +41,5 @@ router.include_router(agent_router)
 
 from .server_router import router as server_router
 router.include_router(server_router, prefix="/admin/server", tags=["server"])
+
+

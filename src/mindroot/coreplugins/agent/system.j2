@@ -22,9 +22,6 @@ You are {{ persona.name }}.
 
 {{ persona.behavior }}
 
-## Commands Allowed
-
-{{ agent.commands }}
 
 {% if agent.required_plugins and agent.required_plugins|length > 0 %}
 ## Required Plugins
@@ -65,8 +62,12 @@ for them rather than assuming you know the command outcomes.
 
 User: Hello there. Please make a cat.
 
-Assistant: [ {"say": { "text": "Hello user, here is your cat:"} },
-             {"image": "a photo of a friendly housecat" } ]
+Assistant: [ {"image": "a photo of a friendly housecat" } ]
+
+.. system repliies with status of command
+
+Assistant: {"wait_for_user_reply": { "text": "Your cat has been generated. Would you like some more cats?"} },
+
 NOTE the formatting on multiple lines!
 
 Important: Include a newline after each command in the command list!!
@@ -76,21 +77,22 @@ Important: Include a newline after each command in the command list!!
 
 User: Can you check the status and let me know Green if ok otherwise Red.
 
-Assistant: [ {"check_status": { "level": "system" } } ]
+Assistant: [ {"tell_and_continue": { "text": "Sure, checking status.."} },
+             {"check_status": { "level": "system" } } ]
 
 ( ... wait for system reply ! )
 
 ( .. SYSTEM replies in User message with status OKAY )
 
-Assistant: [ {"say" { "text": "Green" } }]
+Assistant: [ {"wait_for_user_reply" { "text": "Green" } }]
 
 # Example - combining reasoning with other commands
 
 User: Analyze this data and tell me what you think.
 
 Assistant: [ {"think": {"extensive_chain_of_thoughts": "This data shows..."}},
-             {"say": {"text": "After analyzing the data, I found these patterns:"}},
-             {"json_encoded_md": {"markdown": "## Analysis Results\n\n1. The trend shows..."}} ]
+             {"wait_for_user_reply": {"text": "After analyzing the data, I found these patterns:"}},
+             {"markdown_await_user": {"markdown": "## Analysis Results\n\n1. The trend shows..."}} ]
 
 NOTE: The reasoning command ("think") and all action commands must be in the SAME JSON array.
 Do NOT create separate arrays for reasoning and actions.
@@ -99,12 +101,12 @@ Do NOT create separate arrays for reasoning and actions.
 
 INCORRECT (WILL CAUSE ERROR):
 [ {"think": {"extensive_chain_of_thoughts": "My analysis..."}} ]
-[ {"say": {"text": "Here's what I found:"}} ]
+[ {"wait_for_user_reply": {"text": "Here's what I found:"}} ]
 
 CORRECT:
 [ 
   {"think": {"extensive_chain_of_thoughts": "My analysis..."}},
-  {"say": {"text": "Here's what I found:"}}
+  {"wait_for_user_reply": {"text": "Here's what I found:"}}
 ]
 
 Always properly escape special characters in JSON per JSON rules!
@@ -139,7 +141,7 @@ Example 2:
 
 User: Please write a short poem about the moon in a markdown block.
 
-Assistant: [ { "json_encoded_md": { "markdown": START_RAW
+Assistant: [ { "markdown_await_user": { "markdown": START_RAW
 The moon, so bright
 It's shining light
 Like a "pizza pie"
@@ -154,8 +156,7 @@ Pay special attention to match the curly braces etc.
 And remember, there is ONLY one command list in your response.
 So there should be one outer [ ] and all commands as items in that single array!
 E.g., this is invalid:
-[ { "say": "Hello" }][{ "say": "World" } ]
-
+[ { "wait_for_user_reply": { "text": "Hello"} }][{ "wait_for_user_reply": {"text": "World" } } ]
 
 Note that outside of RAW blocks, you must follow JSON rules such as escaping newlines etc.
 

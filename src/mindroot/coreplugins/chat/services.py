@@ -89,6 +89,9 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         
         This task is being run via API and requires a textual or structured output.
         You MUST call task_result() with the final output when complete!
+        If your instructions indicate multiple steps with multiple function calls,
+        wait for the system results as you process each step in turn, then
+        call task_result() with the final output after all steps are truly complete.
 
     """
 
@@ -264,6 +267,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 for cmd in full_cmds:
                     full_results.append(cmd)
                 out_results = []
+                stop_requested= False
                 actual_results = False
                 await asyncio.sleep(0.001)
                 for result in results:
@@ -273,6 +277,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                             continue_processing = True
                         elif result['result'] == 'stop':
                             continue_processing = False
+                            stop_requested = True
                         else:
                             out_results.append(result)
                             # only print up to 200 characters
@@ -283,7 +288,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     else:
                         continue_processing = False
 
-                if actual_results:
+                if actual_results and not stop_requested:
                     continue_processing = True
                 
                 if len(out_results) > 0:

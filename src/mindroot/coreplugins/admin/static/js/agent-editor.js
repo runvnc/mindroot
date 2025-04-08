@@ -4,6 +4,7 @@ import './agent-form.js';
 import './agent-list.js';
 import './indexed-agents.js';
 import './github-import.js';
+import './missing-commands.js';
 
 class AgentEditor extends BaseEl {
   static properties = {
@@ -153,6 +154,13 @@ class AgentEditor extends BaseEl {
           @agent-installed=${this.handleAgentInstalled}
           @error=${this.handleError}>
         </github-import>
+
+        ${this.agent.name ? html`
+          <details>
+            <summary>Missing Commands</summary>
+            <missing-commands .agentName=${this.agent.name}></missing-commands>
+          </details>
+        ` : ''}
 
       </div>
     `;

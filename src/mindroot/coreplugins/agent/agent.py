@@ -337,7 +337,18 @@ class Agent:
 
         #print("\033[92m" + str(full_cmds) + "\033[0m")
         # getting false positive on this check
-        if len(full_cmds) == 0:
+        reasonOnly = False
+        try:
+            cmd_name = next(iter(full_cmds[0]))
+            if cmd_name == 'reasoning':
+                reasonOnly = True
+                for cmd in full_cmds:
+                    if cmd_name != 'reasoning':
+                        reasonOnly = False
+                        break
+        except Exception as e:
+            pass
+        if len(full_cmds) == 0 or reasonOnly:
             print("\033[91m" + "No results and parse failed" + "\033[0m")
             
             try:
@@ -369,6 +380,20 @@ class Agent:
             "formatted_datetime": formatted_time,
             "context_data": self.context.data
         }
+        # is say in the command_manager
+        if 'say' in command_manager.functions.keys():
+            print("I found say! in the functions!")
+        else:
+            print("Say is not in the functions!")
+        if 'say' in data['command_docs'].keys():
+            print("I found say in the command docs!")
+    
+        # we need to be doubly sure to remove anything from command_docs that is not in command_manager.functions.keys()
+        for cmd in data['command_docs']:
+            if cmd not in command_manager.functions.keys():
+                print("Removing " + cmd + " from command_docs")
+                del data['command_docs'][cmd]
+
         self.system_message = self.sys_template.render(data)
         additional_instructions = await hook_manager.add_instructions(self.context)
 

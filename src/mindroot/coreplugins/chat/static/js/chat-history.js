@@ -72,6 +72,15 @@ export class ChatHistory {
             const cmds = JSON.parse(part.text);
             for (let cmd of cmds) {
                 let markdown = null;
+                if (cmd.wait_for_user_reply) {
+                    if (cmd.wait_for_user_reply.text == undefined) cmd.wait_for_user_reply = { text: cmd.wait_for_user_reply }
+                    markdown = markdownRenderer.parse(cmd.wait_for_user_reply.text);
+                }
+                if (cmd.tell_and_continue) {
+                    if (cmd.tell_and_continue.text == undefined) cmd.tell_and_continue = { text: cmd.tell_and_continue }
+                    markdown = markdownRenderer.parse(cmd.tell_and_continue.text);
+                }
+  
                 if (cmd.say) {
                     if (cmd.say.text == undefined) cmd.say = { text: cmd.say }
                     markdown = markdownRenderer.parse(cmd.say.text);
@@ -79,6 +88,10 @@ export class ChatHistory {
                 if (cmd.json_encoded_md) {
                     markdown = markdownRenderer.parse(cmd.json_encoded_md.markdown);
                 }
+                if (cmd.markdown_await_user) {
+                    markdown = markdownRenderer.parse(cmd.markdown_await_user.markdown);
+                }
+ 
                 if (markdown) {
                     this.chat.messages = [...this.chat.messages, {
                         content: markdown,

@@ -8,87 +8,66 @@ import nanoid
 import termcolor
 
 @command()
-async def say(text="", context=None):
+async def tell_and_continue(text="", context=None):
     """
-    Say something to the user or chat room.
+    Say something to the user or chat room, then CONTINUE processing.
+    One sentence per command. If you want to say multiple sentences, use multiple commands.
+    This is for providing the user with a status update without stopping.
+
+    Parameters:
+    text - String. The text to say.
+
+    Return: True  
+
+    ## Example 1
+   
+    [
+        { "tell_and_continue": { "text": "Hello, user. I will make that directory for you and then continue with the task.." } },
+        { "mkdir": { "absolute_path": "/new/dir" } }
+    ]
+
+    """
+    await context.agent_output("new_message", {"content": text,
+                               "agent": context.agent['name'] })
+    return True
+
+
+@command()
+async def wait_for_user_reply(text="", context=None):
+    """
+    Say something to the user or chat room, then STOP processing and wait for them to reply.
     One sentence per command. If you want to say multiple sentences, use multiple commands.
 
     Parameters:
     text - String. The text to say.
 
-    Return: No return value. To continue without waiting for user reply, add more commands  
-            in the command array. Otherwise, be sure to issue the task_complete or similar
-            command to indicate that the system should wait for the user reply.
-            If you need the result of another command, do not end with task_complete.
+    Return: No return value. After executing commands in the command list, the
+            system will wait for the user to reply, UNLESS you include a command
+            in your list that returns a value. Therefore, do not use this with
+            other commands that return a value instead of waiting.
 
     ## Example 1
    
-   (in this example we issue multiple 'say' commands, but are finished with commands after that)
+   (in this example we issue multiple commands, but are finished with commands after that)
 
     [
-        { "say": { "text": "Hello, user." } },
-        { "say": { "text": "How can I help you today? } },
+        { "wait_for_user_reply": { "text": "Hello, user. Here is some more info on that:" } },
+        { "markdown_await_user": { "text": "[A few paragraphs of info, using RAW encoding]" } },
         { "task_complete": {} }
     ]
 
     (The system waits for the user reply)
-   
-
-    ## Example 2
-
-    (In this example we issue a command and don't wait for the command result)
-
-    [
-        { "say": { "text": "Sure, I can run that command" } },
-        { "execute_command": { "cmd": "update_db 3" } },
-        { "task_complete": {} }
-    ]
-
-    ## Example 3
-
-    (In this example we issue a command and wait for the result from the system)
-
-    [
-        { "say": { "text": "Sure, I can run that command" } },
-        { "execute_command": { "cmd": "ls -l" } }
-    ]
-
-
-    (The system now returns the command output)
-
-
-    ** Important Note **
-
-    The say() command is a special type of command that stops after it is executed.
-    That means, if you want to continue to do work, such as running another commmand
-    after informing the user about your plans, it is CRITICAL that you place those
-    commands in additional items in the same array.
-
-    Otherwise, the system will stop and wait for the user to respond after each say() command.
-    The say command is different from other commands in this way which would normally
-    return a system acnknowledgement or result, allowing you to continue.
-
-
-    ** Note for Reasoning models **
-
-    If you do some reasoning, then end your command list with a comment informing the user
-    about your plans using the say() command, you reasoning will be discarded, and the user
-    will need to request you to continue, and then you will need to repeat the resasoning.
-    Therefore, if you intend to continue, you should issue further commands after this one,
-    or store your reasoning with the think() command, which does return, and will allow 
-    you to continue without waiting for the user.
 
     """
-    print("say command called, text = ", text)
     await context.agent_output("new_message", {"content": text,
                                "agent": context.agent['name'] })
-    return None
+    return 'stop'
 
 
 @command()
-async def json_encoded_md(markdown="", context=None):
+async def markdown_await_user(markdown="", context=None):
     """
-    Output some markdown text to the user or chat room.
+    Output some markdown text to the user or chat room and then wait for the user's reply.
     Use this for any somewhat longer text that the user can read and
     and doesn't necessarily need to be spoken out loud.
 
@@ -114,7 +93,7 @@ async def json_encoded_md(markdown="", context=None):
 
     # Basic Example
 
-        { "json_encoded_md":
+        { "markdown_await_user":
           { "markdown": START_RAW
     ## Section 1
 
@@ -129,6 +108,7 @@ async def json_encoded_md(markdown="", context=None):
     """
     #await context.agent_output("new_message", {"content": markdown,
     #                                        "agent": context.agent['name'] })
+    return 'stop'
 
 zz="""
 Avoid putting LaTeX math expressions directly after list markers (1., -, *) - add some regular text first

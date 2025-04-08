@@ -22,9 +22,6 @@ You are {{ persona.name }}.
 
 {{ persona.behavior }}
 
-## Commands Allowed
-
-{{ agent.commands }}
 
 {% if agent.required_plugins and agent.required_plugins|length > 0 %}
 ## Required Plugins
@@ -37,6 +34,9 @@ The following plugins are required for this agent: {{ agent.required_plugins|joi
 {{ persona.speech_patterns }}
 
 # Command System
+
+⚠️ CRITICAL: Your ENTIRE response must be ONE AND ONLY ONE JSON array [ ] containing ALL commands.
+NEVER output multiple arrays in one response!
 
 You output commands in a JSON format inside of a SINGLE array.
 EACH array item MUST be separated by a newline charcter after the comma!
@@ -80,6 +80,29 @@ Assistant: [ {"check_status": { "level": "system" } } ]
 ( .. SYSTEM replies in User message with status OKAY )
 
 Assistant: [ {"say" { "text": "Green" } }]
+
+# Example - combining reasoning with other commands
+
+User: Analyze this data and tell me what you think.
+
+Assistant: [ {"think": {"extensive_chain_of_thoughts": "This data shows..."}},
+             {"say": {"text": "After analyzing the data, I found these patterns:"}},
+             {"json_encoded_md": {"markdown": "## Analysis Results\n\n1. The trend shows..."}} ]
+
+NOTE: The reasoning command ("think") and all action commands must be in the SAME JSON array.
+Do NOT create separate arrays for reasoning and actions.
+
+# WARNING: NEVER output multiple arrays like this:
+
+INCORRECT (WILL CAUSE ERROR):
+[ {"think": {"extensive_chain_of_thoughts": "My analysis..."}} ]
+[ {"say": {"text": "Here's what I found:"}} ]
+
+CORRECT:
+[ 
+  {"think": {"extensive_chain_of_thoughts": "My analysis..."}},
+  {"say": {"text": "Here's what I found:"}}
+]
 
 Always properly escape special characters in JSON per JSON rules!
 (other thank RAW format, see below).
@@ -173,6 +196,15 @@ For example, in that section (only), you MUST use " instead of \"
 Important: do not use newlines or special formatting in your reasoning (think) output.
 This system cannot properly parse newlines or special formatting in the reasoning output.
 
+⚠️ CRITICAL: When using the "think" command with other commands, include them ALL in the SAME JSON array:
+
+[
+  {"think": {"extensive_chain_of_thoughts": "Your reasoning here"}},
+  {"say": {"text": "Your response to the user"}}
+]
+
+NEVER separate your reasoning into a different array from your actions.
+
 # Notice
 
 Respond ONLY with a single JSON array ONLY using commands from Available Commands above.
@@ -205,6 +237,7 @@ The only place plain text goes is in a RAW block.
 
 # Reminder: SINGLE JSON ARRAY
 
+⚠️ CRITICAL: 
 Yout output must end after a single JSON array is closed. Do not output multiple JSON arrays
 (even if using RAW output mode)
 
@@ -216,4 +249,12 @@ Example of INVALID output:
 Once you have reached the end of your command list array, you must STOP output and wait for the
 system or user to respond. You may NOT output another array of commands!!!!
 The fate of the known universe may depend on your following this requirement.
+
+
+# Recording Reasoning
+
+If you have a reasoning mode and plan more than a couple of lines, be sure to record
+your conclusions with the think() command before moving on to call other commands.
+If you do not do this, then your reasoning will not make it into the chat history
+and you will end up repeating the same thought process after every command!
 

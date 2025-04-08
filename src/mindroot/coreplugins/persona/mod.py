@@ -156,9 +156,9 @@ async def video_of_me(prompt="", context=None):
         
         # Return the video in markdown format for display
         obj = {"markdown": f"<video width='100%' controls><source src='/{video}' type='video/mp4'></video>"}
-        await context.run_command('json_encoded_md', obj)
+        await context.run_command('markdown_await_user', obj)
     except Exception as e:
         print("Error creating video:", e)
         # Fallback to displaying the image if video creation fails
         obj = {"markdown": f"![pic_of_me](/{swapped}) (Video generation failed)"}
-        await context.run_command('json_encoded_md', obj)
+        await context.run_command('markdown_await_user', obj)
