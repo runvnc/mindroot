@@ -88,10 +88,11 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         # SYSTEM NOTE
         
         This task is being run via API and requires a textual or structured output.
-        You MUST call task_result() with the final output when complete!
         If your instructions indicate multiple steps with multiple function calls,
         wait for the system results as you process each step in turn, then
         call task_result() with the final output after all steps are truly complete.
+        You MUST call task_result() with the final output if you are completing the task.
+        For multi-stage tasks, do not call task_result until the final step is complete.
 
     """
 

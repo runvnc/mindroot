@@ -117,6 +117,9 @@ class ProviderManager:
             pass
         else:
             pass
+        if context is not None and hasattr(context, 'data') and 'PREFERRED_PROVIDER' in context.data:
+            preferred_providers_list = [ context.data['PREFERRED_PROVIDER'] ]
+
         if preferred_providers_list and name in self.functions:
             for func_info in self.functions[name]:
                 if func_info['provider'] in preferred_providers_list:
