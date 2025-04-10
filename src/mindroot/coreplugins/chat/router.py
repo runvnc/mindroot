@@ -120,6 +120,16 @@ async def get_chat_html(request: Request, agent_name: str):
 async def chat_history(request: Request, agent_name: str, log_id: str):
     user = request.state.user.username
     history = await get_chat_history(agent_name, log_id, user)
+    print("History is:", history)
+    if history is None or len(history) == 0:
+        try:
+            print("trying to load from system session")
+            history = await get_chat_history(agent_name, log_id, "system")
+            print("System History is:", history)
+        except Exception as e:
+            print("Error loading from system session:", e)
+            history = []
+            pass
     return history
 
 @router.get("/session/{agent_name}/{log_id}")

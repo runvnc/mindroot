@@ -164,7 +164,11 @@ details {
       }
     }
     if (funcName === 'write' || funcName == 'think') {
-      const {fname, text} = params;
+      let {fname, text} = params;
+      if (params.extensive_chain_of_thoughts) {
+        text = params.extensive_chain_of_thoughts
+      }
+
       console.log("Displaying file")
       if (fname?.endsWith('.md') || funcName == 'think') {
         console.log("Displaying markdown")

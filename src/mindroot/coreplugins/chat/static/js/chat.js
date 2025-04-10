@@ -200,7 +200,7 @@ class Chat extends BaseEl {
 
     if (data.command == 'say' || data.command == 'json_encoded_md' ||
         data.command == 'wait_for_user_reply' || data.command == 'markdown_await_user' ||
-        data.command == 'tell_and_continue') {
+        data.command == 'tell_and_continue' || data.command=='think') {
       // Check if there's a registered handler for this command
       if (handler) {
         console.log('Used registered handler for', data.command);
@@ -209,6 +209,8 @@ class Chat extends BaseEl {
         this.msgSoFar = data.params.text
       } else if (data.params.markdown) {
         this.msgSoFar = data.params.markdown
+      } else if (data.params.extensive_chain_of_thoughts) {
+        this.msgSoFar = data.params.extensive_chain_of_thoughts
       } else {
         this.msgSoFar = data.params
       }
