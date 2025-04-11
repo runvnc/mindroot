@@ -47,15 +47,35 @@ export class ChatHistory {
     }
 
     _processUserMessage(part, persona) {
+        console.log("user message part", part)
         if (typeof part === 'string') {
             part = { text: part };
         }
      
-        part.text = removeCmdPrefix(part.text)
+        console.log('removing command prefix from user message')
+        //part.text = removeCmdPrefix(part.text)
         try {
-            JSON.parse(part.text); // If this succeeds, it's a command, skip it
+             console.log('trying to parse user message')
+             console.log('trying to parse:', part.text)
+             let cmd = JSON.parse(part.text); // If this succeeds, it's a command, skip it
+             if (cmd.result) {
+               console.log('user mesage: found command')
+               let parsed = cmd.result
+               try {
+                 parsed = markdownRenderer.parse(parsed);
+                 console.log("rendered command result markdown")
+               } catch (e) {
+               }
+               this.chat.messages = [...this.chat.messages, {
+                  content: parsed,
+                  sender: 'user',
+                  persona: persona
+               }];
+                
+            }             
         } catch (e) {
             // If parsing fails, it's a regular message
+            console.log('user message: not a command')
             const parsed = markdownRenderer.parse(part.text);
             this.chat.messages = [...this.chat.messages, {
                 content: parsed,
