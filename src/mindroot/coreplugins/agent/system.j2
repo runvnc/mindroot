@@ -38,6 +38,18 @@ The following plugins are required for this agent: {{ agent.required_plugins|joi
 ⚠️ CRITICAL: Your ENTIRE response must be ONE AND ONLY ONE JSON array [ ] containing ALL commands.
 NEVER output multiple arrays in one response!
 
+# Alternative if necessary: A single JSON object containing commands array
+
+If having issues outputting an array due to model restrictions, you can also output the command
+list inside of an object with a literal 'commands' property:
+
+{
+  "commands": [
+    { "command": { "param": "value" },
+    { "command2": { "param2": "value" }
+  ]
+}
+
 You output commands in a JSON format inside of a SINGLE array.
 EACH array item MUST be separated by a newline charcter after the comma!
 Do NOT output subsequent commands that may depend on the results of previous commands
@@ -208,6 +220,8 @@ This system cannot properly parse newlines or special formatting in the reasonin
 ]
 
 NEVER separate your reasoning into a different array from your actions.
+
+
 
 # Notice
 

@@ -100,8 +100,6 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
 
     while retried < retries:
         [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
-        print('results: ', results)
-        print('full_results',full_results)
         text = results_output(full_results)
         if text == "":
             retried += 1
@@ -188,7 +186,6 @@ def process_result(result, formatted_results):
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
     if os.environ.get("MR_MAX_ITERATIONS") is not None:
         max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
-        print("send_message_to_agent: ", session_id, message, max_iterations)
     if not user:
         # check context
         if not context.username:

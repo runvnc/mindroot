@@ -45,6 +45,9 @@ END_RAW
 
 ...
 
+- if you prefer not to use the RAW format, you MUST properly escape JSON strings!
+  - remember newlines, double quotes, etc. must be escaped!
+
 - plain text response before JSON.
 
 - some JSON args with unescaped newlines, etc.
@@ -261,10 +264,17 @@ class Agent:
  
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result})
                 return results, full_cmds 
- 
+
+            if buffer[0] == '{':
+                buffer = "[" + buffer
+
             commands, partial_cmd = parse_streaming_commands(buffer)
+
             if not isinstance(commands, list):
                 commands = [commands]
+
+            if len(commands) == 1 and 'commands' in commands[0]:
+                commands = commands[0]['commands']
 
             logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
 

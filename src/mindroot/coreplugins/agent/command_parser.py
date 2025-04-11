@@ -194,7 +194,16 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             return complete_commands, current_partial
         except Exception:
             pass
-                 
+
+        try:
+            complete_commands = json.loads(buffer + "]")
+            num_commands = len(complete_commands)
+            return complete_commands, None
+        except Exception:
+            # If parsing fails, return an empty list of commands and None as partial
+            #print(9)
+            return [], None
+                  
         try:
             parsed_data = loads(raw_replaced)
             num_commands = len(parsed_data)
@@ -220,7 +229,7 @@ def invalid_start_format(str):
     # we might want to use a regex
     # try to match anything that is not a whitespace character or [
     # if it matches, then it is invalid and return True
-    is_invalid = re.match(r'^[^\s\[]', str)
+    is_invalid = re.match(r'^[^\s\[\{]', str)
     return is_invalid
 
 
