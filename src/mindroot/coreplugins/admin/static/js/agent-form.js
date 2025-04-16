@@ -8,7 +8,8 @@ class AgentForm extends BaseEl {
     newAgent: { type: Boolean },
     loading: { type: Boolean },
     personas: { type: Array },
-    commands: { type: Object }
+    commands: { type: Object },
+    serviceModels: { type: Object }
   };
 
   static styles = css`
@@ -206,6 +207,7 @@ class AgentForm extends BaseEl {
     this.agent = {
       commands: [],
       name: '',
+      hashver: '',
       preferred_providers: [],
       thinking_level: 'off', // Default to medium
       persona: '',
@@ -213,6 +215,7 @@ class AgentForm extends BaseEl {
     };
     this.fetchPersonas();
     this.fetchCommands();
+    this.fetchServiceModels();
     this.fetchPlugins();
   }
 
@@ -226,6 +229,20 @@ class AgentForm extends BaseEl {
       if (select && this.agent.persona) {
         select.value = this.agent.persona;
       }
+    }
+  }
+
+  async fetchServiceModels() {
+    try {
+      const response = await fetch('/service-models');
+      if (!response.ok) throw new Error('Failed to fetch service models');
+      const data = await response.json();
+      this.serviceModels = data;
+      console.log('Fetched service models:', this.serviceModels);    
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('error', {
+        detail: `Error loading service models: ${error.message}`
+      }));
     }
   }
 
@@ -402,9 +419,37 @@ class AgentForm extends BaseEl {
       this.loading = true;
       const method = this.newAgent ? 'POST' : 'PUT';
       const url = this.newAgent ? '/agents/local' : `/agents/local/${this.agent.name}`;
-      
+     
+      const cmdSwitches = this.shadowRoot.querySelectorAll('.toggle-command')
+      console.log({cmdSwitches})
+      let cmdsOn = []
+      for (const cmdSwitch of cmdSwitches) {
+        console.log({cmdSwitch})
+        if (cmdSwitch.checked) {
+          cmdsOn.push(cmdSwitch.id.replace('cmd-', ''))
+        }
+      }
+      if (cmdsOn.length > 0) {
+        this.agent.commands = cmdsOn
+      }
+      console.log('Saving, commands are:', this.agent.commands)
+
+      const selectedModelsEls = this.shadowRoot.querySelectorAll('.service-model-select');
+      console.log('Selected models:', selectedModelsEls, this.agent.service_models);
+      for (const select of selectedModelsEls) {
+        const selectedValue = select.value;
+        const serviceName = select.name;
+        if (selectedValue) {
+          console.log(`Selected value for ${serviceName}:`, selectedValue);
+          const [provider, model] = selectedValue.split('__');
+          this.agent.service_models[serviceName] = { provider, model }
+        }
+      }
+
+      console.log('Agent before saving:', this.agent);
       const formData = new FormData();
       const agentData = { ...this.agent };
+
       agentData.flags = [];
       if (this.agent.uncensored) {
         // Make sure flags is an array
@@ -512,7 +557,9 @@ class AgentForm extends BaseEl {
                   ` : ''}
                 </div>
                 <toggle-switch 
+                   class="toggle-command" 
                   .checked=${this.agent.commands?.includes(command.name) || false}
+                  id="cmd-${command.name}" 
                   @toggle-change=${(e) => this.handleInputChange({ 
                     target: {
                       name: 'commands', 
@@ -529,6 +576,39 @@ class AgentForm extends BaseEl {
       </div>
     `);
   }
+
+renderServiceModels() {
+  if (this.serviceModels === undefined || Object.keys(this.serviceModels).length === 0) {
+      return '<div>Loading service models...</div>';
+  }
+  return html`
+    <div class="commands-category">
+    <h4>Service Models</h4>
+    <div class="commands-grid">
+      ${Object.entries(this.serviceModels).map(([serviceName, providers]) => html`
+        <div class="command-item">
+      <div class="command-info">
+        <div class="command-name">${serviceName}</div>
+      </div>
+      <select name="${serviceName}" 
+              class="service-model-select"
+              @change=${this.handleInputChange}>
+        ${Object.entries(providers).map(([provider, models]) => html`
+          <optgroup label="${provider}">
+            ${models.map(model => html`
+              <option
+                selected=${this.agent.service_models?.includes(`${provider}__${model}`) || false}
+                value="${provider}__${model}">${model}</option>
+            `)}
+          </optgroup>
+        `)}
+      </select>
+        </div>
+      `)}
+    </div>
+  `
+}
+
 
   renderPreferredProviders() {
     // Ensure preferred_providers is always an array
@@ -637,11 +717,18 @@ class AgentForm extends BaseEl {
             </option>
           </select>
         </div>
-        
+       
         <div class="form-group commands-section">
           <details>
             <summary>Preferred Providers</summary>
             ${this.renderPreferredProviders()}
+          </details>
+        </div> 
+
+        <div class="form-group commands-section">
+          <details>
+            <summary>Select Models</summary>
+            ${this.renderServiceModels()}
           </details>
         </div> 
 

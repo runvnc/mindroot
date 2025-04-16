@@ -1,5 +1,5 @@
 from lib.providers.services import service, service_manager
-from lib.providers.commands import command_manager
+from lib.providers.commands import command_manager, command
 from lib.providers.hooks import hook
 from lib.pipelines.pipe import pipeline_manager, pipe
 from lib.chatcontext import ChatContext
@@ -49,8 +49,6 @@ def results_text_output(results):
     return text
 
     
-
-
 @service()
 async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, retries=3, context=None):
     """

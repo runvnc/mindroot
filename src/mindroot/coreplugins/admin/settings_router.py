@@ -8,6 +8,7 @@ from lib.providers import services
 from lib.providers.commands import command_manager
 from lib.db.organize_models import organize_for_display
 from copy import deepcopy
+from .service_models import get_service_models_from_providers
 
 router = APIRouter()
 
@@ -126,6 +127,26 @@ async def get_commands():
 @router.get('/services', response_model=List[str])
 async def get_services():
     return service_manager.get_functions()
+
+
+
+#serviceModels will look like:
+#{ "stream_chat": { 
+#    "ah_openai": ["gpt-4o", "gpt-4.1-latest"],
+#    "ah_anthropic": ["claude-3", "claude-2"]
+#},
+#{ "text_to_image": {
+#  "ah_flux": ["flux-dev", "flux-pro"]
+#}
+
+
+@router.get('/service-models', response_model=Dict[str, Dict[str, List[str]]])
+async def get_service_models():
+    # Call get_service_models() on each provider and aggregate the results
+    print("getting service models")
+    service_models = await get_service_models_from_providers()
+    return service_models
+
 
 @router.get('/organized_models', response_model=List[Dict])
 async def get_organized_models():

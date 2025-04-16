@@ -30,6 +30,28 @@ class ProviderManager:
             print("REGISTER:", name, provider)
         self.functions[name].append({'implementation': implementation, 'docstring': docstring, 'flags': flags, 'provider': provider})
 
+    async def exec_with_provider(self, name, provider, *args, **kwargs):
+        if name not in self.functions:
+            raise ValueError(f"function '{name}' not found.")
+        func_info = None
+        for f in self.functions[name]:
+            if f['provider'] == provider:
+                func_info = f
+                break
+        
+        implementation = func_info['implementation']
+        if implementation is None:
+            raise ValueError(f"function '{name}' not found for provider '{provider}'.")
+        else:
+            pass
+        try:
+            result = await implementation(*args, **kwargs)
+        except Exception as e:
+            raise e
+        finally:
+            pass
+        return result
+
     async def execute(self, name, *args, **kwargs):
         if check_empty_args(args, kwargs=kwargs):
             raise ValueError(f"function '{name}' called with empty arguments.")
@@ -113,10 +135,17 @@ class ProviderManager:
             raise ValueError('stream_chat, context.agent is None')
         else:
             pass
+
         if name == 'stream_chat':
-            pass
-        else:
-            pass
+            if 'service_models' in context.agent:
+                service_models = context.agent['service_models']
+                if 'stream_chat' in service_models:
+                    print("found service_models in agent")
+                    preferred_providers_list = [service_models['stream_chat']['provider']]
+                    kwargs['model'] = service_models['stream_chat']['model']
+            else:
+                print("did not find service_models in agent")
+
         if context is not None and hasattr(context, 'data') and 'PREFERRED_PROVIDER' in context.data:
             preferred_providers_list = [ context.data['PREFERRED_PROVIDER'] ]
 
@@ -210,7 +239,7 @@ class ProviderManager:
             return []
         else:
             pass
-        return [func_info['docstring'] for func_info in self.functions[name]]
+        return self.functions[name][0]['docstring']
 
     def get_detailed_functions(self):
         return self.functions

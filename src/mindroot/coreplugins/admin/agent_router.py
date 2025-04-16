@@ -6,6 +6,7 @@ from .agent_importer import scan_and_import_agents, import_github_agent
 from lib.providers.commands import command_manager
 from .persona_handler import handle_persona_import, import_persona_from_index
 import traceback
+import hashlib
 
 router = APIRouter()
 
@@ -153,13 +154,20 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
         elif not isinstance(agent['required_plugins'], list):
             agent['required_plugins'] = list(agent['required_plugins'])
             
-        # Ensure preferred_providers is present and is a list
         if 'preferred_providers' not in agent:
             agent['preferred_providers'] = []
         elif not isinstance(agent['preferred_providers'], list):
             agent['preferred_providers'] = list(agent['preferred_providers'])
             
         agent_path = BASE_DIR / scope / name / 'agent.json'
+        without_hash = agent.copy()
+        without_hash.pop('hashver', None)  # Remove the hash if it exists
+
+        consistent_json = json.dumps(without_hash, sort_keys=True, separators=(',', ':'))
+        hashver = hashlib.sha256(consistent_json.encode('utf-8')).hexdigest()[:4]
+      
+        agent['hashver'] = hashver
+
         if not agent_path.exists():
             raise HTTPException(status_code=404, detail='Agent not found')
         with open(agent_path, 'w') as f:

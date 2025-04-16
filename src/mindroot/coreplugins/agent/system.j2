@@ -6,6 +6,11 @@ Current System Date: {{ formatted_datetime }}
     {{ key }}: {{ context_data[key] }}
 {% endfor %}
 
+# Agent Name and Version
+
+Agent Name: {{ agent.name }}
+Agent Version: {{ agent.hashver }}
+
 # Persona
 
 ## description
@@ -220,8 +225,6 @@ This system cannot properly parse newlines or special formatting in the reasonin
 ]
 
 NEVER separate your reasoning into a different array from your actions.
-
-
 
 # Notice
 

@@ -120,6 +120,19 @@ Avoid putting LaTeX math expressions directly after list markers (1., -, *) - ad
 async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
+@command()
+async def delegate_task(instructions: str, agent_name, retries=3):
+    """
+    Delegate a task to another agent.
+
+    Example:
+
+    { "delegate_task": {"instructions": "Write a poem about the moon", "agent_name": "poet" } }
+    """
+
+    (text, full_results, log_id) = await run_task(instructions, agent_name=agent_name, retries=retries)
+    return f"Task recorded in log ID: {log_id}\nResults:\n\n{text}" 
+
 
 @command()
 async def task_result(output: str, context=None):
@@ -319,7 +332,7 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
     my_sub_context.data['finished_conversation'] = False
     my_sub_context.save_context()
 
-    takeaways = ""
+    takeaways = "..."
 
     blank_my_replies = 0
 
@@ -354,7 +367,8 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
                     break
 
         if my_sub_context.data['finished_conversation'] == True:
-            takeaways = my_sub_context.data['takeaways']
+            if 'takeaways' in my_sub_context.data:
+                takeaways = my_sub_context.data['takeaways']
             finished_conversation = True
             break
         else:
@@ -370,9 +384,13 @@ async def converse_with_agent(agent_name: str, sub_log_id: str, first_message: s
         print(termcolor.colored(my_sub_context.data, 'blue', attrs=['bold']))
         print(termcolor.colored('sub_context.data:', 'blue', attrs=['bold']))
         print(termcolor.colored(sub_context.data, 'blue', attrs=['bold']))
-         
+   
+    ret = f"[SYSTEM]: Exited conversation with {agent_name}"
+    if takeaways != "":
+        ret += " takeaways were:" + takeaways
+ 
     return {
-        f"[SYSTEM]: Exited conversation with {agent_name}. {agent_name} takeaways were:": takeaways
+        ret
     }
 
 

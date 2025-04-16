@@ -417,8 +417,9 @@ class Agent:
                             temperature=0, max_tokens=4000, messages=[]):
 
         self.context = context
-        messages = [{"role": "system", "content": await self.render_system_msg()}] + messages
-        logger.info("Messages for chat", extra={"messages": messages})
+        content = [ { "type": "text", "text": await self.render_system_msg() } ]
+        messages = [{"role": "system", "content": content }] + messages
+        #logger.info("Messages for chat", extra={"messages": messages})
 
         json_messages = json.dumps(messages)
         new_messages = json.loads(json_messages)
