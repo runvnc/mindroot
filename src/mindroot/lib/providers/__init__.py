@@ -139,6 +139,10 @@ class ProviderManager:
         if name == 'stream_chat':
             debug_box('execute stream_chat <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 
+        if context is not None and hasattr(context, 'data') and 'PREFERRED_PROVIDER' in context.data:
+            preferred_providers_list = [ context.data['PREFERRED_PROVIDER'] ]
+
+
         if (len(args) > 0 and args[0] is None) and not 'model' in kwargs or ('model' in kwargs and kwargs['model'] is None):
             print("No model specified, checking service_models")
             if context is not None and context.agent is not None and 'service_models' in context.agent:
@@ -155,9 +159,6 @@ class ProviderManager:
             print("Found possible model in zeroth arg:")
             if len(args) > 0:
                 print(args[0])
-
-        if context is not None and hasattr(context, 'data') and 'PREFERRED_PROVIDER' in context.data:
-            preferred_providers_list = [ context.data['PREFERRED_PROVIDER'] ]
 
         if preferred_providers_list and name in self.functions:
             for func_info in self.functions[name]:
