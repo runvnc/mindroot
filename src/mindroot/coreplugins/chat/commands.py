@@ -121,7 +121,7 @@ async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
 @command()
-async def delegate_task(instructions: str, agent_name, retries=3):
+async def delegate_task(instructions: str, agent_name, retries=3, context=None):
     """
     Delegate a task to another agent.
 
@@ -129,8 +129,9 @@ async def delegate_task(instructions: str, agent_name, retries=3):
 
     { "delegate_task": {"instructions": "Write a poem about the moon", "agent_name": "poet" } }
     """
-
-    (text, full_results, log_id) = await run_task(instructions, agent_name=agent_name, retries=retries)
+    print("in delegate task, context is:")
+    print(context)
+    (text, full_results, log_id) = await service_manager.run_task(instructions, user=context.username, agent_name=agent_name, retries=retries, context=None)
     return f"Task recorded in log ID: {log_id}\nResults:\n\n{text}" 
 
 

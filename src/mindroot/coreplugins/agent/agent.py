@@ -444,6 +444,11 @@ class Agent:
         if not isinstance(context.agent, dict):
             context.agent = await get_agent_data(context.agent, context=context)
 
+        if model is None:
+            if 'service_models' in context.agent and context.agent['service_models'] is not None:
+                if context.agent['service_models'].get('stream_chat', None) is None:
+                    model = os.environ.get("DEFAULT_LLM_MODEL")
+
         stream = await context.stream_chat(model,
                                         temperature=temperature,
                                         max_tokens=max_tokens,

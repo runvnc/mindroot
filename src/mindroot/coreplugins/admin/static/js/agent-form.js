@@ -238,7 +238,9 @@ class AgentForm extends BaseEl {
       if (!response.ok) throw new Error('Failed to fetch service models');
       const data = await response.json();
       this.serviceModels = data;
-      console.log('Fetched service models:', this.serviceModels);    
+      console.log('Fetched service models:', this.serviceModels); 
+      // now re-render everything (force)
+      this.requestUpdate();
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {
         detail: `Error loading service models: ${error.message}`
@@ -442,6 +444,9 @@ class AgentForm extends BaseEl {
         if (selectedValue) {
           console.log(`Selected value for ${serviceName}:`, selectedValue);
           const [provider, model] = selectedValue.split('__');
+          if (!this.agent.service_models) {
+            this.agent.service_models = {};
+          }
           this.agent.service_models[serviceName] = { provider, model }
         }
       }
@@ -579,8 +584,11 @@ class AgentForm extends BaseEl {
 
 renderServiceModels() {
   if (this.serviceModels === undefined || Object.keys(this.serviceModels).length === 0) {
-      return '<div>Loading service models...</div>';
+    return html`<div>Loading service models...</div>`;
   }
+
+  console.log('Service models:', this.serviceModels);
+  console.log('Agent service models:', this.agent.service_models);
   return html`
     <div class="commands-category">
     <h4>Service Models</h4>
@@ -597,7 +605,10 @@ renderServiceModels() {
           <optgroup label="${provider}">
             ${models.map(model => html`
               <option
-                selected=${this.agent.service_models?.includes(`${provider}__${model}`) || false}
+              ?selected=${this.agent.service_models && 
+             this.agent.service_models[serviceName] && 
+             this.agent.service_models[serviceName].provider == provider && 
+             this.agent.service_models[serviceName].model == model}
                 value="${provider}__${model}">${model}</option>
             `)}
           </optgroup>

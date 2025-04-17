@@ -75,7 +75,8 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     else:
         debug_box("Context is not none")
         print(context)
-    
+        
+     
     print("run_task: ", instructions, "log_id: ", context.log_id)
     
     await init_chat_session(context.username, context.agent_name, context.log_id, context)
@@ -107,7 +108,7 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
             debug_box(f"Task output found: {text}")
             break
 
-    return (text, full_results, log_id)
+    return (text, full_results, context.log_id)
 
 
 @service()
@@ -248,8 +249,9 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             iterations += 1
             continue_processing = False
             try:
-                if os.environ.get("DEFAULT_LLM_MODEL") is not None:
-                    context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
+                #if os.environ.get("DEFAULT_LLM_MODEL") is not None:
+                #    context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
+                # default is now specified in the agent settings
     
                 results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
                 try:
