@@ -21,7 +21,7 @@ from lib.logging.logfiles import logger
 from lib.utils.debug import debug_box
 from .init_models import *
 from lib.chatcontext import ChatContext
-from .cmd_start_example import demo_boot_msgs
+from .cmd_start_example import *
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
