@@ -21,7 +21,7 @@ from lib.logging.logfiles import logger
 from lib.utils.debug import debug_box
 from .init_models import *
 from lib.chatcontext import ChatContext
-from cmd_start_example import demo_boot_msgs
+from .cmd_start_example import demo_boot_msgs
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
@@ -421,8 +421,7 @@ class Agent:
 
         self.context = context
         content = [ { "type": "text", "text": await self.render_system_msg() } ]
-        demo_boot = demo_boot_msgs()
-        messages = [{"role": "system", "content": content }] + demo_boot + messages
+        messages = [{"role": "system", "content": content }] + demo_boot_msgs() + messages
         #logger.info("Messages for chat", extra={"messages": messages})
 
         json_messages = json.dumps(messages)

@@ -1,4 +1,5 @@
 from lib.providers.commands import command
+import json
 
 @command()
 async def system_test(echo: str):
