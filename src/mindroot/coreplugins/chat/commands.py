@@ -110,29 +110,29 @@ async def markdown_await_user(markdown="", context=None):
     #                                        "agent": context.agent['name'] })
     return 'stop'
 
-zz="""
-Avoid putting LaTeX math expressions directly after list markers (1., -, *) - add some regular text first
-
-    Avoid putting LaTeX math expressions at the very start of a line - add some text before it
-"""
 
 @command()
 async def insert_image(image_url, context=None):
     await context.agent_output("image", {"url": image_url})
 
 @command()
-async def delegate_task(instructions: str, agent_name, retries=3, context=None):
+async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, context=None):
     """
     Delegate a task to another agent.
 
     Example:
 
-    { "delegate_task": {"instructions": "Write a poem about the moon", "agent_name": "poet" } }
+    { "delegate_task": { "log_id": "poem.moon.03_22_2024.4PM.1", "instructions": "Write a poem about the moon", "agent_name": "poet" } }
+
+    Use something unique for the log_id.
     """
     print("in delegate task, context is:")
     print(context)
-    (text, full_results, log_id) = await service_manager.run_task(instructions, user=context.username, agent_name=agent_name, retries=retries, context=None)
-    return f"Task recorded in log ID: {log_id}\nResults:\n\n{text}" 
+    if log_id is None:
+        log_id = nanoid.generate()
+    (text, full_results, xx) = await service_manager.run_task(instructions, user=context.username, log_id=log_id,
+                                                              agent_name=agent_name, retries=retries, context=None)
+    return f"""<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed in log ID: {log_id}</a>\nResults:\n\n{text}"""
 
 
 @command()

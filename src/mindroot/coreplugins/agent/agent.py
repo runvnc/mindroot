@@ -21,6 +21,7 @@ from lib.logging.logfiles import logger
 from lib.utils.debug import debug_box
 from .init_models import *
 from lib.chatcontext import ChatContext
+from cmd_start_example import demo_boot_msgs
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
@@ -47,6 +48,8 @@ END_RAW
 
 - if you prefer not to use the RAW format, you MUST properly escape JSON strings!
   - remember newlines, double quotes, etc. must be escaped!
+
+NOTE that for the RAW format, the literal strings START_RAW and END_RAW are REQUIRED!
 
 - plain text response before JSON.
 
@@ -418,7 +421,8 @@ class Agent:
 
         self.context = context
         content = [ { "type": "text", "text": await self.render_system_msg() } ]
-        messages = [{"role": "system", "content": content }] + messages
+        demo_boot = demo_boot_msgs()
+        messages = [{"role": "system", "content": content }] + demo_boot + messages
         #logger.info("Messages for chat", extra={"messages": messages})
 
         json_messages = json.dumps(messages)

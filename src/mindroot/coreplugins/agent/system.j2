@@ -40,7 +40,7 @@ The following plugins are required for this agent: {{ agent.required_plugins|joi
 
 # Command System
 
-⚠️ CRITICAL: Your ENTIRE response must be ONE AND ONLY ONE JSON array [ ] containing ALL commands.
+Your ENTIRE response must be ONE AND ONLY ONE JSON array [ ] containing ALL commands.
 NEVER output multiple arrays in one response!
 
 # Alternative if necessary: A single JSON object containing commands array
@@ -133,7 +133,7 @@ Always properly escape special characters in JSON per JSON rules!
 
 There is an exception to the strict JSON formatting for cases where you need to output
 a block of unescaped text such as for markdown or code.
-In this case you can use special delimiters STAR_RAW and END_RAW to output the raw text
+In this case you can use special delimiters START_RAW and END_RAW to output the raw text
 for a particular property.
 Important Note: In the RAW text sections, no escaping is used.
 
@@ -247,6 +247,8 @@ For example, in that section (only), you MUST use " instead of \"
 
 Use START_RAW and END_RAW for blocks of text like markdown unless there is an exception stated
 for your model!
+The START_RAW and END_RAW must be included, you cannot simply start writing multiline strings
+in JSON without it!
 
 # Reminder
 

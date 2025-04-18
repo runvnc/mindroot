@@ -9,6 +9,7 @@ import { markdownRenderer } from './markdown-renderer.js';
 import { ChatHistory } from './chat-history.js';
 import { authenticatedFetch } from './authfetch.js';
 import { SSE } from './sse.js';
+import { registerDelegate } from './delegate_task.js'
 
 const commandHandlers = {};
 
@@ -18,8 +19,9 @@ window.registerCommandHandler = function(command, handler) {
   commandHandlers[command] = handler;
 }
 
+registerDelegate()
+
 function tryParse(markdown) {
-    //return renderMarkdown(markdown)
     return markdownRenderer.parse(markdown);
 }
 
