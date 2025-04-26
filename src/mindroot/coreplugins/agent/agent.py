@@ -273,11 +273,17 @@ class Agent:
 
             commands, partial_cmd = parse_streaming_commands(buffer)
 
+            if isinstance(commands, int):
+                continue
+
             if not isinstance(commands, list):
                 commands = [commands]
 
-            if len(commands) == 1 and 'commands' in commands[0]:
-                commands = commands[0]['commands']
+            try:
+                if len(commands) == 1 and 'commands' in commands[0]:
+                    commands = commands[0]['commands']
+            except Exception as e:
+                continue
 
             logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
 
@@ -336,7 +342,11 @@ class Agent:
                         pass
             else:
                 logger.debug("No new commands found")
-                if partial_cmd is not None and partial_cmd != {}:
+                # sometimes partial_cmd is actually a string for some reason
+                # definitely skip that
+                # check if partial_cmd is a string
+                is_string = isinstance(partial_cmd, str)
+                if partial_cmd is not None and partial_cmd != {} and not is_string:
                     logger.debug(f"Partial command {partial_cmd}")
                     try:
                         cmd_name = next(iter(partial_cmd))

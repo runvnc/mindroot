@@ -2,7 +2,7 @@ import asyncio
 from typing import Dict, List, Any, Optional
 from lib.providers.services import service_manager
 
-async def get_service_models_from_providers(timeout: float = 5.0, context=None) -> Dict[str, Dict[str, List[str]]]:
+async def get_service_models_from_providers(timeout: float = 500.0, context=None) -> Dict[str, Dict[str, List[str]]]:
     """
     Gather service models from all providers.
     
