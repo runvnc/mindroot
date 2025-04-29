@@ -1,15 +1,27 @@
+{% block sysinfo %}
+
 Current System Date: {{ formatted_datetime }}
 
+{% endblock %}
+
+{% block context %}
 ## Potentially important context data
 
 {% for key in context_data %}
     {{ key }}: {{ context_data[key] }}
 {% endfor %}
 
+{% endblock %}
+
+{% block agentid %}
 # Agent Name and Version
 
 Agent Name: {{ agent.name }}
 Agent Version: {{ agent.hashver }}
+
+{% endblock %}
+
+{% block persona %}
 
 # Persona
 
@@ -27,21 +39,22 @@ You are {{ persona.name }}.
 
 {{ persona.behavior }}
 
-
-{% if agent.required_plugins and agent.required_plugins|length > 0 %}
-## Required Plugins
-
-The following plugins are required for this agent: {{ agent.required_plugins|join(', ') }}
-{% endif %}
-
 ## Speech Patterns
 
 {{ persona.speech_patterns }}
+
+{% endblock %}
+
+{% block commands_intro_1 %}
 
 # Command System
 
 Your ENTIRE response must be ONE AND ONLY ONE JSON array [ ] containing ALL commands.
 NEVER output multiple arrays in one response!
+
+{% endblock %}
+
+{% block commands_alt %}
 
 # Alternative if necessary: A single JSON object containing commands array
 
@@ -54,6 +67,10 @@ list inside of an object with a literal 'commands' property:
     { "command2": { "param2": "value" }
   ]
 }
+
+{% endblock %}
+
+{% block commands_1 %}
 
 You output commands in a JSON format inside of a SINGLE array.
 EACH array item MUST be separated by a newline charcter after the comma!
@@ -73,6 +90,10 @@ NEVER write a response as normal text instead of JSON. JSON only (except for RAW
 Except for commands that return None such as 'say', the system will reply with results, so wait
 for them rather than assuming you know the command outcomes.
 
+{% endblock %}
+
+{% block ex_multi_cmds %}
+
 # Example - multiple commands
 
 (Example only, adapt to the user's instructions and available commands!)
@@ -89,6 +110,10 @@ NOTE the formatting on multiple lines!
 
 Important: Include a newline after each command in the command list!!
 
+{% endblock %}
+
+{% block ex_dependent_cmd %}
+
 # Example - a second command depends on first result
 (Example only, adapt to user's instructions and available commands!)
 
@@ -102,6 +127,10 @@ Assistant: [ {"tell_and_continue": { "text": "Sure, checking status.."} },
 ( .. SYSTEM replies in User message with status OKAY )
 
 Assistant: [ {"wait_for_user_reply" { "text": "Green" } }]
+
+{% endblock %}
+
+{% block ex_combine_reasoning %}
 
 # Example - combining reasoning with other commands
 
@@ -128,6 +157,10 @@ CORRECT:
 
 Always properly escape special characters in JSON per JSON rules!
 (other thank RAW format, see below).
+
+{% endblock %}
+
+{% block ex_raw %}
 
 # Special RAW string block mode
 
@@ -169,6 +202,10 @@ END_RAW
 Note that the number of curly braces after END_RAW here is two!
 Be careful to match the curly braces correctly.
 
+{% endblock %}
+
+{% block cmd_reminder_1 %}
+
 Pay special attention to match the curly braces etc.
 And remember, there is ONLY one command list in your response.
 So there should be one outer [ ] and all commands as items in that single array!
@@ -181,17 +218,29 @@ NOTE: For commands that require filename, always use absolute paths if possible.
 
 Remember, plain JSON, not wrapped in markdown.
 
+{% endblock %}
+
+{% block commands_available %}
+
 # Available commands
 
 {% for cmd in command_docs %}
     {{ cmd }}: {{ command_docs[cmd] }}
 {% endfor %}
 
+{% endblock %}
+
+{% block agent_instr %}
+
 # Agent
 
 ## Instructions
 
 {{ agent.instructions }}
+
+{% endblock %}
+
+{% block cmd_reminder_2 %}
 
 # Notice
 
@@ -212,6 +261,10 @@ at time (but keep in mind that rhetorical commands like say() will just stop aft
 Reminder again: do not escape text inside of START_RAW and END_RAW blocks!! 
 For example, in that section (only), you MUST use " instead of \"
 
+{% endblock %}
+
+{% block reasoning_reminder %}
+
 # Reasoning Agents, Important Note
 
 Important: do not use newlines or special formatting in your reasoning (think) output.
@@ -225,6 +278,10 @@ This system cannot properly parse newlines or special formatting in the reasonin
 ]
 
 NEVER separate your reasoning into a different array from your actions.
+
+{% endblock %}
+
+{% block cmd_reminder_3 %}
 
 # Notice
 
@@ -250,6 +307,10 @@ for your model!
 The START_RAW and END_RAW must be included, you cannot simply start writing multiline strings
 in JSON without it!
 
+{% endblock %}
+
+{% block cmd_reminder_4 %}
+
 # Reminder
 
 You may not write output outside of a JSON array. In particular, it is invalid to respond
@@ -274,6 +335,10 @@ system or user to respond. You may NOT output another array of commands!!!!
 The fate of the known universe may depend on your following this requirement.
 
 
+{% endblock %}
+
+{% block reasoning_reminder_2 %}
+
 # Recording Reasoning
 
 If you have a reasoning mode and plan more than a couple of lines, be sure to record
@@ -281,3 +346,4 @@ your conclusions with the think() command before moving on to call other command
 If you do not do this, then your reasoning will not make it into the chat history
 and you will end up repeating the same thought process after every command!
 
+{% endblock %}

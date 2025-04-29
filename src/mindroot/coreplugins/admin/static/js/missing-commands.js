@@ -7,6 +7,7 @@ class MissingCommands extends BaseEl {
     missingCommands: { type: Object },
     commandPluginMapping: { type: Object },
     installQueue: { type: Array },
+    recommendedPlugins: { type: Array },
     loading: { type: Boolean }
   };
 
@@ -25,6 +26,7 @@ class MissingCommands extends BaseEl {
     .command-item {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: visible;
       border-radius: 8px;
       padding: 1rem;
     }
@@ -32,6 +34,8 @@ class MissingCommands extends BaseEl {
     .command-name {
       font-weight: bold;
       margin-bottom: 0.5rem;
+      overflow-wrap: break-word;
+      word-break: break-all;
     }
     
     .plugin-options {
@@ -94,6 +98,7 @@ class MissingCommands extends BaseEl {
     super();
     this.missingCommands = {};
     this.commandPluginMapping = {};
+    this.recommendedPlugins = [];
     this.installQueue = [];
     this.loading = false;
   }
@@ -114,6 +119,13 @@ class MissingCommands extends BaseEl {
       // Fetch command-plugin mapping
       const mappingResponse = await fetch('/admin/commands/command-plugin-mapping');
       this.commandPluginMapping = await mappingResponse.json();
+      
+      // Fetch agent data to get recommended plugins
+      const agentResponse = await fetch(`/agents/local/${this.agentName}`);
+      if (agentResponse.ok) {
+        const agentData = await agentResponse.json();
+        this.recommendedPlugins = agentData.recommended_plugins || agentData.required_plugins || [];
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -150,6 +162,54 @@ class MissingCommands extends BaseEl {
     }
   }
 
+  async installRecommendedPlugins() {
+    if (this.recommendedPlugins.length === 0) return;
+    
+    this.loading = true;
+    try {
+      const response = await fetch(`/admin/install-recommended-plugins/${this.agentName}`, {
+        method: 'POST'
+      });
+      const result = await response.json();
+      this.displayInstallationResults(result);
+      
+      // Refresh data after installation
+      await this.fetchData();
+      
+      return result;
+    } catch (error) {
+      console.error('Error installing recommended plugins:', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  displayInstallationResults(result) {
+    if (!result || !result.results) return;
+    
+    // Create a summary of installation results
+    const successful = result.results.filter(r => r.status === 'success').length;
+    const alreadyInstalled = result.results.filter(r => r.status === 'already_installed').length;
+    const failed = result.results.filter(r => r.status === 'error').length;
+    
+    let message = `Installation summary: `;
+    if (successful > 0) message += `${successful} installed successfully. `;
+    if (alreadyInstalled > 0) message += `${alreadyInstalled} already installed. `;
+    if (failed > 0) message += `${failed} failed to install.`;
+    
+    // Show detailed results for each plugin
+    let details = result.results.map(r => {
+      if (r.status === 'success') return `✅ ${r.plugin}: Successfully installed`;
+      if (r.status === 'already_installed') return `ℹ️ ${r.plugin}: Already installed`;
+      if (r.status === 'error') return `❌ ${r.plugin}: Failed - ${r.message}`;
+      return `${r.plugin}: Unknown status ${r.status}`;
+    }).join('\n');
+    
+    // Display the results using an alert for now
+    // In a real application, you might want to use a modal or toast notification
+    alert(`${message}\n\nDetails:\n${details}`);
+  }
+
   renderMissingCommands() {
     if (Object.keys(this.missingCommands).length === 0) {
       return html`<div>No missing commands found for this agent.</div>`;
@@ -159,7 +219,7 @@ class MissingCommands extends BaseEl {
       <div class="command-item">
         <div class="command-name">${command}</div>
         <div class="plugin-options">
-          ${plugins.length > 0 ? 
+          ${plugins && plugins.length > 0 ? 
             plugins.map(plugin => html`
               <div class="plugin-option">
                 <span>${plugin.name} (${plugin.category})</span>

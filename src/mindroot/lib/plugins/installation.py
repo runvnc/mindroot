@@ -174,3 +174,56 @@ def plugin_update(plugin_name):
         bool: True if update successful
     """
     return plugin_install(plugin_name)
+
+# Import pkg_resources here to avoid circular imports
+async def install_recommended_plugins(agent_name, context=None):
+    """
+    Install plugins recommended for an agent based on its required_plugins list.
+    
+    Args:
+        agent_name (str): Name of the agent
+        
+    Returns:
+        dict: Results of plugin installation
+    """
+    try:
+        # Load agent data
+        agent_path = f"data/agents/local/{agent_name}/agent.json"
+        if not os.path.exists(agent_path):
+            agent_path = f"data/agents/shared/{agent_name}/agent.json"
+            
+        if not os.path.exists(agent_path):
+            return {"error": f"Agent {agent_name} not found"}
+            
+        with open(agent_path, 'r') as f:
+            agent_data = json.load(f)
+            
+        # Get recommended plugins (check both fields for backward compatibility)
+        recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+        
+        # Install each recommended plugin
+        results = []
+        for plugin_name in recommended_plugins:
+            # Check if plugin is already installed
+            try:
+                # Try to import the plugin to check if it's installed
+                try:
+                    # Use pkg_resources to check if package is installed
+                    import pkg_resources
+                    pkg_resources.get_distribution(plugin_name)
+                    # Plugin is already installed
+                    results.append({"plugin": plugin_name, "status": "already_installed"})
+                except pkg_resources.DistributionNotFound:
+                    # Plugin is not installed, install it
+                    try:
+                        plugin_install(plugin_name, 'pypi')
+                        results.append({"plugin": plugin_name, "status": "success"})
+                    except Exception as e:
+                        results.append({"plugin": plugin_name, "status": "error", "message": str(e)})
+            except Exception as e:
+                results.append({"plugin": plugin_name, "status": "error", "message": f"Error checking installation: {str(e)}"})
+                
+        return {"results": results}
+    except Exception as e:
+        return {"error": str(e)}
+

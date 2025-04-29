@@ -22,6 +22,8 @@ from lib.utils.debug import debug_box
 from .init_models import *
 from lib.chatcontext import ChatContext
 from .cmd_start_example import *
+from lib.templates import render
+
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
@@ -417,7 +419,9 @@ class Agent:
                 print("Removing " + cmd + " from command_docs")
                 del data['command_docs'][cmd]
 
-        self.system_message = self.sys_template.render(data)
+        #self.system_message = self.sys_template.render(data)
+        self.system_message = await render('system', data)
+ 
         additional_instructions = await hook_manager.add_instructions(self.context)
 
         for instruction in additional_instructions:

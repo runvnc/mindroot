@@ -115,12 +115,18 @@ def create_agent(scope: str, agent: str = Form(...)):
             persona_name = handle_persona_import(agent_data['persona'], scope)
  
             agent_data['persona'] = persona_name
-            
-        # Ensure required_plugins is present and is a list
+        
+        # Ensure recommended_plugins is present and is a list (also handle legacy required_plugins)
         if 'required_plugins' not in agent_data:
             agent_data['required_plugins'] = []
         elif not isinstance(agent_data['required_plugins'], list):
             agent_data['required_plugins'] = list(agent_data['required_plugins'])
+            
+        # Ensure preferred_providers is present and is a list
+        if 'preferred_providers' not in agent_data:
+            agent_data['recommended_plugins'] = []
+        elif not isinstance(agent_data['recommended_plugins'], list):
+            agent_data['recommended_plugins'] = list(agent_data['recommended_plugins'])
             
         # Ensure preferred_providers is present and is a list
         if 'preferred_providers' not in agent_data:
@@ -148,8 +154,14 @@ def update_agent(scope: str, name: str, agent: str = Form(...)):
         if scope not in ['local', 'shared']:
             raise HTTPException(status_code=400, detail='Invalid scope')
             
-        # Ensure required_plugins is present and is a list
+        # Ensure recommended_plugins is present and is a list (also handle legacy required_plugins)
         if 'required_plugins' not in agent:
+            agent['required_plugins'] = []
+        elif not isinstance(agent['required_plugins'], list):
+            agent['required_plugins'] = list(agent['required_plugins'])
+            
+        # Ensure recommended_plugins is present and is a list
+        if 'recommended_plugins' not in agent:
             agent['required_plugins'] = []
         elif not isinstance(agent['required_plugins'], list):
             agent['required_plugins'] = list(agent['required_plugins'])

@@ -155,12 +155,6 @@ class AgentEditor extends BaseEl {
           @error=${this.handleError}>
         </github-import>
 
-        ${this.agent.name ? html`
-          <details>
-            <summary>Missing Commands</summary>
-            <missing-commands .agentName=${this.agent.name}></missing-commands>
-          </details>
-        ` : ''}
 
       </div>
     `;

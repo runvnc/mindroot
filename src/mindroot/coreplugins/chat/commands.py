@@ -124,6 +124,9 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
 
     { "delegate_task": { "log_id": "poem.moon.03_22_2024.4PM.1", "instructions": "Write a poem about the moon", "agent_name": "poet" } }
 
+    Note: do not specify any other arguments than those in the example.
+    In particular, 'context' is not a valid argument!
+
     Use something unique for the log_id.
     """
     print("in delegate task, context is:")

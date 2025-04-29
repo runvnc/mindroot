@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from lib.providers.services import service_manager
+import os, json
 from lib.plugins.installation import plugin_install
 from lib.providers.missing import get_missing_commands
 from lib.plugins.mapping import get_command_plugin_mapping
+from lib.plugins.installation import install_recommended_plugins
 
 router = APIRouter()
 
@@ -66,3 +68,42 @@ async def install_queued_plugins():
             })
     
     return {"status": "completed", "results": results}
+
+@router.get("/admin/check-recommended-plugins/{agent_name}")
+async def check_recommended_plugins(agent_name: str):
+    """Check which recommended plugins are not installed."""
+    try:
+        # Load agent data
+        agent_path = f"data/agents/local/{agent_name}/agent.json"
+        if not os.path.exists(agent_path):
+            agent_path = f"data/agents/shared/{agent_name}/agent.json"
+            
+        if not os.path.exists(agent_path):
+            raise HTTPException(status_code=404, detail=f"Agent {agent_name} not found")
+            
+        with open(agent_path, 'r') as f:
+            agent_data = json.load(f)
+            
+        # Get recommended plugins
+        recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+        
+        # Check which plugins are not installed
+        pending_plugins = []
+        for plugin_name in recommended_plugins:
+            try:
+                import pkg_resources
+                pkg_resources.get_distribution(plugin_name)
+            except pkg_resources.DistributionNotFound:
+                pending_plugins.append(plugin_name)
+                
+        return {"pending_plugins": pending_plugins}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/admin/install-recommended-plugins/{agent_name}")
+async def install_agent_recommended_plugins(agent_name: str):
+    """Install plugins recommended for an agent."""
+    result = await install_recommended_plugins(agent_name)
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    return result

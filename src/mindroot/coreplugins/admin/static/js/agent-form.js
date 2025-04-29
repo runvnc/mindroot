@@ -1,6 +1,7 @@
 import { LitElement, html, css } from './lit-core.min.js';
 import { BaseEl } from './base.js';
 import './toggle-switch.js';
+import './missing-commands.js';
 
 class AgentForm extends BaseEl {
   static properties = {
@@ -9,7 +10,9 @@ class AgentForm extends BaseEl {
     loading: { type: Boolean },
     personas: { type: Array },
     commands: { type: Object },
-    serviceModels: { type: Object }
+    serviceModels: { type: Object },
+    missingCommands: { type: Object },
+    pendingPlugins: { type: Array }
   };
 
   static styles = css`
@@ -211,12 +214,28 @@ class AgentForm extends BaseEl {
       preferred_providers: [],
       thinking_level: 'off', // Default to medium
       persona: '',
-      required_plugins: []
+      recommended_plugins: []
     };
+    this.pendingPlugins = [];
     this.fetchPersonas();
     this.fetchCommands();
     this.fetchServiceModels();
     this.fetchPlugins();
+  }
+
+  async fetchMissingCommands() {
+    if (!this.agent.name) return;
+    
+    try {
+      const response = await fetch(`/admin/missing-commands/${this.agent.name}`);
+      if (!response.ok) throw new Error('Failed to fetch missing commands');
+      this.missingCommands = await response.json();
+      console.log('Fetched missing commands:', this.missingCommands);
+      this.requestUpdate();
+    } catch (error) {
+      this.missingCommands = {};
+      console.error('Error fetching missing commands:', error);
+    }
   }
 
   updated(changedProperties) {
@@ -228,6 +247,11 @@ class AgentForm extends BaseEl {
       const select = this.shadowRoot.querySelector('select[name="persona"]');
       if (select && this.agent.persona) {
         select.value = this.agent.persona;
+      }
+      
+      if (this.agent.name) {
+        this.fetchMissingCommands();
+        this.checkRecommendedPlugins();
       }
     }
   }
@@ -291,6 +315,40 @@ class AgentForm extends BaseEl {
     }
   }
 
+  async checkRecommendedPlugins() {
+    if (!this.agent.name || !this.agent.recommended_plugins || this.agent.recommended_plugins.length === 0) {
+      this.pendingPlugins = [];
+      return;
+    }
+    
+    try {
+      // Check which recommended plugins are not installed
+      const response = await fetch(`/admin/check-recommended-plugins/${this.agent.name}`);
+      if (!response.ok) throw new Error('Failed to check recommended plugins');
+      const result = await response.json();
+      
+      if (result.pending_plugins) {
+        this.pendingPlugins = result.pending_plugins;
+      } else {
+        this.pendingPlugins = [];
+      }
+      
+      console.log('Pending plugins:', this.pendingPlugins);
+      this.requestUpdate();
+    } catch (error) {
+      console.error('Error checking recommended plugins:', error);
+      this.pendingPlugins = [];
+    }
+  }
+
+  async installRecommendedPlugins() {
+    const response = await fetch(`/admin/install-recommended-plugins/${this.agent.name}`, {
+      method: 'POST'
+    });
+    const result = await response.json();
+    alert('Recommended plugins installed. Please refresh the page to see the changes.');
+    this.checkRecommendedPlugins();
+  }
 
   async fetchCommands() {
     try {
@@ -347,14 +405,14 @@ class AgentForm extends BaseEl {
     }
     
     // Handle required_plugins similar to commands
-    if (name === 'required_plugins') {
-      if (!Array.isArray(this.agent.required_plugins)) {
-        this.agent.required_plugins = [];
+    if (name === 'recommended_plugins') {
+      if (!this.agent.recommended_plugins || !Array.isArray(this.agent.recommended_plugins)) {
+        this.agent.recommended_plugins = [];
       }
       if (checked) {
-        this.agent.required_plugins.push(value);
+        this.agent.recommended_plugins.push(value);
       } else {
-        this.agent.required_plugins = this.agent.required_plugins.filter(plugin => plugin !== value);
+        this.agent.recommended_plugins = this.agent.recommended_plugins.filter(plugin => plugin !== value);
       }
       this.agent = { ...this.agent };
       return;
@@ -493,12 +551,9 @@ class AgentForm extends BaseEl {
   }
 
   renderRequiredPlugins() {
-    return
     // Ensure required_plugins is always an array
-    if (!this.agent.required_plugins) {
-      this.agent.required_plugins = [];
-    } else if (!Array.isArray(this.agent.required_plugins)) {
-      this.agent.required_plugins = [this.agent.required_plugins];
+    if (!Array.isArray(this.agent.recommended_plugins)) {
+      this.agent.recommended_plugins = [];
     }
     
     if (!this.plugins || this.plugins.length === 0) {
@@ -512,12 +567,12 @@ class AgentForm extends BaseEl {
     
     return html`
       <div class="commands-category">
-        <h4>Required Plugins</h4>
+        <h4>Recommended Plugins</h4>
         <div class="commands-grid">
           ${this.plugins.map(plugin => {
             // Use provider name (module name) as the value
             // Create a unique ID for each toggle
-            const providerName = plugin.category || plugin.name;
+            const providerName = plugin.name;
             const toggleId = `req_${plugin._uniqueId}`;
             
             console.log(`Rendering required plugin: ${plugin.name}, providerName: ${providerName}, toggleId: ${toggleId}`);
@@ -528,12 +583,12 @@ class AgentForm extends BaseEl {
                 <div class="command-name">${plugin.name}</div>
               </div>
               <toggle-switch 
-                .checked=${this.agent.required_plugins?.includes(providerName) || false}
+                .checked=${Boolean(this.agent.recommended_plugins.includes(providerName))}
                 id="${toggleId}"
                 @toggle-change=${(e) => this.handleInputChange({ 
                   target: { 
                     plugin: plugin,
-                    name: 'required_plugins', 
+                    name: 'recommended_plugins', 
                     value: providerName,
                     type: 'checkbox', 
                     checked: e.detail.checked 
@@ -660,6 +715,27 @@ renderServiceModels() {
     `;
   }
 
+  renderPendingPlugins() {
+    if (!this.pendingPlugins || this.pendingPlugins.length === 0) {
+      return html``;
+    }
+    
+    return html`
+      <div class="form-group commands-section">
+        <div class="commands-category">
+          <h4>Pending Recommended Plugins</h4>
+          <p>This agent recommends the following plugins that are not yet installed:</p>
+          <ul>
+            ${this.pendingPlugins.map(plugin => html`<li>${plugin}</li>`)}
+          </ul>
+          <button class="btn" @click=${this.installRecommendedPlugins}>
+            Install Recommended Plugins
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   _render() {
     return html`
       <form class="agent-form" @submit=${this.handleSubmit}>
@@ -729,6 +805,8 @@ renderServiceModels() {
           </select>
         </div>
        
+        ${this.renderPendingPlugins()}
+
         <div class="form-group commands-section">
           <details>
             <summary>Preferred Providers</summary>
@@ -743,12 +821,21 @@ renderServiceModels() {
           </details>
         </div> 
 
-        <div class="form-group commands-section" style="display: none;">
+        <div class="form-group commands-section">
           <details>
-            <summary>Required Plugins</summary>
+            <summary>Recommended Plugins</summary>
             ${this.renderRequiredPlugins()}
           </details>
         </div>
+
+        ${this.agent.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`
+          <div class="form-group commands-section">
+            <details>
+              <summary>Missing Commands (${Object.keys(this.missingCommands).length})</summary>
+              <missing-commands .agentName=${this.agent.name}></missing-commands>
+            </details>
+          </div>
+        ` : ''}
 
         <div class="form-group commands-section">
           <label>Available Commands:</label>
