@@ -113,14 +113,14 @@ class Agent:
 
         self.agent = agent
 
-        if sys_core_template is None:
-            system_template_path = os.path.join(os.path.dirname(__file__), "system.j2")
-            with open(system_template_path, "r") as f:
-                self.sys_core_template = f.read()
-        else:
-            self.sys_core_template = sys_core_template
+        #if sys_core_template is None:
+        #    system_template_path = os.path.join(os.path.dirname(__file__), "system.j2")
+        #    with open(system_template_path, "r") as f:
+        #        self.sys_core_template = f.read()
+        #else:
+        #    self.sys_core_template = sys_core_template
 
-        self.sys_template = Template(self.sys_core_template)
+        #self.sys_template = Template(self.sys_core_template)
 
         self.cmd_handler = {}
         self.context = context
