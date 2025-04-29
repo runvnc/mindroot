@@ -34,7 +34,7 @@ Common causes:
 
 - replied with JSON inside of fenced code blocks instead of JSON or RAW string format as below
 
-- for multiline string arguments, use the RAW format described in system instructions, e.g.:
+- ONLY if your model supports this, for complex multiline string arguments, use the RAW format described in system instructions, e.g.:
 
 ...
 
@@ -48,10 +48,8 @@ END_RAW
 
 ...
 
-- if you prefer not to use the RAW format, you MUST properly escape JSON strings!
-  - remember newlines, double quotes, etc. must be escaped!
-
-NOTE that for the RAW format, the literal strings START_RAW and END_RAW are REQUIRED!
+- iF your model does not support RAW format or it is not a complex multiline string like code, you MUST properly escape JSON strings!
+  - remember newlines, double quotes, etc. must be escaped (but not double escaped)!
 
 - plain text response before JSON.
 
@@ -266,8 +264,8 @@ class Agent:
        
             if invalid_start_format(buffer):
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
- 
-                results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result})
+                started_with = f"Your invalid command started with: {buffer[0:20]}"
+                results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result + "\n\n" + started_with})
                 return results, full_cmds 
 
             if buffer[0] == '{':
