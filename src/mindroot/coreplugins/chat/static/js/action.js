@@ -30,8 +30,9 @@ const marked = new Marked(
       if (typeof(x) == 'string') {
         return x.split('\n')[0].slice(0, 160)
       } else {
-        if (x+"" == "[[object Object]]") {
-          return JSON.stringify(x)
+        // if it is an object then stringify it
+        if (typeof (x) == 'object' || x+"" == "[object Object]") {
+          return "<pre><code>"+JSON.stringify(x,undefined, 4)+ "</code></pre>"
         } else {
           return x
         }
