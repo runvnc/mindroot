@@ -65,6 +65,14 @@ mindroot -p 8001
 Note that you will always need to start from that working directory if you want your
 settings to be preserved.
 
+Creating an Admin User
+-----------------------
+
+For the initial startup, you will need to create an admin user.
+Use a command like this the first time you run it:
+```bash
+mindroot --admin-user admin --admin-password pass1234
+```
 
 Installing Plugins
 ------------------
