@@ -30,7 +30,7 @@ MindRoot is a plugin-based Python framework and UI for creating, deploying, and 
 Installation
 ------------
 
-You can install Mindroot simply using pip:
+You can install MindRoot simply using pip:
 
 (As with all Python projects, you almost certainly want to create a virtual environment first: `python -m venv venv` and `source venv/bin/activate`)
 
