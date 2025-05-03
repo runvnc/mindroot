@@ -150,8 +150,8 @@ Key Features:
 -------------
 
 - Public registry for sharing and finding plugins, agents, personas, models, and knowledgebases
-  - https://registry.agenthost.org (work in progress)
-  - Customizable and swappable for user-specific registries
+- https://registry.agenthost.org (work in progress)
+- Customizable and swappable for user-specific registries
 - Extensible plugin architecture for adding services, commands, and building arbitrary web apps
 - Customizable AI agents with persona definitions
 - Intelligent service management based on agent requirements
@@ -165,30 +165,30 @@ Key Features:
 ## Gallery
 
 ### Admin Interface
-![Admin Interface](dash1.png)
+![Admin Interface](gallery/dash1.png)
 
 ### Plugin Management
-![Plugin Management](plugins.png)
+![Plugin Management](gallery/plugins.png)
 
 ### Computer Use
-![Computer Use](cu.gif)
+![Computer Use](gallery/cu.gif)
 
 ### 3D Graph Visualization
-![3D Graph Demo](3dgraph.gif)
+![3D Graph Demo](gallery/3dgraph.gif)
 
 ### Chain Rule Explanation
-![Chain Rule Demo](chainrule.gif)
+![Chain Rule Demo](gallery/chainrule.gif)
 
 ### Character Generation
-![Character Generation](char4.gif)
+![Character Generation](gallery/char4.gif)
 
 ### Fantasy Character Creation
-![Fantasy Character](fantasychar.gif)
+![Fantasy Character](gallery/fantasychar.gif)
 
 ### Morgan's Method
-![Morgan's Method](morgan1.gif)
+![Morgan's Method](gallery/morgan1.gif)
 
 ### Heygen Integration Demos
-![Heygen Integration](heygenscn.png)
+![Heygen Integration](gallery/heygenscn.png)
 
 
