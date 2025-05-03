@@ -37,7 +37,7 @@ You can install Mindroot simply using pip:
 ```bash
 pip install mindroot
 ```
-
+In some cases, you may need to install `libgl-dev` (`sudo apt install libgl-dev`).
 
 Configuration
 -------------
