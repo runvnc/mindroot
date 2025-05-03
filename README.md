@@ -37,7 +37,7 @@ You can install Mindroot simply using pip:
 ```bash
 pip install mindroot
 ```
-``
+
 
 Configuration
 -------------
