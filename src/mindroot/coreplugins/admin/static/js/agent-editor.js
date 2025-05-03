@@ -91,17 +91,13 @@ class AgentEditor extends BaseEl {
   handleAgentSaved(e) {
     this.importStatus = 'Agent saved successfully';
     this.newAgent = false;
-    // Update the current agent with saved data
-    this.agent = e.detail;
-    // Refresh the agent list
-    this.fetchAgents().then(() => {
-      // Re-select the updated agent from the refreshed list
-      const updatedAgent = this.agents.find(a => a.name === this.agent.name);
-      if (updatedAgent) this.agent = updatedAgent;
-      setTimeout(() => {
-        this.importStatus = '';
-      }, 3000);
-    });
+    
+    // Just update the current agent with saved data without refreshing the list
+    this.agent = {...e.detail};
+    
+    setTimeout(() => {
+      this.importStatus = '';
+    }, 3000);
   }
 
   handleAgentInstalled(e) {

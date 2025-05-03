@@ -1,14 +1,4 @@
-
 # Table of Contents
-- [Gallery](#gallery)
-  - [Admin Interface](#admin-interface)
-  - [Plugin Management](#plugin-management)
-  - [3D Graph Visualization](#3d-graph-visualization)
-  - [Chain Rule Explanation](#chain-rule-explanation)
-  - [Character Generation](#character-generation)
-  - [Fantasy Character Creation](#fantasy-character-creation)
-  - [Morgan's Method](#morgans-method)
-  - [Heygen Integration Demo](#heygen-integration-demo)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Starting the Server](#starting-the-server)
@@ -18,39 +8,17 @@
 - [API Documentation](#api-documentation)
 - Python SDK
 - [Key Features](#key-features)
-
-
+- [Gallery](#gallery)
+  - [Admin Interface](#admin-interface)
+  - [Plugin Management](#plugin-management)
+  - [3D Graph Visualization](#3d-graph-visualization)
+  - [Chain Rule Explanation](#chain-rule-explanation)
+  - [Character Generation](#character-generation)
+  - [Fantasy Character Creation](#fantasy-character-creation)
+  - [Morgan's Method](#morgans-method)
+  - [Heygen Integration Demo](#heygen-integration-demo)
 
 Mindroot
-
-## Gallery
-
-### Admin Interface
-![Admin Interface](dash1.png)
-
-### Plugin Management
-![Plugin Management](plugins.png)
-
-### Computer Use
-![Computer Use](cu.gif)
-
-### 3D Graph Visualization
-![3D Graph Demo](3dgraph.gif)
-
-### Chain Rule Explanation
-![Chain Rule Demo](chainrule.gif)
-
-### Character Generation
-![Character Generation](char4.gif)
-
-### Fantasy Character Creation
-![Fantasy Character](fantasychar.gif)
-
-### Morgan's Method
-![Morgan's Method](morgan1.gif)
-
-### Heygen Integration Demos
-![Heygen Integration](heygenscn.png)
 
 ---
 
@@ -62,20 +30,14 @@ Mindroot is a powerful plugin-based Python framework for creating, deploying, an
 Installation
 ------------
 
-You can install Mindroot using pip:
+You can install Mindroot simply using pip:
 
-(You probably want to create a virtual environment first: `python -m venv venv` and `source venv/bin/activate`)
+(As with all Python projects, you almost certainly want to create a virtual environment first: `python -m venv venv` and `source venv/bin/activate`)
+
 ```bash
 pip install mindroot
 ```
-
-For development, you can install the package in editable mode:
-
-```bash
-git clone https://github.com/mindroot/mindroot.git
-cd mindroot
-pip install -e .
-```
+``
 
 Configuration
 -------------
@@ -198,3 +160,35 @@ Key Features:
 - Easily customizable UI built on Jinja2 and Lit Web Components
 - Support for both local and remote AI services
 - RAG: easily share, find and use pre-generated embeddings and documents for topic knowledgebases
+
+
+## Gallery
+
+### Admin Interface
+![Admin Interface](dash1.png)
+
+### Plugin Management
+![Plugin Management](plugins.png)
+
+### Computer Use
+![Computer Use](cu.gif)
+
+### 3D Graph Visualization
+![3D Graph Demo](3dgraph.gif)
+
+### Chain Rule Explanation
+![Chain Rule Demo](chainrule.gif)
+
+### Character Generation
+![Character Generation](char4.gif)
+
+### Fantasy Character Creation
+![Fantasy Character](fantasychar.gif)
+
+### Morgan's Method
+![Morgan's Method](morgan1.gif)
+
+### Heygen Integration Demos
+![Heygen Integration](heygenscn.png)
+
+

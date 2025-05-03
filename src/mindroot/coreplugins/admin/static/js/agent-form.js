@@ -645,7 +645,10 @@ class AgentForm extends BaseEl {
       const savedAgent = await response.json();
       // Update our local agent with the server data
       this.agent = savedAgent;
-      this.resetEditors();
+      
+      // Only reset editors when saving from the main save button
+      const isMainSaveButton = event && event.target && event.target.type === 'submit';
+      if (isMainSaveButton) this.resetEditors();
 
       this.dispatchEvent(new CustomEvent('agent-saved', {
         detail: savedAgent
@@ -872,7 +875,7 @@ renderServiceModels() {
             <label class="required">Instructions:</label>
             <div class="form-group-actions">
               ${this.showInstructionsEditor ? html`
-                <button type="button" class="icon-button" @click=${() => { this.handleInputChange({ target: { name: 'instructions', value: this.agent.instructions } }); this.showInstructionsEditor = false; }}>
+                <button type="button" class="icon-button" @click=${(e) => { e.preventDefault(); this.handleSubmit(e); this.showInstructionsEditor = false; }}>
                   <span class="material-icons">save</span>
                 </button>
               ` : html`
@@ -898,7 +901,7 @@ renderServiceModels() {
             <label>Technical Instructions:</label>
             <div class="form-group-actions">
               ${this.showTechnicalInstructionsEditor ? html`
-                <button type="button" class="icon-button" @click=${() => { this.handleInputChange({ target: { name: 'technicalInstructions', value: this.agent.technicalInstructions } }); this.showTechnicalInstructionsEditor = false; }}>
+                <button type="button" class="icon-button" @click=${(e) => { e.preventDefault(); this.handleSubmit(e); this.showTechnicalInstructionsEditor = false; }}>
                   <span class="material-icons">save</span>
                 </button>
               ` : html`
