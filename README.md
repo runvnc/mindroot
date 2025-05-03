@@ -18,14 +18,14 @@
   - [Morgan's Method](#morgans-method)
   - [Heygen Integration Demo](#heygen-integration-demo)
 
-Mindroot
+MindRoot
 
 ---
 
 [![PyPI](https://img.shields.io/pypi/v/mindroot)](https://pypi.org/project/mindroot/)
 
 
-Mindroot is a powerful plugin-based Python framework for creating, deploying, and sharing AI agents and related models. It offers a flexible architecture with indices and a public registry (coming soon) for easily sharing and finding plugins, agents, personas, services, knowledgebases, and apps.
+MindRoot is a plugin-based Python framework and UI for creating, deploying, and sharing AI agents, tool commands, and applications. The UI is completely customizable.
 
 Installation
 ------------
