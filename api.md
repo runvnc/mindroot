@@ -31,7 +31,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"instructions":"What is the square root of 256? Show your work."}' \
   --max-time 300
-`
+```
 
 ## Authentication
 
