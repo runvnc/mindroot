@@ -1,7 +1,9 @@
 import { LitElement, html, css } from './lit-core.min.js';
 import { BaseEl } from './base.js';
 import './toggle-switch.js';
+import { unsafeHTML } from '../../../chat/static/js/lit-html/directives/unsafe-html.js';
 import './missing-commands.js';
+import {markdownRenderer} from './markdown-renderer.js';
 
 class AgentForm extends BaseEl {
   static properties = {
@@ -12,7 +14,9 @@ class AgentForm extends BaseEl {
     commands: { type: Object },
     serviceModels: { type: Object },
     missingCommands: { type: Object },
-    pendingPlugins: { type: Array }
+    pendingPlugins: { type: Array },
+    showInstructionsEditor: { type: Boolean },
+    showTechnicalInstructionsEditor: { type: Boolean }
   };
 
   static styles = css`
@@ -56,6 +60,95 @@ class AgentForm extends BaseEl {
       user-select: none;
     }
 
+    .form-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .form-group-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .markdown-preview {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px;
+      min-height: 100px;
+      color: #f0f0f0;
+      margin-bottom: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .markdown-preview ul {
+      padding-left: 20px;
+    }
+
+    .markdown-preview li {
+      margin-bottom: 5px;
+    }
+
+    .markdown-preview ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    .markdown-preview input[type="checkbox"] {
+      margin-right: 8px;
+    }
+
+    .markdown-preview h1, .markdown-preview h2, .markdown-preview h3, 
+    .markdown-preview h4, .markdown-preview h5, .markdown-preview h6 {
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+      font-weight: bold;
+    }
+
+    /* Edit button for full-width display */
+    .edit-button {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    /* Icon button for header */
+    .icon-button {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      border-radius: 4px;
+      padding: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+    }
+
+    .edit-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .icon-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
     input[type="text"],
     select,
     textarea {
@@ -70,6 +163,8 @@ class AgentForm extends BaseEl {
 
     textarea {
       min-height: 60vh;
+      max-height: 60vh;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     }
 
     textarea::-webkit-scrollbar {
@@ -204,6 +299,7 @@ class AgentForm extends BaseEl {
     this.attachShadow({mode: 'open'});
     this.personas = [];
     this.commands = {};
+    this.showInstructionsEditor = false;
     this.loading = false;
     this.plugins = [];
     this.providerMapping = {}; // Map display names to module names
@@ -216,8 +312,10 @@ class AgentForm extends BaseEl {
       persona: '',
       recommended_plugins: []
     };
+    this.showTechnicalInstructionsEditor = false;
     this.pendingPlugins = [];
     this.fetchPersonas();
+    this.resetEditors();
     this.fetchCommands();
     this.fetchServiceModels();
     this.fetchPlugins();
@@ -254,6 +352,11 @@ class AgentForm extends BaseEl {
         this.checkRecommendedPlugins();
       }
     }
+  }
+
+  resetEditors() {
+    this.showInstructionsEditor = false;
+    this.showTechnicalInstructionsEditor = false;
   }
 
   async fetchServiceModels() {
@@ -314,6 +417,11 @@ class AgentForm extends BaseEl {
       }));
     }
   }
+
+  renderMarkdown(text) {
+    return markdownRenderer.parse(text); 
+  }
+
 
   async checkRecommendedPlugins() {
     if (!this.agent.name || !this.agent.recommended_plugins || this.agent.recommended_plugins.length === 0) {
@@ -537,6 +645,7 @@ class AgentForm extends BaseEl {
       const savedAgent = await response.json();
       // Update our local agent with the server data
       this.agent = savedAgent;
+      this.resetEditors();
 
       this.dispatchEvent(new CustomEvent('agent-saved', {
         detail: savedAgent
@@ -759,10 +868,55 @@ renderServiceModels() {
         </div>
 
         <div class="form-group">
-          <label class="required">Instructions:</label>
-          <textarea name="instructions" 
+          <div class="form-group-header">
+            <label class="required">Instructions:</label>
+            <div class="form-group-actions">
+              ${this.showInstructionsEditor ? html`
+                <button type="button" class="icon-button" @click=${() => { this.handleInputChange({ target: { name: 'instructions', value: this.agent.instructions } }); this.showInstructionsEditor = false; }}>
+                  <span class="material-icons">save</span>
+                </button>
+              ` : html`
+                <button type="button" class="icon-button" @click=${() => this.showInstructionsEditor = true}>
+                  <span class="material-icons">edit</span>
+                </button>
+              `}
+            </div>
+          </div>
+          ${this.showInstructionsEditor ? html`
+            <textarea name="instructions" 
                     .value=${this.agent.instructions || ''} 
                     @input=${this.handleInputChange}></textarea>
+          ` : html`
+            <div class="markdown-preview">
+              ${unsafeHTML(this.renderMarkdown(this.agent.instructions || ''))}
+            </div>
+          `}
+        </div>
+
+        <div class="form-group">
+          <div class="form-group-header">
+            <label>Technical Instructions:</label>
+            <div class="form-group-actions">
+              ${this.showTechnicalInstructionsEditor ? html`
+                <button type="button" class="icon-button" @click=${() => { this.handleInputChange({ target: { name: 'technicalInstructions', value: this.agent.technicalInstructions } }); this.showTechnicalInstructionsEditor = false; }}>
+                  <span class="material-icons">save</span>
+                </button>
+              ` : html`
+                <button type="button" class="icon-button" @click=${() => this.showTechnicalInstructionsEditor = true}>
+                  <span class="material-icons">edit</span>
+                </button>
+              `}
+            </div>
+          </div>
+          ${this.showTechnicalInstructionsEditor ? html`
+            <textarea name="technicalInstructions" 
+                    .value=${this.agent.technicalInstructions || ''} 
+                    @input=${this.handleInputChange}></textarea>
+          ` : html`
+            <div class="markdown-preview">
+              ${unsafeHTML(this.renderMarkdown(this.agent.technicalInstructions || ''))}
+            </div>
+          `}
         </div>
 
         <div class="form-group">
@@ -838,8 +992,9 @@ renderServiceModels() {
         ` : ''}
 
         <div class="form-group commands-section">
-          <label>Available Commands:</label>
+          <details><summary>Available Commands</summary>
           ${this.renderCommands()}
+          </details>
         </div>
 
         <div class="agent-insert-end"></div>
@@ -849,7 +1004,7 @@ renderServiceModels() {
         
       </form>
     `;
-  }
+   }
 }
 
 customElements.define('agent-form', AgentForm);

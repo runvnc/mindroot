@@ -240,6 +240,16 @@ Remember, plain JSON, not wrapped in markdown.
 
 {% endblock %}
 
+{% block agent_tech_instr %}
+
+{% if agent.technicalInstructions %}
+## Technical Instructions
+
+{{ agent.technicalInstructions }}
+{% endif %}
+
+{% endblock %}
+
 {% block cmd_reminder_2 %}
 
 # Notice

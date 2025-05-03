@@ -174,35 +174,37 @@ class IndexedAgents extends BaseEl {
 
     return html`
       <div class="indexed-agents">
-        <h3>
-          <span class="material-icons">cloud_download</span>
-          Available Indexed Agents
-        </h3>
-        <input type="text"
-               class="search-box"
-               placeholder="Search indexed agents..."
-               .value=${this.searchIndexed}
-               @input=${e => this.searchIndexed = e.target.value}>
-        <div class="agent-list">
-          ${filteredAgents.length ? filteredAgents.map(agent => html`
-            <div class="agent-item">
-              <div class="agent-info">
-                <div class="agent-name">${agent.name}</div>
-                ${agent.description ? html`
-                  <div class="agent-description">${agent.description}</div>
-                ` : ''}
-                <div class="index-name">From index: ${agent.indexName}</div>
+        <details>
+          <summary>
+            <span class="material-icons">cloud_download</span>
+            Available Indexed Agents
+          </summary>
+          <input type="text"
+                 class="search-box"
+                 placeholder="Search indexed agents..."
+                 .value=${this.searchIndexed}
+                 @input=${e => this.searchIndexed = e.target.value}>
+          <div class="agent-list">
+            ${filteredAgents.length ? filteredAgents.map(agent => html`
+              <div class="agent-item">
+                <div class="agent-info">
+                  <div class="agent-name">${agent.name}</div>
+                  ${agent.description ? html`
+                    <div class="agent-description">${agent.description}</div>
+                  ` : ''}
+                  <div class="index-name">From index: ${agent.indexName}</div>
+                </div>
+                <button class="install-btn" 
+                        @click=${() => this.installAgent(agent)}
+                        ?disabled=${this.loading}>
+                  Install
+                </button>
               </div>
-              <button class="install-btn" 
-                      @click=${() => this.installAgent(agent)}
-                      ?disabled=${this.loading}>
-                Install
-              </button>
-            </div>
-          `) : html`
-            <div class="no-items">No indexed agents found</div>
-          `}
-        </div>
+            `) : html`
+              <div class="no-items">No indexed agents found</div>
+            `}
+          </div>
+        </details>
       </div>
     `;
   }
