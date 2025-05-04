@@ -235,14 +235,15 @@ async def complete_subtask(subtask_id=None, context=None):
         return f"{completed}\n\nAll subtasks complete ✅\n\n{_format_checklist_status(context)}"
 
     next_task = st["tasks"][st['cursor']]
-    return (
-        f"{completed}\n\n"
-        f"Next subtask (Subtask {st['cursor']+1}):\n"
-        f"- [ ] {next_task['label']}\n"
-        f"{next_task['body']}\n\n"
-        f"{_format_checklist_status(context)}"
-    )
+    return f"""
+            {completed}
 
+            Next subtask (Subtask {st['cursor']+1})
+            - [ ] {next_task['label']}
+            {next_task['body']}
+
+            {_format_checklist_status(context)}
+            """
 
 @command()
 async def goto_subtask(subtask_id, context=None):
