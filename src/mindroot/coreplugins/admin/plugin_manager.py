@@ -109,7 +109,7 @@ async def install_local_plugin(request: PluginRequest):
         if not plugin_path:
             return {"success": False, "message": "Plugin path not found"}
         
-        success = plugin_install(plugin_name, source='local', source_path=plugin_path)
+        success = await plugin_install(plugin_name, source='local', source_path=plugin_path)
         if success:
             return {"success": True, "message": f"Plugin {plugin_name} installed successfully"}
         else:
@@ -124,7 +124,7 @@ async def install_github_plugin(request: GitHubPluginRequest):
     try:
         print("Request:", request)
         url = request.url or request.github_url
-        success = plugin_install('test', source='github', source_path=url)
+        success = await plugin_install('test', source='github', source_path=url)
         if success:
             return {"success": True, "message": "Plugin installed successfully from GitHub"}
         else:
@@ -156,13 +156,13 @@ async def install_from_index(request: InstallFromIndexRequest):
 
         # Install the plugin
         if plugin_data.get('github_url'):
-            success = plugin_install(
+            success = await plugin_install(
                 request.plugin,
                 source='github',
                 source_path=plugin_data['github_url']
             )
         elif plugin_data.get('source_path'):
-            success = plugin_install(
+            success = await plugin_install(
                 request.plugin,
                 source='local',
                 source_path=plugin_data['source_path']
