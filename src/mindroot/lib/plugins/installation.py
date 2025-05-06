@@ -8,6 +8,7 @@ import zipfile
 import subprocess
 from pkg_resources import require as pkg_require
 from .manifest import update_plugin_manifest
+import traceback
 
 def download_github_files(repo_path, tag=None):
     """Download GitHub repo files to temp directory.
@@ -103,13 +104,14 @@ def install_plugin_dependencies(plugin_path):
             return False
     return True
 
-def plugin_install(plugin_name, source='pypi', source_path=None):
+async def plugin_install(plugin_name, source='pypi', source_path=None, remote_source=None):
     """Install a plugin from various sources.
     
     Args:
         plugin_name (str): Name of the plugin
         source (str): Installation source ('pypi', 'local', 'github')
         source_path (str, optional): Path or GitHub repo reference
+        remote_source (str, optional): Remote source for the plugin (e.g., GitHub repo path)
         
     Returns:
         bool: True if installation successful
@@ -152,7 +154,7 @@ def plugin_install(plugin_name, source='pypi', source_path=None):
                 'github',
                 os.path.abspath(plugin_dir),
                 remote_source=repo_path,
-                version=plugin_info.get('version', '0.0.1'),
+                version=plugin_info.get('version', '0.0.1'), 
                 metadata=plugin_info
             )
             
@@ -173,7 +175,14 @@ def plugin_update(plugin_name):
     Returns:
         bool: True if update successful
     """
-    return plugin_install(plugin_name)
+    # This is a synchronous function that can't use the async plugin_install directly
+    try:
+        # Just use pip directly for now
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', plugin_name])
+        return True
+    except Exception as e:
+        print(f"Error updating plugin {plugin_name}: {str(e)}")
+        return False
 
 # Import pkg_resources here to avoid circular imports
 async def install_recommended_plugins(agent_name, context=None):
@@ -188,6 +197,7 @@ async def install_recommended_plugins(agent_name, context=None):
     """
     try:
         # Load agent data
+        from pathlib import Path
         agent_path = f"data/agents/local/{agent_name}/agent.json"
         if not os.path.exists(agent_path):
             agent_path = f"data/agents/shared/{agent_name}/agent.json"
@@ -200,6 +210,100 @@ async def install_recommended_plugins(agent_name, context=None):
             
         # Get recommended plugins (check both fields for backward compatibility)
         recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+
+        # Get plugin sources from check_recommended_plugins endpoint
+        from fastapi import HTTPException
+        try:
+            # Implement the same logic as check_recommended_plugins directly here
+            # to avoid circular imports
+            plugin_info = {}
+            plugin_sources = {}
+            
+            # Define indices directory path
+            # Try multiple possible locations for indices
+            possible_locations = [
+                Path("indices"),
+                Path("data/indices"),
+                Path(os.getcwd()) / "indices",
+                Path(os.getcwd()).parent / "indices",
+                Path("/files/mindroot/indices")
+            ]
+            
+            indices_dir = None
+            
+            # Determine which indices directory exists
+            for location in possible_locations:
+                print(f"Checking for indices in: {location}")
+                if location.exists():
+                    # Check if it has any .json files
+                    indices_dir = location if any(location.glob("*.json")) else None
+                    print(f"Found indices directory at: {indices_dir} with {len(list(location.glob('*.json')))} JSON files")
+                    break
+            
+            if not indices_dir:
+                print("WARNING: Could not find indices directory in any of the expected locations")
+                indices_dir = Path("indices")  # Fallback to default            
+            # Get all available indices
+            available_indices = []
+            for index_file in indices_dir.glob("*.json"):
+                # Also try looking for indices in subdirectories
+                print(f"Found index file: {index_file}")
+                
+                try:
+                    print(f"Reading index file for plugin sources: {index_file}")
+                    with open(index_file, 'r') as f:
+                        index_data = json.load(f)
+                        available_indices.append(index_data)
+                except Exception as e:
+                    print(f"Error reading index file {index_file}: {str(e)}")
+            
+            # Also check for indices in subdirectories
+            for subdir in indices_dir.glob("*/"):
+                # Also try looking for indices in subdirectories
+                print(f"Checking for index files in subdirectory: {subdir}")
+                
+                # Look for index.json in the subdirectory
+                index_file_path = subdir / "index.json"
+                if index_file_path.exists():
+                    try:
+                        print(f"Reading index file: {index_file_path}")
+                        with open(index_file_path, 'r') as f:
+                            index_data = json.load(f)
+                            available_indices.append(index_data)
+                    except Exception as e:
+                        print(f"Error reading index file {index_file_path}: {str(e)}")
+                else:
+                    print(f"No index.json found in {subdir}")
+            
+            print(f"Found {len(available_indices)} indices with {sum(len(index.get('plugins', [])) for index in available_indices)} total plugins")
+            
+            # Look for each recommended plugin in the indices
+            print(f"Looking for recommended plugins: {recommended_plugins}")
+            for plugin_name in recommended_plugins:
+                for index in available_indices:
+                    for plugin in index.get('plugins', []):
+                        print(f"Checking plugin {plugin.get('name')} against {plugin_name}")
+                        if plugin.get('name') == plugin_name:
+                            # Found the plugin in an index
+                            remote_source = plugin.get('remote_source')
+                            print(f"Found plugin {plugin_name} in index with remote_source: {remote_source}")
+                            github_url = plugin.get('github_url')
+                            print(f"Found plugin {plugin_name} in index with github_url: {github_url}")
+                            
+                            if github_url and 'github.com/' in github_url:
+                                github_path = github_url.split('github.com/')[1]
+                                print(f"Extracted GitHub path for {plugin_name}: {github_path}")
+                                plugin_sources[plugin_name] = github_path
+                            elif remote_source:
+                                plugin_sources[plugin_name] = remote_source
+            print(f"Found plugin sources: {plugin_sources}")
+            
+            plugin_info = {"plugin_sources": plugin_sources}
+            plugin_sources = plugin_info.get("plugin_sources", {}) if plugin_info else {}
+        except Exception as e:
+            trace = traceback.format_exc()
+            print(f"Error getting plugin sources: {str(e)} {trace}")
+            plugin_sources = {}
         
         # Install each recommended plugin
         results = []
@@ -214,14 +318,49 @@ async def install_recommended_plugins(agent_name, context=None):
                     # Plugin is already installed
                     results.append({"plugin": plugin_name, "status": "already_installed"})
                 except pkg_resources.DistributionNotFound:
-                    # Plugin is not installed, install it
+                    # Plugin is not installed, get source info and install it
                     try:
-                        plugin_install(plugin_name, 'pypi')
-                        results.append({"plugin": plugin_name, "status": "success"})
+                        # Get the source information for this plugin
+                        source_info = plugin_sources.get(plugin_name, plugin_name)
+                        
+                        print(f"Installing plugin {plugin_name} from source: {source_info}")
+                        # Determine installation source and path
+                        if '/' in source_info:  # GitHub repo format (user/repo)
+                            source = 'github'
+                            source_path = source_info
+                            remote_source = source_info
+                        else:  # PyPI package
+                            source = 'pypi'
+                            source_path = None
+                            remote_source = None
+                        
+                        # Install the plugin
+                        await plugin_install(
+                            plugin_name,
+                            source,
+                            source_path,
+                            remote_source
+                        )
+                        
+                        results.append({
+                            "plugin": plugin_name,
+                            "status": "success",
+                            "source": source,
+                            "source_path": source_path
+                        })
                     except Exception as e:
-                        results.append({"plugin": plugin_name, "status": "error", "message": str(e)})
+                        results.append({
+                            "plugin": plugin_name,
+                            "status": "error",
+                            "message": str(e),
+                            "source_info": source_info
+                        })
             except Exception as e:
-                results.append({"plugin": plugin_name, "status": "error", "message": f"Error checking installation: {str(e)}"})
+                results.append({
+                    "plugin": plugin_name,
+                    "status": "error",
+                    "message": f"Error checking installation: {str(e)}"
+                })
                 
         return {"results": results}
     except Exception as e:

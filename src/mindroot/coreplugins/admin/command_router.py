@@ -4,6 +4,7 @@ import os, json
 from lib.plugins.installation import plugin_install
 from lib.providers.missing import get_missing_commands
 from lib.plugins.mapping import get_command_plugin_mapping
+from pathlib import Path
 from lib.plugins.installation import install_recommended_plugins
 
 router = APIRouter()
@@ -87,19 +88,69 @@ async def check_recommended_plugins(agent_name: str):
         # Get recommended plugins
         recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
         
-        # Check which plugins are not installed
+        # Check which plugins are not installed by looking in indices
         pending_plugins = []
+        plugin_sources = {}
+        
+        # Define indices directory path
+        indices_dir = Path("indices")
+        data_indices_dir = Path("data/indices")
+        
+        # Determine which indices directory exists
+        if data_indices_dir.exists():
+            indices_dir = data_indices_dir
+        
+        # Get all available indices
+        available_indices = []
+        for index_file in indices_dir.glob("*.json"):
+            try:
+                with open(index_file, 'r') as f:
+                    index_data = json.load(f)
+                    available_indices.append(index_data)
+            except Exception as e:
+                print(f"Error reading index file {index_file}: {str(e)}")
+        
+        # Check each recommended plugin
         for plugin_name in recommended_plugins:
             try:
-                import pkg_resources
-                pkg_resources.get_distribution(plugin_name)
-            except pkg_resources.DistributionNotFound:
+                # First check if plugin is already installed
+                try:
+                    import pkg_resources
+                    pkg_resources.get_distribution(plugin_name)
+                    continue  # Plugin is installed, skip to next
+                except pkg_resources.DistributionNotFound:
+                    # Plugin is not installed, look for it in indices
+                    found = False
+                    for index in available_indices:
+                        for plugin in index.get('plugins', []):
+                            if plugin.get('name') == plugin_name:
+                                # Found the plugin in an index
+                                remote_source = plugin.get('remote_source')
+                                github_url = plugin.get('github_url')
+                                
+                                # Extract GitHub repo path if available
+                                if github_url and 'github.com/' in github_url:
+                                    github_path = github_url.split('github.com/')[1]
+                                    plugin_sources[plugin_name] = github_path
+                                elif remote_source:
+                                    plugin_sources[plugin_name] = remote_source
+                                
+                                found = True
+                                break
+                    
+                    if not found:
+                        # If not found in indices, use the name as is
+                        plugin_sources[plugin_name] = plugin_name
+                    
+                    pending_plugins.append(plugin_name)
+            except Exception as e:
+                print(f"Error checking plugin {plugin_name}: {str(e)}")
                 pending_plugins.append(plugin_name)
-                
-        return {"pending_plugins": pending_plugins}
+        
+        return {"pending_plugins": pending_plugins, "plugin_sources": plugin_sources}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+ 
 @router.post("/admin/install-recommended-plugins/{agent_name}")
 async def install_agent_recommended_plugins(agent_name: str):
     """Install plugins recommended for an agent."""
