@@ -28,7 +28,23 @@ export class ChatHistory {
     }
 
     _processHistoryMessage(msg) {
-        for (let part of msg.content) {
+        let content = []
+        if (typeof msg === 'string') {
+          content = [ { text: msg } ]
+        } else {
+          if (typeof msg.content === 'string') {
+            content = [ { text: msg.content } ]
+          } else if (Array.isArray(msg.content)) {
+            if (typeof msg.content[0] === 'string') {
+              content = msg.content.map(text => ({ text }))
+            } else {
+              content = msg.content
+            }
+          } else {
+            content = msg.content
+          }
+        }
+        for (let part of content) {
             if (!part.text) continue;
             if (this._isSystemMessage(part.text)) continue;
 

@@ -10,6 +10,7 @@ import { ChatHistory } from './chat-history.js';
 import { authenticatedFetch } from './authfetch.js';
 import { SSE } from './sse.js';
 import { registerDelegate } from './delegate_task.js'
+import showNotification from './notification.js';
 
 const commandHandlers = {};
 
@@ -77,6 +78,7 @@ class Chat extends BaseEl {
     return showAvatar;
   }
 
+
   firstUpdated() {
     console.log('First updated');
     console.log('sessionid: ', this.sessionid);
@@ -99,11 +101,14 @@ class Chat extends BaseEl {
     const thisRunning = this._runningCmd.bind(this)
     const thisResult = this._cmdResult.bind(this)
     const thisFinished = this._finished.bind(this)
+    const thisError = this._showError.bind(this)
+
     this.sse.addEventListener('image', this._imageMsg.bind(this));
     this.sse.addEventListener('partial_command', e => thisPartial(e).catch(console.error));
     this.sse.addEventListener('running_command', e => thisRunning(e).catch(console.error));
     this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
     this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));
+    this.sse.addEventListener('system_error', e=> thisError(e).catch(console.error));
 
     // when the user scrolls in the chat log, stop auto-scrolling to the bottom
     const chatLog = this.shadowRoot.querySelector('.chat-log');
@@ -123,6 +128,12 @@ class Chat extends BaseEl {
     setTimeout(() => {
       this.history.loadHistory();
     }, 100);
+  }
+
+  _showError(event) {
+    console.log("NOTIFICATION", event)
+    const data = JSON.parse(event.data);
+    showNotification('error', data.error);
   }
 
   _addMessage(event) {

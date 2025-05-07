@@ -312,10 +312,21 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
                     continue_processing = False
             except Exception as e:
-                print("Found an error in agent output: ")
-                print(e)
-                print(traceback.format_exc())
                 continue_processing = False
+                trace = traceback.format_exc()
+                msg = str(e)
+                descr = msg + "\n\n" + trace
+                print(descr)
+
+                print('------')
+                print(msg)
+                try:
+                    persona = agent_['persona']['name']
+                except Exception as e:
+                    persona = "System error"
+                context.chat_log.add_message({"role": "user", "content": msg })
+                await context.agent_output("system_error", { "error": msg })
+                
 
         await asyncio.sleep(0.001)
         print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
