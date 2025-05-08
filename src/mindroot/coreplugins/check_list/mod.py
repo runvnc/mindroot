@@ -175,7 +175,7 @@ def _format_checklist_status(context):
             status = "❌ " # Not completed
         
         # Add task line
-        lines.append(f"{status}**Subtask {i+1}**: {task['label']}")
+        lines.append(f"{status}**Subtask**: {task['label']}")
     
     return "\n".join(lines)
 
@@ -189,13 +189,11 @@ async def complete_subtask(subtask_id=None, context=None):
     
     Parameters:
     - subtask_id: Optional. The subtask to complete, specified by:
-                 - A number (1-based index)
                  - The exact subtask label text
                  - Omit to complete the current subtask
     
     Example:
     { "complete_subtask": {} }  # Complete current subtask
-    { "complete_subtask": { "subtask_id": 2 } }  # Complete subtask 2
     { "complete_subtask": { "subtask_id": "Review documents" } }  # Complete by label
     """
     if context is None:
@@ -252,11 +250,9 @@ async def goto_subtask(subtask_id, context=None):
     
     Parameters:
     - subtask_id: Required. The subtask to navigate to, specified by:
-                 - A number (1-based index)
                  - The exact subtask label text
     
     Example:
-    { "goto_subtask": { "subtask_id": 3 } }  # Go to subtask 3
     { "goto_subtask": { "subtask_id": "Data analysis" } }  # Go to by label
     """
     if context is None:
@@ -292,13 +288,11 @@ async def clear_subtask(subtask_id=None, context=None):
     
     Parameters:
     - subtask_id: Optional. The subtask to clear, specified by:
-                 - A number (1-based index)
                  - The exact subtask label text
                  - Omit to clear the current subtask
     
     Example:
     { "clear_subtask": {} }  # Clear current subtask
-    { "clear_subtask": { "subtask_id": 2 } }  # Clear subtask 2
     { "clear_subtask": { "subtask_id": "Review documents" } }  # Clear by label
     """
     if context is None:

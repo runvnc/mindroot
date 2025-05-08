@@ -257,12 +257,16 @@ class Agent:
         parse_failed = False
         debug_box("Parsing command stream")
         debug_box(str(context))
-        
+        original_buffer = ""
+
         async for part in stream:
             buffer += part
+            original_buffer += part
+
             logger.debug(f"Current buffer: ||{buffer}||")
        
             if invalid_start_format(buffer):
+                print("Found invalid start to buffer", buffer)
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
                 started_with = f"Your invalid command started with: {buffer[0:20]}"
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result + "\n\n" + started_with})
@@ -385,7 +389,9 @@ class Agent:
                 context.chat_log.add_message({"role": "assistant", "content": buffer})
                 print(parse_fail_reason)
                 await asyncio.sleep(1)
-            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason })
+                tried_to_parse = f"\n\nTried to parse the following input: {original_buffer}"
+            results.append({"cmd": "UNKNOWN", "args": { "invalid": "("}, "result": error_result + '\n\nJSON parse error was: ' + parse_fail_reason +
+                             tried_to_parse })
  
         return results, full_cmds
 
@@ -434,6 +440,7 @@ class Agent:
         self.context = context
         content = [ { "type": "text", "text": await self.render_system_msg() } ]
         messages = [{"role": "system", "content": content }] + demo_boot_msgs() + messages
+
         #logger.info("Messages for chat", extra={"messages": messages})
 
         json_messages = json.dumps(messages)
