@@ -279,23 +279,18 @@ async def install_recommended_plugins(agent_name, context=None):
             
             # Look for each recommended plugin in the indices
             print(f"Looking for recommended plugins: {recommended_plugins}")
-            for plugin_name in recommended_plugins:
+            for plugin_source in recommended_plugins:
                 for index in available_indices:
                     for plugin in index.get('plugins', []):
-                        print(f"Checking plugin {plugin.get('name')} against {plugin_name}")
-                        if plugin.get('name') == plugin_name:
-                            # Found the plugin in an index
-                            remote_source = plugin.get('remote_source')
-                            print(f"Found plugin {plugin_name} in index with remote_source: {remote_source}")
-                            github_url = plugin.get('github_url')
-                            print(f"Found plugin {plugin_name} in index with github_url: {github_url}")
-                            
-                            if github_url and 'github.com/' in github_url:
+                        remote_source = plugin.get('remote_source', plugin.get('github_url', plugin.get('source')))
+                        print(f"Checking plugin Index plugin {remote_source} against recommended {plugin_source}")
+                        if remote_source == plugin_source:
+                            if 'github.com/' in remote_source:
                                 github_path = github_url.split('github.com/')[1]
                                 print(f"Extracted GitHub path for {plugin_name}: {github_path}")
-                                plugin_sources[plugin_name] = github_path
+                                plugin_sources[plugin_source] = github_path
                             elif remote_source:
-                                plugin_sources[plugin_name] = remote_source
+                                plugin_sources[plugin_source] = remote_source
             print(f"Found plugin sources: {plugin_sources}")
             
             plugin_info = {"plugin_sources": plugin_sources}
@@ -307,22 +302,24 @@ async def install_recommended_plugins(agent_name, context=None):
         
         # Install each recommended plugin
         results = []
-        for plugin_name in recommended_plugins:
+        for plugin_source in recommended_plugins:
             # Check if plugin is already installed
             try:
                 # Try to import the plugin to check if it's installed
+                plugin_name = plugin_source.split('/')[-1]
+                
                 try:
                     # Use pkg_resources to check if package is installed
                     import pkg_resources
                     pkg_resources.get_distribution(plugin_name)
                     # Plugin is already installed
                     results.append({"plugin": plugin_name, "status": "already_installed"})
+                    print("Plugin already installed:", plugin_name)
                 except pkg_resources.DistributionNotFound:
                     # Plugin is not installed, get source info and install it
                     try:
                         # Get the source information for this plugin
-                        source_info = plugin_sources.get(plugin_name, plugin_name)
-                        
+                        source_info = plugin_source
                         print(f"Installing plugin {plugin_name} from source: {source_info}")
                         # Determine installation source and path
                         if '/' in source_info:  # GitHub repo format (user/repo)

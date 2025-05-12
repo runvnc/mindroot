@@ -50,7 +50,7 @@ def results_text_output(results):
 
     
 @service()
-async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, retries=3, context=None):
+async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, llm=None, retries=3, context=None):
     """
     Run a task with the given instructions
     IMPORTANT NOTE: agent must have the task_result() command enabled.
@@ -71,7 +71,10 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         context.name = agent_name
         context.log_id = log_id
         context.agent = await service_manager.get_agent_data(agent_name)
+        context.data['llm'] = llm
+        context.current_model = llm
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
+        context.save_context()
     else:
         debug_box("Context is not none")
         print(context)
@@ -249,9 +252,9 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             iterations += 1
             continue_processing = False
             try:
-                #if os.environ.get("DEFAULT_LLM_MODEL") is not None:
-                #    context.current_model = os.environ.get("DEFAULT_LLM_MODEL")
-                # default is now specified in the agent settings
+                if context.current_model is None:
+                    if 'llm' in context.data:
+                        context.current_model = context.data['llm']
     
                 results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
                 try:

@@ -90,6 +90,24 @@ class ProviderManager:
             print("Found possible model in zeroth arg:")
             if len(args) > 0:
                 print(args[0])
+                from coreplugins.admin.service_models import cached_get_service_models
+
+                all_service_models = await cached_get_service_models()
+                this_service_models = all_service_models.get(name, {})
+                model_name = args[0]
+                try:
+                    if '__' in model_name:
+                        #provider = model_name.split('__')[0]
+                        model_name = model_name.split('__')[1]
+                        
+                    for provider, model_list in this_service_models.items():
+                        if model_name in model_list:
+                            print("found provider", provider)
+                            for func_info in self.functions[name]:
+                                if func_info['provider'] == provider:
+                                    return await func_info['implementation'](*args, **kwargs)
+                except Exception as e:
+                    pass
 
         required_plugins = []
         if context and hasattr(context, 'agent') and context.agent:

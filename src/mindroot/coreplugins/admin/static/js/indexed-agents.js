@@ -1,12 +1,14 @@
 import { LitElement, html, css } from './lit-core.min.js';
 import { BaseEl } from './base.js';
+import showNotification from './notification.js';
 
 class IndexedAgents extends BaseEl {
   static properties = {
     indexedAgents: { type: Array },
     searchIndexed: { type: String },
     scope: { type: String },
-    loading: { type: Boolean }
+    loading: { type: Boolean },
+    installRecommendedPlugins: { type: Boolean }
   };
 
   static styles = css`
@@ -79,6 +81,19 @@ class IndexedAgents extends BaseEl {
       font-style: italic;
     }
 
+    .install-options {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+    }
+
+    .install-options label {
+      margin-left: 8px;
+    }
+
     .install-btn {
       padding: 4px 12px;
       background: transparent;
@@ -112,6 +127,7 @@ class IndexedAgents extends BaseEl {
     this.indexedAgents = [];
     this.searchIndexed = '';
     this.loading = false;
+    this.installRecommendedPlugins = true;
     this.scope = 'local';
     this.fetchIndexedAgents();
   }
@@ -134,9 +150,7 @@ class IndexedAgents extends BaseEl {
         );
       }
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error loading indexed agents: ${error.message}`
-      }));
+      showNotification('error', `Error loading indexed agents: ${error.message}`);
     } finally {
       this.loading = false;
     }
@@ -153,16 +167,52 @@ class IndexedAgents extends BaseEl {
         body: formData
       });
 
-      if (!response.ok) throw new Error('Failed to install agent');
+      if (!response.ok) {
+        // Try to get detailed error message from response
+        let errorMessage = 'Failed to install agent';
+        
+        try {
+          const errorData = await response.json();
+          if (errorData.detail) {
+            // Extract the main error without the traceback
+            if (typeof errorData.detail === 'string' && errorData.detail.includes('Internal server error')) {
+              const mainError = errorData.detail.split('Traceback')[0].trim();
+              errorMessage = mainError || errorData.detail;
+            } else {
+              errorMessage = errorData.detail;
+            }
+          }
+        } catch (e) { /* Use default error message if JSON parsing fails */ }
+        throw new Error(errorMessage);
+      }
+
+      // If the checkbox is checked, install recommended plugins
+      if (this.installRecommendedPlugins) {
+        try {
+          const pluginsResponse = await fetch(`/admin/install-recommended-plugins/${agent.name}`, {
+            method: 'POST'
+          });
+          if (!pluginsResponse.ok) {
+            showNotification('warning', `Failed to install recommended plugins: ${await pluginsResponse.text()}`);
+          }
+        } catch (pluginError) {
+          showNotification('warning', `Error installing recommended plugins: ${pluginError.message}`);
+        }
+      }
       
-      this.dispatchEvent(new CustomEvent('agent-installed', {
+      showNotification('success', `Agent ${agent.name} installed successfully`);
+      this.dispatchEvent(new CustomEvent('agent-installed', { 
         detail: agent
       }));
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error installing agent: ${error.message}`
-      }));
-    } finally {
+      // Check for specific error messages
+      if (error.message && error.message.includes('already exists')) {
+        showNotification('error', `Agent ${agent.name} already exists`);
+      } else {
+        showNotification('error', `Error installing agent: ${error.message}`);
+      }
+      
+    } finally { 
       this.loading = false;
     }
   }
@@ -184,6 +234,13 @@ class IndexedAgents extends BaseEl {
                  placeholder="Search indexed agents..."
                  .value=${this.searchIndexed}
                  @input=${e => this.searchIndexed = e.target.value}>
+          <div class="install-options">
+            <input type="checkbox" 
+                   id="install-recommended-plugins"
+                   ?checked=${this.installRecommendedPlugins}
+                   @change=${e => this.installRecommendedPlugins = e.target.checked}>
+            <label for="install-recommended-plugins">Automatically install recommended plugins</label>
+          </div>
           <div class="agent-list">
             ${filteredAgents.length ? filteredAgents.map(agent => html`
               <div class="agent-item">

@@ -28,6 +28,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
 
     if "<<CUT_HERE>>" in buffer:
         buffer = buffer[buffer.find("<<CUT_HERE>>")+12:] + ' '
+        print("CUT! Buffer after cut:", buffer)
 
     if not buffer.strip():
         return [], None

@@ -312,6 +312,7 @@ class Agent:
 
             if len(commands) > num_processed:
                 logger.debug("New command(s) found")
+                logger.debug(f"Commands: {commands}")
                 for i in range(num_processed, len(commands)):
                     try:
                         cmd = commands[i]
@@ -377,11 +378,11 @@ class Agent:
             pass
         if len(full_cmds) == 0 or reasonOnly:
             print("\033[91m" + "No results and parse failed" + "\033[0m")
-            
             try:
                 buffer = replace_raw_blocks(buffer)
                 parse_ok = json.loads(buffer)
                 parse_fail_reason = ""
+                tried_to_parse = ""
             except JSONDecodeError as e:
                 print("final parse fail")
                 print(buffer)

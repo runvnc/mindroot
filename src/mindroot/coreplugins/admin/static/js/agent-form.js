@@ -4,6 +4,8 @@ import './toggle-switch.js';
 import { unsafeHTML } from '../../../chat/static/js/lit-html/directives/unsafe-html.js';
 import './missing-commands.js';
 import {markdownRenderer} from './markdown-renderer.js';
+import showNotification from './notification.js';
+import './indexed-agents.js';
 
 class AgentForm extends BaseEl {
   static properties = {
@@ -16,7 +18,8 @@ class AgentForm extends BaseEl {
     missingCommands: { type: Object },
     pendingPlugins: { type: Array },
     showInstructionsEditor: { type: Boolean },
-    showTechnicalInstructionsEditor: { type: Boolean }
+    showTechnicalInstructionsEditor: { type: Boolean },
+    indexedAgentsVisible: { type: Boolean }
   };
 
   static styles = css`
@@ -303,6 +306,7 @@ class AgentForm extends BaseEl {
     this.loading = false;
     this.plugins = [];
     this.providerMapping = {}; // Map display names to module names
+    this.indexedAgentsVisible = true; // Show indexed agents by default
     this.agent = {
       commands: [],
       name: '',
@@ -332,7 +336,7 @@ class AgentForm extends BaseEl {
       this.requestUpdate();
     } catch (error) {
       this.missingCommands = {};
-      console.error('Error fetching missing commands:', error);
+      showNotification('error', `Error fetching missing commands: ${error.message}`);
     }
   }
 
@@ -369,9 +373,7 @@ class AgentForm extends BaseEl {
       // now re-render everything (force)
       this.requestUpdate();
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error loading service models: ${error.message}`
-      }));
+      showNotification('error', `Error loading service models: ${error.message}`);
     }
   }
 
@@ -384,9 +386,7 @@ class AgentForm extends BaseEl {
       console.log('Fetched personas:', this.personas);
       console.log('Current agent persona:', this.agent.persona);
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error loading personas: ${error.message}`
-      }));
+      showNotification('error', `Error loading personas: ${error.message}`);
     }
   }
 
@@ -402,19 +402,22 @@ class AgentForm extends BaseEl {
       for (const plugin of this.plugins) {
         let name = plugin.name;
         if (plugin.source_path) {
+           plugin.source = plugin.source_path
            name = plugin.source_path.split('/').filter(Boolean).pop();
-        } 
+        }
+        if (plugin.github_url) {
+            plugin.source = plugin.github_url
+        }
         const uniqueId = name.replace(/[^a-zA-Z0-9]/g, '_');
         name = uniqueId;
         plugin.name = name
         plugin._uniqueId = uniqueId;
         plugin._id = uniqueId
+
       }
       
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error loading plugins: ${error.message}`
-      }));
+      showNotification('error', `Error loading plugins: ${error.message}`);
     }
   }
 
@@ -444,7 +447,7 @@ class AgentForm extends BaseEl {
       console.log('Pending plugins:', this.pendingPlugins);
       this.requestUpdate();
     } catch (error) {
-      console.error('Error checking recommended plugins:', error);
+      showNotification('error', `Error checking recommended plugins: ${error.message}`);
       this.pendingPlugins = [];
     }
   }
@@ -454,7 +457,7 @@ class AgentForm extends BaseEl {
       method: 'POST'
     });
     const result = await response.json();
-    alert('Recommended plugins installed. Please refresh the page to see the changes.');
+    showNotification('success', 'Recommended plugins installed. Please refresh the page to see the changes.');
     this.checkRecommendedPlugins();
   }
 
@@ -465,9 +468,7 @@ class AgentForm extends BaseEl {
       const data = await response.json();
       this.commands = this.organizeCommands(data);
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error loading commands: ${error.message}`
-      }));
+      showNotification('error', `Error loading commands: ${error.message}`);
     }
   }
 
@@ -558,21 +559,15 @@ class AgentForm extends BaseEl {
 
   validateForm() {
     if (!this.agent.name?.trim()) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: 'Name is required'
-      }));
+      showNotification('error', 'Name is required');
       return false;
     }
     if (!this.agent.persona?.trim()) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: 'Persona is required'
-      }));
+      showNotification('error', 'Persona is required');
       return false;
     }
     if (!this.agent.instructions?.trim()) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: 'Instructions are required'
-      }));
+      showNotification('error', 'Instructions are required');
       return false;
     }
     return true;
@@ -600,6 +595,12 @@ class AgentForm extends BaseEl {
       if (cmdsOn.length > 0) {
         this.agent.commands = cmdsOn
       }
+      for (let cmd in this.missingCommands) {
+        if (!this.agent.commands.includes(cmd)) {
+          this.agent.commands.push(cmd)
+        }
+      }
+
       console.log('Saving, commands are:', this.agent.commands)
 
       const selectedModelsEls = this.shadowRoot.querySelectorAll('.service-model-select');
@@ -650,13 +651,10 @@ class AgentForm extends BaseEl {
       const isMainSaveButton = event && event.target && event.target.type === 'submit';
       if (isMainSaveButton) this.resetEditors();
 
-      this.dispatchEvent(new CustomEvent('agent-saved', {
-        detail: savedAgent
-      }));
+      showNotification('success', `Agent ${this.agent.name} saved successfully`);
+      this.dispatchEvent(new CustomEvent('agent-saved', { detail: savedAgent }));
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: `Error saving agent: ${error.message}`
-      }));
+      showNotification('error', `Error saving agent: ${error.message}`);
     } finally {
       this.loading = false;
     }
@@ -682,26 +680,25 @@ class AgentForm extends BaseEl {
         <h4>Recommended Plugins</h4>
         <div class="commands-grid">
           ${this.plugins.map(plugin => {
-            // Use provider name (module name) as the value
-            // Create a unique ID for each toggle
-            const providerName = plugin.name;
+            
             const toggleId = `req_${plugin._uniqueId}`;
-            
-            console.log(`Rendering required plugin: ${plugin.name}, providerName: ${providerName}, toggleId: ${toggleId}`);
-            
+            let source = plugin.remote_source
+            if (!source) source = plugin.github_url 
+            if (!source) return null;
+
             return html`
             <div class="command-item">
               <div class="command-info">
-                <div class="command-name">${plugin.name}</div>
+                <div class="command-name">${source}</div>
               </div>
               <toggle-switch 
-                .checked=${Boolean(this.agent.recommended_plugins.includes(providerName))}
+                .checked=${Boolean(this.agent.recommended_plugins.includes(source))}
                 id="${toggleId}"
                 @toggle-change=${(e) => this.handleInputChange({ 
                   target: { 
                     plugin: plugin,
                     name: 'recommended_plugins', 
-                    value: providerName,
+                    value: source,
                     type: 'checkbox', 
                     checked: e.detail.checked 
                   } 
@@ -851,6 +848,15 @@ renderServiceModels() {
   _render() {
     return html`
       <form class="agent-form" @submit=${this.handleSubmit}>
+        <div class="form-group">
+          <details ?open=${this.indexedAgentsVisible}>
+            <summary @click=${() => this.indexedAgentsVisible = !this.indexedAgentsVisible}>
+              <span class="material-icons">cloud_download</span>
+              Install Agent from Index
+            </summary>
+            <indexed-agents></indexed-agents>
+          </details>
+        </div>
         <div class="form-group">
           <label class="required">Name:</label>
           <input type="text" name="name" 

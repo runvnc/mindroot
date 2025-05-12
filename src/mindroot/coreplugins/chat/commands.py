@@ -133,8 +133,14 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
     print(context)
     if log_id is None:
         log_id = nanoid.generate()
+    llm = None
+    if context is not None:
+        if hasattr(context, 'current_model'):
+            llm = context.current_model
+        elif 'llm' in context.data:
+            llm = context.data['llm']
     (text, full_results, xx) = await service_manager.run_task(instructions, user=context.username, log_id=log_id,
-                                                              agent_name=agent_name, retries=retries, context=None)
+                                                              llm=llm, agent_name=agent_name, retries=retries, context=None)
     return f"""<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed in log ID: {log_id}</a>\nResults:\n\n{text}"""
 
 

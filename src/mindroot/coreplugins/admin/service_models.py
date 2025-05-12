@@ -2,6 +2,29 @@ import asyncio
 from typing import Dict, List, Any, Optional
 from lib.providers.services import service_manager
 
+service_models_cache: Dict[str, Dict[str, List[str]]] = {}
+
+async def cached_get_service_models():
+    """
+    Retrieve service models from the cache or fetch them if not available.
+    Returns:
+        Dictionary mapping services to providers to models:
+        {
+            "service_name": {
+                "provider_name": ["model1", "model2", ...],
+                ...
+            },
+            ...
+        }
+    """
+    global service_models_cache
+    if not service_models_cache:
+        print("Cache is empty, fetching service models...")
+        service_models_cache = await get_service_models_from_providers()
+    else:
+        print("Using cached service models")
+    return service_models_cache
+
 async def get_service_models_from_providers(timeout: float = 500.0, context=None) -> Dict[str, Dict[str, List[str]]]:
     """
     Gather service models from all providers.

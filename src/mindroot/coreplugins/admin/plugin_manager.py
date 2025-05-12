@@ -49,6 +49,7 @@ async def get_all_plugins():
                 "category": "core",
                 "enabled": plugin_info['enabled'],
                 "source": "core",
+                "remote_source": plugin_name,
                 "version": "1.0.0",
                 "description": plugin_info.get('metadata', {}).get('description', '')
             })
@@ -60,6 +61,7 @@ async def get_all_plugins():
                 "category": "installed",
                 "enabled": plugin_info['enabled'],
                 "source": plugin_info['source'],
+                "remote_source": plugin_info.get('remote_source', plugin_info.get('github_url')),
                 "source_path": plugin_info.get('source_path'),
                 "version": plugin_info.get('version', '0.0.1'),
                 "description": plugin_info.get('metadata', {}).get('description', ''),

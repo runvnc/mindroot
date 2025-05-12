@@ -86,9 +86,8 @@ async def check_recommended_plugins(agent_name: str):
             agent_data = json.load(f)
             
         # Get recommended plugins
-        recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+        recommended_plugins = agent_data.get('recommended_plugins')
         
-        # Check which plugins are not installed by looking in indices
         pending_plugins = []
         plugin_sources = {}
         
@@ -111,8 +110,10 @@ async def check_recommended_plugins(agent_name: str):
                 print(f"Error reading index file {index_file}: {str(e)}")
         
         # Check each recommended plugin
-        for plugin_name in recommended_plugins:
+        for plugin_source in recommended_plugins:
             try:
+                # if there is a slash, the name is the last part
+                plugin_name = plugin_source.split('/')[-1]
                 # First check if plugin is already installed
                 try:
                     import pkg_resources
