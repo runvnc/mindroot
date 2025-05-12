@@ -306,7 +306,6 @@ class AgentForm extends BaseEl {
     this.loading = false;
     this.plugins = [];
     this.providerMapping = {}; // Map display names to module names
-    this.indexedAgentsVisible = true; // Show indexed agents by default
     this.agent = {
       commands: [],
       name: '',
@@ -328,6 +327,12 @@ class AgentForm extends BaseEl {
   async fetchMissingCommands() {
     if (!this.agent.name) return;
     
+    // Skip API call for new agents that haven't been saved yet
+    if (this.newAgent) {
+      this.missingCommands = {};
+      return;
+    }
+    
     try {
       const response = await fetch(`/admin/missing-commands/${this.agent.name}`);
       if (!response.ok) throw new Error('Failed to fetch missing commands');
@@ -336,7 +341,7 @@ class AgentForm extends BaseEl {
       this.requestUpdate();
     } catch (error) {
       this.missingCommands = {};
-      showNotification('error', `Error fetching missing commands: ${error.message}`);
+      console.log(`Error fetching missing commands: ${error.message}`);
     }
   }
 
@@ -432,6 +437,12 @@ class AgentForm extends BaseEl {
       return;
     }
     
+    // Skip API call for new agents that haven't been saved yet
+    if (this.newAgent) {
+      this.pendingPlugins = [];
+      return;
+    }
+    
     try {
       // Check which recommended plugins are not installed
       const response = await fetch(`/admin/check-recommended-plugins/${this.agent.name}`);
@@ -447,7 +458,7 @@ class AgentForm extends BaseEl {
       console.log('Pending plugins:', this.pendingPlugins);
       this.requestUpdate();
     } catch (error) {
-      showNotification('error', `Error checking recommended plugins: ${error.message}`);
+      console.log(`Error checking recommended plugins: ${error.message}`);
       this.pendingPlugins = [];
     }
   }
@@ -848,15 +859,6 @@ renderServiceModels() {
   _render() {
     return html`
       <form class="agent-form" @submit=${this.handleSubmit}>
-        <div class="form-group">
-          <details ?open=${this.indexedAgentsVisible}>
-            <summary @click=${() => this.indexedAgentsVisible = !this.indexedAgentsVisible}>
-              <span class="material-icons">cloud_download</span>
-              Install Agent from Index
-            </summary>
-            <indexed-agents></indexed-agents>
-          </details>
-        </div>
         <div class="form-group">
           <label class="required">Name:</label>
           <input type="text" name="name" 

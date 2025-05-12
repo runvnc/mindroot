@@ -125,6 +125,11 @@ class AgentEditor extends BaseEl {
           </div>
         ` : ''}
 
+        <indexed-agents
+          @agent-installed=${this.handleAgentInstalled}
+          @error=${this.handleError}>
+        </indexed-agents>
+
         <agent-list
           .agents=${this.agents}
           .selectedAgent=${this.agent}
@@ -140,11 +145,6 @@ class AgentEditor extends BaseEl {
             @error=${this.handleError}>
           </agent-form>
         ` : ''}
-
-        <indexed-agents
-          @agent-installed=${this.handleAgentInstalled}
-          @error=${this.handleError}>
-        </indexed-agents>
 
         <github-import
           @agent-installed=${this.handleAgentInstalled}
