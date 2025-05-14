@@ -13,7 +13,11 @@ from termcolor import colored
 import socket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from dotenv import load_dotenv
 
+# Load environment variables from .env file at the start
+# Set override=True to make .env variables override existing environment variables
+load_dotenv(override=True)
 
 def parse_args():
     import argparse
@@ -48,10 +52,12 @@ def create_directories():
 create_directories()
 
 import mimetypes
-mimetypes.add_type("application/javascript", ".js", True)
+mimetypes.add_type('application/javascript', '.js')
+mimetypes.add_type('text/css', '.css')
 
-app = None
 templates = None
+app = None
+failed_plugins = []
 
 async def setup_app_internal(app_):
     global app, templates
@@ -84,31 +90,13 @@ class HeaderMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # First get the response from other middleware and routes
         response = await call_next(request)
-
-        if "Content-Security-Policy" in response.headers:
-            del response.headers["Content-Security-Policy"]
-
-        response.headers['Content-Security-Policy'] = "frame-ancestors *"
-       
-        if 'Access-Control-Allow-Origin' in response.headers:
-            del response.headers['Access-Control-Allow-Origin']
-        # Additional headers for better cross-origin support
-        response.headers['Access-Control-Allow-Origin'] = '*'  # Or your specific origin
-
-        if 'Access-Control-Allow-Headers' in response.headers:
-            del response.headers['Access-Control-Allow-Headers']
-
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-
-        # Remove the X-Frame-Options header if it exists
-        if 'X-Frame-Options' in response.headers:
-            del response.headers['X-Frame-Options']
         
-        
-        print(dict(response.headers))
+        # Add security headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
         
         return response
-
 
 def main():
     global app
@@ -166,4 +154,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

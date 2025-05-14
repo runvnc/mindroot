@@ -1,66 +1,22 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "7.7.0"
-description = "An agent framework using LLMs"
-authors = [{name = "Jason Livesay", email = "runvnc@gmail.com"}]
-readme = "README.md"
-requires-python = ">=3.7"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-]
+version = "0.1.0"
+description = "MindRoot AI Agent Framework"
+requires-python = ">=3.9"
 dependencies = [
     "fastapi",
-    "aiofiles",
     "uvicorn",
     "jinja2",
-    "nanoid",
-    "termcolor",
-    "colored",
-    "loguru",
     "python-multipart",
-    "pytz",
-    "PyJWT",
-    "pluggy",
-    "sse_starlette",
-    "partial-json-parser",
-    "pydantic",
-    "setuptools",
-    "requests",
-    "aiohttp", # now ad python image library
-    "Pillow",
-    "psutil",
-    "aiosmtplib",
-    "pydantic[email]",
-    "bcrypt",
-    "rich",
-    "colorama"
+    "aiofiles",
+    "termcolor",
+    "nanoid",
+    "python-dotenv",
 ]
-
-
-[project.urls]
-Homepage = "https://github.com/runvnc/mindroot"
-
 
 [project.scripts]
 mindroot = "mindroot.server:main"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["*local*", "*data*", "*personas*", "*static*", "*imgs*", "*models*"]
-
-
-

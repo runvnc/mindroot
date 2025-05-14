@@ -1,0 +1,16 @@
+{% block head %}
+<link rel="stylesheet" href="/env_manager/static/css/env-manager.css">
+<script type="module" src="/env_manager/static/js/env-manager.js"></script>
+{% endblock %}
+
+{% block content %}
+<details>
+  <summary>
+    <span class="material-icons">settings_applications</span>
+    <span>Environment Variables</span>
+  </summary>
+  <div class="details-content">
+    <env-manager theme="dark" scope="local"></env-manager>
+  </div>
+</details>
+{% endblock %}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+aiofiles
+termcolor
+nanoid
+python-dotenv

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  mindroot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8010"
+    volumes:
+      # Persist data outside the container
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./personas:/app/personas
+      - ./imgs:/app/imgs
+    environment:
+      # Set your environment variables here
+      - JWT_SECRET_KEY=your_jwt_secret_key
+      # Add other environment variables as needed:
+      # - OPENAI_API_KEY=your_openai_api_key
+      # - ANTHROPIC_API_KEY=your_anthropic_api_key
+      # - REQUIRE_EMAIL_VERIFY=false
+      # - SMTP_HOST=your_smtp_host
+      # - SMTP_PORT=your_smtp_port
+      # - SMTP_USER=your_smtp_username
+      # - SMTP_PASSWORD=your_smtp_password
+      # - SMTP_FROM=your_from_email
+    restart: unless-stopped

@@ -42,4 +42,6 @@ router.include_router(agent_router)
 from .server_router import router as server_router
 router.include_router(server_router, prefix="/admin/server", tags=["server"])
 
-
+# Import and include the env_manager router
+from coreplugins.env_manager.router import router as env_manager_router
+router.include_router(env_manager_router)
