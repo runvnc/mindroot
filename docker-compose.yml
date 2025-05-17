@@ -13,10 +13,10 @@ services:
       - ./models:/app/models
       - ./personas:/app/personas
       - ./imgs:/app/imgs
+    env_file:
+      - .env
     environment:
-      # Set your environment variables here
-      - JWT_SECRET_KEY=your_jwt_secret_key
-      # Add other environment variables as needed:
+      # Other environment variables as needed:
       # - OPENAI_API_KEY=your_openai_api_key
       # - ANTHROPIC_API_KEY=your_anthropic_api_key
       # - REQUIRE_EMAIL_VERIFY=false

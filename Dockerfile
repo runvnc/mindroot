@@ -39,8 +39,10 @@ RUN pip install --no-cache-dir -e .
 # Expose port
 EXPOSE 8010
 
-# Set environment variables (these should be overridden at runtime)
+# Set environment variables (these will be overridden at runtime from .env)
 ENV JWT_SECRET_KEY=change_this_in_production
+ENV ADMIN_USER=admin
+ENV ADMIN_PASS=password
 
 # Run the application with custom port
 CMD ["python", "-m", "mindroot.server", "--port", "8010"]
