@@ -122,48 +122,27 @@ export class PluginAdvancedInstall extends PluginBase {
       // Open the installation dialog
       this.installDialog.open(repoName || 'GitHub Plugin', 'GitHub');
       
-      // Connect to SSE endpoint
-      // Build URL with properly encoded parameters
-      const params = new URLSearchParams();
-      params.append('plugin', repoName || 'plugin');
-      params.append('source', 'github');
-      params.append('source_path', githubUrl);
+      // Show initial message
+      this.installDialog.addOutput(`Starting installation of ${repoName} from GitHub...`, 'info');
       
-      const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
-      
-      // Debug
-      console.log(`Connected to SSE endpoint: /plugin-manager/stream-install-plugin?${params.toString()}`);
-      
-      eventSource.addEventListener('message', (event) => {
-        console.log('SSE message event:', event.data);
-        this.installDialog.addOutput(event.data, 'info');
-      });
-      
-      eventSource.addEventListener('error', (event) => {
-        console.log('SSE error event:', event.data);
-        this.installDialog.addOutput(event.data, 'error');
-      });
-      
-      eventSource.addEventListener('warning', (event) => {
-        console.log('SSE warning event:', event.data);
-        this.installDialog.addOutput(event.data, 'warning');
-      });
-      
-      eventSource.addEventListener('complete', (event) => {
-        console.log('SSE complete event:', event.data);
-        this.installDialog.addOutput(event.data, 'success');
+      try {
+        // Use the existing GitHub installation endpoint which handles the download and extraction
+        await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
+          plugin: repoName || 'plugin',
+          url: githubUrl
+        });
+        
+        // Show success message
+        this.installDialog.addOutput(`Plugin ${repoName} installed successfully from GitHub`, 'success');
         this.installDialog.setComplete(false);
-        eventSource.close();
-        // Dispatch event for parent components to refresh their lists
+        
+        // Notify parent components to refresh their lists
         this.dispatch('plugin-installed');
-      });
-      
-      eventSource.onerror = () => {
-        console.log('SSE connection error');
-        eventSource.close();
+      } catch (error) {
+        // Show error message
+        this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
         this.installDialog.setComplete(true);
-      };
-      
+      }
     } catch (error) {
       this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
       this.installDialog.setComplete(true);

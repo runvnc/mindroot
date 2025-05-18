@@ -9,6 +9,7 @@ from lib.plugins import (
     load_plugin_manifest, update_plugin_manifest, plugin_install,
     save_plugin_manifest, plugin_update, toggle_plugin_state, get_plugin_path
 )
+from lib.plugins.installation import download_github_files
 from lib.streamcmd import stream_command_as_events
 import asyncio
 
@@ -51,7 +52,7 @@ import sys, os, shlex
 async def stream_install_plugin(request: StreamInstallRequest):
     """Stream the installation process of a plugin using SSE (POST method)."""
     # Prepare the command based on the source
-    if request.source == 'github':
+    if request.source == 'github_direct':
         cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
     elif request.source == 'local':
         cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
@@ -59,8 +60,38 @@ async def stream_install_plugin(request: StreamInstallRequest):
         cmd = [sys.executable, '-m', 'pip', 'install', request.plugin, '-v', '--no-cache-dir']
     else:
         return {"success": False, "message": "Invalid source"}
+
+    # For GitHub installations, use the plugin_install function which handles the download and extraction
+    if request.source == 'github':
+        try:
+            # Use the streaming approach for GitHub installations
+            parts = request.source_path.split(':')
+            repo_path = parts[0]
+            tag = parts[1] if len(parts) > 1 else None
+            
+            async def stream_github_install():
+                yield {"event": "message", "data": f"Downloading GitHub repository {repo_path}..."}
+                
+                try:
+                    plugin_dir, _, plugin_info = download_github_files(repo_path, tag)
+                    
+                    cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v', '--no-cache-dir']
+                    async for event in stream_command_as_events(cmd):
+                        yield event
+                        
+                    update_plugin_manifest(
+                        plugin_info['name'], 'github', os.path.abspath(plugin_dir),
+                        remote_source=repo_path, version=plugin_info.get('version', '0.0.1'),
+                        metadata=plugin_info
+                    )
+                except Exception as e:
+                    yield {"event": "error", "data": f"Error installing from GitHub: {str(e)}"}
+            
+            return EventSourceResponse(stream_github_install())
+        except Exception as e:
+            return {"success": False, "message": f"Error setting up GitHub installation: {str(e)}"}
     
-    # Use our streamcmd module to stream the command output
+    # For other sources, use our streamcmd module to stream the command output
     return EventSourceResponse(stream_command_as_events(cmd))
 @router.get("/stream-install-plugin", response_class=EventSourceResponse)
 async def stream_install_plugin_get(request: Request):
@@ -68,7 +99,7 @@ async def stream_install_plugin_get(request: Request):
     # Extract parameters from query string
     plugin = request.query_params.get("plugin", "")
     source = request.query_params.get("source", "")
-    source_path = request.query_params.get("source_path", None)
+    source_path = request.query_params.get("source_path", "")
     
     # Use the new simpler approach
     if source == 'github':
@@ -80,8 +111,42 @@ async def stream_install_plugin_get(request: Request):
     elif source == 'pypi':
         cmd = [sys.executable, '-m', 'pip', 'install', plugin, '-v', '--no-cache-dir']
         message = f"Installing from PyPI: {plugin}"
-    else:
+    else:  
         return {"success": False, "message": "Invalid source"}
+
+    # For GitHub installations, use the plugin_install function which handles the download and extraction
+    if source == 'github':
+        try:
+            # Use the streaming approach for GitHub installations
+            parts = source_path.split(':')
+            repo_path = parts[0]
+            tag = parts[1] if len(parts) > 1 else None
+            
+            # First yield a message about downloading
+            async def stream_github_install():
+                yield {"event": "message", "data": f"Downloading GitHub repository {repo_path}..."}
+                
+                # Download and extract the GitHub repository
+                try:
+                    plugin_dir, _, plugin_info = download_github_files(repo_path, tag)
+                    
+                    # Now stream the installation from the local directory
+                    cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v', '--no-cache-dir']
+                    async for event in stream_command_as_events(cmd):
+                        yield event
+                        
+                    # Update the plugin manifest
+                    update_plugin_manifest(
+                        plugin_info['name'], 'github', os.path.abspath(plugin_dir),
+                        remote_source=repo_path, version=plugin_info.get('version', '0.0.1'),
+                        metadata=plugin_info
+                    )
+                except Exception as e:
+                    yield {"event": "error", "data": f"Error installing from GitHub: {str(e)}"}
+            
+            return EventSourceResponse(stream_github_install())
+        except Exception as e:
+            return {"success": False, "message": f"Error installing from GitHub: {str(e)}"}
     
     # Use our new streamcmd module
     return EventSourceResponse(stream_command_as_events(cmd))

@@ -4,6 +4,15 @@ import asyncio
 import sys
 from typing import Optional, Callable, Any, List, Dict, AsyncGenerator
 
+# ANSI color codes for terminal output
+COLORS = {
+    'reset': '\033[0m',
+    'green': '\033[32m',  # stdout
+    'yellow': '\033[33m',  # stderr/warning
+    'blue': '\033[34m',    # info
+    'red': '\033[31m'      # error
+}
+
 
 async def read_stream(stream: asyncio.StreamReader, callback: Callable[[str], Any]):
     """Read from stream line by line and call the callback for each line."""
@@ -76,6 +85,9 @@ async def stream_command_as_events(
     Yields:
         Events with type and data
     """
+    # Debug output
+    print(f"{COLORS['blue']}[DEBUG] Running command: {' '.join(cmd)}{COLORS['reset']}")
+    
     # Send initial event
     yield {"event": "message", "data": f"Running command: {' '.join(cmd)}"}
     
@@ -85,6 +97,7 @@ async def stream_command_as_events(
     # Define callbacks for stdout and stderr
     def stdout_callback(line):
         if line.strip():
+            print(f"{COLORS['green']}[STDOUT] {line.strip()}{COLORS['reset']}")
             output_queue.put_nowait(("message", line.strip()))
     
     def stderr_callback(line):
@@ -93,9 +106,11 @@ async def stream_command_as_events(
             if ("WARNING:" in line or 
                 "DEPRECATION:" in line or 
                 "A new release of pip is available" in line):
+                print(f"{COLORS['yellow']}[WARNING] {line.strip()}{COLORS['reset']}")
                 output_queue.put_nowait(("warning", line.strip()))
             else:
-                output_queue.put_nowait(("error", line.strip()))
+                print(f"{COLORS['red']}[ERROR] {line.strip()}{COLORS['reset']}")
+                output_queue.put_nowait(("warning", line.strip()))
     
     # Run the command in a separate task
     run_task = asyncio.create_task(
@@ -115,7 +130,10 @@ async def stream_command_as_events(
     exit_code = await run_task
     
     # Send completion event
+    print(f"{COLORS['blue']}[INFO] Command completed with exit code {exit_code}{COLORS['reset']}")
     if exit_code == 0:
         yield {"event": "complete", "data": "Command completed successfully"}
     else:
+        print(f"{COLORS['red']}[ERROR] Command failed with exit code {exit_code}{COLORS['reset']}")
         yield {"event": "error", "data": f"Command failed with exit code {exit_code}"}
+

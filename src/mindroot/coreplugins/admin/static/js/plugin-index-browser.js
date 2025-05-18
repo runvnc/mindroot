@@ -126,11 +126,11 @@ export class PluginIndexBrowser extends PluginBase {
     if (plugin.source === 'github') {
       try {
         console.log('Installing plugin from GitHub:', {plugin})
-        
+
         // Open the installation dialog
         this.installDialog.open(plugin.name, 'GitHub');
         
-        // Connect to SSE endpoint
+        // Connect to SSE endpoint for streaming GitHub installation
         // Build URL with properly encoded parameters
         const params = new URLSearchParams();
         params.append('plugin', plugin.name);
@@ -140,22 +140,24 @@ export class PluginIndexBrowser extends PluginBase {
         const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
         
         // Debug
-        
-        // Debug
+        console.log(`Connected to SSE endpoint: /plugin-manager/stream-install-plugin?${params.toString()}`);
         
         eventSource.addEventListener('message', (event) => {
           console.log('SSE message event:', event.data);
-          console.log('SSE message event:', event.data);
           this.installDialog.addOutput(event.data, 'info');
         });
+        
         eventSource.addEventListener('error', (event) => {
-          console.log('SSE error event:', event.data);
           console.log('SSE error event:', event.data);
           this.installDialog.addOutput(event.data, 'error');
         });
         
+        eventSource.addEventListener('warning', (event) => {
+          console.log('SSE warning event:', event.data);
+          this.installDialog.addOutput(event.data, 'warning');
+        });
+        
         eventSource.addEventListener('complete', (event) => {
-          console.log('SSE complete event:', event.data);
           console.log('SSE complete event:', event.data);
           this.installDialog.addOutput(event.data, 'success');
           this.installDialog.setComplete(false);
@@ -165,7 +167,6 @@ export class PluginIndexBrowser extends PluginBase {
         });
         
         eventSource.onerror = () => {
-          console.log('SSE connection error');
           console.log('SSE connection error');
           eventSource.close();
           this.installDialog.setComplete(true);
@@ -174,37 +175,68 @@ export class PluginIndexBrowser extends PluginBase {
         this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
         this.installDialog.setComplete(true);
       }
-    } else {
+    } else if (plugin.source === 'local') {
       try {
         // Open the installation dialog
         this.installDialog.open(plugin.name, 'Local');
+        
+        // Use the existing local installation endpoint
+        try {
+          this.installDialog.addOutput(`Starting installation of ${plugin.name} from local path...`, 'info');
+          
+          // Make the API call to install the plugin
+          await this.apiCall('/plugin-manager/install-local-plugin', 'POST', {
+            plugin: plugin.name
+          });
+          
+          // Show success message
+          this.installDialog.addOutput(`Plugin ${plugin.name} installed successfully from local path`, 'success');
+          this.installDialog.setComplete(false);
+          
+          // Notify parent components to refresh their lists
+          this.dispatch('plugin-installed', { plugin });
+        } catch (error) {
+          // Show error message
+          this.installDialog.addOutput(`Failed to install plugin from local path: ${error.message}`, 'error');
+          this.installDialog.setComplete(true);
+        }
+      } catch (error) {
+        this.installDialog.addOutput(`Failed to install plugin ${plugin.name}: ${error.message}`, 'error');
+        this.installDialog.setComplete(true);
+      }
+    } else {
+      // For PyPI packages, use the streaming approach
+      try {
+        // Open the installation dialog
+        this.installDialog.open(plugin.name, 'PyPI');
         
         // Connect to SSE endpoint
         // Build URL with properly encoded parameters
         const params = new URLSearchParams();
         params.append('plugin', plugin.name);
-        params.append('source', 'local');
-        if (plugin.source_path) params.append('source_path', plugin.source_path);
+        params.append('source', 'pypi');
         
         const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
         
         // Debug
-        
-        // Debug
+        console.log(`Connected to SSE endpoint: /plugin-manager/stream-install-plugin?${params.toString()}`);
         
         eventSource.addEventListener('message', (event) => {
           console.log('SSE message event:', event.data);
-          console.log('SSE message event:', event.data);
           this.installDialog.addOutput(event.data, 'info');
         });
+        
         eventSource.addEventListener('error', (event) => {
-          console.log('SSE error event:', event.data);
           console.log('SSE error event:', event.data);
           this.installDialog.addOutput(event.data, 'error');
         });
         
+        eventSource.addEventListener('warning', (event) => {
+          console.log('SSE warning event:', event.data);
+          this.installDialog.addOutput(event.data, 'warning');
+        });
+        
         eventSource.addEventListener('complete', (event) => {
-          console.log('SSE complete event:', event.data);
           console.log('SSE complete event:', event.data);
           this.installDialog.addOutput(event.data, 'success');
           this.installDialog.setComplete(false);
@@ -214,7 +246,6 @@ export class PluginIndexBrowser extends PluginBase {
         });
         
         eventSource.onerror = () => {
-          console.log('SSE connection error');
           console.log('SSE connection error');
           eventSource.close();
           this.installDialog.setComplete(true);
