@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 import sys
 import os
 import psutil
@@ -146,3 +146,10 @@ async def stop_server():
             "success": False,
             "message": f"Stop failed: {str(e)}"
         }
+
+@router.get("/ping")
+async def ping():
+    """Simple endpoint to check if server is running"""
+    return {
+        "status": "ok"
+    }

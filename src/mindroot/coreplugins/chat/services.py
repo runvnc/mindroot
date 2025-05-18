@@ -235,6 +235,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     img = dataurl_to_pil(part['data'])
                     img_msg = await context.format_image_message(img)
                     new_parts.append(img_msg)
+                elif part['type'] == 'text' and '[UPLOADED FILE]' in part['text']:
+                    # Ensure we don't duplicate file entries
+                    if not any('[UPLOADED FILE]' in p.get('text', '') for p in new_parts):
+                        new_parts.append(part)
                 else:
                     new_parts.append(part)
             msg_to_add= {"role": "user", "content": new_parts }

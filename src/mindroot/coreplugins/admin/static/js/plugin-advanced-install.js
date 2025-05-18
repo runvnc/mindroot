@@ -1,5 +1,6 @@
 import { html, css } from './lit-core.min.js';
 import { PluginBase } from './plugin-base.js';
+import './plugin-install-dialog.js';
 
 export class PluginAdvancedInstall extends PluginBase {
   static properties = {
@@ -75,6 +76,23 @@ export class PluginAdvancedInstall extends PluginBase {
     this.showGitHubModal = false;
   }
 
+  firstUpdated() {
+    super.firstUpdated();
+    // Create the install dialog if it doesn't exist
+    if (!this.installDialog) {
+      this.installDialog = document.createElement('plugin-install-dialog');
+      document.body.appendChild(this.installDialog);
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Remove the dialog when component is removed
+    if (this.installDialog && document.body.contains(this.installDialog)) {
+      document.body.removeChild(this.installDialog);
+    }
+  }
+
   openGitHubModal() {
     const modal = this.shadowRoot.querySelector('#github-install-modal');
     modal.showModal();
@@ -94,30 +112,104 @@ export class PluginAdvancedInstall extends PluginBase {
       return;
     }
 
+    // Extract repo name from URL
+    const repoName = githubUrl.split('/').pop();
+
     try {
-      await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
-        plugin: 'test',
-        url: githubUrl
+      // Close the modal
+      this.closeGitHubModal();
+
+      // Open the installation dialog
+      this.installDialog.open(repoName || 'GitHub Plugin', 'GitHub');
+      
+      // Connect to SSE endpoint
+      // Build URL with properly encoded parameters
+      const params = new URLSearchParams();
+      params.append('plugin', repoName || 'plugin');
+      params.append('source', 'github');
+      params.append('source_path', githubUrl);
+      
+      const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
+      
+      // Debug
+      console.log(`Connected to SSE endpoint: /plugin-manager/stream-install-plugin?${params.toString()}`);
+      
+      eventSource.addEventListener('message', (event) => {
+        console.log('SSE message event:', event.data);
+        this.installDialog.addOutput(event.data, 'info');
       });
       
-      alert('Plugin installed successfully from GitHub');
-      this.closeGitHubModal();
-      this.dispatch('plugin-installed');
+      eventSource.addEventListener('error', (event) => {
+        console.log('SSE error event:', event.data);
+        this.installDialog.addOutput(event.data, 'error');
+      });
+      
+      eventSource.addEventListener('warning', (event) => {
+        console.log('SSE warning event:', event.data);
+        this.installDialog.addOutput(event.data, 'warning');
+      });
+      
+      eventSource.addEventListener('complete', (event) => {
+        console.log('SSE complete event:', event.data);
+        this.installDialog.addOutput(event.data, 'success');
+        this.installDialog.setComplete(false);
+        eventSource.close();
+        // Dispatch event for parent components to refresh their lists
+        this.dispatch('plugin-installed');
+      });
+      
+      eventSource.onerror = () => {
+        console.log('SSE connection error');
+        eventSource.close();
+        this.installDialog.setComplete(true);
+      };
+      
     } catch (error) {
-      alert(`Failed to install plugin from GitHub: ${error.message}`);
+      this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
+      this.installDialog.setComplete(true);
     }
   }
 
   async handleScanDirectory() {
     const directory = prompt('Enter the directory path to scan for plugins:');
     if (!directory) return;
+    
+    // Open the installation dialog
+    this.installDialog.open('Directory Scan', 'Local Directory');
+    this.installDialog.addOutput(`Scanning directory: ${directory}`, 'info');
 
     try {
-      await this.apiCall('/plugin-manager/scan-directory', 'POST', { directory });
-      alert('Directory scanned successfully');
-      this.dispatch('plugins-scanned');
+      // Make the API call
+      const response = await this.apiCall('/plugin-manager/scan-directory', 'POST', { directory });
+      
+      if (response.success) {
+        this.installDialog.addOutput(response.message, 'success');
+        
+        // If plugins were found, list them
+        if (response.plugins && response.plugins.length > 0) {
+          this.installDialog.addOutput('Found plugins:', 'info');
+          response.plugins.forEach(plugin => {
+            this.installDialog.addOutput(`- ${plugin.name}: ${plugin.description || 'No description'}`, 'info');
+          });
+        } else {
+          this.installDialog.addOutput('No plugins found in directory.', 'warning');
+        }
+        
+        this.installDialog.setComplete(false);
+        this.dispatch('plugins-scanned');
+      } else {
+        this.installDialog.addOutput(`Scan failed: ${response.message}`, 'error');
+        this.installDialog.setComplete(true);
+      }
     } catch (error) {
-      alert(`Failed to scan directory: ${error.message}`);
+      this.installDialog.addOutput(`Failed to scan directory: ${error.message}`, 'error');
+      
+      // If there's a detailed error message, show it
+      if (error.response && error.response.data && error.response.data.message) {
+        this.installDialog.addOutput(error.response.data.message, 'error');
+      }
+      
+      this.installDialog.setComplete(true);
     }
   }
 

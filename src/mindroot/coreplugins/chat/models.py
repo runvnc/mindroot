@@ -21,4 +21,3 @@ class ImageMessagePart(BaseModel):
 
 # Use Union to create a discriminated union type
 MessageParts = Union[TextMessagePart, ImageMessagePart]
-

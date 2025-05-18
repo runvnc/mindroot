@@ -5,7 +5,8 @@ class ServerControl extends BaseEl {
   static properties = {
     status: { type: String },
     loading: { type: Boolean },
-    method: { type: String }
+    method: { type: String },
+    monitorActive: { type: Boolean }
   };
 
   static styles = css`
@@ -96,6 +97,11 @@ class ServerControl extends BaseEl {
       margin-left: 0.5rem;
     }
 
+    .monitor-status {
+      font-style: italic;
+      margin-left: 0.5rem;
+    }
+
     @keyframes spin {
       100% { transform: rotate(360deg); }
     }
@@ -110,6 +116,56 @@ class ServerControl extends BaseEl {
     this.status = '';
     this.loading = false;
     this.method = '';
+    this.monitorActive = false;
+    this.monitorIntervalId = null;
+  }
+
+  // Function to check if server is online
+  async checkServerStatus() {
+    try {
+      const response = await fetch('/admin/server/ping', { 
+        method: 'GET',
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // Start monitoring server status
+  startServerMonitor() {
+    if (this.monitorActive) return; // Don't start if already monitoring
+    
+    this.monitorActive = true;
+    let checkCount = 0;
+    const maxChecks = 120; // Maximum 2 minutes of checking
+    
+    this.monitorIntervalId = setInterval(async () => {
+      checkCount++;
+      this.status = `Checking server status${'.'.repeat(checkCount % 4)} (${checkCount}s)`;
+      
+      const isOnline = await this.checkServerStatus();
+      
+      if (isOnline) {
+        this.stopMonitoring();
+        this.status = 'Server is back online! Refreshing page...';
+        setTimeout(() => window.location.reload(), 1000);
+      } else if (checkCount >= maxChecks) {
+        this.stopMonitoring();
+        this.status = 'Server did not come back online after 2 minutes. Please refresh manually.';
+      }
+    }, 1000);
+  }
+
+  // Stop monitoring
+  stopMonitoring() {
+    if (this.monitorIntervalId) {
+      clearInterval(this.monitorIntervalId);
+      this.monitorIntervalId = null;
+    }
+    this.monitorActive = false;
   }
 
   async handleRestart() {
@@ -128,12 +184,9 @@ class ServerControl extends BaseEl {
         this.status = result.message;
         this.method = result.method;
         
-        // For PM2 and mindroot methods, we'll reload after a delay
+        // Start monitoring server status
         if (result.method === 'pm2' || result.method === 'mindroot') {
-          setTimeout(() => {
-            this.status = 'Attempting to reconnect...';
-            window.location.reload();
-          }, 5000);
+          this.startServerMonitor();
         }
       } else {
         throw new Error(`${result.message}${result.method ? ` (${result.method})` : ''}`);
@@ -144,6 +197,12 @@ class ServerControl extends BaseEl {
     } finally {
       this.loading = false;
     }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Clean up interval when component is removed
+    this.stopMonitoring();
   }
 
   async handleStop() {
@@ -200,7 +259,10 @@ class ServerControl extends BaseEl {
                 <span class="material-icons">${this.method === 'pm2' ? 'cloud_queue' : 'terminal'}</span>
                 ${this.method}
               </span>
+              ${this.monitorActive ? html`
+              <span class="monitor-status">Monitoring server status...</span>
             ` : ''}
+          ` : ''}
           </div>
         ` : ''}
       </div>

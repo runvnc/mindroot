@@ -3,7 +3,7 @@ import logging
 from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 from .plugins import list_enabled, get_plugin_path
 from .parent_templates import get_parent_templates_env
-
+import traceback
 
 # TODO: get_parent_templates_env(plugins):
 # jinja2 environment containing only 1 template per plugin file name,
@@ -243,8 +243,10 @@ async def render_combined_template(page_name, plugins, context):
         str: Rendered HTML
     """
     parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    print(f"parent_template", parent_template)
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
+    print(f"parent_blocks", parent_blocks)
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
     
     # Ensure context is a dictionary
@@ -348,8 +350,9 @@ async def render(page_name, context):
     # First try to render with the combined template approach
     try:
         parent_env.get_template(f"{page_name}.jinja2")
-        return await render_combined_template(page_name, plugins, context)
     except Exception as e:
+        trace = traceback.format_exc()
+        print(f"Error finding parent template for {page_name}: {e}\n\n{trace}")
         print(f"No parent template found for {page_name}, trying direct rendering: {e}")
         
         # Try to find and render a template directly from a plugin
@@ -358,3 +361,11 @@ async def render(page_name, context):
             return await render_direct_template(template_path, context)
         
         return f"<h1>Template Not Found</h1><p>No template found for '{page_name}'</p>"
+
+    try:
+        return await render_combined_template(page_name, plugins, context)
+    except Exception as e:
+        trace = traceback.format_exc()
+        print(f"Error rendering {page_name}: {e}\n\n{trace}")
+        return f"<h1>Error Rendering Page</h1><p>{str(e)}</p><pre>{trace}</pre>"
+

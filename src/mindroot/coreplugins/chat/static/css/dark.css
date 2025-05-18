@@ -961,6 +961,41 @@ tbody tr {
   width: 32px;
 }
 
+/* File attachment styles */
+.file-attachment {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(30, 30, 50, 0.6);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 5px 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.file-attachment a {
+  display: flex;
+  align-items: center;
+  color: #f0f0f0;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-attachment svg {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.file-attachment:hover {
+  background: rgba(40, 40, 70, 0.8);
+}
+
+.file-attachment a:hover {
+  text-decoration: underline;
+}
+
 .left-side {
   overflow-y: auto;
 }

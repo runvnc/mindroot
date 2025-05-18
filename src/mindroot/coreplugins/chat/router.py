@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import File, UploadFile, Form
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
 from lib.providers.services import service, service_manager
@@ -15,6 +16,8 @@ from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
 from lib.utils.debug import debug_box
 from lib.session_files import load_session_data, save_session_data
+import os
+import shutil
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -188,4 +191,32 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
     print(log_id)
     return {"status": "ok", "results": task_result, "full_results": full_results, "log_id": log_id}
 
+
+@router.post("/chat/{log_id}/upload")
+async def upload_file(request: Request, log_id: str, file: UploadFile = File(...)):
+    """
+    Upload a file and store it in a user-specific directory.
+    Returns the file path that can be used in messages.
+    """
+    user = request.state.user.username
+    
+    # Create user uploads directory if it doesn't exist
+    user_upload_dir = f"data/users/{user}/uploads/{log_id}"
+    os.makedirs(user_upload_dir, exist_ok=True)
+    
+    # Generate a safe filename to prevent path traversal
+    filename = os.path.basename(file.filename)
+    file_path = os.path.join(user_upload_dir, filename)
+    
+    # Save the file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    # Return the file information
+    return {
+        "status": "ok",
+        "filename": filename,
+        "path": file_path,
+        "mime_type": file.content_type
+    }
 

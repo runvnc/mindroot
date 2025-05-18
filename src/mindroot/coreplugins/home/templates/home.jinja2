@@ -10,6 +10,7 @@
 {% block head_title %}
     <title>MindRoot Agent Host</title>
 {% endblock %}
+
 {% block head_css %}
     <link rel="stylesheet" href="/home/static/css/reset.css">
     <link rel="stylesheet" href="/home/static/css/default.css">
@@ -51,9 +52,12 @@
         
         <div class="agent-list" role="list">
             {% for agent in agents %}
-            <a href="/agent/{{ agent }}" class="agent-link" role="listitem" target="_blank" >
-                <span class="agent-status" aria-hidden="true"></span>
-                <span class="agent-name">{{ agent }}</span>
+            <a href="/agent/{{ agent }}" class="agent-link" role="listitem" target="_blank">
+                <img src="/chat/personas/{{ agent }}/avatar.png" alt="{{ agent }} avatar" class="agent-avatar" onerror="this.src='/chat/static/assistant.png'">
+                <div class="agent-info">
+                    <span class="agent-status" aria-hidden="true"></span>
+                    <span class="agent-name">{{ agent | replace('_', ' ') }}</span>
+                </div>
             </a>
             {% endfor %}
         </div>
@@ -74,4 +78,3 @@
 {% endblock %}
 </body>
 </html>
-

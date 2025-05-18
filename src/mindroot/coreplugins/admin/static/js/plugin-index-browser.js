@@ -1,5 +1,6 @@
 import { html, css } from './lit-core.min.js';
 import { PluginBase } from './plugin-base.js';
+import './plugin-install-dialog.js';
 
 export class PluginIndexBrowser extends PluginBase {
   static properties = {
@@ -104,27 +105,123 @@ export class PluginIndexBrowser extends PluginBase {
     }
   }
 
+  firstUpdated() {
+    super.firstUpdated();
+    // Create the install dialog if it doesn't exist
+    if (!this.installDialog) {
+      this.installDialog = document.createElement('plugin-install-dialog');
+      document.body.appendChild(this.installDialog);
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Remove the dialog when component is removed
+    if (this.installDialog && document.body.contains(this.installDialog)) {
+      document.body.removeChild(this.installDialog);
+    }
+  }
+
   async handleInstall(plugin) {
     if (plugin.source === 'github') {
       try {
         console.log('Installing plugin from GitHub:', {plugin})
-        await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
-          plugin: plugin.name,
-          url: plugin.github_url
+        
+        // Open the installation dialog
+        this.installDialog.open(plugin.name, 'GitHub');
+        
+        // Connect to SSE endpoint
+        // Build URL with properly encoded parameters
+        const params = new URLSearchParams();
+        params.append('plugin', plugin.name);
+        params.append('source', 'github');
+        params.append('source_path', plugin.github_url);
+        
+        const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
+        
+        // Debug
+        
+        // Debug
+        
+        eventSource.addEventListener('message', (event) => {
+          console.log('SSE message event:', event.data);
+          console.log('SSE message event:', event.data);
+          this.installDialog.addOutput(event.data, 'info');
         });
-        alert('Plugin installed successfully from GitHub');
+        eventSource.addEventListener('error', (event) => {
+          console.log('SSE error event:', event.data);
+          console.log('SSE error event:', event.data);
+          this.installDialog.addOutput(event.data, 'error');
+        });
+        
+        eventSource.addEventListener('complete', (event) => {
+          console.log('SSE complete event:', event.data);
+          console.log('SSE complete event:', event.data);
+          this.installDialog.addOutput(event.data, 'success');
+          this.installDialog.setComplete(false);
+          eventSource.close();
+          // Dispatch event for parent components to refresh their lists
+          this.dispatch('plugin-installed', { plugin });
+        });
+        
+        eventSource.onerror = () => {
+          console.log('SSE connection error');
+          console.log('SSE connection error');
+          eventSource.close();
+          this.installDialog.setComplete(true);
+        };
       } catch (error) {
-        alert(`Failed to install plugin from GitHub: ${error.message}`);
+        this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
+        this.installDialog.setComplete(true);
       }
     } else {
       try {
-        await this.apiCall('/plugin-manager/install-local-plugin', 'POST', {
-          plugin: plugin.name
+        // Open the installation dialog
+        this.installDialog.open(plugin.name, 'Local');
+        
+        // Connect to SSE endpoint
+        // Build URL with properly encoded parameters
+        const params = new URLSearchParams();
+        params.append('plugin', plugin.name);
+        params.append('source', 'local');
+        if (plugin.source_path) params.append('source_path', plugin.source_path);
+        
+        const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
+        
+        // Debug
+        
+        // Debug
+        
+        eventSource.addEventListener('message', (event) => {
+          console.log('SSE message event:', event.data);
+          console.log('SSE message event:', event.data);
+          this.installDialog.addOutput(event.data, 'info');
         });
-        // Dispatch event for parent components to refresh their lists
-        this.dispatch('plugin-installed', { plugin });
+        eventSource.addEventListener('error', (event) => {
+          console.log('SSE error event:', event.data);
+          console.log('SSE error event:', event.data);
+          this.installDialog.addOutput(event.data, 'error');
+        });
+        
+        eventSource.addEventListener('complete', (event) => {
+          console.log('SSE complete event:', event.data);
+          console.log('SSE complete event:', event.data);
+          this.installDialog.addOutput(event.data, 'success');
+          this.installDialog.setComplete(false);
+          eventSource.close();
+          // Dispatch event for parent components to refresh their lists
+          this.dispatch('plugin-installed', { plugin });
+        });
+        
+        eventSource.onerror = () => {
+          console.log('SSE connection error');
+          console.log('SSE connection error');
+          eventSource.close();
+          this.installDialog.setComplete(true);
+        };
       } catch (error) {
-        alert(`Failed to install plugin ${plugin.name}: ${error.message}`);
+        this.installDialog.addOutput(`Failed to install plugin ${plugin.name}: ${error.message}`, 'error');
+        this.installDialog.setComplete(true);
       }
     }
   }

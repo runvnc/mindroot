@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 import traceback
 import os
 import json
@@ -8,6 +9,9 @@ from lib.plugins import (
     load_plugin_manifest, update_plugin_manifest, plugin_install,
     save_plugin_manifest, plugin_update, toggle_plugin_state, get_plugin_path
 )
+from lib.streamcmd import stream_command_as_events
+import asyncio
+
 
 router = APIRouter()
 
@@ -30,11 +34,57 @@ class InstallFromIndexRequest(BaseModel):
     plugin: str
     index_name: str
 
+class StreamInstallRequest(BaseModel):
+    plugin: str
+    source: str
+    source_path: str = None
+
 class PluginMetadata(BaseModel):
     description: Optional[str] = None
     commands: Optional[List[str]] = None
     services: Optional[List[str]] = None
     dependencies: Optional[List[str]] = None
+
+import sys, os, shlex
+
+@router.post("/stream-install-plugin", response_class=EventSourceResponse)
+async def stream_install_plugin(request: StreamInstallRequest):
+    """Stream the installation process of a plugin using SSE (POST method)."""
+    # Prepare the command based on the source
+    if request.source == 'github':
+        cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
+    elif request.source == 'local':
+        cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
+    elif request.source == 'pypi':
+        cmd = [sys.executable, '-m', 'pip', 'install', request.plugin, '-v', '--no-cache-dir']
+    else:
+        return {"success": False, "message": "Invalid source"}
+    
+    # Use our streamcmd module to stream the command output
+    return EventSourceResponse(stream_command_as_events(cmd))
+@router.get("/stream-install-plugin", response_class=EventSourceResponse)
+async def stream_install_plugin_get(request: Request):
+    """Stream the installation process of a plugin using SSE (GET method)."""
+    # Extract parameters from query string
+    plugin = request.query_params.get("plugin", "")
+    source = request.query_params.get("source", "")
+    source_path = request.query_params.get("source_path", None)
+    
+    # Use the new simpler approach
+    if source == 'github':
+        cmd = [sys.executable, '-m', 'pip', 'install', '-e', source_path, '-v', '--no-cache-dir']
+        message = f"Installing {plugin} from GitHub repository {source_path}..."
+    elif source == 'local':
+        cmd = [sys.executable, '-m', 'pip', 'install', '-e', source_path, '-v', '--no-cache-dir']
+        message = f"Installing from local path: {source_path}"
+    elif source == 'pypi':
+        cmd = [sys.executable, '-m', 'pip', 'install', plugin, '-v', '--no-cache-dir']
+        message = f"Installing from PyPI: {plugin}"
+    else:
+        return {"success": False, "message": "Invalid source"}
+    
+    # Use our new streamcmd module
+    return EventSourceResponse(stream_command_as_events(cmd))
 
 @router.get("/get-all-plugins")
 async def get_all_plugins():
@@ -87,7 +137,7 @@ async def scan_directory(request: DirectoryRequest):
         # Update installed plugins from discovered ones
         for plugin_name, plugin_info in discovered_plugins.items():
             plugin_info['source'] = 'local'
-            plugin_info['metadata'] = {
+            plugin_info['metadata'] = plugin_info.get('metadata', {}) or {
                 "description": plugin_info.get('description', ''),
                 "install_date": plugin_info.get('install_date', ''),
                 "commands": plugin_info.get('commands', []),
@@ -96,8 +146,16 @@ async def scan_directory(request: DirectoryRequest):
             print(plugin_info)
             manifest['plugins']['installed'][plugin_name] = plugin_info
 
+        # Prepare plugin list for response
+        plugins_list = [{
+            "name": name,
+            "description": info.get('metadata', {}).get('description', info.get('description', ''))
+        } for name, info in discovered_plugins.items()]
+        
         save_plugin_manifest(manifest)
-        return {"success": True, "message": f"Scanned {len(discovered_plugins)} plugins in {directory}"}
+        return {"success": True, 
+                "message": f"Scanned {len(discovered_plugins)} plugins in {directory}",
+                "plugins": plugins_list}
     except Exception as e:
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error during scan: {str(e)}\n\n{trace}"}

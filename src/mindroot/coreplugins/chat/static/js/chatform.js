@@ -10,6 +10,7 @@ class ChatForm extends BaseEl {
   static properties = {
     sender: { type: String },
     message: { type: String },
+    uploadedFiles: { type: Array },
     taskid: { type: String },
     autoSizeInput: { type: Boolean, attribute: 'auto-size-input', reflect: true }
   }
@@ -109,6 +110,49 @@ class ChatForm extends BaseEl {
         font-size: 18px;
         padding: 0;
       }
+      .file-preview-container {
+        display: none;
+        margin-bottom: 10px;
+      }
+      .file-preview-container.has-files {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .file-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: rgba(30, 30, 50, 0.6);
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 5px;
+      }
+      .file-icon {
+        margin-right: 8px;
+      }
+      .file-name {
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+      }
+      .remove-file {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        padding: 0;
+      }
       .upload-container {
         display: flex;
         align-items: center;
@@ -123,10 +167,21 @@ class ChatForm extends BaseEl {
         cursor: pointer;
         color: inherit;
       }
+      .file-upload-button {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-left: 8px;
+        cursor: pointer;
+        color: inherit;
+      }
       .upload-button:hover {
         opacity: 0.8;
       }
       #imageUpload {
+        display: none;
+      }
+      #fileUpload {
         display: none;
       }
       .loading {
@@ -159,6 +214,7 @@ class ChatForm extends BaseEl {
     this.message = ''
     this.autoSizeInput = true
     this.taskid = null
+    this.uploadedFiles = []
     this.selectedImages = []
     this.isLoading = false
   }
@@ -181,6 +237,52 @@ class ChatForm extends BaseEl {
       }
       await this._processImage(file)
     }
+    console.log('File upload complete, file preview container:', this.shadowRoot.querySelector('.file-preview-container'))
+  }
+
+  async _handleFileUpload(e) {
+    const files = e.target.files
+    console.log('File upload triggered with files:', files)
+    if (!files || files.length === 0) return
+    
+    this.isLoading = true
+    this.requestUpdate()
+    
+    for (let file of files) {
+      try {
+        console.log('Processing file:', file.name, file.type, file.size)
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        const response = await authenticatedFetch(`/chat/${window.log_id}/upload`, {
+          method: 'POST',
+          body: formData
+        })
+        
+        const result = await response.json()
+        console.log('Upload result:', result)
+        if (result.status === 'ok') {
+          if (this.uploadedFiles.some(f => f.filename === result.filename)) {
+            console.log('File already uploaded:', result.filename)
+            continue
+          }
+          this.uploadedFiles.push({
+            filename: result.filename,
+            path: result.path,
+            mime_type: result.mime_type
+          })
+          console.log('Updated uploadedFiles:', this.uploadedFiles)
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error)
+      }
+    }
+    
+    this._updateFilePreviews()
+    this.isLoading = false
+    this.requestUpdate()
+    e.target.value = '' // Reset file input
+    console.log('File upload complete, file preview container:', this.shadowRoot.querySelector('.file-preview-container'))
   }
 
   _resizeTextarea() {
@@ -249,6 +351,47 @@ class ChatForm extends BaseEl {
     }
   }
 
+  _updateFilePreviews() {
+    console.log('Updating file previews with files:', this.uploadedFiles)
+    const container = this.shadowRoot ? this.shadowRoot.querySelector('.file-preview-container') : null
+    if (!container) {
+      console.error('File preview container not found!')
+      return
+    } else {
+      container.style.display = 'block'  // Make sure the container is visible
+    }
+    
+    container.innerHTML = ''
+    
+    if (this.uploadedFiles.length > 0) {
+      container.classList.add('has-files')
+      this.uploadedFiles.forEach((file, index) => {
+        console.log('Creating file item for:', file.filename)
+        const fileItem = document.createElement('div')
+        fileItem.className = 'file-item'
+        fileItem.innerHTML = `
+          <div class="file-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+            </svg>
+          </div>
+          <div class="file-name">${file.filename}</div>
+          <button class="remove-file" data-index="${index}">×</button>
+        `
+        fileItem.querySelector('.remove-file').addEventListener('click', () => this._removeFile(index))
+        container.appendChild(fileItem)
+      })
+    } else {
+      container.style.display = 'none'  // Hide the container when empty
+      container.classList.remove('has-files')
+    }
+  }
+
+  _removeFile(index) {
+    this.uploadedFiles.splice(index, 1)
+    this._updateFilePreviews()
+  }
+
   _removeImage(index) {
     this.selectedImages.splice(index, 1)
     this._updateImagePreviews()
@@ -264,6 +407,24 @@ class ChatForm extends BaseEl {
   
   firstUpdated() {
     this.messageEl = this.shadowRoot.getElementById('inp_message');
+    this.fileUploadEl = this.shadowRoot.getElementById('fileUpload');
+    
+    // Initialize file preview container
+    const filePreviewContainer = this.shadowRoot.querySelector('.file-preview-container');
+    if (!filePreviewContainer) {
+      console.error('File preview container not found in firstUpdated!');
+    } else {
+      console.log('File preview container initialized:', filePreviewContainer);
+    }
+    
+    // Check if file upload input is properly initialized
+    if (!this.fileUploadEl) {
+      console.error('File upload input not found!');
+    } else {
+      console.log('File upload input initialized:', this.fileUploadEl);
+      this.fileUploadEl.addEventListener('change', this._handleFileUpload.bind(this));
+    }
+    
     this.sendButton = this.shadowRoot.querySelector('.send_msg');
     
     const observer = new MutationObserver(() => {
@@ -308,6 +469,18 @@ class ChatForm extends BaseEl {
       })
     }
     
+    // Only add one file entry to avoid duplication
+    if (this.uploadedFiles.length > 0) {
+      const file = this.uploadedFiles[0];
+      console.log('Adding file to message:', file);
+      
+      // Create a single file entry for all uploaded files
+      messageContent.push({
+        type: 'text',
+        text: `[UPLOADED FILE] Path: ${file.path}\nFilename: ${file.filename}\nType: ${file.mime_type}`
+      });
+    }
+    
     for (let imageData of this.selectedImages) {
       messageContent.push({
         type: 'image',
@@ -327,7 +500,9 @@ class ChatForm extends BaseEl {
     this.dispatch('addmessage', ev_)
     this.messageEl.value = ''
     this.selectedImages = []
+    this.uploadedFiles = []
     this._updateImagePreviews()
+    this._updateFilePreviews()
     this._resizeTextarea()
     this.requestUpdate()
   }
@@ -338,6 +513,7 @@ class ChatForm extends BaseEl {
 
       <div class="chat-entry flex py-2 ${this.isLoading ? 'loading' : ''}">
         <div class="message-container">
+          <div class="file-preview-container"></div>
           <div class="image-preview-container"></div>
           <div class="upload-container">
             <label class="upload-button" title="Upload image">
@@ -346,6 +522,15 @@ class ChatForm extends BaseEl {
                      accept="image/*" multiple>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/>
+              </svg>
+            </label>
+            <label class="file-upload-button" title="Upload file">
+              <input type="file" id="fileUpload"
+                     @change=${this._handleFileUpload} 
+                     multiple>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                <path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5z"/>
               </svg>
             </label>
           </div>
