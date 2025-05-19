@@ -286,7 +286,7 @@ export class PluginInstallDialog extends BaseEl {
     this.hasError = hasError || hasActualErrors;
 
     // Auto close after 2 seconds if no error and autoClose is enabled
-    if (!this.hasError && this.autoClose) {
+    if (false && !this.hasError && this.autoClose) {
       this.autoCloseTimer = setTimeout(() => {
         this.close();
       }, 2000);
