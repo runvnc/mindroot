@@ -37,8 +37,8 @@ export class PluginInstallDialog extends BaseEl {
     .dialog {
       background: rgb(15, 15, 30);
       border-radius: 8px;
-      width: 80%;
-      max-width: 800px;
+      width: 95%;
+      max-width: 1200px;
       max-height: 80vh;
       display: flex;
       flex-direction: column;
@@ -98,7 +98,8 @@ export class PluginInstallDialog extends BaseEl {
       border-radius: 4px;
       padding: 1rem;
       font-family: monospace;
-      white-space: pre-wrap;
+      /* white-space: pre-wrap; */
+      font-size: 0.9rem;
       overflow-x: auto;
       color: #f0f0f0;
       height: 300px;
