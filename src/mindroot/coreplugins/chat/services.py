@@ -252,6 +252,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         results = []
         full_results = []
 
+        invalid = "ERROR, invalid response format."
+        
+        consecutive_parse_errors = 0
+
         while continue_processing and iterations < max_iterations:
             iterations += 1
             continue_processing = False
@@ -260,7 +264,23 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     if 'llm' in context.data:
                         context.current_model = context.data['llm']
     
+                parse_error = False
+
                 results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
+                for result in results:
+                    if result['cmd'] == 'UNKNOWN':
+                        consecutive_parse_errors += 1
+                        parse_error = True
+
+                if not parse_error:
+                    consecutive_parse_errors = 0
+
+                if consecutive_parse_errors > 6:
+                    raise Exception("Too many consecutive parse errors, stopping processing.")
+
+                elif consecutive_parse_errors > 3: 
+                    results.append({"cmd": "UNKNOWN", "args": { "SYSTEM WARNING: Issue valid command list or task processing will be halted. Simplify output."}})
+
                 try:
                     tmp_data3 = { "results": full_cmds }
                     tmp_data3 = await pipeline_manager.process_results(tmp_data3, context=context)

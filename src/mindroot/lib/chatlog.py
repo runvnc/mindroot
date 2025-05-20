@@ -70,7 +70,11 @@ class ChatLog:
             except Exception as e:
                 # assume previous mesage was not a command, was a string
                 debug_box("4")
-                new_msg_text = self.messages[-1]['content'][0]['text'] + message['content'][0]['text']
+                print("Could not combine commands, probably normal if user message and previous system output, assuming string", e)
+                if type(self.messages[-1]['content']) == str:
+                    new_msg_text = self.messages[-1]['content'] + message['content'][0]['text']
+                else:
+                    new_msg_text = self.messages[-1]['content'][0]['text'] + message['content'][0]['text']
                 self.messages.append({'role': message['role'], 'content': [{'type': 'text', 'text': new_msg_text}]})
                 #print('could not combine commands. probably normal if user message and previous system output', e)
                 #print(self.messages[-1])

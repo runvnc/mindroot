@@ -275,6 +275,10 @@ class Agent:
             if buffer[0] == '{':
                 buffer = "[" + buffer
 
+            # happened with Qwen 3 for some reason
+            buffer = buffer.replace('}] <>\n\n[{','}, {')
+            buffer = buffer.replace('}] <>\n[{','}, {')
+
             commands, partial_cmd = parse_streaming_commands(buffer)
 
             if isinstance(commands, int):
