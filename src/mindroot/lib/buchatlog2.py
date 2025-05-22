@@ -305,6 +305,7 @@ def save_token_counts_to_cache(log_id: str, token_counts: Dict[str, int]) -> Non
     cache_path = get_cache_path(log_id)
     with open(cache_path, 'w') as f:
         json.dump(token_counts, f)
+
 def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     """
     Count tokens for a chat log identified by log_id, including any delegated tasks.
@@ -337,14 +338,7 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     temp_log.messages = log_data.get('messages', [])
     
     # Count tokens for this log
-    parent_counts = temp_log.count_tokens()
-    
-    # Create combined counts (starting with parent counts)
-    combined_counts = {
-        'input_tokens_sequence': parent_counts['input_tokens_sequence'],
-        'output_tokens_sequence': parent_counts['output_tokens_sequence'],
-        'input_tokens_total': parent_counts['input_tokens_total']
-    }
+    token_counts = temp_log.count_tokens()
     
     # Find delegated task log IDs
     delegated_log_ids = extract_delegate_task_log_ids(temp_log.messages)
@@ -353,21 +347,9 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     for delegated_id in delegated_log_ids:
         delegated_counts = count_tokens_for_log_id(delegated_id)
         if delegated_counts:
-            combined_counts['input_tokens_sequence'] += delegated_counts['input_tokens_sequence']
-            combined_counts['output_tokens_sequence'] += delegated_counts['output_tokens_sequence']
-            combined_counts['input_tokens_total'] += delegated_counts['input_tokens_total']
-    
-    # Create final result with both parent and combined counts
-    token_counts = {
-        # Parent session only counts
-        'input_tokens_sequence': parent_counts['input_tokens_sequence'],
-        'output_tokens_sequence': parent_counts['output_tokens_sequence'],
-        'input_tokens_total': parent_counts['input_tokens_total'],
-        # Combined counts (parent + all subtasks)
-        'combined_input_tokens_sequence': combined_counts['input_tokens_sequence'],
-        'combined_output_tokens_sequence': combined_counts['output_tokens_sequence'],
-        'combined_input_tokens_total': combined_counts['input_tokens_total']
-    }
+            token_counts['input_tokens_sequence'] += delegated_counts['input_tokens_sequence']
+            token_counts['output_tokens_sequence'] += delegated_counts['output_tokens_sequence']
+            token_counts['input_tokens_total'] += delegated_counts['input_tokens_total']
     
     # Save to cache
     save_token_counts_to_cache(log_id, token_counts)

@@ -240,3 +240,23 @@ async def get_token_count(request: Request, log_id: str):
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
     
     return {"status": "ok", "token_counts": token_counts}
+
+@router.get("/chat/{log_id}/tokens")
+async def get_token_count(request: Request, log_id: str):
+    """
+    Get token counts for a chat log identified by log_id, including any delegated tasks.
+    
+    Parameters:
+    - log_id: The log ID to count tokens for
+    
+    Returns:
+    - JSON with token counts or error message if log not found
+    """
+    from lib.token_counter import count_tokens_for_log_id
+    
+    token_counts = count_tokens_for_log_id(log_id)
+    
+    if token_counts is None:
+        return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
+    
+    return {"status": "ok", "token_counts": token_counts}
