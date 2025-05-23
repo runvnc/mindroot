@@ -267,19 +267,25 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 parse_error = False
 
                 results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
-                for result in results:
-                    if result['cmd'] == 'UNKNOWN':
-                        consecutive_parse_errors += 1
-                        parse_error = True
+                if results is not None:
+                    try:
+                        for result in results:
+                            if result['cmd'] == 'UNKNOWN':
+                                consecutive_parse_errors += 1
+                                parse_error = True
+                    except Exception as e:
+                        pass
 
                 if not parse_error:
                     consecutive_parse_errors = 0
+                else:
+                    await asyncio.sleep(1)
 
                 if consecutive_parse_errors > 6:
                     raise Exception("Too many consecutive parse errors, stopping processing.")
 
                 elif consecutive_parse_errors > 3: 
-                    results.append({"cmd": "UNKNOWN", "args": { "SYSTEM WARNING: Issue valid command list or task processing will be halted. Simplify output."}})
+                    results.append({"cmd": "UNKNOWN", "args": { "SYSTEM WARNING: Issue valid command list or task; processing will be halted. Simplify output."}})
 
                 try:
                     tmp_data3 = { "results": full_cmds }
@@ -340,6 +346,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     continue_processing = False
             except Exception as e:
                 continue_processing = False
+                await asyncio.sleep(1)
                 trace = traceback.format_exc()
                 msg = str(e)
                 descr = msg + "\n\n" + trace
