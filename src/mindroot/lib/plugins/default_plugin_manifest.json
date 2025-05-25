@@ -49,6 +49,10 @@
         "enabled": true,
         "source": "core"
       },
+      "env_manager": {
+        "enabled": true,
+        "source": "core"
+      },
       "check_list": {
         "enabled": true,
         "source": "core"
