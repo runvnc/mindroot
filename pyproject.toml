@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "8.5.0"
+version = "8.6.0"
 description = "MindRoot AI Agent Framework"
 requires-python = ">=3.9"
 dependencies = [
@@ -13,10 +13,28 @@ dependencies = [
     "jinja2",
     "python-multipart",
     "aiofiles",
-    "termcolor",
     "nanoid",
-    "python-dotenv",
+    "termcolor",
+    "colored",
+    "loguru",
+    "pytz",
+    "PyJWT",
+    "pluggy",
+    "sse_starlette",
+    "partial-json-parser",
+    "pydantic",
+    "setuptools",
+    "requests",
+    "aiohttp",
+    "Pillow",
+    "psutil",
+    "aiosmtplib",
+    "pydantic[email]",
+    "bcrypt",
+    "rich",
+    "colorama",
+    "python-dotenv"
 ]
 
-[project.scripts]
+[project.scripts][project.scripts]
 mindroot = "mindroot.server:main"
