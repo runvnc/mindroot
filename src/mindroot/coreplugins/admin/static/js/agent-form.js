@@ -315,7 +315,8 @@ class AgentForm extends BaseEl {
       persona: '',
       recommended_plugins: []
     };
-    this.showTechnicalInstructionsEditor = false;
+    this.showTechnicalInstructionsEditor = false; 
+    this.newAgent = false;
     this.pendingPlugins = [];
     this.fetchPersonas();
     this.resetEditors();
@@ -346,6 +347,20 @@ class AgentForm extends BaseEl {
   }
 
   updated(changedProperties) {
+    // Handle newAgent property changes
+    if (changedProperties.has('newAgent')) {
+      console.log('newAgent changed to:', this.newAgent);
+      if (this.newAgent) {
+        // Initialize empty agent with defaults for new agent
+        this.agent = {
+          ...this.agent,
+          commands: this.agent.commands || [],
+          preferred_providers: this.agent.preferred_providers || [],
+          recommended_plugins: this.agent.recommended_plugins || []
+        };
+      }
+    }
+    
     console.log('Updated with changes:', changedProperties);
     super.updated(changedProperties);
     if (changedProperties.has('agent')) {
@@ -569,15 +584,24 @@ class AgentForm extends BaseEl {
   }
 
   validateForm() {
-    if (!this.agent.name?.trim()) {
+    // Get current form values to ensure we're validating the latest state
+    const nameInput = this.shadowRoot.querySelector('input[name="name"]');
+    const personaSelect = this.shadowRoot.querySelector('select[name="persona"]');
+    const instructionsTextarea = this.shadowRoot.querySelector('textarea[name="instructions"]');
+    
+    const currentName = nameInput?.value || this.agent.name;
+    const currentPersona = personaSelect?.value || this.agent.persona;
+    const currentInstructions = instructionsTextarea?.value || this.agent.instructions;
+    
+    if (!currentName?.trim()) {
       showNotification('error', 'Name is required');
       return false;
     }
-    if (!this.agent.persona?.trim()) {
+    if (!currentPersona?.trim()) {
       showNotification('error', 'Persona is required');
       return false;
     }
-    if (!this.agent.instructions?.trim()) {
+    if (!currentInstructions?.trim()) {
       showNotification('error', 'Instructions are required');
       return false;
     }
@@ -585,9 +609,42 @@ class AgentForm extends BaseEl {
   }
 
   async handleSubmit(event) {  // Complete replacement of method
-    event.preventDefault();
+    event?.preventDefault();
     
-    if (!this.validateForm()) return;
+    // Check if this is a partial save (from instruction save buttons)
+    const isPartialSave = event?.submitter?.classList.contains('partial-save') || 
+                         (event?.target?.classList.contains('icon-button') && 
+                          (this.showInstructionsEditor || this.showTechnicalInstructionsEditor));
+    
+    // Store current form state before any operations
+    const formState = {
+      name: this.agent.name,
+      persona: this.agent.persona,
+      instructions: this.agent.instructions,
+      technicalInstructions: this.agent.technicalInstructions,
+      commands: [...(this.agent.commands || [])],
+      recommended_plugins: [...(this.agent.recommended_plugins || [])],
+      preferred_providers: [...(this.agent.preferred_providers || [])]
+    };
+    
+    // Skip full validation for partial saves
+    if (!isPartialSave && !this.validateForm()) {
+      // Restore form state on validation error
+      this.agent = {
+        ...this.agent,
+        ...formState
+      };
+      // Force update to refresh the form
+      this.requestUpdate();
+      return;
+    }
+    
+    // For new agents, ensure we have default values
+    if (this.newAgent) {
+      this.agent.commands = this.agent.commands || [];
+      this.agent.preferred_providers = this.agent.preferred_providers || [];
+      this.agent.recommended_plugins = this.agent.recommended_plugins || [];
+    }
 
     try {
       this.loading = true;
@@ -655,17 +712,44 @@ class AgentForm extends BaseEl {
 
       // Get the saved agent data from response and update local state
       const savedAgent = await response.json();
-      // Update our local agent with the server data
-      this.agent = savedAgent;
       
-      // Only reset editors when saving from the main save button
-      const isMainSaveButton = event && event.target && event.target.type === 'submit';
-      if (isMainSaveButton) this.resetEditors();
+      // Merge saved data with current form state to preserve unsaved changes in other fields
+      this.agent = {
+        ...this.agent,  // Keep current form state
+        ...savedAgent,  // Update with saved data
+        // But preserve any current form values that might not have been saved
+        name: this.shadowRoot.querySelector('input[name="name"]')?.value || savedAgent.name,
+        persona: this.shadowRoot.querySelector('select[name="persona"]')?.value || savedAgent.persona,
+        instructions: this.shadowRoot.querySelector('textarea[name="instructions"]')?.value || savedAgent.instructions,
+        technicalInstructions: this.shadowRoot.querySelector('textarea[name="technicalInstructions"]')?.value || savedAgent.technicalInstructions,
+        thinking_level: this.shadowRoot.querySelector('select[name="thinking_level"]')?.value || savedAgent.thinking_level
+      };
+      
+      // Reset editors after partial save (from icon buttons)
+      if (isPartialSave) {
+        this.showInstructionsEditor = false;
+        this.showTechnicalInstructionsEditor = false;
+      }
 
       showNotification('success', `Agent ${this.agent.name} saved successfully`);
-      this.dispatchEvent(new CustomEvent('agent-saved', { detail: savedAgent }));
+      
+      // Dispatch event with merged data to preserve form state
+      this.dispatchEvent(new CustomEvent('agent-saved', { 
+        detail: this.agent,  // Send the merged agent data, not just savedAgent
+        bubbles: true,
+        composed: true
+      }));
     } catch (error) {
       showNotification('error', `Error saving agent: ${error.message}`);
+      
+      // Restore form state on error
+      this.agent = {
+        ...this.agent,
+        ...formState
+      };
+      
+      // Force update to refresh the form with restored data
+      this.requestUpdate();
     } finally {
       this.loading = false;
     }
@@ -883,7 +967,7 @@ renderServiceModels() {
             <label class="required">Instructions:</label>
             <div class="form-group-actions">
               ${this.showInstructionsEditor ? html`
-                <button type="button" class="icon-button" @click=${(e) => { e.preventDefault(); this.handleSubmit(e); this.showInstructionsEditor = false; }}>
+                <button type="button" class="icon-button partial-save" @click=${async (e) => { e.preventDefault(); await this.handleSubmit(e); }}>
                   <span class="material-icons">save</span>
                 </button>
               ` : html`
@@ -909,7 +993,7 @@ renderServiceModels() {
             <label>Technical Instructions:</label>
             <div class="form-group-actions">
               ${this.showTechnicalInstructionsEditor ? html`
-                <button type="button" class="icon-button" @click=${(e) => { e.preventDefault(); this.handleSubmit(e); this.showTechnicalInstructionsEditor = false; }}>
+                <button type="button" class="icon-button partial-save" @click=${async (e) => { e.preventDefault(); await this.handleSubmit(e); }}>
                   <span class="material-icons">save</span>
                 </button>
               ` : html`
