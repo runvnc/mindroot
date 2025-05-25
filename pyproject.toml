@@ -36,5 +36,6 @@ dependencies = [
     "python-dotenv"
 ]
 
-[project.scripts][project.scripts]
+[project.scripts]
 mindroot = "mindroot.server:main"
+
