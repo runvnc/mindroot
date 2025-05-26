@@ -10,6 +10,7 @@ import './indexed-agents.js';
 class AgentForm extends BaseEl {
   static properties = {
     agent: { type: Object },
+    agents: { type: Array },
     newAgent: { type: Boolean },
     loading: { type: Boolean },
     personas: { type: Array },
@@ -19,13 +20,44 @@ class AgentForm extends BaseEl {
     pendingPlugins: { type: Array },
     showInstructionsEditor: { type: Boolean },
     showTechnicalInstructionsEditor: { type: Boolean },
-    indexedAgentsVisible: { type: Boolean }
+    indexedAgentsVisible: { type: Boolean },
+    selectedAgentName: { type: String }
   };
 
   static styles = css`
     :host {
       display: block;
       margin-top: 20px;
+    }
+
+    .agent-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .agent-selector select {
+      flex: 1;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      color: #f0f0f0;
+    }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      border: 1px solid #2196F3;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #2196F3;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(33, 150, 243, 0.1);
     }
 
     .agent-form {
@@ -51,7 +83,7 @@ class AgentForm extends BaseEl {
     }
 
     summary::before {
-      content: "\u25b6";
+      content: "▶";
       display: inline-block;
       margin-right: 5px;
       transition: transform 0.2s;
@@ -295,6 +327,13 @@ class AgentForm extends BaseEl {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    .no-agent-message {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-style: italic;
+    }
   `;
 
   constructor() {
@@ -306,18 +345,14 @@ class AgentForm extends BaseEl {
     this.loading = false;
     this.plugins = [];
     this.providerMapping = {}; // Map display names to module names
-    this.agent = {
-      commands: [],
-      name: '',
-      hashver: '',
-      preferred_providers: [],
-      thinking_level: 'off', // Default to medium
-      persona: '',
-      recommended_plugins: []
-    };
+    this.agent = null;
+    this.agents = [];
     this.showTechnicalInstructionsEditor = false; 
     this.newAgent = false;
     this.pendingPlugins = [];
+    this.selectedAgentName = '';
+    
+    this.fetchAgents();
     this.fetchPersonas();
     this.resetEditors();
     this.fetchCommands();
@@ -325,8 +360,67 @@ class AgentForm extends BaseEl {
     this.fetchPlugins();
   }
 
+  async fetchAgents() {
+    try {
+      const response = await fetch('/agents/local');
+      if (!response.ok) throw new Error('Failed to fetch agents');
+      this.agents = await response.json();
+    } catch (error) {
+      showNotification('error', `Error loading agents: ${error.message}`);
+    }
+  }
+
+  async handleAgentChange(event) {
+    const agentName = event.target.value;
+    this.selectedAgentName = agentName;
+    
+    if (agentName) {
+      try {
+        const response = await fetch(`/agents/local/${agentName}`);
+        if (!response.ok) throw new Error('Failed to fetch agent');
+        const agent = await response.json();
+        this.agent = agent;
+        this.newAgent = false;
+        this.resetEditors();
+        this.dispatchEvent(new CustomEvent('agent-selected', {
+          detail: agent,
+          bubbles: true,
+          composed: true
+        }));
+      } catch (error) {
+        showNotification('error', `Error loading agent: ${error.message}`);
+      }
+    } else {
+      this.agent = null;
+      this.newAgent = false;
+    }
+  }
+
+  handleNewAgent() {
+    this.agent = {
+      name: '',
+      hashver: '',
+      commands: [],
+      preferred_providers: [],
+      thinking_level: 'off',
+      persona: '',
+      recommended_plugins: [],
+      instructions: '',
+      technicalInstructions: ''
+    };
+    this.newAgent = true;
+    this.selectedAgentName = '';
+    this.resetEditors();
+    
+    // Update the select to show no selection
+    const select = this.shadowRoot.querySelector('.agent-selector select');
+    if (select) {
+      select.value = '';
+    }
+  }
+
   async fetchMissingCommands() {
-    if (!this.agent.name) return;
+    if (!this.agent?.name) return;
     
     // Skip API call for new agents that haven't been saved yet
     if (this.newAgent) {
@@ -367,11 +461,11 @@ class AgentForm extends BaseEl {
       console.log('Agent updated:', this.agent);
       // Force select element to update
       const select = this.shadowRoot.querySelector('select[name="persona"]');
-      if (select && this.agent.persona) {
+      if (select && this.agent?.persona) {
         select.value = this.agent.persona;
       }
       
-      if (this.agent.name) {
+      if (this.agent?.name) {
         this.fetchMissingCommands();
         this.checkRecommendedPlugins();
       }
@@ -404,7 +498,7 @@ class AgentForm extends BaseEl {
       if (!response.ok) throw new Error('Failed to fetch personas');
       this.personas = await response.json();
       console.log('Fetched personas:', this.personas);
-      console.log('Current agent persona:', this.agent.persona);
+      console.log('Current agent persona:', this.agent?.persona);
     } catch (error) {
       showNotification('error', `Error loading personas: ${error.message}`);
     }
@@ -447,7 +541,7 @@ class AgentForm extends BaseEl {
 
 
   async checkRecommendedPlugins() {
-    if (!this.agent.name || !this.agent.recommended_plugins || this.agent.recommended_plugins.length === 0) {
+    if (!this.agent?.name || !this.agent?.recommended_plugins || this.agent.recommended_plugins.length === 0) {
       this.pendingPlugins = [];
       return;
     }
@@ -523,7 +617,7 @@ class AgentForm extends BaseEl {
 
   handleInputChange(event) {  
     const { name, value, type, checked } = event.target;
-    
+     console.log({name, value, type}) 
     if (name === 'commands') {
       if (!Array.isArray(this.agent.commands)) {
         this.agent.commands = [];
@@ -549,13 +643,15 @@ class AgentForm extends BaseEl {
       } else {
         this.agent.recommended_plugins = this.agent.recommended_plugins.filter(plugin => plugin !== value);
       }
+
       this.agent = { ...this.agent };
       return;
     }
-    
+    console.log('before',this.agent)
     // Handle all other inputs
     const inputValue = type === 'checkbox' ? checked : value;
     this.agent = { ...this.agent, [name]: inputValue };
+    console.log('after', this.agent)
   }
 
   handlePreferredProviderChange(e) {
@@ -589,9 +685,9 @@ class AgentForm extends BaseEl {
     const personaSelect = this.shadowRoot.querySelector('select[name="persona"]');
     const instructionsTextarea = this.shadowRoot.querySelector('textarea[name="instructions"]');
     
-    const currentName = nameInput?.value || this.agent.name;
-    const currentPersona = personaSelect?.value || this.agent.persona;
-    const currentInstructions = instructionsTextarea?.value || this.agent.instructions;
+    const currentName = nameInput?.value || this.agent?.name;
+    const currentPersona = personaSelect?.value || this.agent?.persona;
+    const currentInstructions = instructionsTextarea?.value || this.agent?.instructions;
     
     if (!currentName?.trim()) {
       showNotification('error', 'Name is required');
@@ -608,34 +704,25 @@ class AgentForm extends BaseEl {
     return true;
   }
 
-  async handleSubmit(event) {  // Complete replacement of method
+  async handleSubmit(event) {
     event?.preventDefault();
     
-    // Check if this is a partial save (from instruction save buttons)
-    const isPartialSave = event?.submitter?.classList.contains('partial-save') || 
-                         (event?.target?.classList.contains('icon-button') && 
-                          (this.showInstructionsEditor || this.showTechnicalInstructionsEditor));
+    // Update agent with current textarea values if editors are open
+    if (this.showInstructionsEditor) {
+      const instructionsTextarea = this.shadowRoot.querySelector('textarea[name="instructions"]');
+      if (instructionsTextarea) {
+        this.agent.instructions = instructionsTextarea.value;
+      }
+    }
+    if (this.showTechnicalInstructionsEditor) {
+      const techInstructionsTextarea = this.shadowRoot.querySelector('textarea[name="technicalInstructions"]');
+      if (techInstructionsTextarea) {
+          this.agent.technicalInstructions = techInstructionsTextarea.value;
+      }
+    }
     
-    // Store current form state before any operations
-    const formState = {
-      name: this.agent.name,
-      persona: this.agent.persona,
-      instructions: this.agent.instructions,
-      technicalInstructions: this.agent.technicalInstructions,
-      commands: [...(this.agent.commands || [])],
-      recommended_plugins: [...(this.agent.recommended_plugins || [])],
-      preferred_providers: [...(this.agent.preferred_providers || [])]
-    };
-    
-    // Skip full validation for partial saves
-    if (!isPartialSave && !this.validateForm()) {
-      // Restore form state on validation error
-      this.agent = {
-        ...this.agent,
-        ...formState
-      };
-      // Force update to refresh the form
-      this.requestUpdate();
+    // Validate form
+    if (!this.validateForm()) {
       return;
     }
     
@@ -651,6 +738,7 @@ class AgentForm extends BaseEl {
       const method = this.newAgent ? 'POST' : 'PUT';
       const url = this.newAgent ? '/agents/local' : `/agents/local/${this.agent.name}`;
      
+      // Collect commands from toggle switches
       const cmdSwitches = this.shadowRoot.querySelectorAll('.toggle-command')
       console.log({cmdSwitches})
       let cmdsOn = []
@@ -663,14 +751,13 @@ class AgentForm extends BaseEl {
       if (cmdsOn.length > 0) {
         this.agent.commands = cmdsOn
       }
-      for (let cmd in this.missingCommands) {
-        if (!this.agent.commands.includes(cmd)) {
-          this.agent.commands.push(cmd)
-        }
-      }
+      
+      // Add missing commands
+      // Note: Missing commands stay in missing commands section, not added to regular commands
 
       console.log('Saving, commands are:', this.agent.commands)
 
+      // Collect service models
       const selectedModelsEls = this.shadowRoot.querySelectorAll('.service-model-select');
       console.log('Selected models:', selectedModelsEls, this.agent.service_models);
       for (const select of selectedModelsEls) {
@@ -710,46 +797,44 @@ class AgentForm extends BaseEl {
         throw new Error('Failed to save agent');
       }
 
-      // Get the saved agent data from response and update local state
-      const savedAgent = await response.json();
+      // Server just returns {status: 'success'}, not the agent data
+      const result = await response.json();
+      console.log('Save result:', result);
       
-      // Merge saved data with current form state to preserve unsaved changes in other fields
-      this.agent = {
-        ...this.agent,  // Keep current form state
-        ...savedAgent,  // Update with saved data
-        // But preserve any current form values that might not have been saved
-        name: this.shadowRoot.querySelector('input[name="name"]')?.value || savedAgent.name,
-        persona: this.shadowRoot.querySelector('select[name="persona"]')?.value || savedAgent.persona,
-        instructions: this.shadowRoot.querySelector('textarea[name="instructions"]')?.value || savedAgent.instructions,
-        technicalInstructions: this.shadowRoot.querySelector('textarea[name="technicalInstructions"]')?.value || savedAgent.technicalInstructions,
-        thinking_level: this.shadowRoot.querySelector('select[name="thinking_level"]')?.value || savedAgent.thinking_level
-      };
-      
-      // Reset editors after partial save (from icon buttons)
-      if (isPartialSave) {
-        this.showInstructionsEditor = false;
-        this.showTechnicalInstructionsEditor = false;
+      // Don't replace the agent object - keep the current form data
+      // Just update the hashver if the server returned it
+      if (result.hashver) {
+        this.agent.hashver = result.hashver;
       }
+      
+      // If this was a new agent, update the UI state
+      if (this.newAgent) {
+        this.newAgent = false;
+        this.selectedAgentName = this.agent.name;  // Use the current agent name
+        await this.fetchAgents(); // Refresh agent list
+        // Update the dropdown to show the new agent
+        const select = this.shadowRoot.querySelector('.agent-selector select');
+        if (select) {
+          select.value = this.agent.name;
+        }
+      }
+      
+      // Force a re-render to ensure UI is in sync
+      this.requestUpdate();
+      
+      // Keep editors open if they were open
+      // User can close them manually if desired
 
       showNotification('success', `Agent ${this.agent.name} saved successfully`);
       
-      // Dispatch event with merged data to preserve form state
+      // Dispatch event
       this.dispatchEvent(new CustomEvent('agent-saved', { 
-        detail: this.agent,  // Send the merged agent data, not just savedAgent
+        detail: { ...this.agent },
         bubbles: true,
         composed: true
       }));
     } catch (error) {
       showNotification('error', `Error saving agent: ${error.message}`);
-      
-      // Restore form state on error
-      this.agent = {
-        ...this.agent,
-        ...formState
-      };
-      
-      // Force update to refresh the form with restored data
-      this.requestUpdate();
     } finally {
       this.loading = false;
     }
@@ -757,8 +842,10 @@ class AgentForm extends BaseEl {
 
   renderRequiredPlugins() {
     // Ensure required_plugins is always an array
-    if (!Array.isArray(this.agent.recommended_plugins)) {
-      this.agent.recommended_plugins = [];
+    if (!Array.isArray(this.agent?.recommended_plugins)) {
+      if (this.agent) {
+        this.agent.recommended_plugins = [];
+      }
     }
     
     if (!this.plugins || this.plugins.length === 0) {
@@ -787,7 +874,7 @@ class AgentForm extends BaseEl {
                 <div class="command-name">${source}</div>
               </div>
               <toggle-switch 
-                .checked=${Boolean(this.agent.recommended_plugins.includes(source))}
+                .checked=${Boolean(this.agent?.recommended_plugins?.includes(source))}
                 id="${toggleId}"
                 @toggle-change=${(e) => this.handleInputChange({ 
                   target: { 
@@ -822,7 +909,7 @@ class AgentForm extends BaseEl {
                 </div>
                 <toggle-switch 
                    class="toggle-command" 
-                  .checked=${this.agent.commands?.includes(command.name) || false}
+                  .checked=${this.agent?.commands?.includes(command.name) || false}
                   id="cmd-${command.name}" 
                   @toggle-change=${(e) => this.handleInputChange({ 
                     target: {
@@ -841,51 +928,53 @@ class AgentForm extends BaseEl {
     `);
   }
 
-renderServiceModels() {
-  if (this.serviceModels === undefined || Object.keys(this.serviceModels).length === 0) {
-    return html`<div>Loading service models...</div>`;
-  }
+  renderServiceModels() {
+    if (this.serviceModels === undefined || Object.keys(this.serviceModels).length === 0) {
+      return html`<div>Loading service models...</div>`;
+    }
 
-  console.log('Service models:', this.serviceModels);
-  console.log('Agent service models:', this.agent.service_models);
-  return html`
-    <div class="commands-category">
-    <h4>Service Models</h4>
-    <div class="commands-grid">
-      ${Object.entries(this.serviceModels).map(([serviceName, providers]) => html`
-        <div class="command-item">
-      <div class="command-info">
-        <div class="command-name">${serviceName}</div>
-      </div>
-      <select name="${serviceName}" 
-              class="service-model-select"
-              @change=${this.handleInputChange}>
-        ${Object.entries(providers).map(([provider, models]) => html`
-          <optgroup label="${provider}">
-            ${models.map(model => html`
-              <option
-              ?selected=${this.agent.service_models && 
-             this.agent.service_models[serviceName] && 
-             this.agent.service_models[serviceName].provider == provider && 
-             this.agent.service_models[serviceName].model == model}
-                value="${provider}__${model}">${model}</option>
-            `)}
-          </optgroup>
-        `)}
-      </select>
+    console.log('Service models:', this.serviceModels);
+    console.log('Agent service models:', this.agent?.service_models);
+    return html`
+      <div class="commands-category">
+      <h4>Service Models</h4>
+      <div class="commands-grid">
+        ${Object.entries(this.serviceModels).map(([serviceName, providers]) => html`
+          <div class="command-item">
+        <div class="command-info">
+          <div class="command-name">${serviceName}</div>
         </div>
-      `)}
-    </div>
-  `
-}
+        <select name="${serviceName}" 
+                class="service-model-select"
+                @change=${this.handleInputChange}>
+          ${Object.entries(providers).map(([provider, models]) => html`
+            <optgroup label="${provider}">
+              ${models.map(model => html`
+                <option
+                ?selected=${this.agent?.service_models && 
+               this.agent.service_models[serviceName] && 
+               this.agent.service_models[serviceName].provider == provider && 
+               this.agent.service_models[serviceName].model == model}
+                  value="${provider}__${model}">${model}</option>
+              `)}
+            </optgroup>
+          `)}
+        </select>
+          </div>
+        `)}
+      </div>
+    `
+  }
 
 
   renderPreferredProviders() {
     // Ensure preferred_providers is always an array
-    if (!Array.isArray(this.agent.preferred_providers)) {
-      this.agent.preferred_providers = [];
+    if (!Array.isArray(this.agent?.preferred_providers)) {
+      if (this.agent) {
+        this.agent.preferred_providers = [];
+      }
     }
-    console.log('Preferred providers:', this.agent.preferred_providers);
+    console.log('Preferred providers:', this.agent?.preferred_providers);
     return html`
       <div class="commands-category">
         <h4>Preferred Providers</h4>
@@ -901,7 +990,7 @@ renderServiceModels() {
                 <div class="command-name">${plugin.name}</div>
               </div>
               <toggle-switch 
-                .checked=${this.agent.preferred_providers?.includes(plugin.name) || false}
+                .checked=${this.agent?.preferred_providers?.includes(plugin.name) || false}
                 id="${toggleId}"
                 @toggle-change=${(e) => this.handlePreferredProviderChange({ 
                   detail: {
@@ -942,162 +1031,185 @@ renderServiceModels() {
 
   _render() {
     return html`
-      <form class="agent-form" @submit=${this.handleSubmit}>
-        <div class="form-group">
-          <label class="required">Name:</label>
-          <input type="text" name="name" 
-                 .value=${this.agent.name || ''} 
-                 @input=${this.handleInputChange}>
-        </div>
+      <div class="agent-selector">
+        <select @change=${this.handleAgentChange} 
+                .value=${this.selectedAgentName || ''}>
+          <option value="">Select an agent</option>
+          ${this.agents.map(agent => html`
+            <option value=${agent.name} ?selected=${agent.name === this.selectedAgentName}>${agent.name}</option>
+          `)}
+        </select>
+        <button class="btn btn-secondary" @click=${this.handleNewAgent}>
+          New Agent
+        </button>
+      </div>
 
-        <div class="form-group">
-          <label class="required">Persona:</label>
-          <select name="persona" 
-                  value=${this.agent.persona || ''}
-                  @change=${this.handleInputChange}>
-            <option value="">Select a persona</option>
-            ${this.personas.map(persona => html`
-              <option value="${persona.name}" ?selected=${persona.name === this.agent.persona}>${persona.name}</option>
-            `)}
-          </select>
-        </div>
-
-        <div class="form-group">
-          <div class="form-group-header">
-            <label class="required">Instructions:</label>
-            <div class="form-group-actions">
-              ${this.showInstructionsEditor ? html`
-                <button type="button" class="icon-button partial-save" @click=${async (e) => { e.preventDefault(); await this.handleSubmit(e); }}>
-                  <span class="material-icons">save</span>
-                </button>
-              ` : html`
-                <button type="button" class="icon-button" @click=${() => this.showInstructionsEditor = true}>
-                  <span class="material-icons">edit</span>
-                </button>
-              `}
-            </div>
+      ${this.agent ? html`
+        <form class="agent-form" @submit=${this.handleSubmit}>
+          <div class="form-group">
+            <label class="required">Name:</label>
+            <input type="text" name="name" 
+                   .value=${this.agent.name || ''} 
+                   @input=${this.handleInputChange}>
           </div>
-          ${this.showInstructionsEditor ? html`
-            <textarea name="instructions" 
-                    .value=${this.agent.instructions || ''} 
-                    @input=${this.handleInputChange}></textarea>
-          ` : html`
-            <div class="markdown-preview">
-              ${unsafeHTML(this.renderMarkdown(this.agent.instructions || ''))}
-            </div>
-          `}
-        </div>
 
-        <div class="form-group">
-          <div class="form-group-header">
-            <label>Technical Instructions:</label>
-            <div class="form-group-actions">
-              ${this.showTechnicalInstructionsEditor ? html`
-                <button type="button" class="icon-button partial-save" @click=${async (e) => { e.preventDefault(); await this.handleSubmit(e); }}>
-                  <span class="material-icons">save</span>
-                </button>
-              ` : html`
-                <button type="button" class="icon-button" @click=${() => this.showTechnicalInstructionsEditor = true}>
-                  <span class="material-icons">edit</span>
-                </button>
-              `}
-            </div>
+          <div class="form-group">
+            <label class="required">Persona:</label>
+            <select name="persona" 
+                    value=${this.agent.persona || ''}
+                    @change=${this.handleInputChange}>
+              <option value="">Select a persona</option>
+              ${this.personas.map(persona => html`
+                <option value="${persona.name}" ?selected=${persona.name === this.agent.persona}>${persona.name}</option>
+              `)}
+            </select>
           </div>
-          ${this.showTechnicalInstructionsEditor ? html`
-            <textarea name="technicalInstructions" 
-                    .value=${this.agent.technicalInstructions || ''} 
-                    @input=${this.handleInputChange}></textarea>
-          ` : html`
-            <div class="markdown-preview">
-              ${unsafeHTML(this.renderMarkdown(this.agent.technicalInstructions || ''))}
+
+          <div class="form-group">
+            <div class="form-group-header">
+              <label class="required">Instructions:</label>
+              <div class="form-group-actions">
+                ${this.showInstructionsEditor ? html`
+                  <button type="button" class="icon-button" @click=${this.handleSubmit}>
+                    <span class="material-icons">save</span>
+                  </button>
+                ` : html`
+                  <button type="button" class="icon-button" @click=${() => {
+                    this.showInstructionsEditor = true;
+                  }}>
+                    <span class="material-icons">edit</span>
+                  </button>
+                `}
+              </div>
             </div>
-          `}
-        </div>
+            ${this.showInstructionsEditor ? html`
+              <textarea name="instructions" 
+                      .value=${this.agent.instructions || ''}
+                      @input=${this.handleInputChange}></textarea>
+            ` : html`
+              <div class="markdown-preview">
+                ${unsafeHTML(this.renderMarkdown(this.agent.instructions || ''))}
+              </div>
+            `}
+          </div>
 
-        <div class="form-group">
-          <label>
-            Uncensored:
-            <toggle-switch 
-              .checked=${this.agent.uncensored || false}
-              @toggle-change=${(e) => this.handleInputChange({ 
-                target: { 
-                  name: 'uncensored', 
-                  type: 'checkbox',
-                  checked: e.detail.checked 
-                } 
-              })}>
-            </toggle-switch>
-          </label>
-        </div>
+          <div class="form-group">
+            <div class="form-group-header">
+              <label>Technical Instructions:</label>
+              <div class="form-group-actions">
+                ${this.showTechnicalInstructionsEditor ? html`
+                  <button type="button" class="icon-button" @click=${this.handleSubmit}>
+                    <span class="material-icons">save</span>
+                  </button>
+                ` : html`
+                  <button type="button" class="icon-button" @click=${() => {
+                    this.showTechnicalInstructionsEditor = true;
+                  }}>
+                    <span class="material-icons">edit</span>
+                  </button>
+                `}
+              </div>
+            </div>
+            ${this.showTechnicalInstructionsEditor ? html`
+              <textarea name="technicalInstructions" 
+                      .value=${this.agent.technicalInstructions || ''}
+                      @input=${this.handleInputChange}></textarea>
+            ` : html`
+              <div class="markdown-preview">
+                ${unsafeHTML(this.renderMarkdown(this.agent.technicalInstructions || ''))}
+              </div>
+            `}
+          </div>
 
-        <div class="form-group reasoning-level-group">
-          <label>Reasoning Effort:</label>
-          <select name="thinking_level" 
-                 value=${this.agent.thinking_level || 'off'}
-                 @change=${this.handleInputChange}>
-            <option value="off" 
-                   ?selected=${(this.agent.thinking_level || 'off') === 'off'}>
-              Off
-            </option> 
-            <option value="low" 
-                   ?selected=${(this.agent.thinking_level || 'off') === 'low'}>
-              Low
-            </option>
-            <option value="medium" 
-                   ?selected=${(this.agent.thinking_level || 'off') === 'medium'}>
-              Medium
-            </option>
-            <option value="high" 
-                   ?selected=${(this.agent.thinking_level || 'off') === 'high'}>
-              High
-            </option>
-          </select>
-        </div>
-       
-        ${this.renderPendingPlugins()}
+          <div class="form-group">
+            <label>
+              Uncensored:
+              <toggle-switch 
+                .checked=${this.agent.uncensored || false}
+                @toggle-change=${(e) => this.handleInputChange({ 
+                  target: { 
+                    name: 'uncensored', 
+                    type: 'checkbox',
+                    checked: e.detail.checked 
+                  } 
+                })}>
+              </toggle-switch>
+            </label>
+          </div>
 
-        <div class="form-group commands-section">
-          <details>
-            <summary>Preferred Providers</summary>
-            ${this.renderPreferredProviders()}
-          </details>
-        </div> 
+          <div class="form-group reasoning-level-group">
+            <label>Reasoning Effort:</label>
+            <select name="thinking_level" 
+                   value=${this.agent.thinking_level || 'off'}
+                   @change=${this.handleInputChange}>
+              <option value="off" 
+                     ?selected=${(this.agent.thinking_level || 'off') === 'off'}>
+                Off
+              </option> 
+              <option value="low" 
+                     ?selected=${(this.agent.thinking_level || 'off') === 'low'}>
+                Low
+              </option>
+              <option value="medium" 
+                     ?selected=${(this.agent.thinking_level || 'off') === 'medium'}>
+                Medium
+              </option>
+              <option value="high" 
+                     ?selected=${(this.agent.thinking_level || 'off') === 'high'}>
+                High
+              </option>
+            </select>
+          </div>
+         
+          ${this.renderPendingPlugins()}
 
-        <div class="form-group commands-section">
-          <details>
-            <summary>Select Models</summary>
-            ${this.renderServiceModels()}
-          </details>
-        </div> 
-
-        <div class="form-group commands-section">
-          <details>
-            <summary>Recommended Plugins</summary>
-            ${this.renderRequiredPlugins()}
-          </details>
-        </div>
-
-        ${this.agent.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`
           <div class="form-group commands-section">
             <details>
-              <summary>Missing Commands (${Object.keys(this.missingCommands).length})</summary>
-              <missing-commands .agentName=${this.agent.name}></missing-commands>
+              <summary>Preferred Providers</summary>
+              ${this.renderPreferredProviders()}
+            </details>
+          </div> 
+
+          <div class="form-group commands-section">
+            <details>
+              <summary>Select Models</summary>
+              ${this.renderServiceModels()}
+            </details>
+          </div> 
+
+          <div class="form-group commands-section">
+            <details>
+              <summary>Recommended Plugins</summary>
+              ${this.renderRequiredPlugins()}
             </details>
           </div>
-        ` : ''}
 
-        <div class="form-group commands-section">
-          <details><summary>Available Commands</summary>
-          ${this.renderCommands()}
-          </details>
+          ${this.agent.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`
+            <div class="form-group commands-section">
+              <details>
+                <summary>Missing Commands (${Object.keys(this.missingCommands).length})</summary>
+                <missing-commands .agentName=${this.agent.name}></missing-commands>
+              </details>
+            </div>
+          ` : ''}
+
+          <div class="form-group commands-section">
+            <details><summary>Available Commands</summary>
+            ${this.renderCommands()}
+            </details>
+          </div>
+
+          <div class="agent-insert-end"></div>
+          <button class="btn" type="submit" ?disabled=${this.loading}>
+            ${this.loading ? 'Saving...' : 'Save'}
+          </button>
+          
+        </form>
+      ` : html`
+        <div class="no-agent-message">
+          Select an agent from the dropdown above or click "New Agent" to create one.
         </div>
-
-        <div class="agent-insert-end"></div>
-        <button class="btn" type="submit" ?disabled=${this.loading}>
-          ${this.loading ? 'Saving...' : 'Save'}
-        </button>
-        
-      </form>
+      `}
     `;
    }
 }
