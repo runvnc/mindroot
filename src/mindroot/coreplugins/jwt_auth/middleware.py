@@ -9,11 +9,58 @@ from lib.providers.services import service_manager
 import os
 from lib.session_files import load_session_data
 from lib.utils.debug import debug_box
+import secrets
+from pathlib import Path
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", None)
+def get_or_create_jwt_secret():
+    secret_key = os.environ.get("JWT_SECRET_KEY", None)
+    
+    if secret_key:
+        print("JWT_SECRET_KEY found in environment variables")
+        return secret_key
+    
+    # Check if .env file exists and contains JWT_SECRET_KEY
+    env_path = Path.cwd() / ".env"
+    
+    if env_path.exists():
+        with open(env_path, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line.strip().startswith('JWT_SECRET_KEY='):
+                    # Extract the key value
+                    key_value = line.strip().split('=', 1)[1]
+                    if key_value:
+                        print(f"JWT_SECRET_KEY found in {env_path}")
+                        # Also set it in environment for current session
+                        os.environ['JWT_SECRET_KEY'] = key_value
+                        return key_value
+    
+    # If we get here, no key was found anywhere, so generate one
+    print("JWT_SECRET_KEY not found, generating new key...")
+    secret_key = secrets.token_urlsafe(32)
+    
+    # Save to .env file
+    # Check if file exists and needs a newline before appending
+    needs_newline = False
+    if env_path.exists() and env_path.stat().st_size > 0:
+        with open(env_path, 'rb') as f:
+            f.seek(-1, 2)  # Go to last byte
+            last_char = f.read(1)
+            needs_newline = last_char != b'\n'
+    
+    with open(env_path, 'a') as f:
+        if needs_newline:
+            f.write('\n')
+        f.write(f"JWT_SECRET_KEY={secret_key}\n")
+    
+    print(f"Generated new JWT_SECRET_KEY and saved to {env_path}")
+    os.environ['JWT_SECRET_KEY'] = secret_key
+        
+    return secret_key
 
-if SECRET_KEY is None:
-    raise ValueError("JWT_SECRET_KEY environment variable not set")
+# Get or create the secret key
+SECRET_KEY = get_or_create_jwt_secret()
+print(f"JWT_SECRET_KEY loaded successfully")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 10080  # 1 week

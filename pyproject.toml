@@ -33,9 +33,11 @@ dependencies = [
     "bcrypt",
     "rich",
     "colorama",
-    "python-dotenv"
+    "python-dotenv",
+    "google-auth",
+    "google-auth-oauthlib",
+    "google-auth-httplib2"
 ]
 
 [project.scripts]
 mindroot = "mindroot.server:main"
-

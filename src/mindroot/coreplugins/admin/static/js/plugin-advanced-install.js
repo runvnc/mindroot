@@ -112,8 +112,19 @@ export class PluginAdvancedInstall extends PluginBase {
       return;
     }
 
-    // Extract repo name from URL
-    const repoName = githubUrl.split('/').pop();
+    // Extract repo name from URL - handle various GitHub URL formats
+    let repoPath = githubUrl;
+    
+    // Handle full GitHub URLs
+    if (githubUrl.includes('github.com/')) {
+      const match = githubUrl.match(/github\.com\/([^/]+\/[^/]+)/);
+      if (match) {
+        repoPath = match[1];
+      }
+    }
+    
+    // Extract just the repo name for display
+    const repoName = repoPath.split('/').pop();
 
     try {
       // Close the modal
@@ -122,27 +133,39 @@ export class PluginAdvancedInstall extends PluginBase {
       // Open the installation dialog
       this.installDialog.open(repoName || 'GitHub Plugin', 'GitHub');
       
-      // Show initial message
-      this.installDialog.addOutput(`Starting installation of ${repoName} from GitHub...`, 'info');
+      // Connect to SSE endpoint for streaming GitHub installation
+      // Build URL with properly encoded parameters
+      const params = new URLSearchParams();
+      params.append('plugin', repoName || 'plugin');
+      params.append('source', 'github');
+      params.append('source_path', repoPath);
       
-      try {
-        // Use the existing GitHub installation endpoint which handles the download and extraction
-        await this.apiCall('/plugin-manager/install-x-github-plugin', 'POST', {
-          plugin: repoName || 'plugin',
-          url: githubUrl
-        });
-        
-        // Show success message
-        this.installDialog.addOutput(`Plugin ${repoName} installed successfully from GitHub`, 'success');
+      const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
+      
+      eventSource.addEventListener('message', (event) => {
+        this.installDialog.addOutput(event.data, 'info');
+      });
+      
+      eventSource.addEventListener('error', (event) => {
+        this.installDialog.addOutput(event.data, 'error');
+      });
+      
+      eventSource.addEventListener('warning', (event) => {
+        this.installDialog.addOutput(event.data, 'warning');
+      });
+      
+      eventSource.addEventListener('complete', (event) => {
+        this.installDialog.addOutput(event.data, 'success');
         this.installDialog.setComplete(false);
-        
-        // Notify parent components to refresh their lists
-        this.dispatch('plugin-installed');
-      } catch (error) {
-        // Show error message
-        this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
+        eventSource.close();
+        // Dispatch event for parent components to refresh their lists
+        this.dispatch('plugin-installed', { plugin: { name: repoName, source: 'github' } });
+      });
+      
+      eventSource.onerror = () => {
+        eventSource.close();
         this.installDialog.setComplete(true);
-      }
+      };
     } catch (error) {
       this.installDialog.addOutput(`Failed to install plugin from GitHub: ${error.message}`, 'error');
       this.installDialog.setComplete(true);
