@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import File, UploadFile, Form
 from sse_starlette.sse import EventSourceResponse
@@ -6,6 +6,7 @@ from .models import MessageParts
 from lib.providers.services import service, service_manager
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages, get_chat_history, run_task
 from lib.templates import render
+from lib.auth.auth import require_user
 from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
@@ -17,6 +18,8 @@ from lib.providers.commands import command_manager
 from lib.utils.debug import debug_box
 from lib.session_files import load_session_data, save_session_data
 import os
+import json
+from lib.chatcontext import ChatContext
 import shutil
 from pydantic import BaseModel
 
@@ -240,6 +243,50 @@ async def get_token_count(request: Request, log_id: str):
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
     
     return {"status": "ok", "token_counts": token_counts}
+
+@router.get("/chat/del_session/{log_id}")
+async def delete_chat_session(request: Request, log_id: str, user=Depends(require_user)):
+    """
+    Delete a chat session by log_id, including chat logs, context files, and all child sessions.
+    
+    Parameters:
+    - log_id: The log ID of the session to delete
+    
+    Returns:
+    - JSON with success status and message
+    """
+    try:
+        # Try to determine the agent name from the context file first
+        agent_name = "unknown"
+        context_file_path = f"data/context/{user.username}/context_{log_id}.json"
+        
+        if os.path.exists(context_file_path):
+            try:
+                with open(context_file_path, 'r') as f:
+                    context_data = json.load(f)
+                    agent_name = context_data.get('agent_name', 'unknown')
+                    print(f"Found agent name '{agent_name}' from context file for log_id {log_id}")
+            except Exception as e:
+                print(f"Error reading context file {context_file_path}: {e}")
+        
+        # If we still don't have the agent name, try to find the chatlog file
+        if agent_name == "unknown":
+            from lib.chatlog import find_chatlog_file
+            chatlog_path = find_chatlog_file(log_id)
+            if chatlog_path:
+                # Extract agent from path: data/chat/{user}/{agent}/chatlog_{log_id}.json
+                path_parts = chatlog_path.split(os.sep)
+                if len(path_parts) >= 3:
+                    agent_name = path_parts[-2]  # Agent is the second-to-last part
+                    print(f"Found agent name '{agent_name}' from chatlog file path for log_id {log_id}")
+        
+        await ChatContext.delete_session_by_id(log_id=log_id, user=user.username, agent=agent_name, cascade=True)
+        
+        return {"status": "ok", "message": f"Chat session {log_id} deleted successfully"}
+    except Exception as e:
+        print(f"Error deleting chat session {log_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error deleting chat session: {str(e)}")
+
 
 @router.get("/chat/{log_id}/tokens")
 async def get_token_count(request: Request, log_id: str):

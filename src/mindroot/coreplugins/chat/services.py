@@ -50,7 +50,8 @@ def results_text_output(results):
 
     
 @service()
-async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, llm=None, retries=3, context=None):
+async def run_task(instructions: str, agent_name:str = None, user:str = None, log_id=None, 
+                   parent_log_id=None, llm=None, retries=3, context=None):
     """
     Run a task with the given instructions
     IMPORTANT NOTE: agent must have the task_result() command enabled.
@@ -70,10 +71,11 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         context.username = user
         context.name = agent_name
         context.log_id = log_id
+        context.parent_log_id = parent_log_id
         context.agent = await service_manager.get_agent_data(agent_name)
         context.data['llm'] = llm
         context.current_model = llm
-        context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
+        context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user, parent_log_id=parent_log_id)
         context.save_context()
     else:
         debug_box("Context is not none")

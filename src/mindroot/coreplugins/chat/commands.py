@@ -127,7 +127,15 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
     Note: do not specify any other arguments than those in the example.
     In particular, 'context' is not a valid argument!
 
-    Use something unique for the log_id.
+    log_id is optional, if you specify it you must use something unique.
+
+    You can also let the system assign log_id automatically:
+
+    Example:
+
+    { "delegate_task": { "instructions": "Write a poem about the moon", "agent_name": "poet" } }
+
+
     """
     print("in delegate task, context is:")
     print(context)
@@ -140,8 +148,9 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
         elif 'llm' in context.data:
             llm = context.data['llm']
     (text, full_results, xx) = await service_manager.run_task(instructions, user=context.username, log_id=log_id,
+                                                              parent_log_id = context.log_id,
                                                               llm=llm, agent_name=agent_name, retries=retries, context=None)
-    return f"""<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed in log ID: {log_id}</a>\nResults:\n\n{text}"""
+    return f"""<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed with log ID: {log_id}</a>\nResults:\n\n{text}"""
 
 
 @command()

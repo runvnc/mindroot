@@ -67,6 +67,10 @@ class AgentForm extends BaseEl {
       background: rgba(255, 255, 255, 0.02);
     }
 
+    .form-hidden-when-no-agent {
+      display: none !important;
+    }
+
     .form-group {
       margin-bottom: 15px;
     }
@@ -1030,13 +1034,26 @@ class AgentForm extends BaseEl {
   }
 
   _render() {
+    // Default structure for rendering when this.agent is null
+    // This ensures the DOM structure is present but hidden.
+    const agentForRender = this.agent || {
+      name: '',
+      persona: '',
+      instructions: '',
+      technicalInstructions: '',
+      uncensored: false,
+      thinking_level: 'off',
+      // commands, preferred_providers, etc., are handled by helper functions
+      // which use optional chaining (this.agent?.property) and are safe.
+    };
+
     return html`
       <div class="agent-selector">
         <select @change=${this.handleAgentChange} 
                 .value=${this.selectedAgentName || ''}>
           <option value="">Select an agent</option>
           ${this.agents.map(agent => html`
-            <option value=${agent.name} ?selected=${agent.name === this.selectedAgentName}>${agent.name}</option>
+            <option .value=${agent.name} ?selected=${agent.name === this.selectedAgentName}>${agent.name}</option>
           `)}
         </select>
         <button class="btn btn-secondary" @click=${this.handleNewAgent}>
@@ -1044,23 +1061,22 @@ class AgentForm extends BaseEl {
         </button>
       </div>
 
-      ${this.agent ? html`
-        <form class="agent-form" @submit=${this.handleSubmit}>
+      <form class="agent-form ${!this.agent ? 'form-hidden-when-no-agent' : ''}" @submit=${this.handleSubmit}>
           <div class="form-group">
             <label class="required">Name:</label>
             <input type="text" name="name" 
-                   .value=${this.agent.name || ''} 
+                   .value=${agentForRender.name || ''} 
                    @input=${this.handleInputChange}>
           </div>
 
           <div class="form-group">
             <label class="required">Persona:</label>
             <select name="persona" 
-                    value=${this.agent.persona || ''}
+                    .value=${agentForRender.persona || ''}
                     @change=${this.handleInputChange}>
               <option value="">Select a persona</option>
               ${this.personas.map(persona => html`
-                <option value="${persona.name}" ?selected=${persona.name === this.agent.persona}>${persona.name}</option>
+                <option value="${persona.name}" ?selected=${persona.name === agentForRender.persona}>${persona.name}</option>
               `)}
             </select>
           </div>
@@ -1084,11 +1100,11 @@ class AgentForm extends BaseEl {
             </div>
             ${this.showInstructionsEditor ? html`
               <textarea name="instructions" 
-                      .value=${this.agent.instructions || ''}
+                      .value=${agentForRender.instructions || ''}
                       @input=${this.handleInputChange}></textarea>
             ` : html`
               <div class="markdown-preview">
-                ${unsafeHTML(this.renderMarkdown(this.agent.instructions || ''))}
+                ${unsafeHTML(this.renderMarkdown(agentForRender.instructions || ''))}
               </div>
             `}
           </div>
@@ -1112,11 +1128,11 @@ class AgentForm extends BaseEl {
             </div>
             ${this.showTechnicalInstructionsEditor ? html`
               <textarea name="technicalInstructions" 
-                      .value=${this.agent.technicalInstructions || ''}
+                      .value=${agentForRender.technicalInstructions || ''}
                       @input=${this.handleInputChange}></textarea>
             ` : html`
               <div class="markdown-preview">
-                ${unsafeHTML(this.renderMarkdown(this.agent.technicalInstructions || ''))}
+                ${unsafeHTML(this.renderMarkdown(agentForRender.technicalInstructions || ''))}
               </div>
             `}
           </div>
@@ -1125,7 +1141,7 @@ class AgentForm extends BaseEl {
             <label>
               Uncensored:
               <toggle-switch 
-                .checked=${this.agent.uncensored || false}
+                .checked=${agentForRender.uncensored || false}
                 @toggle-change=${(e) => this.handleInputChange({ 
                   target: { 
                     name: 'uncensored', 
@@ -1140,22 +1156,22 @@ class AgentForm extends BaseEl {
           <div class="form-group reasoning-level-group">
             <label>Reasoning Effort:</label>
             <select name="thinking_level" 
-                   value=${this.agent.thinking_level || 'off'}
+                   .value=${agentForRender.thinking_level || 'off'}
                    @change=${this.handleInputChange}>
               <option value="off" 
-                     ?selected=${(this.agent.thinking_level || 'off') === 'off'}>
+                     ?selected=${(agentForRender.thinking_level || 'off') === 'off'}>
                 Off
               </option> 
               <option value="low" 
-                     ?selected=${(this.agent.thinking_level || 'off') === 'low'}>
+                     ?selected=${(agentForRender.thinking_level || 'off') === 'low'}>
                 Low
               </option>
               <option value="medium" 
-                     ?selected=${(this.agent.thinking_level || 'off') === 'medium'}>
+                     ?selected=${(agentForRender.thinking_level || 'off') === 'medium'}>
                 Medium
               </option>
               <option value="high" 
-                     ?selected=${(this.agent.thinking_level || 'off') === 'high'}>
+                     ?selected=${(agentForRender.thinking_level || 'off') === 'high'}>
                 High
               </option>
             </select>
@@ -1184,11 +1200,11 @@ class AgentForm extends BaseEl {
             </details>
           </div>
 
-          ${this.agent.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`
+          ${this.agent?.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`
             <div class="form-group commands-section">
               <details>
                 <summary>Missing Commands (${Object.keys(this.missingCommands).length})</summary>
-                <missing-commands .agentName=${this.agent.name}></missing-commands>
+                <missing-commands .agentName=${this.agent.name}></missing-commands> <!-- this.agent.name is safe due to condition -->
               </details>
             </div>
           ` : ''}
@@ -1203,13 +1219,13 @@ class AgentForm extends BaseEl {
           <button class="btn" type="submit" ?disabled=${this.loading}>
             ${this.loading ? 'Saving...' : 'Save'}
           </button>
-          
-        </form>
-      ` : html`
+      </form>
+
+      ${!this.agent ? html`
         <div class="no-agent-message">
           Select an agent from the dropdown above or click "New Agent" to create one.
         </div>
-      `}
+      ` : ''}
     `;
    }
 }

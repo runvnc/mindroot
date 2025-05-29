@@ -8,9 +8,10 @@ import time
 from mindroot.lib.utils.debug import debug_box
 
 class ChatLog:
-    def __init__(self, log_id=0, agent=None, context_length: int = 4096, user: str = None):
+    def __init__(self, log_id=0, agent=None, parent_log_id=None, context_length: int = 4096, user: str = None):
         self.log_id = log_id
         self.messages = []
+        self.parent_log_id = parent_log_id
         self.agent = agent
         if user is None or user == '' or user == 'None':
             raise ValueError('User must be provided')
@@ -32,10 +33,13 @@ class ChatLog:
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         self.load_log()
+        
     def _get_log_data(self) -> Dict[str, any]:
         return {
             'agent': self.agent,
-            'messages': self.messages
+            'log_id': self.log_id,
+            'messages': self.messages,
+            'parent_log_id': self.parent_log_id
         }
 
     def _calculate_message_length(self, message: Dict[str, str]) -> int:
@@ -124,19 +128,12 @@ class ChatLog:
                 log_data = json.load(f)
                 self.agent = log_data.get('agent')
                 self.messages = log_data.get('messages', [])
+                self.parent_log_id = log_data.get('parent_log_id', None)
             print("Loaded log file at ", log_file)
             print("Message length: ", len(self.messages))
         else:
             print("Could not find log file at ", log_file)
             self.messages = []
-
-    def delete_log(self) -> None:
-        log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
-        if os.path.exists(log_file):
-            os.remove(log_file)
-            print("Deleted log file at ", log_file)
-        else:
-            print("Could not find log file at ", log_file)
 
     def count_tokens(self) -> Dict[str, int]:
         """
@@ -197,6 +194,34 @@ def find_chatlog_file(log_id: str) -> str:
                 return os.path.join(root, file)
     
     return None
+
+def find_child_logs_by_parent_id(parent_log_id: str) -> List[str]:
+    """
+    Find all chat logs that have the given parent_log_id.
+    
+    Args:
+        parent_log_id: The parent log ID to search for
+        
+    Returns:
+        List of log IDs that have this parent_log_id
+    """
+    child_log_ids = []
+    chat_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
+    
+    # Search through all chatlog files
+    for root, dirs, files in os.walk(chat_dir):
+        for file in files:
+            if file.startswith("chatlog_") and file.endswith(".json"):
+                try:
+                    with open(os.path.join(root, file), 'r') as f:
+                        log_data = json.load(f)
+                        if log_data.get('parent_log_id') == parent_log_id:
+                            # Extract log_id from the data
+                            child_log_ids.append(log_data.get('log_id'))
+                except (json.JSONDecodeError, IOError):
+                    continue
+    
+    return child_log_ids
 
 def extract_delegate_task_log_ids(messages: List[Dict]) -> List[str]:
     """
@@ -331,6 +356,9 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     # Load the chat log
     with open(chatlog_path, 'r') as f:
         log_data = json.load(f)
+    
+    # Get parent_log_id if it exists
+    parent_log_id = log_data.get('parent_log_id')
         
     # Create a temporary ChatLog instance to count tokens
     temp_log = ChatLog(log_id=log_id, user="system", agent=log_data.get('agent', 'unknown'))
@@ -349,9 +377,19 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     # Find delegated task log IDs
     delegated_log_ids = extract_delegate_task_log_ids(temp_log.messages)
     
-    # Recursively count tokens for delegated tasks
-    for delegated_id in delegated_log_ids:
-        delegated_counts = count_tokens_for_log_id(delegated_id)
+    # Also find child logs by parent_log_id
+    child_logs_by_parent = find_child_logs_by_parent_id(log_id)
+    
+    # Combine all child log IDs (delegated tasks and parent_log_id children)
+    all_child_log_ids = set(delegated_log_ids) | set(child_logs_by_parent)
+    
+    # If this log has a parent_log_id, we should not double-count it
+    # (it will be counted as part of its parent's cumulative total)
+    # But we still want to count its own children
+    
+    # Recursively count tokens for all child tasks
+    for child_id in all_child_log_ids:
+        delegated_counts = count_tokens_for_log_id(child_id)
         if delegated_counts:
             combined_counts['input_tokens_sequence'] += delegated_counts['input_tokens_sequence']
             combined_counts['output_tokens_sequence'] += delegated_counts['output_tokens_sequence']
