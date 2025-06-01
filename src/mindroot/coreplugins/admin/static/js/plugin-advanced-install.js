@@ -187,6 +187,14 @@ export class PluginAdvancedInstall extends PluginBase {
       if (response.success) {
         this.installDialog.addOutput(response.message, 'success');
         
+        // Show index compatibility info
+        if (response.addable_to_index !== undefined) {
+          this.installDialog.addOutput(`Index-compatible plugins: ${response.addable_to_index}/${response.plugins.length}`, 'info');
+        }
+        if (response.warning) {
+          this.installDialog.addOutput(response.warning, 'warning');
+        }
+        
         // If plugins were found, list them
         if (response.plugins && response.plugins.length > 0) {
           this.installDialog.addOutput('Found plugins:', 'info');

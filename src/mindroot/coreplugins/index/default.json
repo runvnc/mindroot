@@ -11,44 +11,50 @@
       "version": "1.0.0",
       "description": "Simple Google search functionality",
       "source": "github",
-      "github_url": "runvnc/ah_google",
+      "github_url": "https://github.com/runvnc/ah_google",
       "commands": ["google", "fetch_webpage"],
       "services": [],
       "dependencies": []
     },
     {
-      "name": "Think (Chain-of-Thought)",
+      "name": "ah_think",
       "version": "0.0.1",
       "description": "Chain of thought reasoning capability",
-      "source": "local",
-      "source_path": "/xfiles/plugins_ah/ah_think",
+      "source": "github",
+      "github_url": "https://github.com/runvnc/ah_think",
       "commands": ["think"],
       "services": [],
       "dependencies": []
     },
     {
-      "name": "Look at PDF/Image",
+      "name": "ah_look_at",
       "version": "0.0.1",
       "description": "PDF and image examination tools",
-      "source": "local",
-      "source_path": "/xfiles/plugins_ah/ah_look_at",
+      "source": "github",
+      "github_url": "https://github.com/runvnc/ah_look_at",
       "commands": ["examine_pdf", "examine_image"],
       "services": [],
       "dependencies": []
     },
     {
-      "enabled": true,
-      "source": "github",
-      "source_path": "runvnc/ah_anthropic",
+      "name": "ah_anthropic",
       "version": "0.0.1",
-      "name": "Anthropic (Claude)"
+      "description": "Anthropic Claude AI integration",
+      "source": "github",
+      "github_url": "https://github.com/runvnc/ah_anthropic",
+      "commands": [],
+      "services": [],
+      "dependencies": []
     },
     {
-      "enabled": true,
-      "source": "github",
-      "source_path": "runvnc/ah_shell",
+      "name": "ah_shell",
       "version": "0.0.1",
-      "name": "Shell"
+      "description": "Shell command execution",
+      "source": "github",
+      "github_url": "https://github.com/runvnc/ah_shell",
+      "commands": ["execute_command"],
+      "services": [],
+      "dependencies": []
     }
   ],
   "agents": [

@@ -50,6 +50,7 @@
             background-color: #45a049;
         }
     </style>
+    {% block head_extra %}{% endblock %}
     <script>
         async function handleLogin(event) {
             event.preventDefault();
@@ -78,8 +79,10 @@
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Log In</button>
         </form>
+        {% block content %}{% endblock %}
         <div>
             <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+        </div>
     </div>
 </body>
 </html>

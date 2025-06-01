@@ -82,6 +82,19 @@ async def add_plugin(INDEX_DIR: Path, index_name: str, plugin: PluginEntry):
         if not index_file.exists():
             return JSONResponse({'success': False, 'message': 'Index not found'})
 
+        # Early validation - check for required GitHub info
+        has_github_info = (
+            plugin.remote_source or 
+            plugin.github_url or 
+            getattr(plugin, 'metadata', {}).get('github_url')
+        )
+        
+        if not has_github_info:
+            return JSONResponse({
+                'success': False,
+                'message': 'Plugin missing GitHub repository information. Cannot add to index.'
+            })
+        
         # Check if plugin is local
         if plugin.source == 'local':
             return JSONResponse({

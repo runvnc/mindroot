@@ -62,7 +62,7 @@
           "source": "core"
       },
       "credits": {
-          "enabled": true,
+          "enabled": false,
           "source": "core"
       },
       "startup": {

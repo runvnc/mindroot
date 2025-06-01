@@ -199,6 +199,19 @@ async def scan_directory(request: DirectoryRequest):
         discovered_plugins = discover_plugins(directory)
         manifest = load_plugin_manifest()
         print("discoverd_plugins", discovered_plugins)
+        
+        # Analyze plugins for index compatibility
+        addable_count = 0
+        for plugin_name, plugin_info in discovered_plugins.items():
+            # Check if plugin has GitHub info
+            has_github = (
+                plugin_info.get('github_url') or 
+                plugin_info.get('remote_source') or
+                (plugin_info.get('metadata', {}).get('github_url'))
+            )
+            if has_github:
+                addable_count += 1
+        
         # Update installed plugins from discovered ones
         for plugin_name, plugin_info in discovered_plugins.items():
             plugin_info['source'] = 'local'
@@ -218,9 +231,14 @@ async def scan_directory(request: DirectoryRequest):
         } for name, info in discovered_plugins.items()]
         
         save_plugin_manifest(manifest)
-        return {"success": True, 
-                "message": f"Scanned {len(discovered_plugins)} plugins in {directory}",
-                "plugins": plugins_list}
+        
+        response = {"success": True, 
+                   "message": f"Scanned {len(discovered_plugins)} plugins in {directory}",
+                   "plugins": plugins_list,
+                   "addable_to_index": addable_count}
+        if addable_count < len(discovered_plugins):
+            response["warning"] = f"{len(discovered_plugins) - addable_count} plugins missing GitHub info and cannot be added to indices"
+        return response
     except Exception as e:
         trace = traceback.format_exc()
         return {"success": False, "message": f"Error during scan: {str(e)}\n\n{trace}"}

@@ -96,11 +96,39 @@ class PluginSection extends BaseEl {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    .plugin-warning {
+      font-size: 0.8rem;
+      color: #f39c12;
+      margin-top: 4px;
+    }
+
+    .disabled {
+      background: #555 !important;
+      color: #999 !important;
+      cursor: not-allowed !important;
+    }
   `;
 
   constructor() {
     super();
     this.searchTerm = '';
+  }
+
+  isPluginAddable(plugin) {
+    // Must have GitHub source info
+    const hasGitHubInfo = plugin.remote_source || 
+                         plugin.github_url || 
+                         (plugin.metadata && plugin.metadata.github_url);
+    
+    // Must not be local source
+    const isNotLocal = plugin.source !== 'local';
+    
+    // Must have basic metadata
+    const hasMetadata = plugin.metadata && 
+                       (plugin.metadata.commands || plugin.metadata.services);
+    
+    return hasGitHubInfo && isNotLocal && hasMetadata;
   }
 
   filterPlugins(plugins) {
@@ -165,6 +193,9 @@ class PluginSection extends BaseEl {
                 <div class="plugin-description">${plugin.description}</div>
               ` : ''}
               <div class="plugin-source">Source: ${plugin.source}</div>
+              ${!this.isPluginAddable(plugin) ? html`
+                <div class="plugin-warning">⚠️ Missing GitHub info - cannot add to index</div>
+              ` : ''}
             </div>
             ${isIndexPlugins ? html`
               <button class="action-button remove-button"
@@ -172,11 +203,17 @@ class PluginSection extends BaseEl {
                 Remove
               </button>
             ` : html`
-              <button class="action-button add-button"
-                      ?disabled=${this.selectedIndex?.plugins?.some(p => p.name === plugin.name)}
-                      @click=${() => this.handleAddPlugin(plugin)}>
-                Add
-              </button>
+              ${this.isPluginAddable(plugin) ? html`
+                <button class="action-button add-button"
+                        ?disabled=${this.selectedIndex?.plugins?.some(p => p.name === plugin.name)}
+                        @click=${() => this.handleAddPlugin(plugin)}>
+                  Add
+                </button>
+              ` : html`
+                <button class="action-button disabled" disabled title="Missing GitHub repository information">
+                  Cannot Add
+                </button>
+              `}
             `}
           </div>
         `)}
