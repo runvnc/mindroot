@@ -21,6 +21,17 @@ export class ChatHistory {
             setTimeout( () => { 
               window.initializeCodeCopyButtons() 
             }, 3000);
+            
+            // Trigger re-render to ensure all messages are displayed
+            this.chat.requestUpdate();
+            
+            // Scroll to bottom after loading history (no animation)
+            setTimeout(() => {
+                // Reset user scrolling flag and scroll to bottom
+                this.chat.userScrolling = false;
+                window.userScrolling = false;
+                this.chat._scrollToBottom(true);
+            }, 100);
 
         } catch (error) {
             console.error('Error loading history:', error);

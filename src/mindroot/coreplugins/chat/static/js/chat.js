@@ -345,7 +345,7 @@ class Chat extends BaseEl {
     this.messages = [...this.messages, { content: html, sender: 'ai', spinning: 'no' }]
   }
 
-  _scrollToBottom() {
+  _scrollToBottom(forceInstant = false) {
     const chatLog = this.shadowRoot.querySelector('.chat-log');
     if (!chatLog) return;
     
@@ -359,7 +359,7 @@ class Chat extends BaseEl {
       if (window.access_token && window.access_token.length > 20) {
         console.log('this is an embed probably, not scrolling messages')
       } else {
-        lastEl.scrollIntoView({ behavior: 'instant', block: 'end' });
+        lastEl.scrollIntoView({ behavior: forceInstant ? 'instant' : 'instant', block: 'end' });
       }
 
     } else {
