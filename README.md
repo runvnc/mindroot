@@ -150,6 +150,7 @@ Enter `[github user]/[repo name]` to install from a repo.
 | ah_max_context | Truncate conversation |
 | mr_yolo_replicate | YOLO object detection via Replicate |
 | ah_filetree | File system browser with tree view |
+| mr_mcp | Model Context Protocol integration |
 | mr_cerebras | Integration with Cerebras AI models |
 | ah_faceswap | Face swapping functionality for images |
 | ah_think | Chain of thought commands (important) |

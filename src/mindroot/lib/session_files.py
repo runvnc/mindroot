@@ -30,10 +30,8 @@ async def load_session_data(session_id: str, property: str):
     # check for existing file
     # if not, create it
     if not os.path.exists(name):
-        print("Session data file not found, creating it")
-        os.makedirs(os.path.dirname(name), exist_ok=True)
-        with open(name, "w") as f:
-            f.write("{}")
+        print("Session data file not found, returning None")
+        return None
     # load existing data
     data = json.load(open(name))
     # return data
