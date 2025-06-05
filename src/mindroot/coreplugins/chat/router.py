@@ -237,7 +237,7 @@ async def get_token_count(request: Request, log_id: str):
     Returns:
     - JSON with token counts or error message if log not found
     """
-    token_counts = count_tokens_for_log_id(log_id)
+    token_counts = await count_tokens_for_log_id(log_id)
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
@@ -301,7 +301,7 @@ async def get_token_count(request: Request, log_id: str):
     """
     from lib.token_counter import count_tokens_for_log_id
     
-    token_counts = count_tokens_for_log_id(log_id)
+    token_counts = await count_tokens_for_log_id(log_id)
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}

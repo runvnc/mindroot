@@ -2,6 +2,9 @@ from .providers.services import service_manager
 from .providers.commands import command_manager
 import os
 import json
+import asyncio
+import aiofiles
+import aiofiles.os
 from .chatlog import ChatLog
 from .chatlog import extract_delegate_task_log_ids, find_child_logs_by_parent_id, find_chatlog_file
 from typing import TypeVar, Type, Protocol, runtime_checkable, Set
@@ -85,31 +88,32 @@ class ChatContext:
     def cmds(self, command_set: Type[CommandSetT]) -> CommandSetT:
         return self._commands[command_set]
 
-    def save_context_data(self):
+    async def save_context_data(self):
         if not self.log_id:
             raise ValueError('log_id is not set for the context.')
         else:
             pass
         context_file = f'data/context/{self.username}/context_{self.log_id}.json'
-        os.makedirs(os.path.dirname(context_file), exist_ok=True)
+        await aiofiles.os.makedirs(os.path.dirname(context_file), exist_ok=True)
         try:
-            with open(context_file, 'r') as f:
-                context_data = json.load(f)
+            async with aiofiles.open(context_file, 'r') as f:
+                content = await f.read()
+                context_data = json.loads(content)
         except FileNotFoundError:
             context_data = {}
         finally:
             pass
         context_data['data'] = self.data
-        with open(context_file, 'w') as f:
-            json.dump(context_data, f, indent=2)
+        async with aiofiles.open(context_file, 'w') as f:
+            await f.write(json.dumps(context_data, indent=2))
 
-    def save_context(self):
+    async def save_context(self):
         if not self.log_id:
             raise ValueError('log_id is not set for the context.')
         else:
             pass
         context_file = f'data/context/{self.username}/context_{self.log_id}.json'
-        os.makedirs(os.path.dirname(context_file), exist_ok=True)
+        await aiofiles.os.makedirs(os.path.dirname(context_file), exist_ok=True)
         self.data['log_id'] = self.log_id
         context_data = {'data': self.data, 'chat_log': self.chat_log._get_log_data()}
         if 'name' in self.agent:
@@ -124,15 +128,15 @@ class ChatContext:
             raise ValueError('Tried to save chat context, but agent name not found in context')
         else:
             pass
-        with open(context_file, 'w') as f:
-            json.dump(context_data, f, indent=2)
-
+        async with aiofiles.open(context_file, 'w') as f:
+            await f.write(json.dumps(context_data, indent=2))
     async def load_context(self, log_id):
         self.log_id = log_id
         context_file = f'data/context/{self.username}/context_{log_id}.json'
-        if os.path.exists(context_file):
-            with open(context_file, 'r') as f:
-                context_data = json.load(f)
+        if await aiofiles.os.path.exists(context_file):
+            async with aiofiles.open(context_file, 'r') as f:
+                content = await f.read()
+                context_data = json.loads(content)
                 self.data = context_data.get('data', {})
                 if 'agent_name' in context_data and context_data.get('agent_name') is not None:
                     self.agent_name = context_data.get('agent_name')
@@ -186,22 +190,23 @@ class ChatContext:
             chatlog_dir_base = os.environ.get('CHATLOG_DIR', 'data/chat')
             chatlog_file_path_current = os.path.join(chatlog_dir_base, user, agent, f'chatlog_{log_id}.json')
 
-            if os.path.exists(chatlog_file_path_current):
+            if await aiofiles.os.path.exists(chatlog_file_path_current):
                 try:
-                    with open(chatlog_file_path_current, 'r') as f:
-                        log_data = json.load(f)
+                    async with aiofiles.open(chatlog_file_path_current, 'r') as f:
+                        content = await f.read()
+                        log_data = json.loads(content)
                         messages_for_child_finding = log_data.get('messages', [])
                 except Exception as e:
                     print(f"Error reading chatlog {chatlog_file_path_current} for child finding: {e}")
             
             delegated_child_ids = extract_delegate_task_log_ids(messages_for_child_finding)
-            parented_child_ids = find_child_logs_by_parent_id(log_id)
+            parented_child_ids = await find_child_logs_by_parent_id(log_id)
             all_child_log_ids = set(delegated_child_ids) | set(parented_child_ids)
 
             for child_id in all_child_log_ids:
                 if child_id in visited_log_ids: # Check again before processing child
                     continue
-                child_log_path = find_chatlog_file(child_id) # This searches across all users/agents
+                child_log_path = await find_chatlog_file(child_id) # This searches across all users/agents
                 if child_log_path:
                     try:
                         relative_path = os.path.relpath(child_log_path, chatlog_dir_base)
@@ -222,9 +227,9 @@ class ChatContext:
         # --- Delete Current Session's Files ---
         # ChatLog File
         chatlog_file_to_delete = os.path.join(os.environ.get('CHATLOG_DIR', 'data/chat'), user, agent, f'chatlog_{log_id}.json')
-        if os.path.exists(chatlog_file_to_delete):
+        if await aiofiles.os.path.exists(chatlog_file_to_delete):
             try:
-                os.remove(chatlog_file_to_delete)
+                await aiofiles.os.remove(chatlog_file_to_delete)
                 print(f"Deleted chatlog file: {chatlog_file_to_delete}")
             except Exception as e:
                 print(f"Error deleting chatlog file {chatlog_file_to_delete}: {e}")
@@ -233,9 +238,9 @@ class ChatContext:
 
         # ChatContext File (Agent is not part of the context file path structure)
         context_file_to_delete = os.path.join('data/context', user, f'context_{log_id}.json')
-        if os.path.exists(context_file_to_delete):
+        if await aiofiles.os.path.exists(context_file_to_delete):
             try:
-                os.remove(context_file_to_delete)
+                await aiofiles.os.remove(context_file_to_delete)
                 print(f"Deleted context file: {context_file_to_delete}")
             except Exception as e:
                 print(f"Error deleting context file {context_file_to_delete}: {e}")

@@ -5,6 +5,9 @@ import sys
 import traceback
 import re
 import time
+import asyncio
+import aiofiles
+import aiofiles.os
 from mindroot.lib.utils.debug import debug_box
 
 class ChatLog:
@@ -32,7 +35,9 @@ class ChatLog:
         self.log_dir = os.path.join(self.log_dir, self.agent)
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
-        self.load_log()
+        # For backward compatibility, we'll load synchronously in constructor
+        # but provide async methods for new code
+        self._load_log_sync()
         
     def _get_log_data(self) -> Dict[str, any]:
         return {
@@ -45,7 +50,45 @@ class ChatLog:
     def _calculate_message_length(self, message: Dict[str, str]) -> int:
         return len(json.dumps(message)) // 3
 
+    def _load_log_sync(self, log_id=None) -> None:
+        """Synchronous version for backward compatibility"""
+        if log_id is None:
+            log_id = self.log_id
+        self.log_id = log_id
+        log_file = os.path.join(self.log_dir, f'chatlog_{log_id}.json')
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                log_data = json.load(f)
+                self.agent = log_data.get('agent')
+                self.messages = log_data.get('messages', [])
+                self.parent_log_id = log_data.get('parent_log_id', None)
+            print("Loaded log file at ", log_file)
+            print("Message length: ", len(self.messages))
+        else:
+            print("Could not find log file at ", log_file)
+            self.messages = []
+
+    def _save_log_sync(self) -> None:
+        """Synchronous version for backward compatibility"""
+        log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
+        with open(log_file, 'w') as f:
+            json.dump(self._get_log_data(), f, indent=2)
+
     def add_message(self, message: Dict[str, str]) -> None:
+        """Synchronous version for backward compatibility"""
+        should_save = self._add_message_impl(message)
+        if should_save:
+            self._save_log_sync()
+        else:
+            # Handle the image case that returned False - save synchronously
+            if (len(self.messages) > 0 and 
+                isinstance(self.messages[-1].get('content'), list) and 
+                len(self.messages[-1]['content']) > 0 and 
+                self.messages[-1]['content'][0].get('type') == 'image'):
+                self._save_log_sync()
+
+    def _add_message_impl(self, message: Dict[str, str]) -> None:
+        """Internal implementation shared by sync and async versions"""
         if len(self.messages)>0 and self.messages[-1]['role'] == message['role']:
             print("found repeat role")
             # check if messasge is str
@@ -57,8 +100,7 @@ class ChatLog:
                     if part['type'] == 'image':
                         print("found image")
                         self.messages.append(message)
-                        self.save_log()
-                        return
+                        return False  # Indicate caller should NOT save (we'll handle it)
 
             try:
                 cmd_list = json.loads(self.messages[-1]['content'][0]['text'])
@@ -90,7 +132,19 @@ class ChatLog:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
             debug_box("5")
             self.messages.append(message)
-        self.save_log()
+        self._save_log_sync()
+    async def add_message_async(self, message: Dict[str, str]) -> None:
+        """Async version for new code that needs non-blocking operations"""
+        should_save = self._add_message_impl(message)
+        if should_save:
+            await self.save_log()
+        else:
+            # Handle the image case that returned False - save asynchronously
+            if (len(self.messages) > 0 and 
+                isinstance(self.messages[-1].get('content'), list) and 
+                len(self.messages[-1]['content']) > 0 and 
+                self.messages[-1]['content'][0].get('type') == 'image'):
+                await self.save_log()
 
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
@@ -112,20 +166,21 @@ class ChatLog:
         # 
         #return recent_messages
 
-    def save_log(self) -> None:
+    async def save_log(self) -> None:
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
-        with open(log_file, 'w') as f:
-            json.dump(self._get_log_data(), f, indent=2)
+        async with aiofiles.open(log_file, 'w') as f:
+            await f.write(json.dumps(self._get_log_data(), indent=2))
         
 
-    def load_log(self, log_id = None) -> None:
+    async def load_log(self, log_id = None) -> None:
         if log_id is None:
             log_id = self.log_id
         self.log_id = log_id
         log_file = os.path.join(self.log_dir, f'chatlog_{log_id}.json')
-        if os.path.exists(log_file):
-            with open(log_file, 'r') as f:
-                log_data = json.load(f)
+        if await aiofiles.os.path.exists(log_file):
+            async with aiofiles.open(log_file, 'r') as f:
+                content = await f.read()
+                log_data = json.loads(content)
                 self.agent = log_data.get('agent')
                 self.messages = log_data.get('messages', [])
                 self.parent_log_id = log_data.get('parent_log_id', None)
@@ -175,7 +230,7 @@ class ChatLog:
             'input_tokens_total': input_tokens_total
         }
 
-def find_chatlog_file(log_id: str) -> str:
+async def find_chatlog_file(log_id: str) -> str:
     """
     Find a chatlog file by its log_id.
     
@@ -188,14 +243,14 @@ def find_chatlog_file(log_id: str) -> str:
     chat_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
     
     # Use os.walk to search through all subdirectories
-    for root, dirs, files in os.walk(chat_dir):
+    for root, dirs, files in await asyncio.to_thread(os.walk, chat_dir):
         for file in files:
             if file == f"chatlog_{log_id}.json":
                 return os.path.join(root, file)
     
     return None
 
-def find_child_logs_by_parent_id(parent_log_id: str) -> List[str]:
+async def find_child_logs_by_parent_id(parent_log_id: str) -> List[str]:
     """
     Find all chat logs that have the given parent_log_id.
     
@@ -209,12 +264,13 @@ def find_child_logs_by_parent_id(parent_log_id: str) -> List[str]:
     chat_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
     
     # Search through all chatlog files
-    for root, dirs, files in os.walk(chat_dir):
+    for root, dirs, files in await asyncio.to_thread(os.walk, chat_dir):
         for file in files:
             if file.startswith("chatlog_") and file.endswith(".json"):
                 try:
-                    with open(os.path.join(root, file), 'r') as f:
-                        log_data = json.load(f)
+                    async with aiofiles.open(os.path.join(root, file), 'r') as f:
+                        content = await f.read()
+                        log_data = json.loads(content)
                         if log_data.get('parent_log_id') == parent_log_id:
                             # Extract log_id from the data
                             child_log_ids.append(log_data.get('log_id'))
@@ -263,24 +319,24 @@ def extract_delegate_task_log_ids(messages: List[Dict]) -> List[str]:
     
     return log_ids
 
-def get_cache_dir() -> str:
+async def get_cache_dir() -> str:
     """
     Get the directory for token count cache files.
     Creates the directory if it doesn't exist.
     """
     cache_dir = os.environ.get('TOKEN_CACHE_DIR', 'data/token_cache')
-    if not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
+    if not await aiofiles.os.path.exists(cache_dir):
+        await aiofiles.os.makedirs(cache_dir)
     return cache_dir
 
-def get_cache_path(log_id: str) -> str:
+async def get_cache_path(log_id: str) -> str:
     """
     Get the path to the cache file for a specific log_id.
     """
-    cache_dir = get_cache_dir()
+    cache_dir = await get_cache_dir()
     return os.path.join(cache_dir, f"tokens_{log_id}.json")
 
-def get_cached_token_counts(log_id: str, log_path: str) -> Dict[str, int]:
+async def get_cached_token_counts(log_id: str, log_path: str) -> Dict[str, int]:
     """
     Get cached token counts if available and valid.
     
@@ -291,16 +347,16 @@ def get_cached_token_counts(log_id: str, log_path: str) -> Dict[str, int]:
     Returns:
         Cached token counts if valid, None otherwise
     """
-    cache_path = get_cache_path(log_id)
+    cache_path = await get_cache_path(log_id)
     
     # If cache doesn't exist, return None
-    if not os.path.exists(cache_path):
+    if not await aiofiles.os.path.exists(cache_path):
         return None
     
     try:
         # Get modification times
-        log_mtime = os.path.getmtime(log_path)
-        cache_mtime = os.path.getmtime(cache_path)
+        log_mtime = await aiofiles.os.path.getmtime(log_path)
+        cache_mtime = await aiofiles.os.path.getmtime(cache_path)
         current_time = time.time()
         
         # If log was modified after cache was created, cache is invalid
@@ -309,28 +365,31 @@ def get_cached_token_counts(log_id: str, log_path: str) -> Dict[str, int]:
         
         # Don't recalculate sooner than 3 minutes after last calculation
         if current_time - cache_mtime < 180:  # 3 minutes in seconds
-            with open(cache_path, 'r') as f:
-                return json.load(f)
+            async with aiofiles.open(cache_path, 'r') as f:
+                content = await f.read()
+                return json.loads(content)
                 
         # For logs that haven't been modified in over an hour, consider them "finished"
         # and use the cache regardless of when it was last calculated
         if current_time - log_mtime > 3600:  # 1 hour in seconds
-            with open(cache_path, 'r') as f:
-                return json.load(f)
+            async with aiofiles.open(cache_path, 'r') as f:
+                content = await f.read()
+                return json.loads(content)
     
     except (json.JSONDecodeError, IOError) as e:
         print(f"Error reading token cache: {e}")
     
     return None
 
-def save_token_counts_to_cache(log_id: str, token_counts: Dict[str, int]) -> None:
+async def save_token_counts_to_cache(log_id: str, token_counts: Dict[str, int]) -> None:
     """
     Save token counts to cache.
     """
-    cache_path = get_cache_path(log_id)
-    with open(cache_path, 'w') as f:
-        json.dump(token_counts, f)
-def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
+    cache_path = await get_cache_path(log_id)
+    async with aiofiles.open(cache_path, 'w') as f:
+        await f.write(json.dumps(token_counts))
+
+async def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     """
     Count tokens for a chat log identified by log_id, including any delegated tasks.
     
@@ -341,12 +400,12 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
         Dictionary with token counts or None if log not found
     """
     # Find the chatlog file
-    chatlog_path = find_chatlog_file(log_id)
+    chatlog_path = await find_chatlog_file(log_id)
     if not chatlog_path:
         return None
     
     # Check cache first
-    cached_counts = get_cached_token_counts(log_id, chatlog_path)
+    cached_counts = await get_cached_token_counts(log_id, chatlog_path)
     if cached_counts:
         print(f"Using cached token counts for {log_id}")
         return cached_counts
@@ -354,8 +413,9 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     print(f"Calculating token counts for {log_id}")
     
     # Load the chat log
-    with open(chatlog_path, 'r') as f:
-        log_data = json.load(f)
+    async with aiofiles.open(chatlog_path, 'r') as f:
+        content = await f.read()
+        log_data = json.loads(content)
     
     # Get parent_log_id if it exists
     parent_log_id = log_data.get('parent_log_id')
@@ -378,7 +438,7 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     delegated_log_ids = extract_delegate_task_log_ids(temp_log.messages)
     
     # Also find child logs by parent_log_id
-    child_logs_by_parent = find_child_logs_by_parent_id(log_id)
+    child_logs_by_parent = await find_child_logs_by_parent_id(log_id)
     
     # Combine all child log IDs (delegated tasks and parent_log_id children)
     all_child_log_ids = set(delegated_log_ids) | set(child_logs_by_parent)
@@ -389,7 +449,7 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     
     # Recursively count tokens for all child tasks
     for child_id in all_child_log_ids:
-        delegated_counts = count_tokens_for_log_id(child_id)
+        delegated_counts = await count_tokens_for_log_id(child_id)
         if delegated_counts:
             combined_counts['input_tokens_sequence'] += delegated_counts['input_tokens_sequence']
             combined_counts['output_tokens_sequence'] += delegated_counts['output_tokens_sequence']
@@ -408,6 +468,6 @@ def count_tokens_for_log_id(log_id: str) -> Dict[str, int]:
     }
     
     # Save to cache
-    save_token_counts_to_cache(log_id, token_counts)
+    await save_token_counts_to_cache(log_id, token_counts)
     
     return token_counts
