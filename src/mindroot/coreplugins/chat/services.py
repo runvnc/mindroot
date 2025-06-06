@@ -76,7 +76,7 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         context.data['llm'] = llm
         context.current_model = llm
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user, parent_log_id=parent_log_id)
-        context.save_context()
+        await context.save_context()
     else:
         debug_box("Context is not none")
         print(context)
@@ -132,7 +132,7 @@ async def init_chat_session(user:str, agent_name: str, log_id: str, context=None
         context.agent = await service_manager.get_agent_data(agent_name)
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
         print("context.agent_name: ", context.agent_name)
-        context.save_context()
+        await context.save_context()
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
     return log_id
 
@@ -247,7 +247,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             has_image = has_image or str(msg_to_add).find("image") > -1
             context.chat_log.add_message(msg_to_add)
 
-        context.save_context()
+        await context.save_context()
 
         continue_processing = True
         iterations = 0

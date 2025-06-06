@@ -130,6 +130,7 @@ class ChatContext:
             pass
         async with aiofiles.open(context_file, 'w') as f:
             await f.write(json.dumps(context_data, indent=2))
+
     async def load_context(self, log_id):
         self.log_id = log_id
         context_file = f'data/context/{self.username}/context_{log_id}.json'
