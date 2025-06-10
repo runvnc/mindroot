@@ -4,7 +4,9 @@ import json
 import subprocess
 from pathlib import Path
 from lib.providers.services import service
+import lib
 from lib.plugins import list_enabled, get_plugin_path
+import mindroot.coreplugins
 
 
 def should_skip_directory(directory):
@@ -132,36 +134,29 @@ async def scan_env_vars(params=None, context=None):
                 }
                 all_env_vars.update(env_vars)
     
-    # Also scan the coreplugins directory
-    coreplugins_path = '/files/mindroot/src/mindroot/coreplugins'
-    if os.path.isdir(coreplugins_path):
-        env_vars = scan_directory_for_env_vars(coreplugins_path)
-        if env_vars:
-            if 'core' not in results:
-                results['core'] = {
-                    'plugin_name': 'core',
-                    'category': 'core',
-                    'env_vars': []
-                }
-            results['core']['env_vars'].extend(list(env_vars))
-            all_env_vars.update(env_vars)
-
-    # Also scan the lib directory
-    lib_path = '/files/mindroot/src/mindroot/lib'
+    # Also scan the core directories (lib and coreplugins)
+    core_env_vars = set()
+    lib_path = os.path.dirname(lib.__file__)
+    mindroot_path = os.path.dirname(lib_path)
+    
+    # Scan lib directory
     if os.path.isdir(lib_path):
-        env_vars = scan_directory_for_env_vars(lib_path)
-        if env_vars:
-            if 'core' not in results:
-                results['core'] = {
-                    'plugin_name': 'core',
-                    'category': 'core',
-                    'env_vars': []
-                }
-            # Add only new variables to avoid duplicates
-            existing_vars = set(results['core']['env_vars'])
-            new_vars = env_vars - existing_vars
-            results['core']['env_vars'].extend(list(new_vars))
-            all_env_vars.update(new_vars)
+        lib_vars = scan_directory_for_env_vars(lib_path)
+        core_env_vars.update(lib_vars)
+
+    # Scan coreplugins directory
+    coreplugins_path = os.path.join(mindroot_path, 'coreplugins')
+    if os.path.isdir(coreplugins_path):
+        coreplugins_vars = scan_directory_for_env_vars(coreplugins_path)
+        core_env_vars.update(coreplugins_vars)
+
+    if core_env_vars:
+        results['core'] = {
+            'plugin_name': 'core',
+            'category': 'core',
+            'env_vars': sorted(list(core_env_vars))
+        }
+        all_env_vars.update(core_env_vars)
 
     # Get current environment variables
     current_env = {}
