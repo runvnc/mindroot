@@ -132,6 +132,37 @@ async def scan_env_vars(params=None, context=None):
                 }
                 all_env_vars.update(env_vars)
     
+    # Also scan the coreplugins directory
+    coreplugins_path = '/files/mindroot/src/mindroot/coreplugins'
+    if os.path.isdir(coreplugins_path):
+        env_vars = scan_directory_for_env_vars(coreplugins_path)
+        if env_vars:
+            if 'core' not in results:
+                results['core'] = {
+                    'plugin_name': 'core',
+                    'category': 'core',
+                    'env_vars': []
+                }
+            results['core']['env_vars'].extend(list(env_vars))
+            all_env_vars.update(env_vars)
+
+    # Also scan the lib directory
+    lib_path = '/files/mindroot/src/mindroot/lib'
+    if os.path.isdir(lib_path):
+        env_vars = scan_directory_for_env_vars(lib_path)
+        if env_vars:
+            if 'core' not in results:
+                results['core'] = {
+                    'plugin_name': 'core',
+                    'category': 'core',
+                    'env_vars': []
+                }
+            # Add only new variables to avoid duplicates
+            existing_vars = set(results['core']['env_vars'])
+            new_vars = env_vars - existing_vars
+            results['core']['env_vars'].extend(list(new_vars))
+            all_env_vars.update(new_vars)
+
     # Get current environment variables
     current_env = {}
     for var_name in all_env_vars:

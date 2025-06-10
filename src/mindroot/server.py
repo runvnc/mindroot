@@ -36,7 +36,6 @@ def create_directories():
     root = get_project_root()
     directories = [
         "imgs",
-        "data/chat",
         "models",
         "models/face",
         "models/llm",
@@ -46,6 +45,9 @@ def create_directories():
         "personas/shared",
         "data/sessions"
     ]
+    chatlog_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
+    directories.append(chatlog_dir)
+
     for directory in directories:
         (root / directory).mkdir(parents=True, exist_ok=True)
 

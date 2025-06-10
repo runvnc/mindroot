@@ -93,7 +93,8 @@ class ChatContext:
             raise ValueError('log_id is not set for the context.')
         else:
             pass
-        context_file = f'data/context/{self.username}/context_{self.log_id}.json'
+        context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+        context_file = f'{context_dir}/{self.username}/context_{self.log_id}.json'
         await aiofiles.os.makedirs(os.path.dirname(context_file), exist_ok=True)
         try:
             async with aiofiles.open(context_file, 'r') as f:
@@ -112,7 +113,8 @@ class ChatContext:
             raise ValueError('log_id is not set for the context.')
         else:
             pass
-        context_file = f'data/context/{self.username}/context_{self.log_id}.json'
+        context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+        context_file = f'{context_dir}/{self.username}/context_{self.log_id}.json'
         await aiofiles.os.makedirs(os.path.dirname(context_file), exist_ok=True)
         self.data['log_id'] = self.log_id
         context_data = {'data': self.data, 'chat_log': self.chat_log._get_log_data()}
@@ -133,7 +135,8 @@ class ChatContext:
 
     async def load_context(self, log_id):
         self.log_id = log_id
-        context_file = f'data/context/{self.username}/context_{log_id}.json'
+        context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+        context_file = f'{context_dir}/{self.username}/context_{log_id}.json'
         if await aiofiles.os.path.exists(context_file):
             async with aiofiles.open(context_file, 'r') as f:
                 content = await f.read()
@@ -238,7 +241,8 @@ class ChatContext:
             print(f"Chatlog file not found for deletion: {chatlog_file_to_delete}")
 
         # ChatContext File (Agent is not part of the context file path structure)
-        context_file_to_delete = os.path.join('data/context', user, f'context_{log_id}.json')
+        context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+        context_file_to_delete = os.path.join(context_dir, user, f'context_{log_id}.json')
         if await aiofiles.os.path.exists(context_file_to_delete):
             try:
                 await aiofiles.os.remove(context_file_to_delete)

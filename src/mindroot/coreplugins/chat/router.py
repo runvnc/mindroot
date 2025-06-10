@@ -258,8 +258,9 @@ async def delete_chat_session(request: Request, log_id: str, user=Depends(requir
     try:
         # Try to determine the agent name from the context file first
         agent_name = "unknown"
-        context_file_path = f"data/context/{user.username}/context_{log_id}.json"
-        
+        context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+        context_file_path = f"{context_dir}/{user.username}/context_{log_id}.json"
+
         if os.path.exists(context_file_path):
             try:
                 with open(context_file_path, 'r') as f:

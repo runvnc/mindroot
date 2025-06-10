@@ -22,9 +22,11 @@ async def home(request: Request):
     
     # Try to sort agents by last access time
     agent_access_times = []
+    chatlog_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
     for agent in agent_dirs:
         # Look for the most recent log file for this agent
-        log_pattern = f"data/chatlogs/{agent}_*.json"
+        # Search across all user directories for this agent's logs
+        log_pattern = f"{chatlog_dir}/*/{agent}/chatlog_*.json"
         log_files = glob.glob(log_pattern)
         
         if log_files:
