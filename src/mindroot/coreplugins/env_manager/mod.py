@@ -64,7 +64,7 @@ def scan_directory_for_env_vars(directory):
         # Use grep to find os.environ references - much faster than parsing each file
         cmd = [
             'grep', '-r', 
-            '-E', "(os\.environ\[\"|'|os\.environ\.get\(\"|')", 
+            '-E', r"os\.environ(\.get\(|\[)", 
             '--include=*.py', 
             '--exclude-dir=venv', 
             '--exclude-dir=env',

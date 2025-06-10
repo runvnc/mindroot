@@ -33,3 +33,5 @@ recursive-include src/mindroot/coreplugins/env_manager *
 recursive-include src/mindroot/lib/plugins *.json
 
 recursive-include src/mindroot/coreplugins/google_auth *
+
+recursive-include src/mindroot/coreplugins/user_service *

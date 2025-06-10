@@ -26,3 +26,10 @@ class UserCreate(BaseModel):
 class UserInRequest(UserBase):
     """User data as attached to request.state.user"""
     token_data: dict
+
+
+class PasswordResetToken(BaseModel):
+    """Data for password reset tokens"""
+    token: str
+    expires_at: str
+    is_admin_reset: bool = False
