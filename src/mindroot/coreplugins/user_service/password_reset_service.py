@@ -1,3 +1,4 @@
+from typing import Optional
 from lib.providers.services import service
 from .models import UserAuth, PasswordResetToken
 import bcrypt
@@ -10,13 +11,14 @@ USER_DATA_ROOT = "data/users"
 RESET_TOKEN_VALIDITY_HOURS = 1
 
 @service()
-async def initiate_password_reset(username: str, is_admin_reset: bool = False, context=None) -> str:
+async def initiate_password_reset(username: str, is_admin_reset: bool = False, token: Optional[str] = None, context=None) -> str:
     """Initiates a password reset, generates a token, and stores it."""
     user_dir = os.path.join(USER_DATA_ROOT, username)
     if not os.path.exists(user_dir):
         raise ValueError("User not found")
 
-    token = secrets.token_urlsafe(32)
+    if token is None:
+        token = secrets.token_urlsafe(32)
     expires_at = datetime.utcnow() + timedelta(hours=RESET_TOKEN_VALIDITY_HOURS)
 
     reset_data = PasswordResetToken(

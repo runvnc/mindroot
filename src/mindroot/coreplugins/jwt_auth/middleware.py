@@ -142,7 +142,8 @@ async def middleware(request: Request, call_next):
             print("Error checking for static file", e)
             pass
         print("Did not find static file")
-        if request.url.path in public_routes:
+        # Accept explicitly-registered public routes, _or_ the password-reset link which carries its own token
+        if request.url.path in public_routes or request.url.path.startswith('/user_service/reset-password'):
             print('Public route: ', request.url.path)
             return await call_next(request)
         elif any([request.url.path.startswith(path) for path in public_static]):

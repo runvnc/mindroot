@@ -37,12 +37,13 @@ async def process_password_reset_requests(context=None):
             
             username = data.get("username")
             is_admin_reset = data.get("is_admin_reset", False)
+            token = data.get("token")
 
             if not username:
                 raise ValueError("Username is missing from request file.")
 
             logger.info(f"Processing password reset request for user: {username}")
-            token = await initiate_reset(username=username, is_admin_reset=is_admin_reset)
+            token = await initiate_reset(username=username, is_admin_reset=is_admin_reset, token=token)
             
             reset_link = f"/user_service/reset-password/{token}"
             generated_file_path = os.path.join(GENERATED_DIR, f"{username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.json")
