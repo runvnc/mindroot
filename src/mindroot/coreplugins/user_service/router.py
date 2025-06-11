@@ -13,8 +13,8 @@ from lib.route_decorators import public_route
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.get("/reset-password/{filename}")
 @public_route()
+@router.get("/reset-password/{filename}")
 async def get_reset_password_form_by_file(request: Request, filename: str):
     """Show password reset form if trigger file exists"""
     trigger_dir = "data/password_resets"
@@ -32,8 +32,8 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
     html = await render('reset_password', {"request": request, "token": filename, "error": None, "success": False})
     return HTMLResponse(content=html)
 
-@router.post("/reset-password/{filename}")
 @public_route()
+@router.post("/reset-password/{filename}")
 async def handle_reset_password_by_file(request: Request, filename: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
     """Handle password reset using trigger file"""
     trigger_dir = "data/password_resets"
