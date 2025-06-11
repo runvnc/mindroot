@@ -19,13 +19,16 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
     """Show password reset form if trigger file exists"""
     trigger_dir = "data/password_resets"
     file_path = os.path.join(trigger_dir, f"{filename}.json")
-    
+    print("file path", file_path)
+
     # Validate filename format
-    if not filename or len(filename) < 10 or not filename.replace('-', '').replace('_', '').isalnum():
+    if not filename  or not filename.replace('-', '').replace('_', '').isalnum():
+        print('1')
         html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
         return HTMLResponse(content=html)
     
     if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        print('2')
         html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
         return HTMLResponse(content=html)
     
@@ -43,7 +46,7 @@ async def handle_reset_password_by_file(request: Request, filename: str, passwor
     file_path = os.path.join(trigger_dir, f"{filename}.json")
     
     # Validate filename format
-    if not filename or len(filename) < 10 or not filename.replace('-', '').replace('_', '').isalnum():
+    if not filename or not filename.replace('-', '').replace('_', '').isalnum():
         html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
         return HTMLResponse(content=html)
     
@@ -70,8 +73,8 @@ async def handle_reset_password_by_file(request: Request, filename: str, passwor
         logger.info(f"Processing password reset for user: {username} from file: {filename}")
         
         # Generate token and reset password
-        token = await services.get('user_service.initiate_password_reset')(username=username, is_admin_reset=is_admin_reset)
-        success = await services.get('user_service.reset_password_with_token')(token=token, new_password=password)
+        token = await initiate_password_reset(username=username, is_admin_reset=is_admin_reset)
+        success = await reset_password_with_token(token=token, new_password=password)
         
         if success:
             # Delete the trigger file
