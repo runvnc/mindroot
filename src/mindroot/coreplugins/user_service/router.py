@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.templates import render
+# Import services directly to avoid coroutine-call confusion
 from .password_reset_service import reset_password_with_token, initiate_password_reset
 from lib.providers.services import service_manager
 from lib.providers import ProviderManager
@@ -21,8 +22,8 @@ async def handle_reset_password(request: Request, token: str, password: str = Fo
         return HTMLResponse(content=html)
 
     try:
-        reset_fn = await services.get('user_service.reset_password_with_token')
-        success = await reset_fn(token=token, new_password=password)
+        # Direct call to the service function
+        success = await reset_password_with_token(token=token, new_password=password)
         if success:
             html = await render('reset_password', {"request": request, "token": token, "error": None, "success": True})
             from fastapi.responses import HTMLResponse
