@@ -1,48 +1,78 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.templates import render
+import os
+import json
+import logging
 # Import services directly to avoid coroutine-call confusion
 from .password_reset_service import reset_password_with_token, initiate_password_reset
 from lib.providers.services import service_manager
 from lib.providers import ProviderManager
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.get("/reset-password/{token}")
-async def get_reset_password_form(request: Request, token: str):
-    html = await render('reset_password', {"request": request, "token": token, "error": None, "success": False})
-    from fastapi.responses import HTMLResponse
+@router.get("/reset-password/{filename}")
+async def get_reset_password_form_by_file(request: Request, filename: str):
+    """Show password reset form if trigger file exists"""
+    trigger_dir = "data/password_resets"
+    file_path = os.path.join(trigger_dir, f"{filename}.json")
+    
+    if not filename or len(filename) < 10:  # Basic validation for token-like filename
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
+        return HTMLResponse(content=html)
+    
+    if not os.path.exists(file_path):
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired", "success": False})
+        return HTMLResponse(content=html)
+    
+    # File exists, show the form
+    html = await render('reset_password', {"request": request, "token": filename, "error": None, "success": False})
     return HTMLResponse(content=html)
 
-@router.post("/reset-password/{token}")
-async def handle_reset_password(request: Request, token: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
+@router.post("/reset-password/{filename}")
+async def handle_reset_password_by_file(request: Request, filename: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
+    """Handle password reset using trigger file"""
+    trigger_dir = "data/password_resets"
+    file_path = os.path.join(trigger_dir, f"{filename}.json")
+    
     if password != confirm_password:
-        html = await render('reset_password', {"request": request, "token": token, "error": "Passwords do not match.", "success": False})
-        from fastapi.responses import HTMLResponse
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Passwords do not match.", "success": False})
         return HTMLResponse(content=html)
-
+    
+    if not os.path.exists(file_path):
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired.", "success": False})
+        return HTMLResponse(content=html)
+    
     try:
-        # Direct call to the service function
-        success = await reset_password_with_token(token=token, new_password=password)
+        # Read the trigger file
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        
+        username = data.get("username")
+        is_admin_reset = data.get("is_admin_reset", False)
+        
+        if not username:
+            html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid reset file format.", "success": False})
+            return HTMLResponse(content=html)
+        
+        logger.info(f"Processing password reset for user: {username} from file: {filename}")
+        
+        # Generate token and reset password
+        token = await services.get('user_service.initiate_password_reset')(username=username, is_admin_reset=is_admin_reset)
+        success = await services.get('user_service.reset_password_with_token')(token=token, new_password=password)
+        
         if success:
-            html = await render('reset_password', {"request": request, "token": token, "error": None, "success": True})
-            from fastapi.responses import HTMLResponse
+            # Delete the trigger file
+            os.remove(file_path)
+            logger.info(f"Successfully reset password for {username}, removed trigger file: {filename}")
+            html = await render('reset_password', {"request": request, "token": filename, "error": None, "success": True})
             return HTMLResponse(content=html)
         else:
-            html = await render('reset_password', {"request": request, "token": token, "error": "Invalid or expired token.", "success": False})
-            from fastapi.responses import HTMLResponse
+            html = await render('reset_password', {"request": request, "token": filename, "error": "Password reset failed.", "success": False})
             return HTMLResponse(content=html)
-    except ValueError as e:
-        html = await render('reset_password', {"request": request, "token": token, "error": str(e), "success": False})
-        from fastapi.responses import HTMLResponse
+            
+    except Exception as e:
+        logger.error(f"Error processing trigger file {filename}: {e}")
+        html = await render('reset_password', {"request": request, "token": filename, "error": f"Error processing reset: {str(e)}", "success": False})
         return HTMLResponse(content=html)
-
-# This is an admin-only function to generate a reset link.
-# In a real app, this would be more protected.
-@router.get("/admin/initiate-reset/{username}")
-async def admin_initiate_reset(username: str, services: ProviderManager = Depends(lambda: service_manager)):
-    try:
-        token = await services.get('user_service.initiate_password_reset')(username=username)
-        return HTMLResponse(f'<h1>Password Reset Link</h1><p>Share this link with the user: <a href="/user_service/reset-password/{token}">/user_service/reset-password/{token}</a></p>')
-    except ValueError as e:
-        return HTMLResponse(f'<h1>Error</h1><p>{str(e)}</p>', status_code=404)
