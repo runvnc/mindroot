@@ -45,7 +45,7 @@ async def process_password_reset_requests(context=None):
             logger.info(f"Processing password reset request for user: {username}")
             token = await initiate_reset(username=username, is_admin_reset=is_admin_reset, token=token)
             
-            reset_link = f"/user_service/reset-password/{token}"
+            reset_link = f"/reset-password/{token}"
             generated_file_path = os.path.join(GENERATED_DIR, f"{username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.json")
             with open(generated_file_path, 'w') as f:
                 json.dump({"username": username, "reset_link": reset_link, "token": token}, f, indent=2)
