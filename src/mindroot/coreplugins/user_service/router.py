@@ -9,21 +9,31 @@ router = APIRouter()
 
 @router.get("/reset-password/{token}")
 async def get_reset_password_form(request: Request, token: str):
-    return await render('reset_password', {"request": request, "token": token, "error": None, "success": False})
+    html = await render('reset_password', {"request": request, "token": token, "error": None, "success": False})
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=html)
 
 @router.post("/reset-password/{token}")
 async def handle_reset_password(request: Request, token: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
     if password != confirm_password:
-        return await render('reset_password', {"request": request, "token": token, "error": "Passwords do not match.", "success": False})
+        html = await render('reset_password', {"request": request, "token": token, "error": "Passwords do not match.", "success": False})
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=html)
 
     try:
         success = await services.get('user_service.reset_password_with_token')(token=token, new_password=password)
         if success:
-            return await render('reset_password', {"request": request, "token": token, "error": None, "success": True})
+            html = await render('reset_password', {"request": request, "token": token, "error": None, "success": True})
+            from fastapi.responses import HTMLResponse
+            return HTMLResponse(content=html)
         else:
-            return await render('reset_password', {"request": request, "token": token, "error": "Invalid or expired token.", "success": False})
+            html = await render('reset_password', {"request": request, "token": token, "error": "Invalid or expired token.", "success": False})
+            from fastapi.responses import HTMLResponse
+            return HTMLResponse(content=html)
     except ValueError as e:
-        return await render('reset_password', {"request": request, "token": token, "error": str(e), "success": False})
+        html = await render('reset_password', {"request": request, "token": token, "error": str(e), "success": False})
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=html)
 
 # This is an admin-only function to generate a reset link.
 # In a real app, this would be more protected.
