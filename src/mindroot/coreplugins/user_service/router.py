@@ -20,15 +20,18 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
     trigger_dir = "data/password_resets"
     file_path = os.path.join(trigger_dir, f"{filename}.json")
     
-    if not filename or len(filename) < 10:  # Basic validation for token-like filename
+    # Validate filename format
+    if not filename or len(filename) < 10 or not filename.replace('-', '').replace('_', '').isalnum():
         html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
         return HTMLResponse(content=html)
     
-    if not os.path.exists(file_path):
-        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired", "success": False})
+    if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
         return HTMLResponse(content=html)
     
-    # File exists, show the form
+    # File exists and is actually a file, show the form
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired", "success": False})
+        return HTMLResponse(content=html)
     html = await render('reset_password', {"request": request, "token": filename, "error": None, "success": False})
     return HTMLResponse(content=html)
 
@@ -39,11 +42,16 @@ async def handle_reset_password_by_file(request: Request, filename: str, passwor
     trigger_dir = "data/password_resets"
     file_path = os.path.join(trigger_dir, f"{filename}.json")
     
+    # Validate filename format
+    if not filename or len(filename) < 10 or not filename.replace('-', '').replace('_', '').isalnum():
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
+        return HTMLResponse(content=html)
+    
     if password != confirm_password:
         html = await render('reset_password', {"request": request, "token": filename, "error": "Passwords do not match.", "success": False})
         return HTMLResponse(content=html)
     
-    if not os.path.exists(file_path):
+    if not os.path.exists(file_path) or not os.path.isfile(file_path):
         html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired.", "success": False})
         return HTMLResponse(content=html)
     
