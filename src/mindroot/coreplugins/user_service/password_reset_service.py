@@ -35,6 +35,13 @@ async def initiate_password_reset(username: str, is_admin_reset: bool = False, t
         logger.error(f"Directory exists check: {os.path.exists(abs_user_dir)}")
         raise ValueError("User not found")
 
+    # List existing files in user directory
+    try:
+        existing_files = os.listdir(user_dir)
+        logger.info(f"Existing files in user directory: {existing_files}")
+    except Exception as e:
+        logger.error(f"Error listing user directory: {e}")
+
     if token is None:
         token = secrets.token_urlsafe(32)
     
@@ -55,6 +62,19 @@ async def initiate_password_reset(username: str, is_admin_reset: bool = False, t
         json.dump(reset_data.dict(), f, indent=2)
     
     logger.info(f"Reset token file created successfully")
+    
+    # Verify file was created
+    if os.path.exists(reset_file_path):
+        logger.info(f"Verified: Reset token file exists after creation")
+        try:
+            with open(reset_file_path, 'r') as f:
+                verify_data = json.load(f)
+                logger.info(f"Verified: Reset token file contents: {verify_data}")
+        except Exception as e:
+            logger.error(f"Error reading back reset token file: {e}")
+    else:
+        logger.error(f"ERROR: Reset token file was not created successfully!")
+    
     return token
 
 @service()
@@ -91,19 +111,29 @@ async def reset_password_with_token(token: str, new_password: str, context=None)
     for username in user_dirs:
         user_dir = os.path.join(USER_DATA_ROOT, username)
         abs_user_dir = os.path.abspath(user_dir)
-        logger.debug(f"Checking user directory: {user_dir} (absolute: {abs_user_dir})")
+        logger.info(f"Checking user directory: {user_dir} (absolute: {abs_user_dir})")
         
         if not os.path.isdir(user_dir):
             logger.debug(f"Skipping {username} - not a directory")
             continue
             
         users_found += 1
+        
+        # List all files in this user directory
+        try:
+            user_files = os.listdir(user_dir)
+            logger.info(f"Files in user '{username}' directory: {user_files}")
+        except Exception as e:
+            logger.error(f"Error listing files in user directory {username}: {e}")
+            continue
+        
         reset_file_path = os.path.join(user_dir, "password_reset.json")
         abs_reset_file_path = os.path.abspath(reset_file_path)
-        logger.debug(f"Looking for reset file: {reset_file_path} (absolute: {abs_reset_file_path})")
+        logger.info(f"Looking for reset file: {reset_file_path} (absolute: {abs_reset_file_path})")
+        logger.info(f"Reset file exists: {os.path.exists(reset_file_path)}")
 
         if not os.path.exists(reset_file_path):
-            logger.debug(f"No reset file found for user {username}")
+            logger.info(f"No reset file found for user {username} - skipping")
             continue
 
         logger.info(f"Found reset file for user {username}, reading token data")
@@ -111,7 +141,7 @@ async def reset_password_with_token(token: str, new_password: str, context=None)
         try:
             with open(reset_file_path, 'r') as f:
                 reset_data_dict = json.load(f)
-                logger.debug(f"Reset file contents for {username}: {reset_data_dict}")
+                logger.info(f"Reset file contents for {username}: {reset_data_dict}")
                 reset_data = PasswordResetToken(**reset_data_dict)
         except (json.JSONDecodeError, TypeError, ValueError) as e:
             logger.error(f"Error parsing reset file for {username}: {e}")
