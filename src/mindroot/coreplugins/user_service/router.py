@@ -8,11 +8,13 @@ import logging
 from .password_reset_service import reset_password_with_token, initiate_password_reset
 from lib.providers.services import service_manager
 from lib.providers import ProviderManager
+from lib.route_decorators import public_route
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/reset-password/{filename}")
+@public_route()
 async def get_reset_password_form_by_file(request: Request, filename: str):
     """Show password reset form if trigger file exists"""
     trigger_dir = "data/password_resets"
@@ -31,6 +33,7 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
     return HTMLResponse(content=html)
 
 @router.post("/reset-password/{filename}")
+@public_route()
 async def handle_reset_password_by_file(request: Request, filename: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
     """Handle password reset using trigger file"""
     trigger_dir = "data/password_resets"
