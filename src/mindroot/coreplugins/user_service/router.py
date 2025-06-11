@@ -21,7 +21,8 @@ async def handle_reset_password(request: Request, token: str, password: str = Fo
         return HTMLResponse(content=html)
 
     try:
-        success = await services.get('user_service.reset_password_with_token')(token=token, new_password=password)
+        reset_fn = await services.get('user_service.reset_password_with_token')
+        success = await reset_fn(token=token, new_password=password)
         if success:
             html = await render('reset_password', {"request": request, "token": token, "error": None, "success": True})
             from fastapi.responses import HTMLResponse
