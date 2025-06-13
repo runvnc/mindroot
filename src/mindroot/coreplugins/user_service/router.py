@@ -18,7 +18,7 @@ router = APIRouter()
 async def get_reset_password_form_by_file(request: Request, filename: str):
     """Show password reset form if trigger file exists"""
     trigger_dir = "data/password_resets"
-    file_path = os.path.join(trigger_dir, f"{filename}.json")
+    file_path = os.path.join(trigger_dir, f"{filename}")
     print("file path", file_path)
 
     # Validate filename format
@@ -29,12 +29,10 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
     
     if not os.path.exists(file_path) or not os.path.isfile(file_path):
         print('2')
-        html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid file format", "success": False})
+        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired", "success": False})
         return HTMLResponse(content=html)
     
     # File exists and is actually a file, show the form
-        html = await render('reset_password', {"request": request, "token": filename, "error": "Reset file not found or expired", "success": False})
-        return HTMLResponse(content=html)
     html = await render('reset_password', {"request": request, "token": filename, "error": None, "success": False})
     return HTMLResponse(content=html)
 
@@ -43,7 +41,7 @@ async def get_reset_password_form_by_file(request: Request, filename: str):
 async def handle_reset_password_by_file(request: Request, filename: str, password: str = Form(...), confirm_password: str = Form(...), services: ProviderManager = Depends(lambda: service_manager)):
     """Handle password reset using trigger file"""
     trigger_dir = "data/password_resets"
-    file_path = os.path.join(trigger_dir, f"{filename}.json")
+    file_path = os.path.join(trigger_dir, f"{filename}")
     
     # Validate filename format
     if not filename or not filename.replace('-', '').replace('_', '').isalnum():
@@ -61,10 +59,16 @@ async def handle_reset_password_by_file(request: Request, filename: str, passwor
     try:
         # Read the trigger file
         with open(file_path, 'r') as f:
-            data = json.load(f)
+            data = f.read().strip()
         
-        username = data.get("username")
-        is_admin_reset = data.get("is_admin_reset", False)
+        # Parse the file content: "username is_admin_reset"
+        parts = data.split(' ')
+        if len(parts) != 2:
+            html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid reset file format.", "success": False})
+            return HTMLResponse(content=html)
+        
+        username, is_admin_reset_str = parts
+        is_admin_reset = is_admin_reset_str.lower() == 'true'
         
         if not username:
             html = await render('reset_password', {"request": request, "token": filename, "error": "Invalid reset file format.", "success": False})
