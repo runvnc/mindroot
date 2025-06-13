@@ -17,8 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY . /app/
+# Copy project files to template directory
+COPY . /app-template/
+
+# Install MindRoot from template
+WORKDIR /app-template
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir -e .
 
 # Create necessary directories
 RUN mkdir -p /app/imgs \
@@ -32,9 +37,12 @@ RUN mkdir -p /app/imgs \
     /app/personas/shared \
     /app/data/sessions
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -e .
+# Set working directory back to /app for runtime
+WORKDIR /app
+
+# Add entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expose port
 EXPOSE 8010
@@ -45,4 +53,5 @@ ENV ADMIN_USER=admin
 ENV ADMIN_PASS=password
 
 # Run the application with custom port
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "-m", "mindroot.server", "--port", "8010"]
