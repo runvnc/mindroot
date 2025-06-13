@@ -2,7 +2,7 @@ logs
 
 plugins.json
 plugin_config.json
-plugin_manifest.json
+data/plugin_manifest.json
 /static/
 
 __pycache__

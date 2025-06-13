@@ -14,6 +14,7 @@ import socket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
+from .migrate import run_migrations
 
 # Load environment variables from .env file at the start
 # Set override=True to make .env variables override existing environment variables
@@ -35,6 +36,7 @@ def get_project_root():
 def create_directories():
     root = get_project_root()
     directories = [
+        "data",
         "imgs",
         "models",
         "models/face",
@@ -102,6 +104,9 @@ class HeaderMiddleware(BaseHTTPMiddleware):
 
 def main():
     global app
+    
+    # Run migrations first, before anything else
+    run_migrations()
 
     cmd_args = parse_args()
     # save ALL parsed args in app state

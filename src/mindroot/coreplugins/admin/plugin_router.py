@@ -21,7 +21,7 @@ def update_plugins(request: PluginUpdateRequest):
         with open('plugins.json', 'w') as file:
             json.dump(plugins_data, file, indent=2)
 
-        plugins.load('plugin_manifest.json')
+        plugins.load('data/plugin_manifest.json')
 
         return {"message": "Plugins updated successfully"}
     except Exception as e:

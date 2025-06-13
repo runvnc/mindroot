@@ -1,9 +1,10 @@
 import json
 import os
+import shutil
 from datetime import datetime
 
 # Central definition of manifest file location
-MANIFEST_FILE = 'plugin_manifest.json'
+MANIFEST_FILE = 'data/plugin_manifest.json'
 
 def load_plugin_manifest():
     """Load the plugin manifest file.
@@ -68,12 +69,20 @@ def update_plugin_manifest(plugin_name, source, source_path, remote_source=None,
 
 def create_default_plugin_manifest():
     """Create a new default manifest file."""
-    # read from default_plugin_manifest.json in same dir as this file
-    default_manifest_path = os.path.join(os.path.dirname(__file__), 'default_plugin_manifest.json')
-    with open(default_manifest_path, 'r') as f:
-        default_manifest = json.load(f)
-    save_plugin_manifest(default_manifest)
-
+    # First check if there's an existing manifest in the root directory
+    old_manifest_path = 'plugin_manifest.json'
+    if os.path.exists(old_manifest_path):
+        # Move existing manifest from root to data directory
+        os.makedirs(os.path.dirname(MANIFEST_FILE), exist_ok=True)
+        shutil.move(old_manifest_path, MANIFEST_FILE)
+    else:
+        # No existing manifest, create from default template
+        # read from default_plugin_manifest.json in same dir as this file
+        default_manifest_path = os.path.join(os.path.dirname(__file__), 'default_plugin_manifest.json')
+        with open(default_manifest_path, 'r') as f:
+            default_manifest = json.load(f)
+        os.makedirs(os.path.dirname(MANIFEST_FILE), exist_ok=True)
+        save_plugin_manifest(default_manifest)
 def toggle_plugin_state(plugin_name, enabled):
     """Toggle a plugin's enabled state.
     

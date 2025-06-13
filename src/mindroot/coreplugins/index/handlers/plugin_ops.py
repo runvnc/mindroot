@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 async def get_installed_plugin_metadata(plugin_name: str) -> dict:
     """Get metadata from main plugin manifest"""
     try:
-        manifest_path = Path('plugin_manifest.json')
+        manifest_path = Path('data/plugin_manifest.json')
         logger.debug(f"Reading main plugin manifest from: {manifest_path}")
         
         if not manifest_path.exists():
