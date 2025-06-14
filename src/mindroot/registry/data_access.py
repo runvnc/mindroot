@@ -6,7 +6,7 @@ class DataAccess:
         self.data_dir = 'data'
         self.models_file = os.path.join(self.data_dir, 'models.json')
         self.providers_file = os.path.join(self.data_dir, 'providers.json')
-        self.plugins_file = 'plugin_manifest.json'
+        self.plugins_file = 'data/plugin_manifest.json'
         self.equivalent_flags_file = os.path.join(self.data_dir, 'equivalent_flags.json')
         self.preferred_models_file = os.path.join(self.data_dir, 'preferred_models.json')
 
