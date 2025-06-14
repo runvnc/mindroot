@@ -6,6 +6,14 @@ if [ -z "$(ls -A /app)" ]; then
     echo "Initializing MindRoot from template..."
     cp -r /app-template/* /app/
     cp -r /app-template/.* /app/ 2>/dev/null || :
+    
+    echo "Fixing virtual environment paths..."
+    if [ -d "/app/.venv/bin" ]; then
+        cd /app/.venv/bin
+        sed -i 's|/app-template/.venv|/app/.venv|g' *
+        echo "Virtual environment paths updated"
+    fi
+    
     echo "Initialization complete"
 else
     echo "Using existing MindRoot installation"
@@ -16,6 +24,14 @@ if [ ! -d "/app/.venv" ]; then
     echo "Virtual environment missing, copying from template..."
     if [ -d "/app-template/.venv" ]; then
         cp -r /app-template/.venv /app/
+        
+        echo "Fixing virtual environment paths..."
+        if [ -d "/app/.venv/bin" ]; then
+            cd /app/.venv/bin
+            sed -i 's|/app-template/.venv|/app/.venv|g' *
+            echo "Virtual environment paths updated"
+        fi
+        
         echo "Virtual environment copied from template"
     else
         echo "ERROR: Virtual environment not found in template either!"
