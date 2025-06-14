@@ -17,6 +17,8 @@ router = APIRouter()
 @router.get("/reset-password/{filename}")
 async def get_reset_password_form_by_file(request: Request, filename: str):
     """Show password reset form if trigger file exists"""
+    # print the current working directory
+    print("Current working directory:", os.getcwd())
     trigger_dir = "data/password_resets"
     file_path = os.path.join(trigger_dir, f"{filename}")
     print("file path", file_path)
