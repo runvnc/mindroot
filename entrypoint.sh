@@ -11,5 +11,8 @@ else
     echo "Using existing MindRoot installation"
 fi
 
+# Activate virtual environment
+source /app/.venv/bin/activate
+
 # Run the application
 exec "$@"

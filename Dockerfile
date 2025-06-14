@@ -20,10 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy project files to template directory
 COPY . /app-template/
 
-# Install MindRoot globally (not in editable mode to avoid path issues)
+# Create virtual environment and install MindRoot in template
 WORKDIR /app-template
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir .
+RUN python -m venv .venv
+RUN .venv/bin/pip install --upgrade pip setuptools wheel
+RUN .venv/bin/pip install .
 
 # Create necessary directories
 RUN mkdir -p /app/imgs \
