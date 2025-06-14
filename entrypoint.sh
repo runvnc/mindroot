@@ -11,7 +11,22 @@ else
     echo "Using existing MindRoot installation"
 fi
 
+# Check if .venv exists, if not, copy it from template
+if [ ! -d "/app/.venv" ]; then
+    echo "Virtual environment missing, copying from template..."
+    if [ -d "/app-template/.venv" ]; then
+        cp -r /app-template/.venv /app/
+        echo "Virtual environment copied from template"
+    else
+        echo "ERROR: Virtual environment not found in template either!"
+        echo "Contents of /app-template/:"
+        ls -la /app-template/
+        exit 1
+    fi
+fi
+
 # Activate virtual environment
+echo "Activating virtual environment..."
 source /app/.venv/bin/activate
 
 # Run the application
