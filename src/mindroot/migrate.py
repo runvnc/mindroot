@@ -1,30 +1,49 @@
 import os
-import shutil
-from pathlib import Path
+import logging
+from .lib.plugins.manifest import create_default_plugin_manifest, _get_absolute_paths, _validate_manifest
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 def migrate_plugin_manifest():
-    """Migrate plugin_manifest.json from root to data/ directory if needed."""
-    root_manifest = 'plugin_manifest.json'
-    data_manifest = 'data/plugin_manifest.json'
+    """Migrate plugin_manifest.json from root to data/ directory if needed.
     
-    # If the new location already exists, no migration needed
-    if os.path.exists(data_manifest):
-        print(f"Plugin manifest already exists at {data_manifest}")
+    This function now delegates to the consolidated manifest handling logic.
+    """
+    manifest_abs_path, root_manifest_abs_path, _ = _get_absolute_paths()
+    
+    logger.info("Checking plugin manifest migration...")
+    logger.debug(f"Target manifest path: {manifest_abs_path}")
+    logger.debug(f"Source manifest path: {root_manifest_abs_path}")
+    
+    # Check if target manifest already exists and is valid
+    is_valid, _ = _validate_manifest(manifest_abs_path)
+    if is_valid:
+        logger.info(f"Valid plugin manifest already exists at {manifest_abs_path}")
         return
     
-    # If old location exists, move it to new location
-    if os.path.exists(root_manifest):
-        print(f"Migrating plugin manifest from {root_manifest} to {data_manifest}")
-        # Ensure data directory exists
-        os.makedirs('data', exist_ok=True)
-        # Move the file
-        shutil.move(root_manifest, data_manifest)
-        print(f"Plugin manifest migration complete")
+    # Check if source manifest exists
+    source_exists = os.path.exists(root_manifest_abs_path)
+    if source_exists:
+        logger.info(f"Found manifest to migrate from {root_manifest_abs_path}")
     else:
-        print("No existing plugin manifest found to migrate")
+        logger.info("No existing plugin manifest found to migrate")
+    
+    # Use the consolidated manifest creation logic which handles migration
+    try:
+        create_default_plugin_manifest()
+        logger.info("Plugin manifest migration/creation completed successfully")
+    except Exception as e:
+        logger.error(f"Plugin manifest migration failed: {e}")
+        raise
 
 def run_migrations():
     """Run all necessary migrations."""
-    print("Running MindRoot migrations...")
-    migrate_plugin_manifest()
-    print("Migrations complete")
+    logger.info("Running MindRoot migrations...")
+    try:
+        migrate_plugin_manifest()
+        logger.info("Migrations completed successfully")
+    except Exception as e:
+        logger.error(f"Migration failed: {e}")
+        # Don't raise here - let the system continue with default manifest
+        logger.warning("Continuing with default manifest due to migration failure")

@@ -16,6 +16,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
 from .migrate import run_migrations
 
+# import for file copy
+from shutil import copyfile
+
 # Load environment variables from .env file at the start
 # Set override=True to make .env variables override existing environment variables
 load_dotenv(override=True)
@@ -71,7 +74,9 @@ async def setup_app_internal(app_):
     await plugins.load(app=app)
     app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory=str(root / "imgs"), follow_symlink=True), name="imgs")
-
+    if os.path.exists(root / "imgs/logo.png"):
+        print(colored("No logo found, copying default logo from coreplugins", "yellow"))
+        copyfile(str(root / "coreplugins/home/static/imgs/logo.png"), str(root / "imgs/logo.png"))
     return app
 
 def is_port_in_use(port):

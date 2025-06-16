@@ -65,6 +65,10 @@
           "enabled": false,
           "source": "core"
       },
+      "subscriptions": {
+        "enabled": false,
+        "source": "core"
+      },
       "startup": {
         "enabled": true,
         "source": "core"

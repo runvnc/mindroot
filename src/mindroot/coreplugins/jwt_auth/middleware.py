@@ -150,6 +150,7 @@ async def middleware(request: Request, call_next):
             return await call_next(request)
         else:
             print('Not a public route: ', request.url.path)
+            print("public routes:", public_routes)
 
         # Check for token in cookies first
         token = request.cookies.get("access_token")

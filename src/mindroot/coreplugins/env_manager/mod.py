@@ -66,7 +66,7 @@ def scan_directory_for_env_vars(directory):
         # Use grep to find os.environ references - much faster than parsing each file
         cmd = [
             'grep', '-r', 
-            '-E', r"os\.environ(\.get\(|\[)", 
+            '-E', r"(os\.environ(\.get\(|\[)|os\.getenv\()", 
             '--include=*.py', 
             '--exclude-dir=venv', 
             '--exclude-dir=env',
@@ -87,9 +87,10 @@ def scan_directory_for_env_vars(directory):
         # Extract variable names using regex
         pattern1 = r"os\.environ\.get\(['\"]([A-Za-z0-9_]+)['\"]"  # os.environ.get('VAR_NAME')
         pattern2 = r"os\.environ\[['\"]([A-Za-z0-9_]+)['\"]\]"    # os.environ['VAR_NAME']
+        pattern3 = r"os\.getenv\(['\"]([A-Za-z0-9_]+)['\"]"      # os.getenv('VAR_NAME')
         
         for line in result.stdout.splitlines():
-            for pattern in [pattern1, pattern2]:
+            for pattern in [pattern1, pattern2, pattern3]:
                 for match in re.finditer(pattern, line):
                     var_name = match.group(1)
                     env_vars.add(var_name)

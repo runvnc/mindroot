@@ -17,10 +17,14 @@ async def startup(app, context):
                     public_routes.add(f"{route.path}{sub_route.path}")
                 else:
                     print(f"Skipping private route: {route.path}{sub_route}")
+                    print(sub_route)
+
         elif hasattr(route, 'endpoint') and hasattr(route.endpoint, '__public_route__'):
             print(f"Found public route: {route.path}")
             public_routes.add(route.path)
         else:
-            print(f"Skipping private route: {route}")
+            print(f"2 Skipping private route: {route}")
+            print(route)
+
 
 

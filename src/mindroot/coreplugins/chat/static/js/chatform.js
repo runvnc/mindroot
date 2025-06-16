@@ -53,7 +53,7 @@ class ChatForm extends BaseEl {
         position: absolute;
         right: 21px; /* Original optimal position */
         margin-right: 5px;
-        bottom: 15px; /* Raised 5px to prevent bottom overlap */
+        bottom: 1.5em; /* Raised 5px to prevent bottom overlap */
         /* background: transparent; */
         background-color: #101020
 
@@ -64,7 +64,7 @@ class ChatForm extends BaseEl {
         position: absolute;
         margin-right: 5px;
         right: 61px; /* Maintains 40px spacing from send button */
-        bottom: 15px; /* Matches send button exactly */
+        bottom: 1.5em; /* Matches send button exactly */
         background: #ff4d4d;
         color: white;
         border: none;

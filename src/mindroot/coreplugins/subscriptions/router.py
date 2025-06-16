@@ -235,7 +235,9 @@ async def api_create_checkout(plan_id: str,
                             provider: str = Query('stripe')):
     """Create checkout session for subscription"""
     try:
+        print("checkout")
         if not request.state.user:
+            print("Unauthorized")
             raise UNAUTHORIZED
             
         username = request.state.user.username
@@ -243,6 +245,7 @@ async def api_create_checkout(plan_id: str,
         # Get plan details
         plan = await get_subscription_plan(plan_id, context=request)
         if not plan:
+            print("could not find plan",plan_id)
             raise NOT_FOUND
         
         # Call provider-specific checkout service
