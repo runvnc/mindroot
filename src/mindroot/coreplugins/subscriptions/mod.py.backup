@@ -266,6 +266,7 @@ async def get_available_features(active_only: bool = True, context=None) -> List
     
     features = await _subscription_manager.storage.get_all_features(active_only)
     return [feature.to_dict() for feature in features]
+
 @service()
 async def create_plan_feature(feature_data: Dict[str, Any], context=None) -> Dict[str, Any]:
     """Create a new plan feature
@@ -548,19 +549,6 @@ async def process_subscription_event(event_data: Dict[str, Any], context=None) -
                 }
             )
             
-            # Notify any plugins that handle subscription creation
-            try:
-                from lib.providers.services import service_manager
-                await service_manager.handle_subscription_created(
-                    user_id=username,
-                    subscription_id=subscription.subscription_id,
-                    plan_id=plan_id,
-                    metadata=metadata
-                )
-                logger.info(f"Notified subscription handlers for {username}")
-            except Exception as e:
-                logger.error(f"Failed to notify subscription handlers: {e}")
-            
             return {
                 'status': 'success',
                 'event_type': event_type,
@@ -570,6 +558,7 @@ async def process_subscription_event(event_data: Dict[str, Any], context=None) -
         else:
             logger.error(f"Plan not found: {plan_id}")
             return {'status': 'error', 'message': f"Plan not found: {plan_id}"}
+    
     elif event_type == 'subscription_renewed':
         # Handle subscription renewal
         provider_subscription_id = normalized_event.get('subscription_id')
