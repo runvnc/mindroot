@@ -59,3 +59,4 @@ async def get_git_version_info(context=None):
         
     except Exception as e:
         return None
+
