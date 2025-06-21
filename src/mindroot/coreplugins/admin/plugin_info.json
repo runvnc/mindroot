@@ -1,0 +1,7 @@
+{
+  "name": "Admin Interface",
+  "version": "1.0.0",
+  "description": "Administrative interface for MindRoot system management",
+  "commands": ["get_git_version_info"],
+  "services": []
+}

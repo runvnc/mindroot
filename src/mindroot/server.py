@@ -71,13 +71,13 @@ async def setup_app_internal(app_):
     app = app_
     
     root = get_project_root()
-    #source_root = Path(__file__).parent
+    source_root = Path(__file__).parent
     await plugins.load(app=app)
     app.mount("/static", StaticFiles(directory=str(root / "static"), follow_symlink=True), name="static")
     app.mount("/imgs", StaticFiles(directory=str(root / "imgs"), follow_symlink=True), name="imgs")
-    #if os.path.exists(root / "imgs/logo.png"):
-    #    print(colored("No logo found, copying default logo from coreplugins", "yellow"))
-    #    copyfile(str(source_root / "coreplugins/home/static/imgs/logo.png"), str(root / "imgs/logo.png"))
+    if not os.path.exists(root / "imgs/logo.png"):
+        print(colored("No logo found, copying default logo from coreplugins", "yellow"))
+        copyfile(str(source_root / "coreplugins/home/static/imgs/logo.png"), str(root / "imgs/logo.png"))
     return app
 
 def is_port_in_use(port):
