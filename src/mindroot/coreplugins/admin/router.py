@@ -8,7 +8,8 @@ from lib.plugins import list_enabled
 from lib.templates import render
 from .plugin_manager import router as plugin_manager_router
 from lib.route_decorators import requires_role
-from lib.providers.commands import get_command
+from .mod import get_git_version_info
+
 
 # Create admin router with role requirement for all routes under it
 router = APIRouter(
@@ -34,7 +35,6 @@ async def get_version_info():
         
         # Try to get fresh git info using the command
         try:
-            get_git_version_info = get_command('get_git_version_info')
             if get_git_version_info:
                 git_info = await get_git_version_info()
                 if git_info:

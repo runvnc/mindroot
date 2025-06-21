@@ -1,9 +1,7 @@
 import os
 import subprocess
 from datetime import datetime
-from lib.providers.commands import command
 
-@command()
 async def get_git_version_info(context=None):
     """Get git commit hash and date of last commit.
     
