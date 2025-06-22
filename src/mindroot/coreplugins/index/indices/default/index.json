@@ -164,7 +164,7 @@
         "swap_face"
       ],
       "dependencies": [],
-      "remote_source": "runvnc/ah_swapface"
+      "github_url": "runvnc/ah_swapface"
     },
     {
       "name": "History",
@@ -186,7 +186,7 @@
         "stream_chat"
       ],
       "dependencies": [],
-      "remote_source": "runvnc/ah_openrouter"
+      "github_url": "runvnc/ah_openrouter"
     },
     {
       "name": "RunPod SD",
@@ -201,7 +201,7 @@
         "select_image_model"
       ],
       "dependencies": [],
-      "remote_source": "runvnc/ah_runpod_sd"
+      "github_url": "runvnc/ah_runpod_sd"
     },
     {
       "name": "Browser Use",
@@ -229,14 +229,14 @@
       ],
 
       "dependencies": [],
-      "remote_source": "runvnc/mr_gemini"
+      "github_url": "runvnc/mr_gemini"
     },
     {
       "name": "Session Data",
       "version": "1.0.0",
       "description": "",
       "source": "github",
-      "remote_source": "runvnc/ah_session_data",
+      "github_url": "runvnc/ah_session_data",
       "commands": [
         "session_data_update",
         "session_data_del",
@@ -252,7 +252,7 @@
       "version": "1.0.0",
       "description": "",
       "source": "github",
-      "remote_source": "runvnc/mr_hud",
+      "github_url": "runvnc/mr_hud",
       "commands": [],
       "services": [],
       "dependencies": [],
