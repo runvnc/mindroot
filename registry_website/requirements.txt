@@ -8,3 +8,5 @@ python-multipart
 bcrypt
 requests
 click
+chromadb
+datetime

@@ -403,6 +403,7 @@ class AgentForm extends BaseEl {
   handleNewAgent() {
     this.agent = {
       name: '',
+      description: '',
       hashver: '',
       commands: [],
       preferred_providers: [],
@@ -1038,6 +1039,7 @@ class AgentForm extends BaseEl {
     // This ensures the DOM structure is present but hidden.
     const agentForRender = this.agent || {
       name: '',
+      description: '',
       persona: '',
       instructions: '',
       technicalInstructions: '',
@@ -1066,6 +1068,13 @@ class AgentForm extends BaseEl {
             <label class="required">Name:</label>
             <input type="text" name="name" 
                    .value=${agentForRender.name || ''} 
+                   @input=${this.handleInputChange}>
+          </div>
+
+          <div class="form-group">
+            <label>Description:</label>
+            <input type="text" name="description" 
+                   .value=${agentForRender.description || ''} 
                    @input=${this.handleInputChange}>
           </div>
 

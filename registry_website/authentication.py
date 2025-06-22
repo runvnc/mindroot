@@ -5,8 +5,9 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from database import SessionLocal, User
+from typing import Optional
 
-SECRET_KEY = "your-secret-key"
+SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -17,36 +18,89 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-def verify_password(plain_password, hashed_password):
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain password against its hash."""
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password):
+def get_password_hash(password: str) -> str:
+    """Generate password hash."""
     return pwd_context.hash(password)
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str, password: str) -> Optional[User]:
+    """Authenticate user with username/email and password."""
     db = SessionLocal()
-    user = db.query(User).filter(User.username == username).first()
-    if not user or not verify_password(password, user.password):
-        return False
-    return user
+    try:
+        # Try to find user by username or email
+        user = db.query(User).filter(
+            (User.username == username) | (User.email == username)
+        ).first()
+        
+        if not user:
+            return None
+            
+        if not verify_password(password, user.password):
+            return None
+            
+        if not user.is_active:
+            return None
+            
+        return user
+    finally:
+        db.close()
 
-def create_access_token(data: dict, expires_delta: timedelta):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Create JWT access token."""
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """Get current user from JWT token."""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
-        db = SessionLocal()
-        user = db.query(User).filter(User.username == username).first()
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
-        return user
+            raise credentials_exception
+        token_data = TokenData(username=username)
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+        raise credentials_exception
+    
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == token_data.username).first()
+        if user is None:
+            raise credentials_exception
+        return user
+    finally:
+        db.close()
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Get current active user."""
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> Optional[User]:
+    """Get current user if token is provided, otherwise return None."""
+    if not token:
+        return None
+    
+    try:
+        return get_current_user(token)
+    except HTTPException:
+        return None

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindRoot Registry</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            margin-top: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        .button:hover {
+            background: #5a6fd8;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        code {
+            background: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        .api-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🧠 MindRoot Registry</div>
+            <div class="tagline">The central hub for MindRoot plugins and agents</div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 For Users</h2>
+            <p>To search and install plugins and agents, use the <strong>Registry tab</strong> in your MindRoot admin interface.</p>
+            <a href="/admin" class="button">Open Admin Interface</a>
+            <p><small>Navigate to <code>/admin</code> in your MindRoot installation and look for the Registry tab.</small></p>
+        </div>
+
+        <div class="section">
+            <h2>👩‍💻 For Developers</h2>
+            <p>Publish your plugins and agents to share with the MindRoot community.</p>
+            <a href="/docs" class="button">API Documentation</a>
+            <a href="/register" class="button secondary">Register Account</a>
+            
+            <h3>Quick Start</h3>
+            <div class="api-example">
+# Register and get token
+curl -X POST "/register" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"your_username","email":"you@example.com","password":"your_password"}'
+
+# Login to get access token
+curl -X POST "/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=your_username&password=your_password"
+
+# Publish a plugin
+curl -X POST "/publish" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"My Plugin","description":"A great plugin","category":"plugin",...}'
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Registry Statistics</h2>
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-plugins">-</div>
+                    <div class="stat-label">Plugins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-agents">-</div>
+                    <div class="stat-label">Agents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-users">-</div>
+                    <div class="stat-label">Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-installs">-</div>
+                    <div class="stat-label">Installs</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Browse Registry</h2>
+            <p>Explore available plugins and agents:</p>
+            <a href="/search?category=plugin" class="button">Browse Plugins</a>
+            <a href="/search?category=agent" class="button">Browse Agents</a>
+        </div>
+
+        <div class="section">
+            <h2>📚 Resources</h2>
+            <ul>
+                <li><a href="https://github.com/runvnc/mindroot">MindRoot GitHub Repository</a></li>
+                <li><a href="/docs">API Documentation</a></li>
+                <li><a href="#">Plugin Development Guide</a></li>
+                <li><a href="#">Agent Development Guide</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Load registry statistics
+        fetch('/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-plugins').textContent = data.total_plugins || 0;
+                document.getElementById('total-agents').textContent = data.total_agents || 0;
+                document.getElementById('total-users').textContent = data.total_users || 0;
+                document.getElementById('total-installs').textContent = data.total_installs || 0;
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+            });
+    </script>
+</body>
+</html>
