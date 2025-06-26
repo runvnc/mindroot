@@ -9,4 +9,5 @@ bcrypt
 requests
 click
 chromadb
-datetime
+jinja2
+email-validator

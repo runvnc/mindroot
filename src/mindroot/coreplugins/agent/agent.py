@@ -272,7 +272,7 @@ class Agent:
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result + "\n\n" + started_with})
                 return results, full_cmds 
 
-            if buffer[0] == '{':
+            if len(buffer) > 0 and buffer[0] == '{':
                 buffer = "[" + buffer
 
             # happened with Qwen 3 for some reason

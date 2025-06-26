@@ -1034,6 +1034,61 @@ class AgentForm extends BaseEl {
     `;
   }
 
+  async handleExportAgent() {
+    if (!this.agent?.name) {
+      showNotification('error', 'No agent selected for export');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/agents/local/${this.agent.name}/export`);
+      if (!response.ok) throw new Error('Failed to export agent');
+      
+      // Create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${this.agent.name}_agent.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      showNotification('success', `Agent ${this.agent.name} exported successfully`);
+    } catch (error) {
+      showNotification('error', `Error exporting agent: ${error.message}`);
+    }
+  }
+
+  async handleImportAgent(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.name.endsWith('.zip')) {
+      showNotification('error', 'Please select a zip file');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/agents/local/import-zip', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.detail || 'Import failed');
+      
+      showNotification('success', result.message);
+      await this.fetchAgents(); // Refresh agent list
+    } catch (error) {
+      showNotification('error', `Error importing agent: ${error.message}`);
+    }
+  }
+
   _render() {
     // Default structure for rendering when this.agent is null
     // This ensures the DOM structure is present but hidden.
@@ -1061,6 +1116,18 @@ class AgentForm extends BaseEl {
         <button class="btn btn-secondary" @click=${this.handleNewAgent}>
           New Agent
         </button>
+        <button class="btn btn-secondary" @click=${this.handleExportAgent} ?disabled=${!this.agent}>
+          Export Agent
+        </button>
+        <label class="btn btn-secondary" style="cursor: pointer; display: inline-block;">
+          Import Agent
+          <input 
+            type="file" 
+            accept=".zip" 
+            @change=${this.handleImportAgent}
+            style="display: none;"
+          >
+        </label>
       </div>
 
       <form class="agent-form ${!this.agent ? 'form-hidden-when-no-agent' : ''}" @submit=${this.handleSubmit}>

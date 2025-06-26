@@ -13,10 +13,14 @@ class RegistryManagerBase extends BaseEl {
     loading: { type: Boolean },
     error: { type: String },
     stats: { type: Object },
+    publishSuccess: { type: String },
     showPublishForm: { type: Boolean },
     localPlugins: { type: Array },
     localAgents: { type: Array },
-    activeTab: { type: String }
+    agentOwnership: { type: Object },
+    toasts: { type: Array },
+    activeTab: { type: String },
+    showRegisterForm: { type: Boolean }
   };
 
   static styles = css`
@@ -43,12 +47,43 @@ class RegistryManagerBase extends BaseEl {
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .section h3 {
+    .section h3, .section h4 {
       margin-top: 0;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    .settings-section {
+      margin-bottom: 1rem;
+    }
+
+    .settings-section summary {
+      cursor: pointer;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    .settings-section summary:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .help-text {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 0.5rem;
+    }
+
+    .registry-url-display {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 0.5rem;
     }
 
     .login-form, .search-form, .publish-form {
@@ -62,6 +97,12 @@ class RegistryManagerBase extends BaseEl {
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .form-row label {
+      color: #fff;
+      min-width: 100px;
     }
 
     input, select, textarea {
@@ -71,6 +112,7 @@ class RegistryManagerBase extends BaseEl {
       padding: 0.5rem;
       border-radius: 4px;
       flex: 1;
+      min-width: 200px;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -86,6 +128,7 @@ class RegistryManagerBase extends BaseEl {
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.2s;
+      white-space: nowrap;
     }
 
     button:hover {
@@ -200,6 +243,46 @@ class RegistryManagerBase extends BaseEl {
       font-size: 0.9rem;
     }
 
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: rgba(0, 0, 0, 0.9);
+      color: white !important;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      word-wrap: break-word;
+      animation: slideIn 0.3s ease-out;
+      border-left: 4px solid #4a9eff;
+    }
+
+    .toast.success {
+      border-left-color: #28a745;
+      background: rgba(40, 167, 69, 0.9);
+      color: white !important;
+    }
+
+    .toast.error {
+      border-left-color: #dc3545;
+      background: rgba(220, 53, 69, 0.9);
+      color: white !important;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
     .error {
       background: rgba(220, 53, 69, 0.2);
       color: #dc3545;
@@ -230,6 +313,8 @@ class RegistryManagerBase extends BaseEl {
       padding: 0.5rem 1rem;
       border-radius: 4px;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .tabs {
@@ -254,13 +339,18 @@ class RegistryManagerBase extends BaseEl {
     .tab:hover {
       background: rgba(74, 158, 255, 0.3);
     }
+
+    .auth-toggle {
+      text-align: center;
+      margin-top: 1rem;
+    }
   `;
 
   constructor() {
     super();
     this.isLoggedIn = false;
     this.searchResults = [];
-    this.registryUrl = 'http://localhost:8000';
+    this.registryUrl = this.loadRegistryUrl();
     this.currentUser = null;
     this.authToken = localStorage.getItem('registry_token');
     this.searchQuery = '';
@@ -268,14 +358,121 @@ class RegistryManagerBase extends BaseEl {
     this.loading = false;
     this.error = '';
     this.stats = {};
+    this.publishSuccess = '';
+    this.toasts = [];
     this.showPublishForm = false;
     this.localPlugins = [];
     this.localAgents = [];
+    this.agentOwnership = null;
     this.activeTab = 'search';
+    this.showRegisterForm = false;
     
     this.checkAuthStatus();
     this.loadStats();
     this.loadLocalContent();
+  }
+
+  loadRegistryUrl() {
+    return localStorage.getItem('registry_url') || 
+           (typeof window !== 'undefined' && window.MR_REGISTRY_URL) || 
+           'http://localhost:8000';
+  }
+
+  updateRegistryUrl(newUrl) {
+    this.registryUrl = newUrl;
+    localStorage.setItem('registry_url', newUrl);
+    this.logout();
+    this.loadStats();
+    this.requestUpdate();
+  }
+
+  async testConnection() {
+    try {
+      const response = await fetch(`${this.registryUrl}/stats`);
+      if (response.ok) {
+        this.error = '';
+        await this.loadStats();
+        const originalError = this.error;
+        this.error = 'Connection successful!';
+        this.requestUpdate();
+        setTimeout(() => {
+          this.error = originalError;
+          this.requestUpdate();
+        }, 2000);
+      } else {
+        this.error = `Connection failed: ${response.status}`;
+      }
+    } catch (error) {
+      this.error = `Connection failed: ${error.message}`;
+    }
+    this.requestUpdate();
+  }
+
+  async register(username, email, password) {
+    this.loading = true;
+    
+    try {
+      const response = await fetch(`${this.registryUrl}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password: password
+        })
+      });
+      
+      if (response.ok) {
+        this.showToast('Registration successful! You can now log in.', 'success');
+        this.showRegisterForm = false;
+      } else {
+        const errorData = await response.json();
+        this.showToast(errorData.detail || 'Registration failed', 'error');
+      }
+    } catch (error) {
+      this.showToast('Network error: ' + error.message, 'error');
+    }
+    
+    this.loading = false;
+    this.requestUpdate();
+  }
+
+  showToast(message, type = 'info', duration = 5000) {
+    const toast = {
+      id: Date.now() + Math.random(),
+      message,
+      type,
+      duration
+    };
+    
+    this.toasts = [...this.toasts, toast];
+    this.requestUpdate();
+    
+    // Auto-remove toast after duration
+    setTimeout(() => {
+      this.removeToast(toast.id);
+    }, duration);
+  }
+
+  removeToast(toastId) {
+    this.toasts = this.toasts.filter(toast => toast.id !== toastId);
+    this.requestUpdate();
+  }
+
+  renderToasts() {
+    if (this.toasts.length === 0) return '';
+    
+    return html`
+      <div class="toast-container">
+        ${this.toasts.map(toast => html`
+          <div class="toast ${toast.type}" @click=${() => this.removeToast(toast.id)}>
+            ${toast.message}
+          </div>
+        `)}
+      </div>
+    `;
   }
 }
 

@@ -5,6 +5,7 @@ class RegistryManager extends RegistryManagerBase {
   async checkAuthStatus() {
     if (this.authToken) {
       try {
+        // First check if we can get user info
         const response = await fetch(`${this.registryUrl}/stats`, {
           headers: {
             'Authorization': `Bearer ${this.authToken}`
@@ -12,6 +13,20 @@ class RegistryManager extends RegistryManagerBase {
         });
         
         if (response.ok) {
+          // Try to get actual user info
+          try {
+            const userResponse = await fetch(`${this.registryUrl}/me`, {
+              headers: {
+                'Authorization': `Bearer ${this.authToken}`
+              }
+            });
+            if (userResponse.ok) {
+              this.currentUser = await userResponse.json();
+            }
+          } catch (e) {
+            // If /me endpoint doesn't exist, extract from token or use placeholder
+            this.currentUser = { username: 'User' };
+          }
           this.isLoggedIn = true;
         } else {
           this.logout();
@@ -36,15 +51,23 @@ class RegistryManager extends RegistryManagerBase {
 
   async loadLocalContent() {
     try {
+      // Load plugins
       const pluginsResponse = await fetch('/admin/plugin-manager/get-all-plugins');
       if (pluginsResponse.ok) {
         const pluginsData = await pluginsResponse.json();
         this.localPlugins = pluginsData.data || [];
       }
 
-      const agentsResponse = await fetch('/admin/agents/local');
+      const agentsResponse = await fetch('/agents/local');
       if (agentsResponse.ok) {
-        this.localAgents = await agentsResponse.json();
+        const agentsData = await agentsResponse.json();
+        this.localAgents = agentsData;
+      }
+
+      // Load agent ownership information
+      const ownershipResponse = await fetch('/agents/ownership-info');
+      if (ownershipResponse.ok) {
+        this.agentOwnership = await ownershipResponse.json();
       }
     } catch (error) {
       console.error('Error loading local content:', error);
@@ -56,7 +79,7 @@ class RegistryManager extends RegistryManagerBase {
     const password = this.shadowRoot.getElementById('password').value;
     
     if (!username || !password) {
-      this.error = 'Please enter username and password';
+      this.showToast('Please enter username and password', 'error');
       return;
     }
     
@@ -82,16 +105,40 @@ class RegistryManager extends RegistryManagerBase {
         this.authToken = data.access_token;
         localStorage.setItem('registry_token', this.authToken);
         this.isLoggedIn = true;
-        this.currentUser = { username };
+        
+        // Get actual user info after login
+        try {
+          await this.checkAuthStatus();
+        } catch (e) {
+          // Fallback if checkAuthStatus fails
+          this.currentUser = { username };
+        }
       } else {
         const errorData = await response.json();
-        this.error = errorData.detail || 'Login failed';
+        this.showToast(errorData.detail || 'Login failed', 'error');
       }
     } catch (error) {
-      this.error = 'Network error: ' + error.message;
+      this.showToast('Network error: ' + error.message, 'error');
     }
     
     this.loading = false;
+  }
+
+  async handleRegister() {
+    const username = this.shadowRoot.getElementById('reg-username').value;
+    const email = this.shadowRoot.getElementById('reg-email').value;
+    const password = this.shadowRoot.getElementById('reg-password').value;
+    
+    if (!username || !email || !password) {
+      this.showToast('Please fill in all registration fields', 'error');
+      return;
+    }
+    
+    await this.register(username, email, password);
+  }
+
+  toggleRegisterForm() {
+    this.showRegisterForm = !this.showRegisterForm;
   }
 
   logout() {
@@ -103,7 +150,6 @@ class RegistryManager extends RegistryManagerBase {
 
   async search(query = this.searchQuery, category = this.selectedCategory) {
     this.loading = true;
-    this.error = '';
     
     try {
       const params = new URLSearchParams({
@@ -122,10 +168,10 @@ class RegistryManager extends RegistryManagerBase {
         const data = await response.json();
         this.searchResults = data.results || [];
       } else {
-        this.error = 'Search failed';
+        this.showToast('Search failed', 'error');
       }
     } catch (error) {
-      this.error = 'Network error: ' + error.message;
+      this.showToast('Network error: ' + error.message, 'error');
     }
     
     this.loading = false;
@@ -154,7 +200,7 @@ class RegistryManager extends RegistryManagerBase {
       await this.loadLocalContent();
       
     } catch (error) {
-      this.error = 'Installation failed: ' + error.message;
+      this.showToast('Installation failed: ' + error.message, 'error');
     }
     
     this.loading = false;
@@ -182,12 +228,29 @@ class RegistryManager extends RegistryManagerBase {
 
   async installAgent(item) {
     const agentData = {
+      // Start with the agent data from registry
       ...item.data,
       name: item.title,
-      description: item.description
+      description: item.description,
+      // Preserve ownership information from registry
+      registry_owner: item.owner || item.creator,
+      registry_id: item.id,
+      registry_version: item.version,
+      installed_from_registry: true,
+      installed_at: new Date().toISOString()
     };
     
-    const response = await fetch('/admin/agents/local', {
+    // Handle persona field - if it's an object, ensure it has a name
+    // If it's a string, leave it as is
+    if (agentData.persona && typeof agentData.persona === 'object' && !agentData.persona.name) {
+      // If persona is an object but doesn't have a name, use the agent name as persona name
+      agentData.persona.name = agentData.name + '_persona';
+    } else if (!agentData.persona) {
+      // If no persona specified, use agent name
+      agentData.persona = agentData.name;
+    }
+    
+    const response = await fetch('/agents/local', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -196,13 +259,23 @@ class RegistryManager extends RegistryManagerBase {
     });
     
     if (!response.ok) {
-      throw new Error('Agent installation failed');
+      let errorMessage = `Agent installation failed: ${response.status}`;
+      try {
+        const errorData = await response.text();
+        if (errorData) {
+          errorMessage += ` - ${errorData}`;
+        }
+      } catch (e) {
+        // If we can't read the error response, just use the status
+      }
+      throw new Error(errorMessage);
     }
   }
 
   _render() {
     return html`
       <div class="registry-manager">
+        ${this.renderToasts()}
         ${this.renderHeader()}
         ${this.renderTabs()}
         ${this.renderContent()}
@@ -220,15 +293,38 @@ class RegistryManager extends RegistryManagerBase {
       `;
     } else {
       return html`
-        <div class="section">
-          <h3>Registry Login</h3>
-          <div class="login-form">
-            <input type="text" placeholder="Username or Email" id="username">
-            <input type="password" placeholder="Password" id="password">
-            <button class="primary" @click=${this.handleLogin}>Login</button>
-            ${this.error ? html`<div class="error">${this.error}</div>` : ''}
+        ${this.showRegisterForm ? html`
+          <div class="section">
+            <h3>Create Account</h3>
+            <div class="login-form">
+              <input type="text" placeholder="Username" id="reg-username">
+              <input type="email" placeholder="Email" id="reg-email">
+              <input type="password" placeholder="Password" id="reg-password">
+              <button class="primary" @click=${this.handleRegister} ?disabled=${this.loading}>
+                ${this.loading ? 'Creating Account...' : 'Create Account'}
+              </button>
+              ${this.error ? html`<div class="error">${this.error}</div>` : ''}
+            </div>
+            <div class="auth-toggle">
+              <button @click=${this.toggleRegisterForm}>Already have an account? Login</button>
+            </div>
           </div>
-        </div>
+        ` : html`
+          <div class="section">
+            <h3>Registry Login</h3>
+            <div class="login-form">
+              <input type="text" placeholder="Username or Email" id="username">
+              <input type="password" placeholder="Password" id="password">
+              <button class="primary" @click=${this.handleLogin} ?disabled=${this.loading}>
+                ${this.loading ? 'Logging in...' : 'Login'}
+              </button>
+              ${this.error ? html`<div class="error">${this.error}</div>` : ''}
+            </div>
+            <div class="auth-toggle">
+              <button @click=${this.toggleRegisterForm}>Don't have an account? Register</button>
+            </div>
+          </div>
+        `}
       `;
     }
   }
@@ -242,6 +338,8 @@ class RegistryManager extends RegistryManagerBase {
              @click=${() => this.activeTab = 'publish'}>Publish</div>
         <div class="tab ${this.activeTab === 'stats' ? 'active' : ''}" 
              @click=${() => this.activeTab = 'stats'}>Stats</div>
+        <div class="tab ${this.activeTab === 'settings' ? 'active' : ''}" 
+             @click=${() => this.activeTab = 'settings'}>Settings</div>
       </div>
     `;
   }
@@ -254,6 +352,8 @@ class RegistryManager extends RegistryManagerBase {
         return this.renderPublish();
       case 'stats':
         return this.renderStats();
+      case 'settings':
+        return this.renderSettings();
       default:
         return this.renderSearch();
     }
@@ -327,26 +427,91 @@ class RegistryManager extends RegistryManagerBase {
     return html`
       <div class="section">
         <h3>Publish to Registry</h3>
-        <p>Select a local plugin or agent to publish:</p>
+        <div class="form-row">
+          <button @click=${this.refreshOwnershipCache} ?disabled=${this.loading}>
+            Refresh Ownership Info
+          </button>
+          <span class="help-text">
+            Last scanned: ${this.agentOwnership?.scanned_at ? 
+              new Date(this.agentOwnership.scanned_at).toLocaleString() : 'Never'}
+          </span>
+        </div>
+        <p>Select a local plugin or agent to publish to the registry:</p>
         
-        <h4>Local Plugins</h4>
-        ${this.localPlugins.map(plugin => html`
-          <div class="result-item">
-            <h5>${plugin.name}</h5>
-            <p>${plugin.description || 'No description'}</p>
-            <button class="primary" @click=${() => this.publishItem(plugin, 'plugin')}>Publish Plugin</button>
-          </div>
-        `)}
+        ${this.loading ? html`<div class="loading">Publishing...</div>` : ''}
+        ${this.publishSuccess ? html`<div class="success">${this.publishSuccess}</div>` : ''}
+        ${this.error ? html`<div class="${this.error.includes('Successfully') ? 'success' : 'error'}">${this.error}</div>` : ''}
         
-        <h4>Local Agents</h4>
-        ${this.localAgents.map(agent => html`
-          <div class="result-item">
-            <h5>${agent.name}</h5>
-            <button class="primary" @click=${() => this.publishItem(agent, 'agent')}>Publish Agent</button>
-          </div>
-        `)}
+        <h4>Local Plugins (${this.localPlugins.length})</h4>
+        ${this.localPlugins.length === 0 ? html`
+          <p class="help-text">No local plugins found. Install some plugins first to publish them.</p>
+        ` : html`
+          ${this.localPlugins.map(plugin => html`
+            <div class="result-item">
+              <div class="result-header">
+                <h5 class="result-title">${plugin.name}</h5>
+                <span class="result-version">v${plugin.version || '1.0.0'}</span>
+              </div>
+              <p class="result-description">${plugin.description || 'No description available'}</p>
+              <div class="result-meta">
+                <span>Commands: ${plugin.commands?.length || 0}</span>
+                <span>Services: ${plugin.services?.length || 0}</span>
+              </div>
+              <div class="result-actions">
+                <button class="primary" @click=${() => this.publishItem(plugin, 'plugin')} ?disabled=${this.loading}>Publish Plugin</button>
+              </div>
+            </div>
+          `)}
+        `}
+        
+        <h4>Local Agents (${this.localAgents.length})</h4>
+        ${this.localAgents.length === 0 ? html`
+          <p class="help-text">No local agents found. Create some agents first to publish them.</p>
+        ` : html`
+          ${this.localAgents.map(agent => {
+            // Check if this agent has external ownership
+            const agentKey = `local/${agent.name}`;
+            const ownershipInfo = this.agentOwnership?.agents?.[agentKey];
+            const hasExternalOwner = ownershipInfo?.has_external_owner || false;
+            const canPublish = !hasExternalOwner;
+            const ownerName = ownershipInfo?.creator || ownershipInfo?.owner || ownershipInfo?.registry_owner || ownershipInfo?.created_by;
+            
+            return html`
+            <div class="result-item">
+              <h5 class="result-title">${agent.name}</h5>
+              <p class="result-description">${agent.description || 'No description available'}</p>
+              ${hasExternalOwner ? html`
+                <p class="help-text" style="color: #dc3545;">Cannot publish: Agent created by ${ownerName || 'another user'}</p>
+              ` : ''}
+              <div class="result-actions">
+                <button class="primary" 
+                        @click=${() => this.publishItem(agent, 'agent')} 
+                        ?disabled=${this.loading || !canPublish}>
+                  Publish Agent
+                </button>
+              </div>
+            </div>
+            `;
+          })}
+        `}
       </div>
     `;
+  }
+
+  async refreshOwnershipCache() {
+    this.loading = true;
+    try {
+      const response = await fetch('/agents/refresh-ownership-cache', {
+        method: 'POST'
+      });
+      if (response.ok) {
+        const result = await response.json();
+        this.agentOwnership = result.data;
+      }
+    } catch (error) {
+      console.error('Error refreshing ownership cache:', error);
+    }
+    this.loading = false;
   }
 
   renderStats() {
@@ -375,10 +540,123 @@ class RegistryManager extends RegistryManagerBase {
     `;
   }
 
+  renderSettings() {
+    return html`
+      <div class="section">
+        <h3>Registry Settings</h3>
+        <div class="registry-url-display">
+          Current registry: ${this.registryUrl}
+        </div>
+        <div class="form-row">
+          <label>Registry URL:</label>
+          <input type="url" 
+                 placeholder="http://localhost:8000" 
+                 .value=${this.registryUrl}
+                 @input=${(e) => this.registryUrl = e.target.value}>
+          <button @click=${() => this.updateRegistryUrl(this.registryUrl)}>Update</button>
+          <button @click=${this.testConnection}>Test Connection</button>
+        </div>
+        ${this.error ? html`<div class="error">${this.error}</div>` : ''}
+        <div class="help-text">
+          Configure the MindRoot Registry URL. Default is http://localhost:8000
+        </div>
+      </div>
+    `;
+  }
+
   async publishItem(item, type) {
-    // Implementation for publishing items to registry
-    console.log('Publishing', type, item);
-    // This would involve creating the proper payload and sending to registry
+    if (!this.isLoggedIn) {
+      this.error = 'Please log in to publish items';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+    
+    try {
+      let publishData;
+      
+      if (type === 'plugin') {
+        publishData = {
+          title: item.name,
+          description: item.description || `${item.name} plugin`,
+          category: 'plugin',
+          content_type: 'mindroot_plugin',
+          version: item.version || '1.0.0',
+          data: {
+            plugin_info: item,
+            installation: {
+              type: item.source || 'pypi',
+              source_path: item.source_path || item.name
+            }
+          },
+          commands: item.commands || [],
+          services: item.services || [],
+          tags: item.tags || ['plugin'],
+          dependencies: item.dependencies || [],
+          github_url: item.github_url,
+          pypi_module: item.pypi_module || item.name
+        };
+      } else if (type === 'agent') {
+        publishData = {
+          title: item.name,
+          description: item.description || `${item.name} agent`,
+          category: 'agent',
+          content_type: 'mindroot_agent',
+          version: item.version || '1.0.0',
+          data: {
+            agent_config: item,
+            persona: item.persona || {},
+            instructions: item.instructions || '',
+            model: item.model || 'default'
+          },
+          tags: item.tags || ['agent'],
+          dependencies: item.dependencies || []
+        };
+      } else {
+        throw new Error('Unknown item type');
+      }
+      
+      const response = await fetch(`${this.registryUrl}/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.authToken}`
+        },
+        body: JSON.stringify(publishData)
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        this.showToast(`Successfully published ${publishData.title}!`, 'success');
+      } else {
+        const errorData = await response.json();
+        this.showToast(errorData.detail || 'Publishing failed', 'error');
+      }
+    } catch (error) {
+      this.showToast('Publishing failed: ' + error.message, 'error');
+    }
+    
+    this.loading = false;
+    this.requestUpdate();
+  }
+
+  showSuccessMessage(message) {
+    // Create a temporary success state
+    this.error = '';
+    this.requestUpdate();
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      this.publishSuccess = '';
+      this.requestUpdate();
+    }, 5000);
+  }
+
+  showErrorMessage(message) {
+    this.error = message;
+    this.publishSuccess = '';
+    this.requestUpdate();
   }
 }
 

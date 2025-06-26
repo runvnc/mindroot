@@ -10,6 +10,10 @@ import sys
 import subprocess
 import sqlite3
 from pathlib import Path
+import warnings
+
+# Suppress bcrypt warnings
+warnings.filterwarnings("ignore", message=".*bcrypt.*")
 
 def check_dependencies():
     """Check if required dependencies are installed."""
@@ -23,6 +27,27 @@ def check_dependencies():
     except ImportError as e:
         print(f"✗ Missing dependency: {e}")
         print("Please run: pip install -r requirements.txt")
+        return False
+
+def create_directories():
+    """Create required directories."""
+    try:
+        # Create static directory
+        static_dir = Path("static")
+        static_dir.mkdir(exist_ok=True)
+        
+        # Create templates directory
+        templates_dir = Path("templates")
+        templates_dir.mkdir(exist_ok=True)
+        
+        # Create chroma db directory
+        chroma_dir = Path("registry_chroma_db")
+        chroma_dir.mkdir(exist_ok=True)
+        
+        print("✓ Required directories created")
+        return True
+    except Exception as e:
+        print(f"✗ Directory creation failed: {e}")
         return False
 
 def initialize_database():
@@ -103,6 +128,10 @@ def main():
     
     # Check dependencies
     if not check_dependencies():
+        sys.exit(1)
+    
+    # Create required directories
+    if not create_directories():
         sys.exit(1)
     
     # Initialize database

@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash
 from database import get_db, User, Content, Rating, InstallLog
@@ -12,6 +13,8 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 import json
 import uvicorn
+import os
+from pathlib import Path
 
 app = FastAPI(
     title="MindRoot Registry",
@@ -19,9 +22,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Mount static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your actual origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Create static and templates directories if they don't exist
+static_dir = Path("static")
+static_dir.mkdir(exist_ok=True)
+
+templates_dir = Path("templates")
+templates_dir.mkdir(exist_ok=True)
+
+# Mount static files and templates only if directories exist
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+if templates_dir.exists():
+    templates = Jinja2Templates(directory="templates")
+else:
+    templates = None
 
 # Pydantic models
 class UserCreate(BaseModel):
@@ -39,8 +63,8 @@ class UserResponse(BaseModel):
 class ContentCreate(BaseModel):
     title: str
     description: str
-    category: str  # 'plugin' or 'agent'
-    content_type: str  # 'mindroot_plugin' or 'mindroot_agent'
+    category: str
+    content_type: str
     data: dict
     version: str
     github_url: Optional[str] = None
@@ -74,7 +98,7 @@ class ContentResponse(BaseModel):
 
 class RatingCreate(BaseModel):
     content_id: int
-    rating: int  # 1-5
+    rating: int
     review: Optional[str] = None
 
 class SearchResponse(BaseModel):
@@ -82,17 +106,39 @@ class SearchResponse(BaseModel):
     total: int
     semantic_results: Optional[List[dict]] = None
 
-# Root endpoint
+# Root endpoint with fallback HTML
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    """Simple landing page for the registry."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    if templates:
+        return templates.TemplateResponse("index.html", {"request": request})
+    else:
+        return HTMLResponse('''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MindRoot Registry</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+        h1 { color: #333; }
+        .api-link { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 MindRoot Registry</h1>
+        <p>Welcome to the MindRoot Plugin and Agent Registry</p>
+        <p><a href="/docs" class="api-link">View API Documentation</a></p>
+        <h2>Quick Stats</h2>
+        <p>Visit <a href="/stats">/stats</a> for registry statistics</p>
+    </div>
+</body>
+</html>
+        ''')
 
 # Authentication endpoints
 @app.post("/register", response_model=UserResponse)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
-    """Register a new user."""
-    # Check if user already exists
     existing_user = db.query(User).filter(
         (User.username == user_data.username) | (User.email == user_data.email)
     ).first()
@@ -103,7 +149,6 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Username or email already registered"
         )
     
-    # Create new user
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
         username=user_data.username,
@@ -119,7 +164,6 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Login and get access token."""
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -133,6 +177,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@app.get("/me", response_model=UserResponse)
+def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current authenticated user information"""
+    return current_user
+
 # Content management endpoints
 @app.post("/publish", response_model=ContentResponse)
 def publish_content(
@@ -140,8 +189,6 @@ def publish_content(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Publish a new plugin or agent to the registry."""
-    # Check if content with same title and version already exists
     existing_content = db.query(Content).filter(
         Content.title == content.title,
         Content.version == content.version
@@ -154,7 +201,6 @@ def publish_content(
                 detail="You are not allowed to update this package."
             )
         
-        # Update existing content
         for field, value in content.dict().items():
             setattr(existing_content, field, value)
         existing_content.updated_at = datetime.utcnow()
@@ -162,7 +208,6 @@ def publish_content(
         db.commit()
         db.refresh(existing_content)
         
-        # Update vector store
         vector_store.update_item(
             str(existing_content.id),
             existing_content.title,
@@ -170,9 +215,9 @@ def publish_content(
             {
                 'category': existing_content.category,
                 'content_type': existing_content.content_type,
-                'tags': existing_content.tags or [],
-                'commands': existing_content.commands or [],
-                'services': existing_content.services or [],
+                'tags': ','.join(existing_content.tags) if isinstance(existing_content.tags, list) else (existing_content.tags or ''),
+                'commands': ','.join(existing_content.commands) if isinstance(existing_content.commands, list) else (existing_content.commands or ''),
+                'services': ','.join(existing_content.services) if isinstance(existing_content.services, list) else (existing_content.services or ''),
                 'owner': current_user.username,
                 'version': existing_content.version
             }
@@ -180,7 +225,6 @@ def publish_content(
         
         return existing_content
     else:
-        # Create new content
         db_content = Content(
             **content.dict(),
             owner_id=current_user.id
@@ -190,7 +234,6 @@ def publish_content(
         db.commit()
         db.refresh(db_content)
         
-        # Add to vector store
         vector_store.add_item(
             str(db_content.id),
             db_content.title,
@@ -198,9 +241,9 @@ def publish_content(
             {
                 'category': db_content.category,
                 'content_type': db_content.content_type,
-                'tags': db_content.tags or [],
-                'commands': db_content.commands or [],
-                'services': db_content.services or [],
+                'tags': ','.join(db_content.tags) if isinstance(db_content.tags, list) else (db_content.tags or ''),
+                'commands': ','.join(db_content.commands) if isinstance(db_content.commands, list) else (db_content.commands or ''),
+                'services': ','.join(db_content.services) if isinstance(db_content.services, list) else (db_content.services or ''),
                 'owner': current_user.username,
                 'version': db_content.version
             }
@@ -216,14 +259,11 @@ def search_content(
     semantic: bool = True,
     db: Session = Depends(get_db)
 ):
-    """Search for content using both database and semantic search."""
-    # Database search
     db_query = db.query(Content)
     
     if category:
         db_query = db_query.filter(Content.category == category)
     
-    # Text search in title and description
     db_query = db_query.filter(
         (Content.title.contains(query)) |
         (Content.description.contains(query))
@@ -231,11 +271,10 @@ def search_content(
     
     db_results = db_query.limit(limit).all()
     
-    # Semantic search if enabled
     semantic_results = None
     if semantic:
         filter_dict = {"category": category} if category else None
-        semantic_results = vector_store.search(query, n_results=limit, filter_dict=filter_dict)
+        semantic_results = vector_store.search(query, n_results=limit, filter_dict=filter_dict)['results']
     
     return {
         "results": db_results,
@@ -245,7 +284,6 @@ def search_content(
 
 @app.get("/content/{content_id}", response_model=ContentResponse)
 def get_content(content_id: int, db: Session = Depends(get_db)):
-    """Get specific content by ID."""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
@@ -255,75 +293,27 @@ def get_content(content_id: int, db: Session = Depends(get_db)):
 def track_install(
     content_id: int,
     request: Request,
-    db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
-    """Track an installation of content."""
     content = db.query(Content).filter(Content.id == content_id).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
     
-    # Create install log
     install_log = InstallLog(
         content_id=content_id,
-        user_id=current_user.id if current_user else None,
-        ip_address=request.client.host,
+        user_id=None,
+        ip_address=request.client.host if request.client else "unknown",
         user_agent=request.headers.get("user-agent", "")
     )
     
     db.add(install_log)
-    
-    # Increment install count
     content.install_count += 1
-    
     db.commit()
     
     return {"success": True, "message": "Install tracked"}
 
-@app.post("/rate")
-def rate_content(
-    rating_data: RatingCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Rate content."""
-    if rating_data.rating < 1 or rating_data.rating > 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
-    
-    # Check if user already rated this content
-    existing_rating = db.query(Rating).filter(
-        Rating.content_id == rating_data.content_id,
-        Rating.user_id == current_user.id
-    ).first()
-    
-    if existing_rating:
-        # Update existing rating
-        existing_rating.rating = rating_data.rating
-        existing_rating.review = rating_data.review
-    else:
-        # Create new rating
-        new_rating = Rating(
-            content_id=rating_data.content_id,
-            user_id=current_user.id,
-            rating=rating_data.rating,
-            review=rating_data.review
-        )
-        db.add(new_rating)
-    
-    # Update content rating statistics
-    content = db.query(Content).filter(Content.id == rating_data.content_id).first()
-    if content:
-        ratings = db.query(Rating).filter(Rating.content_id == rating_data.content_id).all()
-        content.rating = sum(r.rating for r in ratings) / len(ratings)
-        content.rating_count = len(ratings)
-    
-    db.commit()
-    
-    return {"success": True, "message": "Rating submitted"}
-
 @app.get("/stats")
 def get_registry_stats(db: Session = Depends(get_db)):
-    """Get registry statistics."""
     total_content = db.query(Content).count()
     total_plugins = db.query(Content).filter(Content.category == "plugin").count()
     total_agents = db.query(Content).filter(Content.category == "agent").count()
@@ -340,43 +330,6 @@ def get_registry_stats(db: Session = Depends(get_db)):
         "total_installs": total_installs,
         "vector_store": vector_stats
     }
-
-# Admin endpoints
-@app.post("/admin/rebuild-index")
-def rebuild_vector_index(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Rebuild the vector search index (admin only)."""
-    # Simple admin check - in production, implement proper role-based access
-    if current_user.username != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    # Get all content
-    all_content = db.query(Content).all()
-    
-    # Prepare items for indexing
-    items = []
-    for content in all_content:
-        items.append({
-            'id': str(content.id),
-            'title': content.title,
-            'description': content.description,
-            'metadata': {
-                'category': content.category,
-                'content_type': content.content_type,
-                'tags': content.tags or [],
-                'commands': content.commands or [],
-                'services': content.services or [],
-                'owner': content.owner.username,
-                'version': content.version
-            }
-        })
-    
-    # Rebuild index
-    vector_store.rebuild_index(items)
-    
-    return {"success": True, "message": f"Index rebuilt with {len(items)} items"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

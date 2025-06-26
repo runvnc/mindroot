@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Response, Depends
+from fastapi import APIRouter, HTTPException, Request, Response, Depends, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import File, UploadFile, Form
 from sse_starlette.sse import EventSourceResponse
@@ -22,6 +22,7 @@ import json
 from lib.chatcontext import ChatContext
 import shutil
 from pydantic import BaseModel
+from lib.auth.api_key import verify_api_key
 
 router = APIRouter()
 
@@ -103,8 +104,26 @@ async def send_message(request: Request, log_id: str, message_parts: List[Messag
     return {"status": "ok", "task_id": task_id}
 
 @router.get("/agent/{agent_name}", response_class=HTMLResponse)
-async def get_chat_html(request: Request, agent_name: str):
-    user = request.state.user
+async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(None), embed: bool = Query(False)):
+    # Handle API key authentication if provided
+    if api_key:
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            # Create a mock user object for API key users
+            class MockUser:
+                def __init__(self, username):
+                    self.username = username
+            user = MockUser(user_data['username'])
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        # Use regular authentication
+        if not hasattr(request.state, "user"):
+            return RedirectResponse("/login")
+        user = request.state.user
+    
     log_id = nanoid.generate()
     plugins = list_enabled()
     print("Init chat with user", user)
@@ -119,7 +138,12 @@ async def get_chat_html(request: Request, agent_name: str):
         debug_box("Access token saved to session file")
     else:
         debug_box("No access token found in request state")
-        
+    
+    # If embed mode is requested, redirect to embed session
+    if embed:
+        return RedirectResponse(f"/session/{agent_name}/{log_id}?embed=true")
+    
+    # Regular redirect
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
 @router.get("/history/{agent_name}/{log_id}")
@@ -137,7 +161,8 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
     return history
 
 @router.get("/session/{agent_name}/{log_id}")
-async def chat_history(request: Request, agent_name: str, log_id: str):
+async def chat_session(request: Request, agent_name: str, log_id: str, embed: bool = Query(False)):
+    # Check authentication (API key or regular user)
     plugins = list_enabled()
     if not hasattr(request.state, "user"):
         return RedirectResponse("/login")
@@ -155,6 +180,10 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
 
     if auth_token is not None:
         chat_data["access_token"] = auth_token
+    
+    # Add embed mode flag
+    if embed:
+        chat_data["embed_mode"] = True
 
     html = await render('chat', chat_data)
     return HTMLResponse(html)
