@@ -4,5 +4,5 @@ models/*
 .venv
 .backup
 xtest
-
+registry_chroma_db
 .aider*
