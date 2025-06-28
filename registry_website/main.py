@@ -213,6 +213,7 @@ def publish_content(
             existing_content.title,
             existing_content.description,
             {
+                'title': existing_content.title,
                 'category': existing_content.category,
                 'content_type': existing_content.content_type,
                 'tags': ','.join(existing_content.tags) if isinstance(existing_content.tags, list) else (existing_content.tags or ''),
@@ -239,6 +240,7 @@ def publish_content(
             db_content.title,
             db_content.description,
             {
+                'title': db_content.title,
                 'category': db_content.category,
                 'content_type': db_content.content_type,
                 'tags': ','.join(db_content.tags) if isinstance(db_content.tags, list) else (db_content.tags or ''),
@@ -257,24 +259,51 @@ def search_content(
     category: Optional[str] = None,
     limit: int = 20,
     semantic: bool = True,
+    sort: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    print(f"\n=== SEARCH DEBUG ===")
+    print(f"Query: '{query}'")
+    print(f"Category: {category}")
+    print(f"Semantic: {semantic}")
+    print(f"Sort: {sort}")
+    
     db_query = db.query(Content)
     
     if category:
         db_query = db_query.filter(Content.category == category)
     
-    db_query = db_query.filter(
-        (Content.title.contains(query)) |
-        (Content.description.contains(query))
-    )
+    # Only apply text filters if query is not empty
+    if query.strip():
+        db_query = db_query.filter(
+            (Content.title.contains(query)) |
+            (Content.description.contains(query))
+        )
+    
+    # Apply sorting
+    if sort == "downloads":
+        db_query = db_query.order_by(Content.download_count.desc())
+    else:
+        db_query = db_query.order_by(Content.created_at.desc())
     
     db_results = db_query.limit(limit).all()
+    print(f"SQL Results: {len(db_results)} items")
     
     semantic_results = None
     if semantic:
         filter_dict = {"category": category} if category else None
-        semantic_results = vector_store.search(query, n_results=limit, filter_dict=filter_dict)['results']
+        # Use a broader search if query is empty or very short
+        search_query = query if query.strip() else "*"
+        if len(query.strip()) < 3:
+            # For short queries, search more broadly
+            search_query = f"{query} plugin agent tool"
+        semantic_results = vector_store.search(search_query, n_results=limit, filter_dict=filter_dict)['results']
+    
+    print(f"Semantic Results: {len(semantic_results) if semantic_results else 0} items")
+    if semantic_results:
+        print("Top 10 semantic results:")
+        for i, result in enumerate(semantic_results[:10]):
+            print(f"  {i+1}. ID: {result['id']}, Distance: {result.get('distance', 'N/A'):.4f}, Title: {result.get('metadata', {}).get('title', 'N/A')}")
     
     return {
         "results": db_results,

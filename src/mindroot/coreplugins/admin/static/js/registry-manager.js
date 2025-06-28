@@ -2,6 +2,11 @@ import { html } from '/admin/static/js/lit-core.min.js';
 import { RegistryManagerBase } from './registry-manager-base.js';
 
 class RegistryManager extends RegistryManagerBase {
+  constructor() {
+    super();
+    this.searchTimeout = null;
+  }
+
   async checkAuthStatus() {
     if (this.authToken) {
       try {
@@ -71,6 +76,11 @@ class RegistryManager extends RegistryManagerBase {
       }
     } catch (error) {
       console.error('Error loading local content:', error);
+    }
+
+    // Load top content by default
+    if (this.searchResults.length === 0) {
+      await this.loadTopContent();
     }
   }
 
@@ -148,6 +158,28 @@ class RegistryManager extends RegistryManagerBase {
     localStorage.removeItem('registry_token');
   }
 
+  async loadTopContent() {
+    this.loading = true;
+    
+    try {
+      // Load top plugins and agents by default
+      const response = await fetch(`${this.registryUrl}/search?limit=20&sort=downloads`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        this.searchResults = data.results || [];
+      } else {
+        console.warn('Failed to load top content, trying basic search');
+        // Fallback to empty search to get some results
+        await this.search('', 'all');
+      }
+    } catch (error) {
+      console.warn('Error loading top content:', error);
+    }
+    
+    this.loading = false;
+  }
+
   async search(query = this.searchQuery, category = this.selectedCategory) {
     this.loading = true;
     
@@ -167,6 +199,41 @@ class RegistryManager extends RegistryManagerBase {
       if (response.ok) {
         const data = await response.json();
         this.searchResults = data.results || [];
+        
+        // Sort semantic results by distance (lower = better match)
+        if (data.semantic_results) {
+          data.semantic_results.sort((a, b) => (a.distance || 1) - (b.distance || 1));
+        }
+        
+        // If we have semantic results, merge them with SQL results
+        if (data.semantic_results && data.semantic_results.length > 0) {
+          console.log('Merging semantic results:', data.semantic_results.length);
+          
+          // Create a map of existing results by ID
+          const existingIds = new Set(this.searchResults.map(item => item.id.toString()));
+          
+          // Add semantic results that aren't already in SQL results
+          const semanticItems = [];
+          for (const semanticResult of data.semantic_results) {
+            if (!existingIds.has(semanticResult.id)) {
+              // Convert semantic result to content format
+              const semanticItem = {
+                id: parseInt(semanticResult.id),
+                title: semanticResult.metadata.title || 'Unknown',
+                description: semanticResult.document || '',
+                category: semanticResult.metadata.category || 'unknown',
+                distance_score: semanticResult.distance,
+                is_semantic: true
+              };
+              semanticItems.push(semanticItem);
+            }
+          }
+          // Sort semantic items by distance (best matches first - lower distance)
+          semanticItems.sort((a, b) => (a.distance_score || 1) - (b.distance_score || 1));
+          
+          // Put best semantic matches at the top, then SQL results
+          this.searchResults = [...semanticItems, ...this.searchResults];
+        }
       } else {
         this.showToast('Search failed', 'error');
       }
@@ -175,6 +242,25 @@ class RegistryManager extends RegistryManagerBase {
     }
     
     this.loading = false;
+  }
+
+  handleSearchInput(e) {
+    this.searchQuery = e.target.value;
+    
+    // Clear existing timeout
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+    
+    // Set new timeout for auto-search after 500ms of no typing
+    this.searchTimeout = setTimeout(() => {
+      this.search();
+    }, 500);
+  }
+
+  handleCategoryChange(category) {
+    this.selectedCategory = category;
+    this.search();
   }
 
   async installFromRegistry(item) {
@@ -226,7 +312,43 @@ class RegistryManager extends RegistryManagerBase {
     }
   }
 
+  async installPersonaFromRegistry(personaRef, personaData, personaAssets) {
+    try {
+      const owner = personaRef.owner;
+      const personaName = personaData.name;
+      
+      // Create the persona using the enhanced endpoint with asset support
+      const response = await fetch('/personas/registry/with-assets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          persona: JSON.stringify(personaData),
+          owner: owner,
+          // Note: In a real implementation, we would need to download and upload
+          // the actual asset files here. For now, we're just creating the persona
+          // without assets, which will fall back to the original file-based approach.
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to install persona via API, will be created during agent installation');
+      }
+      
+      console.log(`Installed registry persona: registry/${owner}/${personaName}`);
+    } catch (error) {
+      console.error('Error installing persona from registry:', error);
+      // Don't throw - let agent installation proceed, persona will be created then
+    }
+  }
+
   async installAgent(item) {
+    // First, install persona if it has full persona data
+    if (item.data.persona_data && item.data.persona_ref) {
+      await this.installPersonaFromRegistry(item.data.persona_ref, item.data.persona_data, item.data.persona_assets);
+    }
+    
     const agentData = {
       // Start with the agent data from registry
       ...item.data,
@@ -240,14 +362,33 @@ class RegistryManager extends RegistryManagerBase {
       installed_at: new Date().toISOString()
     };
     
+    // Handle enhanced persona data from registry
+    if (item.data.persona_ref && item.data.persona_data) {
+      // Use the registry persona reference
+      const owner = item.data.persona_ref.owner;
+      const personaName = item.data.persona_data.name;
+      agentData.persona = `registry/${owner}/${personaName}`;
+    } else {
+      // Fallback to existing logic for backward compatibility
+    
     // Handle persona field - if it's an object, ensure it has a name
     // If it's a string, leave it as is
     if (agentData.persona && typeof agentData.persona === 'object' && !agentData.persona.name) {
       // If persona is an object but doesn't have a name, use the agent name as persona name
       agentData.persona.name = agentData.name + '_persona';
+    }
+    
+    // Handle registry persona installation with owner namespace
+    if (agentData.persona && typeof agentData.persona === 'object') {
+      // For registry installs, create namespaced persona reference
+      const owner = item.owner || item.creator;
+      if (owner) {
+        agentData.persona = `registry/${owner}/${agentData.persona.name}`;
+      }
     } else if (!agentData.persona) {
       // If no persona specified, use agent name
       agentData.persona = agentData.name;
+    }
     }
     
     const response = await fetch('/agents/local', {
@@ -269,6 +410,73 @@ class RegistryManager extends RegistryManagerBase {
         // If we can't read the error response, just use the status
       }
       throw new Error(errorMessage);
+    }
+  }
+
+  async loadPersonaData(personaRef) {
+    try {
+      // Handle different persona reference formats
+      let personaPath;
+      if (personaRef.startsWith('registry/')) {
+        // registry/owner/name format
+        personaPath = `/personas/${personaRef}`;
+      } else {
+        // Simple name - check local first, then shared
+        personaPath = `/personas/local/${personaRef}`;
+      }
+      
+      const response = await fetch(personaPath);
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      // If local failed and not registry format, try shared
+      if (!personaRef.startsWith('registry/')) {
+        const sharedResponse = await fetch(`/personas/shared/${personaRef}`);
+        if (sharedResponse.ok) {
+          return await sharedResponse.json();
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error loading persona data:', error);
+      return null;
+    }
+  }
+
+  async loadPersonaAssets(personaRef) {
+    try {
+      // For now, just return asset metadata - actual file upload would need backend support
+      // In a full implementation, this would:
+      // 1. Load the actual image files from the persona directory
+      // 2. Calculate their hashes
+      // 3. Check if they already exist in the asset store
+      // 4. Upload them if needed
+      // 5. Return the asset hashes for inclusion in the registry data
+      
+      // For Phase 3 implementation, we're focusing on the deduplication infrastructure
+      // The actual asset upload during publishing would require:
+      // - Reading image files from persona directories
+      // - Converting them to base64 or FormData for upload
+      // - Handling the upload to the registry backend
+      // - Storing the returned asset hashes
+      const assets = {};
+      
+      // Check if avatar exists by trying to load it
+      const avatarPath = `/chat/personas/${personaRef}/avatar.png`;
+      const avatarResponse = await fetch(avatarPath, { method: 'HEAD' });
+      if (avatarResponse.ok) {
+        assets.avatar = {
+          path: avatarPath,
+          exists: true
+        };
+      }
+      
+      return assets;
+    } catch (error) {
+      console.error('Error loading persona assets:', error);
+      return {};
     }
   }
 
@@ -362,19 +570,29 @@ class RegistryManager extends RegistryManagerBase {
   renderSearch() {
     return html`
       <div class="section">
-        <h3>Search Registry</h3>
+        <h3>Registry Browser</h3>
         <div class="search-form">
           <div class="form-row">
             <input type="text" placeholder="Search plugins and agents..." 
                    .value=${this.searchQuery}
-                   @input=${(e) => this.searchQuery = e.target.value}>
-            <select .value=${this.selectedCategory}
-                    @change=${(e) => this.selectedCategory = e.target.value}>
-              <option value="all">All</option>
-              <option value="plugin">Plugins</option>
-              <option value="agent">Agents</option>
-            </select>
-            <button class="primary" @click=${() => this.search()}>Search</button>
+                   @input=${this.handleSearchInput}>
+          </div>
+          <div class="category-tabs">
+            <button class="category-tab ${this.selectedCategory === 'all' ? 'active' : ''}" 
+                    @click=${() => this.handleCategoryChange('all')}>
+              <span class="material-icons">apps</span>
+              All
+            </button>
+            <button class="category-tab ${this.selectedCategory === 'plugin' ? 'active' : ''}" 
+                    @click=${() => this.handleCategoryChange('plugin')}>
+              <span class="material-icons">extension</span>
+              Plugins
+            </button>
+            <button class="category-tab ${this.selectedCategory === 'agent' ? 'active' : ''}" 
+                    @click=${() => this.handleCategoryChange('agent')}>
+              <span class="material-icons">smart_toy</span>
+              Agents
+            </button>
           </div>
         </div>
         
@@ -382,6 +600,12 @@ class RegistryManager extends RegistryManagerBase {
         ${this.error ? html`<div class="error">${this.error}</div>` : ''}
         
         <div class="search-results">
+          ${this.searchResults.length === 0 && !this.loading ? html`
+            <div class="no-results">
+              <p>No items found. Try adjusting your search terms or check your connection to the registry.</p>
+              <button @click=${this.loadTopContent}>Load Popular Items</button>
+            </div>
+          ` : ''}
           ${this.searchResults.map(item => this.renderSearchResult(item))}
         </div>
       </div>
@@ -391,6 +615,12 @@ class RegistryManager extends RegistryManagerBase {
   renderSearchResult(item) {
     return html`
       <div class="result-item">
+        ${item.is_semantic ? html`
+          <div class="semantic-badge">
+            <span class="material-icons">psychology</span>
+            Semantic Match ${item.distance_score ? `(${(1 - item.distance_score).toFixed(2)})` : ''}
+          </div>
+        ` : ''}
         <div class="result-header">
           <h4 class="result-title">${item.title}</h4>
           <span class="result-version">v${item.version}</span>
@@ -598,6 +828,15 @@ class RegistryManager extends RegistryManagerBase {
           pypi_module: item.pypi_module || item.name
         };
       } else if (type === 'agent') {
+        // Load persona data if agent has a persona
+        let personaData = null;
+        let personaAssets = null;
+        
+        if (item.persona && typeof item.persona === 'string') {
+          personaData = await this.loadPersonaData(item.persona);
+          personaAssets = await this.loadPersonaAssets(item.persona);
+        }
+        
         publishData = {
           title: item.name,
           description: item.description || `${item.name} agent`,
@@ -606,6 +845,15 @@ class RegistryManager extends RegistryManagerBase {
           version: item.version || '1.0.0',
           data: {
             agent_config: item,
+            persona_ref: personaData ? {
+              name: personaData.name,
+              owner: this.currentUser?.username,
+              version: personaData.version || '1.0.0',
+              original_path: item.persona
+            } : null,
+            persona_data: personaData,
+            persona_assets: personaAssets,
+            // Keep original persona reference for backward compatibility
             persona: item.persona || {},
             instructions: item.instructions || '',
             model: item.model || 'default'

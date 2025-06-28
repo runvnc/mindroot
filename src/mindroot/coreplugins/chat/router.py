@@ -57,14 +57,38 @@ async def context1(request: Request, log_id: str):
 async def context2(request: Request, log_id: str):
     user = request.state.user.username
     context = await get_context(log_id, user)
+    # Check if this is a registry persona with deduplicated assets
+    if persona_path.startswith("registry/"):
+        persona_json_path = f"personas/{persona_path}/persona.json"
+        if os.path.exists(persona_json_path):
+            try:
+                with open(persona_json_path, "r") as f:
+                    persona_data = json.load(f)
+                
+                # Check if persona has asset hashes (deduplicated storage)
+                asset_hashes = persona_data.get("asset_hashes", {})
+                if "avatar" in asset_hashes:
+                    # Redirect to deduplicated asset endpoint
+                    return RedirectResponse(f"/assets/{asset_hashes["avatar"]}")
+            except Exception as e:
+                print(f"Error checking for deduplicated assets: {e}")
+
     print(context)
     return "ok"
 
 
-# need to serve persona images from ./personas/local/[persona_name]/avatar.png
-@router.get("/chat/personas/{persona_name}/avatar.png")
-async def get_persona_avatar(persona_name: str):
-    file_path = f"personas/local/{persona_name}/avatar.png"
+# need to serve persona images from ./personas/local/[persona_path]/avatar.png
+@router.get("/chat/personas/{persona_path:path}/avatar.png")
+async def get_persona_avatar(persona_path: str):
+    # Handle registry personas: registry/owner/name
+    if persona_path.startswith('registry/'):
+        file_path = f"personas/{persona_path}/avatar.png"
+    else:
+        # Legacy support: check local first, then shared
+        file_path = f"personas/local/{persona_path}/avatar.png"
+        if not os.path.exists(file_path):
+            file_path = f"personas/shared/{persona_path}/avatar.png"
+    
     if not os.path.exists(file_path):
         return {"error": "File not found"}
         

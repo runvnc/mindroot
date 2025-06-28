@@ -344,6 +344,64 @@ class RegistryManagerBase extends BaseEl {
       text-align: center;
       margin-top: 1rem;
     }
+
+    .category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .category-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .category-tab:hover {
+      background: rgba(74, 158, 255, 0.2);
+      border-color: rgba(74, 158, 255, 0.3);
+      color: #fff;
+    }
+
+    .category-tab.active {
+      background: #4a9eff;
+      border-color: #4a9eff;
+      color: #fff;
+    }
+
+    .category-tab .material-icons {
+      font-size: 1.1rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+
+    .semantic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(156, 39, 176, 0.2);
+      color: #9c27b0;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid rgba(156, 39, 176, 0.3);
+    }
   `;
 
   constructor() {

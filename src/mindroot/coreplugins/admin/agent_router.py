@@ -97,6 +97,14 @@ def scan_agent_ownership() -> Dict[str, Any]:
 
 async def load_persona_data(persona_name: str) -> dict:
     """Load persona data from local or shared directory"""
+    # Handle registry personas: registry/owner/name
+    if persona_name.startswith('registry/'):
+        persona_path = Path(f'personas/{persona_name}/persona.json')
+        if persona_path.exists():
+            with open(persona_path, 'r') as f:
+                return json.load(f)
+    
+    # Fallback to existing local/shared pattern (UNCHANGED)
     persona_path = Path('personas/local') / persona_name / 'persona.json'
     if not persona_path.exists():
         persona_path = Path('personas/shared') / persona_name / 'persona.json'
@@ -219,8 +227,12 @@ def create_agent(scope: str, agent: str = Form(...)):
         if 'persona' in agent_data:
             # This will either return the persona name or handle the import
             # and return the name
-            persona_name = handle_persona_import(agent_data['persona'], scope)
- 
+            # Extract owner information for registry personas
+            owner = agent_data.get('registry_owner') or agent_data.get('owner') or agent_data.get('creator')
+            persona_scope = 'registry' if owner else scope
+            
+            persona_name = handle_persona_import(agent_data['persona'], persona_scope, owner)
+            
             agent_data['persona'] = persona_name
         
         # Ensure recommended_plugins is present and is a list (also handle legacy required_plugins)

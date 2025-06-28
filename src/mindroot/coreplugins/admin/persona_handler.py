@@ -27,7 +27,7 @@ def import_persona_from_index(index: str, persona: str):
     print("Successfully imported persona", persona, "from index", index)
 
 
-def handle_persona_import(persona_data: dict, scope: str) -> str:
+def handle_persona_import(persona_data: dict, scope: str, owner: str = None) -> str:
     """Handle importing a persona from embedded data in agent configuration.
     Returns the persona name to be used in agent configuration.
     
@@ -57,8 +57,13 @@ def handle_persona_import(persona_data: dict, scope: str) -> str:
             detail='Persona name required in persona data'
         )
     
-    # Create persona path
-    persona_path = Path('personas') / scope / persona_name / 'persona.json'
+    # For registry installs, use namespaced path
+    if owner and scope == 'registry':
+        persona_path = Path(f'personas/registry/{owner}/{persona_name}/persona.json')
+        return_name = f'registry/{owner}/{persona_name}'
+    else:
+        persona_path = Path('personas') / scope / persona_name / 'persona.json'
+        return_name = persona_name
     
     # Check if persona already exists
     if persona_path.exists():
@@ -72,7 +77,7 @@ def handle_persona_import(persona_data: dict, scope: str) -> str:
             json.dump(persona_data, f, indent=2)
         
         logger.info(f"Successfully imported persona '{persona_name}' to {scope} scope")
-        return persona_name
+        return return_name
         
     except Exception as e:
         logger.error(f"Failed to import persona '{persona_name}': {str(e)}")
