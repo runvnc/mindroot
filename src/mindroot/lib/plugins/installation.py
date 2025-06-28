@@ -282,12 +282,12 @@ async def install_recommended_plugins(agent_name, context=None):
             for plugin_source in recommended_plugins:
                 for index in available_indices:
                     for plugin in index.get('plugins', []):
-                        remote_source = plugin.get('remote_source', plugin.get('github_url', plugin.get('source')))
-                        print(f"Checking plugin Index plugin {remote_source} against recommended {plugin_source}")
+                        remote_source = plugin.get('remote_source') or plugin.get('github_url') or plugin.get('source')
+                        print(f"Checking index plugin {remote_source} against recommended {plugin_source}")
                         if remote_source == plugin_source:
-                            if 'github.com/' in remote_source:
-                                github_path = github_url.split('github.com/')[1]
-                                print(f"Extracted GitHub path for {plugin_name}: {github_path}")
+                            if remote_source and 'github.com/' in remote_source:
+                                github_path = remote_source.split('github.com/')[1]
+                                print(f"Extracted GitHub path for {plugin_source}: {github_path}")
                                 plugin_sources[plugin_source] = github_path
                             elif remote_source:
                                 plugin_sources[plugin_source] = remote_source

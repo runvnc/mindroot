@@ -173,8 +173,19 @@ def list_agents(scope: str):
     if scope not in ['local', 'shared']:
         raise HTTPException(status_code=400, detail='Invalid scope')
     scope_dir = BASE_DIR / scope
-    agents = [p.name for p in scope_dir.iterdir() if p.is_dir()]
-    return [{'name': name} for name in agents]
+    agents = []
+    for p in scope_dir.iterdir():
+        if p.is_dir():
+            agent_json_path = p / 'agent.json'
+            if agent_json_path.exists():
+                try:
+                    with open(agent_json_path, 'r') as f:
+                        agent_data = json.load(f)
+                    agents.append(agent_data)
+                except Exception as e:
+                    # If we can't read the agent.json, just include the name
+                    agents.append({'name': p.name})
+    return agents
 
 @router.get('/agents/ownership-info')
 def get_agent_ownership_info():

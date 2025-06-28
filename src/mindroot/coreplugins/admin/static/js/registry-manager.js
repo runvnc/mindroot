@@ -7,6 +7,11 @@ class RegistryManager extends RegistryManagerBase {
     this.searchTimeout = null;
   }
 
+  // Return true if an agent with this name is already present in localAgents
+  isAgentInstalled(name) {
+    return (this.localAgents || []).some(a => a.name === name);
+  }
+
   async checkAuthStatus() {
     if (this.authToken) {
       try {
@@ -637,7 +642,7 @@ class RegistryManager extends RegistryManagerBase {
           </div>
         ` : ''}
         <div class="result-actions">
-          <button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>
+          ${this.isAgentInstalled(item.title) ? html`<button disabled>Installed</button>` : html`<button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>`}
           ${item.github_url ? html`<a href="${item.github_url}" target="_blank"><button>GitHub</button></a>` : ''}
         </div>
       </div>

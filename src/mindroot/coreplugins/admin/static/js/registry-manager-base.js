@@ -20,7 +20,8 @@ class RegistryManagerBase extends BaseEl {
     agentOwnership: { type: Object },
     toasts: { type: Array },
     activeTab: { type: String },
-    showRegisterForm: { type: Boolean }
+    showRegisterForm: { type: Boolean },
+    installRecommendedPlugins: { type: Boolean }
   };
 
   static styles = css`
@@ -145,10 +146,12 @@ class RegistryManagerBase extends BaseEl {
 
     button.success {
       background: #28a745;
+      color: #fff !important;
     }
 
     button.success:hover {
       background: #218838;
+      color: #fff !important;
     }
 
     .search-results {
@@ -424,6 +427,8 @@ class RegistryManagerBase extends BaseEl {
     this.agentOwnership = null;
     this.activeTab = 'search';
     this.showRegisterForm = false;
+    // Automatically install recommended plugins when installing agents
+    this.installRecommendedPlugins = true;
     
     this.checkAuthStatus();
     this.loadStats();
@@ -485,6 +490,8 @@ class RegistryManagerBase extends BaseEl {
       if (response.ok) {
         this.showToast('Registration successful! You can now log in.', 'success');
         this.showRegisterForm = false;
+    // Automatically install recommended plugins when installing agents
+    this.installRecommendedPlugins = true;
       } else {
         const errorData = await response.json();
         this.showToast(errorData.detail || 'Registration failed', 'error');
