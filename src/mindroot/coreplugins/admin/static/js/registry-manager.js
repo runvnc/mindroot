@@ -286,15 +286,119 @@ class RegistryManager extends RegistryManagerBase {
         await this.installPlugin(item);
       } else if (item.category === 'agent') {
         await this.installAgent(item);
+        
+        // Load local content first to update the UI
+        await this.loadLocalContent();
+        
+        // After successful agent installation, check for recommended plugins
+        if (this.installRecommendedPlugins) {
+          try {
+            console.log('Checking for recommended plugins for agent:', item.title);
+            // Check if the agent has recommended plugins
+            const agentName = item.title;
+            const checkResponse = await fetch(`/admin/check-recommended-plugins/${encodeURIComponent(agentName)}`);
+            if (checkResponse.ok) {
+              const checkData = await checkResponse.json();
+              console.log('Recommended plugins check response:', checkData);
+              if (checkData.pending_plugins && checkData.pending_plugins.length > 0) {
+                console.log(`Found ${checkData.pending_plugins.length} recommended plugins to install:`, checkData.pending_plugins);
+                
+                // Use a simple confirm dialog for now
+                const pluginList = checkData.pending_plugins.join('\n- ');
+                const confirmMessage = `The agent "${agentName}" recommends installing ${checkData.pending_plugins.length} plugin(s):\n\n- ${pluginList}\n\nWould you like to install them now?`;
+                
+                if (confirm(confirmMessage)) {
+                  console.log('User confirmed plugin installation');
+                  
+                  // Create or reuse the plugin install dialog
+                  let installDialog = document.querySelector('plugin-install-dialog');
+                  if (!installDialog) {
+                    installDialog = document.createElement('plugin-install-dialog');
+                    document.body.appendChild(installDialog);
+                  }
+                  
+                  // Open the dialog
+                  installDialog.open(`Recommended plugins for ${agentName}`, 'Agent Setup');
+                  
+                  // Connect to SSE endpoint for streaming installation
+                  const eventSource = new EventSource(`/admin/stream-install-recommended-plugins/${encodeURIComponent(agentName)}`);
+                  
+                  let hasError = false;
+                  let receivedEnd = false;
+                  eventSource.onmessage = (event) => {
+                    if (event.data === 'END') {
+                      receivedEnd = true;
+                      eventSource.close();
+                      installDialog.setComplete(hasError);
+                      // Refresh the page or update UI
+                      this.loadLocalContent();
+                    } else {
+                      // Check for error indicators in the output
+                      if (event.data.startsWith('ERROR:')) {
+                        hasError = true;
+                        installDialog.addOutput(event.data, 'error');
+                      } else if (event.data.startsWith('WARNING:')) {
+                        installDialog.addOutput(event.data, 'warning');
+                      } else {
+                        installDialog.addOutput(event.data, 'info');
+                      }
+                    }
+                  };
+                  
+                  eventSource.onerror = () => {
+                    // Only treat as error if we haven't received END
+                    if (!receivedEnd) {
+                      if (eventSource.readyState === EventSource.CLOSED) {
+                        // Connection closed unexpectedly
+                        hasError = true;
+                        installDialog.addOutput('Connection closed unexpectedly', 'error');
+                        installDialog.setComplete(true);
+                      }
+                    } else {
+                      // Normal close after END, ignore
+                      console.log('SSE connection closed normally after END');
+                    }
+                    eventSource.close();
+                  };
+                  
+                  console.log('Installation modal created and appended');
+                } else {
+                  console.log('User declined plugin installation');
+                  this.showToast('Skipped recommended plugin installation', 'info');
+                  }
+                
+              } else {
+                console.log('No pending recommended plugins found for agent:', agentName);
+                // Check if there were recommended plugins but they're all installed
+                const agentRecommended = item.data.recommended_plugins || item.data.required_plugins || [];
+                if (agentRecommended.length > 0) {
+                  console.log(`All ${agentRecommended.length} recommended plugins are already installed`);
+                  this.showToast(`All ${agentRecommended.length} recommended plugins are already installed`, 'success');
+                } else {
+                  console.log('This agent has no recommended plugins');
+                }
+              }
+            } else {
+              console.error('Failed to check recommended plugins, status:', checkResponse.status);
+            }
+          } catch (error) {
+            console.error('Error checking recommended plugins:', error);
+            // Don't fail the whole installation if plugin check fails
+          }
+        }
       }
       
-      await this.loadLocalContent();
+      // Set loading to false before showing success
+      this.loading = false;
+      this.showToast('Agent installed successfully!', 'success');
+      
+      // Force a small delay to ensure all reactive updates are complete
+      await new Promise(resolve => setTimeout(resolve, 100));
       
     } catch (error) {
+      this.loading = false;
       this.showToast('Installation failed: ' + error.message, 'error');
     }
-    
-    this.loading = false;
   }
 
   async installPlugin(item) {
@@ -349,6 +453,9 @@ class RegistryManager extends RegistryManagerBase {
   }
 
   async installAgent(item) {
+    console.log('Installing agent from registry:', item);
+    console.log('Registry item.data structure:', item.data);
+    console.log('Looking for recommended_plugins in:', { direct: item.data.recommended_plugins, required: item.data.required_plugins, agent_config: item.data.agent_config });
     // First, install persona if it has full persona data
     if (item.data.persona_data && item.data.persona_ref) {
       await this.installPersonaFromRegistry(item.data.persona_ref, item.data.persona_data, item.data.persona_assets);
@@ -356,9 +463,14 @@ class RegistryManager extends RegistryManagerBase {
     
     const agentData = {
       // Start with the agent data from registry
-      ...item.data,
+      ...item.data.agent_config || {},
       name: item.title,
       description: item.description,
+      // Copy over important fields from the registry data
+      instructions: item.data.instructions || item.data.agent_config?.instructions || '',
+      model: item.data.model || item.data.agent_config?.model || 'default',
+      // Preserve recommended_plugins from the registry data - check multiple possible locations
+      recommended_plugins: item.data.recommended_plugins || item.data.required_plugins || item.data.agent_config?.recommended_plugins || item.data.agent_config?.required_plugins || [],
       // Preserve ownership information from registry
       registry_owner: item.owner || item.creator,
       registry_id: item.id,
@@ -366,7 +478,8 @@ class RegistryManager extends RegistryManagerBase {
       installed_from_registry: true,
       installed_at: new Date().toISOString()
     };
-    
+    console.log('Agent data being sent for installation:', agentData);
+    console.log('Recommended plugins in agent data:', agentData.recommended_plugins);    
     // Handle enhanced persona data from registry
     if (item.data.persona_ref && item.data.persona_data) {
       // Use the registry persona reference
@@ -642,7 +755,7 @@ class RegistryManager extends RegistryManagerBase {
           </div>
         ` : ''}
         <div class="result-actions">
-          ${this.isAgentInstalled(item.title) ? html`<button disabled>Installed</button>` : html`<button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>`}
+          ${this.isAgentInstalled(item.title) ? html`<button disabled>Already Installed</button>` : html`<button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>`}
           ${item.github_url ? html`<a href="${item.github_url}" target="_blank"><button>GitHub</button></a>` : ''}
         </div>
       </div>

@@ -6,3 +6,4 @@ models/*
 xtest
 registry_chroma_db
 .aider*
+*.db

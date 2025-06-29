@@ -5,7 +5,12 @@ from lib.plugins.installation import plugin_install
 from lib.providers.missing import get_missing_commands
 from lib.plugins.mapping import get_command_plugin_mapping
 from pathlib import Path
-from lib.plugins.installation import install_recommended_plugins
+from lib.plugins.installation import install_recommended_plugins, download_github_files
+from lib.plugins.manifest import update_plugin_manifest
+# For Server-Sent Events (streamed logs)
+from sse_starlette.sse import EventSourceResponse
+from lib.streamcmd import stream_command_as_events
+import contextlib, io, json, asyncio, sys
 
 router = APIRouter()
 
@@ -19,6 +24,121 @@ async def missing_commands(agent_name: str):
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
     return result
+
+# ------------------------------------------------------------------
+#  NEW:  Stream installation of recommended plugins with live logs
+# ------------------------------------------------------------------
+
+@router.get("/admin/stream-install-recommended-plugins/{agent_name}", response_class=EventSourceResponse)
+async def stream_install_recommended_plugins(agent_name: str):
+    """
+    SSE endpoint that installs all recommended plugins for `agent_name`
+    and streams stdout/stderr lines back to the browser.  It finishes by
+    sending a JSON summary and the literal string 'END'.
+    """
+
+    async def event_generator():
+        try:
+            # Load agent data
+            agent_path = f"data/agents/local/{agent_name}/agent.json"
+            if not os.path.exists(agent_path):
+                agent_path = f"data/agents/shared/{agent_name}/agent.json"
+                
+            if not os.path.exists(agent_path):
+                yield f"Error: Agent {agent_name} not found\n"
+                yield "END\n"
+                return
+                
+            with open(agent_path, 'r') as f:
+                agent_data = json.load(f)
+                
+            # Get recommended plugins
+            recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+            
+            if not recommended_plugins:
+                yield "No recommended plugins found for this agent\n"
+                yield "END\n"
+                return
+            
+            yield f"Installing {len(recommended_plugins)} recommended plugins for {agent_name}...\n"
+            
+            results = []
+            
+            # Install each plugin and stream the output
+            for plugin_source in recommended_plugins:
+                plugin_name = plugin_source.split('/')[-1]
+                
+                yield f"\n=== Installing {plugin_name} ===\n"
+                
+                try:
+                    # Check if already installed
+                    import pkg_resources
+                    try:
+                        pkg_resources.get_distribution(plugin_name)
+                        yield f"{plugin_name} is already installed\n"
+                        results.append({"plugin": plugin_name, "status": "already_installed"})
+                        continue
+                    except pkg_resources.DistributionNotFound:
+                        pass
+                    
+                    # Determine installation source
+                    if '/' in plugin_source:  # GitHub format
+                        yield f"Installing from GitHub: {plugin_source}\n"
+                        
+                        # Download and extract
+                        plugin_dir, _, plugin_info = download_github_files(plugin_source)
+                        
+                        # Stream the pip install
+                        cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v']
+                        async for event in stream_command_as_events(cmd):
+                            if event.get('event') == 'message':
+                                yield event['data'] + "\n"
+                            elif event.get('event') == 'warning':
+                                yield "WARNING: " + event['data'] + "\n"
+                            elif event.get('event') == 'error':
+                                yield "ERROR: " + event['data'] + "\n"
+                            elif event.get('event') == 'complete':
+                                # Update the plugin manifest after successful installation
+                                update_plugin_manifest(
+                                    plugin_info['name'],
+                                    'github',
+                                    os.path.abspath(plugin_dir),
+                                    remote_source=plugin_source,
+                                    version=plugin_info.get('version', '0.0.1'),
+                                    metadata=plugin_info
+                                )
+                        
+                        results.append({"plugin": plugin_name, "status": "success", "source": "github", "source_path": plugin_source})
+                    else:
+                        # PyPI installation
+                        yield f"Installing from PyPI: {plugin_name}\n"
+                        cmd = [sys.executable, '-m', 'pip', 'install', plugin_name, '-v']
+                        async for event in stream_command_as_events(cmd):
+                            if event.get('event') == 'message':
+                                yield event['data'] + "\n"
+                            elif event.get('event') == 'warning':
+                                yield "WARNING: " + event['data'] + "\n"
+                            elif event.get('event') == 'error':
+                                yield "ERROR: " + event['data'] + "\n"
+                            elif event.get('event') == 'complete':
+                                # Update the plugin manifest for PyPI install
+                                update_plugin_manifest(plugin_name, 'pypi', None)
+                        
+                        results.append({"plugin": plugin_name, "status": "success", "source": "pypi"})
+                        
+                except Exception as e:
+                    yield f"ERROR: Failed to install {plugin_name}: {str(e)}\n"
+                    results.append({"plugin": plugin_name, "status": "error", "message": str(e)})
+            
+            # Send results and END
+            yield "\n" + json.dumps({"results": results}) + "\n"
+            yield "END"
+            
+        except Exception as e:
+            yield f"ERROR: {str(e)}\n"
+            yield "END"
+
+    return EventSourceResponse(event_generator())
 
 @router.get("/admin/command-plugin-mapping")
 async def command_plugin_mapping():
@@ -159,3 +279,118 @@ async def install_agent_recommended_plugins(agent_name: str):
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
     return result
+
+# ------------------------------------------------------------------
+#  NEW:  Stream installation of recommended plugins with live logs
+# ------------------------------------------------------------------
+
+@router.get("/admin/stream-install-recommended-plugins/{agent_name}", response_class=EventSourceResponse)
+async def stream_install_recommended_plugins(agent_name: str):
+    """
+    SSE endpoint that installs all recommended plugins for `agent_name`
+    and streams stdout/stderr lines back to the browser.  It finishes by
+    sending a JSON summary and the literal string 'END'.
+    """
+
+    async def event_generator():
+        try:
+            # Load agent data
+            agent_path = f"data/agents/local/{agent_name}/agent.json"
+            if not os.path.exists(agent_path):
+                agent_path = f"data/agents/shared/{agent_name}/agent.json"
+                
+            if not os.path.exists(agent_path):
+                yield f"Error: Agent {agent_name} not found\n"
+                yield "END\n"
+                return
+                
+            with open(agent_path, 'r') as f:
+                agent_data = json.load(f)
+                
+            # Get recommended plugins
+            recommended_plugins = agent_data.get('recommended_plugins', agent_data.get('required_plugins', []))
+            
+            if not recommended_plugins:
+                yield "No recommended plugins found for this agent\n"
+                yield "END\n"
+                return
+            
+            yield f"Installing {len(recommended_plugins)} recommended plugins for {agent_name}...\n"
+            
+            results = []
+            
+            # Install each plugin and stream the output
+            for plugin_source in recommended_plugins:
+                plugin_name = plugin_source.split('/')[-1]
+                
+                yield f"\n=== Installing {plugin_name} ===\n"
+                
+                try:
+                    # Check if already installed
+                    import pkg_resources
+                    try:
+                        pkg_resources.get_distribution(plugin_name)
+                        yield f"{plugin_name} is already installed\n"
+                        results.append({"plugin": plugin_name, "status": "already_installed"})
+                        continue
+                    except pkg_resources.DistributionNotFound:
+                        pass
+                    
+                    # Determine installation source
+                    if '/' in plugin_source:  # GitHub format
+                        yield f"Installing from GitHub: {plugin_source}\n"
+                        
+                        # Download and extract
+                        plugin_dir, _, plugin_info = download_github_files(plugin_source)
+                        
+                        # Stream the pip install
+                        cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v']
+                        async for event in stream_command_as_events(cmd):
+                            if event.get('event') == 'message':
+                                yield event['data'] + "\n"
+                            elif event.get('event') == 'warning':
+                                yield "WARNING: " + event['data'] + "\n"
+                            elif event.get('event') == 'error':
+                                yield "ERROR: " + event['data'] + "\n"
+                            elif event.get('event') == 'complete':
+                                # Update the plugin manifest after successful installation
+                                update_plugin_manifest(
+                                    plugin_info['name'],
+                                    'github',
+                                    os.path.abspath(plugin_dir),
+                                    remote_source=plugin_source,
+                                    version=plugin_info.get('version', '0.0.1'),
+                                    metadata=plugin_info
+                                )
+                        
+                        results.append({"plugin": plugin_name, "status": "success", "source": "github", "source_path": plugin_source})
+                    else:
+                        # PyPI installation
+                        yield f"Installing from PyPI: {plugin_name}\n"
+                        cmd = [sys.executable, '-m', 'pip', 'install', plugin_name, '-v']
+                        async for event in stream_command_as_events(cmd):
+                            if event.get('event') == 'message':
+                                yield event['data'] + "\n"
+                            elif event.get('event') == 'warning':
+                                yield "WARNING: " + event['data'] + "\n"
+                            elif event.get('event') == 'error':
+                                yield "ERROR: " + event['data'] + "\n"
+                            elif event.get('event') == 'complete':
+                                # Update the plugin manifest for PyPI install
+                                update_plugin_manifest(plugin_name, 'pypi', None)
+                        
+                        results.append({"plugin": plugin_name, "status": "success", "source": "pypi"})
+                        
+                except Exception as e:
+                    yield f"ERROR: Failed to install {plugin_name}: {str(e)}\n"
+                    results.append({"plugin": plugin_name, "status": "error", "message": str(e)})
+            
+            # Send results and END
+            yield "\n" + json.dumps({"results": results}) + "\n"
+            yield "END"
+            
+        except Exception as e:
+            yield f"ERROR: {str(e)}\n"
+            yield "END"
+
+    return EventSourceResponse(event_generator())
