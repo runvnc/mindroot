@@ -98,6 +98,11 @@ def create_registry_persona_with_assets(persona: str = Form(...), owner: str = F
                                        faceref: UploadFile = File(None), avatar: UploadFile = File(None)):
     """Create a registry persona with deduplicated asset storage"""
     try:
+        print(f"Received persona data (first 200 chars): {persona[:200]}...")
+        print(f"Received owner: {owner}")
+        print(f"Received faceref: {faceref.filename if faceref else 'None'}")
+        print(f"Received avatar: {avatar.filename if avatar else 'None'}")
+        
         persona_data = json.loads(persona)
         persona_name = persona_data.get('name')
         
@@ -122,9 +127,29 @@ def create_registry_persona_with_assets(persona: str = Form(...), owner: str = F
         # Add asset references to persona data
         persona_data['asset_hashes'] = asset_hashes
         
-        # Create registry persona path
+        # For registry personas, update the name to include the owner namespace
+        # This ensures the chat UI can find the images at the correct path
+        if 'name' in persona_data:
+            persona_data['name'] = f"{owner}/{persona_name}"
+        
+        # Create registry persona path first
         persona_path = BASE_DIR / 'registry' / owner / persona_name / 'persona.json'
         persona_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # ALSO copy assets to traditional locations for compatibility
+        if faceref:
+            faceref_path = persona_path.parent / 'faceref.png'
+            faceref_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(faceref_path, 'wb') as f:
+                faceref.file.seek(0)  # Reset file pointer
+                f.write(faceref.file.read())
+                
+        if avatar:
+            avatar_path = persona_path.parent / 'avatar.png'
+            avatar_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(avatar_path, 'wb') as f:
+                avatar.file.seek(0)  # Reset file pointer
+                f.write(avatar.file.read())
         
         with open(persona_path, 'w') as f:
             json.dump(persona_data, f, indent=2)
@@ -135,8 +160,14 @@ def create_registry_persona_with_assets(persona: str = Form(...), owner: str = F
             'asset_hashes': asset_hashes
         }
         
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        print(f"Invalid JSON received: {persona}")
+        raise HTTPException(status_code=400, detail=f'Invalid JSON in persona data: {str(e)}')
     except Exception as e:
         print(f"Error creating registry persona with assets: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f'Internal server error: {str(e)}')
 
 @router.get('/assets/{asset_hash}')

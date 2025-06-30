@@ -291,7 +291,7 @@ class RegistryManager extends RegistryManagerBase {
         await this.loadLocalContent();
         
         // After successful agent installation, check for recommended plugins
-        if (this.installRecommendedPlugins) {
+        // Always check for recommended plugins and install automatically
           try {
             console.log('Checking for recommended plugins for agent:', item.title);
             // Check if the agent has recommended plugins
@@ -303,11 +303,11 @@ class RegistryManager extends RegistryManagerBase {
               if (checkData.pending_plugins && checkData.pending_plugins.length > 0) {
                 console.log(`Found ${checkData.pending_plugins.length} recommended plugins to install:`, checkData.pending_plugins);
                 
-                // Use a simple confirm dialog for now
+                // Automatically install recommended plugins without confirmation
                 const pluginList = checkData.pending_plugins.join('\n- ');
-                const confirmMessage = `The agent "${agentName}" recommends installing ${checkData.pending_plugins.length} plugin(s):\n\n- ${pluginList}\n\nWould you like to install them now?`;
+                console.log(`Auto-installing ${checkData.pending_plugins.length} recommended plugins: ${pluginList}`);
+                this.showToast(`Installing ${checkData.pending_plugins.length} recommended plugins...`, 'info');
                 
-                if (confirm(confirmMessage)) {
                   console.log('User confirmed plugin installation');
                   
                   // Create or reuse the plugin install dialog
@@ -362,10 +362,6 @@ class RegistryManager extends RegistryManagerBase {
                   };
                   
                   console.log('Installation modal created and appended');
-                } else {
-                  console.log('User declined plugin installation');
-                  this.showToast('Skipped recommended plugin installation', 'info');
-                  }
                 
               } else {
                 console.log('No pending recommended plugins found for agent:', agentName);
@@ -385,7 +381,6 @@ class RegistryManager extends RegistryManagerBase {
             console.error('Error checking recommended plugins:', error);
             // Don't fail the whole installation if plugin check fails
           }
-        }
       }
       
       // Set loading to false before showing success
@@ -421,34 +416,132 @@ class RegistryManager extends RegistryManagerBase {
     }
   }
 
+  async extractPersonaAssets(personaRef, personaData) {
+    try {
+      const assets = {};
+      
+      // Check if persona has embedded base64 assets
+      const personaAssets = personaData.persona_assets || {};
+      
+      if (personaAssets.avatar) {
+        // Convert base64 back to blob
+        const base64Data = personaAssets.avatar.data;
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: personaAssets.avatar.type || 'image/png' });
+        assets.avatar = blob;
+        console.log('Extracted avatar from base64, size:', blob.size);
+      } else if (personaData.asset_hashes?.avatar) {
+        // Fallback: try to download from asset store if available
+        try {
+          const response = await fetch(`${this.registryUrl}/assets/${personaData.asset_hashes.avatar}`);
+          if (response.ok) {
+            const blob = await response.blob();
+            assets.avatar = blob;
+          }
+        } catch (e) {
+          console.log('Could not download avatar from asset store:', e);
+        }
+      }
+      
+      if (personaAssets.faceref) {
+        // Convert base64 back to blob
+        const base64Data = personaAssets.faceref.data;
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: personaAssets.faceref.type || 'image/png' });
+        assets.faceref = blob;
+        console.log('Extracted faceref from base64, size:', blob.size);
+      } else if (personaData.asset_hashes?.faceref) {
+        // Fallback: try to download from asset store if available
+        try {
+          const response = await fetch(`${this.registryUrl}/assets/${personaData.asset_hashes.faceref}`);
+          if (response.ok) {
+            const blob = await response.blob();
+            assets.faceref = blob;
+          }
+        } catch (e) {
+          console.log('Could not download faceref from asset store:', e);
+        }
+      }
+      
+      return assets;
+    } catch (error) {
+      console.error('Error extracting persona assets:', error);
+      return {};
+    }
+  }
+
+  async installPersonaAssets(personaPath, assets) {
+    // Create the persona directory structure
+    const personaDir = `personas/${personaPath}`;
+    // Assets will be handled by the backend persona creation endpoint
+  }
+
   async installPersonaFromRegistry(personaRef, personaData, personaAssets) {
     try {
+      console.log("Trying intallPersonaFromRegistry", personaRef, personaData, personaAssets)
       const owner = personaRef.owner;
       const personaName = personaData.name;
+      
+      // Clean persona data - remove any non-serializable properties
+      const cleanPersonaData = {
+        name: personaData.name,
+        description: personaData.description,
+        instructions: personaData.instructions,
+        model: personaData.model,
+        version: personaData.version,
+        moderated: personaData.moderated,
+        // Add other safe properties but exclude problematic ones
+        // Don't include: persona_assets, asset_hashes, or any Blob objects
+      };
+      
+      // Remove any undefined values
+      Object.keys(cleanPersonaData).forEach(key => {
+        if (cleanPersonaData[key] === undefined) {
+          delete cleanPersonaData[key];
+        }
+      });
+      
+      console.log("Cleaned persona data:", cleanPersonaData);
       
       // Create the persona using the enhanced endpoint with asset support
       const response = await fetch('/personas/registry/with-assets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          persona: JSON.stringify(personaData),
-          owner: owner,
-          // Note: In a real implementation, we would need to download and upload
-          // the actual asset files here. For now, we're just creating the persona
-          // without assets, which will fall back to the original file-based approach.
-        })
+        body: (() => {
+          const formData = new FormData();
+          formData.append('persona', JSON.stringify(cleanPersonaData));
+          formData.append('owner', owner);
+          
+          // Download and attach persona assets if available
+          if (personaAssets && personaAssets.avatar) {
+            formData.append('avatar', personaAssets.avatar, 'avatar.png');
+          }
+          
+          if (personaAssets && personaAssets.faceref) {
+            formData.append('faceref', personaAssets.faceref, 'faceref.png');
+          }
+          
+          return formData;
+        })()
       });
       
       if (!response.ok) {
-        console.warn('Failed to install persona via API, will be created during agent installation');
+        const errorText = await response.text();
+        console.error('Failed to install persona via API:', response.status, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       console.log(`Installed registry persona: registry/${owner}/${personaName}`);
     } catch (error) {
       console.error('Error installing persona from registry:', error);
-      // Don't throw - let agent installation proceed, persona will be created then
+      throw error
     }
   }
 
@@ -456,9 +549,16 @@ class RegistryManager extends RegistryManagerBase {
     console.log('Installing agent from registry:', item);
     console.log('Registry item.data structure:', item.data);
     console.log('Looking for recommended_plugins in:', { direct: item.data.recommended_plugins, required: item.data.required_plugins, agent_config: item.data.agent_config });
+    
     // First, install persona if it has full persona data
     if (item.data.persona_data && item.data.persona_ref) {
-      await this.installPersonaFromRegistry(item.data.persona_ref, item.data.persona_data, item.data.persona_assets);
+      // Extract persona assets from registry data
+      const personaAssets = await this.extractPersonaAssets(item.data.persona_ref, item.data.persona_data);
+      console.log("Trying to install persona", {item, personaAssets})
+      // Install persona with downloaded assets
+      await this.installPersonaFromRegistry(item.data.persona_ref, item.data.persona_data, personaAssets);
+    } else {
+      console.log("Did not find persona data")
     }
     
     const agentData = {
@@ -522,6 +622,28 @@ class RegistryManager extends RegistryManagerBase {
       try {
         const errorData = await response.text();
         if (errorData) {
+          // Check if it's an "already exists" error
+          if (errorData.includes('already exists') || errorData.includes('Agent already exists')) {
+            // Show confirmation dialog for overwriting existing agent
+            const confirmOverwrite = confirm(`Agent "${agentData.name}" already exists. Do you want to overwrite it?`);
+            if (confirmOverwrite) {
+              // Retry the installation with overwrite flag
+              agentData.overwrite = true;
+              const retryResponse = await fetch('/agents/local', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `agent=${encodeURIComponent(JSON.stringify(agentData))}`
+              });
+              
+              if (retryResponse.ok) {
+                return; // Success, exit the function
+              }
+            } else {
+              throw new Error('Installation cancelled by user');
+            }
+          }
           errorMessage += ` - ${errorData}`;
         }
       } catch (e) {
@@ -733,6 +855,24 @@ class RegistryManager extends RegistryManagerBase {
   renderSearchResult(item) {
     return html`
       <div class="result-item">
+        ${item.category === 'agent' && (item.data?.persona_data?.persona_assets?.faceref || item.data?.persona_data?.persona_assets?.avatar) ? html`
+          <div class="result-avatar">
+            <img src="data:${(item.data.persona_data.persona_assets.faceref || item.data.persona_data.persona_assets.avatar).type};base64,${(item.data.persona_data.persona_assets.faceref || item.data.persona_data.persona_assets.avatar).data}" 
+                 alt="${item.title} avatar" 
+                 class="agent-avatar-large"
+                 onerror="this.style.display='none'">
+          </div>
+        ` : item.category === 'agent' && (item.data?.persona_data?.asset_hashes?.faceref || item.data?.persona_data?.asset_hashes?.avatar) ? html`
+          <div class="result-avatar">
+            <img src="${this.registryUrl}/assets/${item.data.persona_data.asset_hashes.faceref || item.data.persona_data.asset_hashes.avatar}" 
+                 alt="${item.title} avatar" 
+                 class="agent-avatar-large"
+                 onerror="this.style.display='none'">
+          </div>
+        ` : ''}
+        
+        <div class="result-content">
+        
         ${item.is_semantic ? html`
           <div class="semantic-badge">
             <span class="material-icons">psychology</span>
@@ -740,7 +880,11 @@ class RegistryManager extends RegistryManagerBase {
           </div>
         ` : ''}
         <div class="result-header">
+          ${item.category === 'agent' && (item.data?.persona_data?.persona_assets?.faceref || item.data?.persona_data?.persona_assets?.avatar || item.data?.persona_data?.asset_hashes?.faceref || item.data?.persona_data?.asset_hashes?.avatar) ? html`
+            <div class="agent-name-with-face">${item.title}</div>
+          ` : html`
           <h4 class="result-title">${item.title}</h4>
+          `}
           <span class="result-version">v${item.version}</span>
         </div>
         <p class="result-description">${item.description}</p>
@@ -755,8 +899,11 @@ class RegistryManager extends RegistryManagerBase {
           </div>
         ` : ''}
         <div class="result-actions">
-          ${this.isAgentInstalled(item.title) ? html`<button disabled>Already Installed</button>` : html`<button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>`}
+          <div>${this.isAgentInstalled(item.title) ? html`<div>Installed</div>` : ''}</div>
+          <button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>
           ${item.github_url ? html`<a href="${item.github_url}" target="_blank"><button>GitHub</button></a>` : ''}
+        </div>
+        
         </div>
       </div>
     `;
@@ -912,6 +1059,73 @@ class RegistryManager extends RegistryManagerBase {
     `;
   }
 
+  async uploadPersonaAssets(personaRef) {
+    try {
+      console.log('Uploading persona assets for:', personaRef);
+      const assets = {};
+      
+      // Check for avatar image
+      const avatarPath = `/chat/personas/${personaRef}/avatar.png`;
+      try {
+        const avatarResponse = await fetch(avatarPath);
+        if (avatarResponse.ok) {
+          const avatarBlob = await avatarResponse.blob();
+          console.log('Found avatar image, size:', avatarBlob.size);
+          assets.avatar = avatarBlob;
+        }
+      } catch (e) {
+        console.log(`No avatar found for persona ${personaRef}`);
+      }
+      
+      // Check for faceref image
+      const facerefPath = `/chat/personas/${personaRef}/faceref.png`;
+      try {
+        const facerefResponse = await fetch(facerefPath);
+        if (facerefResponse.ok) {
+          const facerefBlob = await facerefResponse.blob();
+          console.log('Found faceref image, size:', facerefBlob.size);
+          assets.faceref = facerefBlob;
+        }
+      } catch (e) {
+        console.log(`No faceref found for persona ${personaRef}`);
+      }
+      
+      console.log('Total assets found:', Object.keys(assets).length);
+      return assets;
+    } catch (error) {
+      console.error('Error loading persona assets for upload:', error);
+      return {};
+    }
+  }
+
+  async convertAssetsToBase64(assets) {
+    try {
+      console.log('Converting assets to base64:', Object.keys(assets));
+      const assetData = {};
+      
+      for (const [assetType, blob] of Object.entries(assets)) {
+        console.log(`Converting ${assetType} to base64...`);
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const binaryString = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('');
+        const base64String = btoa(binaryString);
+        
+        assetData[assetType] = {
+          data: base64String,
+          type: 'image/png',
+          size: blob.size
+        };
+        console.log(`${assetType} converted successfully, size:`, blob.size);
+      }
+      
+      console.log('Final asset data keys:', Object.keys(assetData));
+      return assetData;
+    } catch (error) {
+      console.error('Error converting assets to base64:', error);
+      return {};
+    }
+  }
+
   async publishItem(item, type) {
     if (!this.isLoggedIn) {
       this.error = 'Please log in to publish items';
@@ -952,7 +1166,26 @@ class RegistryManager extends RegistryManagerBase {
         
         if (item.persona && typeof item.persona === 'string') {
           personaData = await this.loadPersonaData(item.persona);
-          personaAssets = await this.loadPersonaAssets(item.persona);
+          
+          // Clean persona data - remove absolute file paths
+          if (personaData) {
+            // Remove absolute file paths that shouldn't be in registry
+            delete personaData.avatar_image_path;
+            delete personaData.face_ref_image_path;
+            delete personaData.avatar;
+            delete personaData.faceref;
+          }
+          
+          // Load and upload persona assets to registry
+          const localAssets = await this.uploadPersonaAssets(item.persona);
+          if (Object.keys(localAssets).length > 0) {
+            const assetData = await this.convertAssetsToBase64(localAssets);
+            if (personaData) {
+              personaData.persona_assets = assetData;
+              console.log('Added asset data to persona data:', Object.keys(assetData));
+            }
+            personaAssets = assetData;
+          }
         }
         
         publishData = {
@@ -972,7 +1205,7 @@ class RegistryManager extends RegistryManagerBase {
             persona_data: personaData,
             persona_assets: personaAssets,
             // Keep original persona reference for backward compatibility
-            persona: item.persona || {},
+            persona: item.persona || personaData?.name || {},
             instructions: item.instructions || '',
             model: item.model || 'default'
           },

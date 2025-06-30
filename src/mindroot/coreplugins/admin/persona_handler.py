@@ -67,8 +67,12 @@ def handle_persona_import(persona_data: dict, scope: str, owner: str = None) -> 
     
     # Check if persona already exists
     if persona_path.exists():
-        logger.warning(f"Persona '{persona_name}' already exists in {scope} scope - skipping import")
-        return persona_name
+        # For registry personas with owner, we should allow overwrite to support updates
+        if owner and scope == 'registry':
+            logger.info(f"Overwriting existing registry persona '{persona_name}' for owner '{owner}'")
+        else:
+            logger.warning(f"Persona '{persona_name}' already exists in {scope} scope - skipping import")
+            return return_name
     
     try:
         # Create persona directory and save data

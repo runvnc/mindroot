@@ -12,15 +12,20 @@ from .init_persona import *
 @service()
 async def get_persona_data(persona_name, context=None):
     print("persona name is", persona_name, file=sys.stderr)
-    # use pwd as base dir
-    # current working dir of process 
     pwd = os.getcwd()
-    persona_path = os.path.join(pwd, 'personas', 'local', persona_name)
-    if not os.path.exists(persona_path):
-        persona_path = os.path.join(pwd, 'personas', 'shared', persona_name)
+    
+    # Handle registry personas: registry/owner/name
+    if persona_name.startswith('registry/'):
+        persona_path = os.path.join(pwd, 'personas', persona_name)
+    else:
+        # Legacy support: check local first, then shared
+        persona_path = os.path.join(pwd, 'personas', 'local', persona_name)
         if not os.path.exists(persona_path):
-            # need to raise an error here
-            raise Exception(f"Persona {persona_name} not found in {persona_path}")
+            persona_path = os.path.join(pwd, 'personas', 'shared', persona_name)
+    
+    if not os.path.exists(persona_path):
+        # need to raise an error here
+        raise Exception(f"Persona {persona_name} not found in {persona_path}")
 
     # read the persona data
     # use blue background and yellow text

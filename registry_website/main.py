@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash
 from database import get_db, User, Content, Rating, InstallLog
 from vector_store import vector_store
+from asset_manager import registry_asset_manager
 from datetime import timedelta, datetime
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
@@ -15,6 +16,8 @@ import json
 import uvicorn
 import os
 from pathlib import Path
+import base64
+import hashlib
 
 app = FastAPI(
     title="MindRoot Registry",
@@ -182,6 +185,70 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current authenticated user information"""
     return current_user
 
+@app.get("/assets/{asset_hash}")
+def serve_asset(asset_hash: str):
+    """Serve a deduplicated asset by hash"""
+    try:
+        asset_path = registry_asset_manager.get_asset_path(asset_hash)
+        if not asset_path:
+            raise HTTPException(status_code=404, detail='Asset not found')
+        
+        metadata = registry_asset_manager.get_asset_metadata(asset_hash)
+        
+        with open(asset_path, 'rb') as f:
+            content = f.read()
+        
+        # Determine content type from metadata
+        content_type = metadata.get('content_type', 'application/octet-stream') if metadata else 'application/octet-stream'
+        
+        from fastapi.responses import Response
+        return Response(content=content, media_type=content_type)
+        
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f'Asset not found: {str(e)}')
+
+def extract_and_store_assets(data: dict, content_id: int) -> dict:
+    """Extract base64 assets from data and store them deduplicated"""
+    if not isinstance(data, dict):
+        return data
+    
+    # Look for persona_assets in the data
+    if 'persona_assets' in data:
+        persona_assets = data['persona_assets']
+        asset_hashes = {}
+        
+        for asset_type, asset_data in persona_assets.items():
+            if isinstance(asset_data, dict) and 'data' in asset_data:
+                # Decode base64 data
+                try:
+                    content = base64.b64decode(asset_data['data'])
+                    content_type = asset_data.get('type', 'image/png')
+                    
+                    # Store asset
+                    asset_hash, was_new = registry_asset_manager.store_asset(content, content_type, asset_type)
+                    
+                    # Link to content
+                    registry_asset_manager.link_asset_to_content(content_id, asset_hash, asset_type)
+                    
+                    asset_hashes[asset_type] = asset_hash
+                    
+                except Exception as e:
+                    print(f"Error processing asset {asset_type}: {e}")
+        
+        # Replace persona_assets with asset_hashes in the data
+        if asset_hashes:
+            # Remove the large base64 data and replace with hashes
+            data_copy = data.copy()
+            if 'persona_data' in data_copy:
+                data_copy['persona_data'] = data_copy['persona_data'].copy()
+                data_copy['persona_data']['asset_hashes'] = asset_hashes
+                # Remove the large persona_assets to save space
+                data_copy['persona_data'].pop('persona_assets', None)
+            data_copy.pop('persona_assets', None)
+            return data_copy
+   
+    return data
+
 # Content management endpoints
 @app.post("/publish", response_model=ContentResponse)
 def publish_content(
@@ -204,6 +271,9 @@ def publish_content(
         for field, value in content.dict().items():
             setattr(existing_content, field, value)
         existing_content.updated_at = datetime.utcnow()
+        
+        # Extract and store assets
+        existing_content.data = extract_and_store_assets(existing_content.data, existing_content.id)
         
         db.commit()
         db.refresh(existing_content)
@@ -234,6 +304,10 @@ def publish_content(
         db.add(db_content)
         db.commit()
         db.refresh(db_content)
+        
+        # Extract and store assets after getting the content ID
+        db_content.data = extract_and_store_assets(db_content.data, db_content.id)
+        db.commit()
         
         vector_store.add_item(
             str(db_content.id),

@@ -266,7 +266,13 @@ def create_agent(scope: str, agent: str = Form(...)):
             
         agent_path = BASE_DIR / scope / agent_name / 'agent.json'
         if agent_path.exists():
-            raise HTTPException(status_code=400, detail='Agent already exists')
+            # Check if overwrite parameter is provided
+            overwrite = agent_data.get('overwrite', False)
+            if not overwrite:
+                raise HTTPException(status_code=400, detail='Agent already exists')
+            else:
+                # If overwrite is True, we'll proceed to overwrite the existing agent
+                print(f"Overwriting existing agent: {agent_name}")
             
         print(f"Creating agent directory: {agent_path.parent}")
         agent_path.parent.mkdir(parents=True, exist_ok=True)
@@ -430,7 +436,12 @@ async def import_agent_zip(scope: str, file: UploadFile = File(...)):
             # Check if agent already exists
             target_dir = BASE_DIR / scope / agent_name
             if target_dir.exists():
-                raise HTTPException(status_code=400, detail=f'Agent {agent_name} already exists')
+                # For zip imports, we could add overwrite support in the future
+                # For now, we'll keep the existing behavior but make the error message consistent
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f'Agent {agent_name} already exists. Use the registry manager for updates.'
+                )
             
             # Copy extracted files to target directory
             target_dir.mkdir(parents=True, exist_ok=True)

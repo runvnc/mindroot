@@ -51,12 +51,21 @@
         <h2>Click an Agent to Start a Chat Session:</h2>
         
         <div class="agent-list" role="list">
-            {% for agent in agents %}
-            <a href="/agent/{{ agent }}" class="agent-link" role="listitem" target="_blank">
-                <img src="/chat/personas/{{ agent }}/avatar.png" alt="{{ agent }} avatar" class="agent-avatar" onerror="this.src='/chat/static/assistant.png'">
+            {% for agent_persona in agents_with_personas %}
+            <a href="/agent/{{ agent_persona.name }}" class="agent-link" role="listitem" target="_blank">
+                {% set persona_path = agent_persona.persona %}
+                {% set has_faceref = false %}
+                {% if agent_persona.agent_data and agent_persona.agent_data.persona and agent_persona.agent_data.persona.faceref %}
+                    {% set has_faceref = true %}
+                {% endif %}
+                {% if has_faceref %}
+                    <img src="/chat/personas/{{ persona_path }}/faceref.png" alt="{{ agent_persona.name }} avatar" class="agent-avatar" onerror="this.src='/chat/personas/{{ persona_path }}/avatar.png'; this.onerror=function(){this.src='/chat/static/assistant.png'}">
+                {% else %}
+                    <img src="/chat/personas/{{ persona_path }}/avatar.png" alt="{{ agent_persona.name }} avatar" class="agent-avatar" onerror="this.src='/chat/static/assistant.png'">
+                {% endif %}
                 <div class="agent-info">
                     <span class="agent-status" aria-hidden="true"></span>
-                    <span class="agent-name">{{ agent | replace('_', ' ') }}</span>
+                    <span class="agent-name">{{ agent_persona.name | replace('_', ' ') }}</span>
                 </div>
             </a>
             {% endfor %}

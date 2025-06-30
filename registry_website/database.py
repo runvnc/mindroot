@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, JSON, ForeignKey, UniqueConstraint, Float, DateTime, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, JSON, ForeignKey, UniqueConstraint, Float, DateTime, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from datetime import datetime
@@ -88,6 +88,27 @@ class InstallLog(Base):
     # Relationships
     content = relationship("Content")
     user = relationship("User")
+
+class Asset(Base):
+    __tablename__ = "assets"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    hash = Column(String, unique=True, index=True)  # SHA256 hash
+    content_type = Column(String)  # image/png, etc.
+    size = Column(Integer)
+    reference_count = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+class ContentAsset(Base):
+    __tablename__ = "content_assets"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    content_id = Column(Integer, ForeignKey("contents.id"))
+    asset_id = Column(Integer, ForeignKey("assets.id"))
+    asset_type = Column(String)  # 'avatar', 'faceref', etc.
+    
+    content = relationship("Content")
+    asset = relationship("Asset")
 
 def get_db():
     db = SessionLocal()

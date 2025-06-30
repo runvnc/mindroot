@@ -139,14 +139,40 @@ class PersonaEditor extends BaseEl {
   }
 
   async fetchPersonas() {
-    const response = await fetch(`/personas/${this.scope}`);
-    this.personas = await response.json();
+    if (this.scope === 'registry') {
+      // For registry personas, we need to get all owner directories
+      try {
+        const response = await fetch(`/personas/registry`);
+        const owners = await response.json();
+        this.personas = [];
+        
+        // Flatten registry personas to show as "owner/name"
+        for (const owner of owners) {
+          const ownerResponse = await fetch(`/personas/registry/${owner.name}`);
+          const ownerPersonas = await ownerResponse.json();
+          ownerPersonas.forEach(persona => {
+            this.personas.push({ name: `${owner.name}/${persona.name}`, displayName: `${owner.name}/${persona.name}` });
+          });
+        }
+      } catch (e) {
+        this.personas = [];
+      }
+    } else {
+      const response = await fetch(`/personas/${this.scope}`);
+      this.personas = await response.json();
+    }
   }
 
   async fetchPersona() {
     if (!this.newPersona && this.name) {
-      const response = await fetch(`/personas/${this.scope}/${this.name}`);
-      this.persona = await response.json();
+      if (this.scope === 'registry') {
+        // For registry personas, use the full path format
+        const response = await fetch(`/personas/registry/${this.name}`);
+        this.persona = await response.json();
+      } else {
+        const response = await fetch(`/personas/${this.scope}/${this.name}`);
+        this.persona = await response.json();
+      }
     } else {
       this.persona = {};
     }
@@ -223,10 +249,13 @@ class PersonaEditor extends BaseEl {
             <label>
               <input type="radio" name="scope" value="shared" .checked=${this.scope === 'shared'} @change=${this.handleScopeChange} /> Shared
             </label>
+            <label>
+              <input type="radio" name="scope" value="registry" .checked=${this.scope === 'registry'} @change=${this.handleScopeChange} /> Registry
+            </label>
           </div>
           <select @change=${this.handlePersonaChange} .value=${this.name || ''} ?disabled=${this.newPersona}>
             <option value="">Select a persona</option>
-            ${this.personas.map(persona => html`<option value="${persona.name}">${persona.name}</option>`) }
+            ${this.personas.map(persona => html`<option value="${persona.name}">${persona.displayName || persona.name}</option>`) }
           </select>
           <button class="btn btn-secondary" @click=${this.handleNewPersona}>New Persona</button>
         </div>

@@ -167,6 +167,37 @@ class RegistryManagerBase extends BaseEl {
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    .result-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .result-avatar {
+      flex-shrink: 0;
+    }
+
+    .agent-avatar-large {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(74, 158, 255, 0.3);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .result-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .agent-name-with-face {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4a9eff;
+      margin: 0;
+    }
+
     .result-header {
       display: flex;
       justify-content: space-between;

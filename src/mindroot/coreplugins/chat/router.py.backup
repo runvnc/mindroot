@@ -42,14 +42,7 @@ async def cancel_chat(request: Request, log_id: str, task_id: str):
     #    await asyncio.sleep(0.75)
     #    task.cancel()
     #    del tasks[task_id]
-    return {"status": "ok", "message": "Task cancelled successfully"}
-    #else:
-    #    raise HTTPException(status_code=404, detail="Task not found")
-
-@router.get("/context1/{log_id}")
-async def context1(request: Request, log_id: str):
-    user = request.state.user.username
-    context = await get_context(log_id, user)
+                
     print(context)
     return "ok"
 
@@ -57,34 +50,25 @@ async def context1(request: Request, log_id: str):
 # need to serve persona images from ./personas/local/[persona_path]/avatar.png
 @router.get("/chat/personas/{persona_path:path}/avatar.png")
 async def get_persona_avatar(persona_path: str):
-    # Check if this is a registry persona with deduplicated assets
-    if persona_path.startswith("registry/"):
-        persona_json_path = f"personas/{persona_path}/persona.json"
-        if os.path.exists(persona_json_path):
-            try:
-                with open(persona_json_path, "r") as f:
-                    persona_data = json.load(f)
-                
-                # Check if persona has asset hashes (deduplicated storage)
-                asset_hashes = persona_data.get("asset_hashes", {})
-                if "avatar" in asset_hashes:
-                    # Redirect to deduplicated asset endpoint
-                    return RedirectResponse(f"/assets/{asset_hashes['avatar']}")
-            except Exception as e:
-                print(f"Error checking for deduplicated assets: {e}")
-    
     # Handle registry personas: registry/owner/name
     if persona_path.startswith('registry/'):
         file_path = f"personas/{persona_path}/avatar.png"
+            # Check if persona has asset hashes (deduplicated storage)
+        with open(persona_json_path, "r") as f:
+            persona_data = json.load(f)
+ 
+            asset_hashes = persona_data.get("asset_hashes", {})
+            if "avatar" in asset_hashes:
+                # Redirect to deduplicated asset endpoint
+                return RedirectResponse(f"/assets/{asset_hashes["avatar"]}")
     else:
         # Legacy support: check local first, then shared
         file_path = f"personas/local/{persona_path}/avatar.png"
         if not os.path.exists(file_path):
-            file_path = f"personas/registry/{persona_path}/avatar.png"
+            file_path = f"personas/shared/{persona_path}/avatar.png"
     
     if not os.path.exists(file_path):
-        resolved =  os.path.realpath(file_path)
-        return {"error": "File not found: " + resolved}
+        return {"error": "File not found"}
         
     with open(file_path, "rb") as f:
         image_bytes = f.read()
@@ -123,7 +107,7 @@ async def get_persona_faceref(persona_path: str):
         # Legacy support: check local first, then shared
         file_path = f"personas/local/{persona_path}/faceref.png"
         if not os.path.exists(file_path):
-            file_path = f"personas/registry/{persona_path}/faceref.png"
+            file_path = f"personas/shared/{persona_path}/faceref.png"
     
     if not os.path.exists(file_path):
         # Fallback to avatar if faceref doesn't exist
@@ -379,9 +363,9 @@ async def delete_chat_session(request: Request, log_id: str, user=Depends(requir
 
 
 @router.get("/chat/{log_id}/tokens")
-async def get_token_count_alt(request: Request, log_id: str):
+async def get_token_count(request: Request, log_id: str):
     """
-    Alternative token count endpoint using token_counter module.
+    Get token counts for a chat log identified by log_id, including any delegated tasks.
     
     Parameters:
     - log_id: The log ID to count tokens for
