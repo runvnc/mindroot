@@ -92,7 +92,7 @@ async def initialize_admin(user_data_root: str, app) -> Tuple[Optional[str], Opt
         password = env_pass
         
         if not (username and password):
-            #username, password = generate_random_credentials()
+            username, password = generate_random_credentials()
             username = 'admin'
             print("\n" + "="*50)
             print("INITIAL ADMIN CREDENTIALS GENERATED:")
