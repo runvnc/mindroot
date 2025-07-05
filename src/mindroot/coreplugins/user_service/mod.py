@@ -70,20 +70,28 @@ async def create_user(user_data: UserCreate, roles: List[str] = None, skip_verif
 async def verify_user(username: str, password: str, context=None) -> bool:
     """Verify user credentials and update last login"""
     auth_file = os.path.join(USER_DATA_ROOT, username, "auth.json")
-    
+        
     if not os.path.exists(auth_file):
+        print("user not found")
+        print("path", auth_file)
+        print("working dir", os.getcwd())
         return False
         
     with open(auth_file, 'r') as f:
         auth_data = UserAuth(**json.load(f))
     
     if bcrypt.checkpw(password.encode(), auth_data.password_hash.encode()):
+        print("check pw passed")
         # Update last login
         auth_data.last_login = datetime.utcnow().isoformat()
         with open(auth_file, 'w') as f:
             json.dump(auth_data.dict(), f, indent=2, default=str)
         return True
-    return False
+    else:
+        print("checkpw failed,")
+        print("auth_data", auth_data)
+        print("password:", password.encode())
+        return False
 
 
 @service()
