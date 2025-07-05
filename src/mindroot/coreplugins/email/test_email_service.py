@@ -45,11 +45,22 @@ async def test_email_service():
     
     print(f"Sending test email to {test_email}...")
     
+    # Test HTML email
+    html_body = """
+    <html>
+    <body>
+        <h1>MindRoot Email Service Test</h1>
+        <p>This is a test email from MindRoot.</p>
+        <p><strong>HTML formatting works!</strong></p>
+        <p>If you can see this styled content, HTML emails are working correctly.</p>
+    </body>
+    </html>
+    """
+    
     result = await send_email(
         to=test_email,
         subject="MindRoot Email Service Test",
-        body="This is a test email from MindRoot.",
-        html_body="<h1>MindRoot Email Service Test</h1><p>This is a test email from MindRoot.</p>"
+        body=html_body  # HTML will be auto-detected
     )
     
     if result.get('success'):

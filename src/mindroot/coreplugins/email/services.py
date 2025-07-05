@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from email_provider import EmailProvider
+from .email_provider import EmailProvider
 
 # Global provider instance
 _provider = None
@@ -16,10 +16,12 @@ async def get_provider() -> EmailProvider:
         raise RuntimeError("Email provider not initialized. Call init_provider first.")
     return _provider
 
-async def send_email(config: Dict, to: str, subject: str, body: str,
+# Removed @service() decorator - this is now just a helper function
+# The actual service is in mod.py
+async def send_email_helper(config: Dict, to: str, subject: str, body: str,
                reply_to_message: Dict = None,
                headers: Dict = None) -> Dict:
-    """Service to send an email"""
+    """Helper function to send an email (not a service)"""
     provider = await get_provider()
     return await provider.send_email(
         to=to,

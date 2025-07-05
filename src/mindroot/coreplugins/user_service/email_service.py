@@ -32,8 +32,7 @@ async def send_verification_email(email: str, verification_token: str):
         result = await service_manager.send_email(
             to=email,
             subject="Verify Your MindRoot Account",
-            body="Please verify your email address.",  # Plain text fallback
-            html_body=email_html
+            body=email_html  # HTML content will be auto-detected
         )
         
         if result.get('success'):
@@ -72,8 +71,7 @@ async def send_password_reset_email(email: str, username: str, reset_token: str)
         result = await service_manager.send_email(
             to=email,
             subject="Password Reset Request - MindRoot",
-            body="You have requested to reset your password.",  # Plain text fallback
-            html_body=email_html
+            body=email_html  # HTML content will be auto-detected
         )
         
         if result.get('success'):

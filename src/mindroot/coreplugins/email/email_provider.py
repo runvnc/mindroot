@@ -1,6 +1,6 @@
 from typing import Dict, List
-from smtp_handler import SMTPHandler
-from imap_handler import IMAPHandler
+from .smtp_handler import SMTPHandler
+from .imap_handler import IMAPHandler
 import logging
 
 logger = logging.getLogger(__name__)

@@ -40,13 +40,23 @@ async def init_email_provider(config: Dict = None, context=None) -> bool:
         return False
 
 @service()
-async def send_email(to: str, subject: str, body: str, html_body: str = None, context=None) -> Dict:
-    """Service to send an email"""
+async def send_email(to: str, subject: str, body: str, context=None) -> Dict:
+    """Service to send an email
+    
+    Args:
+        to: Recipient email address
+        subject: Email subject
+        body: Email body (can be plain text or HTML - auto-detected)
+        context: Optional context
+    
+    Returns:
+        Dict with success status and error info
+    """
     global _provider
     
     if _provider is None:
         # Try to initialize with default config
-        success = await init_email_provider()
+        success = await init_email_provider(context=context)
         if not success:
             return {
                 "success": False,
@@ -54,12 +64,10 @@ async def send_email(to: str, subject: str, body: str, html_body: str = None, co
             }
     
     try:
-        # Use HTML body if provided, otherwise plain text
-        email_body = html_body if html_body else body
         result = await _provider.send_email(
             to=to,
             subject=subject,
-            body=email_body
+            body=body
         )
         return result
     except Exception as e:
@@ -75,7 +83,7 @@ async def check_emails(folder: str = "INBOX", criteria: Dict = None, context=Non
     global _provider
     
     if _provider is None:
-        success = await init_email_provider()
+        success = await init_email_provider(context=context)
         if not success:
             return {
                 "success": False,
