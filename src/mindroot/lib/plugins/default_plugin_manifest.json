@@ -45,6 +45,14 @@
         "enabled": true,
         "source": "core"
       },
+      "signup": {
+        "enabled": true,
+        "source": "core"
+      },
+      "email": {
+        "enabled": true,
+        "source": "core"
+      },
       "user_service": {
         "enabled": true,
         "source": "core"

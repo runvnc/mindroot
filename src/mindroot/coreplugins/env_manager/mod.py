@@ -22,13 +22,12 @@ def should_skip_directory(directory):
     skip_dirs = [
         '__pycache__', 
         'node_modules', 
-        'static/js', 
+        'static/js',
         'static/css',
         'venv',
         'env',
         '.env',
         'virtualenv',
-        'site-packages',
         'dist-packages',
         '.git',
         '.idea',
@@ -37,6 +36,14 @@ def should_skip_directory(directory):
         'dist',
         'egg-info'
     ]
+    
+    # Special handling for site-packages - only skip if it's not mindroot related
+    if 'site-packages' in directory:
+        # Allow mindroot core plugins in site-packages
+        if 'mindroot/coreplugins' in directory or 'mindroot/lib' in directory:
+            return False
+        # Skip other site-packages content
+        return True
     
     # Check if any part of the path contains a directory to skip
     path_parts = Path(directory).parts
@@ -66,7 +73,7 @@ def scan_directory_for_env_vars(directory):
         # Use grep to find os.environ references - much faster than parsing each file
         cmd = [
             'grep', '-r', 
-            '-E', r"(os\.environ(\.get\(|\[)|os\.getenv\()", 
+            '-E', r"(os\.environ(\.get\(|\[)|os\.getenv\(|getenv\()", 
             '--include=*.py', 
             '--exclude-dir=venv', 
             '--exclude-dir=env',
@@ -85,15 +92,24 @@ def scan_directory_for_env_vars(directory):
             return env_vars
             
         # Extract variable names using regex
-        pattern1 = r"os\.environ\.get\(['\"]([A-Za-z0-9_]+)['\"]"  # os.environ.get('VAR_NAME')
-        pattern2 = r"os\.environ\[['\"]([A-Za-z0-9_]+)['\"]\]"    # os.environ['VAR_NAME']
-        pattern3 = r"os\.getenv\(['\"]([A-Za-z0-9_]+)['\"]"      # os.getenv('VAR_NAME')
+        patterns = [
+            r"os\.environ\.get\(['\"]([A-Za-z0-9_]+)['\"]",  # os.environ.get('VAR_NAME')
+            r"os\.environ\[['\"]([A-Za-z0-9_]+)['\"]\]",    # os.environ['VAR_NAME']
+            r"os\.getenv\(['\"]([A-Za-z0-9_]+)['\"]",      # os.getenv('VAR_NAME')
+            r"(?<!os\.)getenv\(['\"]([A-Za-z0-9_]+)['\"]",  # getenv('VAR_NAME') without os. prefix
+        ]
         
         for line in result.stdout.splitlines():
-            for pattern in [pattern1, pattern2, pattern3]:
+            # Skip lines that are comments containing example patterns
+            if '# os.environ.get(' in line or '# os.environ[' in line or '# os.getenv(' in line:
+                continue
+            
+            for pattern in patterns:
                 for match in re.finditer(pattern, line):
                     var_name = match.group(1)
-                    env_vars.add(var_name)
+                    # Filter out obvious false positives
+                    if var_name not in ['VAR_NAME', 'VARIABLE_NAME', 'ENV_VAR']:
+                        env_vars.add(var_name)
     
     except Exception as e:
         print(f"Error scanning directory {directory}: {e}")
@@ -104,28 +120,38 @@ def scan_directory_for_env_vars(directory):
 async def scan_env_vars(params=None, context=None):
     """Scan all enabled plugins for environment variable references.
     
+    Debug logs added to help troubleshoot path resolution and scanning.
+    
     Returns:
         dict: Dictionary with plugin names as keys and environment variable info as values
     """
     results = {}
     all_env_vars = set()
     
+    print("[ENV_MANAGER DEBUG] Starting scan_env_vars")
+    print(f"[ENV_MANAGER DEBUG] Current working directory: {os.getcwd()}")
+    
     # Get all enabled plugins
     enabled_plugins = list_enabled()
+    print(f"[ENV_MANAGER DEBUG] Found {len(enabled_plugins)} enabled plugins: {[name for name, cat in enabled_plugins]}")
     
     for plugin_name, category in enabled_plugins:
         plugin_path = get_plugin_path(plugin_name)
+        print(f"[ENV_MANAGER DEBUG] Plugin {plugin_name}: path = {plugin_path}")
         if plugin_path:
             # If plugin_path is a file, get its directory
             if os.path.isfile(plugin_path):
                 plugin_path = os.path.dirname(plugin_path)
+                print(f"[ENV_MANAGER DEBUG] Plugin {plugin_name}: converted to directory = {plugin_path}")
                 
             # Skip scanning if this is a directory we should ignore
             if should_skip_directory(plugin_path):
+                print(f"[ENV_MANAGER DEBUG] Plugin {plugin_name}: skipping directory {plugin_path}")
                 continue
                 
             # Scan the plugin directory for environment variable references
             env_vars = scan_directory_for_env_vars(plugin_path)
+            print(f"[ENV_MANAGER DEBUG] Plugin {plugin_name}: found {len(env_vars)} env vars: {sorted(env_vars)}")
             
             if env_vars:
                 results[plugin_name] = {
@@ -134,30 +160,35 @@ async def scan_env_vars(params=None, context=None):
                     'env_vars': list(env_vars)
                 }
                 all_env_vars.update(env_vars)
+        else:
+            print(f"[ENV_MANAGER DEBUG] Plugin {plugin_name}: no path found")
     
-    # Also scan the core directories (lib and coreplugins)
-    core_env_vars = set()
+    # Also scan the lib directory (but not coreplugins since individual plugins are already scanned)
     lib_path = os.path.dirname(lib.__file__)
-    mindroot_path = os.path.dirname(lib_path)
     
-    # Scan lib directory
+    print(f"[ENV_MANAGER DEBUG] lib.__file__ = {lib.__file__}")
+    print(f"[ENV_MANAGER DEBUG] lib_path = {lib_path}")
+    
+    # Scan lib directory for additional core variables
     if os.path.isdir(lib_path):
+        print(f"[ENV_MANAGER DEBUG] Scanning lib directory: {lib_path}")
         lib_vars = scan_directory_for_env_vars(lib_path)
-        core_env_vars.update(lib_vars)
+        print(f"[ENV_MANAGER DEBUG] Lib vars found: {sorted(lib_vars)}")
+        
+        if lib_vars:
+            results['lib'] = {
+                'plugin_name': 'lib',
+                'category': 'core',
+                'env_vars': sorted(list(lib_vars))
+            }
+            all_env_vars.update(lib_vars)
+            print(f"[ENV_MANAGER DEBUG] Added lib section to results")
+    else:
+        print(f"[ENV_MANAGER DEBUG] Lib directory not found: {lib_path}")
 
-    # Scan coreplugins directory
-    coreplugins_path = os.path.join(mindroot_path, 'coreplugins')
-    if os.path.isdir(coreplugins_path):
-        coreplugins_vars = scan_directory_for_env_vars(coreplugins_path)
-        core_env_vars.update(coreplugins_vars)
-
-    if core_env_vars:
-        results['core'] = {
-            'plugin_name': 'core',
-            'category': 'core',
-            'env_vars': sorted(list(core_env_vars))
-        }
-        all_env_vars.update(core_env_vars)
+    # Note: We don't scan the entire coreplugins directory separately because
+    # individual core plugins are already being scanned above in the enabled_plugins loop.
+    # This prevents duplicate entries that would show up as "Multiple Plugins".
 
     # Get current environment variables
     current_env = {}
@@ -175,6 +206,10 @@ async def scan_env_vars(params=None, context=None):
     # Add current environment variables to results
     results['current_env'] = current_env
     
+    print(f"[ENV_MANAGER DEBUG] Results structure: {[(k, len(v.get('env_vars', [])) if isinstance(v, dict) and 'env_vars' in v else 'N/A') for k, v in results.items()]}")
+    
+    print(f"[ENV_MANAGER DEBUG] Final results keys: {list(results.keys())}")
+    print(f"[ENV_MANAGER DEBUG] Total unique env vars: {len(all_env_vars)}")
     return results
 
 

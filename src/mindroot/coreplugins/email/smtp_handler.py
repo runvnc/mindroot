@@ -36,7 +36,7 @@ class SMTPHandler:
         try:
             server = await self.connect()
             
-            msg = MIMEMultipart()
+            msg = MIMEMultipart('alternative')
             msg['From'] = self.email
             msg['To'] = to
             msg['Subject'] = subject
@@ -52,14 +52,20 @@ class SMTPHandler:
                 if not subject.lower().startswith('re:'):
                     msg['Subject'] = f"Re: {subject}"
 
-            msg.attach(MIMEText(body, 'plain'))
+            # Detect if body contains HTML
+            if '<html>' in body.lower() or '<p>' in body.lower() or '<br>' in body.lower():
+                # HTML email
+                msg.attach(MIMEText(body, 'html'))
+            else:
+                # Plain text email
+                msg.attach(MIMEText(body, 'plain'))
             
             server.send_message(msg)
             server.quit()
 
             return {
                 "success": True,
-                "message_id": msg['Message-ID'],
+                "message_id": msg.get('Message-ID'),
                 "error": None
             }
 
