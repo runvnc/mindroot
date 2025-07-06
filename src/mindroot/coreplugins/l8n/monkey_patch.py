@@ -18,7 +18,9 @@ def get_current_language() -> str:
     """
     Get the current language for the request using enhanced detection.
     """
-    return get_fallback_language(get_request_language())def find_localized_template(template_name: str) -> Optional[Path]:
+    return get_fallback_language(get_request_language())
+
+def find_localized_template(template_name: str) -> Optional[Path]:
     """
     Find a localized version of a template.
     
@@ -175,5 +177,7 @@ def uninstall_monkey_patch():
         return False
 
 # Auto-install the monkey patch when this module is imported
-if __name__ != '__main__':
+# Prevent double installation by checking if already installed
+if __name__ != '__main__' and not hasattr(install_monkey_patch, '_auto_installed'):
     install_monkey_patch()
+    install_monkey_patch._auto_installed = True

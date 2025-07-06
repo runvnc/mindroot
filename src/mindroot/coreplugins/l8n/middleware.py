@@ -8,10 +8,10 @@ try:
 except ImportError:
     # For standalone testing
     from language_detection import (
-    _parse_accept_language_header,
-    get_fallback_language,
-    set_language_for_request
-)
+        _parse_accept_language_header,
+        get_fallback_language,
+        set_language_for_request
+    )
 import os
 
 # Global variable to store the current request language
