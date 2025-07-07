@@ -330,6 +330,7 @@ async def get_token_count(request: Request, log_id: str):
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
+
     
     return {"status": "ok", "token_counts": token_counts}
 
@@ -395,5 +396,13 @@ async def get_token_count_alt(request: Request, log_id: str):
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
+
     
     return {"status": "ok", "token_counts": token_counts}
+
+# Include widget routes
+try:
+    from .widget_routes import router as widget_router
+    router.include_router(widget_router)
+except ImportError as e:
+    print(f"Warning: Could not load widget routes: {e}")
