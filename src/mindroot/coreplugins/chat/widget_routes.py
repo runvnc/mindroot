@@ -8,6 +8,8 @@ from lib.providers.services import service_manager
 from lib.route_decorators import public_route
 import nanoid
 from .services import init_chat_session
+from lib.session_files import save_session_data
+import traceback
 
 router = APIRouter()
 
@@ -265,6 +267,11 @@ async def create_widget_session(token: str):
         # Initialize the chat session (this was missing!)
         await init_chat_session(user, agent_name, session_id)
         
+        # Create and save access token for authentication
+        from coreplugins.jwt_auth.middleware import create_access_token
+        token_data = create_access_token({"sub": api_key_data['username']})
+        await save_session_data(session_id, "access_token", token_data)
+        
         # Now redirect to the session WITHOUT exposing the API key
         redirect_url = f"/session/{agent_name}/{session_id}?embed=true"
         
@@ -273,8 +280,8 @@ async def create_widget_session(token: str):
             headers={"Location": redirect_url}
         )
     
-    except HTTPException:
-        raise
     except Exception as e:
+        trace = traceback.format_exc()
+        print(e, trace)
         raise HTTPException(status_code=500, detail=str(e))
         

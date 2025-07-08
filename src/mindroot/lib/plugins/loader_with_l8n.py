@@ -9,16 +9,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from .paths import get_plugin_path, get_plugin_import_path
 from .manifest import list_enabled, load_plugin_manifest
 from .installation import check_plugin_dependencies
+from .l8n_static_handler import mount_translated_static_files
 from mindroot.lib.utils.debug import debug_box
-
-# Try to import l8n static handler
-try:
-    from .l8n_static_handler import mount_translated_static_files
-    L8N_STATIC_AVAILABLE = True
-except ImportError as e:
-    print(f"L8n static handler not available: {e}")
-    debug_box("L8n static handler not available, falling back to regular static files")
-    L8N_STATIC_AVAILABLE = False
 
 app_instance = None
 
@@ -83,14 +75,13 @@ def mount_static_files(app, plugin_name, category):
         plugin_name (str): Name of the plugin
         category (str): Plugin category ('core' or 'installed')
     """
-    # Try to use translated static files first if l8n is available
-    if L8N_STATIC_AVAILABLE:
-        try:
-            mount_translated_static_files(app, plugin_name, category)
-            return
-        except Exception as e:
-            print(f"Could not mount translated static files for {plugin_name}: {e}")
-            print("Falling back to regular static file mounting")
+    try:
+        # Try to use translated static files first
+        mount_translated_static_files(app, plugin_name, category)
+        return
+    except Exception as e:
+        print(f"Could not mount translated static files for {plugin_name}: {e}")
+        print("Falling back to regular static file mounting")
     
     # Fallback to regular static file mounting
     plugin_dir = get_plugin_path(plugin_name)

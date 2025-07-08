@@ -1,4 +1,5 @@
 from fastapi import Request
+
 try:
     from .language_detection import (
         _parse_accept_language_header,
@@ -96,11 +97,10 @@ async def middleware(request: Request, call_next):
         Response from the next handler
     """
     global _current_request_language
-    
     try:
         # Detect the language for this request
         detected_language = detect_language_from_request(request)
-        
+
         # Store it globally for the template system
         _current_request_language = detected_language
         

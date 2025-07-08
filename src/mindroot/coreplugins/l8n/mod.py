@@ -1,72 +1,26 @@
 import os
 import re
+import json
 from pathlib import Path
-from lib.providers.commands import command
+from mindroot.lib.providers.commands import command
+from .utils import extract_plugin_root, get_localized_file_path, load_plugin_translations, get_plugin_translations_path
 
-# Global storage for translations
-# Structure: {language: {key: translation}}
-TRANSLATIONS = {}
+from .l8n_constants import *
 
-# Base directory for localized files
-LOCALIZED_FILES_DIR = Path(__file__).parent / "localized_files"
+def save_plugin_translations(plugin_path: str, translations: dict):
+    """Save translations for a specific plugin to disk."""
+    translations_file = get_plugin_translations_path(plugin_path)
+    
+    try:
+        # Ensure directory exists
+        translations_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(translations_file, 'w', encoding='utf-8') as f:
+            json.dump(translations, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Warning: Could not save translations to {translations_file}: {e}")
+        return False
 
-def extract_plugin_root(absolute_path: str) -> str:
-    """
-    Extract the plugin root from an absolute path.
-    
-    For core plugins: everything after 'coreplugins/'
-    For external plugins: everything after 'src/[plugin_name]/'
-    
-    Examples:
-    - /files/mindroot/src/mindroot/coreplugins/chat/templates/chat.jinja2 -> chat/templates/chat.jinja2
-    - /some/path/src/my_plugin/templates/page.jinja2 -> my_plugin/templates/page.jinja2
-    """
-    path = Path(absolute_path)
-    parts = path.parts
-    
-    # Find coreplugins in the path
-    if 'coreplugins' in parts:
-        coreplugins_idx = parts.index('coreplugins')
-        if coreplugins_idx + 1 < len(parts):
-            return '/'.join(parts[coreplugins_idx + 1:])
-    
-    # Find src/[plugin_name] pattern for external plugins
-    for i, part in enumerate(parts):
-        if part == 'src' and i + 1 < len(parts):
-            # Check if this looks like a plugin (has templates, static, etc.)
-            potential_plugin = parts[i + 1]
-            if i + 2 < len(parts):  # Has more path after src/plugin_name
-                return '/'.join(parts[i + 1:])
-    
-    # Fallback: return the filename
-    return path.name
-
-def get_localized_file_path(original_path: str) -> Path:
-    """
-    Convert an original file path to its localized version path.
-    
-    Examples:
-    - chat/templates/chat.jinja2 -> localized_files/coreplugins/chat/templates/chat.i18n.jinja2
-    - my_plugin/templates/page.jinja2 -> localized_files/external_plugins/my_plugin/templates/page.i18n.jinja2
-    """
-    plugin_root = extract_plugin_root(original_path)
-    path = Path(plugin_root)
-    
-    # Determine if this is a core plugin or external plugin
-    if any(core_plugin in plugin_root for core_plugin in ['chat', 'admin', 'l8n']):
-        # Core plugin
-        base_dir = LOCALIZED_FILES_DIR / "coreplugins"
-    else:
-        # External plugin
-        base_dir = LOCALIZED_FILES_DIR / "external_plugins"
-    
-    # Add .i18n before the file extension
-    stem = path.stem
-    suffix = path.suffix
-    new_filename = f"{stem}.i18n{suffix}"
-    
-    localized_path = base_dir / path.parent / new_filename
-    return localized_path
 
 @command()
 async def write_localized_file(original_path: str, content: str, context=None):
@@ -157,35 +111,51 @@ async def append_localized_file(original_path: str, content: str, context=None):
         return f"Error appending to localized file: {str(e)}"
 
 @command()
-async def set_translations(language: str, translations: dict, context=None):
+async def set_translations(original_path: str, language: str, translations: dict, context=None):
     """
-    Set translations for a specific language.
+    Set translations for a specific language and plugin.
     
     This command stores the translation mappings that will be used to replace
-    __TRANSLATE_key__ placeholders in localized files.
+    __TRANSLATE_key__ placeholders in localized files. Translations are stored
+    per plugin based on the provided file path.
     
     Args:
+        original_path: Absolute path to a file in the plugin (used to identify the plugin)
         language: Language code (e.g., 'en', 'es', 'fr', 'de')
         translations: Dictionary mapping translation keys to translated text
         context: Command context (optional)
     
-    Example:
-        await set_translations('es', {
-            'chat_title': 'Interfaz de Chat',
-            'buttons_send': 'Enviar Mensaje',
-            'nav_home': 'Inicio',
-            'error_connection_failed': 'Error de conexión'
-        })
+    Examples:
+        await set_translations(
+            "/files/mindroot/src/mindroot/coreplugins/chat/templates/chat.jinja2",
+            'es', 
+            {
+                'chat_title': 'Interfaz de Chat',
+                'buttons_send': 'Enviar Mensaje',
+                'nav_home': 'Inicio',
+                'error_connection_failed': 'Error de conexión'
+            }
+        )
         
-        await set_translations('fr', {
-            'chat_title': 'Interface de Chat',
-            'buttons_send': 'Envoyer le Message',
-            'nav_home': 'Accueil'
-        })
+        await set_translations(
+            "/some/path/src/my_plugin/templates/dashboard.jinja2",
+            'fr', 
+            {
+                'dashboard_welcome': 'Bienvenue au Tableau de Bord',
+                'buttons_save': 'Enregistrer',
+                'nav_home': 'Accueil'
+            }
+        )
     """
     try:
         if not isinstance(translations, dict):
             return "Error: translations must be a dictionary"
+        
+        # Get the plugin-specific translations path
+        plugin_key = str(get_plugin_translations_path(original_path))
+        
+        # Load existing translations for this plugin
+        plugin_translations = load_plugin_translations(original_path)
         
         # Validate translation keys (should match placeholder format)
         invalid_keys = []
@@ -196,42 +166,69 @@ async def set_translations(language: str, translations: dict, context=None):
         if invalid_keys:
             return f"Error: Invalid translation keys (use lowercase, numbers, underscores only): {invalid_keys}"
         
-        # Store translations
-        if language not in TRANSLATIONS:
-            TRANSLATIONS[language] = {}
+        # Update translations for this language
+        if language not in plugin_translations:
+            plugin_translations[language] = {}
         
-        TRANSLATIONS[language].update(translations)
+        plugin_translations[language].update(translations)
         
-        return f"Set {len(translations)} translations for language '{language}'. Total languages: {len(TRANSLATIONS)}"
+        # Save translations to disk
+        if save_plugin_translations(original_path, plugin_translations):
+            # Update cache
+            TRANSLATIONS[plugin_key] = plugin_translations
+            return f"Set {len(translations)} translations for language '{language}' in {Path(plugin_key).parent.name} plugin"
+        else:
+            return f"Error: Could not save translations"
     
     except Exception as e:
         return f"Error setting translations: {str(e)}"
 
 @command()
-async def get_translations(language: str = None, context=None):
+async def get_translations(original_path: str = None, language: str = None, context=None):
     """
-    Get translations for a specific language or all languages.
+    Get translations for a specific plugin and language.
     
     Args:
+        original_path: Absolute path to a file in the plugin (optional)
+                      If not provided, returns all cached translations
         language: Language code to get translations for (optional)
         context: Command context (optional)
     
     Returns:
-        Dictionary of translations for the language, or all translations if no language specified
+        Dictionary of translations
     
     Examples:
-        # Get Spanish translations
-        spanish_translations = await get_translations('es')
+        # Get all translations for a plugin
+        translations = await get_translations(
+            "/files/mindroot/src/mindroot/coreplugins/chat/templates/chat.jinja2"
+        )
         
-        # Get all translations
-        all_translations = await get_translations()
+        # Get Spanish translations for a plugin
+        spanish = await get_translations(
+            "/files/mindroot/src/mindroot/coreplugins/chat/templates/chat.jinja2",
+            'es'
+        )
+        
+        # Get all cached translations
+        all_cached = await get_translations()
     """
     try:
-        if language:
-            return TRANSLATIONS.get(language, {})
+        if original_path:
+            # Load translations for specific plugin
+            plugin_translations = load_plugin_translations(original_path)
+            
+            # Update cache
+            plugin_key = str(get_plugin_translations_path(original_path))
+            TRANSLATIONS[plugin_key] = plugin_translations
+            
+            if language:
+                return plugin_translations.get(language, {})
+            else:
+                return plugin_translations
         else:
+            # Return all cached translations
             return TRANSLATIONS
-    
+        
     except Exception as e:
         return f"Error getting translations: {str(e)}"
 
@@ -258,28 +255,4 @@ async def list_localized_files(context=None):
     except Exception as e:
         return f"Error listing localized files: {str(e)}"
 
-def replace_placeholders(content: str, language: str) -> str:
-    """
-    Replace __TRANSLATE_key__ placeholders with actual translations.
-    
-    This function is used by the monkey-patch system to replace placeholders
-    with actual translated text before serving templates.
-    
-    Args:
-        content: Template content with placeholders
-        language: Language code for translations
-    
-    Returns:
-        Content with placeholders replaced by translations
-    """
-    if language not in TRANSLATIONS:
-        return content
-    
-    translations = TRANSLATIONS[language]
-    
-    def replace_match(match):
-        key = match.group(1)
-        return translations.get(key, match.group(0))  # Return original if no translation
-    
-    # Replace all __TRANSLATE_key__ patterns
-    return re.sub(r'__TRANSLATE_([a-z0-9_]+)__', replace_match, content)
+

@@ -110,7 +110,7 @@ def patched_get_source(self, environment, template):
             
             # Replace placeholders with translations
             current_language = get_current_language()
-            translated_source = replace_placeholders(source, current_language)
+            translated_source = replace_placeholders(source, current_language, str(localized_path))
             
             # Return the translated source
             # Note: We use the original template name for caching purposes
@@ -131,7 +131,7 @@ def install_monkey_patch():
     template loading and provide localized versions when available.
     """
     global _original_get_source
-    
+    return
     try:
         from jinja2 import FileSystemLoader
         

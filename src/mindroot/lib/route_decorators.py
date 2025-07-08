@@ -9,23 +9,23 @@ public_routes: Set[str] = set()
 public_static: Set[str] = set()
 
 def public_route():
-    # include route path/function name
-    print("public_route decorator called", public_routes)
+    """Decorator to mark a route as public (no authentication required)"""
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            print("public route !!!!!!!!!!!")
+            # Mark the request as a public route for any middleware that needs to know
             request: Request = next((arg for arg in args if isinstance(arg, Request)), None)
             if request:
                 request.state.public_route = True
             return await func(*args, **kwargs)
+        
+        # Mark the function as a public route so the startup hook can find it
         wrapper.__public_route__ = True
-        public_routes.add(func.__name__)
-        print("wrapper.__public_route__", wrapper.__public_route__)
         return wrapper
     return decorator
 
 def add_public_static(path_start):
+    """Add a path prefix to the public static routes"""
     public_static.add(path_start)
 
 # New role-based dependency functions

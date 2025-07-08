@@ -11,6 +11,7 @@ from lib.session_files import load_session_data
 from lib.utils.debug import debug_box
 import secrets
 from pathlib import Path
+import re
 
 def get_or_create_jwt_secret():
     secret_key = os.environ.get("JWT_SECRET_KEY", None)
@@ -85,6 +86,48 @@ def decode_token(token: str):
         print("Invalid token")
         return False
 
+def path_matches_pattern(request_path: str, route_pattern: str) -> bool:
+    """
+    Check if a request path matches a route pattern with parameters.
+    
+    Examples:
+    - path_matches_pattern('/chat/embed/abc123', '/chat/embed/{token}') -> True
+    - path_matches_pattern('/chat/widget/xyz/session', '/chat/widget/{token}/session') -> True
+    - path_matches_pattern('/login', '/login') -> True
+    """
+    # Handle exact matches first
+    if request_path == route_pattern:
+        return True
+    
+    # Convert FastAPI route pattern to regex
+    # Replace {param} with regex pattern that matches any non-slash characters
+    regex_pattern = re.sub(r'\{[^}]+\}', r'[^/]+', route_pattern)
+    # Escape other regex special characters
+    regex_pattern = regex_pattern.replace('.', '\\.')
+    # Add start and end anchors
+    regex_pattern = f'^{regex_pattern}$'
+    
+    try:
+        return bool(re.match(regex_pattern, request_path))
+    except re.error:
+        # If regex compilation fails, fall back to exact match
+        return request_path == route_pattern
+
+def is_public_route(request_path: str) -> bool:
+    """
+    Check if a request path matches any registered public route pattern.
+    """
+    # Check exact matches and pattern matches
+    for route_pattern in public_routes:
+        if path_matches_pattern(request_path, route_pattern):
+            return True
+    
+    # Check special cases
+    if request_path.startswith('/reset-password'):
+        return True
+        
+    return False
+
 async def middleware(request: Request, call_next):
     try:
         print('-------------------------- auth middleware ----------------------------')
@@ -142,8 +185,9 @@ async def middleware(request: Request, call_next):
             print("Error checking for static file", e)
             pass
         print("Did not find static file")
-        # Accept explicitly-registered public routes, _or_ the password-reset link which carries its own token
-        if request.url.path in public_routes or request.url.path.startswith('/reset-password'):
+        
+        # Use the improved public route checking
+        if is_public_route(request.url.path):
             print('Public route: ', request.url.path)
             return await call_next(request)
         elif any([request.url.path.startswith(path) for path in public_static]):
