@@ -25,8 +25,8 @@ def save_plugin_translations(plugin_path: str, translations: dict):
         return False
 
 
-
 debug_box("l8n: defining command")
+
 @command()
 async def write_localized_file(original_path: str, content: str, context=None):
     """
