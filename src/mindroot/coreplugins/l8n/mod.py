@@ -2,7 +2,15 @@ import os
 import re
 import json
 from pathlib import Path
-from mindroot.lib.providers.commands import command
+
+# Try to import from lib first (for same instance), fallback to mindroot.lib
+try:
+    from lib.providers.commands import command, command_manager
+    print("l8n: Using lib.providers.commands (same instance)")
+except ImportError:
+    from mindroot.lib.providers.commands import command, command_manager
+    print("l8n: Using mindroot.lib.providers.commands (fallback)")
+
 from .utils import extract_plugin_root, get_localized_file_path, load_plugin_translations, get_plugin_translations_path
 from mindroot.lib.utils.debug import debug_box
 
@@ -26,6 +34,10 @@ def save_plugin_translations(plugin_path: str, translations: dict):
 
 
 debug_box("l8n: defining command")
+
+# Debug: Check if command_manager has functions
+debug_box(f"l8n: command_manager has {len(command_manager.functions)} functions before registration")
+debug_box(f"l8n: command_manager instance ID: {id(command_manager)}")
 
 @command()
 async def write_localized_file(original_path: str, content: str, context=None):
@@ -259,5 +271,7 @@ async def list_localized_files(context=None):
     
     except Exception as e:
         return f"Error listing localized files: {str(e)}"
+
+debug_box(f"l8n: command_manager has {len(command_manager.functions)} functions after registration")
 
 debug_box("l8n: End of mod.py")

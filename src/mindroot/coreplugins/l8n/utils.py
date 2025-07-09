@@ -131,10 +131,10 @@ def get_localized_file_path(original_path: str) -> Path:
     return localized_path
 
 
-def load_plugin_translations(translations_path: str):
+def load_plugin_translations(plugin_path: str):
     """Load translations for a specific plugin from disk."""
 
-    #translations_file = get_plugin_translations_path(plugin_path)
+    translations_file = get_plugin_translations_path(plugin_path)
     
     if translations_file.exists():
         try:

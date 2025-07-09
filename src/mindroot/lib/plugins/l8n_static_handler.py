@@ -19,6 +19,7 @@ except ImportError as e:
     trace = traceback.format_exc()
     print(f"L8n not available for static files: {e}\n{trace}")
     L8N_AVAILABLE = False
+    sys.exit(1)
 
 class TranslatedStaticFiles(StaticFiles):
     """Custom StaticFiles handler that applies l8n translations to JavaScript files."""
@@ -48,8 +49,11 @@ class TranslatedStaticFiles(StaticFiles):
     def should_translate_file(self, file_path: Path) -> bool:
         """Check if a file should be translated."""
         if not L8N_AVAILABLE:
+            print("L8n not available, skipping translation check.")
             return False
         
+        # show suffix
+        print(f"Checking if file should be translated: {file_path} suffix is {file_path.suffix}")
         # Only translate JavaScript files for now
         return file_path.suffix.lower() in ['.js', '.mjs']
     
@@ -110,7 +114,11 @@ class TranslatedStaticFiles(StaticFiles):
                         'Expires': '0'
                     }
                 )
-            
+            else:
+                print(f"l8n Static file not translated: {full_path}")
+                # display path exists
+                print(f"l8n File exists: {full_path.exists()}")
+
             # For non-JS files or when translation is not available, use default behavior
             print(f"l8n Serving static file without translation: {full_path}")
             return await super().get_response(path, scope)

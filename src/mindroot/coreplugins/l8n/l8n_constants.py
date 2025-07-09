@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 
+L8N_AVAILABLE = True
+
 # Base directory for l8n plugin
 L8N_DIR = Path(os.environ.get('MR_SOURCE_DIR', '/files/mindroot/src/mindroot/coreplugins/l8n'))
 

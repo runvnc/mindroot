@@ -1,0 +1,58 @@
+{
+  "en": {
+    "admin_title": "Admin Interface",
+    "category_customize": "Customize",
+    "item_install_registry": "Install / Registry",
+    "item_agents": "Agents",
+    "item_personas": "Personas",
+    "category_server_settings": "Server Settings",
+    "item_server_control": "Server Control",
+    "item_about": "About",
+    "item_model_preferences": "Model Preferences",
+    "category_advanced": "Advanced",
+    "item_plugins": "Plugins",
+    "item_secure_widgets": "Secure Chat Widgets"
+  },
+  "es": {
+    "admin_title": "Interfaz de Administración",
+    "category_customize": "Personalizar",
+    "item_install_registry": "Instalar / Registro",
+    "item_agents": "Agentes",
+    "item_personas": "Personas",
+    "category_server_settings": "Configuración del Servidor",
+    "item_server_control": "Control del Servidor",
+    "item_about": "Acerca de",
+    "item_model_preferences": "Preferencias del Modelo",
+    "category_advanced": "Avanzado",
+    "item_plugins": "Complementos",
+    "item_secure_widgets": "Widgets de Chat Seguro"
+  },
+  "fr": {
+    "admin_title": "Interface d'Administration",
+    "category_customize": "Personnaliser",
+    "item_install_registry": "Installer / Registre",
+    "item_agents": "Agents",
+    "item_personas": "Personas",
+    "category_server_settings": "Paramètres du Serveur",
+    "item_server_control": "Contrôle du Serveur",
+    "item_about": "À propos",
+    "item_model_preferences": "Préférences du Modèle",
+    "category_advanced": "Avancé",
+    "item_plugins": "Plugins",
+    "item_secure_widgets": "Widgets de Chat Sécurisé"
+  },
+  "de": {
+    "admin_title": "Admin-Oberfläche",
+    "category_customize": "Anpassen",
+    "item_install_registry": "Installieren / Registrierung",
+    "item_agents": "Agenten",
+    "item_personas": "Personas",
+    "category_server_settings": "Servereinstellungen",
+    "item_server_control": "Serversteuerung",
+    "item_about": "Über",
+    "item_model_preferences": "Modelleinstellungen",
+    "category_advanced": "Erweitert",
+    "item_plugins": "Plugins",
+    "item_secure_widgets": "Sichere Chat-Widgets"
+  }
+}

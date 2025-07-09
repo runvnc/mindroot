@@ -4,6 +4,7 @@ from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 from .plugins import list_enabled, get_plugin_path
 from .parent_templates import get_parent_templates_env
 import traceback
+import sys
 
 # Import l8n translation functions
 try:
@@ -13,8 +14,10 @@ try:
     from mindroot.coreplugins.l8n.language_detection import get_fallback_language
     L8N_AVAILABLE = True
 except ImportError as e:
-    print(f"L8n not available: {e}")
+    trace = traceback.format_exc()
+    print(f"L8n not available: {e} \n{trace}")
     L8N_AVAILABLE = False
+    sys.exit(1)
 
 # TODO: get_parent_templates_env(plugins):
 # jinja2 environment containing only 1 template per plugin file name,
@@ -346,7 +349,37 @@ async def render_combined_template(page_name, plugins, context):
     Returns:
         str: Rendered HTML
     """
-    parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    # Load parent template with translation support
+    parent_template = None
+    parent_template_path = None
+    
+    # Find the parent template file path
+    # We need to search through the parent_env loaders to find the actual file
+    for loader in parent_env.loader.loaders:
+        for template_dir in loader.searchpath:
+            potential_path = os.path.join(template_dir, f"{page_name}.jinja2")
+            if os.path.exists(potential_path):
+                parent_template_path = potential_path
+                break
+        if parent_template_path:
+            break
+    
+    if parent_template_path:
+        # Load the parent template with translation support
+        parent_content = load_template_with_translation(parent_template_path)
+        if parent_content:
+            # Create a template object from the translated content
+            parent_template = env.from_string(parent_content)
+            # We need to preserve the original template name for Jinja2 inheritance
+            parent_template.name = f"{page_name}.jinja2"
+            parent_template.filename = parent_template_path
+        else:
+            # Fallback to loading without translation if something went wrong
+            parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    else:
+        # Fallback to original method if we can't find the file path
+        parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    
     print(f"parent_template", parent_template)
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
