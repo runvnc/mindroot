@@ -312,3 +312,185 @@ h2, h3, h4 {
 .admin-link, .admin-link:visited {
   color: #ddd;
 }
+
+/* Category Section Styles */
+.category-section {
+    margin-bottom: 2rem;
+    background: rgba(5, 5, 15, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 1.5rem 0;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.category-title .material-icons {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+/* Adjust details within categories */
+.category-section details {
+    margin-bottom: 1rem;
+    background: rgba(15, 15, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.category-section details:last-child {
+    margin-bottom: 0;
+}
+
+.category-section details summary {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+}
+
+.category-section details summary:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.category-section .details-content {
+    padding: 1.25rem;
+    background: rgba(10, 10, 25, 0.5);
+}
+
+/* Category-specific styling */
+.category-section:nth-child(1) .category-title {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(74, 158, 255, 0.08));
+    border-color: rgba(74, 158, 255, 0.2);
+}
+
+.category-section:nth-child(2) .category-title {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.08));
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.category-section:nth-child(3) .category-title {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.15), rgba(255, 152, 0, 0.08));
+    border-color: rgba(255, 152, 0, 0.2);
+}
+
+/* Responsive adjustments for categories */
+@media (max-width: 768px) {
+    .category-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-title {
+        font-size: 1.2rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .category-section details summary {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .category-section .details-content {
+        padding: 1rem;
+    }
+}
+
+/* Navigation Category Styles */
+.nav-category {
+    margin-bottom: 0.5rem;
+}
+
+.nav-category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    transition: background 0.2s ease;
+}
+
+.nav-category-header:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-category-header .material-icons {
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.nav-category-content {
+    padding-left: 1rem;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+    margin-left: 1rem;
+}
+
+.nav-category-content .tab-button {
+    width: 100%;
+    margin-bottom: 0.25rem;
+    justify-content: flex-start;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Category-specific colors for headers */
+.nav-category:nth-child(1) .nav-category-header {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(74, 158, 255, 0.08));
+    border-color: rgba(74, 158, 255, 0.2);
+}
+
+.nav-category:nth-child(1) .nav-category-content {
+    border-left-color: rgba(74, 158, 255, 0.3);
+}
+
+.nav-category:nth-child(2) .nav-category-header {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.08));
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.nav-category:nth-child(2) .nav-category-content {
+    border-left-color: rgba(76, 175, 80, 0.3);
+}
+
+.nav-category:nth-child(3) .nav-category-header {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.15), rgba(255, 152, 0, 0.08));
+    border-color: rgba(255, 152, 0, 0.2);
+}
+
+.nav-category:nth-child(3) .nav-category-content {
+    border-left-color: rgba(255, 152, 0, 0.3);
+}
+
+/* Responsive adjustments for navigation categories */
+@media (max-width: 768px) {
+    .nav-category-header {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .nav-category-content {
+        padding-left: 0.75rem;
+        margin-left: 0.75rem;
+    }
+    
+    .nav-category-content .tab-button {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
