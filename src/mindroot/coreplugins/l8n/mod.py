@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 from mindroot.lib.providers.commands import command
 from .utils import extract_plugin_root, get_localized_file_path, load_plugin_translations, get_plugin_translations_path
+from mindroot.lib.utils.debug import debug_box
+
+debug_box("l8n: Top of mod.py")
 
 from .l8n_constants import *
 
@@ -22,6 +25,8 @@ def save_plugin_translations(plugin_path: str, translations: dict):
         return False
 
 
+
+debug_box("l8n: defining command")
 @command()
 async def write_localized_file(original_path: str, content: str, context=None):
     """
@@ -255,4 +260,4 @@ async def list_localized_files(context=None):
     except Exception as e:
         return f"Error listing localized files: {str(e)}"
 
-
+debug_box("l8n: End of mod.py")

@@ -1,3 +1,4 @@
+to_delete = """
 import os
 import re
 from pathlib import Path
@@ -181,3 +182,5 @@ def uninstall_monkey_patch():
 if __name__ != '__main__' and not hasattr(install_monkey_patch, '_auto_installed'):
     install_monkey_patch()
     install_monkey_patch._auto_installed = True
+
+"""

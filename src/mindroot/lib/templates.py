@@ -7,7 +7,7 @@ import traceback
 
 # Import l8n translation functions
 try:
-    from mindroot.coreplugins.l8n.mod import replace_placeholders, get_localized_file_path, extract_plugin_root
+    from mindroot.coreplugins.l8n.utils import replace_placeholders, get_localized_file_path, extract_plugin_root
     from mindroot.coreplugins.l8n.middleware import get_request_language
     from mindroot.coreplugins.l8n.language_detection import get_fallback_language
     L8N_AVAILABLE = True

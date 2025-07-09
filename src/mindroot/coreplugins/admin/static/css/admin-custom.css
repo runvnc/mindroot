@@ -494,3 +494,77 @@ h2, h3, h4 {
         font-size: 0.85rem;
     }
 }
+
+/* Enhanced Navigation Category Styles with Expand Indicators */
+.nav-category-header {
+    position: relative;
+}
+
+.nav-category-header::after {
+    content: '▼';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-category:not([open]) .nav-category-header::after {
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.nav-category-header:hover::after {
+    opacity: 1;
+}
+
+/* Enhanced hover effects */
+.nav-category-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Category-specific hover enhancements */
+.nav-category:nth-child(1) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.25), rgba(74, 158, 255, 0.15));
+    border-color: rgba(74, 158, 255, 0.3);
+}
+
+.nav-category:nth-child(2) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(76, 175, 80, 0.15));
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.nav-category:nth-child(3) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.25), rgba(255, 152, 0, 0.15));
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+/* Smooth transitions for all category interactions */
+.nav-category-header {
+    transition: all 0.2s ease;
+}
+
+.nav-category-content {
+    transition: all 0.2s ease;
+}
+
+/* Enhanced tab button hover within categories */
+.nav-category-content .tab-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(2px);
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Active state enhancements */
+.nav-category-content .tab-button.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 3px solid #4a9eff;
+    font-weight: 500;
+}
+
+.nav-category-content .tab-button.active:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
