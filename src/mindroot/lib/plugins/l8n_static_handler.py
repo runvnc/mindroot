@@ -32,6 +32,7 @@ class TranslatedStaticFiles(StaticFiles):
     def get_current_language(self, request: Request) -> str:
         """Get the current language for the request."""
         if not L8N_AVAILABLE:
+            print("WARNING: L8n not available, defaulting to 'en'.")
             return 'en'
         
         try:
@@ -96,7 +97,6 @@ class TranslatedStaticFiles(StaticFiles):
                 current_language = self.get_current_language(request)
                 print(f"l8n Current language for static file: {current_language}")
 
-                localized_path = get_localized_file_path(str(full_path))
                 localized_path = get_localized_file_path(str(full_path))
 
                 # Check if localized file exists
