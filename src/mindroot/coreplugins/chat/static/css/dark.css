@@ -3,7 +3,7 @@ html, body {
   color: #f0f0f0;
   padding: 5px 5px;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 16px;
+  font-size: 18px;
   display: flex;
   line-height: 1.5;
   flex-direction: column;
@@ -89,6 +89,7 @@ chat-form {
   width: 100%;
 }
 
+
 chat-message {
   /* max-width: 69%; */
   width: 100%;
@@ -128,6 +129,15 @@ chat-message:first-of-type .outer-msg.without-avatar {
   background-color:  transparent;
 }
 
+.outer-msg.user {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.message:has(.action-summary) {
+  width: 100%;
+}
+
 .user {
   align-self: flex-end;
 }
@@ -147,6 +157,7 @@ chat-message:first-of-type .outer-msg.without-avatar {
   /* background-color: #080808; */
   border: 1px solid #181818;
   border-radius: 30px;
+  width: 80%;
 }
 
 .msg-ai:first-child {
@@ -750,6 +761,7 @@ button:hover {
 
 summary {
   border-radius: 8px;
+  color: white;
 }
 
 details {

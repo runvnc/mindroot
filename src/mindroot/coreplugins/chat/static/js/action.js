@@ -44,18 +44,78 @@ class ActionComponent extends BaseEl {
   static properties = {
     funcName: { type: String },
     params: { type: String },
-    result: { type: String }
+    result: { type: String },
+    isExpanded: { type: Boolean },
+    isRunning: { type: Boolean }
   }
 
   static styles = [
     css`
 :host {
   display: block;
+  width: 100%;
 }
 
-details {
-  border: none;
-  display: contents;
+.action-container {
+  width: 100%;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin: 4px 0;
+  background-color: transparent;
+}
+
+.action-container.running {
+  border-color: #4a5eff;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: #4a5eff;
+    box-shadow: 0 0 5px rgba(74, 94, 255, 0.3);
+  }
+  50% {
+    border-color: #6a7eff;
+    box-shadow: 0 0 10px rgba(74, 94, 255, 0.5);
+  }
+}
+
+.action-summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  background: rgba(200, 200, 255, 0.1);
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  color: #f0f0f0;
+  user-select: none;
+}
+
+.action-summary:hover {
+  background: #444;
+}
+
+.action-content {
+  padding: 8px 12px;
+  border-top: 1px solid #333;
+  color: #f0f0f0;
+  display: none;
+}
+
+.action-content.expanded {
+  display: block;
+}
+
+.param-preview {
+  color: #ddd;
+  font-style: italic;
+  margin-left: 8px;
+}
+
+.fn_name {
+  color: #f0f0f0;
+  font-weight: normal;
 }
 
 @keyframes flash {
@@ -63,47 +123,40 @@ details {
   50% { opacity: 0.5; }
   100% { opacity: 0; }
 }
-/*
-.animated-element::before {
-  content: '';
-  display: inline-block;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(200,200,200,0.5);
-  animation: flash 0.2s;
-  pointer-events: none;
-} */
-
-.animated-element {
-  /* position: relative; */
-}
     `
   ];
 
   constructor() {
     super();
     this.funcName = '';
-    //this.params = {};
     this.result = '';
+    this.isExpanded = false;
+    this.isRunning = false;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.checkRunningState();
+  }
+
+  checkRunningState() {
+    const chatMessages = document.querySelectorAll('chat-message');
+    const lastMessage = chatMessages[chatMessages.length - 1];
+    if (lastMessage && lastMessage.getAttribute('spinning') === 'yes') {
+      this.isRunning = true;
+      setTimeout(() => {
+        this.isRunning = false;
+        this.requestUpdate();
+      }, 5000);
+    }
+  }
+
+  _toggleExpanded() {
+    this.isExpanded = !this.isExpanded;
   }
  
   _paramsHTML(params) {
     let paramshtml = '';
-/*    const format_ = (x) => {
-        // if it is a string then split, otherwise return the object
-        if (typeof(x) == 'string') {
-          return x.split('\n')[0].slice(0, 160)
-        } else {
-          if (x+"" == "[[object Object]]") {
-            return JSON.stringify(x)
-          } else {
-            return x
-          }
-        }
-      }
- */
     if (Array.isArray(params)) {
       for (let item of params) {
         paramshtml += `<span class="param_value">(${format_(item)}), </span> `;
@@ -120,6 +173,31 @@ details {
     return paramshtml;
   } 
 
+  _getFirstParamPreview(params) {
+    if (!params) return '';
+    
+    let firstValue = '';
+    if (Array.isArray(params) && params.length > 0) {
+      firstValue = params[0];
+    } else if (typeof(params) == 'object') {
+      const keys = Object.keys(params);
+      if (keys.length > 0) {
+        firstValue = params[keys[0]];
+      }
+    } else {
+      firstValue = params;
+    }
+
+    if (typeof(firstValue) === 'string') {
+      return firstValue.length > 100 ? firstValue.substring(0, 100) + '...' : firstValue;
+    } else if (typeof(firstValue) === 'object') {
+      const str = JSON.stringify(firstValue);
+      return str.length > 100 ? str.substring(0, 100) + '...' : str;
+    } else {
+      const str = String(firstValue);
+      return str.length > 100 ? str.substring(0, 100) + '...' : str;
+    }
+  }
 
   _render() {
     let {funcName, params, result} = this;
@@ -136,18 +214,8 @@ details {
     if (params.val) {
       params = params.val
     }
-    let dontTruncate = false;
-    //let format_;
-    /* if (funcName != 'write') {
-      format_ = (str) => {
-        return str
-      }
-    } else {
-      format_ = (str) => {
-        return str.split('\n')[0].slice(0, 160)
-      }
-    }
-*/
+
+    const paramPreview = this._getFirstParamPreview(params);
     paramshtml = this._paramsHTML(params)
 
     console.log('paramshtml', paramshtml)
@@ -209,15 +277,18 @@ details {
     }
 
     return html`
-    <details class="animated-element-x" style="position: relative; max-width: 800px;" open >
-      <!-- we need to make sure it's open by default so we will set property to true -->
-      <summary class="fn_name">⚡ ${funcName}</summary>
-      <div class="av-x"></div>
-      <div class="action">
-        <span class="fn_name"> ${unsafeHTML(paramshtml)}</span>
-        ${res}
-      </div> 
-    </details>
+    <div class="action-container ${this.isRunning ? 'running' : ''}">
+      <div class="action-summary" @click="${this._toggleExpanded}">
+        <span class="fn_name">${funcName}</span>
+        ${paramPreview ? html`<span class="param-preview">${paramPreview}</span>` : ''}
+      </div>
+      <div class="action-content ${this.isExpanded ? 'expanded' : ''}">
+        <div class="action">
+          <span class="fn_name"> ${unsafeHTML(paramshtml)}</span>
+          ${res}
+        </div>
+      </div>
+    </div>
     `;
   }
 }
