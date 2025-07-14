@@ -57,13 +57,17 @@ def detect_language_from_request(request: Request) -> str:
         Detected language code
     """
     # 1. Check URL parameter first (highest priority)
+    print(f"L8n: Checking URL parameters for language: {request.query_params}")
     url_lang = request.query_params.get('lang')
     if url_lang:
+
         return get_fallback_language(url_lang.lower())
     
     # 2. Check cookie value
+    print(f"L8n: Checking cookies for language: {request.cookies}")
     cookie_lang = request.cookies.get('mindroot_language')
     if cookie_lang:
+        print(f"L8n: Found language in cookie: {cookie_lang}")
         return get_fallback_language(cookie_lang.lower())
     
     # 3. Check Accept-Language header
@@ -102,9 +106,11 @@ async def middleware(request: Request, call_next):
     """
     global _current_request_language
     try:
+        print("L8n middleware: Starting language detection")
         # Detect the language for this request
         detected_language = detect_language_from_request(request)
 
+        print(f"L8n: Detected language '{detected_language}' for {request.url.path}")
         # Store it globally for the template system
         _current_request_language = detected_language
         
