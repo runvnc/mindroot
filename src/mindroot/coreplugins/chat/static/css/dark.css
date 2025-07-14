@@ -90,7 +90,8 @@ chat-form {
 }
 
 chat-message {
-  max-width: 69%;
+  /* max-width: 69%; */
+  width: 100%;
   padding: 4px 8px;
   margin: 2px 0;
   display: block;
@@ -745,7 +746,15 @@ button:hover {
 }
 
 .param_name { font-weight: bold; }
-.param_value { color: yellow; }
+.param_value { color: #ccc; }
+
+summary {
+  border-radius: 8px;
+}
+
+details {
+  width: 100%;
+}
 
 .fn_result, .code-result { 
   white-space: normal !important;

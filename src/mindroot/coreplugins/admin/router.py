@@ -89,3 +89,46 @@ router.include_router(server_router, prefix="/admin/server", tags=["server"])
 # Import and include the env_manager router
 from coreplugins.env_manager.router import router as env_manager_router
 router.include_router(env_manager_router)
+
+@router.post("/admin/update-mindroot")
+async def update_mindroot():
+    """Update MindRoot using pip install --upgrade mindroot"""
+    import subprocess
+    import sys
+    
+    try:
+        # Run pip install --upgrade mindroot in the current environment
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "--upgrade", "mindroot"],
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minute timeout
+        )
+        
+        if result.returncode == 0:
+            return JSONResponse({
+                "success": True,
+                "message": "MindRoot updated successfully",
+                "output": result.stdout,
+                "note": "Restart the application to use the updated version"
+            })
+        else:
+            return JSONResponse({
+                "success": False,
+                "message": "Failed to update MindRoot",
+                "error": result.stderr,
+                "output": result.stdout
+            })
+            
+    except subprocess.TimeoutExpired:
+        return JSONResponse({
+            "success": False,
+            "message": "Update timed out after 5 minutes",
+            "error": "Process timed out"
+        })
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "message": "Error during update",
+            "error": str(e)
+        })

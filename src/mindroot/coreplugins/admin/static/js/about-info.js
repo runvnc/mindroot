@@ -5,6 +5,8 @@ class AboutInfo extends BaseEl {
   static properties = {
     versionInfo: { type: Object },
     loading: { type: Boolean },
+    updating: { type: Boolean },
+    updateResult: { type: Object },
     error: { type: String }
   }
 
@@ -73,7 +75,31 @@ class AboutInfo extends BaseEl {
       border: 1px solid rgba(255, 107, 107, 0.2);
     }
 
-    .refresh-btn {
+    .success {
+      color: #51cf66;
+      background: rgba(81, 207, 102, 0.1);
+      padding: 1rem;
+      border-radius: 4px;
+      border: 1px solid rgba(81, 207, 102, 0.2);
+    }
+
+    .warning {
+      color: #ffd43b;
+      background: rgba(255, 212, 59, 0.1);
+      padding: 1rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 212, 59, 0.2);
+    }
+
+    .info {
+      color: #74c0fc;
+      background: rgba(116, 192, 252, 0.1);
+      padding: 1rem;
+      border-radius: 4px;
+      border: 1px solid rgba(116, 192, 252, 0.2);
+    }
+
+    .btn {
       background: #2a2a40;
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -82,10 +108,24 @@ class AboutInfo extends BaseEl {
       cursor: pointer;
       transition: background 0.2s;
       margin-top: 1rem;
+      margin-right: 0.5rem;
     }
 
-    .refresh-btn:hover {
+    .btn:hover:not(:disabled) {
       background: #3a3a50;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn.update {
+      background: #2a4a2a;
+    }
+
+    .btn.update:hover:not(:disabled) {
+      background: #3a5a3a;
     }
 
     .logo-section {
@@ -108,12 +148,50 @@ class AboutInfo extends BaseEl {
       color: rgba(255, 255, 255, 0.8);
       line-height: 1.6;
     }
+
+    .update-output {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .restart-notice {
+      margin-top: 1rem;
+    }
+
+    .restart-notice p {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .tab-link {
+      color: #74c0fc;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .tab-link:hover {
+      color: #91d5ff;
+    }
   `;
 
   constructor() {
     super();
     this.versionInfo = null;
     this.loading = false;
+    this.updating = false;
+    this.updateResult = null;
     this.error = null;
     this.loadVersionInfo();
   }
@@ -145,8 +223,57 @@ class AboutInfo extends BaseEl {
     }
   }
 
+  async handleUpdate() {
+    this.updating = true;
+    this.updateResult = null;
+    this.error = null;
+    
+    try {
+      const response = await fetch('/admin/update-mindroot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        this.updateResult = result;
+        
+        // If successful, refresh version info after a short delay
+        if (result.success) {
+          setTimeout(() => {
+            this.loadVersionInfo();
+          }, 2000);
+        }
+      } else {
+        throw new Error('Failed to update MindRoot');
+      }
+    } catch (error) {
+      console.error('Error updating MindRoot:', error);
+      this.error = 'Failed to update MindRoot';
+    } finally {
+      this.updating = false;
+    }
+  }
+
   handleRefresh() {
     this.loadVersionInfo();
+  }
+
+  switchToServerTab() {
+    // Find and click the Server Control tab
+    const serverTab = document.querySelector('details[data-tab="server"] summary');
+    if (serverTab) {
+      // Close current tab if it's open
+      const currentTab = document.querySelector('details[open]');
+      if (currentTab && currentTab !== serverTab.parentElement) {
+        currentTab.removeAttribute('open');
+      }
+      // Open server tab
+      serverTab.parentElement.setAttribute('open', '');
+      serverTab.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   formatDate(dateString) {
@@ -176,7 +303,7 @@ class AboutInfo extends BaseEl {
             <div class="loading">Loading version information...</div>
           ` : this.error ? html`
             <div class="error">${this.error}</div>
-            <button class="refresh-btn" @click=${this.handleRefresh}>Retry</button>
+            <button class="btn" @click=${this.handleRefresh}>Retry</button>
           ` : this.versionInfo ? html`
             <div class="version-info">
               <div class="label">Commit Hash:</div>
@@ -188,12 +315,50 @@ class AboutInfo extends BaseEl {
               <div class="label">Retrieved:</div>
               <div class="value">${this.formatDate(this.versionInfo.retrieved_at)}</div>
             </div>
-            <button class="refresh-btn" @click=${this.handleRefresh}>Refresh</button>
+            
+            <div class="button-group">
+              <button class="btn" @click=${this.handleRefresh}>Refresh</button>
+              <button 
+                class="btn update" 
+                @click=${this.handleUpdate}
+                ?disabled=${this.updating}
+              >
+                ${this.updating ? 'Updating...' : 'Update MindRoot'}
+              </button>
+            </div>
           ` : html`
             <div class="error">No version information available</div>
-            <button class="refresh-btn" @click=${this.handleRefresh}>Retry</button>
+            <button class="btn" @click=${this.handleRefresh}>Retry</button>
           `}
         </div>
+
+        ${this.updateResult ? html`
+          <div class="section">
+            <h2>Update Result</h2>
+            
+            ${this.updateResult.success ? html`
+              <div class="success">
+                ${this.updateResult.message}
+              </div>
+              
+              <div class="restart-notice">
+                <div class="info">
+                  <p><strong>Restart Required:</strong> To use the updated version, you need to restart the MindRoot server.</p>
+                  <p>You can restart the server using the <span class="tab-link" @click=${this.switchToServerTab}>Server Control</span> tab.</p>
+                </div>
+              </div>
+            ` : html`
+              <div class="error">
+                ${this.updateResult.message}
+                ${this.updateResult.error ? html`<br><strong>Error:</strong> ${this.updateResult.error}` : ''}
+              </div>
+            `}
+            
+            ${this.updateResult.output ? html`
+              <div class="update-output">${this.updateResult.output}</div>
+            ` : ''}
+          </div>
+        ` : ''}
       </div>
     `;
   }
