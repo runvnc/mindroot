@@ -97,7 +97,7 @@ class TranslatedStaticFiles(StaticFiles):
                 # Create a request object to get language
                 request = Request(scope)
                 current_language = self.get_current_language(request)
-                print(f"l8n Current language for static file: {current_language}")
+                print(f"[UPDATE] l8n Current language for static file: {current_language}")
 
                 localized_path = get_localized_file_path(str(full_path))
 
