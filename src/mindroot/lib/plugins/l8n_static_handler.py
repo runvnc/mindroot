@@ -31,6 +31,7 @@ class TranslatedStaticFiles(StaticFiles):
     
     def get_current_language(self, request: Request) -> str:
         """Get the current language for the request."""
+        print("Getting current language for static file request...")
         if not L8N_AVAILABLE:
             print("WARNING: L8n not available, defaulting to 'en'.")
             return 'en'
@@ -38,6 +39,7 @@ class TranslatedStaticFiles(StaticFiles):
         try:
             # Try to get from request state first (set by middleware)
             if hasattr(request.state, 'language'):
+                print(f"Using language from request state: {request.state.language}")
                 return request.state.language
             
             # Fallback to l8n middleware function

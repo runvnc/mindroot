@@ -30,12 +30,13 @@ def get_request_language() -> str:
         Language code for the current request
     """
     global _current_request_language
-    
+    print(f"L8n: Current request language is '{_current_request_language}'")
     # If we have a request-specific language, use it
     if _current_request_language:
         return _current_request_language
     
     # Fallback to environment variable or default
+    print("L8n: No request language set, falling back to environment variable or default")
     return os.environ.get('MINDROOT_LANGUAGE', 'en')
 
 def detect_language_from_request(request: Request) -> str:
@@ -66,10 +67,13 @@ def detect_language_from_request(request: Request) -> str:
         return get_fallback_language(cookie_lang.lower())
     
     # 3. Check Accept-Language header
+    print(f"L8n: Accept-Language header: {request.headers.get('accept-language')}")
     accept_language = request.headers.get('accept-language')
     if accept_language:
+        print(f"L8n: Parsing Accept-Language header: {accept_language}")
         parsed_lang = _parse_accept_language_header(accept_language)
         if parsed_lang:
+            print(f"L8n: Parsed language from header: {parsed_lang}")
             return get_fallback_language(parsed_lang)
     
     # 4. Check environment variable
