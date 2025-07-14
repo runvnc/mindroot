@@ -3,6 +3,19 @@ from pathlib import Path
 from .l8n_constants import *
 import json
 import re
+import logging
+
+# Set up logging for l8n warnings
+logger = logging.getLogger('l8n')
+logger.setLevel(logging.WARNING)
+
+# Create console handler with formatting
+if not logger.handlers:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.WARNING)
+    formatter = logging.Formatter('\033[91m[L8N WARNING]\033[0m %(message)s')
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
 
 def extract_plugin_root(absolute_path: str) -> str:
     """
@@ -35,15 +48,27 @@ def extract_plugin_root(absolute_path: str) -> str:
     # Fallback: return the filename
     return path.name
 
-
-
+def extract_translation_keys(content: str) -> set:
+    """
+    Extract all __TRANSLATE_key__ placeholders from content.
+    
+    Args:
+        content: Content to scan for translation keys
+        
+    Returns:
+        Set of translation keys found in the content
+    """
+    pattern = r'__TRANSLATE_([a-z0-9_]+)__'
+    matches = re.findall(pattern, content)
+    return set(matches)
 
 def replace_placeholders(content: str, language: str, plugin_path: str = None) -> str:
     """
     Replace __TRANSLATE_key__ placeholders with actual translations.
     
-    This function is used by the monkey-patch system to replace placeholders
-    with actual translated text before serving templates.
+    This function now validates that ALL required translations are available
+    for the specified language. If any translations are missing, it logs
+    a strong warning and returns None to indicate fallback is needed.
     
     Args:
         content: Template content with placeholders
@@ -51,21 +76,27 @@ def replace_placeholders(content: str, language: str, plugin_path: str = None) -
         plugin_path: Path to the localized file (used to determine which plugin's translations to use)
     
     Returns:
-        Content with placeholders replaced by translations
+        Content with placeholders replaced by translations, or None if translations are incomplete
     """
     if not plugin_path:
         # No plugin path provided, return content unchanged
-        print("Warning: No plugin path provided for translation replacement.")
+        logger.warning("No plugin path provided for translation replacement.")
         return content
     
     try:
+        # Extract all translation keys from the content
+        required_keys = extract_translation_keys(content)
+        
+        if not required_keys:
+            # No translation keys found, return content as-is
+            return content
+        
         # Extract plugin name from the localized file path
         # Path format: .../localized_files/[coreplugins|external_plugins]/[plugin_name]/...
         path_parts = Path(plugin_path).parts
         
         # Find 'localized_files' in the path
         if 'localized_files' in path_parts:
-            print("1")
             idx = path_parts.index('localized_files')
             if idx + 2 < len(path_parts):
                 # Get plugin name (should be at idx+2)
@@ -74,36 +105,67 @@ def replace_placeholders(content: str, language: str, plugin_path: str = None) -
                 
                 # Load translations for this plugin
                 translations_path = TRANSLATIONS_DIR / plugin_type / plugin_name / "translations.json"
-                print(f"Translations path: {translations_path}")
                 plugin_translations = {}
                 if translations_path.exists():
                     try:
                         with open(translations_path, 'r', encoding='utf-8') as f:
                              plugin_translations = json.load(f)
                     except Exception as e:
-                        print(f"Warning: Could not load translations from {translations_path}: {e}")
+                        logger.warning(f"Could not load translations from {translations_path}: {e}")
+                        return None  # Fallback to original file
                 
-                    print(f"Loaded translations for plugin: {plugin_name}: {plugin_translations}")
-                    if language in plugin_translations:
-                        print(f"Using translations for language: {language}")
-                        # Replace placeholders
-                        translations = plugin_translations[language]
-                        
-                        def replace_match(match):
-                            key = match.group(1)
-                            return translations.get(key, match.group(0))  # Return original if no translation
-                        
-                        return re.sub(r'__TRANSLATE_([a-z0-9_]+)__', replace_match, content)
-                    else:
-                        print(f"Warning: No translations found for language '{language}' in {translations_path}")
+                if language in plugin_translations:
+                    translations = plugin_translations[language]
+                    
+                    # Check if ALL required translations are available
+                    missing_keys = required_keys - set(translations.keys())
+                    
+                    if missing_keys:
+                        # Some translations are missing - log strong warning and return None
+                        missing_list = ', '.join(sorted(missing_keys))
+                        logger.warning(
+                            f"\n" +
+                            f"="*80 + "\n" +
+                            f"MISSING TRANSLATIONS DETECTED!\n" +
+                            f"Plugin: {plugin_name}\n" +
+                            f"Language: {language}\n" +
+                            f"File: {plugin_path}\n" +
+                            f"Missing keys: {missing_list}\n" +
+                            f"Falling back to original file to avoid showing placeholders.\n" +
+                            f"="*80
+                        )
+                        return None  # Signal that fallback is needed
+                    
+                    # All translations are available - proceed with replacement
+                    def replace_match(match):
+                        key = match.group(1)
+                        return translations.get(key, match.group(0))  # This shouldn't happen now
+                    
+                    return re.sub(r'__TRANSLATE_([a-z0-9_]+)__', replace_match, content)
                 else:
-                    print(f"Warning: Translations file not found at {translations_path}")
+                    # No translations for this language
+                    logger.warning(
+                        f"\n" +
+                        f"="*80 + "\n" +
+                        f"NO TRANSLATIONS FOR LANGUAGE!\n" +
+                        f"Plugin: {plugin_name}\n" +
+                        f"Language: {language}\n" +
+                        f"File: {plugin_path}\n" +
+                        f"Required keys: {', '.join(sorted(required_keys))}\n" +
+                        f"Falling back to original file.\n" +
+                        f"="*80
+                    )
+                    return None  # Signal that fallback is needed
+            else:
+                logger.warning(f"Could not extract plugin info from path: {plugin_path}")
+                return None
+        else:
+            logger.warning(f"Path does not contain 'localized_files': {plugin_path}")
+            return None
         
-        return content
-    
     except Exception as e:
-        print(f"Warning: Error in replace_placeholders: {e}")
-        return content
+        logger.warning(f"Error in replace_placeholders: {e}")
+        return None  # Fallback to original file on any error
        
 def get_localized_file_path(original_path: str) -> Path:
     """
@@ -141,9 +203,9 @@ def load_plugin_translations(plugin_path: str):
             with open(translations_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Warning: Could not load translations from {translations_file}: {e}")
+            logger.warning(f"Could not load translations from {translations_file}: {e}")
     else:
-        print(f"Warning: Translations file does not exist at {translations_file}")
+        logger.warning(f"Translations file does not exist at {translations_file}")
     return {}
 
 def get_plugin_translations_path(original_path: str) -> Path:

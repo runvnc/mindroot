@@ -4,11 +4,115 @@ from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 from .plugins import list_enabled, get_plugin_path
 from .parent_templates import get_parent_templates_env
 import traceback
+import sys
+
+# Import l8n translation functions
+try:
+    from mindroot.coreplugins.l8n.utils import replace_placeholders, get_localized_file_path, extract_plugin_root
+    from mindroot.coreplugins.l8n.mod import *
+    from mindroot.coreplugins.l8n.middleware import get_request_language
+    from mindroot.coreplugins.l8n.language_detection import get_fallback_language
+    L8N_AVAILABLE = True
+except ImportError as e:
+    trace = traceback.format_exc()
+    print(f"L8n not available: {e} \n{trace}")
+    L8N_AVAILABLE = False
+    sys.exit(1)
 
 # TODO: get_parent_templates_env(plugins):
 # jinja2 environment containing only 1 template per plugin file name,
 # the first one that is found from plugins with that name,
 # need to look at how jinja2 loaders work
+
+def get_current_language():
+    """Get the current language for translation."""
+    if not L8N_AVAILABLE:
+        return 'en'
+    
+    try:
+        # Try to get language from request context
+        lang = get_request_language()
+        return get_fallback_language(lang) if lang else 'en'
+    except Exception as e:
+        print(f"Error getting current language: {e}")
+        return 'en'
+
+def apply_translations_to_content(content, template_path=None):
+    """Apply l8n translations to template content.
+    
+    Args:
+        content (str): Template content with __TRANSLATE_key__ placeholders
+        template_path (str): Path to the template file for plugin context
+        
+    Returns:
+        str: Content with translations applied
+    """
+    if not L8N_AVAILABLE or not content:
+        return content
+    
+    try:
+        current_language = get_current_language()
+        
+        # If we have a template path, use it for plugin context
+        if template_path:
+            return replace_placeholders(content, current_language, template_path)
+        else:
+            # Fallback: try to replace without plugin context
+            return replace_placeholders(content, current_language)
+    except Exception as e:
+        print(f"Error applying translations: {e}")
+        return content
+
+def check_for_localized_template(template_path):
+    """Check if a localized version of a template exists.
+    
+    Args:
+        template_path (str): Original template path
+        
+    Returns:
+        str: Path to localized template if it exists, None otherwise
+    """
+    if not L8N_AVAILABLE:
+        return None
+        
+    try:
+        localized_path = get_localized_file_path(template_path)
+        if localized_path.exists():
+            return str(localized_path)
+    except Exception as e:
+        print(f"Error checking for localized template: {e}")
+    
+    return None
+
+def load_template_with_translation(template_path):
+    """Load a template and apply translations if available.
+    
+    Args:
+        template_path (str): Path to the template file
+        
+    Returns:
+        str: Template content with translations applied
+    """
+    # First check for localized version
+    localized_path = check_for_localized_template(template_path)
+    
+    if localized_path:
+        # Load localized template and apply translations
+        try:
+            with open(localized_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return apply_translations_to_content(content, localized_path)
+        except Exception as e:
+            print(f"Error loading localized template {localized_path}: {e}")
+    
+    # Fallback to original template
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return apply_translations_to_content(content, template_path)
+    except Exception as e:
+        print(f"Error loading template {template_path}: {e}")
+        return ""
 
 def setup_template_environment(plugins=None):
     """Set up Jinja2 environment with multiple template paths.
@@ -106,7 +210,6 @@ async def find_parent_template(page_name, plugins):
                                 return rel_path
                     return alt_path
     return None
-
 async def find_plugin_template(page_name, plugins):
     """Find a template in a plugin's templates directory.
     
@@ -148,7 +251,7 @@ async def find_plugin_template(page_name, plugins):
     return None, None
 
 async def load_plugin_templates(page_name, plugins):
-    """Load templates from plugins.
+    """Load templates from plugins with translation support.
     
     Args:
         page_name (str): Name of the template page
@@ -180,9 +283,11 @@ async def load_plugin_templates(page_name, plugins):
             
             for path in inject_paths:
                 if os.path.exists(path):
-                    with open(path) as f:
+                    # Load template content with translation support
+                    content = load_template_with_translation(path)
+                    if content:
                         #print(f"Found inject template at: {path}")
-                        templates.append({'type': 'inject', 'template': env.from_string(f.read())})
+                        templates.append({'type': 'inject', 'template': env.from_string(content)})
                         break
                 #else:
                 #
@@ -198,9 +303,11 @@ async def load_plugin_templates(page_name, plugins):
             
             for path in override_paths:
                 if os.path.exists(path):
-                    with open(path) as f:
+                    # Load template content with translation support
+                    content = load_template_with_translation(path)
+                    if content:
                         #print(f"Found override template at: {path}")
-                        templates.append({'type': 'override', 'template': env.from_string(f.read())})
+                        templates.append({'type': 'override', 'template': env.from_string(content)})
                         break
                         
         except Exception as e:
@@ -232,7 +339,7 @@ async def collect_content(template, blocks, template_type, data):
     return content
 
 async def render_combined_template(page_name, plugins, context):
-    """Render combined template with injections and overrides.
+    """Render combined template with injections and overrides, including translation support.
     
     Args:
         page_name (str): Name of the template page
@@ -242,7 +349,37 @@ async def render_combined_template(page_name, plugins, context):
     Returns:
         str: Rendered HTML
     """
-    parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    # Load parent template with translation support
+    parent_template = None
+    parent_template_path = None
+    
+    # Find the parent template file path
+    # We need to search through the parent_env loaders to find the actual file
+    for loader in parent_env.loader.loaders:
+        for template_dir in loader.searchpath:
+            potential_path = os.path.join(template_dir, f"{page_name}.jinja2")
+            if os.path.exists(potential_path):
+                parent_template_path = potential_path
+                break
+        if parent_template_path:
+            break
+    
+    if parent_template_path:
+        # Load the parent template with translation support
+        parent_content = load_template_with_translation(parent_template_path)
+        if parent_content:
+            # Create a template object from the translated content
+            parent_template = env.from_string(parent_content)
+            # We need to preserve the original template name for Jinja2 inheritance
+            parent_template.name = f"{page_name}.jinja2"
+            parent_template.filename = parent_template_path
+        else:
+            # Fallback to loading without translation if something went wrong
+            parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    else:
+        # Fallback to original method if we can't find the file path
+        parent_template = parent_env.get_template(f"{page_name}.jinja2")
+    
     print(f"parent_template", parent_template)
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
@@ -307,7 +444,7 @@ async def render_combined_template(page_name, plugins, context):
     return rendered_html
 
 async def render_direct_template(template_path, context):
-    """Render a template directly without combining with a parent template.
+    """Render a template directly without combining with a parent template, with translation support.
     
     Args:
         template_path (str): Path to the template
@@ -320,6 +457,25 @@ async def render_direct_template(template_path, context):
     context = context or {}
     
     try:
+        # Check if we need to load with translation support
+        template_full_path = None
+        for loader in env.loader.loaders:
+            for template_dir in loader.searchpath:
+                potential_path = os.path.join(template_dir, template_path)
+                if os.path.exists(potential_path):
+                    template_full_path = potential_path
+                    break
+            if template_full_path:
+                break
+        
+        if template_full_path:
+            # Load with translation support
+            content = load_template_with_translation(template_full_path)
+            if content:
+                template = env.from_string(content)
+                return template.render(**context)
+        
+        # Fallback to normal template loading
         template = env.get_template(template_path)
         return template.render(**context)
     except Exception as e:
@@ -327,7 +483,7 @@ async def render_direct_template(template_path, context):
         return f"<h1>Error rendering template</h1><p>{str(e)}</p>"
 
 async def render(page_name, context):
-    """Render a template with plugin injections and overrides.
+    """Render a template with plugin injections, overrides, and translation support.
     If no parent template exists, tries to render a template directly from a plugin.
     
     Args:
@@ -368,4 +524,3 @@ async def render(page_name, context):
         trace = traceback.format_exc()
         print(f"Error rendering {page_name}: {e}\n\n{trace}")
         return f"<h1>Error Rendering Page</h1><p>{str(e)}</p><pre>{trace}</pre>"
-

@@ -23,6 +23,36 @@ import base64
 import nanoid
 sse_clients = {}
 
+@service()
+async def prompt(model: str, instructions: str, temperature=0, max_tokens=2000, json=False, context=None):
+    messages = [
+        { "role": "system",
+          "content": "Respond to prompt with no extraneous commentary."
+        },
+        { "role": "user",
+          "content": instructions
+        }]
+    
+    stream = await context.stream_chat(model, temperature=temperature,
+                                       max_tokens=max_tokens,
+                                       messages=messages,
+                                       json=False,
+                                       context=context)
+    text = ""
+    if os.environ.get("AH_DEBUG") == "True":
+        print("Prompting, instructions ", instructions)
+    async for chunk in stream:
+        #print("Chunk received: ", chunk)
+        if chunk is None or chunk == "":
+            continue
+        else:
+            text += chunk
+            if os.environ.get("AH_DEBUG") == "True":
+                print(chunk, end='', flush=True)
+
+    return text
+
+
 def results_text(results):
     text = ""
     for result in results:
@@ -304,7 +334,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 actual_results = False
                 await asyncio.sleep(0.001)
                 for result in results:
-                    if result['result'] is not None:
+                    if 'result' in result and result['result'] is not None:
                         if result['result'] == 'continue':
                             out_results.append(result)
                             continue_processing = True

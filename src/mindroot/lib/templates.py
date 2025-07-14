@@ -45,7 +45,7 @@ def apply_translations_to_content(content, template_path=None):
         template_path (str): Path to the template file for plugin context
         
     Returns:
-        str: Content with translations applied
+        str or None: Content with translations applied, or None if translations are incomplete
     """
     if not L8N_AVAILABLE or not content:
         return content
@@ -55,7 +55,11 @@ def apply_translations_to_content(content, template_path=None):
         
         # If we have a template path, use it for plugin context
         if template_path:
-            return replace_placeholders(content, current_language, template_path)
+            # Check if translation failed (missing translations)
+            translated = replace_placeholders(content, current_language, template_path)
+            if translated is None:
+                return None  # Signal that translations are incomplete
+            return translated
         else:
             # Fallback: try to replace without plugin context
             return replace_placeholders(content, current_language)
@@ -85,13 +89,18 @@ def check_for_localized_template(template_path):
     return None
 
 def load_template_with_translation(template_path):
-    """Load a template and apply translations if available.
+    """Load a template and apply translations if available and complete.
+    
+    If translations are missing for the current language, this function
+    will fall back to serving the original template to avoid showing
+    __TRANSLATE_key__ placeholders to users.
     
     Args:
         template_path (str): Path to the template file
         
     Returns:
-        str: Template content with translations applied
+        str: Template content with translations applied, or original content
+             if translations are incomplete for the current language
     """
     # First check for localized version
     localized_path = check_for_localized_template(template_path)
@@ -101,7 +110,15 @@ def load_template_with_translation(template_path):
         try:
             with open(localized_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            return apply_translations_to_content(content, localized_path)
+            
+            # Apply translations - if None is returned, translations are incomplete
+            translated_content = apply_translations_to_content(content, localized_path)
+            if translated_content is None:
+                # Fall back to original template
+                print(f"L8n: Falling back to original template due to missing translations: {template_path}")
+                with open(template_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+            return translated_content
         except Exception as e:
             print(f"Error loading localized template {localized_path}: {e}")
     
@@ -109,7 +126,7 @@ def load_template_with_translation(template_path):
     try:
         with open(template_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        return apply_translations_to_content(content, template_path)
+        return content  # Don't apply translations to original templates
     except Exception as e:
         print(f"Error loading template {template_path}: {e}")
         return ""

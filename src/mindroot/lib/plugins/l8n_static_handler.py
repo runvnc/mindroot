@@ -61,7 +61,8 @@ class TranslatedStaticFiles(StaticFiles):
         """Apply translations to JavaScript content.
         
         This looks for __TRANSLATE_key__ placeholders in JS files and replaces them
-        with translated strings, properly escaped for JavaScript.
+        with translated strings. If translations are missing, returns None to
+        signal that the original file should be served instead.
         """
         if not L8N_AVAILABLE or not content:
             return content
@@ -70,12 +71,15 @@ class TranslatedStaticFiles(StaticFiles):
             # Use the l8n replace_placeholders function
             translated_content = replace_placeholders(content, language, file_path)
             
-            # Additional JavaScript-specific processing if needed
-            # For example, ensure proper string escaping
+            # If None is returned, translations are incomplete
+            if translated_content is None:
+                print(f"L8n: Missing translations for JS file, will serve original: {file_path}")
+                return None
+            
             return translated_content
         except Exception as e:
             print(f"Error applying translations to JS file {file_path}: {e}")
-            return content
+            return None  # Fallback to original file on error
     
     async def get_response(self, path: str, scope: Scope) -> Response:
         """Override to add translation support for JavaScript files."""
@@ -93,32 +97,35 @@ class TranslatedStaticFiles(StaticFiles):
                 print(f"l8n Current language for static file: {current_language}")
 
                 localized_path = get_localized_file_path(str(full_path))
+                localized_path = get_localized_file_path(str(full_path))
 
-                # Read the file content
-                with open(localized_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Apply translations
-                translated_content = self.apply_translations_to_js(
-                    content, current_language, str(localized_path)
-                )
-                print(f"l8n file {content} done")
-
-                # Return translated content with appropriate headers
-                return Response(
-                    content=translated_content,
-                    media_type='application/javascript',
-                    headers={
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                )
-            else:
-                print(f"l8n Static file not translated: {full_path}")
-                # display path exists
-                print(f"l8n File exists: {full_path.exists()}")
-
+                # Check if localized file exists
+                if localized_path.exists():
+                    # Read the localized file content
+                    with open(localized_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    
+                    # Apply translations
+                    translated_content = self.apply_translations_to_js(
+                        content, current_language, str(localized_path)
+                    )
+                    
+                    # If translations are complete, serve translated content
+                    if translated_content is not None:
+                        print(f"l8n: Serving translated JS file: {full_path}")
+                        return Response(
+                            content=translated_content,
+                            media_type="application/javascript",
+                            headers={
+                                "Cache-Control": "no-cache, no-store, must-revalidate",
+                                "Pragma": "no-cache",
+                                "Expires": "0"
+                            }
+                        )
+                    else:
+                        print(f"l8n: Translations incomplete, serving original JS file: {full_path}")
+                else:
+                    print(f"l8n: No localized version found, serving original JS file: {full_path}")
             # For non-JS files or when translation is not available, use default behavior
             print(f"l8n Serving static file without translation: {full_path}")
             return await super().get_response(path, scope)
