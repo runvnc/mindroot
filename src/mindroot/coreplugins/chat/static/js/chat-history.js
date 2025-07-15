@@ -89,6 +89,9 @@ export class ChatHistory {
                console.log('user mesage: found command')
                let parsed = cmd.result
                try {
+                 if (typeof parsed != 'string') {
+                     parsed = JSON.stringify(parsed);
+                 }
                  parsed = markdownRenderer.parse(parsed);
                  console.log("rendered command result markdown")
                } catch (e) {
