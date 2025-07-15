@@ -24,7 +24,7 @@ import nanoid
 sse_clients = {}
 
 @service()
-async def prompt(model: str, instructions: str, temperature=0, max_tokens=2000, json=False, context=None):
+async def prompt(model: str, instructions: str, temperature=0, max_tokens=400, json=False, context=None):
     messages = [
         { "role": "system",
           "content": "Respond to prompt with no extraneous commentary."
