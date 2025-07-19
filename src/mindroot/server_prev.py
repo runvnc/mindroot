@@ -8,13 +8,11 @@ from .lib.chatcontext import ChatContext
 from .lib.providers.hooks import hook_manager
 from .lib.utils.debug import debug_box
 import asyncio
-import sys
 import uvicorn
 from termcolor import colored
 import socket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from .lib.cli.plugins import install_plugins_from_cli
 from dotenv import load_dotenv
 from .migrate import run_migrations
 
@@ -27,25 +25,11 @@ load_dotenv(override=True)
 
 def parse_args():
     import argparse
-    parser = argparse.ArgumentParser(description="Run the MindRoot server or manage plugins.", allow_abbrev=False)
-
-    # Server arguments are top-level
+    parser = argparse.ArgumentParser(description="Run the server")
     parser.add_argument("-p", "--port", type=int, help="Port to run the server on")
+    # need to include optional admin-user and admin-password
     parser.add_argument("-u", "--admin-user", type=str, help="Admin username")
     parser.add_argument("-pw", "--admin-password", type=str, help="Admin password")
-
-    subparsers = parser.add_subparsers(dest='command', help='sub-command help')
-
-    # Explicit 'server' command for clarity in help, but it's the default action
-    server_parser = subparsers.add_parser('server', help='Run the web server (default action)')
-
-    # Plugin command group
-    plugin_parser = subparsers.add_parser('plugin', help='Manage plugins')
-    plugin_subparsers = plugin_parser.add_subparsers(dest='plugin_command', required=True)
-    install_parser = plugin_subparsers.add_parser('install', help='Install or update one or more plugins')
-    install_parser.add_argument('plugins', nargs='+', help='List of plugins to install (e.g., runvnc/plugin-name)')
-    install_parser.add_argument('--reinstall', action='store_true', help='Force reinstall of the plugin if it already exists.')
-
     return parser.parse_args()
 
 def get_project_root():
@@ -134,22 +118,14 @@ def main():
     # Run migrations first, before anything else
     run_migrations()
 
-    args = parse_args()
-
-    # If the command is 'plugin', handle it and exit.
-    if args.command == 'plugin':
-        if args.plugin_command == 'install':
-            asyncio.run(install_plugins_from_cli(args.plugins, reinstall=args.reinstall))
-        sys.exit(0)
-
-    # Default action: run the server. The server arguments are on the main 'args' object.
-    cmd_args = args
+    cmd_args = parse_args()
+    # save ALL parsed args in app state
     port = 8010
     if cmd_args.port:
         port = cmd_args.port
     else:
-        cmd_args.port = port
-
+        cmd_args.port = port 
+  
     app = FastAPI()
 
     #app.add_middleware(

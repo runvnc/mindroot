@@ -8,8 +8,8 @@ from .lib.chatcontext import ChatContext
 from .lib.providers.hooks import hook_manager
 from .lib.utils.debug import debug_box
 import asyncio
-import sys
 import uvicorn
+import sys
 from termcolor import colored
 import socket
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,24 +27,20 @@ load_dotenv(override=True)
 
 def parse_args():
     import argparse
-    parser = argparse.ArgumentParser(description="Run the MindRoot server or manage plugins.", allow_abbrev=False)
-
-    # Server arguments are top-level
-    parser.add_argument("-p", "--port", type=int, help="Port to run the server on")
-    parser.add_argument("-u", "--admin-user", type=str, help="Admin username")
-    parser.add_argument("-pw", "--admin-password", type=str, help="Admin password")
-
+    parser = argparse.ArgumentParser(description="Run the server")
     subparsers = parser.add_subparsers(dest='command', help='sub-command help')
 
-    # Explicit 'server' command for clarity in help, but it's the default action
-    server_parser = subparsers.add_parser('server', help='Run the web server (default action)')
+    # Server command (default)
+    server_parser = subparsers.add_parser('server', help='Run the web server (default)')
+    server_parser.add_argument("-p", "--port", type=int, help="Port to run the server on")
+    server_parser.add_argument("-u", "--admin-user", type=str, help="Admin username")
+    server_parser.add_argument("-pw", "--admin-password", type=str, help="Admin password")
 
-    # Plugin command group
+    # Plugin command
     plugin_parser = subparsers.add_parser('plugin', help='Manage plugins')
     plugin_subparsers = plugin_parser.add_subparsers(dest='plugin_command', required=True)
-    install_parser = plugin_subparsers.add_parser('install', help='Install or update one or more plugins')
-    install_parser.add_argument('plugins', nargs='+', help='List of plugins to install (e.g., runvnc/plugin-name)')
-    install_parser.add_argument('--reinstall', action='store_true', help='Force reinstall of the plugin if it already exists.')
+    install_parser = plugin_subparsers.add_parser('install', help='Install one or more plugins')
+    install_parser.add_argument('plugins', nargs='+', help='List of plugins to install (e.g., runvnc/plugin-name or pypi-package-name)')
 
     return parser.parse_args()
 
@@ -136,19 +132,23 @@ def main():
 
     args = parse_args()
 
-    # If the command is 'plugin', handle it and exit.
-    if args.command == 'plugin':
-        if args.plugin_command == 'install':
-            asyncio.run(install_plugins_from_cli(args.plugins, reinstall=args.reinstall))
+    # If no command is specified, default to 'server'
+    if args.command is None:
+        args.command = 'server'
+
+    if args.command == 'plugin' and args.plugin_command == 'install':
+        asyncio.run(install_plugins_from_cli(args.plugins))
         sys.exit(0)
 
-    # Default action: run the server. The server arguments are on the main 'args' object.
+    # Proceed with server startup
     cmd_args = args
     port = 8010
     if cmd_args.port:
         port = cmd_args.port
     else:
-        cmd_args.port = port
+        # Add a default port to the args namespace if not provided
+        # to avoid AttributeError later.
+        setattr(cmd_args, 'port', port)
 
     app = FastAPI()
 
