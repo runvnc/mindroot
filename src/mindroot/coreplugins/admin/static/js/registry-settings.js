@@ -9,7 +9,7 @@ export class RegistrySettings {
     // Load from localStorage, environment variable, or default
     this.component.registryUrl = localStorage.getItem('registry_url') || 
                                 window.MR_REGISTRY_URL || 
-                                'http://localhost:8000';
+                                'https://registry.mindroot.io';
   }
 
   updateRegistryUrl(newUrl) {
@@ -35,12 +35,12 @@ export class RegistrySettings {
             <input type="url" 
                    id="registry-url" 
                    value="${this.component.registryUrl}"
-                   placeholder="http://localhost:8000">
+                   placeholder="https://registry.mindroot.io">
             <button onclick="registrySettings.handleUrlChange()">Update URL</button>
             <button onclick="registrySettings.testConnection()">Test Connection</button>
           </div>
           <p class="help-text">
-            Default: http://localhost:8000 or MR_REGISTRY_URL environment variable
+            Default: https://registry.mindroot.io or MR_REGISTRY_URL environment variable
           </p>
         </div>
       </details>

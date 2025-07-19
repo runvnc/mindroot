@@ -469,7 +469,7 @@ class RegistryManagerBase extends BaseEl {
   loadRegistryUrl() {
     return localStorage.getItem('registry_url') || 
            (typeof window !== 'undefined' && window.MR_REGISTRY_URL) || 
-           'http://localhost:8000';
+           'https://registry.mindroot.io';
   }
 
   updateRegistryUrl(newUrl) {
