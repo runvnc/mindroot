@@ -15,11 +15,12 @@ body {
 }
 
 details {
-  background: rgb(10, 10, 25);
+  background: #fff;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   margin-bottom: 20px;
   overflow: hidden;
+  width: 100%;
   transition: all 0.3s ease;
 }
 
@@ -29,7 +30,7 @@ details[open] {
 
 summary {
   padding: 15px 20px;
-  background: rgb(15, 15, 30);
+  background: #222;
   color: #f0f0f0;
   cursor: pointer;
   transition: background 0.3s ease;
@@ -42,7 +43,8 @@ summary:hover {
 }
 
 details[open] summary {
-  background: rgb(25, 25, 50);
+  /* background: rgb(25, 25, 50); */
+  background: #222;
 }
 
 .details-content {

@@ -110,6 +110,7 @@ async def get_providers():
 @router.get('/commands', response_model=Dict)
 async def get_commands():
     print("retrieving commands")
+    print(f"settings_router: command_manager instance ID: {id(command_manager)}")
     #funcs = command_manager.get_functions()
     funcs = command_manager.get_detailed_functions()
     print("funcs is")

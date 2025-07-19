@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, Response, Depends, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi import File, UploadFile, Form
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
@@ -206,6 +206,20 @@ async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(
     # Regular redirect
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
+@router.get("/makesession/{agent_name}")
+async def make_session(request: Request, agent_name: str):
+    """
+    Create a new chat session for the specified agent.
+    Returns a redirect to the chat session page.
+    """
+    if not hasattr(request.state, "user"):
+        return RedirectResponse("/login")
+    user = request.state.user
+    log_id = nanoid.generate()
+    
+    await init_chat_session(user, agent_name, log_id)
+    return JSONResponse({ "log_id": log_id })
+
 @router.get("/history/{agent_name}/{log_id}")
 async def chat_history(request: Request, agent_name: str, log_id: str):
     user = request.state.user.username
@@ -330,6 +344,7 @@ async def get_token_count(request: Request, log_id: str):
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
+
     
     return {"status": "ok", "token_counts": token_counts}
 
@@ -395,5 +410,13 @@ async def get_token_count_alt(request: Request, log_id: str):
     
     if token_counts is None:
         return {"status": "error", "message": f"Chat log with ID {log_id} not found"}
+
     
     return {"status": "ok", "token_counts": token_counts}
+
+# Include widget routes
+try:
+    from .widget_routes import router as widget_router
+    router.include_router(widget_router)
+except ImportError as e:
+    print(f"Warning: Could not load widget routes: {e}")

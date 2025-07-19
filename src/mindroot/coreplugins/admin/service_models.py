@@ -71,7 +71,7 @@ async def get_service_models_from_providers(timeout: float = 500.0, context=None
     print(f"Querying {len(providers)} providers for service models...")
     provider_tasks = [query_provider(provider) for provider in providers]
     provider_results = await asyncio.gather(*provider_tasks)
-    print(provider_results)
+    #print(provider_results)
     # Organize results by service, then by provider
     service_models: Dict[str, Dict[str, List[str]]] = {}
     

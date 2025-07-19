@@ -21,6 +21,10 @@
         "enabled": true,
         "source": "core"
       },
+      "l8n": {
+        "enabled": true,
+        "source": "core"
+      },
       "jwt_auth": {
         "enabled": true,
         "source": "core"

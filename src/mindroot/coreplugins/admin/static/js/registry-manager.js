@@ -1045,7 +1045,7 @@ class RegistryManager extends RegistryManagerBase {
         <div class="form-row">
           <label>Registry URL:</label>
           <input type="url" 
-                 placeholder="http://localhost:8000" 
+                 placeholder="https://registry.mindroot.io" 
                  .value=${this.registryUrl}
                  @input=${(e) => this.registryUrl = e.target.value}>
           <button @click=${() => this.updateRegistryUrl(this.registryUrl)}>Update</button>
@@ -1053,7 +1053,7 @@ class RegistryManager extends RegistryManagerBase {
         </div>
         ${this.error ? html`<div class="error">${this.error}</div>` : ''}
         <div class="help-text">
-          Configure the MindRoot Registry URL. Default is http://localhost:8000
+          Configure the MindRoot Registry URL. Default is https://registry.mindroot.io
         </div>
       </div>
     `;

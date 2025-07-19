@@ -11,6 +11,15 @@ from .manifest import list_enabled, load_plugin_manifest
 from .installation import check_plugin_dependencies
 from mindroot.lib.utils.debug import debug_box
 
+# Try to import l8n static handler
+try:
+    from .l8n_static_handler import mount_translated_static_files
+    L8N_STATIC_AVAILABLE = True
+except ImportError as e:
+    print(f"L8n static handler not available: {e}")
+    debug_box("L8n static handler not available, falling back to regular static files")
+    L8N_STATIC_AVAILABLE = False
+
 app_instance = None
 
 def load_middleware(app, plugin_name, plugin_path, category):
@@ -67,13 +76,23 @@ def load_middleware(app, plugin_name, plugin_path, category):
         print(f"No middleware loaded for plugin: {plugin_name}")
 
 def mount_static_files(app, plugin_name, category):
-    """Mount plugin static files if they exist.
+    """Mount plugin static files with translation support if available.
     
     Args:
         app (FastAPI): The FastAPI application instance
         plugin_name (str): Name of the plugin
         category (str): Plugin category ('core' or 'installed')
     """
+    # Try to use translated static files first if l8n is available
+    if L8N_STATIC_AVAILABLE:
+        try:
+            mount_translated_static_files(app, plugin_name, category)
+            return
+        except Exception as e:
+            print(f"Could not mount translated static files for {plugin_name}: {e}")
+            print("Falling back to regular static file mounting")
+    
+    # Fallback to regular static file mounting
     plugin_dir = get_plugin_path(plugin_name)
     if not plugin_dir:
         return
@@ -145,7 +164,7 @@ async def pre_load(app=None):
             print("Error in pre_load: " + str(e))
  
 async def load(app=None):
-    """Load all enabled plugins.
+    """Load all enabled plugins with l8n translation support.
     
     Args:
         app (FastAPI, optional): The FastAPI application instance
@@ -247,7 +266,8 @@ async def load(app=None):
                 trace = traceback.format_exc()
                 print(termcolor.colored(
                     f"Failed to load router for plugin: {plugin_name}\n{str(e)}\n{trace}",'red'))
-            # Mount static files
+            
+            # Mount static files with translation support
             mount_static_files(app, plugin_name, category)
 
         except Exception as e:
