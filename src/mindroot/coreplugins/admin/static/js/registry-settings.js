@@ -56,12 +56,11 @@ export class RegistrySettings {
 
   async testConnection() {
     try {
-      const response = await fetch(`${this.component.registryUrl}/stats`);
+      const response = await fetch(`${this.component.registryUrl}/alive`);
       if (response.ok) {
         alert('Connection successful!');
-        this.component.loadStats();
       } else {
-        alert('Connection failed: ' + response.status);
+        alert('Connection failed: Server responded with status ' + response.status);
       }
     } catch (error) {
       alert('Connection failed: ' + error.message);

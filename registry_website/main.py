@@ -249,6 +249,10 @@ def extract_and_store_assets(data: dict, content_id: int) -> dict:
    
     return data
 
+@app.get("/alive"):
+async def alive_check():
+    return "OK"
+
 # Content management endpoints
 @app.post("/publish", response_model=ContentResponse)
 def publish_content(
