@@ -152,11 +152,6 @@ def main():
 
     app = FastAPI()
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"]  # This one line is all you need to allow all origins
-    )
-
     app.state.cmd_args = cmd_args
 
     debug_box("pre_load")
