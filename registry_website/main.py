@@ -249,7 +249,7 @@ def extract_and_store_assets(data: dict, content_id: int) -> dict:
    
     return data
 
-@app.get("/alive"):
+@app.get("/alive")
 async def alive_check():
     return "OK"
 
