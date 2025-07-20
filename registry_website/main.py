@@ -121,11 +121,13 @@ app.add_middleware(
 # Authentication endpoints
 @app.post("/register")
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+    print("Trying to register  user:", user_data.username, user_data.email)
     existing_user = db.query(User).filter(
         (User.username == user_data.username) | (User.email == user_data.email)
     ).first()
     
     if existing_user:
+        print("Existing user")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username or email already registered"
@@ -144,7 +146,8 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    
+    print("Sending verification email to:", user_data.email, "with token:", verification_token)
+
     await send_verification_email(user_data.email, verification_token)
     
     return {"message": "Registration successful. Please check your email to verify your account."}
