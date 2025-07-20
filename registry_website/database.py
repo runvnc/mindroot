@@ -18,6 +18,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     is_active = Column(Boolean, default=True)
+    email_verified = Column(Boolean, default=False)
+    email_verification_token = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationship to content

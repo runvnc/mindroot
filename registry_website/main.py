@@ -4,8 +4,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash
+from sqlalchemy.orm import Session, aliased
+from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash, create_verification_token, send_verification_email
 from database import get_db, User, Content, Rating, InstallLog
 from vector_store import vector_store
 from asset_manager import registry_asset_manager
@@ -140,8 +140,8 @@ async def root(request: Request):
         ''')
 
 # Authentication endpoints
-@app.post("/register", response_model=UserResponse)
-def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+@app.post("/register")
+async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(
         (User.username == user_data.username) | (User.email == user_data.email)
     ).first()
@@ -152,18 +152,40 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Username or email already registered"
         )
     
+    verification_token = create_verification_token(user_data.email)
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
         username=user_data.username,
         email=user_data.email,
-        password=hashed_password
+        password=hashed_password,
+        is_active=False, # User is inactive until email is verified
+        email_verification_token=verification_token
     )
     
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     
-    return db_user
+    await send_verification_email(user_data.email, verification_token)
+    
+    return {"message": "Registration successful. Please check your email to verify your account."}
+
+@app.get("/verify-email/{token}", response_class=HTMLResponse)
+def verify_email(token: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email_verification_token == token).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid verification token"
+        )
+    
+    user.email_verified = True
+    user.is_active = True
+    user.email_verification_token = None
+    db.commit()
+    
+    return HTMLResponse("<h1>Email verified successfully!</h1><p>You can now log in.</p>")
 
 @app.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -174,6 +196,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"}
         )
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email not verified. Please check your inbox for a verification link."
+        )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires

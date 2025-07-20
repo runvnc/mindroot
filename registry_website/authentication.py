@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from database import SessionLocal, User
 from typing import Optional
+import secrets
 
 SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
@@ -62,6 +63,23 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def create_verification_token(email: str) -> str:
+    """Create a secure token for email verification."""
+    return secrets.token_urlsafe(32)
+
+async def send_verification_email(email: str, token: str):
+    """Placeholder for sending a verification email."""
+    verification_link = f"http://localhost:8000/verify-email/{token}"
+    print("\n--- EMAIL VERIFICATION ---")
+    print(f"To: {email}")
+    print(f"Subject: Verify your email address")
+    print(f"Body: Please click the following link to verify your email address:")
+    print(verification_link)
+    print("--------------------------\n")
+    # In a real application, you would use a library like `fastapi-mail`
+    # or `smtplib` to send an actual email.
+    pass
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     """Get current user from JWT token."""
