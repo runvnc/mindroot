@@ -112,10 +112,10 @@ class SearchResponse(BaseModel):
     total: int
     semantic_results: Optional[List[dict]] = None
 
- app.add_middleware(
+app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"]  # This one line is all you need to allow all origins
-    )
+)
 
 
 # Authentication endpoints
