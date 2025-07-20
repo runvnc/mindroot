@@ -4,8 +4,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session, aliased
-from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash, create_verification_token, send_verification_email
+from sqlalchemy.orm import Session
+from authentication import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash, create_verification_token
 from database import get_db, User, Content, Rating, InstallLog
 from vector_store import vector_store
 from asset_manager import registry_asset_manager
@@ -13,6 +13,7 @@ from datetime import timedelta, datetime
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 import json
+from email_sender import send_verification_email
 import uvicorn
 import os
 from pathlib import Path
