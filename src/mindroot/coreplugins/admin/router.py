@@ -74,8 +74,13 @@ router.include_router(command_router)
 from .settings_router import router as settings_router
 router.include_router(settings_router)
 
+# Use the fixed plugin router instead of the old one
+from .plugin_router_fixed import router as plugin_router_fixed
+router.include_router(plugin_router_fixed, prefix="/admin", tags=["plugins", "mcp"])
+
+# Keep the old plugin router for backward compatibility if needed
 from .plugin_router import router as plugin_router
-router.include_router(plugin_router)
+router.include_router(plugin_router, prefix="/admin/legacy", tags=["legacy-plugins"])
 
 from .persona_router import router as persona_router
 router.include_router(persona_router)

@@ -22,7 +22,6 @@ dependencies = [
     "pluggy",
     "sse_starlette",
     "partial-json-parser",
-    "pydantic",
     "setuptools",
     "requests",
     "aiohttp",
@@ -37,7 +36,12 @@ dependencies = [
     "google-auth",
     "google-auth-oauthlib",
     "google-auth-httplib2",
-    "chardet"
+    "chardet",
+    "mcp>=1.9.0",
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "aiofiles>=23.0.0",
+    "uv>=0.7.0"
 ]
 
 [project.scripts]

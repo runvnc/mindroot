@@ -58,43 +58,43 @@ export function addPublishMethods(RegistryManager) {
     `;
   };
 
-  // Handle plugin publishing
-  RegistryManager.prototype.handlePublishPlugin = async function() {
-    const title = this.shadowRoot.getElementById('plugin-title').value;
-    const description = this.shadowRoot.getElementById('plugin-description').value;
-    const version = this.shadowRoot.getElementById('plugin-version').value;
-    const githubUrl = this.shadowRoot.getElementById('plugin-github').value;
-    const pypiModule = this.shadowRoot.getElementById('plugin-pypi').value;
-    const tags = this.shadowRoot.getElementById('plugin-tags').value;
-    
-    if (!title || !description || !version) {
-      this.error = 'Please fill in title, description, and version';
+  // Handle plugin publishing from GitHub
+  RegistryManager.prototype.handlePublishPluginFromGithub = async function() {
+    const repo = this.shadowRoot.getElementById('plugin-github-repo').value;
+    if (!repo || !repo.includes('/')) {
+      this.error = 'Please provide a valid GitHub repository (e.g., user/repo)';
       this.requestUpdate();
       return;
     }
-    
-    if (!githubUrl && !pypiModule) {
-      this.error = 'Please provide either GitHub URL or PyPI module name';
-      this.requestUpdate();
-      return;
+
+    this.loading = true;
+    this.error = '';
+
+    try {
+      const response = await fetch('/admin/plugins/publish_from_github', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.authToken}`
+        },
+        body: JSON.stringify({ repo: repo })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        this.error = result.message || 'Published successfully!';
+        this.shadowRoot.getElementById('plugin-github-repo').value = '';
+        setTimeout(() => { this.error = ''; this.requestUpdate(); }, 3000);
+      } else {
+        const errorData = await response.json();
+        this.error = errorData.detail || 'Publishing failed';
+      }
+    } catch (error) {
+      this.error = 'Network error: ' + error.message;
     }
-    
-    const publishData = {
-      title: title,
-      description: description,
-      category: 'plugin',
-      content_type: 'mindroot_plugin',
-      version: version,
-      data: {
-        source: githubUrl ? 'github' : 'pypi',
-        installation_notes: 'Install via MindRoot admin interface'
-      },
-      github_url: githubUrl || null,
-      pypi_module: pypiModule || null,
-      tags: tags ? tags.split(',').map(t => t.trim()) : []
-    };
-    
-    await this.publishToRegistry(publishData);
+
+    this.loading = false;
+    this.requestUpdate();
   };
 
   // Handle agent publishing

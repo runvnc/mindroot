@@ -130,7 +130,7 @@ class ActionComponent extends BaseEl {
     super();
     this.funcName = '';
     this.result = '';
-    this.isExpanded = false;
+    this.isExpanded = true;
     this.isRunning = false;
   }
 
@@ -147,7 +147,7 @@ class ActionComponent extends BaseEl {
       setTimeout(() => {
         this.isRunning = false;
         this.requestUpdate();
-      }, 5000);
+      }, 1000);
     }
   }
 

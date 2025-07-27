@@ -1,9 +1,11 @@
 import { html } from '/admin/static/js/lit-core.min.js';
 import { RegistryManagerBase } from './registry-manager-base.js';
+import "./mcp-publisher.js";
 
 class RegistryManager extends RegistryManagerBase {
   constructor() {
     super();
+    this.localMcpServers = [];
     this.searchTimeout = null;
   }
 
@@ -72,6 +74,13 @@ class RegistryManager extends RegistryManagerBase {
       if (agentsResponse.ok) {
         const agentsData = await agentsResponse.json();
         this.localAgents = agentsData;
+      }
+
+      // Load local MCP servers
+      const mcpResponse = await fetch('/admin/mcp/list');
+      if (mcpResponse.ok) {
+        const mcpData = await mcpResponse.json();
+        this.localMcpServers = mcpData.data || [];
       }
 
       // Load agent ownership information
@@ -286,6 +295,8 @@ class RegistryManager extends RegistryManagerBase {
         await this.installPlugin(item);
       } else if (item.category === 'agent') {
         await this.installAgent(item);
+      } else if (item.category === 'mcp_server') {
+        await this.installMcpServer(item);
         
         // Load local content first to update the UI
         await this.loadLocalContent();
@@ -393,6 +404,28 @@ class RegistryManager extends RegistryManagerBase {
     } catch (error) {
       this.loading = false;
       this.showToast('Installation failed: ' + error.message, 'error');
+    }
+  }
+
+  async installMcpServer(item) {
+    this.loading = true;
+    try {
+      const response = await fetch('/admin/mcp/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item.data)
+      });
+      if (response.ok) {
+        this.showToast(`MCP Server '${item.title}' installed successfully.`, 'success');
+        await this.loadLocalContent();
+      } else {
+        const err = await response.json();
+        throw new Error(err.detail || 'Failed to install MCP server');
+      }
+    } catch (error) {
+      this.showToast(`Error: ${error.message}`, 'error');
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -720,6 +753,44 @@ class RegistryManager extends RegistryManagerBase {
     }
   }
 
+  async handlePublishPluginFromGithub() {
+    const repoInput = this.shadowRoot.getElementById('plugin-github-repo');
+    const repo = repoInput.value;
+    if (!repo || !repo.includes('/')) {
+      this.showToast('Please provide a valid GitHub repository (e.g., user/repo)', 'error');
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+    this.requestUpdate();
+
+    try {
+      const response = await fetch('/admin/plugins/publish_from_github', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.authToken}`
+        },
+        body: JSON.stringify({ repo: repo, registry_url: this.registryUrl })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        this.showToast(result.message || 'Published successfully!', 'success');
+        repoInput.value = '';
+      } else {
+        const errorData = await response.json();
+        this.showToast(errorData.detail || 'Publishing failed', 'error');
+      }
+    } catch (error) {
+      this.showToast('Network error: ' + error.message, 'error');
+    }
+
+    this.loading = false;
+    this.requestUpdate();
+  }
+
   _render() {
     return html`
       <div class="registry-manager">
@@ -833,6 +904,11 @@ class RegistryManager extends RegistryManagerBase {
               <span class="material-icons">smart_toy</span>
               Agents
             </button>
+            <button class="category-tab ${this.selectedCategory === 'mcp_server' ? 'active' : ''}" 
+                    @click=${() => this.handleCategoryChange('mcp_server')}>
+              <span class="material-icons">dns</span>
+              MCP Servers
+            </button>
           </div>
         </div>
         
@@ -853,6 +929,9 @@ class RegistryManager extends RegistryManagerBase {
   }
 
   renderSearchResult(item) {
+    const isMcp = item.category === 'mcp_server';
+    const isInstalled = isMcp ? this.localMcpServers.some(s => s.name === item.title) : this.isAgentInstalled(item.title);
+
     return html`
       <div class="result-item">
         ${item.category === 'agent' && (item.data?.persona_data?.persona_assets?.faceref || item.data?.persona_data?.persona_assets?.avatar) ? html`
@@ -899,8 +978,10 @@ class RegistryManager extends RegistryManagerBase {
           </div>
         ` : ''}
         <div class="result-actions">
-          <div>${this.isAgentInstalled(item.title) ? html`<div>Installed</div>` : ''}</div>
-          <button class="success" @click=${() => this.installFromRegistry(item)}>Install</button>
+          ${isInstalled
+            ? html`<div class="installed-badge"><span class="material-icons">check_circle</span> Installed</div>`
+            : html`<button class="success" @click=${() => this.installFromRegistry(item)} ?disabled=${this.loading}>Install</button>`
+          }
           ${item.github_url ? html`<a href="${item.github_url}" target="_blank"><button>GitHub</button></a>` : ''}
         </div>
         
@@ -921,6 +1002,15 @@ class RegistryManager extends RegistryManagerBase {
 
     return html`
       <div class="section">
+        <h3>Publish Plugin from GitHub</h3>
+        <div class="publish-form" style="max-width: 500px; display: flex; flex-direction: column; gap: 1rem;">
+          <p>Enter the GitHub repository (e.g., user/repo) to publish a plugin directly to the registry.</p>
+          <input type="text" placeholder="GitHub Repository (e.g., user/repo)" id="plugin-github-repo">
+          <button class="primary" @click=${this.handlePublishPluginFromGithub}>Publish from GitHub</button>
+        </div>
+      </div>
+
+      <div class="section">
         <h3>Publish to Registry</h3>
         <div class="form-row">
           <button @click=${this.refreshOwnershipCache} ?disabled=${this.loading}>
@@ -928,43 +1018,20 @@ class RegistryManager extends RegistryManagerBase {
           </button>
           <span class="help-text">
             Last scanned: ${this.agentOwnership?.scanned_at ? 
-              new Date(this.agentOwnership.scanned_at).toLocaleString() : 'Never'}
+              new Date(this.agentOwnership.scanned_at).toLocaleString() : "Never"}
           </span>
         </div>
         <p>Select a local plugin or agent to publish to the registry:</p>
         
-        ${this.loading ? html`<div class="loading">Publishing...</div>` : ''}
-        ${this.publishSuccess ? html`<div class="success">${this.publishSuccess}</div>` : ''}
-        ${this.error ? html`<div class="${this.error.includes('Successfully') ? 'success' : 'error'}">${this.error}</div>` : ''}
-        
-        <h4>Local Plugins (${this.localPlugins.length})</h4>
-        ${this.localPlugins.length === 0 ? html`
-          <p class="help-text">No local plugins found. Install some plugins first to publish them.</p>
-        ` : html`
-          ${this.localPlugins.map(plugin => html`
-            <div class="result-item">
-              <div class="result-header">
-                <h5 class="result-title">${plugin.name}</h5>
-                <span class="result-version">v${plugin.version || '1.0.0'}</span>
-              </div>
-              <p class="result-description">${plugin.description || 'No description available'}</p>
-              <div class="result-meta">
-                <span>Commands: ${plugin.commands?.length || 0}</span>
-                <span>Services: ${plugin.services?.length || 0}</span>
-              </div>
-              <div class="result-actions">
-                <button class="primary" @click=${() => this.publishItem(plugin, 'plugin')} ?disabled=${this.loading}>Publish Plugin</button>
-              </div>
-            </div>
-          `)}
-        `}
+        ${this.loading ? html`<div class="loading">Publishing...</div>` : ""}
+        ${this.publishSuccess ? html`<div class="success">${this.publishSuccess}</div>` : ""}
+        ${this.error ? html`<div class="${this.error.includes("Successfully") ? "success" : "error"}">${this.error}</div>` : ""}
         
         <h4>Local Agents (${this.localAgents.length})</h4>
         ${this.localAgents.length === 0 ? html`
           <p class="help-text">No local agents found. Create some agents first to publish them.</p>
         ` : html`
           ${this.localAgents.map(agent => {
-            // Check if this agent has external ownership
             const agentKey = `local/${agent.name}`;
             const ownershipInfo = this.agentOwnership?.agents?.[agentKey];
             const hasExternalOwner = ownershipInfo?.has_external_owner || false;
@@ -974,13 +1041,13 @@ class RegistryManager extends RegistryManagerBase {
             return html`
             <div class="result-item">
               <h5 class="result-title">${agent.name}</h5>
-              <p class="result-description">${agent.description || 'No description available'}</p>
+              <p class="result-description">${agent.description || "No description available"}</p>
               ${hasExternalOwner ? html`
-                <p class="help-text" style="color: #dc3545;">Cannot publish: Agent created by ${ownerName || 'another user'}</p>
-              ` : ''}
+                <p class="help-text" style="color: #dc3545;">Cannot publish: Agent created by ${ownerName || "another user"}</p>
+              ` : ""}
               <div class="result-actions">
                 <button class="primary" 
-                        @click=${() => this.publishItem(agent, 'agent')} 
+                        @click=${() => this.publishItem(agent, "agent")} 
                         ?disabled=${this.loading || !canPublish}>
                   Publish Agent
                 </button>
@@ -990,7 +1057,58 @@ class RegistryManager extends RegistryManagerBase {
           })}
         `}
       </div>
+
+      <div class="section">
+        <h3>Publish MCP Server</h3>
+        <mcp-publisher></mcp-publisher>
+      </div>
     `;
+  }
+
+  async toggleMcpServerConnection(serverName, connect) {
+    this.loading = true;
+    const action = connect ? 'connect' : 'disconnect';
+    try {
+      const response = await fetch(`/admin/mcp/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server_name: serverName })
+      });
+      if (response.ok) {
+        this.showToast(`Server '${serverName}' ${action}ed successfully.`, 'success');
+        await this.loadLocalContent();
+      } else {
+        const err = await response.json();
+        throw new Error(err.detail || `Failed to ${action} server`);
+      }
+    } catch (error) {
+      this.showToast(`Error: ${error.message}`, 'error');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async removeMcpServer(serverName) {
+    if (!confirm(`Are you sure you want to remove the MCP server '${serverName}'?`)) return;
+    this.loading = true;
+    try {
+      const response = await fetch('/admin/mcp/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server_name: serverName })
+      });
+      if (response.ok) {
+        this.showToast(`Server '${serverName}' removed.`, 'success');
+        await this.loadLocalContent();
+      } else {
+        const err = await response.json();
+        throw new Error(err.detail || 'Failed to remove server');
+      }
+    } catch (error) {
+      this.showToast(`Error: ${error.message}`, 'error');
+    } finally {
+      this.loading = false;
+    }
   }
 
   async refreshOwnershipCache() {
@@ -1138,28 +1256,7 @@ class RegistryManager extends RegistryManagerBase {
     try {
       let publishData;
       
-      if (type === 'plugin') {
-        publishData = {
-          title: item.name,
-          description: item.description || `${item.name} plugin`,
-          category: 'plugin',
-          content_type: 'mindroot_plugin',
-          version: item.version || '1.0.0',
-          data: {
-            plugin_info: item,
-            installation: {
-              type: item.source || 'pypi',
-              source_path: item.source_path || item.name
-            }
-          },
-          commands: item.commands || [],
-          services: item.services || [],
-          tags: item.tags || ['plugin'],
-          dependencies: item.dependencies || [],
-          github_url: item.github_url,
-          pypi_module: item.pypi_module || item.name
-        };
-      } else if (type === 'agent') {
+      if (type === 'agent') {
         // Load persona data if agent has a persona
         let personaData = null;
         let personaAssets = null;

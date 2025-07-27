@@ -12,6 +12,7 @@ from lib.plugins import (
 from lib.plugins.installation import download_github_files
 from lib.streamcmd import stream_command_as_events
 import asyncio
+import httpx
 
 
 router = APIRouter()
@@ -360,3 +361,65 @@ def discover_plugins(directory):
                 continue
 
     return discovered
+
+async def publish_plugin_from_github(repo: str, registry_token: str, registry_url: str):
+    """
+    Fetches plugin_info.json from a GitHub repo and publishes it to the registry.
+    """
+    plugin_info = None
+    # Try to fetch from 'main' and then 'master' branch
+    for branch in ['main', 'master']:
+        url = f"https://raw.githubusercontent.com/{repo}/{branch}/plugin_info.json"
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url)
+                if response.status_code == 200:
+                    plugin_info = response.json()
+                    break
+            except httpx.RequestError as e:
+                # This might happen if the repo is private or other network issues
+                print(f"Error fetching from {url}: {e}")
+                continue
+
+    if not plugin_info:
+        raise Exception(f"Could not find or access plugin_info.json in repo {repo} on 'main' or 'master' branch.")
+
+    # Construct the payload for the registry's /publish endpoint
+    publish_data = {
+        "title": plugin_info.get("name"),
+        "description": plugin_info.get("description", ""),
+        "category": "plugin",
+        "content_type": "mindroot_plugin",
+        "version": plugin_info.get("version", "0.1.0"),
+        "github_url": f"https://github.com/{repo}",
+        "pypi_module": plugin_info.get("pypi_module"),
+        "commands": plugin_info.get("commands", []),
+        "services": plugin_info.get("services", []),
+        "tags": plugin_info.get("tags", ["plugin"]),
+        "dependencies": plugin_info.get("dependencies", []),
+        "data": {
+            "plugin_info": plugin_info,
+            "installation": {
+                "type": "github",
+                "source_path": repo
+            }
+        }
+    }
+
+    # Post the data to the registry
+    publish_url = f"{registry_url}/publish"
+    headers = {
+        "Authorization": f"Bearer {registry_token}",
+        "Content-Type": "application/json"
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post(publish_url, json=publish_data, headers=headers)
+
+    if response.status_code >= 400:
+        try:
+            error_detail = response.json().get("detail", response.text)
+        except:
+            error_detail = response.text
+        raise Exception(f"Failed to publish to registry: {response.status_code} - {error_detail}")
+
+    return response.json()
