@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MCP Server Catalog</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a2e; color: #eee; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid #0f3460; }
+        h1, h2 { color: #4fc3f7; }
+        .server-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
+        .server-card { background: #0f3460; border-radius: 6px; padding: 15px; border: 1px solid #1976d2; position: relative; }
+        .server-card.running { border-color: #4caf50; box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
+        .server-card.installed { border-color: #ff9800; }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; position: absolute; top: 10px; right: 10px; }
+        .status.running { background: #4caf50; color: white; }
+        .status.installed { background: #ff9800; color: white; }
+        .status.available { background: #757575; color: white; }
+        .category-badge { background: #1976d2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 5px; }
+        .tools-list { font-size: 12px; color: #bbb; margin-top: 5px; }
+        button { background: #1976d2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 4px; font-size: 12px; }
+        button:hover { background: #1565c0; }
+        button.success { background: #4caf50; }
+        button.success:hover { background: #45a049; }
+        button.danger { background: #f44336; }
+        button.danger:hover { background: #d32f2f; }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: #0f3460; padding: 15px; border-radius: 6px; text-align: center; min-width: 100px; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #4fc3f7; }
+        .stat-label { font-size: 12px; color: #bbb; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        input, select { background: #0f3460; color: #eee; border: 1px solid #1976d2; padding: 8px; border-radius: 4px; margin: 4px; }
+        .loading { text-align: center; padding: 20px; color: #bbb; }
+        .error { background: #f44336; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background: #4caf50; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MCP Server Catalog</h1>
+        
+        <div class="stats" id="catalogStats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalServers">-</div>
+                <div class="stat-label">Total Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="runningServers">-</div>
+                <div class="stat-label">Running</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="installedServers">-</div>
+                <div class="stat-label">Installed</div>
+            </div>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="categoryFilter" onchange="filterCatalog()">
+                <option value="">All Categories</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search servers..." onkeyup="searchCatalog()">
+            <button onclick="refreshCatalog()">Refresh Status</button>
+        </div>
+        
+        <div id="catalogServers" class="server-grid">
+            <div class="loading">Loading server catalog...</div>
+        </div>
+        
+        <div id="messages"></div>
+    </div>
+    
+    <script>
+        let catalogData = {};
+        
+        async function loadCatalog() {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_catalog_list', args: {}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    catalogData = result.result;
+                    displayCatalog(catalogData);
+                    updateStats(catalogData);
+                    loadCategories(catalogData.categories);
+                } else {
+                    showMessage('Error loading catalog: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error loading catalog: ' + error.message, 'error');
+            }
+        }
+        
+        function displayCatalog(data) {
+            const container = document.getElementById('catalogServers');
+            container.innerHTML = '';
+            
+            if (!data.servers || data.servers.length === 0) {
+                container.innerHTML = '<div class="loading">No servers found</div>';
+                return;
+            }
+            
+            data.servers.forEach(server => {
+                const card = document.createElement('div');
+                card.className = 'server-card ' + (server.running ? 'running' : server.installed ? 'installed' : '');
+                
+                const statusClass = server.running ? 'running' : server.installed ? 'installed' : 'available';
+                const statusText = server.running ? 'RUNNING' : server.installed ? 'INSTALLED' : 'AVAILABLE';
+                
+                const toolsList = server.tools.slice(0, 3).join(', ') + (server.tools.length > 3 ? '...' : '');
+                
+                card.innerHTML = '<span class="status ' + statusClass + '">' + statusText + '</span>' +
+                    '<h3>' + server.display_name + '</h3>' +
+                    '<p>' + server.description + '</p>' +
+                    '<div><span class="category-badge">' + server.category + '</span>' +
+                    '<span style="font-size: 12px; color: #bbb;">' + server.install_method + '</span></div>' +
+                    '<div class="tools-list">Tools: ' + toolsList + '</div>' +
+                    '<div style="margin-top: 10px;">' +
+                    (server.running ? 
+                        '<button class="danger" onclick="stopServer(\'' + server.name + '\')">' + String.fromCharCode(9209) + ' Stop</button>' :
+                        '<button class="success" onclick="installAndRun(\'' + server.name + '\')">' + String.fromCharCode(128640) + ' Install & Run</button>'
+                    ) +
+                    (!server.installed && !server.running ? 
+                        '<button onclick="installOnly(\'' + server.name + '\')">' + String.fromCharCode(128230) + ' Install Only</button>' : ''
+                    ) +
+                    '<button onclick="showServerInfo(\'' + server.name + '\')">' + String.fromCharCode(8505) + ' Info</button>' +
+                    '</div>';
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function updateStats(data) {
+            const total = data.servers.length;
+            const running = data.servers.filter(s => s.running).length;
+            const installed = data.servers.filter(s => s.installed).length;
+            
+            document.getElementById('totalServers').textContent = total;
+            document.getElementById('runningServers').textContent = running;
+            document.getElementById('installedServers').textContent = installed;
+        }
+        
+        function loadCategories(categories) {
+            const select = document.getElementById('categoryFilter');
+            select.innerHTML = '<option value="">All Categories</option>';
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                select.appendChild(option);
+            });
+        }
+        
+        async function installAndRun(serverName) {
+            showMessage('Installing and starting ' + serverName + '...', 'info');
+            
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_catalog_install_and_run', args: {server_name: serverName}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.result, 'success');
+                    loadCatalog();
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function installOnly(serverName) {
+            showMessage('Installing ' + serverName + '...', 'info');
+            
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_catalog_install', args: {server_name: serverName}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.result, 'success');
+                    loadCatalog();
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function stopServer(serverName) {
+            showMessage('Stopping ' + serverName + '...', 'info');
+            
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_catalog_stop', args: {server_name: serverName}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.result, 'success');
+                    loadCatalog();
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function showServerInfo(serverName) {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_catalog_info', args: {server_name: serverName}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(JSON.stringify(result.result, null, 2));
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+        
+        function filterCatalog() {
+            const category = document.getElementById('categoryFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = catalogData.servers;
+            
+            if (category) {
+                filtered = filtered.filter(s => s.category === category);
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(s => 
+                    s.name.toLowerCase().includes(searchTerm) ||
+                    s.display_name.toLowerCase().includes(searchTerm) ||
+                    s.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            displayCatalog({servers: filtered, categories: catalogData.categories});
+        }
+        
+        function searchCatalog() {
+            filterCatalog();
+        }
+        
+        function refreshCatalog() {
+            loadCatalog();
+        }
+        
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        // Load catalog on page load
+        loadCatalog();
+    </script>
+</body>
+</html>

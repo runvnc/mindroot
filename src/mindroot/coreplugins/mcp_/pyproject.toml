@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mr-mcp"
+version = "1.0.0"
+description = "Model Context Protocol integration for MindRoot"
+authors = [{name = "MindRoot Team"}]
+requires-python = ">=3.8"
+dependencies = [
+    "mcp>=1.9.0",
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "aiofiles>=23.0.0",
+    "uv>=0.7.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"mr_mcp" = [
+    "templates/*.jinja2",
+    "inject/*.jinja2",
+    "static/js/*.js",
+    "static/css/*.css",
+    "data/*.json"
+]

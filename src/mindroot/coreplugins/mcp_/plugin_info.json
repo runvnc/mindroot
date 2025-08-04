@@ -1,0 +1,42 @@
+{
+  "name": "MCP Integration",
+  "version": "1.0.0",
+  "description": "Model Context Protocol integration for MindRoot - connect to MCP servers and use their tools, resources, and prompts with uvx/npx support, dynamic command registration, server catalog, and one-click installation",
+  "author": "MindRoot Team",
+  "services": ["mcp_manager", "enhanced_mcp_manager_service"],
+  "commands": [
+    "mcp_connect",
+    "mcp_disconnect",
+    "mcp_list_servers",
+    "mcp_list_tools",
+    "mcp_call_tool",
+    "mcp_list_resources",
+    "mcp_read_resource",
+    "mcp_discover_servers",
+    "mcp_install_server",
+    "mcp_enhanced_connect",
+    "mcp_enhanced_disconnect",
+    "mcp_install_uvx_server",
+    "mcp_install_npx_server",
+    "mcp_check_tools",
+    "mcp_refresh_dynamic_commands",
+    "mcp_debug_connection",
+    "mcp_list_dynamic_commands",
+    "mcp_catalog_list",
+    "mcp_catalog_search",
+    "mcp_catalog_install",
+    "mcp_catalog_install_and_run",
+    "mcp_catalog_stop",
+    "mcp_catalog_status",
+    "mcp_catalog_info",
+    "mcp_catalog_categories",
+    "mcp_catalog_add_custom",
+    "mcp_catalog_refresh"
+  ],
+  "dependencies": {
+    "mcp": ">=1.9.0",
+    "httpx": ">=0.24.0",
+    "pydantic": ">=2.0.0",
+    "psutil": ">=5.8.0"
+  }
+}

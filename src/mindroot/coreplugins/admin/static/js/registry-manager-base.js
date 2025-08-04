@@ -436,6 +436,44 @@ class RegistryManagerBase extends BaseEl {
       margin-bottom: 0.5rem;
       border: 1px solid rgba(156, 39, 176, 0.3);
     }
+
+    .oauth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(255, 152, 0, 0.2);
+      color: #ff9800;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+
+    .oauth-badge .material-icons {
+      font-size: 0.9rem;
+    }
+
+    .oauth-status {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.5rem;
+    }
+
+    .oauth-status.needs-auth {
+      color: #ffc107;
+    }
+
+    .oauth-status .material-icons {
+      font-size: 1rem;
+    }
+
+    .installed-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: #28a745;
+    }
   `;
 
   constructor() {

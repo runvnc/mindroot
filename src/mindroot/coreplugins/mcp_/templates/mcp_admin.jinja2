@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MCP Server Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #0f3460;
+        }
+        h1, h2 {
+            color: #4fc3f7;
+        }
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .server-card {
+            background: #0f3460;
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #1976d2;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #4caf50;
+            color: white;
+        }
+        .status.disconnected {
+            background: #757575;
+            color: white;
+        }
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #d32f2f;
+        }
+        input, select {
+            background: #0f3460;
+            color: #eee;
+            border: 1px solid #1976d2;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MCP Server Management</h1>
+        
+        <div class="section">
+            <h2>Add New Server</h2>
+            <div class="form-row">
+                <input type="text" id="serverName" placeholder="Server Name">
+                <input type="text" id="serverDesc" placeholder="Description">
+                <input type="text" id="serverCmd" placeholder="Command">
+                <input type="text" id="serverArgs" placeholder="Args (comma-separated)">
+                <button onclick="addServer()">Add Server</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Discover Servers</h2>
+            <button onclick="discoverServers()">Discover Available Servers</button>
+            <div id="discoveredServers"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Configured Servers</h2>
+            <div id="serverList" class="server-grid">
+                <!-- Servers will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Available Tools</h2>
+            <div id="toolsList">
+                <!-- Tools will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadServers() {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_list_servers', args: {}})
+                });
+                const result = await response.json();
+                
+                const serverList = document.getElementById('serverList');
+                serverList.innerHTML = '';
+                
+                if (result.success && result.result) {
+                    result.result.forEach(server => {
+                        const card = document.createElement('div');
+                        card.className = 'server-card';
+                        card.innerHTML = `
+                            <h3>${server.name}</h3>
+                            <p>${server.description}</p>
+                            <p>Transport: ${server.transport}</p>
+                            <p>Tools: ${server.tools_count} | Resources: ${server.resources_count}</p>
+                            <span class="status ${server.status}">${server.status.toUpperCase()}</span>
+                            <div>
+                                ${server.status === 'disconnected' ? 
+                                    `<button onclick="connectServer('${server.name}')">Connect</button>` :
+                                    `<button onclick="disconnectServer('${server.name}')">Disconnect</button>`
+                                }
+                                <button class="danger" onclick="removeServer('${server.name}')">Remove</button>
+                            </div>
+                        `;
+                        serverList.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading servers:', error);
+            }
+        }
+        
+        async function addServer() {
+            const name = document.getElementById('serverName').value;
+            const description = document.getElementById('serverDesc').value;
+            const command = document.getElementById('serverCmd').value;
+            const argsStr = document.getElementById('serverArgs').value;
+            const args = argsStr ? argsStr.split(',').map(s => s.trim()) : [];
+            
+            if (!name || !description || !command) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        command: 'mcp_install_server',
+                        args: {name, description, command, args}
+                    })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Server added successfully!');
+                    document.getElementById('serverName').value = '';
+                    document.getElementById('serverDesc').value = '';
+                    document.getElementById('serverCmd').value = '';
+                    document.getElementById('serverArgs').value = '';
+                    loadServers();
+                } else {
+                    alert('Error adding server: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error adding server: ' + error.message);
+            }
+        }
+        
+        async function connectServer(name) {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_connect', args: {server_name: name}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Connected successfully!');
+                    loadServers();
+                    loadTools();
+                } else {
+                    alert('Connection failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+        
+        async function disconnectServer(name) {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_disconnect', args: {server_name: name}})
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Disconnected successfully!');
+                    loadServers();
+                    loadTools();
+                } else {
+                    alert('Disconnect failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Disconnect error: ' + error.message);
+            }
+        }
+        
+        async function loadTools() {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_list_tools', args: {}})
+                });
+                const result = await response.json();
+                
+                const toolsList = document.getElementById('toolsList');
+                toolsList.innerHTML = '';
+                
+                if (result.success && result.result) {
+                    result.result.forEach(tool => {
+                        const toolDiv = document.createElement('div');
+                        toolDiv.style.cssText = 'background: #0f3460; padding: 10px; margin: 5px; border-radius: 4px;';
+                        toolDiv.innerHTML = `
+                            <strong>${tool.server}:${tool.name}</strong><br>
+                            ${tool.description || 'No description'}
+                        `;
+                        toolsList.appendChild(toolDiv);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading tools:', error);
+            }
+        }
+        
+        async function discoverServers() {
+            try {
+                const response = await fetch('/api/command', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: 'mcp_discover_servers', args: {}})
+                });
+                const result = await response.json();
+                
+                const discoveredDiv = document.getElementById('discoveredServers');
+                discoveredDiv.innerHTML = '';
+                
+                if (result.success && result.result) {
+                    result.result.forEach(server => {
+                        const serverDiv = document.createElement('div');
+                        serverDiv.style.cssText = 'background: #0f3460; padding: 10px; margin: 5px; border-radius: 4px;';
+                        serverDiv.innerHTML = `
+                            <strong>${server.name}</strong> - ${server.description}<br>
+                            Command: ${server.command} ${server.args.join(' ')}<br>
+                            <button onclick="installDiscoveredServer('${server.name}', '${server.description}', '${server.command}', '${JSON.stringify(server.args)}')">Install</button>
+                        `;
+                        discoveredDiv.appendChild(serverDiv);
+                    });
+                }
+            } catch (error) {
+                console.error('Error discovering servers:', error);
+            }
+        }
+        
+        function installDiscoveredServer(name, description, command, argsJson) {
+            const args = JSON.parse(argsJson);
+            document.getElementById('serverName').value = name;
+            document.getElementById('serverDesc').value = description;
+            document.getElementById('serverCmd').value = command;
+            document.getElementById('serverArgs').value = args.join(', ');
+        }
+        
+        // Load initial data
+        loadServers();
+        loadTools();
+    </script>
+</body>
+</html>

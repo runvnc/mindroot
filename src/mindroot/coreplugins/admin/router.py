@@ -3,7 +3,7 @@ import os
 import json
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, Response
 from lib.plugins import list_enabled
 from lib.templates import render
 from .plugin_manager import router as plugin_manager_router
@@ -64,7 +64,6 @@ async def get_version_info():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting version info: {str(e)}")
 
-
 from lib.logging.log_router import router as log_router
 router.include_router(log_router)
 
@@ -94,6 +93,10 @@ router.include_router(server_router, prefix="/admin/server", tags=["server"])
 # Import and include the env_manager router
 from coreplugins.env_manager.router import router as env_manager_router
 router.include_router(env_manager_router)
+
+# Import and include the OAuth callback router
+from .oauth_callback_router import router as oauth_callback_router
+router.include_router(oauth_callback_router)
 
 @router.post("/admin/update-mindroot")
 async def update_mindroot():

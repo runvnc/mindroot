@@ -1,0 +1,350 @@
+{
+  "_metadata": {
+    "version": "1.0.0",
+    "last_updated": "2025-06-02",
+    "description": "MCP Server Catalog for MindRoot",
+    "categories": [
+      "utilities",
+      "system",
+      "development",
+      "search",
+      "database",
+      "communication",
+      "cloud",
+      "automation",
+      "ai"
+    ]
+  },
+  "servers": {
+    "calculator": {
+      "name": "calculator",
+      "display_name": "Calculator",
+      "description": "Precise mathematical calculations and expression evaluation",
+      "category": "utilities",
+      "command": "uvx",
+      "args": [
+        "mcp-server-calculator"
+      ],
+      "install_method": "uvx",
+      "install_package": "mcp-server-calculator",
+      "auto_install": true,
+      "process_names": [
+        "mcp-server-calculator",
+        "uvx"
+      ],
+      "tools": [
+        "calculate"
+      ],
+      "homepage": "https://github.com/githejie/mcp-server-calculator",
+      "tags": [
+        "math",
+        "calculator",
+        "utilities"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "filesystem": {
+      "name": "filesystem",
+      "display_name": "File System",
+      "description": "File and directory operations, reading and writing files",
+      "category": "system",
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp.server.filesystem"
+      ],
+      "install_method": "pip",
+      "install_package": "mcp",
+      "auto_install": true,
+      "process_names": [
+        "mcp.server.filesystem"
+      ],
+      "tools": [
+        "read_file",
+        "write_file",
+        "list_directory",
+        "create_directory"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/python-sdk",
+      "tags": [
+        "filesystem",
+        "files",
+        "system"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "github": {
+      "name": "github",
+      "display_name": "GitHub",
+      "description": "GitHub API integration for repository management and operations",
+      "category": "development",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-github",
+      "auto_install": true,
+      "process_names": [
+        "server-github",
+        "npx"
+      ],
+      "tools": [
+        "create_repository",
+        "get_repository",
+        "list_repositories",
+        "create_issue"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "github",
+        "git",
+        "development",
+        "api"
+      ],
+      "status": "available",
+      "installed": true,
+      "running": false
+    },
+    "brave-search": {
+      "name": "brave-search",
+      "display_name": "Brave Search",
+      "description": "Web search capabilities using Brave Search API",
+      "category": "search",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-brave-search",
+      "auto_install": true,
+      "process_names": [
+        "server-brave-search",
+        "npx"
+      ],
+      "tools": [
+        "brave_search"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "search",
+        "web",
+        "brave",
+        "api"
+      ],
+      "status": "available",
+      "installed": true,
+      "running": false
+    },
+    "sqlite": {
+      "name": "sqlite",
+      "display_name": "SQLite",
+      "description": "SQLite database operations and queries",
+      "category": "database",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-sqlite",
+      "auto_install": true,
+      "process_names": [
+        "server-sqlite",
+        "npx"
+      ],
+      "tools": [
+        "read_query",
+        "write_query",
+        "create_table",
+        "list_tables"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "database",
+        "sqlite",
+        "sql",
+        "data"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "postgres": {
+      "name": "postgres",
+      "display_name": "PostgreSQL",
+      "description": "PostgreSQL database operations and queries",
+      "category": "database",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-postgres",
+      "auto_install": true,
+      "process_names": [
+        "server-postgres",
+        "npx"
+      ],
+      "tools": [
+        "read_query",
+        "write_query",
+        "list_schemas",
+        "describe_table"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "database",
+        "postgresql",
+        "sql",
+        "data"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "slack": {
+      "name": "slack",
+      "display_name": "Slack",
+      "description": "Slack workspace integration for messaging and channel management",
+      "category": "communication",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-slack"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-slack",
+      "auto_install": true,
+      "process_names": [
+        "server-slack",
+        "npx"
+      ],
+      "tools": [
+        "send_message",
+        "list_channels",
+        "get_channel_history"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "slack",
+        "communication",
+        "messaging",
+        "api"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "gdrive": {
+      "name": "gdrive",
+      "display_name": "Google Drive",
+      "description": "Google Drive file management and operations",
+      "category": "cloud",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-gdrive"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-gdrive",
+      "auto_install": true,
+      "process_names": [
+        "server-gdrive",
+        "npx"
+      ],
+      "tools": [
+        "search_files",
+        "get_file",
+        "create_file",
+        "list_files"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "google",
+        "drive",
+        "cloud",
+        "storage"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "puppeteer": {
+      "name": "puppeteer",
+      "display_name": "Puppeteer",
+      "description": "Web scraping and browser automation with Puppeteer",
+      "category": "automation",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-puppeteer",
+      "auto_install": true,
+      "process_names": [
+        "server-puppeteer",
+        "npx"
+      ],
+      "tools": [
+        "screenshot",
+        "pdf",
+        "click",
+        "type",
+        "navigate"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "puppeteer",
+        "automation",
+        "scraping",
+        "browser"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    },
+    "memory": {
+      "name": "memory",
+      "display_name": "Memory",
+      "description": "Persistent memory and knowledge management for AI conversations",
+      "category": "ai",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "install_method": "npm",
+      "install_package": "@modelcontextprotocol/server-memory",
+      "auto_install": true,
+      "process_names": [
+        "server-memory",
+        "npx"
+      ],
+      "tools": [
+        "create_memory",
+        "search_memories",
+        "update_memory",
+        "delete_memory"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "tags": [
+        "memory",
+        "ai",
+        "knowledge",
+        "persistence"
+      ],
+      "status": "available",
+      "installed": false,
+      "running": false
+    }
+  }
+}

@@ -29,6 +29,10 @@
         "enabled": true,
         "source": "core"
       },
+      "mcp_": {
+        "enabled": true,
+        "source": "core"
+      },
       "api_keys": {
         "enabled": true,
         "source": "core"

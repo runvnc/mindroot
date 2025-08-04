@@ -8,11 +8,13 @@ class McpPublisher extends BaseEl {
     serverDescription: { type: String },
     localConfig: { type: Object },
     remoteUrl: { type: String },
-    authHeaders: { type: Object },
+    authType: { type: String },
     discoveredTools: { type: Array },
     loading: { type: Boolean },
     error: { type: String },
-    success: { type: String }
+    success: { type: String },
+    oauthFlow: { type: Object },
+    oauthWindow: { type: Object }
   };
 
   static styles = css`
@@ -180,6 +182,14 @@ class McpPublisher extends BaseEl {
       white-space: pre-wrap;
       margin-top: 0.5rem;
     }
+
+    .oauth-status {
+      background: rgba(74, 158, 255, 0.2);
+      color: #4a9eff;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
   `;
 
   constructor() {
@@ -193,17 +203,33 @@ class McpPublisher extends BaseEl {
       env: {}
     };
     this.remoteUrl = '';
-    this.authHeaders = {};
+    this.authType = 'none';
     this.discoveredTools = [];
     this.loading = false;
     this.error = '';
     this.success = '';
+    this.oauthFlow = null;
+    this.oauthWindow = null;
+    
+    // Listen for OAuth callback messages
+    window.addEventListener('message', this.handleOAuthCallback.bind(this));
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Clean up OAuth window if it exists
+    if (this.oauthWindow && !this.oauthWindow.closed) {
+      this.oauthWindow.close();
+    }
+    // Remove event listener
+    window.removeEventListener('message', this.handleOAuthCallback.bind(this));
   }
 
   handleServerTypeChange(e) {
     this.serverType = e.target.value;
     this.discoveredTools = [];
     this.error = '';
+    this.oauthFlow = null;
   }
 
   handleLocalConfigChange(e) {
@@ -228,7 +254,9 @@ class McpPublisher extends BaseEl {
 
     this.loading = true;
     this.error = '';
+    this.success = '';
     this.discoveredTools = [];
+    this.oauthFlow = null;
 
     try {
       if (this.serverType === 'local') {
@@ -304,60 +332,116 @@ class McpPublisher extends BaseEl {
       throw new Error('URL is required for remote servers');
     }
 
-    // For remote servers, we need to make HTTP requests to discover tools
-    const headers = {
-      'Content-Type': 'application/json',
-      ...this.authHeaders
-    };
+    // Use the new backend endpoint that handles OAuth
+    const response = await fetch('/admin/mcp/test-remote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: this.remoteUrl,
+        name: this.serverName
+      })
+    });
 
-    // Try to connect and list tools using MCP HTTP transport
-    const initRequest = {
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'initialize',
-      params: {
-        protocolVersion: '2024-11-05',
-        capabilities: {
-          tools: {}
-        },
-        clientInfo: {
-          name: 'mindroot-publisher',
-          version: '1.0.0'
+    const data = await response.json();
+
+    if (data.success) {
+      // Successfully connected without OAuth
+      this.discoveredTools = data.tools || [];
+      this.success = data.message;
+    } else if (data.requires_oauth) {
+      // OAuth flow required
+      this.oauthFlow = {
+        auth_url: data.auth_url,
+        flow_id: data.flow_id,
+        server_name: data.server_name
+      };
+      this.success = data.message;
+      
+      // Automatically open OAuth window
+      await this.startOAuthFlow();
+    } else {
+      // Other error
+      throw new Error(data.detail || 'Connection failed');
+    }
+  }
+
+  async startOAuthFlow() {
+    if (!this.oauthFlow || !this.oauthFlow.auth_url) {
+      this.error = 'No OAuth flow available';
+      return;
+    }
+
+    this.success = 'Opening OAuth authorization window...';
+    
+    // Open OAuth window
+    const width = 600;
+    const height = 700;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    
+    this.oauthWindow = window.open(
+      this.oauthFlow.auth_url,
+      'oauth_window',
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+
+    if (!this.oauthWindow) {
+      this.error = 'Failed to open OAuth window. Please allow popups and try again.';
+      return;
+    }
+
+    // Monitor window closure
+    const checkClosed = setInterval(() => {
+      if (this.oauthWindow.closed) {
+        clearInterval(checkClosed);
+        if (!this.discoveredTools.length) {
+          this.error = 'OAuth window was closed before completion';
+          this.loading = false;
         }
       }
-    };
+    }, 1000);
+  }
 
-    const initResponse = await fetch(this.remoteUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(initRequest)
-    });
-
-    if (!initResponse.ok) {
-      throw new Error(`HTTP ${initResponse.status}: ${initResponse.statusText}`);
+  async handleOAuthCallback(event) {
+    // Only handle messages from our OAuth window
+    if (!this.oauthWindow || event.source !== this.oauthWindow) {
+      return;
     }
 
-    // List tools
-    const toolsRequest = {
-      jsonrpc: '2.0',
-      id: 2,
-      method: 'tools/list',
-      params: {}
-    };
+    if (event.data.type === 'oauth_callback' && event.data.code) {
+      try {
+        this.success = 'OAuth authorization received, completing flow...';
+        
+        // Close the OAuth window
+        this.oauthWindow.close();
+        this.oauthWindow = null;
 
-    const toolsResponse = await fetch(this.remoteUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(toolsRequest)
-    });
+        // Complete the OAuth flow
+        const response = await fetch('/admin/mcp/complete-oauth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            server_name: this.oauthFlow.server_name,
+            code: event.data.code,
+            state: event.data.state
+          })
+        });
 
-    if (!toolsResponse.ok) {
-      throw new Error(`Failed to list tools: HTTP ${toolsResponse.status}`);
-    }
+        const data = await response.json();
 
-    const toolsData = await toolsResponse.json();
-    if (toolsData.result && toolsData.result.tools) {
-      this.discoveredTools = toolsData.result.tools;
+        if (data.success) {
+          this.discoveredTools = data.tools || [];
+          this.success = data.message;
+          this.oauthFlow = null;
+        } else {
+          throw new Error(data.detail || 'OAuth completion failed');
+        }
+      } catch (error) {
+        this.error = `OAuth completion failed: ${error.message}`;
+        this.oauthFlow = null;
+      } finally {
+        this.loading = false;
+      }
     }
   }
 
@@ -382,20 +466,28 @@ class McpPublisher extends BaseEl {
     this.success = "";
 
     try {
+      // Prepare server configuration based on type
       const requestData = {
         name: this.serverName,
         description: this.serverDescription,
         server_type: this.serverType,
         tools: this.discoveredTools,
-        ...(this.serverType === "local" ? {
+        transport: this.serverType === 'local' ? 'stdio' : 'http',
+        auth_type: this.serverType === 'local' ? 'none' : this.authType
+      };
+      
+      // Add type-specific configuration
+      if (this.serverType === "local") {
+        Object.assign(requestData, {
           command: this.localConfig.command,
           args: this.localConfig.args,
           env: this.localConfig.env
-        } : {
-          url: this.remoteUrl,
-          auth_headers: this.authHeaders
-        })
-      };
+        });
+      } else {
+        Object.assign(requestData, {
+          url: this.remoteUrl
+        });
+      }
 
       const response = await fetch("/admin/mcp/publish", {
         method: "POST",
@@ -425,8 +517,8 @@ class McpPublisher extends BaseEl {
     this.serverDescription = '';
     this.localConfig = { command: '', args: [], env: {} };
     this.remoteUrl = '';
-    this.authHeaders = {};
     this.discoveredTools = [];
+    this.oauthFlow = null;
   }
 
   _render() {
@@ -437,6 +529,7 @@ class McpPublisher extends BaseEl {
           
           ${this.error ? html`<div class="error">${this.error}</div>` : ''}
           ${this.success ? html`<div class="success">${this.success}</div>` : ''}
+          ${this.oauthFlow ? html`<div class="oauth-status">OAuth flow in progress...</div>` : ''}
           
           <div class="form-group">
             <label>Server Name</label>
@@ -478,20 +571,12 @@ class McpPublisher extends BaseEl {
           ${this.serverType === 'local' ? this.renderLocalConfig() : this.renderRemoteConfig()}
 
           <div class="form-row">
-            <button @click=${this.discoverTools} ?disabled=${this.loading}>
-              ${this.loading ? 'Discovering...' : 'Discover Tools'}
+            <button @click=${this.discoverTools} ?disabled=${this.loading} class="primary">
+              ${this.loading ? 'Discovering...' : 'Discover & Connect'}
             </button>
           </div>
 
           ${this.discoveredTools.length > 0 ? this.renderToolsPreview() : ''}
-
-          ${this.discoveredTools.length > 0 ? html`
-            <div class="form-row">
-              <button class="primary" @click=${this.publishServer} ?disabled=${this.loading}>
-                ${this.loading ? 'Publishing...' : 'Publish Server'}
-              </button>
-            </div>
-          ` : ''}
         </div>
       </div>
     `;
@@ -530,23 +615,7 @@ ${JSON.stringify(exampleConfig, null, 2)}
                @input=${(e) => this.remoteUrl = e.target.value}
                placeholder="https://your-mcp-server.com/mcp">
         <div class="help-text">
-          Enter the HTTP endpoint for your remote MCP server.
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Authentication Headers (JSON, optional)</label>
-        <textarea @input=${(e) => {
-          try {
-            this.authHeaders = JSON.parse(e.target.value || '{}');
-            this.error = '';
-          } catch (error) {
-            this.error = 'Invalid JSON for auth headers';
-          }
-        }}
-                 placeholder='{"Authorization": "Bearer your-token"}'></textarea>
-        <div class="help-text">
-          Optional authentication headers for accessing your remote MCP server.
+          Enter the HTTP endpoint for your remote MCP server. OAuth authentication will be handled automatically if required.
         </div>
       </div>
     `;
@@ -556,6 +625,11 @@ ${JSON.stringify(exampleConfig, null, 2)}
     return html`
       <div class="tools-preview">
         <h4>Discovered Tools (${this.discoveredTools.length})</h4>
+        <div class="form-row">
+          <button class="primary" @click=${this.publishServer} ?disabled=${this.loading}>
+            ${this.loading ? 'Publishing...' : 'Publish Server'}
+          </button>
+        </div>
         ${this.discoveredTools.map(tool => html`
           <div class="tool-item">
             <div class="tool-name">${tool.name}</div>

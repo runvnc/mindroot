@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
+import os
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from lib.route_decorators import requires_role
 
 # Import MCP components - use the actual MCP system
@@ -22,11 +23,24 @@ class McpServerRequest(BaseModel):
 class McpServerAddRequest(BaseModel):
     name: str
     description: str
-    command: str
+    command: Optional[str] = None
     args: List[str] = []
     env: dict = {}
     transport: str = "stdio"
     url: Optional[str] = None
+    # OAuth 2.0 fields
+    auth_type: str = "none"
+    auth_headers: Dict[str, str] = {}
+    authorization_server_url: Optional[str] = None
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    scopes: List[str] = []
+    redirect_uri: Optional[str] = None
+
+class McpOAuthCallbackRequest(BaseModel):
+    server_name: str
+    code: str
+    state: Optional[str] = None
 
 # --- MCP Server Management Routes ---
 
@@ -60,6 +74,16 @@ async def add_mcp_server(server_request: McpServerAddRequest):
     
     try:
         # Create MCPServer object
+        # Validate required fields based on transport type
+        if server_request.transport == "stdio" and not server_request.command:
+            raise HTTPException(status_code=400, detail="Command is required for stdio transport")
+        
+        if server_request.transport in ["http", "sse", "websocket"] and not server_request.url:
+            raise HTTPException(status_code=400, detail="URL is required for remote transports")
+        
+        if server_request.auth_type == "oauth2" and not server_request.client_id:
+            raise HTTPException(status_code=400, detail="Client ID is required for OAuth 2.0")
+        
         server = MCPServer(
             name=server_request.name,
             description=server_request.description,
@@ -67,10 +91,21 @@ async def add_mcp_server(server_request: McpServerAddRequest):
             args=server_request.args,
             env=server_request.env,
             transport=server_request.transport,
-            url=server_request.url
+            url=server_request.url,
+            auth_type=server_request.auth_type,
+            auth_headers=server_request.auth_headers,
+            authorization_server_url=server_request.authorization_server_url,
+            client_id=server_request.client_id,
+            client_secret=server_request.client_secret,
+            scopes=server_request.scopes,
+            redirect_uri=server_request.redirect_uri or f"{server_request.url}/oauth/callback" if server_request.url else None
         )
         
-        # Add server to manager
+        # Use BASE_URL for redirect_uri if not explicitly provided
+        if not server.redirect_uri and server_request.auth_type == "oauth2":
+            base_url = os.getenv('BASE_URL', 'http://localhost:3000')
+            server.redirect_uri = f"{base_url}/mcp_oauth_cb"
+        
         mcp_manager.add_server(server_request.name, server)
         
         return {
@@ -121,6 +156,7 @@ async def connect_mcp_server(request: McpServerRequest):
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/mcp/disconnect")
 async def disconnect_mcp_server(request: McpServerRequest):

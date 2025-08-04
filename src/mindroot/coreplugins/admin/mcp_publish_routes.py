@@ -2,8 +2,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from lib.route_decorators import requires_role
+from lib.providers.services import service_manager
 import httpx
 import json
+import uuid
+import asyncio
 
 # Create router with admin role requirement
 router = APIRouter(
@@ -21,7 +24,10 @@ class McpServerPublishRequest(BaseModel):
     env: Optional[Dict[str, str]] = None
     # Remote server fields
     url: Optional[str] = None
-    auth_headers: Optional[Dict[str, str]] = None
+
+class McpTestRemoteRequest(BaseModel):
+    url: str
+    name: Optional[str] = None
 
 @router.post("/mcp/publish")
 async def publish_mcp_server(request: McpServerPublishRequest):
@@ -37,11 +43,23 @@ async def publish_mcp_server(request: McpServerPublishRequest):
         else:
             raise HTTPException(status_code=400, detail="Server type must be 'local' or 'remote'")
 
+        # Prepare registry publish data
+        publish_data = {
+            "title": request.name,
+            "description": request.description,
+            "category": "mcp_server",
+            "content_type": "mcp_server",
+            "version": "1.0.0",
+            "tags": ["mcp", "server", request.server_type],
+            "dependencies": []
+        }
+
         # Prepare server data for registry
         server_data = {
             "name": request.name,
             "description": request.description,
             "transport": "stdio" if request.server_type == 'local' else "http",
+            "auth_type": "none" if request.server_type == 'local' else "auto",
             "tools": request.tools,
             "server_type": request.server_type
         }
@@ -55,8 +73,7 @@ async def publish_mcp_server(request: McpServerPublishRequest):
             })
         else:
             server_data.update({
-                "url": request.url,
-                "auth_headers": request.auth_headers or {}
+                "url": request.url
             })
 
         # Prepare registry publish data
@@ -132,66 +149,214 @@ async def publish_mcp_server(request: McpServerPublishRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/mcp/test-remote")
-async def test_remote_mcp_server(url: str, auth_headers: Optional[Dict[str, str]] = None):
-    """Test connection to a remote MCP server and list its tools."""
+async def test_remote_mcp_server(request: McpTestRemoteRequest):
+    """Test connection to a remote MCP server and list its tools using MCP manager OAuth flow."""
     try:
-        headers = {
-            "Content-Type": "application/json",
-            **(auth_headers or {})
-        }
-
-        # Initialize connection
-        init_request = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "initialize",
-            "params": {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {
-                    "tools": {}
-                },
-                "clientInfo": {
-                    "name": "mindroot-tester",
-                    "version": "1.0.0"
-                }
-            }
-        }
-
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            init_response = await client.post(url, headers=headers, json=init_request)
+        # Get the MCP manager service
+        mcp_manager = await service_manager.mcp_manager_service()
+        if not mcp_manager:
+            raise HTTPException(status_code=500, detail="MCP manager service not available")
+        
+        # Generate a unique temporary server name
+        temp_server_name = f"temp_publish_test_{uuid.uuid4().hex[:8]}"
+        server_name = request.name or temp_server_name
+        
+        try:
+            # Create temporary server configuration for testing
+            from mindroot.coreplugins.mcp.mod import MCPServer
             
-            if init_response.status_code != 200:
-                raise HTTPException(
-                    status_code=init_response.status_code,
-                    detail=f"Failed to initialize: {init_response.text}"
-                )
-
-            # List tools
-            tools_request = {
-                "jsonrpc": "2.0",
-                "id": 2,
-                "method": "tools/list",
-                "params": {}
-            }
-
-            tools_response = await client.post(url, headers=headers, json=tools_request)
+            temp_server = MCPServer(
+                name=server_name,
+                description=f"Temporary server for testing {request.url}",
+                command="",  # Not used for remote servers
+                transport="http",
+                url=request.url,
+                auth_type="oauth2"  # Assume OAuth2 for remote servers
+            )
             
-            if tools_response.status_code != 200:
-                raise HTTPException(
-                    status_code=tools_response.status_code,
-                    detail=f"Failed to list tools: {tools_response.text}"
-                )
-
-            tools_data = tools_response.json()
-            tools = tools_data.get("result", {}).get("tools", [])
-
+            # Add to MCP manager
+            mcp_manager.add_server(server_name, temp_server)
+            
+            # Try to connect (this will handle OAuth flow if needed)
+            success = await mcp_manager.connect_server(server_name)
+            
+            if not success:
+                # Check if OAuth flow is pending
+                oauth_status = mcp_manager.get_oauth_status(server_name)
+                
+                if "oauth_flow" in oauth_status and oauth_status["oauth_flow"]["status"] == "awaiting_authorization":
+                    # OAuth flow is pending - return the auth URL for frontend to handle
+                    return {
+                        "success": False,
+                        "requires_oauth": True,
+                        "auth_url": oauth_status["oauth_flow"]["auth_url"],
+                        "flow_id": oauth_status["oauth_flow"]["flow_id"],
+                        "server_name": server_name,
+                        "message": "OAuth authorization required. Please complete the authorization flow."
+                    }
+                else:
+                    # Try without OAuth first to see if it's a 401
+                    try:
+                        await test_direct_connection(request.url)
+                    except HTTPException as e:
+                        if e.status_code == 401:
+                            # Server requires auth - try OAuth connection
+                            oauth_success = await mcp_manager.connect_oauth_server(server_name)
+                            if not oauth_success:
+                                oauth_status = mcp_manager.get_oauth_status(server_name)
+                                if "oauth_flow" in oauth_status:
+                                    return {
+                                        "success": False,
+                                        "requires_oauth": True,
+                                        "auth_url": oauth_status["oauth_flow"]["auth_url"],
+                                        "flow_id": oauth_status["oauth_flow"]["flow_id"],
+                                        "server_name": server_name,
+                                        "message": "OAuth authorization required. Please complete the authorization flow."
+                                    }
+                        raise e
+            
+            # Get server capabilities (tools, resources, prompts)
+            server = mcp_manager.servers[server_name]
+            tools = server.capabilities.get("tools", [])
+            resources = server.capabilities.get("resources", [])
+            prompts = server.capabilities.get("prompts", [])
+            
             return {
                 "success": True,
-                "message": f"Successfully connected to remote MCP server. Found {len(tools)} tools.",
-                "tools": tools
+                "message": f"Successfully connected to remote MCP server. Found {len(tools)} tools, {len(resources)} resources, {len(prompts)} prompts.",
+                "tools": tools,
+                "resources": resources,
+                "prompts": prompts,
+                "server_name": server_name
             }
+            
+        finally:
+            # Clean up temporary server
+            try:
+                await mcp_manager.disconnect_server(server_name)
+                mcp_manager.remove_server(server_name)
+            except Exception as cleanup_error:
+                print(f"Error cleaning up temporary server {server_name}: {cleanup_error}")
 
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Connection test failed: {str(e)}")
+
+async def test_direct_connection(url: str):
+    """Test direct connection to MCP server without OAuth to check if auth is required."""
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    # Initialize connection
+    init_request = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {
+                "tools": {}
+            },
+            "clientInfo": {
+                "name": "mindroot-tester",
+                "version": "1.0.0"
+            }
+        }
+    }
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        init_response = await client.post(url, headers=headers, json=init_request)
+        
+        if init_response.status_code == 401:
+            raise HTTPException(status_code=401, detail="Server requires authentication")
+        
+        if init_response.status_code != 200:
+            raise HTTPException(
+                status_code=init_response.status_code,
+                detail=f"Failed to initialize: {init_response.text}"
+            )
+
+        # List tools
+        tools_request = {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list",
+            "params": {}
+        }
+
+        tools_response = await client.post(url, headers=headers, json=tools_request)
+        
+        if tools_response.status_code != 200:
+            raise HTTPException(
+                status_code=tools_response.status_code,
+                detail=f"Failed to list tools: {tools_response.text}"
+            )
+
+        tools_data = tools_response.json()
+        tools = tools_data.get("result", {}).get("tools", [])
+        return tools
+
+@router.post("/mcp/complete-oauth")
+async def complete_oauth_flow(server_name: str, code: str, state: Optional[str] = None):
+    """Complete OAuth flow for MCP server testing."""
+    try:
+        # Get the MCP manager service
+        mcp_manager = await service_manager.mcp_manager_service()
+        if not mcp_manager:
+            raise HTTPException(status_code=500, detail="MCP manager service not available")
+        
+        # Complete the OAuth flow
+        success = mcp_manager.complete_oauth_flow(server_name, code, state)
+        
+        if not success:
+            raise HTTPException(status_code=400, detail="Failed to complete OAuth flow")
+        
+        # Wait a moment for the OAuth flow to complete
+        await asyncio.sleep(1)
+        
+        # Check if server is now connected
+        if server_name in mcp_manager.servers:
+            server = mcp_manager.servers[server_name]
+            if server.status == "connected":
+                tools = server.capabilities.get("tools", [])
+                resources = server.capabilities.get("resources", [])
+                prompts = server.capabilities.get("prompts", [])
+                
+                return {
+                    "success": True,
+                    "message": f"OAuth completed successfully. Found {len(tools)} tools, {len(resources)} resources, {len(prompts)} prompts.",
+                    "tools": tools,
+                    "resources": resources,
+                    "prompts": prompts
+                }
+        
+        return {
+            "success": True,
+            "message": "OAuth flow completed, but server connection is still pending."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"OAuth completion failed: {str(e)}")
+
+@router.get("/mcp/oauth-status/{server_name}")
+async def get_oauth_status(server_name: str):
+    """Get OAuth flow status for a server."""
+    try:
+        # Get the MCP manager service
+        mcp_manager = await service_manager.mcp_manager_service()
+        if not mcp_manager:
+            raise HTTPException(status_code=500, detail="MCP manager service not available")
+        
+        status = mcp_manager.get_oauth_status(server_name)
+        return status
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get OAuth status: {str(e)}")
