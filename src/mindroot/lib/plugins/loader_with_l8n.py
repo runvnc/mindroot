@@ -208,6 +208,7 @@ async def load(app=None):
 
             # Import plugin module
             try:
+                print(plugin_name, "Trying to import plugin module: " + plugin_path)
                 module = importlib.import_module(plugin_path)
             except ImportError:
                 module = importlib.import_module(f"{plugin_path}.mod")
@@ -244,6 +245,12 @@ async def load(app=None):
                     router_path = os.path.join(plugin_dir, 'router.py')
 
                 if os.path.exists(router_path):
+                    print(termcolor.colored(
+                        f">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Trying to load router for plugin: {plugin_name}",
+                        'green'
+                    ))
+ 
+                    print("Trying to load router for plugin: " + plugin_name)
                     router_module = importlib.import_module(f"{plugin_path}.router")
                     app.include_router(router_module.router)
                     print(termcolor.colored(

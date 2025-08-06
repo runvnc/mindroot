@@ -2,14 +2,14 @@
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from lib.route_decorators import requires_role
+from lib.route_decorators import requires_role, public_route
 
 # Create router with admin role requirement
 router = APIRouter(
-    dependencies=[requires_role('admin')]
 )
 
 @router.get("/mcp_oauth_cb")
+@public_route()
 async def mcp_oauth_callback(request: Request):
     """Handle OAuth callback for MCP servers."""
     try:

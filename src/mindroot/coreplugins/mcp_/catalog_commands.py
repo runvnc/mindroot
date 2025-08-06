@@ -3,7 +3,7 @@ import asyncio
 from typing import Dict, List, Optional, Any
 from lib.providers.commands import command
 from .catalog_manager import MCPCatalogManager
-from .enhanced_mod import enhanced_mcp_manager, EnhancedMCPServer
+from .mod import mcp_manager, MCPServer
 
 # Global catalog manager
 # Use current working directory for data files
@@ -130,33 +130,58 @@ async def mcp_catalog_install(server_name: str, context=None):
 
 @command()
 async def mcp_catalog_install_and_run(server_name: str, context=None):
-    """Install and run an MCP server from catalog (one-click)
+    """Install and run an MCP server from catalog
     
     Example:
     { "mcp_catalog_install_and_run": { "server_name": "calculator" } }
     """
-    # First install
-    install_result = await mcp_catalog_install(server_name, context)
-    
-    if "Failed" in install_result:
-        return install_result
-    
-    # Then connect (which will auto-install if needed)
-    success = await enhanced_mcp_manager.connect_server(server_name)
-    
-    if success:
-        catalog_manager.update_server_status()
+    try:
+        # Get server info from catalog
+        server_info = catalog_manager.get_server_info(server_name)
+        if not server_info:
+            return f"Server {server_name} not found in catalog"
         
-        # Add a small delay and then refresh dynamic commands to ensure they register
-        await asyncio.sleep(1)
+        print(f"Installing and running {server_name}...")
         
-        # Import and call the refresh function
-        from .enhanced_mod import mcp_refresh_dynamic_commands
-        refresh_result = await mcp_refresh_dynamic_commands()
+        # Create server configuration
+        print(f"Creating server configuration for {server_name}...")
         
-        return f"Successfully installed and connected to {server_name}. MCP tools are now available as commands. Refreshed {refresh_result.get('total_dynamic_commands', 0)} dynamic commands."
-    else:
-        return f"Installed {server_name} but failed to connect"
+        server_config = MCPServer(
+            name=server_name,
+            description=server_info.get('description', f'MCP Server: {server_name}'),
+            command=server_info['command'],
+            args=server_info.get('args', []),
+            env=server_info.get('env', {}),
+            install_method=server_info.get('install_method', 'manual'),
+            install_package=server_info.get('install_package'),
+            auto_install=True,
+            installed=False
+        )
+        
+        # Add server to manager
+        mcp_manager.add_server(server_name, server_config)
+        
+        # Connect to the server
+        success = await mcp_manager.connect_server(server_name)
+        
+        if success:
+            # Get final server status
+            catalog_manager.update_server_status()
+            
+            # Import and call the refresh function to update dynamic commands
+            try:
+                from .mod import mcp_refresh_dynamic_commands
+                await mcp_refresh_dynamic_commands()
+            except Exception as e:
+                print(f"Warning: Could not refresh dynamic commands: {e}")
+            
+            return f"Successfully installed and connected to {server_name}. MCP tools are now available as commands."
+        else:
+            return f"Installed {server_name} but failed to connect. Check server configuration."
+            
+    except Exception as e:
+        print(f"Error in mcp_catalog_install_and_run: {e}")
+        return f"Error installing and running {server_name}: {str(e)}"
 
 
 @command()
@@ -166,7 +191,7 @@ async def mcp_catalog_stop(server_name: str, context=None):
     Example:
     { "mcp_catalog_stop": { "server_name": "calculator" } }
     """
-    success = await enhanced_mcp_manager.disconnect_server(server_name)
+    success = await mcp_manager.disconnect_server(server_name)
     
     if success:
         catalog_manager.update_server_status()

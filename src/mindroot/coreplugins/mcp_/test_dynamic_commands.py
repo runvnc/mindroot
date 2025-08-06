@@ -10,7 +10,7 @@ import os
 # Add the mindroot lib to path
 sys.path.insert(0, '/files/mindroot/src/mindroot')
 
-from src.mr_mcp.enhanced_mod import enhanced_mcp_manager, EnhancedMCPServer
+from .mod import mcp_manager, MCPServer
 from src.mr_mcp.dynamic_commands import MCPDynamicCommands
 from lib.providers.commands import command_manager
 

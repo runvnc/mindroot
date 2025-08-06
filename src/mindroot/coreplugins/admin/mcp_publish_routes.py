@@ -29,6 +29,11 @@ class McpTestRemoteRequest(BaseModel):
     url: str
     name: Optional[str] = None
 
+class McpCompleteOAuthRequest(BaseModel):
+    server_name: str
+    code: str
+    state: Optional[str] = None
+
 @router.post("/mcp/publish")
 async def publish_mcp_server(request: McpServerPublishRequest):
     """Publish an MCP server to the registry."""
@@ -153,17 +158,19 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
     """Test connection to a remote MCP server and list its tools using MCP manager OAuth flow."""
     try:
         # Get the MCP manager service
-        mcp_manager = await service_manager.mcp_manager_service()
+        print("Testing remote MCP server connection: ", request.url)
+        mcp_manager = await service_manager.enhanced_mcp_manager_service(context=None)
         if not mcp_manager:
             raise HTTPException(status_code=500, detail="MCP manager service not available")
         
         # Generate a unique temporary server name
         temp_server_name = f"temp_publish_test_{uuid.uuid4().hex[:8]}"
         server_name = request.name or temp_server_name
-        
+        print(f"Using server name: {server_name}")
+
         try:
             # Create temporary server configuration for testing
-            from mindroot.coreplugins.mcp.mod import MCPServer
+            from mindroot.coreplugins.mcp_.mod import MCPServer
             
             temp_server = MCPServer(
                 name=server_name,
@@ -176,10 +183,18 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
             
             # Add to MCP manager
             mcp_manager.add_server(server_name, temp_server)
-            
+           
+            print("Connecting to remote MCP server: ", server_name)
+            print(f"Server URL: {request.url}")
+            print("MCP manager is: ", mcp_manager)
+            mcp_manager = await service_manager.enhanced_mcp_manager_service(context=None)
+            print("MCP manager after re-fetch: ", mcp_manager)
+
+            print("Running sanity test")
+            await mcp_manager.sanity_test()
             # Try to connect (this will handle OAuth flow if needed)
             success = await mcp_manager.connect_server(server_name)
-            
+            print("Connection result: ", success)
             if not success:
                 # Check if OAuth flow is pending
                 oauth_status = mcp_manager.get_oauth_status(server_name)
@@ -239,6 +254,9 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
                 print(f"Error cleaning up temporary server {server_name}: {cleanup_error}")
 
     except HTTPException:
+        print("HTTPException occurred during MCP server test.")
+        import traceback
+        traceback.print_exc() 
         raise
     except Exception as e:
         import traceback
@@ -301,26 +319,26 @@ async def test_direct_connection(url: str):
         return tools
 
 @router.post("/mcp/complete-oauth")
-async def complete_oauth_flow(server_name: str, code: str, state: Optional[str] = None):
+async def complete_oauth_flow(request: McpCompleteOAuthRequest):
     """Complete OAuth flow for MCP server testing."""
     try:
-        # Get the MCP manager service
-        mcp_manager = await service_manager.mcp_manager_service()
+        # Get the enhanced MCP manager service
+        mcp_manager = await service_manager.enhanced_mcp_manager_service(context=None)
         if not mcp_manager:
             raise HTTPException(status_code=500, detail="MCP manager service not available")
         
         # Complete the OAuth flow
-        success = mcp_manager.complete_oauth_flow(server_name, code, state)
+        success = mcp_manager.complete_oauth_flow(request.server_name, request.code, request.state)
         
         if not success:
             raise HTTPException(status_code=400, detail="Failed to complete OAuth flow")
         
-        # Wait a moment for the OAuth flow to complete
-        await asyncio.sleep(1)
+        # Wait a bit longer for the background task to complete the connection
+        await asyncio.sleep(3)
         
         # Check if server is now connected
-        if server_name in mcp_manager.servers:
-            server = mcp_manager.servers[server_name]
+        if request.server_name in mcp_manager.servers:
+            server = mcp_manager.servers[request.server_name]
             if server.status == "connected":
                 tools = server.capabilities.get("tools", [])
                 resources = server.capabilities.get("resources", [])
@@ -350,8 +368,8 @@ async def complete_oauth_flow(server_name: str, code: str, state: Optional[str] 
 async def get_oauth_status(server_name: str):
     """Get OAuth flow status for a server."""
     try:
-        # Get the MCP manager service
-        mcp_manager = await service_manager.mcp_manager_service()
+        # Get the enhanced MCP manager service
+        mcp_manager = await service_manager.enhanced_mcp_manager_service(context=None)
         if not mcp_manager:
             raise HTTPException(status_code=500, detail="MCP manager service not available")
         
