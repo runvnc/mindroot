@@ -22,8 +22,56 @@ window.registerCommandHandler = function(command, handler) {
 
 registerDelegate()
 
-function tryParse(markdown) {
-    return markdownRenderer.parse(markdown);
+
+// we need to make sure we don't try to parse and render markdown constantly
+// because it freezes up the UI
+
+function debounce(func, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Create a throttled parser that limits parsing frequency but doesn't skip updates
+const throttledParse = throttle((markdown, messageIndex, chatInstance) => {
+  try {
+    const result = markdownRenderer.parse(markdown);
+    if (chatInstance.messages[messageIndex]) {
+      chatInstance.messages[messageIndex].content = result;
+      chatInstance.requestUpdate();
+      chatInstance._scrollToBottom();
+      window.initializeCodeCopyButtons();
+    }
+  } catch (e) {
+    console.error("Could not parse markdown:", e);
+    if (chatInstance.messages[messageIndex]) {
+      chatInstance.messages[messageIndex].content = `<pre><code>${markdown}</code></pre>`;
+      chatInstance.requestUpdate();
+    }
+  }
+}, 100); // Throttle to max 10 updates per second
+
+function tryParse(markdown, useThrottle = false, messageIndex = null, chatInstance = null) {
+  if (!useThrottle || !chatInstance || messageIndex === null) {
+    // Immediate parsing for cases where we don't need throttling
+    try {
+      return markdownRenderer.parse(markdown);
+    } catch (e) {
+      console.error("Could not parse markdown:", e);
+      return `<pre><code>${markdown}</code></pre>`;
+    }
+  } else {
+    // Throttled parsing - will update the message in place
+    throttledParse(markdown, messageIndex, chatInstance);
+    // Return current content immediately (might be partially parsed)
+    try {
+      return markdownRenderer.parse(markdown);
+    } catch (e) {
+      return `<pre><code>${markdown}</code></pre>`;
+    }
+  }
 }
 
 class Chat extends BaseEl {
@@ -195,12 +243,12 @@ class Chat extends BaseEl {
   }
 
   async _partialCmd(event) {
-    console.log('Event received');
-    console.log(event);
+    //console.log('Event received');
+    //console.log(event);
     let content = null
     const data = JSON.parse(event.data);
     data.event = 'partial'
-    console.log("data:", data)
+    //console.log("data:", data)
     const handler = commandHandlers[data.command];
     if (handler) {
       content = await handler(data);
@@ -228,17 +276,18 @@ class Chat extends BaseEl {
         this.msgSoFar = data.params
       }
 
-      try {
-        if (content) {
-          this.messages[this.messages.length - 1].content = content
-        } else if (this.msgSoFar) {
-          this.messages[this.messages.length - 1].content = tryParse(this.msgSoFar);
-        }
-      } catch (e) {
-        console.error("Could not parse markdown:", e)
-        console.log('msgSoFar:')
-        console.log(this.msgSoFar)
-        this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
+      if (content) {
+        this.messages[this.messages.length - 1].content = content
+        this.requestUpdate();
+        this._scrollToBottom()
+      } else if (this.msgSoFar) {
+        // Use throttled parsing for frequent updates - this ensures all updates are shown
+        const messageIndex = this.messages.length - 1;
+        const parsedContent = tryParse(this.msgSoFar, true, messageIndex, this);
+        this.messages[messageIndex].content = parsedContent;
+        this.requestUpdate();
+        this._scrollToBottom();
+        window.initializeCodeCopyButtons();
       }
     } else {
       console.log('partial. data.params', data.params)
@@ -270,10 +319,10 @@ class Chat extends BaseEl {
                              result="">
           </action-component>`;
       }
+      this.requestUpdate();
+      this._scrollToBottom()
+      window.initializeCodeCopyButtons();
     }
-    this.requestUpdate();
-    this._scrollToBottom()
-    window.initializeCodeCopyButtons();
   }
 
   async _runningCmd(event) {

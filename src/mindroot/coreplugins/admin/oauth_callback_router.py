@@ -1,17 +1,24 @@
-"""OAuth callback router for MCP servers."""
+"""OAuth callback router for MCP servers.
+
+This router contains public routes that do not require authentication,
+as external OAuth providers need to be able to redirect to these endpoints.
+"""
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from lib.route_decorators import requires_role, public_route
+from lib.route_decorators import public_route
 
-# Create router with admin role requirement
-router = APIRouter(
-)
+# Create router without dependencies - routes will be public
+router = APIRouter()
 
 @router.get("/mcp_oauth_cb")
 @public_route()
 async def mcp_oauth_callback(request: Request):
-    """Handle OAuth callback for MCP servers."""
+    """Handle OAuth callback for MCP servers.
+    
+    This endpoint must be publicly accessible as external OAuth providers
+    will redirect to it without any authentication.
+    """
     try:
         # Get query parameters
         code = request.query_params.get('code')

@@ -56,18 +56,6 @@ NEVER output multiple arrays in one response!
 
 {% block commands_alt %}
 
-# Alternative if necessary: A single JSON object containing commands array
-
-If having issues outputting an array due to model restrictions, you can also output the command
-list inside of an object with a literal 'commands' property:
-
-{
-  "commands": [
-    { "command": { "param": "value" },
-    { "command2": { "param2": "value" }
-  ]
-}
-
 {% endblock %}
 
 {% block commands_1 %}

@@ -4,13 +4,16 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from lib.route_decorators import requires_role
 
-# Import MCP components - use the actual MCP system
+# Import MCP components - prefer new mcp_ module, fallback to legacy if needed
 try:
-    from mindroot.coreplugins.mcp.mod import mcp_manager, MCPServer
+    from mindroot.coreplugins.mcp_.mod import mcp_manager, MCPServer
 except ImportError:
-    # Mock objects if MCP plugin is not fully installed, to prevent startup crash
-    mcp_manager = None
-    MCPServer = None
+    try:
+        from mindroot.coreplugins.mcp.mod import mcp_manager, MCPServer
+    except ImportError:
+        # Mock objects if MCP plugin is not fully installed, to prevent startup crash
+        mcp_manager = None
+        MCPServer = None
 
 # Create router with admin role requirement
 router = APIRouter(
@@ -28,6 +31,10 @@ class McpServerAddRequest(BaseModel):
     env: dict = {}
     transport: str = "stdio"
     url: Optional[str] = None
+    # New URL fields
+    provider_url: Optional[str] = None
+    transport_url: Optional[str] = None
+    transport_type: Optional[str] = None  # "sse" | "streamable_http"
     # OAuth 2.0 fields
     auth_type: str = "none"
     auth_headers: Dict[str, str] = {}

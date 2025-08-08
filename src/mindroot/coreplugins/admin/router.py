@@ -10,22 +10,26 @@ from .plugin_manager import router as plugin_manager_router
 from lib.route_decorators import requires_role
 from .mod import get_git_version_info
 
+# Create separate routers for public and admin routes
+public_router = APIRouter()  # No dependencies - for OAuth callbacks etc.
+admin_router = APIRouter(dependencies=[requires_role('admin')])  # Admin only
 
-# Create admin router with role requirement for all routes under it
-router = APIRouter(
-    dependencies=[requires_role('admin')]
-)
+# === PUBLIC ROUTES (no authentication required) ===
+# Import and include the OAuth callback router in public router
+from .oauth_callback_router import router as oauth_callback_router
+public_router.include_router(oauth_callback_router)
 
-router.include_router(plugin_manager_router, prefix="/plugin-manager", tags=["plugin-manager"])
+# === ADMIN ROUTES (authentication required) ===
+admin_router.include_router(plugin_manager_router, prefix="/plugin-manager", tags=["plugin-manager"])
 
-@router.get("/admin", response_class=HTMLResponse)
+@admin_router.get("/admin", response_class=HTMLResponse)
 async def get_admin_html():
     log_id = nanoid.generate()
     plugins = list_enabled()
     html = await render('admin', {"log_id": log_id})
     return html
 
-@router.post("/admin/get-version-info")
+@admin_router.post("/admin/get-version-info")
 async def get_version_info():
     """Get version information, trying git first, then falling back to cached file."""
     try:
@@ -65,40 +69,36 @@ async def get_version_info():
         raise HTTPException(status_code=500, detail=f"Error getting version info: {str(e)}")
 
 from lib.logging.log_router import router as log_router
-router.include_router(log_router)
+admin_router.include_router(log_router)
 
 from .command_router import router as command_router
-router.include_router(command_router)
+admin_router.include_router(command_router)
 
 from .settings_router import router as settings_router
-router.include_router(settings_router)
+admin_router.include_router(settings_router)
 
 # Use the fixed plugin router instead of the old one
 from .plugin_router_fixed import router as plugin_router_fixed
-router.include_router(plugin_router_fixed, prefix="/admin", tags=["plugins", "mcp"])
+admin_router.include_router(plugin_router_fixed, prefix="/admin", tags=["plugins", "mcp"])
 
 # Keep the old plugin router for backward compatibility if needed
 from .plugin_router import router as plugin_router
-router.include_router(plugin_router, prefix="/admin/legacy", tags=["legacy-plugins"])
+admin_router.include_router(plugin_router, prefix="/admin/legacy", tags=["legacy-plugins"])
 
 from .persona_router import router as persona_router
-router.include_router(persona_router)
+admin_router.include_router(persona_router)
 
 from .agent_router import router as agent_router
-router.include_router(agent_router)
+admin_router.include_router(agent_router)
 
 from .server_router import router as server_router
-router.include_router(server_router, prefix="/admin/server", tags=["server"])
+admin_router.include_router(server_router, prefix="/admin/server", tags=["server"])
 
 # Import and include the env_manager router
 from coreplugins.env_manager.router import router as env_manager_router
-router.include_router(env_manager_router)
+admin_router.include_router(env_manager_router)
 
-# Import and include the OAuth callback router
-from .oauth_callback_router import router as oauth_callback_router
-router.include_router(oauth_callback_router)
-
-@router.post("/admin/update-mindroot")
+@admin_router.post("/admin/update-mindroot")
 async def update_mindroot():
     """Update MindRoot using pip install --upgrade mindroot"""
     import subprocess
@@ -140,3 +140,9 @@ async def update_mindroot():
             "message": "Error during update",
             "error": str(e)
         })
+
+# === MAIN ROUTER COMBINING PUBLIC AND ADMIN ===
+# Create main router that combines both public and admin routes
+router = APIRouter()
+router.include_router(public_router)  # Public routes first (no auth)
+router.include_router(admin_router)   # Admin routes (with auth)

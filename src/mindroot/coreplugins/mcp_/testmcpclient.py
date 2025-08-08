@@ -49,13 +49,15 @@ async def handle_redirect(auth_url: str) -> None:
 async def handle_callback() -> tuple[str, str | None]:
     callback_url = input("Paste callback URL: ")
     params = parse_qs(urlparse(callback_url).query)
+    print("Callback URL parameters:")
+    print(params)
     return params["code"][0], params.get("state", [None])[0]
 
 
 async def main():
     """Run the OAuth client example."""
     oauth_auth = OAuthClientProvider(
-        server_url="https://mcp.notion.com/sse",
+        server_url="https://mcp.notion.com",
         client_metadata=OAuthClientMetadata(
             client_name="Example MCP Client",
             redirect_uris=[AnyUrl("http://localhost:3000/callback")],
@@ -68,10 +70,13 @@ async def main():
         callback_handler=handle_callback,
     )
 
+    print("Starting.")
     async with streamablehttp_client("https://mcp.notion.com/sse", auth=oauth_auth) as (read, write, _):
+        print("1")
         async with ClientSession(read, write) as session:
+            print("2")
             await session.initialize()
-
+            print("3")
             tools = await session.list_tools()
             print(f"Available tools: {[tool.name for tool in tools.tools]}")
 
