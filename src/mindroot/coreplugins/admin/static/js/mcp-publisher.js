@@ -333,6 +333,7 @@ class McpPublisher extends BaseEl {
     }
 
     // Use the new backend endpoint that handles OAuth
+    console.log('[MCP-Publisher] discoverRemoteTools: starting test-remote', { url: this.remoteUrl, name: this.serverName });
     const response = await fetch('/admin/mcp/test-remote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -343,11 +344,15 @@ class McpPublisher extends BaseEl {
     });
 
     const data = await response.json();
+    console.log('[MCP-Publisher] discoverRemoteTools: response', data);
 
     if (data.success) {
       // Successfully connected without OAuth
       this.discoveredTools = data.tools || [];
+      console.log('[MCP-Publisher] discoverRemoteTools: tools discovered (no OAuth)', this.discoveredTools);
       this.success = data.message;
+      // Default remote auth type to 'auto' unless specified
+      this.authType = 'auto';
     } else if (data.requires_oauth) {
       // OAuth flow required
       this.oauthFlow = {
@@ -355,7 +360,10 @@ class McpPublisher extends BaseEl {
         flow_id: data.flow_id,
         server_name: data.server_name
       };
+      // Ensure we publish with remote auth type when OAuth was needed
+      this.authType = 'oauth2';
       this.success = data.message;
+      console.log('[MCP-Publisher] discoverRemoteTools: OAuth required', this.oauthFlow);
       
       // Automatically open OAuth window
       await this.startOAuthFlow();
@@ -372,6 +380,7 @@ class McpPublisher extends BaseEl {
     }
 
     this.success = 'Opening OAuth authorization window...';
+    console.log('[MCP-Publisher] startOAuthFlow: opening', this.oauthFlow?.auth_url);
     
     // Open OAuth window
     const width = 600;
@@ -392,10 +401,18 @@ class McpPublisher extends BaseEl {
 
     // Monitor window closure
     const checkClosed = setInterval(() => {
-      if (this.oauthWindow.closed) {
+      // Polling for window status; discoveredTools length:', this.discoveredTools?.length
+      console.log('[MCP-Publisher] startOAuthFlow: polling window closed?', this.oauthWindow?.closed, 'tools:', this.discoveredTools?.length);
+      if (this.oauthWindow && this.oauthWindow.closed) {
         clearInterval(checkClosed);
         if (!this.discoveredTools.length) {
           this.error = 'OAuth window was closed before completion';
+          this.loading = false;
+        }
+      } else {
+        if (!this.oauthWindow && this.discoveredTools.length) {
+          clearInterval(checkClosed);
+          this.success = 'OAuth flow completed successfully, tools discovered.';
           this.loading = false;
         }
       }
@@ -405,12 +422,15 @@ class McpPublisher extends BaseEl {
   async handleOAuthCallback(event) {
     // Only handle messages from our OAuth window
     if (!this.oauthWindow || event.source !== this.oauthWindow) {
+      // Note: admin UI can receive unrelated messages; ignore safely
+      // console.debug('[MCP-Publisher] handleOAuthCallback: ignoring message from different source');
       return;
     }
 
-    if (event.data.type === 'oauth_callback' && event.data.code) {
+    if (event.data && event.data.type === 'oauth_callback' && event.data.code) {
       try {
         this.success = 'OAuth authorization received, completing flow...';
+        console.log('[MCP-Publisher] handleOAuthCallback: received code/state', { code: !!event.data.code, state: event.data.state });
         
         // Close the OAuth window
         this.oauthWindow.close();
@@ -428,9 +448,42 @@ class McpPublisher extends BaseEl {
         });
 
         const data = await response.json();
+        console.log('[MCP-Publisher] handleOAuthCallback: complete-oauth response', data);
 
         if (data.success) {
-          this.discoveredTools = data.tools || [];
+          // Prefer tools from response; if pending, poll once for updated status
+          if (Array.isArray(data.tools) && data.tools.length) {
+            this.discoveredTools = data.tools;
+            console.log('[MCP-Publisher] handleOAuthCallback: tools from complete-oauth', this.discoveredTools);
+          } else {
+            // Fallback: ask backend for oauth-status and try to extract tools if connected
+            try {
+              const statusResp = await fetch(`/admin/mcp/oauth-status/${this.oauthFlow.server_name}`);
+              if (statusResp.ok) {
+                const statusData = await statusResp.json();
+                console.log('[MCP-Publisher] handleOAuthCallback: oauth-status', statusData);
+                // If server appears connected, re-trigger a lightweight test to fetch tools
+                if (statusData && statusData.status === 'connected') {
+                  const recheck = await fetch('/admin/mcp/test-remote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: this.remoteUrl, name: this.oauthFlow.server_name })
+                  });
+                  const reData = await recheck.json();
+                  console.log('[MCP-Publisher] handleOAuthCallback: recheck test-remote response', reData);
+                  if (reData.success && Array.isArray(reData.tools)) {
+                    this.discoveredTools = reData.tools;
+                  }
+                }
+                // If still pending, start a short polling loop for connection then fetch tools
+                if (!this.discoveredTools.length) {
+                  await this.pollForToolsAfterOAuth(6);
+                }
+              }
+            } catch (e) {
+              console.warn('Post-OAuth tool recheck failed', e);
+            }
+          }
           this.success = data.message;
           this.oauthFlow = null;
         } else {
@@ -443,6 +496,36 @@ class McpPublisher extends BaseEl {
         this.loading = false;
       }
     }
+  }
+
+  async pollForToolsAfterOAuth(maxTries = 6, delayMs = 1000) {
+    console.log('[MCP-Publisher] pollForToolsAfterOAuth: start', { maxTries, delayMs, server: this.oauthFlow?.server_name });
+    for (let i = 0; i < maxTries && (!this.discoveredTools || this.discoveredTools.length === 0); i++) {
+      try {
+        const statusResp = await fetch(`/admin/mcp/oauth-status/${this.oauthFlow.server_name}`);
+        const status = statusResp.ok ? await statusResp.json() : null;
+        console.log(`[MCP-Publisher] pollForToolsAfterOAuth: try ${i+1} status`, status);
+        if (status && status.status === 'connected') {
+          const recheck = await fetch('/admin/mcp/test-remote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: this.remoteUrl, name: this.oauthFlow.server_name })
+          });
+          const reData = await recheck.json();
+          console.log('[MCP-Publisher] pollForToolsAfterOAuth: test-remote response', reData);
+          if (reData.success && Array.isArray(reData.tools) && reData.tools.length) {
+            this.discoveredTools = reData.tools;
+            console.log('[MCP-Publisher] pollForToolsAfterOAuth: tools discovered', this.discoveredTools);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn('[MCP-Publisher] pollForToolsAfterOAuth: error', e);
+      }
+      await new Promise(res => setTimeout(res, delayMs));
+    }
+    console.log('[MCP-Publisher] pollForToolsAfterOAuth: end, tools found?', this.discoveredTools?.length);
+    return false;
   }
 
   async publishServer() {

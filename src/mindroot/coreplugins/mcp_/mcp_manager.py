@@ -20,8 +20,8 @@ try:
     from mcp.client.stdio import stdio_client
     from mcp.client.streamable_http import streamablehttp_client
     from mcp.client.sse import sse_client
-    from mcp.client.auth import OAuthClientProvider, TokenStorage
-    from mcp.shared.auth import OAuthClientMetadata, OAuthToken, OAuthClientInformationFull
+    from mcp.client.auth import OAuthClientProvider
+    from mcp.shared.auth import OAuthClientMetadata
     from pydantic import AnyUrl
     MCP_AVAILABLE = True
 except ImportError:
@@ -36,32 +36,9 @@ except ImportError:
     OAuthToken = None
     OAuthClientInformationFull = None
     AnyUrl = None
-    TokenStorage = None
     MCP_AVAILABLE = False
 
 
-class InMemoryTokenStorage:
-    """Demo In-memory token storage implementation."""
-
-    def __init__(self):
-        self.tokens: Optional[Any] = None
-        self.client_info: Optional[Any] = None
-
-    async def get_tokens(self):
-        """Get stored tokens."""
-        return self.tokens
-
-    async def set_tokens(self, tokens):
-        """Store tokens."""
-        self.tokens = tokens
-
-    async def get_client_info(self):
-        """Get stored client information."""
-        return self.client_info
-
-    async def set_client_info(self, client_info):
-        """Store client information."""
-        self.client_info = client_info
 
 
 class MCPServer(BaseModel):
@@ -113,6 +90,8 @@ class MCPManager:
         self.exit_stacks: Dict[str, AsyncExitStack] = {}
         self.background_tasks: Dict[str, asyncio.Task] = {}
         self.pending_oauth_flows: Dict[str, Dict[str, Any]] = {}
+        # Debug/diagnostics: short-lived cache of last discovered capabilities per server
+        self.last_capabilities: Dict[str, Dict[str, Any]] = {}
         self.installer = MCPServerInstaller()
         self.dynamic_commands = MCPDynamicCommands()
         self.config_file = Path("/tmp/mcp_servers.json")
@@ -189,6 +168,11 @@ class MCPManager:
             changed = True
         if changed:
             self.save_config()
+        # Debug log
+        try:
+            print(f"DEBUG: _update_server_urls: name={name} provider={provider_url} transport={transport_url} type={transport_type}")
+        except Exception:
+            pass
 
     def _build_oauth_provider(self, name: str, server: MCPServer, provider_url: str):
         """Create an OAuthClientProvider bound to this server using persistent storage."""
@@ -241,65 +225,116 @@ class MCPManager:
         print(f"DEBUG: Starting persistent OAuth connection task for {name}")
         
         try:
-            # Create OAuth client provider
-            base_url = os.getenv('BASE_URL', 'http://localhost:3000')
-            callback_url = f"{base_url.rstrip('/')}/mcp_oauth_cb"
-            
-            oauth_provider = OAuthClientProvider(
-                server_url=server.url,
-                client_metadata=OAuthClientMetadata(
-                    client_name="test",
-                    redirect_uris=[AnyUrl(callback_url)],
-                    grant_types=["authorization_code", "refresh_token"],
-                    response_types=["code"],
-                    scope="user"
-                ),
-                storage=InMemoryTokenStorage(),
-                redirect_handler=lambda auth_url: self._handle_oauth_redirect(name, auth_url),
-                callback_handler=lambda: self._handle_oauth_callback(name)
-            )
-            
-            print(f"DEBUG: Persistent task connecting to {server.url}")
-            
-            # Keep connection alive indefinitely
-            async with streamablehttp_client(server.url, auth=oauth_provider) as (read, write, _):
-                print(f"DEBUG: Persistent transport created for {name}")
-                async with ClientSession(read, write) as session:
-                    print(f"DEBUG: Persistent session created for {name}")
-                    
-                    # Initialize the session
-                    await session.initialize()
-                    print(f"DEBUG: Persistent session initialized for {name}")
-                    
-                    # Store session globally
-                    self.sessions[name] = session
-                    server.status = "connected"
-                    
-                    # Get server capabilities
-                    try:
-                        tools = await session.list_tools()
-                        resources = await session.list_resources()
-                        prompts = await session.list_prompts()
+            # Determine transport details and ensure config is updated
+            provider_url, transport_url, transport_type = self._infer_urls(server)
+            self._update_server_urls(name, provider_url, transport_url, transport_type)
+
+            # Create OAuth client provider using persistent storage
+            oauth_provider = self._build_oauth_provider(name, server, provider_url)
+
+            print(f"DEBUG: Persistent task connecting to {transport_url} via {transport_type}")
+
+            # Keep connection alive indefinitely using appropriate transport
+            if transport_type == "sse":
+                async with sse_client(url=transport_url, auth=oauth_provider) as (read, write):
+                    print(f"DEBUG: Persistent SSE transport created for {name}")
+                    async with ClientSession(read, write) as session:
+                        print(f"DEBUG: Persistent session created for {name}")
                         
-                        server.capabilities = {
-                            "tools": [tool.dict() for tool in tools.tools],
-                            "resources": [res.dict() for res in resources.resources],
-                            "prompts": [prompt.dict() for prompt in prompts.prompts]
-                        }
-                        print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
-                    except Exception as e:
-                        print(f"Error getting capabilities for {name}: {e}")
-                    
-                    self.save_config()
-                    print(f"DEBUG: Persistent connection established for {name}")
-                    
-                    # Keep the task alive until cancelled
-                    try:
-                        while True:
-                            await asyncio.sleep(60)  # Heartbeat every minute
-                    except asyncio.CancelledError:
-                        print(f"DEBUG: Persistent connection task cancelled for {name}")
-                        raise
+                        # Initialize the session
+                        await session.initialize()
+                        print(f"DEBUG: Persistent session initialized for {name}")
+                        
+                        # Store session globally
+                        self.sessions[name] = session
+                        server.status = "connected"
+                        
+                        # Get server capabilities
+                        try:
+                            tools = []
+                            resources = []
+                            prompts = []
+                            print("DEBUG: listing tools")
+                            tools = await session.list_tools()
+                            print("DEBUG: tools listed successfully", tools)
+                            print("DEBUG: listing resources")
+                            try:
+                                resources = await session.list_resources()
+                            except Exception as e:
+                                print(f"Error listing resources for {name}: {e}")
+                                resources = []
+                            print("DEBUG: resources listed successfully", resources)
+                            print("DEBUG: listing prompts")
+                            try:
+                                prompts = await session.list_prompts()
+                            except Exception as e:
+                                print(f"Error listing prompts for {name}: {e}")
+
+                            server.capabilities = {
+                                "tools": [tool.dict() for tool in tools.tools]
+                                #"resources": [res.dict() for res in resources.resources]
+                            }
+                            self.servers[name] = server
+                            self.last_capabilities[name] = server.capabilities
+                            print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
+                        except Exception as e:
+                            print(f"Error getting capabilities for {name}: {e}")
+                        
+                        self.save_config()
+                        print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
+                        print(f"DEBUG: Persistent SSE connection established for {name}")
+
+                        # Keep the task alive until cancelled
+                        try:
+                            while True:
+                                await asyncio.sleep(60)  # Heartbeat every minute
+                        except asyncio.CancelledError:
+                            print(f"DEBUG: Persistent connection task cancelled for {name}")
+                            raise
+            else:
+                async with streamablehttp_client(url=transport_url, auth=oauth_provider) as (read, write, _):
+                    print(f"DEBUG: Persistent StreamableHTTP transport created for {name}")
+                    async with ClientSession(read, write) as session:
+                        print(f"DEBUG: Persistent session created for {name}")
+                        
+                        # Initialize the session
+                        await session.initialize()
+                        print(f"DEBUG: Persistent session initialized for {name}")
+                        
+                        # Store session globally
+                        self.sessions[name] = session
+                        server.status = "connected"
+                        
+                        # Get server capabilities
+                        try:
+                            tools = await session.list_tools()
+                            resources = await session.list_resources()
+                            prompts = await session.list_prompts()
+                            
+                            server.capabilities = {
+                                "tools": [tool.dict() for tool in tools.tools],
+                                "resources": [res.dict() for res in resources.resources],
+                                "prompts": [prompt.dict() for prompt in prompts.prompts]
+                            }
+                            self.last_capabilities[name] = server.capabilities
+                            # Save to diagnostics cache
+                            self.last_capabilities[name] = server.capabilities
+                            print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
+                        except Exception as e:
+                            print(f"Error getting capabilities for {name}: {e}")
+                        
+                        self.save_config()
+                        print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
+                        print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
+                        print(f"DEBUG: Persistent StreamableHTTP connection established for {name}")
+                        
+                        # Keep the task alive until cancelled
+                        try:
+                            while True:
+                                await asyncio.sleep(60)  # Heartbeat every minute
+                        except asyncio.CancelledError:
+                            print(f"DEBUG: Persistent connection task cancelled for {name}")
+                            raise
                         
         except Exception as e:
             print(f"ERROR: Persistent OAuth connection failed for {name}: {e}")
@@ -314,7 +349,7 @@ class MCPManager:
             raise ImportError("MCP SDK not installed. Run: pip install mcp")
         print('1')
         if name not in self.servers:
-            print("Server not found:", name)
+            print("Server not found:", name, " Known:", list(self.servers.keys()))
             return False
         
         server = self.servers[name]
@@ -340,8 +375,7 @@ class MCPManager:
             task = asyncio.create_task(self._persistent_oauth_connection(name))
             self.background_tasks[name] = task
             
-            # Wait longer for OAuth flow to potentially start
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
             
             # Check if connection was successful or OAuth flow started
             if name in self.sessions and server.status == "connected":
@@ -422,18 +456,21 @@ class MCPManager:
     def complete_oauth_flow(self, server_name: str, code: str, state: Optional[str] = None) -> bool:
         """Complete OAuth flow with authorization code."""
         if server_name not in self.pending_oauth_flows:
+            print(f"DEBUG: complete_oauth_flow: server_name '{server_name}' not in pending flows. Available: {list(self.pending_oauth_flows.keys())}")
             return False
         
         flow = self.pending_oauth_flows[server_name]
         flow["code"] = code
         flow["state"] = state
         flow["status"] = "callback_received"
+        print(f"DEBUG: complete_oauth_flow: marked callback_received for {server_name}, state={state} code_present={bool(code)}")
         
         return True
     
     def get_oauth_status(self, server_name: str) -> Dict[str, Any]:
         """Get OAuth flow status for a server."""
         if server_name not in self.servers:
+            print(f"DEBUG: get_oauth_status: Server not found: '{server_name}'. Known servers: {list(self.servers.keys())}")
             return {"error": "Server not found"}
         
         server = self.servers[server_name]
@@ -454,6 +491,12 @@ class MCPManager:
                 "status": flow["status"],
                 "auth_url": flow["auth_url"] if flow["status"] == "awaiting_authorization" else None
             }
+        # Add diagnostics: last capabilities snapshot size
+        try:
+            if server_name in self.last_capabilities:
+                status["last_tools_count"] = len(self.last_capabilities[server_name].get("tools", []))
+        except Exception:
+            pass
         
         return status
     
@@ -465,7 +508,7 @@ class MCPManager:
             raise ImportError("MCP SDK not installed. Run: pip install mcp")
         
         if name not in self.servers:
-            print("Server not found:", name)
+            print("Server not found:", name, " Known:", list(self.servers.keys()))
             return False
         
         server = self.servers[name]
@@ -524,10 +567,12 @@ class MCPManager:
                     "resources": [res.dict() for res in resources.resources],
                     "prompts": [prompt.dict() for prompt in prompts.prompts]
                 }
+                self.last_capabilities[name] = server.capabilities
             except Exception as e:
                 print(f"Error getting capabilities for {name}: {e}")
             
             self.save_config()
+            print(f"DEBUG: connect_remote_server: saved capabilities for {name}, tools={len(server.capabilities.get('tools', []))}")
             return True
             
         except Exception as e:
@@ -579,7 +624,7 @@ class MCPManager:
         """Connect to an MCP server"""
         print("Connecting to MCP server:", name)
         if name not in self.servers:
-            print("Server not found:", name)
+            print("Server not found:", name, " Known:", list(self.servers.keys()))
             return False
         if ClientSession is None:
             raise ImportError("MCP SDK not installed. Run: pip install mcp")
@@ -655,10 +700,11 @@ class MCPManager:
                                 })
                         
                         server.capabilities = {
-                            "tools": tools_data,
-                            "resources": [res.dict() for res in resources.resources],
-                            "prompts": [prompt.dict() for prompt in prompts.prompts]
+                            "tools": tools_data #,
+                            #"resources": [res.dict() for res in resources.resources],
+                            #"prompts": [prompt.dict() for prompt in prompts.prompts]
                         }
+                        self.servers[name] = server
                         print(f"DEBUG: Saved {len(tools_data)} tools to server capabilities")
                     except Exception as e:
                         print(f"DEBUG: Error serializing capabilities: {e}")

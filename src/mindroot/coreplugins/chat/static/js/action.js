@@ -9,7 +9,7 @@ import {markedHighlight} from 'https://cdn.jsdelivr.net/npm/marked-highlight@2.1
 
 function tryParse(markdown) {
     //return renderMarkdown(markdown)
-    return markdownRenderer.parse(markdown);
+      return markdownRenderer.parse(markdown);
 }
 
 
@@ -241,7 +241,9 @@ class ActionComponent extends BaseEl {
       console.log("Displaying file")
       if (fname?.endsWith('.md') || funcName == 'think') {
         console.log("Displaying markdown")
-        res = html`<div class="markdown-content">${unsafeHTML(tryParse(text, {breaks: true}))}</div>`;
+        if (true || Date.now() - window.lastParsed > 300) {
+           res = html`<div class="markdown-content">${unsafeHTML(tryParse(text, {breaks: true}))}</div>`;
+        }
       } else {
         console.log("Displaying code")
         const hih = hljs.highlightAuto(text).value;
@@ -251,7 +253,9 @@ class ActionComponent extends BaseEl {
     } else {
       if (typeof(params) === "string") {
           try {
-            res = html`<div class="markdown-content">${unsafeHTML(tryParse(params))}</div>`;
+            if (true || Date.now() - window.lastParsed > 300) {
+              res = html`<div class="markdown-content">${unsafeHTML(tryParse(params))}</div>`;
+            }
           } catch (e) {
             res = html`<pre><code>${params}</code></pre>`;
           }
@@ -261,7 +265,9 @@ class ActionComponent extends BaseEl {
           if (typeof(params[key]) === 'string' && params[key].split('\n').length > 2) {
             console.log('rendering markdown', params[key])
             try { 
-            res = html`<div class="markdown-content">${unsafeHTML(tryParse(params[key]+" "))}</div>`;
+              if (true || Date.now() - window.lastParsed > 300) {
+                res = html`<div class="markdown-content">${unsafeHTML(tryParse(params[key]+" "))}</div>`;
+              }
             } catch (e) {
               res = html`<pre><code>${params[key]}</code></pre>`;
             }

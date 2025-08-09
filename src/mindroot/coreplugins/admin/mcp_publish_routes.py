@@ -339,11 +339,12 @@ async def complete_oauth_flow(request: McpCompleteOAuthRequest):
         # Check if server is now connected
         if request.server_name in mcp_manager.servers:
             server = mcp_manager.servers[request.server_name]
+            print(f"DEBUG: complete-oauth: server entry found for '{request.server_name}', status={server.status}, tools={len(server.capabilities.get('tools', []))}")
             if server.status == "connected":
                 tools = server.capabilities.get("tools", [])
                 resources = server.capabilities.get("resources", [])
                 prompts = server.capabilities.get("prompts", [])
-                
+
                 return {
                     "success": True,
                     "message": f"OAuth completed successfully. Found {len(tools)} tools, {len(resources)} resources, {len(prompts)} prompts.",
@@ -351,10 +352,24 @@ async def complete_oauth_flow(request: McpCompleteOAuthRequest):
                     "resources": resources,
                     "prompts": prompts
                 }
+
+            # Not yet connected; surface pending status so frontend can poll
+            try:
+                status = mcp_manager.get_oauth_status(request.server_name)
+                print(f"DEBUG: complete-oauth: oauth-status for '{request.server_name}' -> {status}")
+            except Exception:
+                status = {"status": "pending"}
+            return {
+                "success": True,
+                "message": "OAuth flow completed, but server connection is still pending.",
+                "status": status.get("status", "pending")
+            }
+
         
         return {
             "success": True,
-            "message": "OAuth flow completed, but server connection is still pending."
+            "message": "OAuth flow completed, but server connection is still pending.",
+            "status": "pending"
         }
         
     except HTTPException:
