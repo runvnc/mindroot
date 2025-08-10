@@ -289,17 +289,16 @@ class Chat extends BaseEl {
       const paramStr = JSON.stringify(data.params)
       const escaped = escapeJsonForHtml(paramStr)
       if (content) {
+        console.log('found content, not using action component')
         this.messages[this.messages.length - 1].content = content
       } else {
         if (this.messages[this.messages.length - 1].content == '' ||
             Date.now()- window.lastParsed > 40) {
-          const content = this.textParam(data);
           window.lastParsed = Date.now();
-          this.messages[this.messages.length - 1].content = tryParse(content);
-          /* this.messages[this.messages.length - 1].content = `
+          this.messages[this.messages.length - 1].content = `
            <action-component funcName="${data.command}" params="${escaped}" 
                                result="">
-            </action-component>`; */
+            </action-component>`; 
         }
       }
     }

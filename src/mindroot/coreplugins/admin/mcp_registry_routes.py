@@ -213,7 +213,7 @@ async def install_registry_server(request: RegistryServerInstallRequest):
         server_name = request.server_name or server_info["title"].lower().replace(" ", "_")
         
         # Get MCP manager
-        mcp_manager = await service_manager.mcp_manager_service()
+        mcp_manager = await service_manager.enhanced_mcp_manager_service()
         if not mcp_manager:
             raise HTTPException(status_code=500, detail="MCP manager service not available")
         
@@ -224,7 +224,7 @@ async def install_registry_server(request: RegistryServerInstallRequest):
         # Create server configuration based on type
         if server_info["server_type"] == "remote":
             # Remote server - use OAuth if needed
-            from mindroot.coreplugins.mcp.mod import MCPServer
+            from mindroot.coreplugins.mcp_.mod import MCPServer
             import os
             
             # Get BASE_URL for callback
@@ -233,7 +233,7 @@ async def install_registry_server(request: RegistryServerInstallRequest):
             server = MCPServer(
                 name=server_name,
                 description=server_info["description"],
-                command="",  # Not used for remote servers
+                command=None,  # Not used for remote servers
                 transport="http",
                 url=server_info["url"],
                 auth_type=server_info.get("auth_type", "oauth2"),
@@ -281,11 +281,10 @@ async def install_registry_server(request: RegistryServerInstallRequest):
                 if not enhanced_mcp_manager:
                     raise HTTPException(status_code=500, detail="Enhanced MCP manager service not available")
                 
-                from mindroot.coreplugins.mcp.enhanced_mod import EnhancedMCPServer
+                from mindroot.coreplugins.mcp_.mod import MCPServer
                 
                 # Create enhanced server configuration
-                enhanced_server = EnhancedMCPServer(
-                    name=server_name,
+                enhanced_server = MCPServer(                    name=server_name,
                     description=server_info["description"],
                     command=server_info["command"],
                     args=server_info.get("args", []),
@@ -333,7 +332,7 @@ async def complete_registry_oauth(server_name: str, code: str, state: Optional[s
     """Complete OAuth flow for registry server installation."""
     try:
         # Get the MCP manager service
-        mcp_manager = await service_manager.mcp_manager_service()
+        mcp_manager = await service_manager.enhanced_mcp_manager_service()
         if not mcp_manager:
             raise HTTPException(status_code=500, detail="MCP manager service not available")
         

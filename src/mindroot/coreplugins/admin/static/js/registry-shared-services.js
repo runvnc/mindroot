@@ -313,6 +313,63 @@ class RegistrySharedServices {
     }
   }
 
+  /**
+   * Connect an already installed OAuth MCP server from a registry item.
+   * This triggers the /admin/mcp/test-remote -> OAuth popup -> /complete-oauth flow,
+   * then refreshes local MCP list and attempts a final /admin/mcp/connect to ensure
+   * dynamic MCP commands are registered.
+   */
+  async connectInstalledOAuthMcp(item) {
+    try {
+      // Derive name and URL from registry data and local list
+      const serverName = item.data?.name || item.title;
+      const remoteUrl = item.data?.transport_url || item.data?.url || item.data?.provider_url || item.data?.authorization_server_url || '';
+
+      if (!serverName) {
+        throw new Error('Missing server name');
+      }
+      if (!remoteUrl) {
+        // Fallback: try to infer from local list
+        const localServer = (this.main.localMcpServers || []).find(s => s.name === item.title || s.name === serverName);
+        if (localServer?.transport_url) {
+          // ok
+        } else {
+          this.showToast('Cannot determine remote URL for OAuth connection', 'error');
+          return false;
+        }
+      }
+
+      // Kick off test-remote to either connect or return requires_oauth
+      const testResp = await fetch('/admin/mcp/test-remote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: remoteUrl, name: serverName })
+      });
+      const testData = await testResp.json();
+
+      if (testData.success) {
+        this.showToast(testData.message || `Connected to '${serverName}'.`, 'success');
+        await this.loadLocalContent();
+        return true;
+      }
+
+      if (testData.requires_oauth && testData.auth_url && testData.server_name) {
+        await this.startOAuthWindowFlow({
+          server_name: testData.server_name,
+          auth_url: testData.auth_url,
+          remote_url: remoteUrl
+        });
+        // startOAuthWindowFlow does post-completion recheck and refresh
+        return true;
+      }
+
+      throw new Error(testData.detail || 'Connection failed');
+    } catch (e) {
+      this.showToast(`Connect failed: ${e.message}`, 'error');
+      return false;
+    }
+  }
+
   async installOAuthMcpServer(item) {
     try {
       // 1) Ensure the server exists in backend manager

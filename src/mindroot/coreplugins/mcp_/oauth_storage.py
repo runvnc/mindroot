@@ -42,7 +42,7 @@ class MCPTokenStorage(TokenStorage):
         expires_at = None
         if server.token_expires_at:
             try:
-                expires_at = datetime.fromisoformat(server.token_expires_at)
+                expires_at = datetime.fromisoformat(server.token_expires_at.replace('Z', '+00:00'))
             except ValueError:
                 pass
         
@@ -64,8 +64,13 @@ class MCPTokenStorage(TokenStorage):
         server.access_token = tokens.access_token
         server.refresh_token = tokens.refresh_token
         
-        if tokens.expires_at:
+        if hasattr(tokens, 'expires_at') and tokens.expires_at:
             server.token_expires_at = tokens.expires_at.isoformat()
+        elif hasattr(tokens, 'expires_in') and tokens.expires_in:
+            # Calculate expires_at from expires_in
+            from datetime import datetime, timedelta
+            expires_at = datetime.now() + timedelta(seconds=tokens.expires_in)
+            server.token_expires_at = expires_at.isoformat()
         else:
             server.token_expires_at = None
         

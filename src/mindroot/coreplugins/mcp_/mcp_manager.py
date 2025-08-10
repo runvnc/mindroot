@@ -45,7 +45,7 @@ class MCPServer(BaseModel):
     """Model for MCP server configuration"""
     name: str
     description: str
-    command: str
+    command: Optional[str] = None
     args: List[str] = []
     env: Dict[str, str] = {}
     transport: str = "stdio"  # stdio, sse, websocket, http
@@ -254,12 +254,17 @@ class MCPManager:
 
             # Keep connection alive indefinitely using appropriate transport
             if transport_type == "sse":
+                print(f"DEBUG: About to create SSE client for {transport_url}")
+                print(f"DEBUG: OAuth provider: {oauth_provider}")
                 async with sse_client(url=transport_url, auth=oauth_provider) as (read, write):
                     print(f"DEBUG: Persistent SSE transport created for {name}")
+                    print(f"DEBUG: SSE read: {read}, write: {write}")
+                    print(f"DEBUG: About to create ClientSession")
                     async with ClientSession(read, write) as session:
                         print(f"DEBUG: Persistent session created for {name}")
                         
                         # Initialize the session
+                        print(f"DEBUG: About to initialize session for {name}")
                         await session.initialize()
                         print(f"DEBUG: Persistent session initialized for {name}")
                         
@@ -272,6 +277,7 @@ class MCPManager:
                             tools = []
                             resources = []
                             prompts = []
+                            print(f"DEBUG: About to list tools for {name}")
                             print("DEBUG: listing tools")
                             tools = await session.list_tools()
                             print("DEBUG: tools listed successfully", tools)
@@ -288,6 +294,7 @@ class MCPManager:
                             except Exception as e:
                                 print(f"Error listing prompts for {name}: {e}")
 
+                            print(f"DEBUG: Processing capabilities - tools type: {type(tools)}, tools: {tools}")
                             server.capabilities = {
                                 "tools": [tool.dict() for tool in tools.tools]
                                 #"resources": [res.dict() for res in resources.resources]
@@ -295,8 +302,15 @@ class MCPManager:
                             self.servers[name] = server
                             self.last_capabilities[name] = server.capabilities
                             print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
+                            
+                            # Register dynamic commands
+                            print(f"DEBUG: Registering tools for {name}...")
+                            await self.dynamic_commands.register_tools(name, tools.tools)
+                            print(f"DEBUG: Successfully registered {len(tools.tools)} tools for {name}")
                         except Exception as e:
                             print(f"Error getting capabilities for {name}: {e}")
+                            # Don't set status to error if we got this far - keep it connected
+                            pass
                         
                         self.save_config()
                         print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
@@ -316,6 +330,7 @@ class MCPManager:
                         print(f"DEBUG: Persistent session created for {name}")
                         
                         # Initialize the session
+                        print(f"DEBUG: About to initialize session for {name}")
                         await session.initialize()
                         print(f"DEBUG: Persistent session initialized for {name}")
                         
@@ -338,8 +353,15 @@ class MCPManager:
                             # Save to diagnostics cache
                             self.last_capabilities[name] = server.capabilities
                             print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
+                            
+                            # Register dynamic commands
+                            print(f"DEBUG: Registering tools for {name}...")
+                            await self.dynamic_commands.register_tools(name, tools.tools)
+                            print(f"DEBUG: Successfully registered {len(tools.tools)} tools for {name}")
                         except Exception as e:
                             print(f"Error getting capabilities for {name}: {e}")
+                            # Don't set status to error if we got this far - keep it connected
+                            pass
                         
                         self.save_config()
                         print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
@@ -356,6 +378,8 @@ class MCPManager:
                         
         except Exception as e:
             print(f"ERROR: Persistent OAuth connection failed for {name}: {e}")
+            import traceback
+            traceback.print_exc()
             server.status = "error"
             self.save_config()
             raise
@@ -399,6 +423,12 @@ class MCPManager:
             if name in self.sessions and server.status == "connected":
                 print(f"DEBUG: Background OAuth connection successful for {name}")
                 return True
+            elif server.status == "error":
+                print(f"DEBUG: Background OAuth connection failed for {name}")
+                # Check if the background task had an exception
+                if not task.done():
+                    task.cancel()
+                return False
             elif name in self.pending_oauth_flows:
                 print(f"DEBUG: OAuth flow started for {name}, frontend should handle popup")
                 return False  # This will trigger the OAuth flow check in the calling code

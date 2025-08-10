@@ -88,13 +88,20 @@ async def add_mcp_server(server_request: McpServerAddRequest):
         if server_request.transport in ["http", "sse", "websocket"] and not server_request.url:
             raise HTTPException(status_code=400, detail="URL is required for remote transports")
         
-        if server_request.auth_type == "oauth2" and not server_request.client_id:
-            raise HTTPException(status_code=400, detail="Client ID is required for OAuth 2.0")
+        # More flexible OAuth validation - allow registry servers to be added without client_id initially
+        # The OAuth configuration might be provided by the registry or discovered during connection
+        if server_request.auth_type == "oauth2":
+            # Log the OAuth configuration for debugging
+            print(f"DEBUG: Adding OAuth server '{server_request.name}'")
+            print(f"DEBUG: client_id: {server_request.client_id}")
+            print(f"DEBUG: authorization_server_url: {server_request.authorization_server_url}")
+            print(f"DEBUG: scopes: {server_request.scopes}")
+            # Note: client_id validation removed to allow registry servers with dynamic OAuth discovery
         
         server = MCPServer(
             name=server_request.name,
             description=server_request.description,
-            command=server_request.command,
+            command=server_request.command or "",
             args=server_request.args,
             env=server_request.env,
             transport=server_request.transport,

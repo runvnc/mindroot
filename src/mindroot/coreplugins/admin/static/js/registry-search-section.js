@@ -256,23 +256,32 @@ class RegistrySearchSection {
   }
 
   renderResultActions(item, isInstalled, requiresOAuth, oauthStatus) {
+    const isMcp = item.category === 'mcp_server';
+    const needsAuth = isMcp && requiresOAuth && isInstalled && oauthStatus === 'needs_auth';
     return html`
       <div class="result-actions">
         ${isInstalled ? html`
-          <div class="installed-badge">
+          <div class="installed-badge" title="${needsAuth ? 'Installed locally; OAuth authorization required' : 'Installed'}">
             <span class="material-icons">check_circle</span> 
             Installed
-            ${oauthStatus === 'needs_auth' ? html`
+            ${needsAuth ? html`
               <span class="oauth-status needs-auth" title="OAuth authorization required">
                 <span class="material-icons">warning</span>
               </span>
             ` : ''}
           </div>
+          ${needsAuth ? html`
+            <button class="success"
+                    @click=${() => this.services.connectInstalledOAuthMcp(item)}
+                    ?disabled=${this.state.loading}>
+              Connect
+            </button>
+          ` : ''}
         ` : html`
           <button class="success" 
                   @click=${() => this.installFromRegistry(item)} 
                   ?disabled=${this.state.loading}>
-            ${requiresOAuth ? 'Install & Authorize' : 'Install'}
+            ${requiresOAuth ? 'Install & Connect' : 'Install'}
           </button>
         `}
         ${item.github_url ? html`

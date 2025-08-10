@@ -169,21 +169,38 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
         print(f"Using server name: {server_name}")
 
         try:
-            # Create temporary server configuration for testing
             from mindroot.coreplugins.mcp_.mod import MCPServer
             
-            temp_server = MCPServer(
-                name=server_name,
-                description=f"Temporary server for testing {request.url}",
-                command="",  # Not used for remote servers
-                transport="http",
-                url=request.url,
-                auth_type="oauth2"  # Assume OAuth2 for remote servers
-            )
+            # Check if server already exists (from registry install flow)
+            existing_server = None
+            if server_name in mcp_manager.servers:
+                existing_server = mcp_manager.servers[server_name]
+                print(f"Found existing server configuration for {server_name}")
+                print(f"Existing server auth_type: {existing_server.auth_type}")
+                print(f"Existing server client_id: {existing_server.client_id}")
             
-            # Add to MCP manager
-            mcp_manager.add_server(server_name, temp_server)
-           
+            if existing_server:
+                # Use existing server configuration (registry install flow)
+                server_to_test = existing_server
+                print(f"Using existing server config with auth_type={server_to_test.auth_type}")
+            else:
+                # Create temporary server configuration for testing (publish flow)
+                temp_server = MCPServer(
+                    name=server_name,
+                    description=f"Temporary server for testing {request.url}",
+                    command="",  # Not used for remote servers
+                    transport="http",
+                    url=request.url,
+                    auth_type="oauth2"  # Assume OAuth2 for remote servers
+                )
+                
+                # Add temporary server to MCP manager
+                mcp_manager.add_server(server_name, temp_server)
+                server_to_test = temp_server
+                print(f"Created temporary server config for publish flow")
+            
+            # Note: OAuth client_id will be discovered during the OAuth flow
+            
             print("Connecting to remote MCP server: ", server_name)
             print(f"Server URL: {request.url}")
             print("MCP manager is: ", mcp_manager)
@@ -248,8 +265,11 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
         finally:
             # Clean up temporary server
             try:
-                await mcp_manager.disconnect_server(server_name)
-                mcp_manager.remove_server(server_name)
+                # Only clean up if we created a temporary server (not existing one)
+                if not existing_server:
+                    await mcp_manager.disconnect_server(server_name)
+                    mcp_manager.remove_server(server_name)
+                    print(f"Cleaned up temporary server {server_name}")
             except Exception as cleanup_error:
                 print(f"Error cleaning up temporary server {server_name}: {cleanup_error}")
 

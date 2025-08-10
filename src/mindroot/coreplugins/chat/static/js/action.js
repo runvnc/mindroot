@@ -232,7 +232,7 @@ class ActionComponent extends BaseEl {
         </details>`;
       }
     }
-    if (funcName === 'write' || funcName == 'think') {
+    if (funcName === 'overwrite' || funcName === 'write' || funcName == 'think') {
       let {fname, text} = params;
       if (params.extensive_chain_of_thoughts) {
         text = params.extensive_chain_of_thoughts
