@@ -200,6 +200,16 @@ class Chat extends BaseEl {
     this._scrollToBottom()
   }
 
+  textParam (data) {
+    if (data.params.text) {
+      return data.params.text;
+      } else if (data.params.markdown) {
+      return data.params.markdown;
+      } else if (data.params.extensive_chain_of_thoughts) {
+      return data.params.extensive_chain_of_thoughts;
+      }
+    return JSON.stringify(data.params);
+  }
 
   async _partialCmd(event) {
     console.log('Event received');
@@ -225,14 +235,8 @@ class Chat extends BaseEl {
       if (handler) {
         console.log('Used registered handler for', data.command);
         this.msgSoFar = null
-      } else if (data.params.text) {
-        this.msgSoFar = data.params.text
-      } else if (data.params.markdown) {
-        this.msgSoFar = data.params.markdown
-      } else if (data.params.extensive_chain_of_thoughts) {
-        this.msgSoFar = data.params.extensive_chain_of_thoughts
       } else {
-        this.msgSoFar = data.params
+        this.msgSoFar = this.textParam(data);
       }
 
       try {
@@ -332,6 +336,7 @@ class Chat extends BaseEl {
       }
     } else {
       console.warn('No handler for command:', data.command)
+      this.messages[this.messages.length - 1].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" result=""></action-component>`;
     }
     window.initializeCodeCopyButtons();
     this.requestUpdate();

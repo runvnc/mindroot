@@ -101,6 +101,22 @@ class MCPManager:
         
         self.load_config()
 
+    # ---- Serialization helpers ----
+    def _server_to_jsonable(self, server: MCPServer) -> Dict[str, Any]:
+        """Convert server model to plain JSON-serializable dict.
+        Ensures AnyUrl or other exotic types are stringified.
+        """
+        # Start with pydantic dict (already basic types), but normalize URLs just in case
+        data = server.dict()
+        for key in ("url", "provider_url", "transport_url", "authorization_server_url", "redirect_uri"):
+            val = data.get(key)
+            if val is not None and not isinstance(val, (str, int, float, bool)):  # e.g., AnyUrl
+                try:
+                    data[key] = str(val)
+                except Exception:
+                    data[key] = f"{val}"
+        return data
+
     # ---- URL/Transport helpers ----
     def _infer_urls(self, server: MCPServer) -> tuple[str, str, str]:
         """Infer provider_url, transport_url, and transport_type from server fields.
@@ -182,7 +198,8 @@ class MCPManager:
         storage = MCPTokenStorage(name, self)
         metadata = OAuthClientMetadata(
             client_name=f"MindRoot - {server.name}",
-            redirect_uris=[AnyUrl(callback_url)] if AnyUrl else [callback_url],
+            # Use plain string to avoid pydantic AnyUrl leaking into persisted state
+            redirect_uris=[str(callback_url)],
             grant_types=["authorization_code", "refresh_token"],
             response_types=["code"],
             scope=" ".join(server.scopes) if server.scopes else "user",
@@ -212,7 +229,8 @@ class MCPManager:
     def save_config(self):
         """Save server configurations to file"""
         try:
-            data = {name: server.dict() for name, server in self.servers.items()}
+            # Use JSON-safe conversion to avoid 'AnyUrl is not serializable' errors
+            data = {name: self._server_to_jsonable(server) for name, server in self.servers.items()}
             with open(self.config_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
@@ -375,7 +393,7 @@ class MCPManager:
             task = asyncio.create_task(self._persistent_oauth_connection(name))
             self.background_tasks[name] = task
             
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
             
             # Check if connection was successful or OAuth flow started
             if name in self.sessions and server.status == "connected":

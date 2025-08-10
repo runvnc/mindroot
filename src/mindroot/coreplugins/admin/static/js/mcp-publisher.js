@@ -716,7 +716,6 @@ ${JSON.stringify(exampleConfig, null, 2)}
         ${this.discoveredTools.map(tool => html`
           <div class="tool-item">
             <div class="tool-name">${tool.name}</div>
-            <div class="tool-description">${tool.description || 'No description available'}</div>
           </div>
         `)}
       </div>
