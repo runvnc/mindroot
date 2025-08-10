@@ -354,7 +354,11 @@ class RegistryPublishSection {
       
       <div class="section">
         <h3>Publish New MCP Server</h3>
-        <mcp-publisher></mcp-publisher>
+        <mcp-publisher
+          .registryUrl=${this.state.registryUrl}
+          .authToken=${this.state.authToken}
+          .isLoggedIn=${this.state.isLoggedIn}
+        ></mcp-publisher>
       </div>
     `;
   }

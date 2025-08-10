@@ -14,7 +14,10 @@ class McpPublisher extends BaseEl {
     error: { type: String },
     success: { type: String },
     oauthFlow: { type: Object },
-    oauthWindow: { type: Object }
+    oauthWindow: { type: Object },
+    registryUrl: { type: String },
+    authToken: { type: String },
+    isLoggedIn: { type: Boolean }
   };
 
   static styles = css`
@@ -210,6 +213,9 @@ class McpPublisher extends BaseEl {
     this.success = '';
     this.oauthFlow = null;
     this.oauthWindow = null;
+    this.registryUrl = '';
+    this.authToken = '';
+    this.isLoggedIn = false;
     
     // Listen for OAuth callback messages
     window.addEventListener('message', this.handleOAuthCallback.bind(this));
@@ -544,13 +550,23 @@ class McpPublisher extends BaseEl {
       return;
     }
 
+    if (!this.isLoggedIn || !this.authToken) {
+      this.error = "Please log in to the registry first (top of page).";
+      return;
+    }
+
+    if (!this.registryUrl) {
+      this.error = "Registry URL is not configured.";
+      return;
+    }
+
     this.loading = true;
     this.error = "";
     this.success = "";
 
     try {
       // Prepare server configuration based on type
-      const requestData = {
+      const serverData = {
         name: this.serverName,
         description: this.serverDescription,
         server_type: this.serverType,
@@ -561,23 +577,36 @@ class McpPublisher extends BaseEl {
       
       // Add type-specific configuration
       if (this.serverType === "local") {
-        Object.assign(requestData, {
+        Object.assign(serverData, {
           command: this.localConfig.command,
           args: this.localConfig.args,
           env: this.localConfig.env
         });
       } else {
-        Object.assign(requestData, {
+        Object.assign(serverData, {
           url: this.remoteUrl
         });
       }
 
-      const response = await fetch("/admin/mcp/publish", {
+      // Build registry publish payload (align with registry ContentCreate)
+      const publishData = {
+        title: this.serverName,
+        description: this.serverDescription,
+        category: "mcp_server",
+        content_type: "mcp_server",
+        version: "1.0.0",
+        data: serverData,
+        tags: ["mcp", "server", this.serverType],
+        dependencies: []
+      };
+
+      const response = await fetch(`${this.registryUrl}/publish`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.authToken}`
         },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(publishData)
       });
 
       if (response.ok) {

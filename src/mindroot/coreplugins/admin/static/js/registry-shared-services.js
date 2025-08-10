@@ -315,67 +315,131 @@ class RegistrySharedServices {
 
   async installOAuthMcpServer(item) {
     try {
-      const response = await fetch('/admin/mcp/add', {
+      // 1) Ensure the server exists in backend manager
+      const addResp = await fetch('/admin/mcp/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item.data)
       });
-      
-      if (!response.ok) {
-        const err = await response.json();
+      if (!addResp.ok) {
+        const err = await addResp.json();
         throw new Error(err.detail || 'Failed to install MCP server');
       }
-      
-      this.showToast(`MCP Server '${item.title}' installed successfully.`, 'success');
-      
-      const authUrl = item.data.authorization_server_url;
-      const clientId = item.data.client_id;
-      const scopes = item.data.scopes || [];
-      const redirectUri = item.data.redirect_uri || `${window.location.origin}/admin/oauth/callback`;
-      
-      const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        scope: scopes.join(' '),
-        state: item.title
+      this.showToast(`MCP Server '${item.title}' installed locally. Connecting...`, 'info');
+
+      // 2) Kick off connection test which will return requires_oauth if needed
+      const testBody = {
+        url: item.data.transport_url || item.data.url || item.data.provider_url || item.data.authorization_server_url || '',
+        name: item.data.name || item.title
+      };
+      const testResp = await fetch('/admin/mcp/test-remote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testBody)
       });
-      
-      const oauthUrl = `${authUrl}?${params.toString()}`;
-      this.handleOAuthFlow(item.title, oauthUrl);
-      
+      const testData = await testResp.json();
+
+      if (testData.success) {
+        this.showToast(testData.message || `Connected to '${item.title}'.`, 'success');
+        return true;
+      }
+
+      if (testData.requires_oauth && testData.auth_url && testData.server_name) {
+        // 3) Open OAuth window and wire completion to /admin/mcp/complete-oauth
+        await this.startOAuthWindowFlow({
+          server_name: testData.server_name,
+          auth_url: testData.auth_url,
+          remote_url: testBody.url
+        });
+        return true;
+      }
+
+      throw new Error(testData.detail || 'Connection failed');
     } catch (error) {
       throw new Error(`OAuth MCP Server installation failed: ${error.message}`);
     }
   }
 
-  handleOAuthFlow(serverName, oauthUrl) {
-    this.showToast(`Opening OAuth authorization for '${serverName}'...`, 'info');
-    
-    const popup = window.open(oauthUrl, 'oauth', 'width=600,height=600');
-    
-    const messageHandler = (event) => {
-      if (event.data && event.data.type === 'oauth_callback') {
-        window.removeEventListener('message', messageHandler);
-        
-        if (event.data.code) {
-          this.showToast(`OAuth authorization completed for '${serverName}'`, 'success');
-        } else {
-          this.showToast(`OAuth authorization failed for '${serverName}'`, 'error');
+  async startOAuthWindowFlow({ server_name, auth_url, remote_url }) {
+    this.showToast(`Opening OAuth authorization for '${server_name}'...`, 'info');
+
+    const width = 600;
+    const height = 700;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    const popup = window.open(
+      auth_url,
+      'oauth_window',
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+
+    if (!popup) {
+      this.showToast('Failed to open OAuth window. Please allow popups and try again.', 'error');
+      return false;
+    }
+
+    const onMessage = async (event) => {
+      if (!event.data || event.data.type !== 'oauth_callback') return;
+      window.removeEventListener('message', onMessage);
+      try {
+        // Close popup ASAP
+        if (popup && !popup.closed) popup.close();
+
+        // Complete the OAuth flow with backend
+        const resp = await fetch('/admin/mcp/complete-oauth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ server_name, code: event.data.code, state: event.data.state })
+        });
+        const data = await resp.json();
+
+        if (!data.success) {
+          this.showToast(data.detail || 'OAuth completion failed', 'error');
+          return false;
         }
-        
-        if (popup && !popup.closed) {
-          popup.close();
+
+        // Optionally re-test to fetch tools, like publisher
+        try {
+          const recheck = await fetch('/admin/mcp/test-remote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: remote_url, name: server_name })
+          });
+          const reData = await recheck.json();
+          if (reData.success) {
+            this.showToast(reData.message || `Connected to '${server_name}'.`, 'success');
+          }
+        } catch (e) {
+          // ignore
         }
+
+        // Ensure dynamic commands are ready by refreshing local content
+        await this.loadLocalContent();
+
+        // As a final safety, if not connected, try /admin/mcp/connect
+        try {
+          await fetch('/admin/mcp/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ server_name })
+          });
+          await this.loadLocalContent();
+        } catch (_) {}
+
+        return true;
+      } catch (err) {
+        this.showToast(`OAuth completion failed: ${err.message}`, 'error');
+        return false;
       }
     };
-    
-    window.addEventListener('message', messageHandler);
-    
+
+    window.addEventListener('message', onMessage);
+
+    // Cleanup if user closes popup before finishing
     const checkClosed = setInterval(() => {
-      if (popup.closed) {
+      if (!popup || popup.closed) {
         clearInterval(checkClosed);
-        window.removeEventListener('message', messageHandler);
+        window.removeEventListener('message', onMessage);
       }
     }, 1000);
   }

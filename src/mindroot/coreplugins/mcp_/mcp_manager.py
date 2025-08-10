@@ -393,7 +393,7 @@ class MCPManager:
             task = asyncio.create_task(self._persistent_oauth_connection(name))
             self.background_tasks[name] = task
             
-            await asyncio.sleep(5)
+            await asyncio.sleep(2)
             
             # Check if connection was successful or OAuth flow started
             if name in self.sessions and server.status == "connected":

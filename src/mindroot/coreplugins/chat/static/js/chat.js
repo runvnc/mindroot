@@ -31,6 +31,8 @@ function tryParse(markdown) {
     return markdownRenderer.parse(markdown);
 }
 
+const noAction = [ 'say', 'json_encoded_md', 'wait_for_user_reply', 'markdown_await_user', 'tell_and_continue', 'think' ]
+
 class Chat extends BaseEl {
   static properties = {
     sessionid: { type: String },
@@ -142,6 +144,8 @@ class Chat extends BaseEl {
     showNotification('error', data.error);
   }
 
+  
+
   _addMessage(event) {
     const { content, sender, persona } = event.detail;
     
@@ -228,9 +232,7 @@ class Chat extends BaseEl {
       this.startNewMsg = false
     }
 
-    if (data.command == 'say' || data.command == 'json_encoded_md' ||
-        data.command == 'wait_for_user_reply' || data.command == 'markdown_await_user' ||
-        data.command == 'tell_and_continue' || data.command=='think') {
+    if (noAction.includes(data.command)) {
       // Check if there's a registered handler for this command
       if (handler) {
         console.log('Used registered handler for', data.command);
@@ -291,11 +293,13 @@ class Chat extends BaseEl {
       } else {
         if (this.messages[this.messages.length - 1].content == '' ||
             Date.now()- window.lastParsed > 40) {
-          this.messages[this.messages.length - 1].content = `
+          const content = this.textParam(data);
+          window.lastParsed = Date.now();
+          this.messages[this.messages.length - 1].content = tryParse(content);
+          /* this.messages[this.messages.length - 1].content = `
            <action-component funcName="${data.command}" params="${escaped}" 
                                result="">
-            </action-component>`;
-          window.lastParsed = Date.now();
+            </action-component>`; */
         }
       }
     }
@@ -336,7 +340,11 @@ class Chat extends BaseEl {
       }
     } else {
       console.warn('No handler for command:', data.command)
-      this.messages[this.messages.length - 1].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" result=""></action-component>`;
+      if (!noAction.includes(data.command)) {
+        this.messages[this.messages.length - 1].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" result=""></action-component>`;
+      } else {
+        this.messages[this.messages.length - 1].content = tryParse(this.textParam(data));
+      }
     }
     window.initializeCodeCopyButtons();
     this.requestUpdate();
