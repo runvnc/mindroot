@@ -141,7 +141,7 @@ def merge_json_arrays(data, partial=False):
                     pass
     
     # Combine all parsed arrays into a single list
-    if arrays:
+    if len(arrays) > 0:
         return list(chain.from_iterable(arrays))
     
     # If all else fails, try the original json.loads as fallback

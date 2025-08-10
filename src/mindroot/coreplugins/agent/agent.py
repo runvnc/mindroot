@@ -362,7 +362,7 @@ class Agent:
                         cmd_args = partial_cmd[cmd_name]
                         logger.debug(f"Partial command detected: {partial_cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
-                    except json.JSONDecodeError as de:
+                    except Exception as de:
                         logger.error("Failed to parse partial command")
                         logger.error(str(de))
                         pass

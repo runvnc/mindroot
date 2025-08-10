@@ -44,6 +44,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             #print("Trying merge_json_arrays in parse_streaming_commands")
             complete_commands = merge_json_arrays(raw_replaced)
             if len(complete_commands) > 0:
+                print('AA')
                 return complete_commands, None
         except Exception:
             pass
@@ -53,28 +54,32 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             complete_commands = json.loads(raw_replaced)
             ##print("Found complete command from escape_for_json")
             #print(2)
+            print('BB')
             return complete_commands, None
         except Exception:
             pass
         try:
+            d=1
+
             ##print("trying merge_json_arrays with partial=True")
-            complete_commands = merge_json_arrays(buffer, partial=True)
-            num_commands = len(complete_commands)
+            #complete_commands = merge_json_arrays(buffer, partial=True)
+            #num_commands = len(complete_commands)
             #print("complete_commands before assigning current partial:", complete_commands)
             #print("current_partial", current_partial)
  
-            if num_commands > 1:
-                complete_commands = complete_commands[:num_commands-1]
-                current_partial = complete_commands[-1]
-            else:
-                current_partial = complete_commands[-1]
-                complete_commands = []
+            #if num_commands > 1:
+            #    complete_commands = complete_commands[:num_commands-1]
+            #    current_partial = complete_commands[-1]
+            #else:
+            #    current_partial = complete_commands[-1]
+            #    complete_commands = []
             #print("complete_commands AFTER assigning current partial:", complete_commands)
             #print("current_partial", current_partial)
 
             ##print("Found partial command from merge_json_arrays")
             #print(3)
-            return complete_commands, current_partial
+            #print('CC')
+            #return complete_commands, current_partial
         except Exception as e:
             ##print("Failed to find partial command from merge_json_arrays")
             ##print(e)
@@ -93,6 +98,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 current_partial = complete_commands[-1]
                 complete_commands = []
             #print(4)
+            print('DD')
             return complete_commands, current_partial
         except Exception as e:
             #print("Failed to parse using loads")
@@ -108,8 +114,9 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
 
             #print("parsed, num complete commands:", num_commands)
             if len(complete_commands) > 0:
+                print('EE')
                 return complete_commands, None
- 
+            print('FF')
             return complete_commands, current_partial
         except Exception as e:
             #print("Failed to parse using loads")
@@ -129,6 +136,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             ##print("complete_commands before assigning current partial:", complete_commands)
             ##print("Found partial command from merge_json_arrays")
             #print(5)
+            print('GG')
             return complete_commands, current_partial
         except Exception as e:
             ##print("Failed to find partial command from merge_json_arrays")
@@ -147,6 +155,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 current_partial = complete_commands[-1]
                 complete_commands = []
             #print(6)
+            print('HH')
             return complete_commands, current_partial
         except Exception:
             pass
@@ -160,6 +169,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                 current_partial = complete_commands[-1]
                 complete_commands = []
             #print(7)
+            print('II')
             return complete_commands, current_partial
         except Exception:
             # if ends in ']', then may be end of command list
@@ -177,6 +187,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
                         current_partial = complete_commands[-1]
                         complete_commands = []
                     #print(7)
+                    print('JJ')
                     return complete_commands, current_partial
                 except Exception:
                     #print("\033[93m", end="")
@@ -192,6 +203,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             else:
                 complete_commands = []
             current_partial = parsed_data[-1]
+            print('KK')
             return complete_commands, current_partial
         except Exception:
             pass
@@ -199,6 +211,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
         try:
             complete_commands = json.loads(buffer + "]")
             num_commands = len(complete_commands)
+            print("LL")
             return complete_commands, None
         except Exception:
             # If parsing fails, return an empty list of commands and None as partial
@@ -213,6 +226,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
             else:
                 complete_commands = []
             current_partial = parsed_data[-1]
+            print("MM")
             return complete_commands, current_partial
         except Exception:
             # If parsing fails, return an empty list of commands and None as partial
@@ -221,6 +235,7 @@ def parse_streaming_commands(buffer: str) -> Tuple[List[Dict[str, Any]], str]:
     if not isinstance(current_partial, dict):
         current_partial = None
     #print(10)
+    print("NN")
     return complete_commands, current_partial
 
 def invalid_start_format(str):
