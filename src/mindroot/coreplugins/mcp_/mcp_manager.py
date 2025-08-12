@@ -796,6 +796,84 @@ class MCPManager:
             print(f"Error connecting to {name}: {e}")
             return False
 
+    async def test_local_server_capabilities(self, name: str, command: str, args: List[str], env: Dict[str, str]) -> Dict[str, Any]:
+        """Test connection to a local MCP server and return its capabilities.
+        
+        This method creates a temporary server, connects to it, extracts capabilities,
+        and cleans up. It follows the same pattern as the working catalog system.
+        
+        Args:
+            name: Display name for the server (for error messages)
+            command: Command to run the MCP server
+            args: Arguments for the command
+            env: Environment variables
+            
+        Returns:
+            Dict containing success status, message, and capabilities (tools, resources, prompts)
+            
+        Raises:
+            Exception: If MCP SDK is not available or connection fails
+        """
+        if not MCP_AVAILABLE:
+            raise ImportError("MCP SDK not installed. Run: pip install mcp")
+        
+        if not command:
+            raise ValueError("Command is required for local servers")
+        
+        # Generate unique temporary server name
+        temp_server_name = f"temp_local_test_{uuid.uuid4().hex[:8]}"
+        
+        try:
+            # Create temporary server configuration (following catalog pattern)
+            temp_server = MCPServer(
+                name=temp_server_name,
+                description=f"Temporary local server for testing {name}",
+                command=command,
+                args=args,
+                env=env,
+                transport="stdio",  # Explicitly set stdio transport
+                # Explicitly do NOT set url field for local servers
+            )
+            
+            print(f"DEBUG: test_local_server_capabilities: Created temp server {temp_server_name}")
+            
+            # Add temporary server to MCP manager
+            self.add_server(temp_server_name, temp_server)
+            
+            # Connect to server (this will use stdio connection)
+            success = await self.connect_server(temp_server_name)
+            if not success:
+                raise Exception("Failed to connect to local server")
+            
+            print(f"DEBUG: test_local_server_capabilities: Connected to {temp_server_name}")
+            
+            # Get server capabilities
+            server = self.servers[temp_server_name]
+            tools = server.capabilities.get("tools", [])
+            resources = server.capabilities.get("resources", [])
+            prompts = server.capabilities.get("prompts", [])
+            
+            print(f"DEBUG: test_local_server_capabilities: Found {len(tools)} tools, {len(resources)} resources, {len(prompts)} prompts")
+            
+            return {
+                "success": True,
+                "message": f"Successfully connected to local server. Found {len(tools)} tools, {len(resources)} resources, {len(prompts)} prompts.",
+                "tools": tools,
+                "resources": resources,
+                "prompts": prompts
+            }
+            
+        finally:
+            # Clean up temporary server
+            try:
+                if temp_server_name in self.sessions:
+                    await self.disconnect_server(temp_server_name)
+                if temp_server_name in self.servers:
+                    self.remove_server(temp_server_name)
+                print(f"DEBUG: test_local_server_capabilities: Cleaned up {temp_server_name}")
+            except Exception as cleanup_error:
+                print(f"Error cleaning up temporary server {temp_server_name}: {cleanup_error}")
+
     async def disconnect_server(self, name: str) -> bool:
         """Disconnect from an MCP server"""
         if name in self.sessions:

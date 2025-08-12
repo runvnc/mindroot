@@ -29,6 +29,12 @@ class McpTestRemoteRequest(BaseModel):
     url: str
     name: Optional[str] = None
 
+class McpTestLocalRequest(BaseModel):
+    name: str
+    command: str
+    args: List[str] = []
+    env: Dict[str, str] = {}
+
 class McpCompleteOAuthRequest(BaseModel):
     server_name: str
     code: str
@@ -152,6 +158,35 @@ async def publish_mcp_server(request: McpServerPublishRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/mcp/test-local")
+async def test_local_mcp_server(request: McpTestLocalRequest):
+    """Test connection to a local MCP server and list its capabilities."""
+    try:
+        # Get the MCP manager service
+        mcp_manager = await service_manager.enhanced_mcp_manager_service(context=None)
+        if not mcp_manager:
+            raise HTTPException(status_code=500, detail="MCP manager service not available")
+        
+        print(f"DEBUG: test_local_mcp_server: Testing local server {request.name} with command {request.command}")
+        
+        # Use the new testing method from MCPManager
+        result = await mcp_manager.test_local_server_capabilities(
+            name=request.name,
+            command=request.command,
+            args=request.args,
+            env=request.env
+        )
+        
+        print(f"DEBUG: test_local_mcp_server: Result: {result}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Local server test failed: {str(e)}")
 
 @router.post("/mcp/test-remote")
 async def test_remote_mcp_server(request: McpTestRemoteRequest):

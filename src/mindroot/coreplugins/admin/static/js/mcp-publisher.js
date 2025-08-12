@@ -282,54 +282,24 @@ class McpPublisher extends BaseEl {
       throw new Error('Command is required for local servers');
     }
 
-    // Create temporary MCP server to test connection and get tools
-    const tempServer = {
-      name: `temp_${Date.now()}`,
-      description: 'Temporary server for tool discovery',
-      command: this.localConfig.command,
-      args: this.localConfig.args,
-      env: this.localConfig.env,
-      transport: 'stdio'
-    };
-
-    const response = await fetch('/admin/mcp/add', {
+    // Use the new dedicated endpoint for testing local servers
+    const response = await fetch('/admin/mcp/test-local', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tempServer)
+      body: JSON.stringify({
+        name: this.serverName,
+        command: this.localConfig.command,
+        args: this.localConfig.args,
+        env: this.localConfig.env
+      })
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create temporary server');
-    }
-
-    try {
-      // Connect to get capabilities
-      const connectResponse = await fetch('/admin/mcp/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server_name: tempServer.name })
-      });
-
-      if (!connectResponse.ok) {
-        throw new Error('Failed to connect to server');
-      }
-
-      // Get server info with capabilities
-      const listResponse = await fetch('/admin/mcp/list');
-      if (listResponse.ok) {
-        const data = await listResponse.json();
-        const server = data.data.find(s => s.name === tempServer.name);
-        if (server && server.capabilities && server.capabilities.tools) {
-          this.discoveredTools = server.capabilities.tools;
-        }
-      }
-    } finally {
-      // Clean up temporary server
-      await fetch('/admin/mcp/remove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server_name: tempServer.name })
-      });
+    const data = await response.json();
+    if (data.success) {
+      this.discoveredTools = data.tools || [];
+      this.success = data.message;
+    } else {
+      throw new Error(data.detail || 'Local server test failed');
     }
   }
 
