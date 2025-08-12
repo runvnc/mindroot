@@ -250,7 +250,7 @@ class RegistrySharedServices {
     }
     
     semanticItems.sort((a, b) => (a.distance_score || 1) - (b.distance_score || 1));
-    this.main.searchResults = [...semanticItems, ...this.main.searchResults];
+    this.main.searchResults = [...this.main.searchResults, ...semanticItems];
   }
 
   // === Installation Services ===

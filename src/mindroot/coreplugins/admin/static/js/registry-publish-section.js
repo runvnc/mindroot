@@ -69,7 +69,7 @@ class RegistryPublishSection {
         this.services.showToast(`Successfully published ${publishData.title}!`, 'success');
       } else {
         const errorData = await response.json();
-        this.services.showToast(errorData.detail || 'Publishing failed', 'error');
+        this.services.showToast(errorData.details || 'Publishing failed', 'error');
       }
     } catch (error) {
       this.services.showToast('Publishing failed: ' + error.message, 'error');
@@ -237,9 +237,11 @@ class RegistryPublishSection {
     }
 
     return html`
+     <div class="publish-details">
       ${this.renderGithubPublishing()}
       ${this.renderLocalPublishing()}
       ${this.renderMcpPublishing()}
+    </div>
     `;
   }
 
@@ -254,27 +256,29 @@ class RegistryPublishSection {
 
   renderGithubPublishing() {
     return html`
-      <div class="section">
-        <h3>Publish Plugin from GitHub</h3>
+      <details>
+        <summary>Publish Plugin from GitHub</summary>
         <div class="publish-form" style="max-width: 500px; display: flex; flex-direction: column; gap: 1rem;">
           <p>Enter the GitHub repository (e.g., user/repo) to publish a plugin directly to the registry.</p>
           <input type="text" placeholder="GitHub Repository (e.g., user/repo)" id="plugin-github-repo">
           <button class="primary" @click=${() => this.handlePublishPluginFromGithub()}>Publish from GitHub</button>
         </div>
-      </div>
+      </details>
     `;
   }
 
   renderLocalPublishing() {
     return html`
-      <div class="section">
-        <h3>Publish to Registry</h3>
+      <!-- <div class="section"> -->
+      <details>
+        <summary>Publish Agent</summary>
         ${this.renderOwnershipInfo()}
         <p>Select a local plugin or agent to publish to the registry:</p>
         
         ${this.renderPublishingStatus()}
         ${this.renderLocalAgents()}
-      </div>
+      </details>
+      <!-- </div> -->
     `;
   }
 
@@ -311,7 +315,7 @@ class RegistryPublishSection {
 
   renderLocalAgents() {
     return html`
-      <h4>Local Agents (${this.state.localAgents.length})</h4>
+        <h4>Local Agents (${this.state.localAgents.length})</h4>
       ${this.state.localAgents.length === 0 ? html`
         <p class="help-text">No local agents found. Create some agents first to publish them.</p>
       ` : html`
@@ -347,19 +351,25 @@ class RegistryPublishSection {
 
   renderMcpPublishing() {
     return html`
-      <div class="section">
+      <!-- <div class="section"> -->
+     <!-- <details>
+        <summary>
         <h3>MCP Server Registry</h3>
+        </summary>
         <mcp-registry-browser></mcp-registry-browser>
-      </div>
+      <!-- </div> 
+      </details> -->
       
-      <div class="section">
-        <h3>Publish New MCP Server</h3>
+      <!-- <div class="section"> -->
+      <details>
+        <summary>Publish New MCP Server</summary>
         <mcp-publisher
           .registryUrl=${this.state.registryUrl}
           .authToken=${this.state.authToken}
           .isLoggedIn=${this.state.isLoggedIn}
         ></mcp-publisher>
-      </div>
+      <!-- </div> -->
+    </details>
     `;
   }
 }

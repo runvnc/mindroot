@@ -571,3 +571,99 @@ h2, h3, h4 {
 .nav-category-content .tab-button.active:hover {
     background: rgba(255, 255, 255, 0.25);
 }
+
+
+.publish-details summary {
+  list-style: none;
+}
+
+/* Remove webkit default arrow */
+.publish-details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Add custom arrow using ::before pseudo-element */
+.publish-details summary::before {
+  content: '▶';
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+/* Rotate arrow when expanded */
+.publish-details details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+
+
+/* Override all radio buttons globally */
+input[type="radio"] {
+  /* Remove default appearance */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Size and positioning */
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  
+  /* Dark theme styling */
+  background-color: #2a2a2a;
+  border: 2px solid #4a4a4a;
+  border-radius: 50%;
+  
+  /* Smooth transitions */
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  /* Positioning for the inner dot */
+  position: relative;
+  vertical-align: middle;
+}
+
+/* Hover state */
+input[type="radio"]:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Checked state */
+input[type="radio"]:checked {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+/* Inner dot when checked */
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* Focus state for accessibility */
+input[type="radio"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Disabled state */
+input[type="radio"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type="radio"]:disabled:hover {
+  border-color: #4a4a4a;
+  box-shadow: none;
+}
+
+
+
