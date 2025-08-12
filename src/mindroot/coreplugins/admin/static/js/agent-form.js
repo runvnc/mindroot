@@ -257,7 +257,7 @@ class AgentForm extends BaseEl {
 
     .commands-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 12px;
     }
 
@@ -265,7 +265,7 @@ class AgentForm extends BaseEl {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 10px 15px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 6px;
@@ -280,13 +280,17 @@ class AgentForm extends BaseEl {
 
     .command-info {
       flex: 1;
-      margin-right: 12px;
+      margin-right: 20px;
+      min-width: 0; /* Allow flex item to shrink below content size */
       position: relative;
     }
 
     .command-name {
       color: #f0f0f0;
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tooltip-text {

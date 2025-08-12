@@ -138,7 +138,7 @@ details summary .material-icons {
 
 .commands-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 0.5rem;
     margin-top: 0.25rem;
 }
@@ -147,7 +147,7 @@ details summary .material-icons {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.35rem 0.5rem;
+    padding: 0.5rem 0.75rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
     cursor: pointer;
@@ -167,6 +167,9 @@ details summary .material-icons {
 
 .command-name {
     white-space: nowrap;
+    flex: 1;
+    margin-right: 1rem;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 0.9rem;

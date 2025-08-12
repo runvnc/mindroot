@@ -290,7 +290,8 @@ async def mcp_debug_connection(server_name: str, context=None):
         
         for tool in tools:
             tool_name = tool.get('name', 'unknown')
-            expected_cmd = f"mcp_{server_name}_{tool_name}"
+            #expected_cmd = f"mcp_{server_name}_{tool_name}"
+            expecte_cmd = "mcp_"+tool_name
             is_registered = expected_cmd in command_manager.functions
             tool_analysis.append({
                 "tool_name": tool_name,

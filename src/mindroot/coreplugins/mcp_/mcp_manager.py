@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from contextlib import AsyncExitStack
 from urllib.parse import parse_qs, urlparse
+import traceback
 
 import httpx
 from pydantic import BaseModel
@@ -182,8 +183,8 @@ class MCPManager:
         if not srv.transport_type:
             srv.transport_type = transport_type
             changed = True
-        if changed:
-            self.save_config()
+        #if changed:
+            #self.save_config()
         # Debug log
         try:
             print(f"DEBUG: _update_server_urls: name={name} provider={provider_url} transport={transport_url} type={transport_type}")
@@ -206,6 +207,8 @@ class MCPManager:
         )
         print("DEBUG: -------------------------------------------------------")
         print("DEBUG: OAuth provider server_url:", provider_url)
+
+        print("DEBUG: OAuth provider metadata:", metadata.dict())
         oauth_provider = OAuthClientProvider(
             server_url=provider_url,
             client_metadata=metadata,
@@ -213,6 +216,7 @@ class MCPManager:
             redirect_handler=lambda auth_url: self._handle_oauth_redirect(name, auth_url),
             callback_handler=lambda: self._handle_oauth_callback(name),
         )
+
         return oauth_provider
     
     def load_config(self):
@@ -230,7 +234,14 @@ class MCPManager:
         """Save server configurations to file"""
         try:
             # Use JSON-safe conversion to avoid 'AnyUrl is not serializable' errors
-            data = {name: self._server_to_jsonable(server) for name, server in self.servers.items()}
+            #data = {name: self._server_to_jsonable(server) for name, server in self.servers.items()}
+            #we need data as above but filter out anything with transport == 'http'
+            data = {}
+            for name, server in self.servers.items():
+                if server.transport != 'http':
+                    data[name] = self._server_to_jsonable(server)
+
+            print("DEBUG: Saving configuration to file:", self.config_file, "data:", data)
             with open(self.config_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
@@ -312,7 +323,7 @@ class MCPManager:
                             # Don't set status to error if we got this far - keep it connected
                             pass
                         
-                        self.save_config()
+                        #self.save_config()
                         print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
                         print(f"DEBUG: Persistent SSE connection established for {name}")
 
@@ -363,7 +374,7 @@ class MCPManager:
                             # Don't set status to error if we got this far - keep it connected
                             pass
                         
-                        self.save_config()
+                        #self.save_config()
                         print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
                         print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
                         print(f"DEBUG: Persistent StreamableHTTP connection established for {name}")
@@ -380,6 +391,7 @@ class MCPManager:
             print(f"ERROR: Persistent OAuth connection failed for {name}: {e}")
             import traceback
             traceback.print_exc()
+            t = traceback.format_exc()
             server.status = "error"
             self.save_config()
             raise
@@ -401,9 +413,10 @@ class MCPManager:
             return await self.connect_server(name)  # Fallback to regular connection
         
         print(f"DEBUG: Starting OAuth connection for {name}")
-        
+       
+
         # If already connected via background task, return success
-        if name in self.background_tasks and not self.background_tasks[name].done():
+        if False and name in self.background_tasks and not self.background_tasks[name].done():
             print(f"DEBUG: OAuth server {name} already connected via background task")
             return True
         
@@ -416,14 +429,13 @@ class MCPManager:
             # Start background task for persistent connection
             task = asyncio.create_task(self._persistent_oauth_connection(name))
             self.background_tasks[name] = task
-            
             await asyncio.sleep(2)
             
             # Check if connection was successful or OAuth flow started
             if name in self.sessions and server.status == "connected":
                 print(f"DEBUG: Background OAuth connection successful for {name}")
                 return True
-            elif server.status == "error":
+            elif False and server.status == "error":
                 print(f"DEBUG: Background OAuth connection failed for {name}")
                 # Check if the background task had an exception
                 if not task.done():
@@ -433,13 +445,14 @@ class MCPManager:
                 print(f"DEBUG: OAuth flow started for {name}, frontend should handle popup")
                 return False  # This will trigger the OAuth flow check in the calling code
             else:
-                print(f"DEBUG: Background OAuth connection failed for {name}")
+                print(f"DEBUG: (X) Background OAuth connection failed for {name}, {server.status} {self.sessions}")
                 return False
                 
         except Exception as e:
             server.status = "error"
+            t = traceback.format_exc()
             self.save_config()
-            print(f"Error starting OAuth connection for {name}: {e}")
+            print(f"Error starting OAuth connection for {name}: {e}\n{t}")
             return False
     
     async def _handle_oauth_redirect(self, server_name: str, auth_url: str) -> None:
@@ -771,10 +784,13 @@ class MCPManager:
                 except Exception as e:
                     print(f"Error getting capabilities for {name}: {e}")
                 
-                self.save_config()
+                #self.save_config()
                 return True
                 
         except Exception as e:
+            print("DEBUG: Error connecting to MCP server:", name, e)
+            import traceback
+            traceback.print_exc()
             server.status = "error"
             self.save_config()
             print(f"Error connecting to {name}: {e}")
@@ -806,7 +822,7 @@ class MCPManager:
                 
                 if name in self.servers:
                     self.servers[name].status = "disconnected"
-                    self.save_config()
+                    #self.save_config()
                 
                 return True
             except Exception as e:
@@ -835,7 +851,7 @@ class MCPManager:
     def add_server(self, name: str, server: MCPServer):
         """Add a new server configuration"""
         self.servers[name] = server
-        self.save_config()
+        #self.save_config()
     
     def remove_server(self, name: str):
         """Remove a server configuration"""

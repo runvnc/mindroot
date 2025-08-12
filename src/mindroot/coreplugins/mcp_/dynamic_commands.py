@@ -19,8 +19,9 @@ class MCPDynamicCommands:
         for tool in tools:
             try:
                 tool_name = tool.name
-                cmd_name = f"mcp_{server_name}_{tool_name}"
-                
+                #cmd_name = f"mcp_{server_name}_{tool_name}"
+                cmd_name = "mcp_"+tool_name
+ 
                 self.registered_commands[cmd_name] = server_name
                 
                 # Create wrapper function with closure to capture current values
@@ -150,3 +151,4 @@ Example:
     def get_registered_commands(self) -> List[str]:
         """Get list of registered command names"""
         return list(self.registered_commands.keys())
+

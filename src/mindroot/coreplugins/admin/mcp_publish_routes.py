@@ -354,7 +354,7 @@ async def complete_oauth_flow(request: McpCompleteOAuthRequest):
             raise HTTPException(status_code=400, detail="Failed to complete OAuth flow")
         
         # Wait a bit longer for the background task to complete the connection
-        await asyncio.sleep(3)
+        await asyncio.sleep(6)
         
         # Check if server is now connected
         if request.server_name in mcp_manager.servers:

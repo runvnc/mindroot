@@ -261,16 +261,16 @@ class RegistrySearchSection {
     return html`
       <div class="result-actions">
         ${isInstalled ? html`
-          <div class="installed-badge" title="${needsAuth ? 'Installed locally; OAuth authorization required' : 'Installed'}">
+          <div class="installed-badge" title="${needsAuth ? 'Installed locally; OAuth authorization required' : 'Connected'}">
             <span class="material-icons">check_circle</span> 
-            Installed
+            Connected
             ${needsAuth ? html`
               <span class="oauth-status needs-auth" title="OAuth authorization required">
                 <span class="material-icons">warning</span>
               </span>
             ` : ''}
           </div>
-          ${needsAuth ? html`
+          ${false && needsAuth ? html`
             <button class="success"
                     @click=${() => this.services.connectInstalledOAuthMcp(item)}
                     ?disabled=${this.state.loading}>
@@ -281,7 +281,7 @@ class RegistrySearchSection {
           <button class="success" 
                   @click=${() => this.installFromRegistry(item)} 
                   ?disabled=${this.state.loading}>
-            ${requiresOAuth ? 'Install & Connect' : 'Install'}
+            ${requiresOAuth ? 'Connect' : 'Install'}
           </button>
         `}
         ${item.github_url ? html`

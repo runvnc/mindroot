@@ -164,6 +164,7 @@ async def connect_mcp_server(request: McpServerRequest):
                 "message": f"MCP server '{request.server_name}' connected successfully."
             }
         else:
+            print(f"DEBUG: Failed to connect to MCP server '{request.server_name}'")
             raise HTTPException(
                 status_code=500, 
                 detail=f"Failed to connect to MCP server '{request.server_name}'. Check logs for details."
