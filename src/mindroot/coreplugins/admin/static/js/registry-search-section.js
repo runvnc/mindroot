@@ -54,12 +54,16 @@ class RegistrySearchSection {
 
   // === Helper Methods ===
 
-  isAgentInstalled(name) {
-    return (this.state.localAgents || []).some(a => a.name === name);
-  }
-
-  isMcpServerInstalled(name) {
-    return (this.main.localMcpServers || []).some(s => s.name === name);
+  getInstalledMcpServer(item) {
+    if (!this.main.localMcpServers || this.main.localMcpServers.length === 0) {
+      return null;
+    }
+    // Use a fuzzy match: check if the item's title contains the server's name.
+    // This handles cases where title is "Calculator Server" and name is "calculator".
+    const normalizedTitle = item.title.toLowerCase();
+    return this.main.localMcpServers.find(s => 
+      normalizedTitle.includes(s.name.toLowerCase())
+    );
   }
 
   // === Render Methods ===
@@ -142,27 +146,19 @@ class RegistrySearchSection {
   }
 
   renderSearchResult(item) {
-    const isMcp = item.category === 'mcp_server';
-    const isInstalled = isMcp ? this.isMcpServerInstalled(item.title) : this.isAgentInstalled(item.title);
-    const requiresOAuth = isMcp && item.data && item.data.auth_type === 'oauth2';
-    
-    // Check if OAuth server is properly configured
-    let oauthStatus = null;
-    if (requiresOAuth && isInstalled) {
-      const localServer = (this.main.localMcpServers || []).find(s => s.name === item.title);
-      oauthStatus = localServer && localServer.access_token ? 'authorized' : 'needs_auth';
-    }
+    const installedServer = item.category === 'mcp_server' ? this.getInstalledMcpServer(item) : null;
+    const isInstalled = !!installedServer;
 
     return html`
       <div class="result-item">
         ${this.renderResultAvatar(item)}
         <div class="result-content">
           ${this.renderSemanticBadge(item)}
-          ${this.renderResultHeader(item, requiresOAuth)}
+          ${this.renderResultHeader(item, item.data?.auth_type === 'oauth2')}
           <p class="result-description">${item.description}</p>
           ${this.renderResultMeta(item)}
           ${this.renderResultTags(item)}
-          ${this.renderResultActions(item, isInstalled, requiresOAuth, oauthStatus)}
+          ${this.renderResultActions(item, installedServer)}
         </div>
       </div>
     `;
@@ -255,41 +251,60 @@ class RegistrySearchSection {
     `;
   }
 
-  renderResultActions(item, isInstalled, requiresOAuth, oauthStatus) {
+  renderResultActions(item, installedServer) {
     const isMcp = item.category === 'mcp_server';
-    const needsAuth = isMcp && requiresOAuth && isInstalled && oauthStatus === 'needs_auth';
+    const isInstalled = !!installedServer;
+
     return html`
       <div class="result-actions">
-        ${isInstalled ? html`
-          <div class="installed-badge" title="${needsAuth ? 'Installed locally; OAuth authorization required' : 'Connected'}">
-            <span class="material-icons">check_circle</span> 
-            Connected
-            ${needsAuth ? html`
-              <span class="oauth-status needs-auth" title="OAuth authorization required">
-                <span class="material-icons">warning</span>
-              </span>
-            ` : ''}
-          </div>
-          ${false && needsAuth ? html`
-            <button class="success"
-                    @click=${() => this.services.connectInstalledOAuthMcp(item)}
-                    ?disabled=${this.state.loading}>
-              Connect
-            </button>
-          ` : ''}
-        ` : html`
-          <button class="success" 
-                  @click=${() => this.installFromRegistry(item)} 
-                  ?disabled=${this.state.loading}>
-            ${requiresOAuth ? 'Connect' : 'Install'}
-          </button>
-        `}
+        ${isMcp ? 
+          (isInstalled ? 
+            this.renderInstalledMcpActions(installedServer) : 
+            this.renderUninstalledMcpActions(item)
+          ) : 
+          (this.state.localPlugins.some(p => p.name === item.title) ? 
+            html`<div class="installed-badge"><span class="material-icons">check_circle</span> Installed</div>` : 
+            html`<button class="success" @click=${() => this.installFromRegistry(item)} ?disabled=${this.state.loading}>Install</button>`
+          )
+        }
         ${item.github_url ? html`
           <a href="${item.github_url}" target="_blank">
             <button>GitHub</button>
           </a>
         ` : ''}
       </div>
+    `;
+  }
+
+  renderInstalledMcpActions(server) {
+    return html`
+      <div class="installed-badge">
+        <span class="material-icons">check_circle</span> 
+        ${server.status === 'connected' ? 'Connected' : 'Installed'}
+      </div>
+      ${server.status === 'connected' ? html`
+        <button class="danger" @click=${() => this.main.toggleMcpServerConnection(server.name, false)} ?disabled=${this.state.loading}>
+          Disconnect
+        </button>
+      ` : html`
+        <button class="success" @click=${() => this.main.toggleMcpServerConnection(server.name, true)} ?disabled=${this.state.loading}>
+          Connect
+        </button>
+      `}
+      <button class="danger" @click=${() => this.main.removeMcpServer(server.name)} ?disabled=${this.state.loading}>
+        Remove
+      </button>
+    `;
+  }
+
+  renderUninstalledMcpActions(item) {
+    const requiresOAuth = item.data && item.data.auth_type === 'oauth2';
+    return html`
+      <button class="success" 
+              @click=${() => this.installFromRegistry(item)} 
+              ?disabled=${this.state.loading}>
+        ${requiresOAuth ? 'Connect' : 'Install'}
+      </button>
     `;
   }
 }

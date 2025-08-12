@@ -231,23 +231,40 @@ class MCPManager:
                 print(f"Error loading MCP config: {e}")
     
     def save_config(self):
-        """Save server configurations to file"""
+        """Save server configurations to file - LOCAL SERVERS ONLY"""
         try:
-            # Use JSON-safe conversion to avoid 'AnyUrl is not serializable' errors
-            #data = {name: self._server_to_jsonable(server) for name, server in self.servers.items()}
-            #we need data as above but filter out anything with transport == 'http'
             data = {}
             for name, server in self.servers.items():
-                if server.transport != 'http':
+                # Only save local servers (stdio transport with no URL)
+                if self._is_local_server(server):
                     data[name] = self._server_to_jsonable(server)
 
-            print("DEBUG: Saving configuration to file:", self.config_file, "data:", data)
+            print(f"DEBUG: Saving {len(data)} local servers to config (filtered out {len(self.servers) - len(data)} remote servers)")
             with open(self.config_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             print(f"Error saving MCP config: {e}")
             raise e
-
+    
+    def _is_local_server(self, server: MCPServer) -> bool:
+        """Determine if a server is local (should be persisted) or remote (session-only)"""
+        # Local servers use stdio transport and have no URL
+        return (server.transport == "stdio" and 
+                not server.url and 
+                not server.provider_url and 
+                not server.transport_url and
+                server.command)  # Local servers must have a command
+    
+    def mark_server_as_installed(self, name: str, registry_id: str = None):
+        """Mark server as installed (in-memory only for remote servers)"""
+        if name in self.servers:
+            self.servers[name].installed = True
+            if registry_id:
+                setattr(self.servers[name], 'registry_id', registry_id)
+            
+            # Only save to config if it's a local server
+            if self._is_local_server(self.servers[name]):
+                self.save_config()
     async def _persistent_oauth_connection(self, name: str) -> None:
         """Background task to maintain persistent OAuth connection."""
         server = self.servers[name]
@@ -677,7 +694,9 @@ class MCPManager:
         
         if success:
             server.installed = True
-            self.save_config()
+            # Only save config for local servers
+            if self._is_local_server(server):
+                self.save_config()
         
         return success
 
@@ -784,7 +803,10 @@ class MCPManager:
                 except Exception as e:
                     print(f"Error getting capabilities for {name}: {e}")
                 
-                #self.save_config()
+                # Only save config for local servers
+                if self._is_local_server(server):
+                    self.save_config()
+                
                 return True
                 
         except Exception as e:
@@ -929,8 +951,9 @@ class MCPManager:
     def add_server(self, name: str, server: MCPServer):
         """Add a new server configuration"""
         self.servers[name] = server
-        #self.save_config()
-    
+        # Only save config for local servers
+        if self._is_local_server(server):
+            self.save_config()    
     def remove_server(self, name: str):
         """Remove a server configuration"""
         if name in self.servers:

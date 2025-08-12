@@ -267,11 +267,18 @@ async def install_registry_server(request: RegistryServerInstallRequest):
             # Success - server is connected
             tools_count = len(server.capabilities.get("tools", []))
             
+            # Mark as installed (will only save to config if local)
+            mcp_manager.mark_server_as_installed(server_name, request.registry_id)
+            is_local = mcp_manager._is_local_server(server)
+            
             return {
                 "success": True,
-                "message": f"Successfully installed and connected to remote MCP server '{server_name}'. Found {tools_count} tools.",
+                "message": f"Successfully installed '{server_name}' with {tools_count} tools.",
                 "server_name": server_name,
-                "tools_count": tools_count
+                "tools_count": tools_count,
+                "server_type": "local" if is_local else "remote",
+                "persisted": is_local,
+                "installed": True
             }
             
         elif server_info["server_type"] == "local":
@@ -307,11 +314,18 @@ async def install_registry_server(request: RegistryServerInstallRequest):
                 server = enhanced_mcp_manager.servers[server_name]
                 tools_count = len(server.capabilities.get("tools", []))
                 
+                # Mark as installed (will only save to config if local)
+                enhanced_mcp_manager.mark_server_as_installed(server_name, request.registry_id)
+                is_local = enhanced_mcp_manager._is_local_server(server)
+                
                 return {
                     "success": True,
-                    "message": f"Successfully installed and connected to local MCP server '{server_name}'. Found {tools_count} tools.",
+                    "message": f"Successfully installed '{server_name}' with {tools_count} tools.",
                     "server_name": server_name,
-                    "tools_count": tools_count
+                    "tools_count": tools_count,
+                    "server_type": "local" if is_local else "remote",
+                    "persisted": is_local,
+                    "installed": True
                 }
                 
             except Exception as e:
@@ -376,6 +390,36 @@ async def complete_registry_oauth(server_name: str, code: str, state: Optional[s
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"OAuth completion failed: {str(e)}")
 
+@router.get("/mcp/registry/installation-status")
+async def get_installation_status():
+    """Get installation status of all registry servers."""
+    try:
+        mcp_manager = await service_manager.enhanced_mcp_manager_service()
+        if not mcp_manager:
+            return {"success": False, "installed_servers": []}
+        
+        installed_servers = []
+        for name, server in mcp_manager.servers.items():
+            # Include servers with registry_id OR servers that are marked as installed
+            has_registry_id = hasattr(server, 'registry_id') and server.registry_id
+            is_installed = hasattr(server, 'installed') and server.installed
+            
+            if has_registry_id or is_installed:
+                installed_servers.append({
+                    "registry_id": getattr(server, 'registry_id', None),
+                    "server_name": name,
+                    "status": server.status,
+                    "server_type": "local" if mcp_manager._is_local_server(server) else "remote",
+                    "persisted": mcp_manager._is_local_server(server),
+                    "tools_count": len(server.capabilities.get("tools", []))
+                })
+        
+        return {"success": True, "installed_servers": installed_servers}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "installed_servers": [], "error": str(e)}
+
 @router.get("/mcp/registry/categories")
 async def get_registry_categories():
     """Get available MCP server categories from the registry."""
@@ -427,3 +471,25 @@ async def get_registry_categories():
             "success": True,
             "categories": ["utilities", "development", "database", "communication", "ai", "automation"]
         }
+
+@router.post("/mcp/registry/mark-installed")
+async def mark_server_installed(server_name: str, registry_id: str = None):
+    """Manually mark a server as installed (for testing/fixing)."""
+    try:
+        mcp_manager = await service_manager.enhanced_mcp_manager_service()
+        if not mcp_manager:
+            raise HTTPException(status_code=500, detail="MCP manager service not available")
+        
+        if server_name not in mcp_manager.servers:
+            raise HTTPException(status_code=404, detail=f"Server '{server_name}' not found")
+        
+        mcp_manager.mark_server_as_installed(server_name, registry_id)
+        
+        return {
+            "success": True,
+            "message": f"Server '{server_name}' marked as installed"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
