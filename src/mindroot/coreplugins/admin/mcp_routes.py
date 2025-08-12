@@ -20,8 +20,19 @@ router = APIRouter(
     dependencies=[requires_role('admin')]
 )
 
+class McpLocalTestRequest(BaseModel):
+    name: str
+    command: str
+    args: List[str] = []
+    env: Dict[str, str] = {}
+    secrets: Optional[Dict[str, str]] = None
+
 class McpServerRequest(BaseModel):
     server_name: str
+
+class McpConnectRequest(BaseModel):
+    server_name: str
+    secrets: Optional[Dict[str, str]] = None
 
 class McpServerAddRequest(BaseModel):
     name: str
@@ -151,13 +162,23 @@ async def remove_mcp_server(request: McpServerRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/mcp/connect")
-async def connect_mcp_server(request: McpServerRequest):
+async def connect_mcp_server(request: McpConnectRequest):
     """Connect to an MCP server."""
     if not mcp_manager:
         raise HTTPException(status_code=501, detail="MCP Plugin not available")
     
+    # Persist secrets if provided
+    if request.secrets:
+        if request.server_name in mcp_manager.servers:
+            server = mcp_manager.servers[request.server_name]
+            if server.secrets is None:
+                server.secrets = {}
+            server.secrets.update(request.secrets)
+            # This will save the updated server config, including secrets
+            mcp_manager.save_config()
+
     try:
-        success = await mcp_manager.connect_server(request.server_name)
+        success = await mcp_manager.connect_server(request.server_name, secrets=request.secrets)
         if success:
             return {
                 "success": True, 

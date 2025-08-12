@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from contextlib import AsyncExitStack
+import re
 from urllib.parse import parse_qs, urlparse
 import traceback
 
@@ -39,6 +40,32 @@ except ImportError:
     AnyUrl = None
     MCP_AVAILABLE = False
 
+def _substitute_secrets(config_item: Any, secrets: Dict[str, str]) -> Any:
+    if not secrets or config_item is None:
+        return config_item
+
+    if isinstance(config_item, str):
+        # Find all placeholders like <SECRET_NAME> or ${SECRET_NAME}
+        # This regex captures the name inside the brackets/braces
+        placeholder_keys = re.findall(r'<([A-Z0-9_]+)>|\${([A-Z0-9_]+)}', config_item)
+        # Flatten list of tuples and remove empty matches
+        keys_to_replace = [key for tpl in placeholder_keys for key in tpl if key]
+
+        temp_item = config_item
+        for key in keys_to_replace:
+            if key in secrets:
+                # Replace both placeholder formats
+                temp_item = temp_item.replace(f'<{key}>', secrets[key])
+                temp_item = temp_item.replace(f'${{{key}}}', secrets[key])
+        return temp_item
+
+    if isinstance(config_item, list):
+        return [_substitute_secrets(item, secrets) for item in config_item]
+
+    if isinstance(config_item, dict):
+        return {k: _substitute_secrets(v, secrets) for k, v in config_item.items()}
+
+    return config_item
 
 
 
@@ -73,6 +100,7 @@ class MCPServer(BaseModel):
     token_expires_at: Optional[str] = None  # ISO format datetime string
     
     status: str = "disconnected"  # connected, disconnected, error
+    secrets: Optional[Dict[str, str]] = None
     capabilities: Dict[str, Any] = {}
     
     # Installation config (Enhanced features)
@@ -700,7 +728,7 @@ class MCPManager:
         
         return success
 
-    async def connect_server(self, name: str) -> bool:
+    async def connect_server(self, name: str, secrets: Optional[Dict[str, str]] = None) -> bool:
         """Connect to an MCP server"""
         print("Connecting to MCP server:", name)
         if name not in self.servers:
@@ -724,11 +752,22 @@ class MCPManager:
         
         try:
             if server.transport == "stdio":
+                import copy
+
+                # The final environment is constructed from stored secrets, updated with any session secrets.
+                # The `env` block in the config is only for discovering keys on the frontend.
+                final_env = (server.secrets or {}).copy()
+                if secrets:
+                    final_env.update(secrets)
+
+                final_command = _substitute_secrets(server.command, final_env)
+                final_args = _substitute_secrets(copy.deepcopy(server.args), final_env)
+
                 # Create server parameters
                 server_params = StdioServerParameters(
-                    command=server.command,
-                    args=server.args,
-                    env=server.env
+                    command=final_command,
+                    args=final_args,
+                    env=final_env  # Use the constructed environment
                 )
                 
                 # Create exit stack for cleanup
@@ -818,7 +857,7 @@ class MCPManager:
             print(f"Error connecting to {name}: {e}")
             return False
 
-    async def test_local_server_capabilities(self, name: str, command: str, args: List[str], env: Dict[str, str]) -> Dict[str, Any]:
+    async def test_local_server_capabilities(self, name: str, command: str, args: List[str], env: Dict[str, str], secrets: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """Test connection to a local MCP server and return its capabilities.
         
         This method creates a temporary server, connects to it, extracts capabilities,
@@ -829,6 +868,7 @@ class MCPManager:
             command: Command to run the MCP server
             args: Arguments for the command
             env: Environment variables
+            secrets: A dictionary of secrets to substitute into placeholders.
             
         Returns:
             Dict containing success status, message, and capabilities (tools, resources, prompts)
@@ -850,9 +890,9 @@ class MCPManager:
             temp_server = MCPServer(
                 name=temp_server_name,
                 description=f"Temporary local server for testing {name}",
-                command=command,
+                command=command,  # Command and args can still have placeholders
                 args=args,
-                env=env,
+                env=secrets or {},  # Use the provided secrets as the definitive environment for the test
                 transport="stdio",  # Explicitly set stdio transport
                 # Explicitly do NOT set url field for local servers
             )
@@ -863,7 +903,7 @@ class MCPManager:
             self.add_server(temp_server_name, temp_server)
             
             # Connect to server (this will use stdio connection)
-            success = await self.connect_server(temp_server_name)
+            success = await self.connect_server(temp_server_name, secrets=secrets)
             if not success:
                 raise Exception("Failed to connect to local server")
             

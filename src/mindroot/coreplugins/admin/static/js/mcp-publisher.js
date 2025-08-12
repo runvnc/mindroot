@@ -17,7 +17,9 @@ class McpPublisher extends BaseEl {
     oauthWindow: { type: Object },
     registryUrl: { type: String },
     authToken: { type: String },
-    isLoggedIn: { type: Boolean }
+    isLoggedIn: { type: Boolean },
+    requiredPlaceholders: { type: Array },
+    placeholderValues: { type: Object }
   };
 
   static styles = css`
@@ -216,6 +218,8 @@ class McpPublisher extends BaseEl {
     this.registryUrl = '';
     this.authToken = '';
     this.isLoggedIn = false;
+    this.requiredPlaceholders = [];
+    this.placeholderValues = {};
     
     // Listen for OAuth callback messages
     window.addEventListener('message', this.handleOAuthCallback.bind(this));
@@ -246,10 +250,25 @@ class McpPublisher extends BaseEl {
         args: config.args || [],
         env: config.env || {}
       };
+      this.scanForEnvKeys();
       this.error = '';
     } catch (error) {
       this.error = 'Invalid JSON configuration';
     }
+  }
+
+  scanForEnvKeys() {
+    // Treat all keys in the 'env' object as secrets that need values.
+    this.requiredPlaceholders = this.localConfig.env ? Object.keys(this.localConfig.env) : [];
+
+    // Reset values for placeholders that no longer exist
+    const newValues = {};
+    this.requiredPlaceholders.forEach(p => {
+      if (this.placeholderValues[p]) {
+        newValues[p] = this.placeholderValues[p];
+      }
+    });
+    this.placeholderValues = newValues;
   }
 
   async discoverTools() {
@@ -290,7 +309,8 @@ class McpPublisher extends BaseEl {
         name: this.serverName,
         command: this.localConfig.command,
         args: this.localConfig.args,
-        env: this.localConfig.env
+        env: this.localConfig.env,
+        secrets: this.placeholderValues
       })
     });
 
@@ -651,6 +671,7 @@ class McpPublisher extends BaseEl {
           </div>
 
           ${this.serverType === 'local' ? this.renderLocalConfig() : this.renderRemoteConfig()}
+          ${this.serverType === 'local' && this.requiredPlaceholders.length > 0 ? this.renderPlaceholderInputs() : ''}
 
           <div class="form-row">
             <button @click=${this.discoverTools} ?disabled=${this.loading} class="primary">
@@ -667,23 +688,44 @@ class McpPublisher extends BaseEl {
   renderLocalConfig() {
     const exampleConfig = {
       command: "npx",
-      args: ["@modelcontextprotocol/server-filesystem", "/path/to/files"],
-      env: {}
+      args: ["-y", "slack-mcp-server@latest"],
+      env: {
+        "SLACK_MCP_XOXP_TOKEN": "xoxp-YOUR-TOKEN-HERE"
+      }
     };
 
     return html`
       <div class="form-group">
         <label>Local Server Configuration (JSON)</label>
-        <textarea @input=${this.handleLocalConfigChange}
-                 placeholder="Enter JSON configuration...">
-        </textarea>
+        <textarea @input=${this.handleLocalConfigChange} placeholder="Enter JSON configuration...">${JSON.stringify(this.localConfig, null, 2)}</textarea>
         <div class="help-text">
+          <strong style='color: #ffc107;'>Warning:</strong> Do not paste real secrets here. Use placeholder values. The form below will prompt for the actual secrets, which are not stored in this text block.
+        </div>
+        <div class="help-text" style="margin-top: 1rem;">
           Configure the command, arguments, and environment variables for your local MCP server.
         </div>
         <div class="json-example">
 Example:
 ${JSON.stringify(exampleConfig, null, 2)}
         </div>
+      </div>
+    `;
+  }
+
+  renderPlaceholderInputs() {
+     return html`
+      <div class="section" style="margin-top: 1rem;">
+        <h4>Provide Environment Variables</h4>
+        <p class="help-text">Provide values for the environment variables found in your configuration. These values are not published to the registry but are stored locally for convenience.</p>
+        ${this.requiredPlaceholders.map(placeholder => html`
+          <div class="form-group">
+            <label for="placeholder-${placeholder}">${placeholder}</label>
+            <input type="password"
+                   id="placeholder-${placeholder}"
+                   .value=${this.placeholderValues[placeholder] || ''}
+                   @input=${e => this.placeholderValues = { ...this.placeholderValues, [placeholder]: e.target.value }} autocomplete="off">
+          </div>
+        `)}
       </div>
     `;
   }

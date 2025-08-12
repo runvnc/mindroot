@@ -12,6 +12,9 @@ class RegistryManager extends RegistryManagerBase {
     super();
     this.localMcpServers = [];
     this.searchTimeout = null;
+    this.isSecretModalOpen = false;
+    this.serverForSecrets = null;
+    this.placeholderValues = {};
     
     // Initialize shared state
     this.sharedState = {
@@ -58,13 +61,46 @@ class RegistryManager extends RegistryManagerBase {
   // === MCP Server Management (kept in main component for now) ===
 
   async toggleMcpServerConnection(serverName, connect) {
+    if (!connect) {
+      // Disconnecting doesn't require secrets, so proceed directly
+      return this.performConnectionToggle(serverName, false);
+    }
+
+    // Find the full server definition
+    const server = this.localMcpServers.find(s => s.name === serverName);
+    if (!server) {
+      this.showToast(`Error: Could not find local server definition for '${serverName}'.`, 'error');
+      return;
+    }
+
+    // Scan for placeholders
+    const configString = JSON.stringify(server);
+    const placeholderRegex = /<([A-Z0-9_]+)>|\${([A-Z0-9_]+)}/g;
+    const placeholders = new Set();
+    let match;
+    while ((match = placeholderRegex.exec(configString)) !== null) {
+      placeholders.add(match[1] || match[2]);
+    }
+
+    if (placeholders.size > 0) {
+      // Placeholders found, open modal to ask for secrets
+      this.serverForSecrets = { name: serverName, placeholders: Array.from(placeholders) };
+      this.placeholderValues = {};
+      this.isSecretModalOpen = true;
+    } else {
+      // No placeholders, connect directly
+      await this.performConnectionToggle(serverName, true);
+    }
+  }
+
+  async performConnectionToggle(serverName, connect, secrets = null) {
     this.loading = true;
     const action = connect ? 'connect' : 'disconnect';
     try {
       const response = await fetch(`/admin/mcp/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server_name: serverName })
+        body: JSON.stringify({ server_name: serverName, secrets })
       });
       if (response.ok) {
         this.showToast(`Server '${serverName}' ${action}ed successfully.`, 'success');
@@ -78,6 +114,13 @@ class RegistryManager extends RegistryManagerBase {
     } finally {
       this.loading = false;
     }
+  }
+
+  async handleSecretSubmit() {
+    const { name } = this.serverForSecrets;
+    await this.performConnectionToggle(name, true, this.placeholderValues);
+    this.isSecretModalOpen = false;
+    this.serverForSecrets = null;
   }
 
   async removeMcpServer(serverName) {
@@ -109,9 +152,35 @@ class RegistryManager extends RegistryManagerBase {
     return html`
       <div class="registry-manager">
         ${this.renderToasts()}
+        ${this.isSecretModalOpen ? this.renderSecretPromptModal() : ''}
         ${this.authSection.renderHeader()}
         ${this.renderTabs()}
         ${this.renderContent()}
+      </div>
+    `;
+  }
+
+  renderSecretPromptModal() {
+    if (!this.serverForSecrets) return '';
+
+    return html`
+      <div class="modal-overlay">
+        <div class="modal-content">
+          <h3>Provide Secrets for ${this.serverForSecrets.name}</h3>
+          <p class="help-text">Enter the required values to connect. These are not stored.</p>
+          <div class="form-group">
+            ${this.serverForSecrets.placeholders.map(p => html`
+              <label for="secret-${p}">${p}</label>
+              <input type="password" 
+                     id="secret-${p}" 
+                     @input=${e => this.placeholderValues[p] = e.target.value}>
+            `)}
+          </div>
+          <div class="modal-actions">
+            <button @click=${() => this.isSecretModalOpen = false}>Cancel</button>
+            <button class="primary" @click=${this.handleSecretSubmit}>Connect</button>
+          </div>
+        </div>
       </div>
     `;
   }
