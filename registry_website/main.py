@@ -387,6 +387,14 @@ def search_content(
         print("Top 10 semantic results:")
         for i, result in enumerate(semantic_results[:10]):
             print(f"  {i+1}. ID: {result['id']}, Distance: {result.get('distance', 'N/A'):.4f}, Title: {result.get('metadata', {}).get('title', 'N/A')}")
+        # we need to load the actual data for each semantic result from the database based on id
+        semantic_ids = [int(result['id']) for result in semantic_results]
+        semantic_records = db.query(Content).filter(Content.id.in_(semantic_ids)).all()
+        # now we need to merge the semantic results with the actual content data as the .data field
+        for record in semantic_records:
+            # get the corresponding semantic result
+            semantic_result = next((res for res in semantic_results if res['id'] == str(record.id)), None)
+            semantic_result['data'] = record.data
     
     return {
         "results": db_results,

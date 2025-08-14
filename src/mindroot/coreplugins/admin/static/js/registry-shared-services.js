@@ -237,6 +237,7 @@ class RegistrySharedServices {
     
     for (const semanticResult of semanticResults) {
       if (!existingIds.has(semanticResult.id)) {
+        /*
         const semanticItem = {
           id: parseInt(semanticResult.id),
           title: semanticResult.metadata.title || 'Unknown',
@@ -244,8 +245,8 @@ class RegistrySharedServices {
           category: semanticResult.metadata.category || 'unknown',
           distance_score: semanticResult.distance,
           is_semantic: true
-        };
-        semanticItems.push(semanticItem);
+        }; */
+        semanticItems.push(semanticResult);
       }
     }
     

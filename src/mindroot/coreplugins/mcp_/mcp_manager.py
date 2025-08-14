@@ -765,14 +765,17 @@ class MCPManager:
                 # Combine stored secrets with any provided for this session
                 all_secrets = (server.secrets or {}).copy()
                 if secrets:
-                    all_secrets.update(secrets)
+                    for k, v in secrets.items():
+                        if v is not None and v != "":
+                            all_secrets[k] = v
 
                 final_command = _substitute_secrets(server.command, all_secrets)
                 args_ = _substitute_secrets(copy.deepcopy(server.args), all_secrets)
                 env_ = _substitute_secrets(copy.deepcopy(server.env), all_secrets)
                 for key, value in all_secrets.items():
                     if key in env_:
-                        env_[key] = value
+                        if value is not None and value is not "":
+                            env_[key] = value
                 final_env = {k: v for k, v in env_.items() if v is not None}
                 final_args = [str(arg) for arg in args_ if arg is not None]
                 print("DEBUG: server secrets:", server.secrets)
