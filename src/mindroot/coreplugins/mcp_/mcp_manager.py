@@ -264,8 +264,12 @@ class MCPManager:
             data = {}
             for name, server in self.servers.items():
                 # Only save local servers (stdio transport with no URL)
+                print("Determining if server is local:", name, server.transport, server.url, server.provider_url, server.transport_url, server.command)
                 if self._is_local_server(server):
+                    print(f"DEBUG: Saving local server {name} to config")
                     data[name] = self._server_to_jsonable(server)
+                else:
+                    print(f"DEBUG: Skipping remote server {name} from config")
 
             print(f"DEBUG: Saving {len(data)} local servers to config (filtered out {len(self.servers) - len(data)} remote servers)")
             with open(self.config_file, 'w') as f:
@@ -754,20 +758,20 @@ class MCPManager:
             if server.transport == "stdio":
                 import copy
 
-                # The final environment is constructed from stored secrets, updated with any session secrets.
-                # The `env` block in the config is only for discovering keys on the frontend.
-                final_env = (server.secrets or {}).copy()
+                # Combine stored secrets with any provided for this session
+                all_secrets = (server.secrets or {}).copy()
                 if secrets:
-                    final_env.update(secrets)
+                    all_secrets.update(secrets)
 
-                final_command = _substitute_secrets(server.command, final_env)
-                final_args = _substitute_secrets(copy.deepcopy(server.args), final_env)
+                final_command = _substitute_secrets(server.command, all_secrets)
+                final_args = _substitute_secrets(copy.deepcopy(server.args), all_secrets)
+                final_env = _substitute_secrets(copy.deepcopy(server.env), all_secrets)
 
                 # Create server parameters
                 server_params = StdioServerParameters(
                     command=final_command,
                     args=final_args,
-                    env=final_env  # Use the constructed environment
+                    env=final_env
                 )
                 
                 # Create exit stack for cleanup
@@ -800,8 +804,8 @@ class MCPManager:
                     for tool in tools.tools:
                         print(f"  Tool: {tool.name} - {tool.description}")
                     
-                    resources = await session.list_resources()
-                    prompts = await session.list_prompts()
+                    #resources = await session.list_resources()
+                    #prompts = await session.list_prompts()
                     
                     # Safely serialize tools, resources, and prompts
                     try:
@@ -890,9 +894,9 @@ class MCPManager:
             temp_server = MCPServer(
                 name=temp_server_name,
                 description=f"Temporary local server for testing {name}",
-                command=command,  # Command and args can still have placeholders
+                command=command,
                 args=args,
-                env=secrets or {},  # Use the provided secrets as the definitive environment for the test
+                env=env,
                 transport="stdio",  # Explicitly set stdio transport
                 # Explicitly do NOT set url field for local servers
             )
@@ -938,7 +942,9 @@ class MCPManager:
 
     async def disconnect_server(self, name: str) -> bool:
         """Disconnect from an MCP server"""
+        print("Attempting to disconnect from MCP server:", name)
         if name in self.sessions:
+            print(f"DEBUG: Disconnecting from server {name} with session {self.sessions[name]}")
             try:
                 # Unregister dynamic commands
                 await self.dynamic_commands.unregister_server_tools(name)
@@ -962,12 +968,19 @@ class MCPManager:
                 
                 if name in self.servers:
                     self.servers[name].status = "disconnected"
-                    #self.save_config()
+                    self.save_config()
                 
                 return True
             except Exception as e:
                 print(f"Error disconnecting from {name}: {e}")
                 return False
+        else:
+            print(f"No active session found for {name}. Trying to disconnect with {name} as server name.")
+            if name in self.servers:
+                await self.dynamic_commands.unregister_server_tools(name)
+ 
+                self.servers[name].status = "disconnected"
+                self.save_config()
         return True
     
     async def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Any:

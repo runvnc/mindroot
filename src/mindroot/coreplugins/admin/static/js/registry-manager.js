@@ -15,6 +15,7 @@ class RegistryManager extends RegistryManagerBase {
     this.isSecretModalOpen = false;
     this.serverForSecrets = null;
     this.placeholderValues = {};
+    this.mcpInstallSecrets = {}; // New state for install-time secrets
     
     // Initialize shared state
     this.sharedState = {
@@ -64,6 +65,15 @@ class RegistryManager extends RegistryManagerBase {
     if (!connect) {
       // Disconnecting doesn't require secrets, so proceed directly
       return this.performConnectionToggle(serverName, false);
+    }
+
+    // Check for secrets from the inline form first
+    const inlineSecrets = this.mcpInstallSecrets[serverName];
+    const hasInlineSecrets = inlineSecrets && Object.keys(inlineSecrets).length > 0;
+
+    if (hasInlineSecrets) {
+        console.log(`[RegistryManager] Found inline secrets for ${serverName}, connecting directly.`);
+        return this.performConnectionToggle(serverName, true, inlineSecrets);
     }
 
     // Find the full server definition
@@ -121,6 +131,15 @@ class RegistryManager extends RegistryManagerBase {
     await this.performConnectionToggle(name, true, this.placeholderValues);
     this.isSecretModalOpen = false;
     this.serverForSecrets = null;
+  }
+
+  handleMcpInstallSecretChange(key, placeholder, value) {
+    console.log(`[RegistryManager] Secret input for key '${key}', placeholder '${placeholder}'`);
+    if (!this.mcpInstallSecrets[key]) {
+      this.mcpInstallSecrets[key] = {};
+    }
+    this.mcpInstallSecrets[key][placeholder] = value;
+    console.log('[RegistryManager] Current install secrets state:', JSON.stringify(this.mcpInstallSecrets));
   }
 
   async removeMcpServer(serverName) {

@@ -149,6 +149,8 @@ class RegistrySearchSection {
     const installedServer = item.category === 'mcp_server' ? this.getInstalledMcpServer(item) : null;
     const isInstalled = !!installedServer;
 
+    console.log('[SearchSection] Rendering item:', JSON.stringify(item, null, 2));
+
     return html`
       <div class="result-item">
         ${this.renderResultAvatar(item)}
@@ -158,6 +160,7 @@ class RegistrySearchSection {
           <p class="result-description">${item.description}</p>
           ${this.renderResultMeta(item)}
           ${this.renderResultTags(item)}
+          ${this.renderMcpSecretsForm(item, isInstalled, installedServer)}
           ${this.renderResultActions(item, installedServer)}
         </div>
       </div>
@@ -272,6 +275,67 @@ class RegistrySearchSection {
             <button>GitHub</button>
           </a>
         ` : ''}
+      </div>
+    `;
+  }
+
+  renderMcpSecretsForm(item, isInstalled, installedServer) {
+    try {
+      const isUninstalledLocal = !isInstalled && item.category === 'mcp_server' && item.data?.server_type === 'local';
+      const isInstalledLocal = isInstalled && installedServer && installedServer.status !== 'connected' && installedServer.server_type === 'local';
+
+      if (!isInstalled) { //!isUninstalledLocal && !isInstalledLocal) {
+
+        console.log('No env vars form because: ',{isUninstalledLocal, isInstalledLocal, item})
+        return '';
+      }
+      console.log("SearchSection] Rendering secrets form for item:", item.title)
+
+      //const configSource = isInstalledLocal ? installedServer : item.data;
+      const configSource = isInstalled : item.data;
+ 
+      const configString = JSON.stringify(configSource);
+      const placeholderRegex = /<([A-Z0-9_]+)>/g;
+      const placeholders = new Set();
+
+      if (configSource.env) {
+        Object.keys(configSource.env).forEach(key => placeholders.add(key));
+      }
+
+      let match;
+      while ((match = placeholderRegex.exec(configString)) !== null) {
+        placeholders.add(match[1]);
+      }
+
+      const requiredPlaceholders = Array.from(placeholders);
+      if (requiredPlaceholders.length === 0) return '';
+
+      const serverName = isInstalledLocal ? installedServer.name : item.title;
+      console.log(`[SearchSection] Rendering secrets form for '${serverName}' with placeholders:`, requiredPlaceholders);
+      return html`
+        <div class="mcp-secrets-form section" style="margin-top: 1rem; background: rgba(0,0,0,0.2);">
+          <h5 class="secrets-title">Required Environment Variables</h5>
+          <p class="help-text">Provide values to be used on ${isInstalledLocal ? 'connect' : 'install'}. These are not published.</p>
+          ${requiredPlaceholders.map(p => this.renderSecretInput(item, p, serverName))}
+        </div>
+      `;
+    } catch (error) {
+      console.error('[SearchSection] Error rendering MCP secrets form:', error);
+      return html``
+      //return html`<div class="error">Error loading secrets form. Please check the console.</div>`;
+    }
+  }
+
+  renderSecretInput(item, placeholder, serverName) {
+    const key = serverName || item.id;
+    const secretsForItem = this.main.mcpInstallSecrets[key] || {};
+    return html`
+      <div class="form-group secret-input-group">
+        <label for="secret-install-${item.id}-${placeholder}">${placeholder}</label>
+        <input type="password" 
+               id="secret-install-${item.id}-${placeholder}"
+               .value=${secretsForItem[placeholder] || ''}
+               @input=${e => this.main.handleMcpInstallSecretChange(key, placeholder, e.target.value)} autocomplete="off">
       </div>
     `;
   }

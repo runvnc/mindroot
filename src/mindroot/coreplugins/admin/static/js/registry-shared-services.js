@@ -291,14 +291,23 @@ class RegistrySharedServices {
   }
 
   async installMcpServer(item) {
+    // Retrieve secrets from the main component's state
+    const secrets = this.main.mcpInstallSecrets[item.id] || null;
+    console.log(`[SharedServices] Installing MCP Server '${item.title}' (ID: ${item.id}) with secrets:`, secrets ? Object.keys(secrets) : 'None');
+
     try {
       if (item.data && item.data.auth_type === 'oauth2') {
         await this.installOAuthMcpServer(item);
       } else {
-        const response = await fetch('/admin/mcp/add', {
+        // Use the new install endpoint that accepts secrets
+        const response = await fetch('/admin/mcp/install', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item.data)
+          body: JSON.stringify({
+            registry_id: item.id,
+            registry_url: this.state.registryUrl,
+            secrets: secrets
+          })
         });
         
         if (response.ok) {

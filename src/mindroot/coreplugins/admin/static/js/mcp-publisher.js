@@ -250,17 +250,30 @@ class McpPublisher extends BaseEl {
         args: config.args || [],
         env: config.env || {}
       };
-      this.scanForEnvKeys();
+      this.scanForRequiredSecrets();
       this.error = '';
     } catch (error) {
       this.error = 'Invalid JSON configuration';
     }
   }
 
-  scanForEnvKeys() {
-    // Treat all keys in the 'env' object as secrets that need values.
-    this.requiredPlaceholders = this.localConfig.env ? Object.keys(this.localConfig.env) : [];
+  scanForRequiredSecrets() {
+    const placeholders = new Set();
 
+    // 1. Add all keys from the 'env' object automatically.
+    if (this.localConfig.env) {
+      Object.keys(this.localConfig.env).forEach(key => placeholders.add(key));
+    }
+
+    // 2. Scan the entire configuration for <PLACEHOLDER> syntax.
+    const configString = JSON.stringify(this.localConfig);
+    const placeholderRegex = /<([A-Z0-9_]+)>/g;
+    let match;
+    while ((match = placeholderRegex.exec(configString)) !== null) {
+      placeholders.add(match[1]);
+    }
+
+    this.requiredPlaceholders = Array.from(placeholders);
     // Reset values for placeholders that no longer exist
     const newValues = {};
     this.requiredPlaceholders.forEach(p => {
