@@ -395,6 +395,10 @@ def search_content(
             # get the corresponding semantic result
             semantic_result = next((res for res in semantic_results if res['id'] == str(record.id)), None)
             semantic_result['data'] = record.data
+            # also copy all 'metadata' fields into the semantic result
+            for field, val in semantic_result['metadata']:
+                semantic_result[field] = val
+
     
     return {
         "results": db_results,
