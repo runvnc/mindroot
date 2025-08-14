@@ -42,9 +42,11 @@ except ImportError:
 
 def _substitute_secrets(config_item: Any, secrets: Dict[str, str]) -> Any:
     if not secrets or config_item is None:
+        print("DEBUG: No secrets to substitute or config_item is None, not substituting", config_item)
         return config_item
 
     if isinstance(config_item, str):
+        print("String")
         # Find all placeholders like <SECRET_NAME> or ${SECRET_NAME}
         # This regex captures the name inside the brackets/braces
         placeholder_keys = re.findall(r'<([A-Z0-9_]+)>|\${([A-Z0-9_]+)}', config_item)
@@ -60,9 +62,11 @@ def _substitute_secrets(config_item: Any, secrets: Dict[str, str]) -> Any:
         return temp_item
 
     if isinstance(config_item, list):
+        print("List")
         return [_substitute_secrets(item, secrets) for item in config_item]
 
     if isinstance(config_item, dict):
+        print("DEBUG: Substituting secrets in config_item (dict)")
         return {k: _substitute_secrets(v, secrets) for k, v in config_item.items()}
 
     return config_item
@@ -742,7 +746,7 @@ class MCPManager:
             raise ImportError("MCP SDK not installed. Run: pip install mcp")
         
         server = self.servers[name]
-        
+        print("DEBUG: secrets passed in connect_server:", secrets) 
         # Auto-install if needed
         if server.auto_install and not server.installed:
             print(f"Auto-installing {name}...")
@@ -764,9 +768,15 @@ class MCPManager:
                     all_secrets.update(secrets)
 
                 final_command = _substitute_secrets(server.command, all_secrets)
-                final_args = _substitute_secrets(copy.deepcopy(server.args), all_secrets)
-                final_env = _substitute_secrets(copy.deepcopy(server.env), all_secrets)
-
+                args_ = _substitute_secrets(copy.deepcopy(server.args), all_secrets)
+                env_ = _substitute_secrets(copy.deepcopy(server.env), all_secrets)
+                for key, value in all_secrets.items():
+                    if key in env_:
+                        env_[key] = value
+                final_env = {k: v for k, v in env_.items() if v is not None}
+                final_args = [str(arg) for arg in args_ if arg is not None]
+                print("DEBUG: server secrets:", server.secrets)
+                print(f"DEBUG: connect_server: final_command={final_command}, final_args={final_args}, final_env={final_env}")
                 # Create server parameters
                 server_params = StdioServerParameters(
                     command=final_command,

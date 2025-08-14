@@ -292,7 +292,7 @@ class RegistrySearchSection {
       console.log("SearchSection] Rendering secrets form for item:", item.title)
 
       //const configSource = isInstalledLocal ? installedServer : item.data;
-      const configSource = isInstalled : item.data;
+      const configSource =  item.data;
  
       const configString = JSON.stringify(configSource);
       const placeholderRegex = /<([A-Z0-9_]+)>/g;
