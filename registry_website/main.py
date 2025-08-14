@@ -398,7 +398,8 @@ def search_content(
             # also copy all 'metadata' fields into the semantic result
             for field, val in semantic_result['metadata'].items():
                 semantic_result[field] = val
-
+            # now we need to split tags into an array
+            semantic_result['tags'] = semantic_result.get('tags', '').split(',') if isinstance(semantic_result.get('tags'), str) else semantic_result.get('tags', [])
     
     return {
         "results": db_results,
