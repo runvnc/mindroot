@@ -160,11 +160,35 @@ class RegistrySearchSection {
           <p class="result-description">${item.description}</p>
           ${this.renderResultMeta(item)}
           ${this.renderResultTags(item)}
+          ${this.renderRemote(item)}
+          ${this.renderCommandArgs(item)}
           ${this.renderMcpSecretsForm(item, isInstalled, installedServer)}
           ${this.renderResultActions(item, installedServer)}
         </div>
       </div>
     `;
+  }
+
+  renderCommandArgs(item) {
+    if (item?.data?.command) {
+      const argsString = item?.data?.args?.join(' ') || '';
+      const commandLine = `${item.data.command} ${argsString}`.trim();
+      if (commandLine.length === 0) return '';
+      return html`
+        <div class="command-args">
+          <strong>Command:</strong> 
+          <pre><code class="command-line">${commandLine}</code></pre>
+        </div>
+      `;
+    }
+  }
+
+  renderRemote(item) {
+    if (item?.data?.url) {
+      return html`
+        <div class="key-details">${item.data.url}</div>
+     `
+    } else return '';
   }
 
   renderResultAvatar(item) {
