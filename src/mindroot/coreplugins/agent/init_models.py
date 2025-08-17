@@ -24,6 +24,9 @@ def init_agents():
         os.makedirs(agents_path)
     if not (agents_path / "Assistant").exists():
         shutil.copytree(assistant, agents_path / "Assistant")
+    sysadmin = script_path / "SysAdmin"
+    if not (agents_path / "SysAdmin").exists():
+        shutil.copytree(sysadmin, agents_path / "SysAdmin")
 
 init_models_and_providers()
 init_agents()
