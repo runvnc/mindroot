@@ -133,6 +133,7 @@ async def stream_install_plugin_get(request: Request):
         return {"success": False, "message": "Invalid source"}
 
     print("Command to execute:", cmd)
+    tag = None
     # For GitHub installations, use the plugin_install function which handles the download and extraction
     if source == 'github':
         try:
@@ -143,21 +144,23 @@ async def stream_install_plugin_get(request: Request):
             tag = parts[1] if len(parts) > 1 else None
             print("repo_path:", repo_path, "tag:", tag)
             # First yield a message about downloading
+            #
             async def stream_github_install():
                 yield {"event": "message", "data": f"Downloading GitHub repository {repo_path}..."}
                 repo_path_ = repo_path
+                tag_ = tag
                 # Download and extract the GitHub repository
                 try:
                     if source_path.startswith('https://'):
                         print("Processing direct GitHub URL")
                         repo_path_ = source_path
-                        tag = None
+                        tag_ = None
                         parts = repo_path_.split('/')
                         if len(parts) >= 5:
                             repo_path_ = f"{parts[3]}/{parts[4]}"
 
                     print("repo_path_:", repo_path_)
-                    plugin_dir, _, plugin_info = download_github_files(repo_path_, tag)
+                    plugin_dir, _, plugin_info = download_github_files(repo_path_, tag_)
                     print('ok')
                     # Now stream the installation from the local directory
                     cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v', '--no-cache-dir']
