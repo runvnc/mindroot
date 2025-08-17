@@ -512,24 +512,70 @@ class RegistrySharedServices {
   }
 
   async installPlugin(item) {
-    const installData = {
-      plugin: item.title,
-      source: item.github_url ? 'github' : 'pypi',
-      source_path: item.github_url || item.pypi_module
-    };
-    
-    const response = await fetch('/admin/plugin-manager/stream-install-plugin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(installData)
+    return new Promise((resolve, reject) => {
+      try {
+        let installDialog = document.querySelector('plugin-install-dialog');
+        if (!installDialog) {
+          installDialog = document.createElement('plugin-install-dialog');
+          document.body.appendChild(installDialog);
+        }
+
+        const source = item.github_url ? 'github' : 'pypi';
+        const sourcePath = item.github_url || item.pypi_module;
+
+        installDialog.open(item.title, source.charAt(0).toUpperCase() + source.slice(1));
+
+        const params = new URLSearchParams();
+        params.append('plugin', item.title);
+        params.append('source', source);
+        params.append('source_path', sourcePath);
+
+        const eventSource = new EventSource(`/plugin-manager/stream-install-plugin?${params.toString()}`);
+        let hasError = false;
+
+        eventSource.addEventListener('message', (event) => {
+          installDialog.addOutput(event.data, 'info');
+        });
+
+        eventSource.addEventListener('error', (event) => {
+          hasError = true;
+          installDialog.addOutput(event.data, 'error');
+        });
+
+        eventSource.addEventListener('warning', (event) => {
+          installDialog.addOutput(event.data, 'warning');
+        });
+
+        eventSource.addEventListener('complete', (event) => {
+          installDialog.addOutput(event.data, 'success');
+          installDialog.setComplete(hasError);
+          eventSource.close();
+          this.loadLocalContent(); // Refresh plugin list
+          resolve();
+        });
+
+        eventSource.onerror = (err) => {
+          if (eventSource.readyState === EventSource.CLOSED) {
+            if (!hasError) {
+              installDialog.setComplete(false); // Closed cleanly
+            } else {
+              installDialog.addOutput('Connection closed with an error.', 'error');
+              installDialog.setComplete(true);
+            }
+          } else {
+            installDialog.addOutput('An unknown error occurred with the connection.', 'error');
+            installDialog.setComplete(true);
+          }
+          eventSource.close();
+          reject(new Error('Plugin installation stream failed.'));
+        };
+      } catch (error) {
+        this.showToast(`Failed to start plugin installation: ${error.message}`, 'error');
+        reject(error);
+      }
     });
-    
-    if (!response.ok) {
-      throw new Error('Plugin installation failed');
-    }
   }
+
   async installAgent(item) {
     console.log('Installing agent from registry:', item);
     

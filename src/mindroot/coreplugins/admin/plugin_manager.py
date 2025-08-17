@@ -53,15 +53,22 @@ import sys, os, shlex
 async def stream_install_plugin(request: StreamInstallRequest):
     """Stream the installation process of a plugin using SSE (POST method)."""
     # Prepare the command based on the source
-    if request.source == 'github_direct':
-        cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
+    print("Stream Install Request:", request)
+    if request.source == 'github_direct' or request.source == 'github':
+        if request.source_path.startswith('https://'):
+            # For direct GitHub URLs, we can use the pip install directly
+            cmd = [sys.executable, '-m', 'pip', 'install', request.source_path, '-v', '--no-cache-dir']
+        else:
+            cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
     elif request.source == 'local':
         cmd = [sys.executable, '-m', 'pip', 'install', '-e', request.source_path, '-v', '--no-cache-dir']
     elif request.source == 'pypi':
         cmd = [sys.executable, '-m', 'pip', 'install', request.plugin, '-v', '--no-cache-dir']
     else:
+        print("Invalid source")
         return {"success": False, "message": "Invalid source"}
 
+    print("Command to execute:", cmd)
     # For GitHub installations, use the plugin_install function which handles the download and extraction
     if request.source == 'github':
         try:
@@ -70,10 +77,14 @@ async def stream_install_plugin(request: StreamInstallRequest):
             repo_path = parts[0]
             tag = parts[1] if len(parts) > 1 else None
             
+            print(1)
+
             async def stream_github_install():
+                print("dling")
                 yield {"event": "message", "data": f"Downloading GitHub repository {repo_path}..."}
                 
                 try:
+                    print("dling 2")
                     plugin_dir, _, plugin_info = download_github_files(repo_path, tag)
                     
                     cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v', '--no-cache-dir']
@@ -86,18 +97,24 @@ async def stream_install_plugin(request: StreamInstallRequest):
                         metadata=plugin_info
                     )
                 except Exception as e:
+                    print(e)
                     yield {"event": "error", "data": f"Error installing from GitHub: {str(e)}"}
             
             return EventSourceResponse(stream_github_install())
         except Exception as e:
+            print(3)
+            print(e)
             return {"success": False, "message": f"Error setting up GitHub installation: {str(e)}"}
     
     # For other sources, use our streamcmd module to stream the command output
+    print("stream cmd as events")
     return EventSourceResponse(stream_command_as_events(cmd))
+
 @router.get("/stream-install-plugin", response_class=EventSourceResponse)
 async def stream_install_plugin_get(request: Request):
     """Stream the installation process of a plugin using SSE (GET method)."""
     # Extract parameters from query string
+    print("Stream Install GET Request:", request.query_params)
     plugin = request.query_params.get("plugin", "")
     source = request.query_params.get("source", "")
     source_path = request.query_params.get("source_path", "")
@@ -115,22 +132,33 @@ async def stream_install_plugin_get(request: Request):
     else:  
         return {"success": False, "message": "Invalid source"}
 
+    print("Command to execute:", cmd)
     # For GitHub installations, use the plugin_install function which handles the download and extraction
     if source == 'github':
         try:
             # Use the streaming approach for GitHub installations
+            print("source_path:", source_path)
             parts = source_path.split(':')
             repo_path = parts[0]
             tag = parts[1] if len(parts) > 1 else None
-            
+            print("repo_path:", repo_path, "tag:", tag)
             # First yield a message about downloading
             async def stream_github_install():
                 yield {"event": "message", "data": f"Downloading GitHub repository {repo_path}..."}
-                
+                repo_path_ = repo_path
                 # Download and extract the GitHub repository
                 try:
-                    plugin_dir, _, plugin_info = download_github_files(repo_path, tag)
-                    
+                    if source_path.startswith('https://'):
+                        print("Processing direct GitHub URL")
+                        repo_path_ = source_path
+                        tag = None
+                        parts = repo_path_.split('/')
+                        if len(parts) >= 5:
+                            repo_path_ = f"{parts[3]}/{parts[4]}"
+
+                    print("repo_path_:", repo_path_)
+                    plugin_dir, _, plugin_info = download_github_files(repo_path_, tag)
+                    print('ok')
                     # Now stream the installation from the local directory
                     cmd = [sys.executable, '-m', 'pip', 'install', '-e', plugin_dir, '-v', '--no-cache-dir']
                     async for event in stream_command_as_events(cmd):
@@ -139,15 +167,17 @@ async def stream_install_plugin_get(request: Request):
                     # Update the plugin manifest
                     update_plugin_manifest(
                         plugin_info['name'], 'github', os.path.abspath(plugin_dir),
-                        remote_source=repo_path, version=plugin_info.get('version', '0.0.1'),
+                        remote_source=repo_path_, version=plugin_info.get('version', '0.0.1'),
                         metadata=plugin_info
                     )
                 except Exception as e:
-                    yield {"event": "error", "data": f"Error installing from GitHub: {str(e)}"}
+                    trace = traceback.format_exc()
+                    yield {"event": "error", "data": f"Error installing from GitHub: {str(e)} \n\n{trace}"}
             
             return EventSourceResponse(stream_github_install())
         except Exception as e:
-            return {"success": False, "message": f"Error installing from GitHub: {str(e)}"}
+            trace = traceback.format_exc()
+            return {"success": False, "message": f"Error installing from GitHub: {str(e)}\n\n{trace}"}
     
     # Use our new streamcmd module
     return EventSourceResponse(stream_command_as_events(cmd))
