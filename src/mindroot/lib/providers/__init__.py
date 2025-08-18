@@ -77,35 +77,16 @@ class ProviderManager:
 
         need_model = await uses_models(name)
 
-        # NEW V2 PREFERENCES LOGIC - Try this first, then fall back to existing logic
-        if ModelPreferencesV2 is not None and need_model:
-            try:
-                prefs_manager = ModelPreferencesV2()
-                ordered_providers = prefs_manager.get_ordered_providers_for_service(name)
-                
-                if ordered_providers:
-                    print(f"Trying v2 preferences for {name}: {ordered_providers}")
-                    
-                    for provider_name, model_name in ordered_providers:
-                        # Check if this provider is available for this function
-                        if name in self.functions:
-                            for func_info in self.functions[name]:
-                                if func_info['provider'] == provider_name:
-                                    try:
-                                        print(f"Trying provider {provider_name} with model {model_name}")
-                                        # Set the model as first argument if needed
-                                        if len(args) > 0 and (args[0] is None or not args[0]):
-                                            args = (model_name, *args[1:])
-                                        elif 'model' not in kwargs:
-                                            kwargs['model'] = model_name
-                                        
-                                        return await func_info['implementation'](*args, **kwargs)
-                                    except Exception as e:
-                                        print(f"Provider {provider_name} failed: {e}, trying next...")
-                                        continue
-            except Exception as e:
-                print(f"V2 preferences failed: {e}, falling back to existing logic")
-        
+        # DEBUG: Check what we have for model selection
+        print(f"\n=== MODEL SELECTION DEBUG for {name} ===")
+        print(f"args[0]: {args[0] if len(args) > 0 else 'N/A'}")
+        print(f"kwargs.get('model'): {kwargs.get('model', 'N/A')}")
+        if context and hasattr(context, 'agent') and context.agent:
+            print(f"Agent service_models: {context.agent.get('service_models', 'N/A')}")
+        else:
+            print("No agent context or service_models")
+        print("=== END DEBUG ===")
+
         if (len(args) > 0 and args[0] is None) and not 'model' in kwargs or ('model' in kwargs and kwargs['model'] is None):
             print("No model specified, checking service_models")
             if context is not None and context.agent is not None and 'service_models' in context.agent:
@@ -121,6 +102,36 @@ class ProviderManager:
             else:
                 print("did not find service_models in agent")
                 print('context.agent:', context.agent)
+                
+                # NEW V2 PREFERENCES LOGIC - Only as fallback when no agent-specific model
+                if ModelPreferencesV2 is not None:
+                    try:
+                        print("No agent-specific model found, trying V2 system preferences...")
+                        prefs_manager = ModelPreferencesV2()
+                        ordered_providers = prefs_manager.get_ordered_providers_for_service(name)
+                        
+                        if ordered_providers:
+                            print(f"Found V2 preferences for {name}: {ordered_providers}")
+                            
+                            for provider_name, model_name in ordered_providers:
+                                # Check if this provider is available for this function
+                                if name in self.functions:
+                                    for func_info in self.functions[name]:
+                                        if func_info['provider'] == provider_name:
+                                            try:
+                                                print(f"Trying V2 provider {provider_name} with model {model_name}")
+                                                # Set the model as first argument if needed
+                                                if len(args) > 0 and (args[0] is None or not args[0]):
+                                                    args = (model_name, *args[1:])
+                                                elif 'model' not in kwargs:
+                                                    kwargs['model'] = model_name
+                                                
+                                                return await func_info['implementation'](*args, **kwargs)
+                                            except Exception as e:
+                                                print(f"V2 provider {provider_name} failed: {e}, trying next...")
+                                                continue
+                    except Exception as e:
+                        print(f"V2 preferences failed: {e}, continuing with existing logic")
         else:
             print("Found possible model in zeroth arg:")
             if len(args) > 0:
