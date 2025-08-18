@@ -11,6 +11,12 @@ import sys
 import nanoid
 from termcolor import colored
 
+# Import the new v2 preferences system with try/except for backward compatibility
+try:
+    from .model_preferences_v2 import ModelPreferencesV2
+except ImportError:
+    ModelPreferencesV2 = None
+
 class ProviderManager:
 
     def __init__(self):
@@ -71,6 +77,35 @@ class ProviderManager:
 
         need_model = await uses_models(name)
 
+        # NEW V2 PREFERENCES LOGIC - Try this first, then fall back to existing logic
+        if ModelPreferencesV2 is not None and need_model:
+            try:
+                prefs_manager = ModelPreferencesV2()
+                ordered_providers = prefs_manager.get_ordered_providers_for_service(name)
+                
+                if ordered_providers:
+                    print(f"Trying v2 preferences for {name}: {ordered_providers}")
+                    
+                    for provider_name, model_name in ordered_providers:
+                        # Check if this provider is available for this function
+                        if name in self.functions:
+                            for func_info in self.functions[name]:
+                                if func_info['provider'] == provider_name:
+                                    try:
+                                        print(f"Trying provider {provider_name} with model {model_name}")
+                                        # Set the model as first argument if needed
+                                        if len(args) > 0 and (args[0] is None or not args[0]):
+                                            args = (model_name, *args[1:])
+                                        elif 'model' not in kwargs:
+                                            kwargs['model'] = model_name
+                                        
+                                        return await func_info['implementation'](*args, **kwargs)
+                                    except Exception as e:
+                                        print(f"Provider {provider_name} failed: {e}, trying next...")
+                                        continue
+            except Exception as e:
+                print(f"V2 preferences failed: {e}, falling back to existing logic")
+        
         if (len(args) > 0 and args[0] is None) and not 'model' in kwargs or ('model' in kwargs and kwargs['model'] is None):
             print("No model specified, checking service_models")
             if context is not None and context.agent is not None and 'service_models' in context.agent:

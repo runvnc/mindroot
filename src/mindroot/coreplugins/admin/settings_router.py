@@ -10,6 +10,12 @@ from lib.db.organize_models import organize_for_display
 from copy import deepcopy
 from .service_models import get_service_models_from_providers
 
+# Import the new v2 preferences system with try/except for backward compatibility
+try:
+    from lib.providers.model_preferences_v2 import ModelPreferencesV2
+except ImportError:
+    ModelPreferencesV2 = None
+
 router = APIRouter()
 
 SETTINGS_FILE_PATH = 'data/preferred_models.json'
@@ -160,3 +166,77 @@ async def get_organized_models():
 async def get_equivalent_flags():
     return read_equivalent_flags()
 
+# NEW V2 ENDPOINTS - These are additive and don't affect existing functionality
+
+@router.get('/settings_v2', response_model=Dict[str, List[List[str]]])
+async def get_settings_v2():
+    """Get preferences in new v2 format: {service: [[provider, model], ...]}"""
+    if ModelPreferencesV2 is None:
+        raise HTTPException(status_code=501, detail="Model Preferences V2 not available")
+    
+    try:
+        prefs_manager = ModelPreferencesV2()
+        return prefs_manager.get_preferences()
+    except Exception as e:
+        print(f"Error getting v2 preferences: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post('/settings_v2')
+async def save_settings_v2(request: Request):
+    """Save preferences in new v2 format."""
+    if ModelPreferencesV2 is None:
+        raise HTTPException(status_code=501, detail="Model Preferences V2 not available")
+    
+    try:
+        body = await request.json()
+        print(f"Received v2 preferences: {body}")
+        
+        # Validate format: should be {service: [[provider, model], ...]}
+        if not isinstance(body, dict):
+            raise ValueError("Preferences must be a dictionary")
+        
+        for service, provider_model_pairs in body.items():
+            if not isinstance(provider_model_pairs, list):
+                raise ValueError(f"Service '{service}' must have a list of provider/model pairs")
+            
+            for pair in provider_model_pairs:
+                if not isinstance(pair, list) or len(pair) != 2:
+                    raise ValueError(f"Each provider/model pair must be a list of exactly 2 items")
+                if not all(isinstance(item, str) for item in pair):
+                    raise ValueError(f"Provider and model names must be strings")
+        
+        prefs_manager = ModelPreferencesV2()
+        prefs_manager.save_preferences(body)
+        
+        return {"success": True, "message": "Preferences saved successfully"}
+        
+    except Exception as e:
+        print(f"Error saving v2 preferences: {e}")
+        raise HTTPException(status_code=422, detail=str(e))
+
+@router.post('/migrate_settings')
+async def migrate_settings():
+    """One-time migration from old format to new v2 format."""
+    if ModelPreferencesV2 is None:
+        raise HTTPException(status_code=501, detail="Model Preferences V2 not available")
+    
+    try:
+        # Get old format preferences
+        old_preferences = read_settings()
+        
+        # Convert to new format
+        prefs_manager = ModelPreferencesV2()
+        new_preferences = prefs_manager.migrate_from_old_format(old_preferences)
+        
+        # Save new format
+        prefs_manager.save_preferences(new_preferences)
+        
+        return {
+            "success": True, 
+            "message": f"Migrated {len(old_preferences)} old preferences to new format",
+            "migrated_preferences": new_preferences
+        }
+        
+    except Exception as e:
+        print(f"Error migrating preferences: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

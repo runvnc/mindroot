@@ -29,6 +29,12 @@ async def get_admin_html():
     html = await render('admin', {"log_id": log_id})
     return html
 
+@admin_router.get("/admin/model-preferences-v2", response_class=HTMLResponse)
+async def get_model_preferences_v2_html():
+    """Serve the new Model Preferences V2 page"""
+    html = await render('model-preferences-v2', {})
+    return html
+
 @admin_router.post("/admin/get-version-info")
 async def get_version_info():
     """Get version information, trying git first, then falling back to cached file."""
