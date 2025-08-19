@@ -178,7 +178,7 @@ async def middleware(request: Request, call_next):
             filename = path_parts[-1]
             print(f"Checking for static file: {plugin_name} {static_part} {filename}")
             if static_part == 'static':
-                if filename.endswith('.js') or filename.endswith('.css') or filename.endswith('.png') or filename.endswith('.mp4'):
+                if filename.endswith('.js') or filename.endswith('.css') or filename.endswith('.png') or filename.endswith('.mp4') or filename.endswith('.gif'):
                     print('Static file requested:', filename)
                     return await call_next(request)
         except Exception as e:
