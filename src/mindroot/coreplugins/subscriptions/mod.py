@@ -778,6 +778,58 @@ async def cancel_subscription(subscription_id: str, at_period_end: bool = True, 
     
     return updated_subscription.to_dict()
 
+@service()
+async def get_subscription_by_provider_id(provider_subscription_id: str, context=None) -> Optional[Dict]:
+    """Get subscription by provider subscription ID (e.g., Stripe subscription ID)
+    
+    Args:
+        provider_subscription_id: Provider's subscription ID
+        context: Request context
+    
+    Returns:
+        Optional[Dict]: Subscription details or None if not found
+    """
+    global _subscription_manager
+    if not _subscription_manager:
+        plugin = SubscriptionsPlugin(get_base_path(context))
+        _, subscription_manager, _ = plugin.create_components()
+        _subscription_manager = subscription_manager
+    
+    try:
+        subscriptions = await _subscription_manager.get_subscriptions_by_provider_id(
+            provider='stripe',
+            provider_subscription_id=provider_subscription_id
+        )
+        return subscriptions[0].to_dict() if subscriptions else None
+    except Exception as e:
+        logger.error(f"Error getting subscription by provider ID: {e}")
+        return None
+
+@service()
+async def update_subscription_status(subscription_id: str, status: str, context=None) -> Optional[Dict]:
+    """Update a subscription's status
+    
+    Args:
+        subscription_id: Internal subscription ID
+        status: New status (active, canceled, etc.)
+        context: Request context
+    
+    Returns:
+        Optional[Dict]: Updated subscription details or None if not found
+    """
+    global _subscription_manager
+    if not _subscription_manager:
+        plugin = SubscriptionsPlugin(get_base_path(context))
+        _, subscription_manager, _ = plugin.create_components()
+        _subscription_manager = subscription_manager
+    
+    try:
+        subscription = await _subscription_manager.update_subscription_status(subscription_id, status)
+        return subscription.to_dict() if subscription else None
+    except Exception as e:
+        logger.error(f"Error updating subscription status: {e}")
+        return None
+
 # Command methods
 
 @command()
