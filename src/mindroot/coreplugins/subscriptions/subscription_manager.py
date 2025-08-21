@@ -134,7 +134,7 @@ class SubscriptionManager:
     async def get_user_subscriptions(self, username: str) -> List[UserSubscription]:
         """Get all subscriptions for a user"""
         return await self.storage.get_user_subscriptions(username)
-    
+
     async def get_subscriptions_by_provider_id(self, provider: str, provider_subscription_id: str) -> List[UserSubscription]:
         """Get subscriptions by provider subscription ID"""
         return await self.storage.get_subscriptions_by_provider_id(provider, provider_subscription_id)

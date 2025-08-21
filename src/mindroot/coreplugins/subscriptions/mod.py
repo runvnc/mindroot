@@ -805,6 +805,7 @@ async def get_subscription_by_provider_id(provider_subscription_id: str, context
         logger.error(f"Error getting subscription by provider ID: {e}")
         return None
 
+
 @service()
 async def update_subscription_status(subscription_id: str, status: str, context=None) -> Optional[Dict]:
     """Update a subscription's status
