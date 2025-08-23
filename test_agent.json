@@ -1,9 +1,0 @@
-{
-  "name": "TestAgent",
-  "description": "A test agent for registry persona functionality",
-  "persona": "Assistant",
-  "instructions": "You are a helpful test assistant.",
-  "model": "default",
-  "version": "1.0.0",
-  "tags": ["test", "assistant"]
-}
