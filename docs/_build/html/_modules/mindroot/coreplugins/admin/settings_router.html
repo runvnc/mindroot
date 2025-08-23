@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.settings_router &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.settings_router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.settings_router</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">command_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers</span><span class="w"> </span><span class="kn">import</span> <span class="n">services</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.db.organize_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">organize_for_display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.service_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_service_models_from_providers</span>
+
+<span class="c1"># Import the new v2 preferences system with try/except for backward compatibility</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.model_preferences_v2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelPreferencesV2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">ModelPreferencesV2</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+
+<span class="n">SETTINGS_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;data/preferred_models.json&#39;</span>
+<span class="n">MODELS_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;data/models.json&#39;</span>
+<span class="n">PROVIDERS_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;data/providers.json&#39;</span>
+<span class="n">EQUIVALENT_FLAGS_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;data/equivalent_flags.json&#39;</span>
+
+<span class="c1"># Helper function to read settings file</span>
+<div class="viewcode-block" id="read_settings">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.read_settings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">SETTINGS_FILE_PATH</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">SETTINGS_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">settings_file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">settings_file</span><span class="p">)</span></div>
+
+
+<span class="c1"># Helper function to write settings file</span>
+<div class="viewcode-block" id="write_settings">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.write_settings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">SETTINGS_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">settings_file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">settings_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
+
+<span class="c1"># Helper function to read models file</span>
+<div class="viewcode-block" id="read_models">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.read_models">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_models</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">MODELS_FILE_PATH</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">MODELS_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">models_file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">models_file</span><span class="p">)</span></div>
+
+
+<span class="c1"># Helper function to read providers file</span>
+<div class="viewcode-block" id="read_providers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.read_providers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_providers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PROVIDERS_FILE_PATH</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PROVIDERS_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">providers_file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">providers_file</span><span class="p">)</span></div>
+
+
+<span class="c1"># Helper function to read equivalent flags file</span>
+<div class="viewcode-block" id="read_equivalent_flags">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.read_equivalent_flags">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_equivalent_flags</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">EQUIVALENT_FLAGS_FILE_PATH</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No equivalent flags file found&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Looked in &quot;</span> <span class="o">+</span> <span class="n">EQUIVALENT_FLAGS_FILE_PATH</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">EQUIVALENT_FLAGS_FILE_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">equivalent_flags_file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">equivalent_flags_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Setting">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.Setting">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Setting</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">service_or_command_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">flag</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="get_settings">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_settings">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/settings&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_settings</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">read_settings</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="save_settings">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.save_settings">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/settings&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">save_settings</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received raw body: </span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span><span class="n">Setting</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">body</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="p">[</span><span class="n">Setting</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">body</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data format&quot;</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed settings: </span><span class="si">{</span><span class="n">settings</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">write_settings</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">settings</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing request: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="update_setting">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.update_setting">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s1">&#39;/settings/</span><span class="si">{setting_id}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">Dict</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_setting</span><span class="p">(</span><span class="n">setting_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">updated_setting</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">read_settings</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">setting_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">setting_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Setting not found&#39;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="p">[</span><span class="n">setting_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_setting</span>
+    <span class="n">write_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">updated_setting</span></div>
+
+
+<div class="viewcode-block" id="delete_setting">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.delete_setting">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;/settings/</span><span class="si">{setting_id}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">Dict</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_setting</span><span class="p">(</span><span class="n">setting_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">read_settings</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">setting_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">setting_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Setting not found&#39;</span><span class="p">)</span>
+    <span class="n">deleted_setting</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">setting_id</span><span class="p">)</span>
+    <span class="n">write_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deleted_setting</span></div>
+
+
+<div class="viewcode-block" id="get_models">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_models">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/models&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_models</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">read_models</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_providers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_providers">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/providers&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_providers</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">read_providers</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_commands">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_commands">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/commands&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">Dict</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_commands</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;retrieving commands&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;settings_router: command_manager instance ID: </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">command_manager</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1">#funcs = command_manager.get_functions()</span>
+    <span class="n">funcs</span> <span class="o">=</span> <span class="n">command_manager</span><span class="o">.</span><span class="n">get_detailed_functions</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;funcs is&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+    <span class="c1"># we need to clone and remove the &#39;implementation&#39; key which can&#39;t be serialized</span>
+    <span class="n">commands</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">cmd_name</span><span class="p">,</span> <span class="n">providers_list</span> <span class="ow">in</span> <span class="n">commands</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;implementation&#39;</span> <span class="ow">in</span> <span class="n">provider</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">provider</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">commands</span></div>
+
+
+<div class="viewcode-block" id="get_services">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_services">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/services&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_services</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">get_functions</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">#serviceModels will look like:</span>
+<span class="c1">#{ &quot;stream_chat&quot;: { </span>
+<span class="c1">#    &quot;ah_openai&quot;: [&quot;gpt-4o&quot;, &quot;gpt-4.1-latest&quot;],</span>
+<span class="c1">#    &quot;ah_anthropic&quot;: [&quot;claude-3&quot;, &quot;claude-2&quot;]</span>
+<span class="c1">#},</span>
+<span class="c1">#{ &quot;text_to_image&quot;: {</span>
+<span class="c1">#  &quot;ah_flux&quot;: [&quot;flux-dev&quot;, &quot;flux-pro&quot;]</span>
+<span class="c1">#}</span>
+
+
+<div class="viewcode-block" id="get_service_models">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_service_models">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/service-models&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_service_models</span><span class="p">():</span>
+    <span class="c1"># Call get_service_models() on each provider and aggregate the results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;getting service models&quot;</span><span class="p">)</span>
+    <span class="n">service_models</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_service_models_from_providers</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">service_models</span></div>
+
+
+
+<div class="viewcode-block" id="get_organized_models">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_organized_models">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/organized_models&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_organized_models</span><span class="p">():</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="n">read_models</span><span class="p">()</span>
+    <span class="n">providers</span> <span class="o">=</span> <span class="n">read_providers</span><span class="p">()</span>
+    <span class="n">equivalent_flags</span> <span class="o">=</span> <span class="n">read_equivalent_flags</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">organize_for_display</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">providers</span><span class="p">,</span> <span class="n">equivalent_flags</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_equivalent_flags">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_equivalent_flags">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/equivalent_flags&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_equivalent_flags</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">read_equivalent_flags</span><span class="p">()</span></div>
+
+
+<span class="c1"># NEW V2 ENDPOINTS - These are additive and don&#39;t affect existing functionality</span>
+
+<div class="viewcode-block" id="get_settings_v2">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.get_settings_v2">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/settings_v2&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_settings_v2</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get preferences in new v2 format: {service: [[provider, model], ...]}&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ModelPreferencesV2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Model Preferences V2 not available&quot;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">prefs_manager</span> <span class="o">=</span> <span class="n">ModelPreferencesV2</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">prefs_manager</span><span class="o">.</span><span class="n">get_preferences</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting v2 preferences: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="save_settings_v2">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.save_settings_v2">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/settings_v2&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">save_settings_v2</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save preferences in new v2 format.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ModelPreferencesV2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Model Preferences V2 not available&quot;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received v2 preferences: </span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Validate format: should be {service: [[provider, model], ...]}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Preferences must be a dictionary&quot;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">service</span><span class="p">,</span> <span class="n">provider_model_pairs</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">provider_model_pairs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Service &#39;</span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&#39; must have a list of provider/model pairs&quot;</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">provider_model_pairs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Each provider/model pair must be a list of exactly 2 items&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Provider and model names must be strings&quot;</span><span class="p">)</span>
+        
+        <span class="n">prefs_manager</span> <span class="o">=</span> <span class="n">ModelPreferencesV2</span><span class="p">()</span>
+        <span class="n">prefs_manager</span><span class="o">.</span><span class="n">save_preferences</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Preferences saved successfully&quot;</span><span class="p">}</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving v2 preferences: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="migrate_settings">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.migrate_settings">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/migrate_settings&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">migrate_settings</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One-time migration from old format to new v2 format.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ModelPreferencesV2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Model Preferences V2 not available&quot;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get old format preferences</span>
+        <span class="n">old_preferences</span> <span class="o">=</span> <span class="n">read_settings</span><span class="p">()</span>
+        
+        <span class="c1"># Convert to new format</span>
+        <span class="n">prefs_manager</span> <span class="o">=</span> <span class="n">ModelPreferencesV2</span><span class="p">()</span>
+        <span class="n">new_preferences</span> <span class="o">=</span> <span class="n">prefs_manager</span><span class="o">.</span><span class="n">migrate_from_old_format</span><span class="p">(</span><span class="n">old_preferences</span><span class="p">)</span>
+        
+        <span class="c1"># Save new format</span>
+        <span class="n">prefs_manager</span><span class="o">.</span><span class="n">save_preferences</span><span class="p">(</span><span class="n">new_preferences</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Migrated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">old_preferences</span><span class="p">)</span><span class="si">}</span><span class="s2"> old preferences to new format&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;migrated_preferences&quot;</span><span class="p">:</span> <span class="n">new_preferences</span>
+        <span class="p">}</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error migrating preferences: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

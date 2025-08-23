@@ -1,0 +1,565 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.chat.commands &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.chat.commands</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.chat.commands</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">command_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatcontext</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_chat_session</span><span class="p">,</span> <span class="n">send_message_to_agent</span><span class="p">,</span> <span class="n">subscribe_to_agent_messages</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">termcolor</span>
+
+<div class="viewcode-block" id="tell_and_continue">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.tell_and_continue">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">tell_and_continue</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Say something to the user or chat room, then CONTINUE processing.</span>
+<span class="sd">    One sentence per command. If you want to say multiple sentences, use multiple commands.</span>
+<span class="sd">    This is for providing the user with a status update without stopping.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    text - String. The text to say.</span>
+
+<span class="sd">    Return: True  </span>
+
+<span class="sd">    ## Example 1</span>
+<span class="sd">   </span>
+<span class="sd">    [</span>
+<span class="sd">        { &quot;tell_and_continue&quot;: { &quot;text&quot;: &quot;Hello, user. I will make that directory for you and then continue with the task..&quot; } },</span>
+<span class="sd">        { &quot;mkdir&quot;: { &quot;absolute_path&quot;: &quot;/new/dir&quot; } }</span>
+<span class="sd">    ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                               <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">})</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="wait_for_user_reply">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.wait_for_user_reply">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_user_reply</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Say something to the user or chat room, then STOP processing and wait for them to reply.</span>
+<span class="sd">    One sentence per command. If you want to say multiple sentences, use multiple commands.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    text - String. The text to say.</span>
+
+<span class="sd">    Return: No return value. After executing commands in the command list, the</span>
+<span class="sd">            system will wait for the user to reply, UNLESS you include a command</span>
+<span class="sd">            in your list that returns a value. Therefore, do not use this with</span>
+<span class="sd">            other commands that return a value instead of waiting.</span>
+
+<span class="sd">    ## Example 1</span>
+<span class="sd">   </span>
+<span class="sd">   (in this example we issue multiple commands, but are finished with commands after that)</span>
+
+<span class="sd">    [</span>
+<span class="sd">        { &quot;wait_for_user_reply&quot;: { &quot;text&quot;: &quot;Hello, user. Here is some more info on that:&quot; } },</span>
+<span class="sd">        { &quot;markdown_await_user&quot;: { &quot;text&quot;: &quot;[A few paragraphs of info, using RAW encoding]&quot; } },</span>
+<span class="sd">        { &quot;task_complete&quot;: {} }</span>
+<span class="sd">    ]</span>
+
+<span class="sd">    (The system waits for the user reply)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                               <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">})</span>
+    <span class="k">return</span> <span class="s1">&#39;stop&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="markdown_await_user">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.markdown_await_user">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">markdown_await_user</span><span class="p">(</span><span class="n">markdown</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Output some markdown text to the user or chat room and then wait for the user&#39;s reply.</span>
+<span class="sd">    Use this for any somewhat longer text that the user can read and</span>
+<span class="sd">    and doesn&#39;t necessarily need to be spoken out loud.</span>
+
+<span class="sd">    You can write as much text/sentences etc. as you need.</span>
+
+<span class="sd">    Use the special RAW format with START_RAW and END_RAW to output raw markdown.</span>
+
+<span class="sd">    Parameters:</span>
+
+<span class="sd">    markdown - String. Insert using RAW mode.</span>
+
+<span class="sd">    Note that you can use Katex for math rendering in markdown, but remember to</span>
+<span class="sd">    use &#39;aligned&#39; instead of &#39;align&#39;. Always use &#39;math&#39; code blocks for this.</span>
+<span class="sd">    Be careful of limitations with KaTeX such as macros etc.</span>
+
+<span class="sd">    Also, IMPORTANT: if you need to do other formatting in math sections such as</span>
+<span class="sd">    a list of steps or a table, use the KaTeX formatting for this </span>
+<span class="sd">    rather than trying to add LaTeX in the middle of markdown lists</span>
+<span class="sd">    or tables etc.</span>
+
+<span class="sd">    Also, you can use HTML in the typical way it is inserted into markdown,</span>
+<span class="sd">    including, for example, embedding YouTube videos.</span>
+
+<span class="sd">    # Basic Example</span>
+
+<span class="sd">        { &quot;markdown_await_user&quot;:</span>
+<span class="sd">          { &quot;markdown&quot;: START_RAW</span>
+<span class="sd">    ## Section 1</span>
+
+<span class="sd">    - item 1</span>
+<span class="sd">    - item 2</span>
+<span class="sd">    END_RAW</span>
+<span class="sd">          }</span>
+<span class="sd">        }</span>
+
+<span class="sd">    NOTE: Do NOT start a new command list if there already is one!!</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#await context.agent_output(&quot;new_message&quot;, {&quot;content&quot;: markdown,</span>
+    <span class="c1">#                                        &quot;agent&quot;: context.agent[&#39;name&#39;] })</span>
+    <span class="k">return</span> <span class="s1">&#39;stop&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="insert_image">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.insert_image">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">insert_image</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">image_url</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="delegate_task">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.delegate_task">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delegate_task</span><span class="p">(</span><span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delegate a task to another agent.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    { &quot;delegate_task&quot;: { &quot;log_id&quot;: &quot;poem.moon.03_22_2024.4PM.1&quot;, &quot;instructions&quot;: &quot;Write a poem about the moon&quot;, &quot;agent_name&quot;: &quot;poet&quot; } }</span>
+
+<span class="sd">    Note: do not specify any other arguments than those in the example.</span>
+<span class="sd">    In particular, &#39;context&#39; is not a valid argument!</span>
+
+<span class="sd">    log_id is optional, if you specify it you must use something unique.</span>
+
+<span class="sd">    You can also let the system assign log_id automatically:</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    { &quot;delegate_task&quot;: { &quot;instructions&quot;: &quot;Write a poem about the moon&quot;, &quot;agent_name&quot;: &quot;poet&quot; } }</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;in delegate task, context is:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">log_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    <span class="n">llm</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s1">&#39;current_model&#39;</span><span class="p">):</span>
+            <span class="n">llm</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">current_model</span>
+        <span class="k">elif</span> <span class="s1">&#39;llm&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">llm</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;llm&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">full_results</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">instructions</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
+                                                              <span class="n">parent_log_id</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+                                                              <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">agent_name</span><span class="o">=</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;&lt;a href=&quot;/session/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot; target=&quot;_blank&quot;&gt;Task completed with log ID: </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&lt;/a&gt;</span><span class="se">\n</span><span class="s2">Results:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="task_result">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.task_result">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">task_result</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the result of a task to the user.</span>
+
+<span class="sd">    This should be the final output of a task that the user requested.</span>
+
+<span class="sd">    Note: if you have this command defined, you MUST use it at the end of a task.</span>
+<span class="sd">    Be sure to include the full output of the task, unless they specified </span>
+<span class="sd">    that they only want a brief or final answer.</span>
+
+<span class="sd">    If you do not call this, the task will be repeated.</span>
+
+<span class="sd">    Parameters:</span>
+
+<span class="sd">    output - Array OR Object OR String. The output of the task, such as analysis, structured data,</span>
+<span class="sd">    report, answer, etc.</span>
+
+<span class="sd">    IMPORTANT: If the user requests JSON output or provides a schema, you must</span>
+<span class="sd">    output ONLY the data in the format requested. </span>
+
+<span class="sd">    Unless otherwise indicated for your model, use the special </span>
+<span class="sd">    RAW format with START_RAW and END_RAW to output raw markdown.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    User: Please output the addresses from the following document</span>
+<span class="sd">        using this format (e.g.): </span>
+<span class="sd">        [{ &quot;address1&quot;: &quot;Main St.&quot;, &quot;state&quot;: &quot;CA&quot;, &quot;zip: &quot;90210&quot; }]</span>
+
+<span class="sd">        (... document ...)</span>
+
+<span class="sd">    you would output something like this:</span>
+
+<span class="sd">    { &quot;task_result&quot;: {</span>
+<span class="sd">        &quot;output&quot;: [</span>
+<span class="sd">            { &quot;address1&quot;: &quot;First St.&quot;, &quot;state&quot;: &quot;TX&quot;, &quot;zip: &quot;78573&quot; },</span>
+<span class="sd">            { &quot;address2&quot;: &quot;Second St.&quot;, &quot;state&quot;: &quot;TX&quot;, &quot;zip: &quot;78001&quot; }</span>
+<span class="sd">        ] }</span>
+<span class="sd">    }</span>
+
+<span class="sd">    ___</span>
+
+
+<span class="sd">    In the case that the user requested a formatted report:</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    User: What is the answer to the universe?</span>
+
+<span class="sd">    you would output something like this:</span>
+
+<span class="sd">        { &quot;task_result&quot;:</span>
+<span class="sd">            { &quot;output&quot;: START_RAW</span>
+<span class="sd">    ## Answer</span>
+<span class="sd">    </span>
+<span class="sd">    The answer is 42.</span>
+
+<span class="sd">    END_RAW</span>
+
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;task_result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="initiate_agent_session">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.initiate_agent_session">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initiate_agent_session</span><span class="p">(</span><span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initiate a chat session with another agent.</span>
+<span class="sd">    IMPORTANT NOTE: You may not use this command while already in conversation with another agent.</span>
+<span class="sd">    You must exit the current conversation and then the parent context will continue.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    agent_name - String. The name of the agent to start a session with.</span>
+
+<span class="sd">    Important: wait for the system to return the log_id for the new chat session before using the converse_with_agent() command.</span>
+<span class="sd">    Return: String. The log_id for the new chat session.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    
+    <span class="k">await</span> <span class="n">init_chat_session</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">log_id</span></div>
+
+
+
+<div class="viewcode-block" id="exit_conversation">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.exit_conversation">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">exit_conversation</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exit a chat session with another agent. Use this when exit criteria are met.</span>
+<span class="sd">    Use this command when you are finished with an agent. You may not initiate another conversation whie in a chat session with an agent.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    output - String :</span>
+<span class="sd">                        ALL relevant details of the conversation.</span>
+<span class="sd">                        IMPORTANT: if the output of the conversation is a deliverable </span>
+<span class="sd">                        in the form of text, then depending on the wording of the user&#39;s  </span>
+<span class="sd">                        instructions, you may need to include the ALL the text</span>
+<span class="sd">                        of the deliverable here!</span>
+<span class="sd">                        If the user asked for only a summary, then provide a summary.</span>
+<span class="sd">                        If there was work output to a file, this must include the full filename. </span>
+<span class="sd">                        Etc.</span>
+
+<span class="sd">                        This should be EVERY detail that is needed to continue, but none of </span>
+<span class="sd">                        any intermediary details of the conversation that aren&#39;t relevant.</span>
+<span class="sd">                        Such as greetings, intermediary work steps, etc.</span>
+<span class="sd">                        But assume that you will not be able to refer back to this conversation </span>
+<span class="sd">                        other than the takeaways listed here. So err on the side of caution of </span>
+<span class="sd">                        including MORE information. But be concise without losing ANY potentially </span>
+<span class="sd">                        relevant detail.</span>
+
+<span class="sd">                        Example: discussion was about a shopping list that was requested from the user.</span>
+<span class="sd">                        The output should be the full shopping list verbatim (but you can use abbreviations)</span>
+
+<span class="sd">                        Example: discussion was about a long process ending in a file being created. </span>
+<span class="sd">                        The output should be the full filename and path.</span>
+
+<span class="sd">                        Example: user requested to have an agent install some software. The output should be </span>
+<span class="sd">                        whether the software was successfully installed or not, and how to start and configure it.</span>
+<span class="sd">                        The output in this case should not include all of the steps involved or files installed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------------------------&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">log_id</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="s1">&#39;exiting conversation&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;takeaways&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+    
+    <span class="n">context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+
+<div class="viewcode-block" id="converse_with_agent">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.converse_with_agent">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">converse_with_agent</span><span class="p">(</span><span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sub_log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">first_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">contextual_info</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_criteria</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    IMPORTANT: Wait for the system to return the sub_log_id from the initiate_agent_session() command before using this command.</span>
+<span class="sd">    Have a conversation with an agent in an existing chat session.</span>
+<span class="sd">    Note:</span>
+<span class="sd">        Do not use this command again to send more messages to the agent. </span>
+<span class="sd">        Again, IMPORTANT: do NOT use this command from within a subconversation.</span>
+<span class="sd">        You only issue this command ONCE, then the conversation occurs in another subcontext.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    agent_name - String. The name of the agent to converse with.</span>
+<span class="sd">    sub_log_id - String. The log_id of the existing chat session with a secondary agent.</span>
+
+<span class="sd">    first_message - String. The first message to the agent.</span>
+<span class="sd">    contextual_info - String. Relevant details that may come up.</span>
+<span class="sd">    exit_criteria - String. The criteria for ending the conversation.</span>
+
+<span class="sd">    Return: String. Contains a concise summary of relevant details of conversation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># create a temp chat log for the agent&#39;s perspective on this subconversation</span>
+    <span class="n">first_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">first_message</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Additional Context:</span><span class="se">\n</span><span class="si">{</span><span class="n">contextual_info</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">my_sub_log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------------------------------------------&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;===================================================================&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">init_chat_session</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">my_sub_log_id</span><span class="p">)</span>
+    <span class="n">my_sub_context</span> <span class="o">=</span> <span class="n">ChatContext</span><span class="p">(</span><span class="n">service_manager</span><span class="p">,</span> <span class="n">command_manager</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">load_context</span><span class="p">(</span><span class="n">my_sub_log_id</span><span class="p">)</span>
+    <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;parent_log_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">log_id</span>
+    <span class="n">my_sub_log</span> <span class="o">=</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">chat_log</span>
+
+    <span class="n">init_sub_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;[SYSTEM]:</span>
+<span class="s2">    Initiating chat session between [</span><span class="si">{</span><span class="n">my_sub_context</span><span class="o">.</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">] and </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> ...</span>
+<span class="s2">    </span><span class="si">{</span><span class="n">contextual_info</span><span class="si">}</span>
+<span class="s2">    </span>
+<span class="s2">    </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> may execute several commands to achieve the goal.</span>
+
+<span class="s2">    The commands and results from </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> will be shown in the User role as &quot;[</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">]:&quot;</span>
+<span class="s2">    </span>
+<span class="s2">    Conversation exit criteria: </span><span class="si">{</span><span class="n">exit_criteria</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">    At each conversation turn, evaluate whether they have completed the task satisfactorily according to </span>
+<span class="s2">    the exit criteria. If not, give them instructions to guide them towards completion.</span>
+
+<span class="s2">    If their command parameters or results or statements satsify the exit criteria, use the exit_conversation() command</span>
+<span class="s2">    immediately with the detailed takeaways from the output of </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.</span>
+
+<span class="s2">    Important note: do not ever use the converse_with_agent() command from within this conversation.</span>
+<span class="s2">    You are already in such a subconversation. Your role now is to judge whether they have completed the </span>
+<span class="s2">    task at each conversation turn and if necessary guide them towards completion.</span>
+
+<span class="s2">    Remember the command list format from your system message!</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">my_sub_log</span><span class="o">.</span><span class="n">add_message</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">init_sub_msg</span><span class="p">})</span>
+    <span class="n">my_sub_log</span><span class="o">.</span><span class="n">add_message</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">]:&quot;</span> <span class="o">+</span> <span class="n">first_message</span><span class="p">})</span>
+    
+    <span class="n">finished_conversation</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">my_sub_context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+
+    <span class="n">takeaways</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+
+    <span class="n">blank_my_replies</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">finished_conversation</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;finished_conversation&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error: &#39;finished_conversation&#39; key not found in context.data &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">my_sub_context</span><span class="p">))</span>
+        <span class="n">replies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mf">1200.0</span><span class="p">):</span>
+            <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">replies</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">send_message_to_agent</span><span class="p">(</span><span class="n">sub_log_id</span><span class="p">,</span> <span class="n">first_message</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="c1">#print replies data for debugging, in magenta</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="s1">&#39;replies:&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">replies</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+
+        <span class="n">task_output</span> <span class="o">=</span> <span class="n">replies</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">replies</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;output&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]:</span>
+                <span class="n">task_output</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;output&#39;</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">task_output</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mf">1200.0</span><span class="p">):</span>
+            <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">my_replies</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">send_message_to_agent</span><span class="p">(</span><span class="n">my_sub_log_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">task_output</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">my_sub_context</span><span class="p">)</span>
+            <span class="c1"># print my_replies data for debugging, in cyan</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="s1">&#39;my_replies:&#39;</span><span class="p">,</span> <span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">my_replies</span><span class="p">,</span> <span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_replies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">blank_my_replies</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">blank_my_replies</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="c1"># print in red for debugging</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Too many blank replies, exiting conversation&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;takeaways&#39;</span> <span class="ow">in</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">takeaways</span> <span class="o">=</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;takeaways&#39;</span><span class="p">]</span>
+            <span class="n">finished_conversation</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_message</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">my_replies</span><span class="p">)</span>
+            
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End of loop&quot;</span><span class="p">)</span>
+        <span class="n">sub_context</span> <span class="o">=</span> <span class="n">ChatContext</span><span class="p">(</span><span class="n">service_manager</span><span class="p">,</span> <span class="n">command_manager</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="n">sub_context</span><span class="o">.</span><span class="n">load_context</span><span class="p">(</span><span class="n">sub_log_id</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">my_sub_context</span><span class="o">.</span><span class="n">load_context</span><span class="p">(</span><span class="n">my_sub_log_id</span><span class="p">)</span>
+  
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="s1">&#39;my_sub_context.data:&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">my_sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="s1">&#39;sub_context.data:&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">sub_context</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]))</span>
+   
+    <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[SYSTEM]: Exited conversation with </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">takeaways</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s2">&quot; takeaways were:&quot;</span> <span class="o">+</span> <span class="n">takeaways</span>
+ 
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">ret</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="send_to_parent_chat">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.commands.send_to_parent_chat">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_to_parent_chat</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send a message to the parent chat session.</span>
+<span class="sd">    This must only be used within a subconversation initiated by converse_with_agent().</span>
+<span class="sd">    It is useful for things like informing the user about task status or requesting that the user provide a file, etc.</span>
+
+<span class="sd">Parameters:</span>
+<span class="sd">    message - String. The message to send to the parent chat session.</span>
+<span class="sd">    Return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parent_log</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;parent_log_id&#39;</span><span class="p">]</span>
+    <span class="n">parent_context</span> <span class="o">=</span> <span class="n">ChatContext</span><span class="p">(</span><span class="n">service_manager</span><span class="p">,</span> <span class="n">command_manager</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">parent_context</span><span class="o">.</span><span class="n">load_context</span><span class="p">(</span><span class="n">parent_log</span><span class="p">)</span>
+    <span class="n">chat_log</span><span class="o">.</span><span class="n">add_message</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;new_message&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span> <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]})</span>
+    <span class="n">chat_log</span> <span class="o">=</span> <span class="n">parent_context</span><span class="o">.</span><span class="n">chat_log</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

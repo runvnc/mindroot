@@ -1,0 +1,476 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.usage package &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">mindroot.coreplugins.usage package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.handlers">mindroot.coreplugins.usage.handlers module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.handlers.UsageTracker"><code class="docutils literal notranslate"><span class="pre">UsageTracker</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_cost"><code class="docutils literal notranslate"><span class="pre">UsageTracker.get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_total_cost"><code class="docutils literal notranslate"><span class="pre">UsageTracker.get_total_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_usage"><code class="docutils literal notranslate"><span class="pre">UsageTracker.get_usage()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.handlers.UsageTracker.track_usage"><code class="docutils literal notranslate"><span class="pre">UsageTracker.track_usage()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.mod">mindroot.coreplugins.usage.mod module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_base_path"><code class="docutils literal notranslate"><span class="pre">get_base_path()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_cost"><code class="docutils literal notranslate"><span class="pre">get_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_cost_summary"><code class="docutils literal notranslate"><span class="pre">get_cost_summary()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_cost_types"><code class="docutils literal notranslate"><span class="pre">get_cost_types()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_daily_costs"><code class="docutils literal notranslate"><span class="pre">get_daily_costs()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.get_usage_report"><code class="docutils literal notranslate"><span class="pre">get_usage_report()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.register_cost_type"><code class="docutils literal notranslate"><span class="pre">register_cost_type()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.set_cost"><code class="docutils literal notranslate"><span class="pre">set_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.mod.track_usage"><code class="docutils literal notranslate"><span class="pre">track_usage()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.models">mindroot.coreplugins.usage.models module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.CostTypeInfo"><code class="docutils literal notranslate"><span class="pre">CostTypeInfo</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.CostTypeInfo.description"><code class="docutils literal notranslate"><span class="pre">CostTypeInfo.description</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.CostTypeInfo.name"><code class="docutils literal notranslate"><span class="pre">CostTypeInfo.name</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.CostTypeInfo.unit"><code class="docutils literal notranslate"><span class="pre">CostTypeInfo.unit</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent"><code class="docutils literal notranslate"><span class="pre">UsageEvent</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.cost_type_id"><code class="docutils literal notranslate"><span class="pre">UsageEvent.cost_type_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.metadata"><code class="docutils literal notranslate"><span class="pre">UsageEvent.metadata</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.model_id"><code class="docutils literal notranslate"><span class="pre">UsageEvent.model_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.plugin_id"><code class="docutils literal notranslate"><span class="pre">UsageEvent.plugin_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.quantity"><code class="docutils literal notranslate"><span class="pre">UsageEvent.quantity</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.request_id"><code class="docutils literal notranslate"><span class="pre">UsageEvent.request_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.session_id"><code class="docutils literal notranslate"><span class="pre">UsageEvent.session_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.timestamp"><code class="docutils literal notranslate"><span class="pre">UsageEvent.timestamp</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.to_dict"><code class="docutils literal notranslate"><span class="pre">UsageEvent.to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent.username"><code class="docutils literal notranslate"><span class="pre">UsageEvent.username</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.reporting">mindroot.coreplugins.usage.reporting module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.reporting.UsageReport"><code class="docutils literal notranslate"><span class="pre">UsageReport</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_cost_summary"><code class="docutils literal notranslate"><span class="pre">UsageReport.get_cost_summary()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_daily_costs"><code class="docutils literal notranslate"><span class="pre">UsageReport.get_daily_costs()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_user_report"><code class="docutils literal notranslate"><span class="pre">UsageReport.get_user_report()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.router">mindroot.coreplugins.usage.router module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.get_base_path"><code class="docutils literal notranslate"><span class="pre">get_base_path()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.get_user_daily"><code class="docutils literal notranslate"><span class="pre">get_user_daily()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.get_user_report"><code class="docutils literal notranslate"><span class="pre">get_user_report()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.get_user_summary"><code class="docutils literal notranslate"><span class="pre">get_user_summary()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.update_costs"><code class="docutils literal notranslate"><span class="pre">update_costs()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.router.usage_admin"><code class="docutils literal notranslate"><span class="pre">usage_admin()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage.storage">mindroot.coreplugins.usage.storage module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage"><code class="docutils literal notranslate"><span class="pre">UsageStorage</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.get_total_cost"><code class="docutils literal notranslate"><span class="pre">UsageStorage.get_total_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.get_usage"><code class="docutils literal notranslate"><span class="pre">UsageStorage.get_usage()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.load_cost_types"><code class="docutils literal notranslate"><span class="pre">UsageStorage.load_cost_types()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.load_costs"><code class="docutils literal notranslate"><span class="pre">UsageStorage.load_costs()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.save_cost"><code class="docutils literal notranslate"><span class="pre">UsageStorage.save_cost()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.save_cost_type"><code class="docutils literal notranslate"><span class="pre">UsageStorage.save_cost_type()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage.store_event"><code class="docutils literal notranslate"><span class="pre">UsageStorage.store_event()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.usage">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.usage package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/mindroot.coreplugins.usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mindroot-coreplugins-usage-package">
+<h1>mindroot.coreplugins.usage package<a class="headerlink" href="#mindroot-coreplugins-usage-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mindroot.coreplugins.usage.handlers">
+<span id="mindroot-coreplugins-usage-handlers-module"></span><h2>mindroot.coreplugins.usage.handlers module<a class="headerlink" href="#module-mindroot.coreplugins.usage.handlers" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.handlers.UsageTracker">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.handlers.</span></span><span class="sig-name descname"><span class="pre">UsageTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage" title="mindroot.coreplugins.usage.storage.UsageStorage"><span class="pre">UsageStorage</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/handlers.html#UsageTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.handlers.UsageTracker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.handlers.UsageTracker.get_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/handlers.html#UsageTracker.get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_cost" title="Link to this definition"></a></dt>
+<dd><p>Get the cost for a specific usage type and optional model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.handlers.UsageTracker.get_total_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_total_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/handlers.html#UsageTracker.get_total_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_total_cost" title="Link to this definition"></a></dt>
+<dd><p>Get total cost for a user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.handlers.UsageTracker.get_usage">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/handlers.html#UsageTracker.get_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.handlers.UsageTracker.get_usage" title="Link to this definition"></a></dt>
+<dd><p>Get usage records for a user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.handlers.UsageTracker.track_usage">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent" title="mindroot.coreplugins.usage.models.UsageEvent"><span class="pre">UsageEvent</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/handlers.html#UsageTracker.track_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.handlers.UsageTracker.track_usage" title="Link to this definition"></a></dt>
+<dd><p>Track a usage event and store it with calculated cost</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage.mod">
+<span id="mindroot-coreplugins-usage-mod-module"></span><h2>mindroot.coreplugins.usage.mod module<a class="headerlink" href="#module-mindroot.coreplugins.usage.mod" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_base_path">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_base_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_base_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_base_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_cost_summary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_cost_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_cost_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_cost_summary" title="Link to this definition"></a></dt>
+<dd><p>Get a cost summary for a user.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_cost_types">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_cost_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_cost_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_cost_types" title="Link to this definition"></a></dt>
+<dd><p>Get all registered cost types.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_daily_costs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_daily_costs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_daily_costs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_daily_costs" title="Link to this definition"></a></dt>
+<dd><p>Get daily cost breakdown for a user.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.get_usage_report">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">get_usage_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#get_usage_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.get_usage_report" title="Link to this definition"></a></dt>
+<dd><p>Get a detailed usage report for a user.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.register_cost_type">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">register_cost_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#register_cost_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.register_cost_type" title="Link to this definition"></a></dt>
+<dd><p>Register a new cost type for a plugin.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.set_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">set_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#set_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.set_cost" title="Link to this definition"></a></dt>
+<dd><p>Set the cost for a specific usage type.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.mod.track_usage">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.mod.</span></span><span class="sig-name descname"><span class="pre">track_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/mod.html#track_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.mod.track_usage" title="Link to this definition"></a></dt>
+<dd><p>Track usage for a plugin.</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage.models">
+<span id="mindroot-coreplugins-usage-models-module"></span><h2>mindroot.coreplugins.usage.models module<a class="headerlink" href="#module-mindroot.coreplugins.usage.models" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.CostTypeInfo">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.models.</span></span><span class="sig-name descname"><span class="pre">CostTypeInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/models.html#CostTypeInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.models.CostTypeInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.CostTypeInfo.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.CostTypeInfo.description" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.CostTypeInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.CostTypeInfo.name" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.CostTypeInfo.unit">
+<span class="sig-name descname"><span class="pre">unit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.CostTypeInfo.unit" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.models.</span></span><span class="sig-name descname"><span class="pre">UsageEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">timestamp:</span> <span class="pre">datetime.datetime,</span> <span class="pre">plugin_id:</span> <span class="pre">str,</span> <span class="pre">cost_type_id:</span> <span class="pre">str,</span> <span class="pre">quantity:</span> <span class="pre">float,</span> <span class="pre">metadata:</span> <span class="pre">Dict[str,</span> <span class="pre">Any],</span> <span class="pre">username:</span> <span class="pre">str,</span> <span class="pre">model_id:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">session_id:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">request_id:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/models.html#UsageEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.cost_type_id">
+<span class="sig-name descname"><span class="pre">cost_type_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.cost_type_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.metadata" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.model_id">
+<span class="sig-name descname"><span class="pre">model_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.model_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.plugin_id">
+<span class="sig-name descname"><span class="pre">plugin_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.plugin_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.quantity">
+<span class="sig-name descname"><span class="pre">quantity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.quantity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.request_id">
+<span class="sig-name descname"><span class="pre">request_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.request_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.session_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.timestamp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/models.html#UsageEvent.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.to_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.models.UsageEvent.username">
+<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.usage.models.UsageEvent.username" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage.reporting">
+<span id="mindroot-coreplugins-usage-reporting-module"></span><h2>mindroot.coreplugins.usage.reporting module<a class="headerlink" href="#module-mindroot.coreplugins.usage.reporting" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.reporting.UsageReport">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.reporting.</span></span><span class="sig-name descname"><span class="pre">UsageReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.usage.storage.UsageStorage" title="mindroot.coreplugins.usage.storage.UsageStorage"><span class="pre">UsageStorage</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/reporting.html#UsageReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.reporting.UsageReport" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.reporting.UsageReport.get_cost_summary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_cost_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/reporting.html#UsageReport.get_cost_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_cost_summary" title="Link to this definition"></a></dt>
+<dd><p>Generate a simplified cost summary for a user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.reporting.UsageReport.get_daily_costs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_daily_costs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/reporting.html#UsageReport.get_daily_costs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_daily_costs" title="Link to this definition"></a></dt>
+<dd><p>Generate daily cost breakdown for a user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.reporting.UsageReport.get_user_report">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_user_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/reporting.html#UsageReport.get_user_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.reporting.UsageReport.get_user_report" title="Link to this definition"></a></dt>
+<dd><p>Generate a complete usage report for a user</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage.router">
+<span id="mindroot-coreplugins-usage-router-module"></span><h2>mindroot.coreplugins.usage.router module<a class="headerlink" href="#module-mindroot.coreplugins.usage.router" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.get_base_path">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">get_base_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#get_base_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.get_base_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.get_user_daily">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">get_user_daily</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#get_user_daily"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.get_user_daily" title="Link to this definition"></a></dt>
+<dd><p>Get daily cost breakdown for a specific user</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.get_user_report">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">get_user_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#get_user_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.get_user_report" title="Link to this definition"></a></dt>
+<dd><p>Get usage report for a specific user</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.get_user_summary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">get_user_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#get_user_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.get_user_summary" title="Link to this definition"></a></dt>
+<dd><p>Get cost summary for a specific user</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.update_costs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">update_costs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#update_costs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.update_costs" title="Link to this definition"></a></dt>
+<dd><p>Update cost configuration</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.router.usage_admin">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.router.</span></span><span class="sig-name descname"><span class="pre">usage_admin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/router.html#usage_admin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.router.usage_admin" title="Link to this definition"></a></dt>
+<dd><p>Admin interface for usage tracking configuration</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage.storage">
+<span id="mindroot-coreplugins-usage-storage-module"></span><h2>mindroot.coreplugins.usage.storage module<a class="headerlink" href="#module-mindroot.coreplugins.usage.storage" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.usage.storage.</span></span><span class="sig-name descname"><span class="pre">UsageStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.get_total_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_total_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.get_total_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.get_total_cost" title="Link to this definition"></a></dt>
+<dd><p>Calculate total cost for a user within date range</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.get_usage">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.get_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.get_usage" title="Link to this definition"></a></dt>
+<dd><p>Get usage records for a user within date range</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.load_cost_types">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_cost_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.load_cost_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.load_cost_types" title="Link to this definition"></a></dt>
+<dd><p>Load cost type definitions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.load_costs">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_costs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.load_costs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.load_costs" title="Link to this definition"></a></dt>
+<dd><p>Load cost configurations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.save_cost">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.save_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.save_cost" title="Link to this definition"></a></dt>
+<dd><p>Save a cost configuration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.save_cost_type">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_cost_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.save_cost_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.save_cost_type" title="Link to this definition"></a></dt>
+<dd><p>Save a cost type definition</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.usage.storage.UsageStorage.store_event">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">store_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.usage.models.UsageEvent" title="mindroot.coreplugins.usage.models.UsageEvent"><span class="pre">UsageEvent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/usage/storage.html#UsageStorage.store_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.usage.storage.UsageStorage.store_event" title="Link to this definition"></a></dt>
+<dd><p>Store a usage event with its calculated cost</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.usage">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.coreplugins.usage" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

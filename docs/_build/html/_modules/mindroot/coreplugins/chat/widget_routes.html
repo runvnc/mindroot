@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.chat.widget_routes &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.chat.widget_routes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.chat.widget_routes</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.widget_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">widget_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.auth.api_key</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_api_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">public_route</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_chat_session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.session_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_session_data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+
+<div class="viewcode-block" id="WidgetTokenCreate">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WidgetTokenCreate</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">styling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="WidgetTokenResponse">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WidgetTokenResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">token</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">created_by</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">styling</span><span class="p">:</span> <span class="nb">dict</span></div>
+
+
+<div class="viewcode-block" id="create_widget_token">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.create_widget_token">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/widgets/create&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_widget_token</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">widget_request</span><span class="p">:</span> <span class="n">WidgetTokenCreate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new widget token.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verify the API key is valid</span>
+        <span class="n">api_key_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">verify_api_key</span><span class="p">(</span><span class="n">widget_request</span><span class="o">.</span><span class="n">api_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">api_key_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid API key&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Verify the agent exists</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">agent_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">get_agent_data</span><span class="p">(</span><span class="n">widget_request</span><span class="o">.</span><span class="n">agent_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">agent_data</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Agent not found&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Agent not found&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Get the current user</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+        
+        <span class="c1"># Create the widget token</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">create_widget_token</span><span class="p">(</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="n">widget_request</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+            <span class="n">agent_name</span><span class="o">=</span><span class="n">widget_request</span><span class="o">.</span><span class="n">agent_name</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="n">widget_request</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span>
+            <span class="n">created_by</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">widget_request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">styling</span><span class="o">=</span><span class="n">widget_request</span><span class="o">.</span><span class="n">styling</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+            <span class="s2">&quot;embed_url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">widget_request</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/chat/embed/</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">}</span>
+    
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="list_widget_tokens">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.list_widget_tokens">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/widgets/list&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_widget_tokens</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List widget tokens for the current user.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">list_widget_tokens</span><span class="p">(</span><span class="n">created_by</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">widgets</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="delete_widget_token">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.delete_widget_token">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/widgets/delete/</span><span class="si">{token}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_widget_token</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete a widget token.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verify the widget exists and belongs to the user</span>
+        <span class="n">widget_config</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">get_widget_config</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">widget_config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Widget token not found&quot;</span><span class="p">)</span>
+        
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+        <span class="k">if</span> <span class="n">widget_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_by&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Not authorized to delete this widget&quot;</span><span class="p">)</span>
+        
+        <span class="n">success</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">delete_widget_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Widget token deleted successfully&quot;</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Failed to delete widget token&quot;</span><span class="p">)</span>
+    
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_embed_script">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.get_embed_script">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/embed/</span><span class="si">{token}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nd">@public_route</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_embed_script</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate the secure embed script for a widget token.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Validate the widget token</span>
+        <span class="n">widget_config</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">get_widget_config</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">widget_config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Widget token not found&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Generate the embed JavaScript</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="n">widget_config</span><span class="p">[</span><span class="s2">&quot;base_url&quot;</span><span class="p">]</span>
+        <span class="n">styling</span> <span class="o">=</span> <span class="n">widget_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;styling&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="c1"># Create the embed script that doesn&#39;t expose the API key</span>
+        <span class="n">embed_script</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">(function() </span><span class="se">{{</span>
+<span class="s1">    const config = </span><span class="se">{{</span>
+<span class="s1">        baseUrl: &quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s1">&quot;,</span>
+<span class="s1">        token: &quot;</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s1">&quot;,</span>
+<span class="s1">        position: &quot;</span><span class="si">{</span><span class="n">styling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;bottom-right&#39;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;,</span>
+<span class="s1">        width: &quot;</span><span class="si">{</span><span class="n">styling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;400px&#39;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;,</span>
+<span class="s1">        height: &quot;</span><span class="si">{</span><span class="n">styling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;600px&#39;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;,</span>
+<span class="s1">        theme: &quot;</span><span class="si">{</span><span class="n">styling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;theme&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;dark&#39;</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;</span>
+<span class="s1">    </span><span class="se">}}</span><span class="s1">;</span>
+<span class="s1">    </span>
+<span class="s1">    let chatContainer = null;</span>
+<span class="s1">    let chatIcon = null;</span>
+<span class="s1">    let isLoaded = false;</span>
+<span class="s1">    </span>
+<span class="s1">    function createChatIcon() </span><span class="se">{{</span>
+<span class="s1">        if (chatIcon) return;</span>
+<span class="s1">        </span>
+<span class="s1">        chatIcon = document.createElement(&quot;div&quot;);</span>
+<span class="s1">        chatIcon.id = &quot;mindroot-chat-icon-&quot; + config.token;</span>
+<span class="s1">        chatIcon.innerHTML = &quot;💬&quot;;</span>
+<span class="s1">        </span>
+<span class="s1">        const iconStyles = </span><span class="se">{{</span>
+<span class="s1">            position: &quot;fixed&quot;,</span>
+<span class="s1">            bottom: &quot;20px&quot;,</span>
+<span class="s1">            right: config.position.includes(&quot;left&quot;) ? &quot;auto&quot; : &quot;20px&quot;,</span>
+<span class="s1">            left: config.position.includes(&quot;left&quot;) ? &quot;20px&quot; : &quot;auto&quot;,</span>
+<span class="s1">            width: &quot;60px&quot;,</span>
+<span class="s1">            height: &quot;60px&quot;,</span>
+<span class="s1">            background: &quot;#2196F3&quot;,</span>
+<span class="s1">            borderRadius: &quot;50%&quot;,</span>
+<span class="s1">            display: &quot;flex&quot;,</span>
+<span class="s1">            alignItems: &quot;center&quot;,</span>
+<span class="s1">            justifyContent: &quot;center&quot;,</span>
+<span class="s1">            cursor: &quot;pointer&quot;,</span>
+<span class="s1">            boxShadow: &quot;0 4px 12px rgba(0, 0, 0, 0.3)&quot;,</span>
+<span class="s1">            zIndex: &quot;10000&quot;,</span>
+<span class="s1">            fontSize: &quot;24px&quot;,</span>
+<span class="s1">            color: &quot;white&quot;,</span>
+<span class="s1">            transition: &quot;all 0.3s ease&quot;</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1">;</span>
+<span class="s1">        </span>
+<span class="s1">        Object.assign(chatIcon.style, iconStyles);</span>
+<span class="s1">        chatIcon.addEventListener(&quot;click&quot;, toggleChat);</span>
+<span class="s1">        document.body.appendChild(chatIcon);</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    </span>
+<span class="s1">    function createChatContainer() </span><span class="se">{{</span>
+<span class="s1">        if (chatContainer) return;</span>
+<span class="s1">        </span>
+<span class="s1">        chatContainer = document.createElement(&quot;div&quot;);</span>
+<span class="s1">        chatContainer.id = &quot;mindroot-chat-container-&quot; + config.token;</span>
+<span class="s1">        </span>
+<span class="s1">        const containerStyles = </span><span class="se">{{</span>
+<span class="s1">            position: &quot;fixed&quot;,</span>
+<span class="s1">            bottom: &quot;90px&quot;,</span>
+<span class="s1">            right: config.position.includes(&quot;left&quot;) ? &quot;auto&quot; : &quot;20px&quot;,</span>
+<span class="s1">            left: config.position.includes(&quot;left&quot;) ? &quot;20px&quot; : &quot;auto&quot;,</span>
+<span class="s1">            width: config.width,</span>
+<span class="s1">            height: config.height,</span>
+<span class="s1">            background: &quot;white&quot;,</span>
+<span class="s1">            borderRadius: &quot;12px&quot;,</span>
+<span class="s1">            boxShadow: &quot;0 8px 32px rgba(0, 0, 0, 0.3)&quot;,</span>
+<span class="s1">            zIndex: &quot;10001&quot;,</span>
+<span class="s1">            display: &quot;none&quot;,</span>
+<span class="s1">            overflow: &quot;hidden&quot;</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1">;</span>
+<span class="s1">        </span>
+<span class="s1">        Object.assign(chatContainer.style, containerStyles);</span>
+<span class="s1">        document.body.appendChild(chatContainer);</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    </span>
+<span class="s1">    function toggleChat() </span><span class="se">{{</span>
+<span class="s1">        if (!chatContainer) createChatContainer();</span>
+<span class="s1">        </span>
+<span class="s1">        const isVisible = chatContainer.style.display !== &quot;none&quot;;</span>
+<span class="s1">        </span>
+<span class="s1">        if (isVisible) </span><span class="se">{{</span>
+<span class="s1">            chatContainer.style.display = &quot;none&quot;;</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> else </span><span class="se">{{</span>
+<span class="s1">            if (!isLoaded) </span><span class="se">{{</span>
+<span class="s1">                // Create iframe and load the secure session</span>
+<span class="s1">                const iframe = document.createElement(&quot;iframe&quot;);</span>
+<span class="s1">                iframe.style.cssText = &quot;width: 100%; height: 100%; border: none; border-radius: 12px;&quot;;</span>
+<span class="s1">                iframe.src = config.baseUrl + &quot;/chat/widget/&quot; + config.token + &quot;/session&quot;;</span>
+<span class="s1">                chatContainer.appendChild(iframe);</span>
+<span class="s1">                isLoaded = true;</span>
+<span class="s1">            </span><span class="se">}}</span>
+<span class="s1">            chatContainer.style.display = &quot;block&quot;;</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    </span>
+<span class="s1">    function init() </span><span class="se">{{</span>
+<span class="s1">        if (document.readyState === &quot;loading&quot;) </span><span class="se">{{</span>
+<span class="s1">            document.addEventListener(&quot;DOMContentLoaded&quot;, function() </span><span class="se">{{</span>
+<span class="s1">                createChatIcon();</span>
+<span class="s1">            </span><span class="se">}}</span><span class="s1">);</span>
+<span class="s1">        </span><span class="se">}}</span><span class="s1"> else </span><span class="se">{{</span>
+<span class="s1">            createChatIcon();</span>
+<span class="s1">        </span><span class="se">}}</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">    </span>
+<span class="s1">    init();</span>
+<span class="se">}}</span><span class="s1">)();</span>
+<span class="s1">&#39;&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">embed_script</span><span class="p">,</span>
+            <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;application/javascript&quot;</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache, no-store, must-revalidate&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Pragma&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Expires&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="create_widget_session">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.create_widget_session">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/widget/</span><span class="si">{token}</span><span class="s2">/session&quot;</span><span class="p">)</span>
+<span class="nd">@public_route</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_widget_session</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a secure chat session for a widget token.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Validate the widget token</span>
+        <span class="n">widget_config</span> <span class="o">=</span> <span class="n">widget_manager</span><span class="o">.</span><span class="n">get_widget_config</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">widget_config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Widget token not found&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Verify the API key from the widget config</span>
+        <span class="n">api_key_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">verify_api_key</span><span class="p">(</span><span class="n">widget_config</span><span class="p">[</span><span class="s2">&quot;api_key&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">api_key_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid API key in widget configuration&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create mock user and generate session ID</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">MockUser</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">MockUser</span><span class="p">(</span><span class="n">api_key_data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+        <span class="n">session_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+        <span class="n">agent_name</span> <span class="o">=</span> <span class="n">widget_config</span><span class="p">[</span><span class="s2">&quot;agent_name&quot;</span><span class="p">]</span>
+        
+        <span class="c1"># Initialize the chat session (this was missing!)</span>
+        <span class="k">await</span> <span class="n">init_chat_session</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)</span>
+        
+        <span class="c1"># Create and save access token for authentication</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">coreplugins.jwt_auth.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_access_token</span>
+        <span class="n">token_data</span> <span class="o">=</span> <span class="n">create_access_token</span><span class="p">({</span><span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="n">api_key_data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]})</span>
+        <span class="k">await</span> <span class="n">save_session_data</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="s2">&quot;access_token&quot;</span><span class="p">,</span> <span class="n">token_data</span><span class="p">)</span>
+        
+        <span class="c1"># Now redirect to the session WITHOUT exposing the API key</span>
+        <span class="n">redirect_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/session/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">?embed=true&quot;</span>
+        
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">302</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Location&quot;</span><span class="p">:</span> <span class="n">redirect_url</span><span class="p">}</span>
+        <span class="p">)</span>
+    
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+[
+    {
+        "service_or_command_name": "stream_chat",
+        "flag": "no_flags",
+        "model": "claude-3-5-sonnet-20241022"
+    },
+    {
+        "service_or_command_name": "stream_chat",
+        "flag": "uncensored",
+        "model": "llama-3.1-405b-instruct"
+    }
+]

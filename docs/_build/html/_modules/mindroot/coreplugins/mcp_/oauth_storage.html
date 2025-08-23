@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.mcp_.oauth_storage &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.mcp_.oauth_storage</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.mcp_.oauth_storage</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;OAuth token storage implementation for MCP servers.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenStorage</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.shared.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuthToken</span><span class="p">,</span> <span class="n">OAuthClientInformationFull</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># Fallback if MCP not available</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">TokenStorage</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">OAuthToken</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientInformationFull</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="MCPTokenStorage">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MCPTokenStorage</span><span class="p">(</span><span class="n">TokenStorage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Token storage implementation for MCP OAuth flows.</span>
+<span class="sd">    </span>
+<span class="sd">    Stores tokens and client information in the MCP server configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mcp_manager</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="n">server_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span> <span class="o">=</span> <span class="n">mcp_manager</span>
+    
+<div class="viewcode-block" id="MCPTokenStorage.get_tokens">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_tokens">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OAuthToken</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored OAuth tokens for the server.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">OAuthToken</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">access_token</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="c1"># Parse token expiration</span>
+        <span class="n">expires_at</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">expires_at</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;+00:00&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        <span class="k">return</span> <span class="n">OAuthToken</span><span class="p">(</span>
+            <span class="n">access_token</span><span class="o">=</span><span class="n">server</span><span class="o">.</span><span class="n">access_token</span><span class="p">,</span>
+            <span class="n">refresh_token</span><span class="o">=</span><span class="n">server</span><span class="o">.</span><span class="n">refresh_token</span><span class="p">,</span>
+            <span class="n">expires_at</span><span class="o">=</span><span class="n">expires_at</span><span class="p">,</span>
+            <span class="n">scope</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">scopes</span><span class="p">)</span> <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">scopes</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPTokenStorage.set_tokens">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_tokens">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">set_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="n">OAuthToken</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store OAuth tokens for the server.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="c1"># Update server with token information</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">access_token</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">access_token</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">refresh_token</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">refresh_token</span>
+        
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="s1">&#39;expires_at&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tokens</span><span class="o">.</span><span class="n">expires_at</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">expires_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="s1">&#39;expires_in&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tokens</span><span class="o">.</span><span class="n">expires_in</span><span class="p">:</span>
+            <span class="c1"># Calculate expires_at from expires_in</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+            <span class="n">expires_at</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">tokens</span><span class="o">.</span><span class="n">expires_in</span><span class="p">)</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span> <span class="o">=</span> <span class="n">expires_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">if</span> <span class="n">tokens</span><span class="o">.</span><span class="n">scope</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">scopes</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Save configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="MCPTokenStorage.get_client_info">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_client_info">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_client_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OAuthClientInformationFull</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored OAuth client information.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">OAuthClientInformationFull</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">client_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="c1"># Create client info from server configuration</span>
+        <span class="n">client_info_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
+            <span class="s2">&quot;client_name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MindRoot MCP Client - </span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;redirect_uris&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span><span class="p">]</span> <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s2">&quot;grant_types&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span> <span class="s2">&quot;refresh_token&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;response_types&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">scopes</span><span class="p">)</span> <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">scopes</span> <span class="k">else</span> <span class="s2">&quot;user&quot;</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">client_secret</span><span class="p">:</span>
+            <span class="n">client_info_data</span><span class="p">[</span><span class="s2">&quot;client_secret&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">client_secret</span>
+        
+        <span class="k">return</span> <span class="n">OAuthClientInformationFull</span><span class="p">(</span><span class="o">**</span><span class="n">client_info_data</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPTokenStorage.set_client_info">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_client_info">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">set_client_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_info</span><span class="p">:</span> <span class="n">OAuthClientInformationFull</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store OAuth client information.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="c1"># Update server with client information</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">client_id</span> <span class="o">=</span> <span class="n">client_info</span><span class="o">.</span><span class="n">client_id</span>
+        
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">client_info</span><span class="p">,</span> <span class="s1">&#39;client_secret&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">client_info</span><span class="o">.</span><span class="n">client_secret</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">client_secret</span> <span class="o">=</span> <span class="n">client_info</span><span class="o">.</span><span class="n">client_secret</span>
+        
+        <span class="k">if</span> <span class="n">client_info</span><span class="o">.</span><span class="n">redirect_uris</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="o">=</span> <span class="n">client_info</span><span class="o">.</span><span class="n">redirect_uris</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">client_info</span><span class="o">.</span><span class="n">scope</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">scopes</span> <span class="o">=</span> <span class="n">client_info</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Save configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="MCPTokenStorage.clear_tokens">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.clear_tokens">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear stored tokens for the server.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">access_token</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">refresh_token</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1"># Save configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

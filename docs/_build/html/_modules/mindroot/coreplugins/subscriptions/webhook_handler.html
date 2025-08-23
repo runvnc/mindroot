@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.subscriptions.webhook_handler &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.subscriptions.webhook_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.subscriptions.webhook_handler</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.subscription_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.credit_integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">CreditIntegration</span>
+
+<div class="viewcode-block" id="WebhookHandler">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.webhook_handler.WebhookHandler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WebhookHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles webhook events from payment providers for subscription events&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">:</span> <span class="n">SubscriptionManager</span><span class="p">,</span> <span class="n">credit_integration</span><span class="p">:</span> <span class="n">CreditIntegration</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">credit_integration</span> <span class="o">=</span> <span class="n">credit_integration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed_events</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># For idempotency</span>
+    
+<div class="viewcode-block" id="WebhookHandler.handle_stripe_event">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.webhook_handler.WebhookHandler.handle_stripe_event">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_stripe_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process Stripe webhook events related to subscriptions</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            event: Stripe event object</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[Dict]: Processing result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">event_id</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+        <span class="n">event_type</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Stripe event: </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Ensure idempotency</span>
+        <span class="k">if</span> <span class="n">event_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_events</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Event already processed: </span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;already_processed&#39;</span><span class="p">,</span> <span class="s1">&#39;event_id&#39;</span><span class="p">:</span> <span class="n">event_id</span><span class="p">}</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;checkout.session.completed&#39;</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_checkout_completed</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;invoice.paid&#39;</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_invoice_paid</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;customer.subscription.updated&#39;</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_subscription_updated</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;customer.subscription.deleted&#39;</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_subscription_deleted</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ignoring unhandled event type: </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;ignored&#39;</span><span class="p">,</span> <span class="s1">&#39;event_id&#39;</span><span class="p">:</span> <span class="n">event_id</span><span class="p">,</span> <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">}</span>
+            
+            <span class="c1"># Mark as processed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processed_events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;event_id&#39;</span><span class="p">:</span> <span class="n">event_id</span><span class="p">,</span> <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">}</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing event </span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;event_id&#39;</span><span class="p">:</span> <span class="n">event_id</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_checkout_completed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle initial subscription creation and credit allocation&quot;&quot;&quot;</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># Only process subscription checkouts</span>
+        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;subscription&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ignoring non-subscription checkout: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">username</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;client_reference_id&#39;</span><span class="p">)</span>
+        <span class="n">subscription_id</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription&#39;</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">plan_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plan_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">username</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required subscription data: username=</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;subscription_id=</span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">, plan_id=</span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing required subscription data&quot;</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating subscription for </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">, plan: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create subscription record</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">plan_id</span><span class="o">=</span><span class="n">plan_id</span><span class="p">,</span>
+            <span class="n">provider_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;stripe&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;provider_subscription_id&#39;</span><span class="p">:</span> <span class="n">subscription_id</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Allocate initial credits</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Allocating </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="si">}</span><span class="s2"> credits to </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">credit_integration</span><span class="o">.</span><span class="n">allocate_subscription_credits</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">amount</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="p">,</span>
+                <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;subscription_created&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_id&#39;</span><span class="p">:</span> <span class="n">plan_id</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_name&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">&#39;stripe_session_id&#39;</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_invoice_paid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle subscription renewal and credit allocation&quot;&quot;&quot;</span>
+        <span class="n">invoice</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+        <span class="n">subscription_id</span> <span class="o">=</span> <span class="n">invoice</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscription_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invoice has no subscription: </span><span class="si">{</span><span class="n">invoice</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing paid invoice for subscription: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Get subscription details from Stripe</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to retrieve Stripe subscription: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+        
+        <span class="c1"># Find our internal subscription</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="s1">&#39;stripe&#39;</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for Stripe ID: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Update subscription period</span>
+        <span class="n">period_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="o">.</span><span class="n">current_period_start</span><span class="p">)</span>
+        <span class="n">period_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="o">.</span><span class="n">current_period_end</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating subscription period: </span><span class="si">{</span><span class="n">period_start</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">period_end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">update_subscription_period</span><span class="p">(</span>
+            <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+            <span class="n">period_start</span><span class="o">=</span><span class="n">period_start</span><span class="p">,</span>
+            <span class="n">period_end</span><span class="o">=</span><span class="n">period_end</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Allocate renewal credits</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">subscription</span><span class="o">.</span><span class="n">plan_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Allocating renewal credits: </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">credit_integration</span><span class="o">.</span><span class="n">allocate_subscription_credits</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">amount</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="p">,</span>
+                <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;subscription_renewed&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_id&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">plan_id</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_name&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">&#39;invoice_id&#39;</span><span class="p">:</span> <span class="n">invoice</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
+                    <span class="s1">&#39;period_start&#39;</span><span class="p">:</span> <span class="n">period_start</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                    <span class="s1">&#39;period_end&#39;</span><span class="p">:</span> <span class="n">period_end</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found for renewal: </span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_subscription_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle subscription updates (plan changes, etc.)&quot;&quot;&quot;</span>
+        <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+        <span class="n">subscription_id</span> <span class="o">=</span> <span class="n">stripe_subscription</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing subscription update: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="s1">&#39;stripe&#39;</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for update: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Update status</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">stripe_subscription</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+        <span class="n">cancel_at_period_end</span> <span class="o">=</span> <span class="n">stripe_subscription</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cancel_at_period_end&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">period_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="o">.</span><span class="n">current_period_end</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating subscription status: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">, &quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;cancel_at_period_end: </span><span class="si">{</span><span class="n">cancel_at_period_end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">subscription</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="n">subscription</span><span class="o">.</span><span class="n">cancel_at_period_end</span> <span class="o">=</span> <span class="n">cancel_at_period_end</span>
+        <span class="n">subscription</span><span class="o">.</span><span class="n">current_period_end</span> <span class="o">=</span> <span class="n">period_end</span>
+        
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">update_subscription_status</span><span class="p">(</span>
+            <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status</span>
+        <span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_subscription_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle subscription cancellation&quot;&quot;&quot;</span>
+        <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+        <span class="n">subscription_id</span> <span class="o">=</span> <span class="n">stripe_subscription</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing subscription deletion: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="s1">&#39;stripe&#39;</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for deletion: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cancelling subscription: </span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscription_manager</span><span class="o">.</span><span class="n">update_subscription_status</span><span class="p">(</span>
+            <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;canceled&#39;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

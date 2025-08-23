@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.email package &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.email package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/mindroot.coreplugins.email.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mindroot-coreplugins-email-package">
+<h1>mindroot.coreplugins.email package<a class="headerlink" href="#mindroot-coreplugins-email-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mindroot.coreplugins.email.email_provider">
+<span id="mindroot-coreplugins-email-email-provider-module"></span><h2>mindroot.coreplugins.email.email_provider module<a class="headerlink" href="#module-mindroot.coreplugins.email.email_provider" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.email_provider.EmailProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.email_provider.</span></span><span class="sig-name descname"><span class="pre">EmailProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/email_provider.html#EmailProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.email_provider.EmailProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.email_provider.EmailProvider.check_emails">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_emails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/email_provider.html#EmailProvider.check_emails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.email_provider.EmailProvider.check_emails" title="Link to this definition"></a></dt>
+<dd><p>Check for emails using IMAP</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.email_provider.EmailProvider.mark_as_processed">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mark_as_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/email_provider.html#EmailProvider.mark_as_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.email_provider.EmailProvider.mark_as_processed" title="Link to this definition"></a></dt>
+<dd><p>Mark messages as processed using IMAP</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.email_provider.EmailProvider.send_email">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_to_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/email_provider.html#EmailProvider.send_email"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.email_provider.EmailProvider.send_email" title="Link to this definition"></a></dt>
+<dd><p>Send an email using SMTP</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.email.imap_handler">
+<span id="mindroot-coreplugins-email-imap-handler-module"></span><h2>mindroot.coreplugins.email.imap_handler module<a class="headerlink" href="#module-mindroot.coreplugins.email.imap_handler" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.imap_handler.</span></span><span class="sig-name descname"><span class="pre">IMAPHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.build_search_criteria">
+<span class="sig-name descname"><span class="pre">build_search_criteria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.build_search_criteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.build_search_criteria" title="Link to this definition"></a></dt>
+<dd><p>Build IMAP search criteria string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.check_emails">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_emails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.check_emails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.check_emails" title="Link to this definition"></a></dt>
+<dd><p>Check for emails in specified folder with pagination using UIDs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">IMAP4</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.connect" title="Link to this definition"></a></dt>
+<dd><p>Establish IMAP connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.decode_text">
+<span class="sig-name descname"><span class="pre">decode_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.decode_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.decode_text" title="Link to this definition"></a></dt>
+<dd><p>Safely decode text bytes to string, trying multiple encodings</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.get_email_body">
+<span class="sig-name descname"><span class="pre">get_email_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email_message</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.get_email_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.get_email_body" title="Link to this definition"></a></dt>
+<dd><p>Extract email body with better encoding handling</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.imap_handler.IMAPHandler.mark_as_processed">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mark_as_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/imap_handler.html#IMAPHandler.mark_as_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.imap_handler.IMAPHandler.mark_as_processed" title="Link to this definition"></a></dt>
+<dd><p>Mark messages as processed/read using UIDs</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.email.mod">
+<span id="mindroot-coreplugins-email-mod-module"></span><h2>mindroot.coreplugins.email.mod module<a class="headerlink" href="#module-mindroot.coreplugins.email.mod" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.mod.check_emails">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.mod.</span></span><span class="sig-name descname"><span class="pre">check_emails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/mod.html#check_emails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.mod.check_emails" title="Link to this definition"></a></dt>
+<dd><p>Service to check for new emails</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.mod.init_email_provider">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.mod.</span></span><span class="sig-name descname"><span class="pre">init_email_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/mod.html#init_email_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.mod.init_email_provider" title="Link to this definition"></a></dt>
+<dd><p>Initialize the email provider with config</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.mod.send_email">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.mod.</span></span><span class="sig-name descname"><span class="pre">send_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/mod.html#send_email"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.mod.send_email" title="Link to this definition"></a></dt>
+<dd><p>Service to send an email</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>to</strong> – Recipient email address</p></li>
+<li><p><strong>subject</strong> – Email subject</p></li>
+<li><p><strong>body</strong> – Email body (can be plain text or HTML - auto-detected)</p></li>
+<li><p><strong>context</strong> – Optional context</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict with success status and error info</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.email.services">
+<span id="mindroot-coreplugins-email-services-module"></span><h2>mindroot.coreplugins.email.services module<a class="headerlink" href="#module-mindroot.coreplugins.email.services" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.services.check_emails">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.services.</span></span><span class="sig-name descname"><span class="pre">check_emails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/services.html#check_emails"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.services.check_emails" title="Link to this definition"></a></dt>
+<dd><p>Service to check for new emails with pagination support</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.services.get_provider">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.services.</span></span><span class="sig-name descname"><span class="pre">get_provider</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mindroot.coreplugins.email.email_provider.EmailProvider" title="mindroot.coreplugins.email.email_provider.EmailProvider"><span class="pre">EmailProvider</span></a></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/services.html#get_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.services.get_provider" title="Link to this definition"></a></dt>
+<dd><p>Get the provider instance, initializing with defaults if needed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.services.init_provider">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.services.</span></span><span class="sig-name descname"><span class="pre">init_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/services.html#init_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.services.init_provider" title="Link to this definition"></a></dt>
+<dd><p>Initialize the email provider with config</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.services.mark_as_processed">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.services.</span></span><span class="sig-name descname"><span class="pre">mark_as_processed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'INBOX'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/services.html#mark_as_processed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.services.mark_as_processed" title="Link to this definition"></a></dt>
+<dd><p>Service to mark emails as processed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.services.send_email_helper">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.services.</span></span><span class="sig-name descname"><span class="pre">send_email_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_to_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/services.html#send_email_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.services.send_email_helper" title="Link to this definition"></a></dt>
+<dd><p>Helper function to send an email (not a service)</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.email.smtp_handler">
+<span id="mindroot-coreplugins-email-smtp-handler-module"></span><h2>mindroot.coreplugins.email.smtp_handler module<a class="headerlink" href="#module-mindroot.coreplugins.email.smtp_handler" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.smtp_handler.SMTPHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.smtp_handler.</span></span><span class="sig-name descname"><span class="pre">SMTPHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/smtp_handler.html#SMTPHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.smtp_handler.SMTPHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.smtp_handler.SMTPHandler.connect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SMTP</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/smtp_handler.html#SMTPHandler.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.smtp_handler.SMTPHandler.connect" title="Link to this definition"></a></dt>
+<dd><p>Establish SMTP connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.smtp_handler.SMTPHandler.send_email">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_to_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/smtp_handler.html#SMTPHandler.send_email"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.smtp_handler.SMTPHandler.send_email" title="Link to this definition"></a></dt>
+<dd><p>Send an email</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mindroot-coreplugins-email-test-batch-module">
+<h2>mindroot.coreplugins.email.test_batch module<a class="headerlink" href="#mindroot-coreplugins-email-test-batch-module" title="Link to this heading"></a></h2>
+</section>
+<section id="mindroot-coreplugins-email-test-email-module">
+<h2>mindroot.coreplugins.email.test_email module<a class="headerlink" href="#mindroot-coreplugins-email-test-email-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mindroot.coreplugins.email.test_email_service">
+<span id="mindroot-coreplugins-email-test-email-service-module"></span><h2>mindroot.coreplugins.email.test_email_service module<a class="headerlink" href="#module-mindroot.coreplugins.email.test_email_service" title="Link to this heading"></a></h2>
+<p>Test script to verify email service functionality.
+Run this to test if email sending works with your configuration.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.email.test_email_service.test_email_service">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.email.test_email_service.</span></span><span class="sig-name descname"><span class="pre">test_email_service</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/email/test_email_service.html#test_email_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.email.test_email_service.test_email_service" title="Link to this definition"></a></dt>
+<dd><p>Test the email service with current environment configuration</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.email">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.coreplugins.email" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

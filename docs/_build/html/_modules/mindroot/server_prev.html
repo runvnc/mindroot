@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.server_prev &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.server_prev</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.server_prev</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.staticfiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticFiles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.templating</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jinja2Templates</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">plugins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.chatcontext</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.providers.hooks</span><span class="w"> </span><span class="kn">import</span> <span class="n">hook_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uvicorn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.middleware.cors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CORSMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.middleware.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHTTPMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.migrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_migrations</span>
+
+<span class="c1"># import for file copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">copyfile</span>
+
+<span class="c1"># Load environment variables from .env file at the start</span>
+<span class="c1"># Set override=True to make .env variables override existing environment variables</span>
+<span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="parse_args">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.parse_args">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_args</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run the server&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--port&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Port to run the server on&quot;</span><span class="p">)</span>
+    <span class="c1"># need to include optional admin-user and admin-password</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-u&quot;</span><span class="p">,</span> <span class="s2">&quot;--admin-user&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Admin username&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-pw&quot;</span><span class="p">,</span> <span class="s2">&quot;--admin-password&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Admin password&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_project_root">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.get_project_root">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_project_root</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span></div>
+
+    <span class="c1">#return Path(__file__).parent</span>
+
+<div class="viewcode-block" id="create_directories">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.create_directories">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_directories</span><span class="p">():</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">get_project_root</span><span class="p">()</span>
+    <span class="n">directories</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;imgs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;models&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;models/face&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;models/llm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;static/personas&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;personas&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;personas/local&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;personas/shared&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data/sessions&quot;</span>
+    <span class="p">]</span>
+    <span class="n">chatlog_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CHATLOG_DIR&#39;</span><span class="p">,</span> <span class="s1">&#39;data/chat&#39;</span><span class="p">)</span>
+    <span class="n">directories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chatlog_dir</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<span class="n">create_directories</span><span class="p">()</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mimetypes</span>
+<span class="n">mimetypes</span><span class="o">.</span><span class="n">add_type</span><span class="p">(</span><span class="s1">&#39;application/javascript&#39;</span><span class="p">,</span> <span class="s1">&#39;.js&#39;</span><span class="p">)</span>
+<span class="n">mimetypes</span><span class="o">.</span><span class="n">add_type</span><span class="p">(</span><span class="s1">&#39;text/css&#39;</span><span class="p">,</span> <span class="s1">&#39;.css&#39;</span><span class="p">)</span>
+
+<span class="n">templates</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">app</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">failed_plugins</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="setup_app_internal">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.setup_app_internal">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">setup_app_internal</span><span class="p">(</span><span class="n">app_</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">app</span><span class="p">,</span> <span class="n">templates</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">app_</span>
+    
+    <span class="n">root</span> <span class="o">=</span> <span class="n">get_project_root</span><span class="p">()</span>
+    <span class="n">source_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">await</span> <span class="n">plugins</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/static&quot;</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span><span class="p">),</span> <span class="n">follow_symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;static&quot;</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/imgs&quot;</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;imgs&quot;</span><span class="p">),</span> <span class="n">follow_symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;imgs&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;imgs/logo.png&quot;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;No logo found, copying default logo from coreplugins&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">))</span>
+        <span class="n">copyfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source_root</span> <span class="o">/</span> <span class="s2">&quot;coreplugins/home/static/imgs/logo.png&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;imgs/logo.png&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">app</span></div>
+
+
+<div class="viewcode-block" id="is_port_in_use">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.is_port_in_use">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_port_in_use</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="find_available_port">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.find_available_port">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_available_port</span><span class="p">(</span><span class="n">start_port</span><span class="o">=</span><span class="mi">8010</span><span class="p">,</span> <span class="n">max_attempts</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">start_port</span>
+    <span class="k">while</span> <span class="n">port</span> <span class="o">&lt;</span> <span class="n">start_port</span> <span class="o">+</span> <span class="n">max_attempts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_port_in_use</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">port</span>
+        <span class="n">port</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find an available port after </span><span class="si">{</span><span class="n">max_attempts</span><span class="si">}</span><span class="s2"> attempts&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HeaderMiddleware">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.HeaderMiddleware">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HeaderMiddleware</span><span class="p">(</span><span class="n">BaseHTTPMiddleware</span><span class="p">):</span>
+<div class="viewcode-block" id="HeaderMiddleware.dispatch">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.HeaderMiddleware.dispatch">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">call_next</span><span class="p">):</span>
+        <span class="c1"># First get the response from other middleware and routes</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        
+        <span class="c1"># Add security headers</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Content-Type-Options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nosniff&quot;</span>
+
+        <span class="c1">#chat widgets don&#39;t work if we do this</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MR_X_FRAME_SAMEORIGIN&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Frame-Options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SAMEORIGIN&quot;</span>
+
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-XSS-Protection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1; mode=block&quot;</span>
+        
+        <span class="k">return</span> <span class="n">response</span></div>
+</div>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../source/mindroot.html#mindroot.server_prev.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">app</span>
+    
+    <span class="c1"># Run migrations first, before anything else</span>
+    <span class="n">run_migrations</span><span class="p">()</span>
+
+    <span class="n">cmd_args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+    <span class="c1"># save ALL parsed args in app state</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="mi">8010</span>
+    <span class="k">if</span> <span class="n">cmd_args</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">cmd_args</span><span class="o">.</span><span class="n">port</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cmd_args</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span> 
+  
+    <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+    <span class="c1">#app.add_middleware(</span>
+    <span class="c1">#    CORSMiddleware,</span>
+    <span class="c1">#    allow_origins=[&quot;*&quot;]  # This one line is all you need to allow all origins</span>
+    <span class="c1">#)</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">cmd_args</span> <span class="o">=</span> <span class="n">cmd_args</span>
+
+    <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;pre_load&quot;</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">pre_load</span><span class="p">(</span><span class="n">app</span><span class="p">))</span> <span class="c1"># middleware</span>
+
+    <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;finished with pre_load, now calling uvicorn.run&quot;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">&quot;startup&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">setup_app</span><span class="p">():</span>
+        <span class="k">global</span> <span class="n">app</span>
+        <span class="k">await</span> <span class="n">setup_app_internal</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Plugin setup complete&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">&quot;shutdown&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">shutdown_event</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shutting down MindRoot&quot;</span><span class="p">)</span>
+        <span class="n">hook_manager</span><span class="o">.</span><span class="n">eject</span><span class="p">()</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+        <span class="n">CORSMiddleware</span><span class="p">,</span>
+        <span class="n">allow_origins</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span>  <span class="c1"># Replace with your specific origins for production</span>
+        <span class="n">allow_credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span>  <span class="c1"># Or specify: [&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, etc.]</span>
+        <span class="n">allow_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span>  <span class="c1"># Or specify required headers</span>
+        <span class="n">expose_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>  <span class="c1"># Headers that browsers are allowed to access</span>
+    <span class="p">)</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">HeaderMiddleware</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting server on port </span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">))</span>
+        <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">lifespan</span><span class="o">=</span><span class="s2">&quot;on&quot;</span><span class="p">,</span> <span class="n">timeout_graceful_shutdown</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error starting server: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

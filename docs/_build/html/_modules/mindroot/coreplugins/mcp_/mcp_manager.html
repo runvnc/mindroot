@@ -1,0 +1,1186 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.mcp_.mcp_manager &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.mcp_.mcp_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.mcp_.mcp_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncExitStack</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_qs</span><span class="p">,</span> <span class="n">urlparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.server_installer</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPServerInstaller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dynamic_commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPDynamicCommands</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.oauth_storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPTokenStorage</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientSession</span><span class="p">,</span> <span class="n">StdioServerParameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.stdio</span><span class="w"> </span><span class="kn">import</span> <span class="n">stdio_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.streamable_http</span><span class="w"> </span><span class="kn">import</span> <span class="n">streamablehttp_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.sse</span><span class="w"> </span><span class="kn">import</span> <span class="n">sse_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuthClientProvider</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.shared.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuthClientMetadata</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnyUrl</span>
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># MCP not installed yet</span>
+    <span class="n">ClientSession</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">StdioServerParameters</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stdio_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">streamablehttp_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sse_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientProvider</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientMetadata</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthToken</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientInformationFull</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">AnyUrl</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_substitute_secrets</span><span class="p">(</span><span class="n">config_item</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">secrets</span> <span class="ow">or</span> <span class="n">config_item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: No secrets to substitute or config_item is None, not substituting&quot;</span><span class="p">,</span> <span class="n">config_item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">config_item</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;String&quot;</span><span class="p">)</span>
+        <span class="c1"># Find all placeholders like &lt;SECRET_NAME&gt; or ${SECRET_NAME}</span>
+        <span class="c1"># This regex captures the name inside the brackets/braces</span>
+        <span class="n">placeholder_keys</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;([A-Z0-9_]+)&gt;|\${([A-Z0-9_]+)}&#39;</span><span class="p">,</span> <span class="n">config_item</span><span class="p">)</span>
+        <span class="c1"># Flatten list of tuples and remove empty matches</span>
+        <span class="n">keys_to_replace</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">placeholder_keys</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tpl</span> <span class="k">if</span> <span class="n">key</span><span class="p">]</span>
+
+        <span class="n">temp_item</span> <span class="o">=</span> <span class="n">config_item</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_to_replace</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">secrets</span><span class="p">:</span>
+                <span class="c1"># Replace both placeholder formats</span>
+                <span class="n">temp_item</span> <span class="o">=</span> <span class="n">temp_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">secrets</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">temp_item</span> <span class="o">=</span> <span class="n">temp_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">}}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">secrets</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">temp_item</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_item</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;List&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_substitute_secrets</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">secrets</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">config_item</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: Substituting secrets in config_item (dict)&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_substitute_secrets</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">secrets</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config_item</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">return</span> <span class="n">config_item</span>
+
+
+
+<div class="viewcode-block" id="MCPServer">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPServer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MCPServer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model for MCP server configuration&quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">command</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">transport</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;stdio&quot;</span>  <span class="c1"># stdio, sse, websocket, http</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for remote servers (legacy single URL)</span>
+    <span class="c1"># New: explicit provider vs transport URLs</span>
+    <span class="n">provider_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># e.g., https://mcp.notion.com</span>
+    <span class="n">transport_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># e.g., https://mcp.notion.com/sse or /mcp</span>
+    <span class="n">transport_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &quot;sse&quot; | &quot;streamable_http&quot;</span>
+    
+    <span class="c1"># OAuth 2.0 Configuration</span>
+    <span class="n">auth_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>  <span class="c1"># none, basic, oauth2</span>
+    <span class="n">auth_headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># for basic auth or custom headers</span>
+    
+    <span class="c1"># OAuth 2.0 specific fields</span>
+    <span class="n">authorization_server_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">client_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">client_secret</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># For confidential clients</span>
+    <span class="n">scopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">redirect_uri</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Token storage</span>
+    <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">refresh_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">token_expires_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># ISO format datetime string</span>
+    
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;disconnected&quot;</span>  <span class="c1"># connected, disconnected, error</span>
+    <span class="n">secrets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">capabilities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1"># Installation config (Enhanced features)</span>
+    <span class="n">install_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;manual&quot;</span>  <span class="c1"># uvx, pip, npm, manual</span>
+    <span class="n">install_package</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">auto_install</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">installed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="MCPManager">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MCPManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages MCP server connections and operations&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MCPServer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ClientSession</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AsyncExitStack</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Debug/diagnostics: short-lived cache of last discovered capabilities per server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installer</span> <span class="o">=</span> <span class="n">MCPServerInstaller</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span> <span class="o">=</span> <span class="n">MCPDynamicCommands</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/tmp/mcp_servers.json&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Set sessions reference for dynamic commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">set_sessions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+    <span class="c1"># ---- Serialization helpers ----</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_server_to_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert server model to plain JSON-serializable dict.</span>
+<span class="sd">        Ensures AnyUrl or other exotic types are stringified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start with pydantic dict (already basic types), but normalize URLs just in case</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;provider_url&quot;</span><span class="p">,</span> <span class="s2">&quot;transport_url&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization_server_url&quot;</span><span class="p">,</span> <span class="s2">&quot;redirect_uri&quot;</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>  <span class="c1"># e.g., AnyUrl</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1"># ---- URL/Transport helpers ----</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Infer provider_url, transport_url, and transport_type from server fields.</span>
+
+<span class="sd">        transport_type returns one of: &#39;sse&#39;, &#39;streamable_http&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Prefer explicit transport_url, otherwise fallback to legacy url</span>
+        <span class="n">turl</span> <span class="o">=</span> <span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">transport_url</span> <span class="ow">or</span> <span class="n">server</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">turl</span><span class="p">:</span>
+            <span class="c1"># As last resort, try to build from provider_url + transport</span>
+            <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">provider_url</span> <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span><span class="p">:</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">provider_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s1">&#39;sse&#39;</span><span class="p">:</span>
+                    <span class="n">turl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/sse&quot;</span>
+                <span class="k">elif</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;streamable_http&#39;</span><span class="p">):</span>
+                    <span class="n">turl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/mcp&quot;</span>
+        <span class="c1"># Determine type from suffix if not set</span>
+        <span class="n">ttype</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">transport_type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ttype</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">turl</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/sse&#39;</span><span class="p">):</span>
+                <span class="n">ttype</span> <span class="o">=</span> <span class="s1">&#39;sse&#39;</span>
+            <span class="k">elif</span> <span class="n">turl</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/mcp&#39;</span><span class="p">):</span>
+                <span class="n">ttype</span> <span class="o">=</span> <span class="s1">&#39;streamable_http&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># fallback based on declared transport</span>
+                <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s1">&#39;sse&#39;</span><span class="p">:</span>
+                    <span class="n">ttype</span> <span class="o">=</span> <span class="s1">&#39;sse&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ttype</span> <span class="o">=</span> <span class="s1">&#39;streamable_http&#39;</span>
+        <span class="c1"># Determine provider_url</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">provider_url</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">provider</span><span class="p">:</span>
+            <span class="c1"># Strip known suffixes</span>
+            <span class="k">if</span> <span class="n">turl</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/sse&#39;</span><span class="p">):</span>
+                <span class="n">provider</span> <span class="o">=</span> <span class="n">turl</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;/sse&#39;</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="n">turl</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/mcp&#39;</span><span class="p">):</span>
+                <span class="n">provider</span> <span class="o">=</span> <span class="n">turl</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;/mcp&#39;</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use scheme://host[:port]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlsplit</span>
+                    <span class="n">parts</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">turl</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">and</span> <span class="n">parts</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
+                        <span class="n">provider</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parts</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parts</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">provider</span> <span class="o">=</span> <span class="n">turl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">provider</span> <span class="o">=</span> <span class="n">turl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">),</span> <span class="n">turl</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">),</span> <span class="n">ttype</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_server_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">transport_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">transport_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persist inferred URL fields back to the server config if missing/outdated.&quot;&quot;&quot;</span>
+        <span class="n">srv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">srv</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">srv</span><span class="o">.</span><span class="n">provider_url</span><span class="p">:</span>
+            <span class="n">srv</span><span class="o">.</span><span class="n">provider_url</span> <span class="o">=</span> <span class="n">provider_url</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">srv</span><span class="o">.</span><span class="n">transport_url</span><span class="p">:</span>
+            <span class="n">srv</span><span class="o">.</span><span class="n">transport_url</span> <span class="o">=</span> <span class="n">transport_url</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">srv</span><span class="o">.</span><span class="n">transport_type</span><span class="p">:</span>
+            <span class="n">srv</span><span class="o">.</span><span class="n">transport_type</span> <span class="o">=</span> <span class="n">transport_type</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1">#if changed:</span>
+            <span class="c1">#self.save_config()</span>
+        <span class="c1"># Debug log</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: _update_server_urls: name=</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> provider=</span><span class="si">{</span><span class="n">provider_url</span><span class="si">}</span><span class="s2"> transport=</span><span class="si">{</span><span class="n">transport_url</span><span class="si">}</span><span class="s2"> type=</span><span class="si">{</span><span class="n">transport_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_oauth_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an OAuthClientProvider bound to this server using persistent storage.&quot;&quot;&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;BASE_URL&#39;</span><span class="p">,</span> <span class="s1">&#39;http://localhost:3000&#39;</span><span class="p">)</span>
+        <span class="n">callback_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/mcp_oauth_cb&quot;</span>
+        <span class="c1"># Storage persists tokens into the server record</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">MCPTokenStorage</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">OAuthClientMetadata</span><span class="p">(</span>
+            <span class="n">client_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;MindRoot - </span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="c1"># Use plain string to avoid pydantic AnyUrl leaking into persisted state</span>
+            <span class="n">redirect_uris</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">callback_url</span><span class="p">)],</span>
+            <span class="n">grant_types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span> <span class="s2">&quot;refresh_token&quot;</span><span class="p">],</span>
+            <span class="n">response_types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">],</span>
+            <span class="n">scope</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">scopes</span><span class="p">)</span> <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">scopes</span> <span class="k">else</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: -------------------------------------------------------&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: OAuth provider server_url:&quot;</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: OAuth provider metadata:&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
+        <span class="n">oauth_provider</span> <span class="o">=</span> <span class="n">OAuthClientProvider</span><span class="p">(</span>
+            <span class="n">server_url</span><span class="o">=</span><span class="n">provider_url</span><span class="p">,</span>
+            <span class="n">client_metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">storage</span><span class="o">=</span><span class="n">storage</span><span class="p">,</span>
+            <span class="n">redirect_handler</span><span class="o">=</span><span class="k">lambda</span> <span class="n">auth_url</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_oauth_redirect</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">auth_url</span><span class="p">),</span>
+            <span class="n">callback_handler</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_oauth_callback</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">oauth_provider</span>
+    
+<div class="viewcode-block" id="MCPManager.load_config">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.load_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load server configurations from file&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading MCP config: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.save_config">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.save_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save server configurations to file - LOCAL SERVERS ONLY&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Only save local servers (stdio transport with no URL)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Determining if server is local:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">provider_url</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">transport_url</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Saving local server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> to config&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_to_jsonable</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Skipping remote server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> from config&quot;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Saving </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> local servers to config (filtered out </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> remote servers)&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving MCP config: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_local_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if a server is local (should be persisted) or remote (session-only)&quot;&quot;&quot;</span>
+        <span class="c1"># Local servers use stdio transport and have no URL</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s2">&quot;stdio&quot;</span> <span class="ow">and</span> 
+                <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">url</span> <span class="ow">and</span> 
+                <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">provider_url</span> <span class="ow">and</span> 
+                <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">transport_url</span> <span class="ow">and</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>  <span class="c1"># Local servers must have a command</span>
+    
+<div class="viewcode-block" id="MCPManager.mark_server_as_installed">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.mark_server_as_installed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mark_server_as_installed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">registry_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark server as installed (in-memory only for remote servers)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">installed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">registry_id</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="s1">&#39;registry_id&#39;</span><span class="p">,</span> <span class="n">registry_id</span><span class="p">)</span>
+            
+            <span class="c1"># Only save to config if it&#39;s a local server</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span></div>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_persistent_oauth_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Background task to maintain persistent OAuth connection.&quot;&quot;&quot;</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Starting persistent OAuth connection task for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Determine transport details and ensure config is updated</span>
+            <span class="n">provider_url</span><span class="p">,</span> <span class="n">transport_url</span><span class="p">,</span> <span class="n">transport_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_urls</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_server_urls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">,</span> <span class="n">transport_url</span><span class="p">,</span> <span class="n">transport_type</span><span class="p">)</span>
+
+            <span class="c1"># Create OAuth client provider using persistent storage</span>
+            <span class="n">oauth_provider</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_oauth_provider</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent task connecting to </span><span class="si">{</span><span class="n">transport_url</span><span class="si">}</span><span class="s2"> via </span><span class="si">{</span><span class="n">transport_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Keep connection alive indefinitely using appropriate transport</span>
+            <span class="k">if</span> <span class="n">transport_type</span> <span class="o">==</span> <span class="s2">&quot;sse&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: About to create SSE client for </span><span class="si">{</span><span class="n">transport_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth provider: </span><span class="si">{</span><span class="n">oauth_provider</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="n">sse_client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">transport_url</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">oauth_provider</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">read</span><span class="p">,</span> <span class="n">write</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent SSE transport created for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: SSE read: </span><span class="si">{</span><span class="n">read</span><span class="si">}</span><span class="s2">, write: </span><span class="si">{</span><span class="n">write</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: About to create ClientSession&quot;</span><span class="p">)</span>
+                    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">(</span><span class="n">read</span><span class="p">,</span> <span class="n">write</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent session created for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Initialize the session</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: About to initialize session for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent session initialized for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Store session globally</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span>
+                        <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;connected&quot;</span>
+                        
+                        <span class="c1"># Get server capabilities</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">resources</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">prompts</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: About to list tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: listing tools&quot;</span><span class="p">)</span>
+                            <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: tools listed successfully&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: listing resources&quot;</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">resources</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_resources</span><span class="p">()</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error listing resources for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">resources</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: resources listed successfully&quot;</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: listing prompts&quot;</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">prompts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_prompts</span><span class="p">()</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error listing prompts for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Processing capabilities - tools type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2">, tools: </span><span class="si">{</span><span class="n">tools</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">]</span>
+                                <span class="c1">#&quot;resources&quot;: [res.dict() for res in resources.resources]</span>
+                            <span class="p">}</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Retrieved capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools&quot;</span><span class="p">)</span>
+                            
+                            <span class="c1"># Register dynamic commands</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Registering tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">register_tools</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Successfully registered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="c1"># Don&#39;t set status to error if we got this far - keep it connected</span>
+                            <span class="k">pass</span>
+                        
+                        <span class="c1">#self.save_config()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Capabilities saved for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, tools=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent SSE connection established for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># Keep the task alive until cancelled</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># Heartbeat every minute</span>
+                        <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent connection task cancelled for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="n">streamablehttp_client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">transport_url</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">oauth_provider</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">read</span><span class="p">,</span> <span class="n">write</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent StreamableHTTP transport created for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">(</span><span class="n">read</span><span class="p">,</span> <span class="n">write</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent session created for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Initialize the session</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: About to initialize session for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent session initialized for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Store session globally</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span>
+                        <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;connected&quot;</span>
+                        
+                        <span class="c1"># Get server capabilities</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+                            <span class="n">resources</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_resources</span><span class="p">()</span>
+                            <span class="n">prompts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_prompts</span><span class="p">()</span>
+                            
+                            <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">],</span>
+                                <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">resources</span><span class="o">.</span><span class="n">resources</span><span class="p">],</span>
+                                <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">prompt</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span><span class="o">.</span><span class="n">prompts</span><span class="p">]</span>
+                            <span class="p">}</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span>
+                            <span class="c1"># Save to diagnostics cache</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Retrieved capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools&quot;</span><span class="p">)</span>
+                            
+                            <span class="c1"># Register dynamic commands</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Registering tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">register_tools</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Successfully registered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="c1"># Don&#39;t set status to error if we got this far - keep it connected</span>
+                            <span class="k">pass</span>
+                        
+                        <span class="c1">#self.save_config()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Capabilities saved for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, tools=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Capabilities saved for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, tools=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent StreamableHTTP connection established for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        
+                        <span class="c1"># Keep the task alive until cancelled</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># Heartbeat every minute</span>
+                        <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Persistent connection task cancelled for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span>
+                        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERROR: Persistent OAuth connection failed for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+            <span class="k">raise</span>
+
+<div class="viewcode-block" id="MCPManager.connect_oauth_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_oauth_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect_oauth_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect to an OAuth-protected MCP server.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connecting to OAuth server:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MCP_AVAILABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;MCP SDK not installed. Run: pip install mcp&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server not found:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot; Known:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">auth_type</span> <span class="o">!=</span> <span class="s2">&quot;oauth2&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server is not configured for OAuth2:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># Fallback to regular connection</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Starting OAuth connection for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+       
+
+        <span class="c1"># If already connected via background task, return success</span>
+        <span class="k">if</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> already connected via background task&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        
+        <span class="c1"># Clean up any old background task</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Start background task for persistent connection</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_persistent_oauth_connection</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="c1"># Check if connection was successful or OAuth flow started</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span> <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;connected&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Background OAuth connection successful for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Background OAuth connection failed for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Check if the background task had an exception</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth flow started for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, frontend should handle popup&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># This will trigger the OAuth flow check in the calling code</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: (X) Background OAuth connection failed for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error starting OAuth connection for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_oauth_redirect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">auth_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle OAuth redirect - store auth URL for frontend to handle.&quot;&quot;&quot;</span>
+        <span class="n">flow_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Creating OAuth flow for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Auth URL: </span><span class="si">{</span><span class="n">auth_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">flow_id</span><span class="p">,</span>
+            <span class="s2">&quot;auth_url&quot;</span><span class="p">:</span> <span class="n">auth_url</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;awaiting_authorization&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth flow created with ID: </span><span class="si">{</span><span class="n">flow_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OAuth flow started for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">auth_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_handle_oauth_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle OAuth callback - get code from pending flow.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: No pending OAuth flow found for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Available flows: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No pending OAuth flow for server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="c1"># Wait for callback to be processed by frontend</span>
+        <span class="n">max_wait</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># 5 minutes</span>
+        <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Waiting for OAuth callback for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">, current status: </span><span class="si">{</span><span class="n">flow</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">while</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awaiting_authorization&quot;</span> <span class="ow">and</span> <span class="n">wait_time</span> <span class="o">&lt;</span> <span class="n">max_wait</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">wait_time</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Log every 10 seconds</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Still waiting for OAuth callback... </span><span class="si">{</span><span class="n">wait_time</span><span class="si">}</span><span class="s2">s elapsed&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">wait_time</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth wait completed. Status: </span><span class="si">{</span><span class="n">flow</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, wait_time: </span><span class="si">{</span><span class="n">wait_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span>
+ 
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: OAuth flow completed for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">, code: </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">, state: </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;callback_received&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;OAuth authorization timed out or failed&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Clean up flow</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">code</span><span class="p">,</span> <span class="n">state</span>
+
+<div class="viewcode-block" id="MCPManager.start_oauth_flow">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.start_oauth_flow">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_oauth_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start OAuth flow and return authorization URL.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Found existing OAuth flow for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awaiting_authorization&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Returning existing auth URL: </span><span class="si">{</span><span class="n">flow</span><span class="p">[</span><span class="s1">&#39;auth_url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;auth_url&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.complete_oauth_flow">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.complete_oauth_flow">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">complete_oauth_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Complete OAuth flow with authorization code.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: complete_oauth_flow: server_name &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; not in pending flows. Available: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;callback_received&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: complete_oauth_flow: marked callback_received for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">, state=</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2"> code_present=</span><span class="si">{</span><span class="nb">bool</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.get_oauth_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.get_oauth_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_oauth_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get OAuth flow status for a server.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: get_oauth_status: Server not found: &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;. Known servers: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Server not found&quot;</span><span class="p">}</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="n">status</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+            <span class="s2">&quot;auth_type&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">auth_type</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s2">&quot;has_tokens&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">access_token</span><span class="p">),</span>
+            <span class="s2">&quot;token_expires_at&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">token_expires_at</span><span class="p">,</span>
+            <span class="s2">&quot;scopes&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">scopes</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">:</span>
+            <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_oauth_flows</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="n">status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;flow_id&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;auth_url&quot;</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;auth_url&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">flow</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awaiting_authorization&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">}</span>
+        <span class="c1"># Add diagnostics: last capabilities snapshot size</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">:</span>
+                <span class="n">status</span><span class="p">[</span><span class="s2">&quot;last_tools_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">return</span> <span class="n">status</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.connect_remote_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_remote_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect_remote_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect to a remote MCP server (HTTP/SSE).&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;remote connect&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MCP_AVAILABLE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;import error&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;MCP SDK not installed. Run: pip install mcp&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server not found:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot; Known:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">auth_type</span> <span class="o">==</span> <span class="s2">&quot;oauth2&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;connect oauth server:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_oauth_server</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        
+        <span class="c1"># Handle basic auth or no auth remote servers</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create exit stack for cleanup</span>
+            <span class="n">exit_stack</span> <span class="o">=</span> <span class="n">AsyncExitStack</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">exit_stack</span>
+            
+            <span class="c1"># Determine transport details</span>
+            <span class="n">provider_url</span><span class="p">,</span> <span class="n">transport_url</span><span class="p">,</span> <span class="n">transport_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_urls</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_server_urls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">provider_url</span><span class="p">,</span> <span class="n">transport_url</span><span class="p">,</span> <span class="n">transport_type</span><span class="p">)</span>
+            
+            <span class="c1"># Use appropriate transport based on type</span>
+            <span class="k">if</span> <span class="n">transport_type</span> <span class="o">==</span> <span class="s2">&quot;sse&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connecting via SSE to: </span><span class="si">{</span><span class="n">transport_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">transport</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">sse_client</span><span class="p">(</span><span class="n">transport_url</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># SSE returns (read, write) - no session_id</span>
+                <span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">ClientSession</span><span class="p">(</span><span class="n">transport</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">transport</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># streamable_http</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connecting via StreamableHTTP to: </span><span class="si">{</span><span class="n">transport_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">transport</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">streamablehttp_client</span><span class="p">(</span><span class="n">transport_url</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># StreamableHTTP returns (read, write, get_session_id)</span>
+                <span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">ClientSession</span><span class="p">(</span><span class="n">transport</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">transport</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Session created:&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+            <span class="c1"># Initialize the session</span>
+            <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+            
+            <span class="c1"># Store session</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span>
+            
+            <span class="c1"># Update server status and capabilities</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;connected&quot;</span>
+            
+            <span class="c1"># Get server capabilities</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+                <span class="n">resources</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_resources</span><span class="p">()</span>
+                <span class="n">prompts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_prompts</span><span class="p">()</span>
+                
+                <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">],</span>
+                    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">resources</span><span class="o">.</span><span class="n">resources</span><span class="p">],</span>
+                    <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">prompt</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span><span class="o">.</span><span class="n">prompts</span><span class="p">]</span>
+                <span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_capabilities</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: connect_remote_server: saved capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, tools=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error connecting to remote server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="MCPManager.sanity_test">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.sanity_test">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sanity_test</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Basic MCP Manager sanity test&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;OK&quot;</span></div>
+
+
+<div class="viewcode-block" id="MCPManager.install_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.install_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Install an MCP server&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;manual&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;uvx&quot;</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">installer</span><span class="o">.</span><span class="n">install_with_uvx</span><span class="p">(</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">install_package</span> <span class="ow">or</span> <span class="n">server_name</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">server</span><span class="o">.</span><span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;pip&quot;</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">installer</span><span class="o">.</span><span class="n">install_with_pip</span><span class="p">(</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">install_package</span> <span class="ow">or</span> <span class="n">server_name</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">server</span><span class="o">.</span><span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;npm&quot;</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">installer</span><span class="o">.</span><span class="n">install_with_npm</span><span class="p">(</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">install_package</span> <span class="ow">or</span> <span class="n">server_name</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">server</span><span class="o">.</span><span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;npx&quot;</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">installer</span><span class="o">.</span><span class="n">install_with_npx</span><span class="p">(</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">install_package</span> <span class="ow">or</span> <span class="n">server_name</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">installed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># Only save config for local servers</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">success</span></div>
+
+
+<div class="viewcode-block" id="MCPManager.connect_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect to an MCP server&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connecting to MCP server:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server not found:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot; Known:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ClientSession</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;MCP SDK not installed. Run: pip install mcp&quot;</span><span class="p">)</span>
+        
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: secrets passed in connect_server:&quot;</span><span class="p">,</span> <span class="n">secrets</span><span class="p">)</span> 
+        <span class="c1"># Auto-install if needed</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">auto_install</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">installed</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto-installing </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">install_server</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to auto-install </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Route to appropriate connection method based on transport</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;sse&quot;</span><span class="p">,</span> <span class="s2">&quot;websocket&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">server</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_remote_server</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s2">&quot;stdio&quot;</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+                <span class="c1"># Combine stored secrets with any provided for this session</span>
+                <span class="n">all_secrets</span> <span class="o">=</span> <span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">secrets</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">secrets</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">secrets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                            <span class="n">all_secrets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+                <span class="n">final_command</span> <span class="o">=</span> <span class="n">_substitute_secrets</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">all_secrets</span><span class="p">)</span>
+                <span class="n">args_</span> <span class="o">=</span> <span class="n">_substitute_secrets</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="n">all_secrets</span><span class="p">)</span>
+                <span class="n">env_</span> <span class="o">=</span> <span class="n">_substitute_secrets</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">env</span><span class="p">),</span> <span class="n">all_secrets</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_secrets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">env_</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                            <span class="n">env_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">final_env</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">env_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="n">final_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args_</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: server secrets:&quot;</span><span class="p">,</span> <span class="n">server</span><span class="o">.</span><span class="n">secrets</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: connect_server: final_command=</span><span class="si">{</span><span class="n">final_command</span><span class="si">}</span><span class="s2">, final_args=</span><span class="si">{</span><span class="n">final_args</span><span class="si">}</span><span class="s2">, final_env=</span><span class="si">{</span><span class="n">final_env</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Create server parameters</span>
+                <span class="n">server_params</span> <span class="o">=</span> <span class="n">StdioServerParameters</span><span class="p">(</span>
+                    <span class="n">command</span><span class="o">=</span><span class="n">final_command</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="n">final_args</span><span class="p">,</span>
+                    <span class="n">env</span><span class="o">=</span><span class="n">final_env</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Create exit stack for cleanup</span>
+                <span class="n">exit_stack</span> <span class="o">=</span> <span class="n">AsyncExitStack</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">exit_stack</span>
+                
+                <span class="c1"># Connect via stdio</span>
+                <span class="n">stdio_transport</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">stdio_client</span><span class="p">(</span><span class="n">server_params</span><span class="p">)</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Create session</span>
+                <span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_async_context</span><span class="p">(</span>
+                    <span class="n">ClientSession</span><span class="p">(</span><span class="n">stdio_transport</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stdio_transport</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Initialize the session</span>
+                <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+                
+                <span class="c1"># Store session</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span>
+                
+                <span class="c1"># Update server status and capabilities</span>
+                <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;connected&quot;</span>
+                
+                <span class="c1"># Get server capabilities</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools from </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Tool: </span><span class="si">{</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">tool</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+                    <span class="c1">#resources = await session.list_resources()</span>
+                    <span class="c1">#prompts = await session.list_prompts()</span>
+                    
+                    <span class="c1"># Safely serialize tools, resources, and prompts</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">tools_data</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">tools_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Failed to serialize tool </span><span class="si">{</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="c1"># Fallback to basic info</span>
+                                <span class="n">tools_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                                    <span class="s2">&quot;inputSchema&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;inputSchema&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                                <span class="p">})</span>
+                        
+                        <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">tools_data</span> <span class="c1">#,</span>
+                            <span class="c1">#&quot;resources&quot;: [res.dict() for res in resources.resources],</span>
+                            <span class="c1">#&quot;prompts&quot;: [prompt.dict() for prompt in prompts.prompts]</span>
+                        <span class="p">}</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Saved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools to server capabilities&quot;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Error serializing capabilities: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="c1"># Set basic capabilities even if serialization fails</span>
+                        <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)}</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">],</span>
+                            <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                            <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[]</span>
+                        <span class="p">}</span>
+                    
+                    <span class="c1"># Register dynamic commands</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Registering tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">register_tools</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Successfully registered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting capabilities for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Only save config for local servers</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+                
+                <span class="k">return</span> <span class="kc">True</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: Error connecting to MCP server:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error connecting to </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="MCPManager.test_local_server_capabilities">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.test_local_server_capabilities">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_local_server_capabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">env</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">secrets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test connection to a local MCP server and return its capabilities.</span>
+<span class="sd">        </span>
+<span class="sd">        This method creates a temporary server, connects to it, extracts capabilities,</span>
+<span class="sd">        and cleans up. It follows the same pattern as the working catalog system.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            name: Display name for the server (for error messages)</span>
+<span class="sd">            command: Command to run the MCP server</span>
+<span class="sd">            args: Arguments for the command</span>
+<span class="sd">            env: Environment variables</span>
+<span class="sd">            secrets: A dictionary of secrets to substitute into placeholders.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict containing success status, message, and capabilities (tools, resources, prompts)</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If MCP SDK is not available or connection fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MCP_AVAILABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;MCP SDK not installed. Run: pip install mcp&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Command is required for local servers&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Generate unique temporary server name</span>
+        <span class="n">temp_server_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;temp_local_test_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create temporary server configuration (following catalog pattern)</span>
+            <span class="n">temp_server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">temp_server_name</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Temporary local server for testing </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+                <span class="n">transport</span><span class="o">=</span><span class="s2">&quot;stdio&quot;</span><span class="p">,</span>  <span class="c1"># Explicitly set stdio transport</span>
+                <span class="c1"># Explicitly do NOT set url field for local servers</span>
+            <span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_server_capabilities: Created temp server </span><span class="si">{</span><span class="n">temp_server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Add temporary server to MCP manager</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">temp_server_name</span><span class="p">,</span> <span class="n">temp_server</span><span class="p">)</span>
+            
+            <span class="c1"># Connect to server (this will use stdio connection)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">temp_server_name</span><span class="p">,</span> <span class="n">secrets</span><span class="o">=</span><span class="n">secrets</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to connect to local server&quot;</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_server_capabilities: Connected to </span><span class="si">{</span><span class="n">temp_server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Get server capabilities</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">temp_server_name</span><span class="p">]</span>
+            <span class="n">tools</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">resources</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">prompts</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_server_capabilities: Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resources, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompts&quot;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Successfully connected to local server. Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resources, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompts.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">tools</span><span class="p">,</span>
+                <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="n">resources</span><span class="p">,</span>
+                <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="n">prompts</span>
+            <span class="p">}</span>
+            
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Clean up temporary server</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">temp_server_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">temp_server_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">temp_server_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_server</span><span class="p">(</span><span class="n">temp_server_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_server_capabilities: Cleaned up </span><span class="si">{</span><span class="n">temp_server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">cleanup_error</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error cleaning up temporary server </span><span class="si">{</span><span class="n">temp_server_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cleanup_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MCPManager.disconnect_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.disconnect_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Disconnect from an MCP server&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Attempting to disconnect from MCP server:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Disconnecting from server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> with session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Unregister dynamic commands</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">unregister_server_tools</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                
+                <span class="c1"># Cancel background task if it exists</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Cancelling background task for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                
+                <span class="c1"># Clean up exit stack (this will close the session)</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_stacks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;disconnected&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+                
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error disconnecting from </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No active session found for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Trying to disconnect with </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> as server name.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">unregister_server_tools</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+ 
+                <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;disconnected&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.call_tool">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.call_tool">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call a tool on an MCP server&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> not connected&quot;</span><span class="p">)</span>
+        
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">call_tool</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.read_resource">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.read_resource">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a resource from an MCP server&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> not connected&quot;</span><span class="p">)</span>
+        
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">read_resource</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    
+<div class="viewcode-block" id="MCPManager.add_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.add_server">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new server configuration&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="c1"># Only save config for local servers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>    </div>
+
+<div class="viewcode-block" id="MCPManager.remove_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.remove_server">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a server configuration&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="c1"># Disconnect first if connected</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+                <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

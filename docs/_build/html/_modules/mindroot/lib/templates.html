@@ -1,0 +1,677 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.templates &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.templates</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.templates</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jinja2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">FileSystemLoader</span><span class="p">,</span> <span class="n">ChoiceLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_enabled</span><span class="p">,</span> <span class="n">get_plugin_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.parent_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_parent_templates_env</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="c1"># Import l8n translation functions</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace_placeholders</span><span class="p">,</span> <span class="n">get_localized_file_path</span><span class="p">,</span> <span class="n">extract_plugin_root</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.mod</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_request_language</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_fallback_language</span>
+    <span class="n">L8N_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n not available: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">L8N_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># TODO: get_parent_templates_env(plugins):</span>
+<span class="c1"># jinja2 environment containing only 1 template per plugin file name,</span>
+<span class="c1"># the first one that is found from plugins with that name,</span>
+<span class="c1"># need to look at how jinja2 loaders work</span>
+
+<div class="viewcode-block" id="get_current_language">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.get_current_language">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_current_language</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the current language for translation.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;en&#39;</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Try to get language from request context</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">get_request_language</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span> <span class="k">if</span> <span class="n">lang</span> <span class="k">else</span> <span class="s1">&#39;en&#39;</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting current language: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;en&#39;</span></div>
+
+
+<div class="viewcode-block" id="apply_translations_to_content">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.apply_translations_to_content">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_translations_to_content</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">template_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply l8n translations to template content.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        content (str): Template content with __TRANSLATE_key__ placeholders</span>
+<span class="sd">        template_path (str): Path to the template file for plugin context</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str or None: Content with translations applied, or None if translations are incomplete</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">content</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">content</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_language</span> <span class="o">=</span> <span class="n">get_current_language</span><span class="p">()</span>
+        
+        <span class="c1"># If we have a template path, use it for plugin context</span>
+        <span class="k">if</span> <span class="n">template_path</span><span class="p">:</span>
+            <span class="c1"># Check if translation failed (missing translations)</span>
+            <span class="n">translated</span> <span class="o">=</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">current_language</span><span class="p">,</span> <span class="n">template_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">translated</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Signal that translations are incomplete</span>
+            <span class="k">return</span> <span class="n">translated</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fallback: try to replace without plugin context</span>
+            <span class="k">return</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">current_language</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error applying translations: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">content</span></div>
+
+
+<div class="viewcode-block" id="check_for_localized_template">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.check_for_localized_template">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_for_localized_template</span><span class="p">(</span><span class="n">template_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a localized version of a template exists.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_path (str): Original template path</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to localized template if it exists, None otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">localized_path</span> <span class="o">=</span> <span class="n">get_localized_file_path</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">localized_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">localized_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error checking for localized template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="load_template_with_translation">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.load_template_with_translation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_template_with_translation</span><span class="p">(</span><span class="n">template_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a template and apply translations if available and complete.</span>
+<span class="sd">    </span>
+<span class="sd">    If translations are missing for the current language, this function</span>
+<span class="sd">    will fall back to serving the original template to avoid showing</span>
+<span class="sd">    __TRANSLATE_key__ placeholders to users.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_path (str): Path to the template file</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Template content with translations applied, or original content</span>
+<span class="sd">             if translations are incomplete for the current language</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First check for localized version</span>
+    <span class="n">localized_path</span> <span class="o">=</span> <span class="n">check_for_localized_template</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">localized_path</span><span class="p">:</span>
+        <span class="c1"># Load localized template and apply translations</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">localized_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            
+            <span class="c1"># Apply translations - if None is returned, translations are incomplete</span>
+            <span class="n">translated_content</span> <span class="o">=</span> <span class="n">apply_translations_to_content</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">localized_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">translated_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Fall back to original template</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Falling back to original template due to missing translations: </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">translated_content</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading localized template </span><span class="si">{</span><span class="n">localized_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Fallback to original template</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">content</span>  <span class="c1"># Don&#39;t apply translations to original templates</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading template </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="setup_template_environment">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.setup_template_environment">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_template_environment</span><span class="p">(</span><span class="n">plugins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up Jinja2 environment with multiple template paths.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Environment: Configured Jinja2 environment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">plugins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">template_paths</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;templates&#39;</span><span class="p">])</span>  <span class="c1"># Start with default templates directory</span>
+    
+    <span class="c1"># Add plugin template paths</span>
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plugin_path</span><span class="p">:</span>
+            <span class="c1"># Add main template directory</span>
+            <span class="n">template_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_dir</span><span class="p">):</span>
+                <span class="n">template_paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">template_dir</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Added template path: </span><span class="si">{</span><span class="n">template_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Add inject directory</span>
+            <span class="n">inject_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;inject&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">inject_dir</span><span class="p">):</span>
+                <span class="n">template_paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inject_dir</span><span class="p">)</span>
+                <span class="c1"># change color to green background, white text</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[92m&quot;</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Added inject path: </span><span class="si">{</span><span class="n">inject_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># reset color</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Add parent directories to handle absolute paths</span>
+            <span class="n">template_paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">))</span>
+            <span class="n">template_paths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)))</span>
+    
+    <span class="c1"># Create environment with multiple loaders</span>
+    <span class="n">loaders</span> <span class="o">=</span> <span class="p">[</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">template_paths</span><span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">ChoiceLoader</span><span class="p">(</span><span class="n">loaders</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initialized Jinja2 environment with paths: </span><span class="si">{</span><span class="n">template_paths</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">env</span></div>
+
+
+<span class="c1"># Create a Jinja2 environment with multiple template paths</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">setup_template_environment</span><span class="p">()</span>
+<span class="n">coreplugins</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="s1">&#39;chat&#39;</span><span class="p">,</span> <span class="s1">&#39;chat_avatar&#39;</span><span class="p">,</span> <span class="s1">&#39;agent&#39;</span><span class="p">,</span> <span class="s1">&#39;jwt_auth&#39;</span><span class="p">,</span> <span class="s1">&#39;home&#39;</span><span class="p">,</span> <span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;persona&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;user_service&#39;</span><span class="p">,</span> <span class="s1">&#39;usage&#39;</span><span class="p">,</span> <span class="s1">&#39;subscriptions&#39;</span><span class="p">,</span> <span class="s1">&#39;credits&#39;</span><span class="p">,</span> <span class="s1">&#39;startup&#39;</span><span class="p">]</span>
+<span class="n">parent_env</span> <span class="o">=</span> <span class="n">get_parent_templates_env</span><span class="p">(</span><span class="n">coreplugins</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="find_parent_template">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.find_parent_template">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">find_parent_template</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find parent template in enabled plugins.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        page_name (str): Name of the template page</span>
+<span class="sd">        plugins (list): List of enabled plugins</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Template path if found, None otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: Could not find path for plugin: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+            
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Checking plugin: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">, path: </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">template_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found parent template in plugin: </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1"># Convert to relative path from one of our template roots</span>
+            <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+                    <span class="n">rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">template_dir</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using template path: </span><span class="si">{</span><span class="n">rel_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">rel_path</span>
+            <span class="c1"># Fallback to absolute path if no relative path works</span>
+            <span class="k">return</span> <span class="n">template_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No parent template found in plugin: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">, template path was </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Try alternate locations</span>
+            <span class="n">alt_paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+            <span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">alt_path</span> <span class="ow">in</span> <span class="n">alt_paths</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">alt_path</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found parent template in alternate location: </span><span class="si">{</span><span class="n">alt_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="c1"># Convert to relative path</span>
+                    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+                            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">alt_path</span><span class="p">,</span> <span class="n">template_dir</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">):</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using template path: </span><span class="si">{</span><span class="n">rel_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                                <span class="k">return</span> <span class="n">rel_path</span>
+                    <span class="k">return</span> <span class="n">alt_path</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="find_plugin_template">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.find_plugin_template">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">find_plugin_template</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find a template in a plugin&#39;s templates directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        page_name (str): Name of the template page</span>
+<span class="sd">        plugins (list): List of enabled plugins</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: (template_path, template_obj) if found, (None, None) otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: Could not find path for plugin: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+            
+        <span class="c1"># Try to find the template in the plugin&#39;s templates directory</span>
+        <span class="n">template_paths</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">plugin_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;templates&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">template_paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found template in plugin: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="c1"># Try to get the template from the environment</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Convert to relative path from one of our template roots</span>
+                    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+                            <span class="n">rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">template_dir</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">):</span>
+                                <span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">rel_path</span><span class="p">)</span>
+                                <span class="k">return</span> <span class="n">rel_path</span><span class="p">,</span> <span class="n">template</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="load_plugin_templates">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.load_plugin_templates">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_plugin_templates</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load templates from plugins with translation support.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        page_name (str): Name of the template page</span>
+<span class="sd">        plugins (list): List of enabled plugins</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of template info dictionaries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">templates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: Could not find path for plugin: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+ 
+            <span class="c1">#print(f&quot;Loading templates from plugin: {plugin}, path: {plugin_path}&quot;)</span>
+            <span class="c1"># plugin might be name rather than directory</span>
+            <span class="c1"># get the last part of the path to check also</span>
+            <span class="c1">#</span>
+            <span class="n">last_part</span> <span class="o">=</span> <span class="n">plugin_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># Check inject templates</span>
+            <span class="n">inject_paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;inject&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;inject&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;inject&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">last_part</span><span class="p">,</span> <span class="s1">&#39;inject&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+            <span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">inject_paths</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                    <span class="c1"># Load template content with translation support</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">load_template_with_translation</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                        <span class="c1">#print(f&quot;Found inject template at: {path}&quot;)</span>
+                        <span class="n">templates</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;inject&#39;</span><span class="p">,</span> <span class="s1">&#39;template&#39;</span><span class="p">:</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)})</span>
+                        <span class="k">break</span>
+                <span class="c1">#else:</span>
+                <span class="c1">#</span>
+                <span class="c1">#    print(f&quot;Inject template not found at: {path}&quot;)</span>
+            
+            <span class="c1"># Check override templates</span>
+            <span class="n">override_paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">last_part</span><span class="p">,</span> <span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s1">.jinja2&#39;</span><span class="p">)</span>
+            <span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">override_paths</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                    <span class="c1"># Load template content with translation support</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">load_template_with_translation</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                        <span class="c1">#print(f&quot;Found override template at: {path}&quot;)</span>
+                        <span class="n">templates</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="s1">&#39;template&#39;</span><span class="p">:</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)})</span>
+                        <span class="k">break</span>
+                        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading plugin template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">templates</span></div>
+
+
+<div class="viewcode-block" id="collect_content">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.collect_content">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">collect_content</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">blocks</span><span class="p">,</span> <span class="n">template_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect content from child templates.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template: Jinja2 template object</span>
+<span class="sd">        blocks (list): List of block names</span>
+<span class="sd">        template_type (str): Type of template (&#39;inject&#39; or &#39;override&#39;)</span>
+<span class="sd">        data (dict): Template context data</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Collected content by block</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="n">block</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;inject&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;override&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">template</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">block_content</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block</span><span class="p">](</span><span class="n">template</span><span class="o">.</span><span class="n">new_context</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+ 
+            <span class="k">if</span> <span class="n">template_type</span> <span class="o">==</span> <span class="s1">&#39;override&#39;</span><span class="p">:</span>
+                <span class="n">content</span><span class="p">[</span><span class="n">block</span><span class="p">][</span><span class="s1">&#39;override&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">block_content</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">content</span><span class="p">[</span><span class="n">block</span><span class="p">][</span><span class="s1">&#39;inject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">content</span></div>
+
+
+<div class="viewcode-block" id="render_combined_template">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.render_combined_template">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">render_combined_template</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render combined template with injections and overrides, including translation support.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        page_name (str): Name of the template page</span>
+<span class="sd">        plugins (list): List of enabled plugins</span>
+<span class="sd">        context (dict): Template context data (can be None)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Rendered HTML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load parent template with translation support</span>
+    <span class="n">parent_template</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">parent_template_path</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Find the parent template file path</span>
+    <span class="c1"># We need to search through the parent_env loaders to find the actual file</span>
+    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">parent_env</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+            <span class="n">potential_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">template_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">.jinja2&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">potential_path</span><span class="p">):</span>
+                <span class="n">parent_template_path</span> <span class="o">=</span> <span class="n">potential_path</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">parent_template_path</span><span class="p">:</span>
+            <span class="k">break</span>
+    
+    <span class="k">if</span> <span class="n">parent_template_path</span><span class="p">:</span>
+        <span class="c1"># Load the parent template with translation support</span>
+        <span class="n">parent_content</span> <span class="o">=</span> <span class="n">load_template_with_translation</span><span class="p">(</span><span class="n">parent_template_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent_content</span><span class="p">:</span>
+            <span class="c1"># Create a template object from the translated content</span>
+            <span class="n">parent_template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">parent_content</span><span class="p">)</span>
+            <span class="c1"># We need to preserve the original template name for Jinja2 inheritance</span>
+            <span class="n">parent_template</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">.jinja2&quot;</span>
+            <span class="n">parent_template</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">parent_template_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fallback to loading without translation if something went wrong</span>
+            <span class="n">parent_template</span> <span class="o">=</span> <span class="n">parent_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">.jinja2&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Fallback to original method if we can&#39;t find the file path</span>
+        <span class="n">parent_template</span> <span class="o">=</span> <span class="n">parent_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">.jinja2&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parent_template&quot;</span><span class="p">,</span> <span class="n">parent_template</span><span class="p">)</span>
+    <span class="n">child_templates</span> <span class="o">=</span> <span class="k">await</span> <span class="n">load_plugin_templates</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">)</span>
+    <span class="n">parent_blocks</span> <span class="o">=</span> <span class="n">parent_template</span><span class="o">.</span><span class="n">blocks</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parent_blocks&quot;</span><span class="p">,</span> <span class="n">parent_blocks</span><span class="p">)</span>
+    <span class="n">all_content</span> <span class="o">=</span> <span class="p">{</span><span class="n">block</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;inject&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;override&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">parent_blocks</span><span class="p">}</span>
+    
+    <span class="c1"># Ensure context is a dictionary</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;child_templates&quot;</span><span class="p">,</span> <span class="n">child_templates</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">child_template_info</span> <span class="ow">in</span> <span class="n">child_templates</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calling collect_content&quot;</span><span class="p">)</span>
+        <span class="n">child_content</span> <span class="o">=</span> <span class="k">await</span> <span class="n">collect_content</span><span class="p">(</span>
+            <span class="n">child_template_info</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">],</span>
+            <span class="n">parent_blocks</span><span class="p">,</span>
+            <span class="n">child_template_info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+            <span class="n">context</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">child_content</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]:</span>
+                <span class="n">all_content</span><span class="p">[</span><span class="n">block</span><span class="p">][</span><span class="s1">&#39;override&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_content</span><span class="p">[</span><span class="n">block</span><span class="p">][</span><span class="s1">&#39;inject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;inject&#39;</span><span class="p">])</span>
+
+    <span class="n">combined_template_str</span> <span class="o">=</span> <span class="s1">&#39;{</span><span class="si">% e</span><span class="s1">xtends layout_template %}</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">all_content</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">all_content</span><span class="p">[</span><span class="n">block</span><span class="p">][</span><span class="s1">&#39;override&#39;</span><span class="p">]:</span>
+            <span class="n">combined_template_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">% block </span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1"> %</span><span class="se">}}\n</span><span class="s1">    </span><span class="se">{{{{</span><span class="s1"> combined_</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1">_override|safe </span><span class="se">}}}}\n{{</span><span class="s1">% endblock %</span><span class="se">}}\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">combined_template_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="s1">% block </span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1"> %</span><span class="se">}}\n</span><span class="s1">  </span><span class="se">{{{{</span><span class="s1"> super() </span><span class="se">}}}}\n</span><span class="s1">   </span><span class="se">{{{{</span><span class="s1"> combined_</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1">_inject|safe </span><span class="se">}}}}\n{{</span><span class="s1">% endblock %</span><span class="se">}}\n</span><span class="s1">&#39;</span>
+
+    <span class="n">combined_child_template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">combined_template_str</span><span class="p">)</span>
+
+    <span class="n">combined_inject</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">combined_override</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">all_content</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;inject&#39;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;inject&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># print with a yellow background, black text</span>
+            <span class="c1"># report details including page name and content injected</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[103m&quot;</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Injecting into block </span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s2"> on page </span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2"> with content:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;inject&#39;</span><span class="p">])</span>
+            <span class="c1"># reset color</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+            <span class="n">combined_inject</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;combined_</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1">_inject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;inject&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">combined_inject</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;combined_</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1">_inject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="s1">&#39;override&#39;</span> <span class="ow">in</span> <span class="n">content</span> <span class="ow">and</span> <span class="n">content</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]:</span>
+            <span class="n">combined_override</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;combined_</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s1">_override&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;in render combined, context is&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+    <span class="n">rendered_html</span> <span class="o">=</span> <span class="n">combined_child_template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+        <span class="n">layout_template</span><span class="o">=</span><span class="n">parent_template</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">combined_inject</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">combined_override</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">context</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rendered_html</span></div>
+
+
+<div class="viewcode-block" id="render_direct_template">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.render_direct_template">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">render_direct_template</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a template directly without combining with a parent template, with translation support.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_path (str): Path to the template</span>
+<span class="sd">        context (dict): Template context data</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Rendered HTML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure context is a dictionary</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Check if we need to load with translation support</span>
+        <span class="n">template_full_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">template_dir</span> <span class="ow">in</span> <span class="n">loader</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+                <span class="n">potential_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">template_dir</span><span class="p">,</span> <span class="n">template_path</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">potential_path</span><span class="p">):</span>
+                    <span class="n">template_full_path</span> <span class="o">=</span> <span class="n">potential_path</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">template_full_path</span><span class="p">:</span>
+                <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">template_full_path</span><span class="p">:</span>
+            <span class="c1"># Load with translation support</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">load_template_with_translation</span><span class="p">(</span><span class="n">template_full_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>
+        
+        <span class="c1"># Fallback to normal template loading</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error rendering template </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;h1&gt;Error rendering template&lt;/h1&gt;&lt;p&gt;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/p&gt;&quot;</span></div>
+
+
+<div class="viewcode-block" id="render">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.templates.render">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a template with plugin injections, overrides, and translation support.</span>
+<span class="sd">    If no parent template exists, tries to render a template directly from a plugin.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        page_name (str): Name of the template page</span>
+<span class="sd">        context (dict): Template context data (can be None)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Rendered HTML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># print with white background red text</span>
+    <span class="c1"># report details including page name and plugins enabled</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[101m&quot;</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Rendering page </span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2"> with plugins enabled:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Ensure context is a dictionary</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+    
+    <span class="c1"># First try to render with the combined template approach</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parent_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">.jinja2&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error finding parent template for </span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No parent template found for </span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">, trying direct rendering: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Try to find and render a template directly from a plugin</span>
+        <span class="n">template_path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="k">await</span> <span class="n">find_plugin_template</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">template_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">render_direct_template</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;h1&gt;Template Not Found&lt;/h1&gt;&lt;p&gt;No template found for &#39;</span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">&#39;&lt;/p&gt;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">render_combined_template</span><span class="p">(</span><span class="n">page_name</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error rendering </span><span class="si">{</span><span class="n">page_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;h1&gt;Error Rendering Page&lt;/h1&gt;&lt;p&gt;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;pre&gt;</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&lt;/pre&gt;&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

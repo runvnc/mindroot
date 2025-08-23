@@ -1,0 +1,571 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.chat.router &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.chat.router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.chat.router</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">Query</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLResponse</span><span class="p">,</span> <span class="n">RedirectResponse</span><span class="p">,</span> <span class="n">JSONResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">File</span><span class="p">,</span> <span class="n">UploadFile</span><span class="p">,</span> <span class="n">Form</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sse_starlette.sse</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventSourceResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessageParts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span><span class="p">,</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_chat_session</span><span class="p">,</span> <span class="n">send_message_to_agent</span><span class="p">,</span> <span class="n">subscribe_to_agent_messages</span><span class="p">,</span> <span class="n">get_chat_history</span><span class="p">,</span> <span class="n">run_task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.auth.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_enabled</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatcontext</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_context</span><span class="p">,</span> <span class="n">ChatContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span><span class="p">,</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.session_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_session_data</span><span class="p">,</span> <span class="n">save_session_data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatcontext</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatContext</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.auth.api_key</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_api_key</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+
+<span class="c1"># Global dictionary to store tasks</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="cancel_chat">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.cancel_chat">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/</span><span class="si">{task_id}</span><span class="s2">/cancel&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_chat</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;cancel_chat&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to cancel task&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_context</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="n">debug_box</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#if task_id in tasks:</span>
+    <span class="c1">#    task = tasks[task_id]</span>
+    <span class="c1">#    await asyncio.sleep(0.75)</span>
+    <span class="c1">#    task.cancel()</span>
+    <span class="c1">#    del tasks[task_id]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Task cancelled successfully&quot;</span><span class="p">}</span></div>
+
+    <span class="c1">#else:</span>
+    <span class="c1">#    raise HTTPException(status_code=404, detail=&quot;Task not found&quot;)</span>
+
+<div class="viewcode-block" id="context1">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.context1">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/context1/</span><span class="si">{log_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">context1</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_context</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;ok&quot;</span></div>
+
+
+
+<span class="c1"># need to serve persona images from ./personas/local/[persona_path]/avatar.png</span>
+<div class="viewcode-block" id="get_persona_avatar">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_persona_avatar">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/personas/{persona_path:path}/avatar.png&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_persona_avatar</span><span class="p">(</span><span class="n">persona_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="c1"># Check if this is a registry persona with deduplicated assets</span>
+    <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;registry/&quot;</span><span class="p">):</span>
+        <span class="n">persona_json_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/persona.json&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_json_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_json_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">persona_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                
+                <span class="c1"># Check if persona has asset hashes (deduplicated storage)</span>
+                <span class="n">asset_hashes</span> <span class="o">=</span> <span class="n">persona_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;asset_hashes&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="s2">&quot;avatar&quot;</span> <span class="ow">in</span> <span class="n">asset_hashes</span><span class="p">:</span>
+                    <span class="c1"># Redirect to deduplicated asset endpoint</span>
+                    <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/assets/</span><span class="si">{</span><span class="n">asset_hashes</span><span class="p">[</span><span class="s1">&#39;avatar&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error checking for deduplicated assets: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Handle registry personas: registry/owner/name</span>
+    <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;registry/&#39;</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/avatar.png&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Legacy support: check local first, then shared</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/local/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/avatar.png&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/registry/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/avatar.png&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="n">resolved</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;File not found: &quot;</span> <span class="o">+</span> <span class="n">resolved</span><span class="p">}</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">image_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content</span><span class="o">=</span><span class="n">image_bytes</span><span class="p">,</span> 
+        <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=3600&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Content-Disposition&quot;</span><span class="p">:</span> <span class="s2">&quot;inline; filename=avatar.png&quot;</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_persona_faceref">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_persona_faceref">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/personas/{persona_path:path}/faceref.png&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_persona_faceref</span><span class="p">(</span><span class="n">persona_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="c1"># Check if this is a registry persona with deduplicated assets</span>
+    <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;registry/&quot;</span><span class="p">):</span>
+        <span class="n">persona_json_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/persona.json&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_json_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_json_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">persona_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                
+                <span class="c1"># Check if persona has asset hashes (deduplicated storage)</span>
+                <span class="n">asset_hashes</span> <span class="o">=</span> <span class="n">persona_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;asset_hashes&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="s2">&quot;faceref&quot;</span> <span class="ow">in</span> <span class="n">asset_hashes</span><span class="p">:</span>
+                    <span class="c1"># Redirect to deduplicated asset endpoint</span>
+                    <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/assets/</span><span class="si">{</span><span class="n">asset_hashes</span><span class="p">[</span><span class="s1">&#39;faceref&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error checking for deduplicated assets: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Handle registry personas: registry/owner/name</span>
+    <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;registry/&#39;</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/faceref.png&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Legacy support: check local first, then shared</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/local/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/faceref.png&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;personas/registry/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/faceref.png&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="c1"># Fallback to avatar if faceref doesn&#39;t exist</span>
+        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/chat/personas/</span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">/avatar.png&quot;</span><span class="p">)</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">image_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content</span><span class="o">=</span><span class="n">image_bytes</span><span class="p">,</span> 
+        <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=3600&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Content-Disposition&quot;</span><span class="p">:</span> <span class="s2">&quot;inline; filename=faceref.png&quot;</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="chat_events">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_events">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/events&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_events</span><span class="p">(</span><span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">EventSourceResponse</span><span class="p">(</span><span class="k">await</span> <span class="n">subscribe_to_agent_messages</span><span class="p">(</span><span class="n">log_id</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="send_message">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.send_message">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/send&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_message</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message_parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">MessageParts</span><span class="p">]</span> <span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;send_message&quot;</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_context</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    <span class="n">debug_box</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+    <span class="c1">#context = ChatContext(command_manager, service_manager, user=user.user)</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">send_message_to_agent</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="n">message_parts</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">))</span>
+    <span class="c1">#task = asyncio.create_task(send_message_to_agent(log_id, message_parts, user=user))</span>
+     
+    <span class="n">task_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    
+    <span class="n">tasks</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;task_id&quot;</span><span class="p">:</span> <span class="n">task_id</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="get_chat_html">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_chat_html">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/agent/</span><span class="si">{agent_name}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">HTMLResponse</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_chat_html</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">embed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="kc">False</span><span class="p">)):</span>
+    <span class="c1"># Handle API key authentication if provided</span>
+    <span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">user_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">verify_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">user_data</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid API key&quot;</span><span class="p">)</span>
+            <span class="c1"># Create a mock user object for API key users</span>
+            <span class="k">class</span><span class="w"> </span><span class="nc">MockUser</span><span class="p">:</span>
+                <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">MockUser</span><span class="p">(</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid API key&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Use regular authentication</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+    
+    <span class="n">log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Init chat with user&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Init chat with </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">init_chat_session</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;access_token&quot;</span><span class="p">):</span>
+        <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;Access token found in request state, saving to session file&quot;</span><span class="p">)</span>
+        <span class="n">access_token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">access_token</span>
+        <span class="k">await</span> <span class="n">save_session_data</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;access_token&quot;</span><span class="p">,</span> <span class="n">access_token</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>
+        <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;Access token saved to session file&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;No access token found in request state&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># If embed mode is requested, redirect to embed session</span>
+    <span class="k">if</span> <span class="n">embed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/session/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">?embed=true&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Regular redirect</span>
+    <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/session/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_session">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.make_session">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/makesession/</span><span class="si">{agent_name}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new chat session for the specified agent.</span>
+<span class="sd">    Returns a redirect to the chat session page.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    
+    <span class="k">await</span> <span class="n">init_chat_session</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span> <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="chat_history">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_history">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/history/</span><span class="si">{agent_name}</span><span class="s2">/</span><span class="si">{log_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_history</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_chat_history</span><span class="p">(</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;trying to load from system session&quot;</span><span class="p">)</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_chat_history</span><span class="p">(</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;system&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error loading from system session:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">history</span></div>
+
+
+<div class="viewcode-block" id="chat_session">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_session">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/session/</span><span class="si">{agent_name}</span><span class="s2">/</span><span class="si">{log_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">embed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="kc">False</span><span class="p">)):</span>
+    <span class="c1"># Check authentication (API key or regular user)</span>
+    <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">)</span>
+
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">get_agent_data</span><span class="p">(</span><span class="n">agent_name</span><span class="p">)</span>  
+    <span class="n">persona</span> <span class="o">=</span> <span class="n">agent</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona is:&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
+    <span class="n">auth_token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">auth_token</span> <span class="o">=</span> <span class="k">await</span> <span class="n">load_session_data</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;access_token&quot;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">chat_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;agent_name&quot;</span><span class="p">:</span> <span class="n">agent_name</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span> <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">persona</span> <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">auth_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">chat_data</span><span class="p">[</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auth_token</span>
+    
+    <span class="c1"># Add embed mode flag</span>
+    <span class="k">if</span> <span class="n">embed</span><span class="p">:</span>
+        <span class="n">chat_data</span><span class="p">[</span><span class="s2">&quot;embed_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">render</span><span class="p">(</span><span class="s1">&#39;chat&#39;</span><span class="p">,</span> <span class="n">chat_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HTMLResponse</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+
+<span class="c1"># use starlette staticfiles to mount ./imgs</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/published&quot;</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">published_dir</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;published_indices&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TaskRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.TaskRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="run_task_route">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.run_task_route">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/task/</span><span class="si">{agent_name}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_task_route</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task_request</span><span class="p">:</span> <span class="n">TaskRequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a task for an agent with the given instructions.</span>
+<span class="sd">    This endpoint allows programmatic interaction with agents without a full chat session.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - agent_name: The name of the agent to run the task</span>
+<span class="sd">    - instructions: The instructions/prompt to send to the agent</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - JSON with results and log_id for tracking</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+    
+    <span class="n">instructions</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">task_request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">task_request</span><span class="o">.</span><span class="n">instructions</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">instructions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No instructions provided&quot;</span><span class="p">}</span>
+    
+    <span class="n">task_result</span><span class="p">,</span> <span class="n">full_results</span><span class="p">,</span> <span class="n">log_id</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_task</span><span class="p">(</span><span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span> <span class="n">agent_name</span><span class="o">=</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">task_result</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">full_results</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">log_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="n">task_result</span><span class="p">,</span> <span class="s2">&quot;full_results&quot;</span><span class="p">:</span> <span class="n">full_results</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="upload_file">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.upload_file">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/upload&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Upload a file and store it in a user-specific directory.</span>
+<span class="sd">    Returns the file path that can be used in messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+    
+    <span class="c1"># Create user uploads directory if it doesn&#39;t exist</span>
+    <span class="n">user_upload_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/users/</span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s2">/uploads/</span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">user_upload_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1"># Generate a safe filename to prevent path traversal</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_upload_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    
+    <span class="c1"># Save the file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
+    
+    <span class="c1"># Return the file information</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+        <span class="s2">&quot;mime_type&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">content_type</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatlog</span><span class="w"> </span><span class="kn">import</span> <span class="n">count_tokens_for_log_id</span>
+
+<div class="viewcode-block" id="get_token_count">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_token_count">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/tokens&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_token_count</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get token counts for a chat log identified by log_id, including any delegated tasks.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - log_id: The log ID to count tokens for</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - JSON with token counts or error message if log not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">token_counts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">count_tokens_for_log_id</span><span class="p">(</span><span class="n">log_id</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">token_counts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Chat log with ID </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;token_counts&quot;</span><span class="p">:</span> <span class="n">token_counts</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="delete_chat_session">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.delete_chat_session">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/del_session/</span><span class="si">{log_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_chat_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete a chat session by log_id, including chat logs, context files, and all child sessions.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - log_id: The log ID of the session to delete</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - JSON with success status and message</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Try to determine the agent name from the context file first</span>
+        <span class="n">agent_name</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+        <span class="n">context_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CHATCONTEXT_DIR&#39;</span><span class="p">,</span> <span class="s1">&#39;data/context&#39;</span><span class="p">)</span>
+        <span class="n">context_file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">context_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">/context_</span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">.json&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">context_file_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">context_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">context_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">agent_name</span> <span class="o">=</span> <span class="n">context_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;agent_name&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found agent name &#39;</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">&#39; from context file for log_id </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading context file </span><span class="si">{</span><span class="n">context_file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># If we still don&#39;t have the agent name, try to find the chatlog file</span>
+        <span class="k">if</span> <span class="n">agent_name</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatlog</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_chatlog_file</span>
+            <span class="n">chatlog_path</span> <span class="o">=</span> <span class="n">find_chatlog_file</span><span class="p">(</span><span class="n">log_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">chatlog_path</span><span class="p">:</span>
+                <span class="c1"># Extract agent from path: data/chat/{user}/{agent}/chatlog_{log_id}.json</span>
+                <span class="n">path_parts</span> <span class="o">=</span> <span class="n">chatlog_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">agent_name</span> <span class="o">=</span> <span class="n">path_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Agent is the second-to-last part</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found agent name &#39;</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">&#39; from chatlog file path for log_id </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">await</span> <span class="n">ChatContext</span><span class="o">.</span><span class="n">delete_session_by_id</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">cascade</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Chat session </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2"> deleted successfully&quot;</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error deleting chat session </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Error deleting chat session: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_token_count_alt">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_token_count_alt">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/chat/</span><span class="si">{log_id}</span><span class="s2">/tokens&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_token_count_alt</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Alternative token count endpoint using token_counter module.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - log_id: The log ID to count tokens for</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - JSON with token counts or error message if log not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">lib.token_counter</span><span class="w"> </span><span class="kn">import</span> <span class="n">count_tokens_for_log_id</span>
+    
+    <span class="n">token_counts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">count_tokens_for_log_id</span><span class="p">(</span><span class="n">log_id</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">token_counts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Chat log with ID </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;token_counts&quot;</span><span class="p">:</span> <span class="n">token_counts</span><span class="p">}</span></div>
+
+
+<span class="c1"># Include widget routes</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.widget_routes</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">widget_router</span>
+    <span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">widget_router</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not load widget routes: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

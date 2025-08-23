@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.plugins.l8n_static_handler &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.plugins.l8n_static_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.plugins.l8n_static_handler</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.staticfiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticFiles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scope</span><span class="p">,</span> <span class="n">Receive</span><span class="p">,</span> <span class="n">Send</span>
+<span class="c1">#from lib.utils.debug import debug_box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="c1"># Import l8n translation functions</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace_placeholders</span><span class="p">,</span> <span class="n">extract_plugin_root</span><span class="p">,</span> <span class="n">get_localized_file_path</span><span class="p">,</span> <span class="n">load_plugin_translations</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_request_language</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.l8n.language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_fallback_language</span>
+    <span class="n">L8N_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n not available for static files: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">L8N_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranslatedStaticFiles">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.TranslatedStaticFiles">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TranslatedStaticFiles</span><span class="p">(</span><span class="n">StaticFiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom StaticFiles handler that applies l8n translations to JavaScript files.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_name</span> <span class="o">=</span> <span class="n">plugin_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directory_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="TranslatedStaticFiles.get_current_language">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.TranslatedStaticFiles.get_current_language">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_language</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current language for the request.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting current language for static file request...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: L8n not available, defaulting to &#39;en&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;en&#39;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try to get from request state first (set by middleware)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using language from request state: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span>
+            
+            <span class="c1"># Fallback to l8n middleware function</span>
+            <span class="n">lang</span> <span class="o">=</span> <span class="n">get_request_language</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span> <span class="k">if</span> <span class="n">lang</span> <span class="k">else</span> <span class="s1">&#39;en&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting language for static file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;en&#39;</span></div>
+
+    
+<div class="viewcode-block" id="TranslatedStaticFiles.should_translate_file">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.TranslatedStaticFiles.should_translate_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">should_translate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a file should be translated.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;L8n not available, skipping translation check.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># show suffix</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking if file should be translated: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2"> suffix is </span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Only translate JavaScript files for now</span>
+        <span class="k">return</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;.js&#39;</span><span class="p">,</span> <span class="s1">&#39;.mjs&#39;</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="TranslatedStaticFiles.apply_translations_to_js">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.TranslatedStaticFiles.apply_translations_to_js">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_translations_to_js</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply translations to JavaScript content.</span>
+<span class="sd">        </span>
+<span class="sd">        This looks for __TRANSLATE_key__ placeholders in JS files and replaces them</span>
+<span class="sd">        with translated strings. If translations are missing, returns None to</span>
+<span class="sd">        signal that the original file should be served instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">L8N_AVAILABLE</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">content</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">content</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Use the l8n replace_placeholders function</span>
+            <span class="n">translated_content</span> <span class="o">=</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">language</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+            
+            <span class="c1"># If None is returned, translations are incomplete</span>
+            <span class="k">if</span> <span class="n">translated_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Missing translations for JS file, will serve original: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            
+            <span class="k">return</span> <span class="n">translated_content</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error applying translations to JS file </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Fallback to original file on error</span></div>
+
+    
+<div class="viewcode-block" id="TranslatedStaticFiles.get_response">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.TranslatedStaticFiles.get_response">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">Scope</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override to add translation support for JavaScript files.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get the full file path</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory_path</span> <span class="o">/</span> <span class="n">path</span>
+            
+            <span class="c1"># Check if file exists and should be translated</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n Checking static file: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_translate_file</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n Translating static file: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Create a request object to get language</span>
+                <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+                <span class="n">current_language</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_language</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UPDATE] l8n Current language for static file: </span><span class="si">{</span><span class="n">current_language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="n">localized_path</span> <span class="o">=</span> <span class="n">get_localized_file_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">full_path</span><span class="p">))</span>
+
+                <span class="c1"># Check if localized file exists</span>
+                <span class="k">if</span> <span class="n">localized_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="c1"># Read the localized file content</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">localized_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    
+                    <span class="c1"># Apply translations</span>
+                    <span class="n">translated_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_translations_to_js</span><span class="p">(</span>
+                        <span class="n">content</span><span class="p">,</span> <span class="n">current_language</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">localized_path</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    
+                    <span class="c1"># If translations are complete, serve translated content</span>
+                    <span class="k">if</span> <span class="n">translated_content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: Serving translated JS file: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                            <span class="n">content</span><span class="o">=</span><span class="n">translated_content</span><span class="p">,</span>
+                            <span class="n">media_type</span><span class="o">=</span><span class="s2">&quot;application/javascript&quot;</span><span class="p">,</span>
+                            <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+                                <span class="s2">&quot;Cache-Control&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache, no-store, must-revalidate&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;Pragma&quot;</span><span class="p">:</span> <span class="s2">&quot;no-cache&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;Expires&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: Translations incomplete, serving original JS file: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: No localized version found, serving original JS file: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># For non-JS files or when translation is not available, use default behavior</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n Serving static file without translation: </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in translated static file handler: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Fallback to default behavior on error</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="mount_translated_static_files">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.mount_translated_static_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mount_translated_static_files</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mount plugin static files with translation support.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        app (FastAPI): The FastAPI application instance</span>
+<span class="sd">        plugin_name (str): Name of the plugin</span>
+<span class="sd">        category (str): Plugin category (&#39;core&#39; or &#39;installed&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_plugin_path</span>
+    
+    <span class="c1"># debug_box(f&quot;Mounting translated static files for plugin: {plugin_name} in category: {category}&quot;)</span>
+
+    <span class="n">plugin_dir</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_dir</span><span class="p">:</span>
+        <span class="k">return</span>
+        
+    <span class="n">dir_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">category</span> <span class="o">!=</span> <span class="s1">&#39;core&#39;</span><span class="p">:</span> 
+        <span class="n">static_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">static_path</span><span class="p">):</span>
+            <span class="n">static_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">static_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">static_path</span><span class="p">):</span>
+        <span class="c1"># Use our custom TranslatedStaticFiles instead of regular StaticFiles</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s2">/static&quot;</span><span class="p">,</span> 
+            <span class="n">TranslatedStaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">static_path</span><span class="p">,</span> <span class="n">plugin_name</span><span class="o">=</span><span class="n">plugin_name</span><span class="p">),</span> 
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s2">/static&quot;</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mounted translated static files for plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">static_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1">#debug_box(f&quot;Mounted translated static files for plugin: {plugin_name} at {static_path}&quot;)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No static files found for plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">. Searched in </span><span class="si">{</span><span class="n">static_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+        <span class="c1">#debug_box(f&quot;No static files found for plugin: {plugin_name}. Searched in {static_path}&quot;)</span>
+
+<span class="c1"># JavaScript-specific translation helpers</span>
+<div class="viewcode-block" id="create_js_translation_object">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.create_js_translation_object">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_js_translation_object</span><span class="p">(</span><span class="n">translations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a JavaScript object containing translations.</span>
+<span class="sd">    </span>
+<span class="sd">    This can be injected into JS files to provide client-side translation support.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        translations: Dictionary of translation key-value pairs</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JavaScript code defining a translation object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    
+    <span class="c1"># Safely serialize translations to JavaScript</span>
+    <span class="n">js_translations</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">translations</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">// Auto-generated translation object</span>
+<span class="s2">window.MINDROOT_TRANSLATIONS = </span><span class="si">{</span><span class="n">js_translations</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">// Helper function to get translations</span>
+<span class="s2">window.translate = function(key, fallback) </span><span class="se">{{</span>
+<span class="s2">    return window.MINDROOT_TRANSLATIONS[key] || fallback || key;</span>
+<span class="se">}}</span><span class="s2">;</span>
+
+<span class="s2">// Alias for shorter usage</span>
+<span class="s2">window.t = window.translate;</span>
+<span class="s2">&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="inject_translations_into_js">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.l8n_static_handler.inject_translations_into_js">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inject_translations_into_js</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">translations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inject translation object into JavaScript content.</span>
+<span class="sd">    </span>
+<span class="sd">    This prepends translation definitions to JS files.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        content: Original JavaScript content</span>
+<span class="sd">        translations: Translation dictionary</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JavaScript content with translations injected</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">translations</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">content</span>
+    
+    <span class="n">translation_js</span> <span class="o">=</span> <span class="n">create_js_translation_object</span><span class="p">(</span><span class="n">translations</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">translation_js</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">content</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

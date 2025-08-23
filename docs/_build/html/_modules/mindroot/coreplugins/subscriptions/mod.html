@@ -1,0 +1,1089 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.subscriptions.mod &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.subscriptions.mod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.subscriptions.mod</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.hooks</span><span class="w"> </span><span class="kn">import</span> <span class="n">hook</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionPlan</span><span class="p">,</span> <span class="n">UserSubscription</span><span class="p">,</span> <span class="n">PlanFeature</span><span class="p">,</span> <span class="n">PageTemplate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionStorage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.subscription_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.credit_integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">CreditIntegration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.default_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_HTML_TEMPLATE</span><span class="p">,</span> <span class="n">DEFAULT_CSS_TEMPLATE</span><span class="p">,</span> <span class="n">DEFAULT_JS_TEMPLATE</span>
+
+<span class="c1"># Global components</span>
+<span class="n">_subscription_manager</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_credit_integration</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SubscriptionsPlugin">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.SubscriptionsPlugin">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubscriptionsPlugin</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span> <span class="o">=</span> <span class="n">base_path</span>
+
+<div class="viewcode-block" id="SubscriptionsPlugin.create_components">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.SubscriptionsPlugin.create_components">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create fresh instances of all subscription system components&quot;&quot;&quot;</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="n">SubscriptionStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_path</span><span class="p">)</span>
+        <span class="n">subscription_manager</span> <span class="o">=</span> <span class="n">SubscriptionManager</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span><span class="p">)</span>
+        <span class="n">credit_integration</span> <span class="o">=</span> <span class="n">CreditIntegration</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">storage</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">credit_integration</span></div>
+</div>
+
+
+<div class="viewcode-block" id="get_base_path">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_base_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the base path for subscription data storage&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;subscriptions&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="startup">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.startup">[docs]</a>
+<span class="nd">@hook</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Startup tasks&quot;&quot;&quot;</span>
+    <span class="c1"># Initialize components</span>
+    <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+    <span class="n">storage</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">credit_integration</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+    
+    <span class="c1"># Store components globally</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span><span class="p">,</span> <span class="n">_credit_integration</span>
+    <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    <span class="n">_credit_integration</span> <span class="o">=</span> <span class="n">credit_integration</span>
+    
+    <span class="c1"># Initialize default features if none exist</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="k">await</span> <span class="n">storage</span><span class="o">.</span><span class="n">get_all_features</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">features</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">initialize_default_features</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
+    
+    <span class="c1"># Initialize default template if none exist</span>
+    <span class="n">templates</span> <span class="o">=</span> <span class="k">await</span> <span class="n">storage</span><span class="o">.</span><span class="n">get_all_templates</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">templates</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">initialize_default_template</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
+    
+    <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;Subscriptions plugin initialized&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="initialize_default_features">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.initialize_default_features">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialize_default_features</span><span class="p">(</span><span class="n">storage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize default plan features&quot;&quot;&quot;</span>
+    <span class="n">default_features</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;feature_id&quot;</span><span class="p">:</span> <span class="s2">&quot;sessions_per_month&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sessions Per Month&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Number of sessions included per month&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;default_value&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;display_order&quot;</span><span class="p">:</span> <span class="mi">10</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;feature_id&quot;</span><span class="p">:</span> <span class="s2">&quot;session_length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Session Length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Length of each session&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;select&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;15 minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;30 minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;45 minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;60 minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;unlimited&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;default_value&quot;</span><span class="p">:</span> <span class="s2">&quot;30 minutes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;display_order&quot;</span><span class="p">:</span> <span class="mi">20</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;feature_id&quot;</span><span class="p">:</span> <span class="s2">&quot;priority_support&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Priority Support&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Access to priority customer support&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;default_value&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;display_order&quot;</span><span class="p">:</span> <span class="mi">30</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;feature_id&quot;</span><span class="p">:</span> <span class="s2">&quot;additional_resources&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Additional Resources&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Access to additional resources and materials&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;default_value&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;display_order&quot;</span><span class="p">:</span> <span class="mi">40</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">feature_data</span> <span class="ow">in</span> <span class="n">default_features</span><span class="p">:</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">PlanFeature</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">storage</span><span class="o">.</span><span class="n">store_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initialized </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">default_features</span><span class="p">)</span><span class="si">}</span><span class="s2"> default features&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="initialize_default_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.initialize_default_template">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialize_default_template</span><span class="p">(</span><span class="n">storage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize default page template&quot;&quot;&quot;</span>
+    <span class="n">default_template</span> <span class="o">=</span> <span class="n">PageTemplate</span><span class="p">(</span>
+        <span class="n">template_id</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Default Template&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Standard subscription page template&quot;</span><span class="p">,</span>
+        <span class="n">html_template</span><span class="o">=</span><span class="n">DEFAULT_HTML_TEMPLATE</span><span class="p">,</span>
+        <span class="n">css_template</span><span class="o">=</span><span class="n">DEFAULT_CSS_TEMPLATE</span><span class="p">,</span>
+        <span class="n">js_template</span><span class="o">=</span><span class="n">DEFAULT_JS_TEMPLATE</span><span class="p">,</span>
+        <span class="n">is_default</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">storage</span><span class="o">.</span><span class="n">store_template</span><span class="p">(</span><span class="n">default_template</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initialized default page template&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># Plan management services</span>
+
+<div class="viewcode-block" id="create_subscription_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.create_subscription_plan">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_subscription_plan</span><span class="p">(</span><span class="n">plan_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new subscription plan</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plan_data: Plan details including name, description, price, etc.</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Created plan details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">create_plan</span><span class="p">(</span><span class="n">plan_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plan</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_subscription_plans">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_subscription_plans">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_subscription_plans</span><span class="p">(</span><span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all subscription plans</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        active_only: Whether to return only active plans</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Dict]: List of plan details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plans</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">list_plans</span><span class="p">(</span><span class="n">active_only</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">plan</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">plan</span> <span class="ow">in</span> <span class="n">plans</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_subscription_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_subscription_plan">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a subscription plan by ID</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plan_id: ID of the plan to retrieve</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Dict]: Plan details or None if not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plan</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">plan</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="update_subscription_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.update_subscription_plan">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plan_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing subscription plan</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plan_id: ID of the plan to update</span>
+<span class="sd">        plan_data: Updated plan details</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Updated plan details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">plan_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plan</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="deactivate_subscription_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.deactivate_subscription_plan">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">deactivate_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deactivate a subscription plan</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plan_id: ID of the plan to deactivate</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Status result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">deactivate_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plan </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2"> deactivated&quot;</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="activate_subscription_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.activate_subscription_plan">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">activate_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Activate a subscription plan</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plan_id: ID of the plan to activate</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Status result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plan </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+    
+    <span class="n">plan</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">plan</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plan </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2"> activated&quot;</span><span class="p">}</span></div>
+
+
+<span class="c1"># Feature management services</span>
+
+<div class="viewcode-block" id="get_available_features">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_available_features">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_available_features</span><span class="p">(</span><span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all available plan features</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        active_only: Whether to return only active features</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Dict]: List of feature details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">features</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_all_features</span><span class="p">(</span><span class="n">active_only</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">feature</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="create_plan_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.create_plan_feature">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_plan_feature</span><span class="p">(</span><span class="n">feature_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new plan feature</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        feature_data: Feature details</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Created feature details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="c1"># Generate feature ID if not provided</span>
+    <span class="k">if</span> <span class="s1">&#39;feature_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feature_data</span><span class="p">:</span>
+        <span class="n">feature_data</span><span class="p">[</span><span class="s1">&#39;feature_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;feature_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">PlanFeature</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">feature</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="update_plan_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.update_plan_feature">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">feature_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing plan feature</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        feature_id: ID of the feature to update</span>
+<span class="sd">        feature_data: Updated feature details</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Updated feature details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">feature</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">feature</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+    
+    <span class="c1"># Update fields</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">feature_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">feature</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="deactivate_plan_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.deactivate_plan_feature">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">deactivate_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deactivate a plan feature</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        feature_id: ID of the feature to deactivate</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Status result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">feature</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">feature</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+    
+    <span class="n">feature</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature_id</span><span class="si">}</span><span class="s2"> deactivated&quot;</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="activate_plan_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.activate_plan_feature">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">activate_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Activate a plan feature</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        feature_id: ID of the feature to activate</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Status result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">feature</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">feature</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+    
+    <span class="n">feature</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature_id</span><span class="si">}</span><span class="s2"> activated&quot;</span><span class="p">}</span></div>
+
+
+<span class="c1"># Template management services</span>
+
+<div class="viewcode-block" id="get_page_templates">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_page_templates">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_page_templates</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all page templates</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Dict]: List of template details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">templates</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_all_templates</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">template</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="create_page_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.create_page_template">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_page_template</span><span class="p">(</span><span class="n">template_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new page template</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_data: Template details</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Created template details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="c1"># Generate template ID if not provided</span>
+    <span class="k">if</span> <span class="s1">&#39;template_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">template_data</span><span class="p">:</span>
+        <span class="n">template_data</span><span class="p">[</span><span class="s1">&#39;template_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;template_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="c1"># Set is_default to False by default</span>
+    <span class="k">if</span> <span class="s1">&#39;is_default&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">template_data</span><span class="p">:</span>
+        <span class="n">template_data</span><span class="p">[</span><span class="s1">&#39;is_default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="n">template</span> <span class="o">=</span> <span class="n">PageTemplate</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">template_data</span><span class="p">)</span>
+    
+    <span class="c1"># If this is set as default, unset other defaults</span>
+    <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">is_default</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">set_default_template</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">template_id</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="update_page_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.update_page_template">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_page_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">template_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing page template</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_id: ID of the template to update</span>
+<span class="sd">        template_data: Updated template details</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Updated template details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">template</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Template </span><span class="si">{</span><span class="n">template_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+    
+    <span class="c1"># Update fields</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">template_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+    <span class="c1"># If this is set as default, unset other defaults</span>
+    <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">is_default</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">set_default_template</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">template_id</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="set_default_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.set_default_template">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">set_default_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a template as the default</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        template_id: ID of the template to set as default</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Status result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">set_default_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Template </span><span class="si">{</span><span class="n">template_id</span><span class="si">}</span><span class="s2"> set as default&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Template </span><span class="si">{</span><span class="n">template_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span></div>
+
+
+<span class="c1"># Subscription event handling</span>
+
+<div class="viewcode-block" id="process_subscription_event">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.process_subscription_event">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_subscription_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process normalized subscription events from any payment provider</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        event_data: Normalized event data with provider, event type, etc.</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Processing result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span><span class="p">,</span> <span class="n">_credit_integration</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_credit_integration</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">credit_integration</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+        <span class="n">_credit_integration</span> <span class="o">=</span> <span class="n">credit_integration</span>
+    
+    <span class="n">provider</span> <span class="o">=</span> <span class="n">event_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;provider&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+    <span class="n">normalized_event</span> <span class="o">=</span> <span class="n">event_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;normalized_event&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">event_type</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;event_type&#39;</span><span class="p">)</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2"> subscription event: </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;subscription_created&#39;</span><span class="p">:</span>
+        <span class="c1"># Extract data from normalized event</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">plan_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plan_id&#39;</span><span class="p">)</span>
+        <span class="n">provider_subscription_id</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">username</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">,</span> <span class="n">provider_subscription_id</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required subscription data: username=</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;plan_id=</span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">, subscription_id=</span><span class="si">{</span><span class="n">provider_subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing required data&#39;</span><span class="p">}</span>
+        
+        <span class="c1"># Create subscription record</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">plan_id</span><span class="o">=</span><span class="n">plan_id</span><span class="p">,</span>
+            <span class="n">provider_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="n">provider</span><span class="p">,</span>
+                <span class="s1">&#39;provider_subscription_id&#39;</span><span class="p">:</span> <span class="n">provider_subscription_id</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Allocate initial credits</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">_credit_integration</span><span class="o">.</span><span class="n">allocate_subscription_credits</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">amount</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="p">,</span>
+                <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;subscription_created&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_id&#39;</span><span class="p">:</span> <span class="n">plan_id</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_name&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="n">provider</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Notify any plugins that handle subscription creation</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+                <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">handle_subscription_created</span><span class="p">(</span>
+                    <span class="n">user_id</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                    <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                    <span class="n">plan_id</span><span class="o">=</span><span class="n">plan_id</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Notified subscription handlers for </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to notify subscription handlers: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+                <span class="s1">&#39;subscription_id&#39;</span><span class="p">:</span> <span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="s1">&#39;credits_allocated&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;subscription_renewed&#39;</span><span class="p">:</span>
+        <span class="c1"># Handle subscription renewal</span>
+        <span class="n">provider_subscription_id</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription_id&#39;</span><span class="p">)</span>
+        <span class="n">period_start</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;period_start&#39;</span><span class="p">)</span>
+        <span class="n">period_end</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;period_end&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">provider_subscription_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Missing subscription ID in renewal event&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing subscription ID&#39;</span><span class="p">}</span>
+        
+        <span class="c1"># Find subscription by provider subscription ID</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">provider_subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for renewal: </span><span class="si">{</span><span class="n">provider_subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Subscription not found&#39;</span><span class="p">}</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Update subscription period if provided</span>
+        <span class="k">if</span> <span class="n">period_start</span> <span class="ow">and</span> <span class="n">period_end</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">period_start</span><span class="p">)</span>
+                <span class="n">end_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">period_end</span><span class="p">)</span>
+                
+                <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_subscription_period</span><span class="p">(</span>
+                    <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                    <span class="n">period_start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+                    <span class="n">period_end</span><span class="o">=</span><span class="n">end_date</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid date format in renewal event: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Allocate renewal credits</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">subscription</span><span class="o">.</span><span class="n">plan_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">_credit_integration</span><span class="o">.</span><span class="n">allocate_subscription_credits</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">amount</span><span class="o">=</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="p">,</span>
+                <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;subscription_renewed&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_id&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">plan_id</span><span class="p">,</span>
+                    <span class="s1">&#39;plan_name&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="n">provider</span><span class="p">,</span>
+                    <span class="s1">&#39;invoice_id&#39;</span><span class="p">:</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;invoice_id&#39;</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+                <span class="s1">&#39;subscription_id&#39;</span><span class="p">:</span> <span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="s1">&#39;credits_allocated&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found for renewal: </span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    
+    <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;subscription_updated&#39;</span><span class="p">:</span>
+        <span class="c1"># Handle subscription updates</span>
+        <span class="n">provider_subscription_id</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription_id&#39;</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+        <span class="n">cancel_at_period_end</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cancel_at_period_end&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">provider_subscription_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Missing subscription ID in update event&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing subscription ID&#39;</span><span class="p">}</span>
+        
+        <span class="c1"># Find subscription by provider subscription ID</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">provider_subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for update: </span><span class="si">{</span><span class="n">provider_subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Subscription not found&#39;</span><span class="p">}</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Update subscription status if provided</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_subscription_status</span><span class="p">(</span>
+                <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># Update cancel_at_period_end if provided</span>
+        <span class="k">if</span> <span class="n">cancel_at_period_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="n">cancel_at_period_end</span> <span class="o">=</span> <span class="n">cancel_at_period_end</span>
+            <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+            <span class="s1">&#39;subscription_id&#39;</span><span class="p">:</span> <span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span>
+        <span class="p">}</span>
+    
+    <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;subscription_canceled&#39;</span><span class="p">:</span>
+        <span class="c1"># Handle subscription cancellation</span>
+        <span class="n">provider_subscription_id</span> <span class="o">=</span> <span class="n">normalized_event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subscription_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">provider_subscription_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Missing subscription ID in cancellation event&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing subscription ID&#39;</span><span class="p">}</span>
+        
+        <span class="c1"># Find subscription by provider subscription ID</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">provider_subscription_id</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No matching subscription found for cancellation: </span><span class="si">{</span><span class="n">provider_subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Subscription not found&#39;</span><span class="p">}</span>
+        
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Update subscription status to canceled</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_subscription_status</span><span class="p">(</span>
+            <span class="n">subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;canceled&#39;</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+            <span class="s1">&#39;subscription_id&#39;</span><span class="p">:</span> <span class="n">subscription</span><span class="o">.</span><span class="n">subscription_id</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># Unknown event type</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown subscription event type: </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;ignored&#39;</span><span class="p">,</span> <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">}</span></div>
+
+
+<span class="c1"># User subscription services</span>
+
+<div class="viewcode-block" id="get_user_subscriptions">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_user_subscriptions">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_subscriptions</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all subscriptions for a user</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        username: User to get subscriptions for</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Dict]: List of subscription details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">sub</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="cancel_subscription">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.cancel_subscription">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cancel a user subscription</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        subscription_id: ID of the subscription to cancel</span>
+<span class="sd">        at_period_end: Whether to cancel at period end or immediately</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: Updated subscription details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="c1"># Get subscription details</span>
+    <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">subscription</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subscription not found: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Cancel with payment provider if applicable</span>
+    <span class="k">if</span> <span class="n">subscription</span><span class="o">.</span><span class="n">provider_subscription_id</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Call provider-specific cancellation service if available</span>
+            <span class="c1"># The service name follows the pattern: cancel_{provider}_subscription</span>
+            <span class="n">cancel_service</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cancel_</span><span class="si">{</span><span class="n">subscription</span><span class="o">.</span><span class="n">payment_provider</span><span class="si">}</span><span class="s2">_subscription&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">service_manager</span><span class="p">,</span> <span class="n">cancel_service</span><span class="p">):</span>
+                <span class="k">await</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">service_manager</span><span class="p">,</span> <span class="n">cancel_service</span><span class="p">)(</span>
+                    <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">provider_subscription_id</span><span class="p">,</span>
+                    <span class="n">at_period_end</span><span class="o">=</span><span class="n">at_period_end</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to cancel with provider: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Continue with local cancellation even if provider fails</span>
+    
+    <span class="c1"># Update subscription status</span>
+    <span class="n">updated_subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">cancel_subscription</span><span class="p">(</span>
+        <span class="n">subscription_id</span><span class="p">,</span> 
+        <span class="n">at_period_end</span>
+    <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">updated_subscription</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_subscription_by_provider_id">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_subscription_by_provider_id">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_subscription_by_provider_id</span><span class="p">(</span><span class="n">provider_subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get subscription by provider subscription ID (e.g., Stripe subscription ID)</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        provider_subscription_id: Provider&#39;s subscription ID</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Dict]: Subscription details or None if not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="s1">&#39;stripe&#39;</span><span class="p">,</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">provider_subscription_id</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">subscriptions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">subscriptions</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting subscription by provider ID: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="update_subscription_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.update_subscription_status">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_subscription_status</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a subscription&#39;s status</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        subscription_id: Internal subscription ID</span>
+<span class="sd">        status: New status (active, canceled, etc.)</span>
+<span class="sd">        context: Request context</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Dict]: Updated subscription details or None if not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">update_subscription_status</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">subscription</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">subscription</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating subscription status: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="c1"># Command methods</span>
+
+<div class="viewcode-block" id="list_subscription_plans">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.list_subscription_plans">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_subscription_plans</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List available subscription plans</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        { &quot;list_subscription_plans&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">plans</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">list_plans</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plans</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;No subscription plans are currently available.&quot;</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;Available Subscription Plans:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    
+    <span class="k">for</span> <span class="n">plan</span> <span class="ow">in</span> <span class="n">plans</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Plan: </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Description: </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Price: </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">price</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">currency</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">interval</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Credits: </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span><span class="si">}</span><span class="s2"> per </span><span class="si">{</span><span class="n">plan</span><span class="o">.</span><span class="n">interval</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        
+        <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;Features:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        
+        <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="get_my_subscriptions">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.mod.get_my_subscriptions">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_my_subscriptions</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get current user&#39;s subscriptions</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        { &quot;get_my_subscriptions&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;You must be logged in to view your subscriptions.&quot;</span>
+    
+    <span class="k">global</span> <span class="n">_subscription_manager</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_subscription_manager</span><span class="p">:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">SubscriptionsPlugin</span><span class="p">(</span><span class="n">get_base_path</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">subscription_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_components</span><span class="p">()</span>
+        <span class="n">_subscription_manager</span> <span class="o">=</span> <span class="n">subscription_manager</span>
+    
+    <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriptions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;You don&#39;t have any active subscriptions.&quot;</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;Your Subscriptions:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    
+    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_subscription_manager</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">plan_id</span><span class="p">)</span>
+        <span class="n">plan_name</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">plan</span> <span class="k">else</span> <span class="s2">&quot;Unknown Plan&quot;</span>
+        
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Plan: </span><span class="si">{</span><span class="n">plan_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Status: </span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Current period: </span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">current_period_start</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">current_period_end</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        
+        <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">cancel_at_period_end</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;Will cancel at end of current period</span><span class="se">\n</span><span class="s2">&quot;</span>
+        
+        <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    
+    <span class="k">return</span> <span class="n">result</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

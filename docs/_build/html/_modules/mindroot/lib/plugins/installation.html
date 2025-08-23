@@ -1,0 +1,481 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.plugins.installation &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.plugins.installation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.plugins.installation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pkg_resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">require</span> <span class="k">as</span> <span class="n">pkg_require</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.manifest</span><span class="w"> </span><span class="kn">import</span> <span class="n">update_plugin_manifest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<div class="viewcode-block" id="download_github_files">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.download_github_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_github_files</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download GitHub repo files to temp directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        repo_path (str): GitHub repository path (user/repo)</span>
+<span class="sd">        tag (str, optional): Specific tag to download</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: (plugin_dir, plugin_root, plugin_info)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">download_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://github.com/</span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">/archive/refs/tags/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.zip&quot;</span> <span class="k">if</span> <span class="n">tag</span> <span class="k">else</span> \
+                  <span class="sa">f</span><span class="s2">&quot;https://github.com/</span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">/archive/refs/heads/main.zip&quot;</span>
+    
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">repo_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+    <span class="n">zip_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">,</span> <span class="s1">&#39;repo.zip&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Github install: Downloading </span><span class="si">{</span><span class="n">download_url</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">zip_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">download_url</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
+            <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">zip_path</span><span class="p">)</span>
+            
+        <span class="c1"># Find plugin_info.json</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;plugin_info.json&#39;</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;plugin_info.json&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                
+                <span class="c1"># Setup local plugin directory</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Handle subdirectory structure</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">subdir</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">))][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">subdir</span> <span class="o">!=</span> <span class="n">repo</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">subdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;./local/plugins/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">plugin_info</span>
+                
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No plugin_info.json found in repository&quot;</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span></div>
+
+
+<div class="viewcode-block" id="check_plugin_dependencies">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.check_plugin_dependencies">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_plugin_dependencies</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if all plugin dependencies are met.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_path (str): Path to plugin directory</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if all dependencies are met</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">requirements_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;requirements.txt&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">requirements</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">requirements</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pkg_require</span><span class="p">(</span><span class="n">requirement</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="install_plugin_dependencies">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.install_plugin_dependencies">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install_plugin_dependencies</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install plugin dependencies from requirements.txt.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_path (str): Path to plugin directory</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if installation successful</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">requirements_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;requirements.txt&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">requirements_file</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">requirements_file</span><span class="p">])</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="plugin_install">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.plugin_install">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">plugin_install</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;pypi&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remote_source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install a plugin from various sources.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_name (str): Name of the plugin</span>
+<span class="sd">        source (str): Installation source (&#39;pypi&#39;, &#39;local&#39;, &#39;github&#39;)</span>
+<span class="sd">        source_path (str, optional): Path or GitHub repo reference</span>
+<span class="sd">        remote_source (str, optional): Remote source for the plugin (e.g., GitHub repo path)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if installation successful</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;source_path is required for local installation&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;setup.py&#39;</span><span class="p">))</span> <span class="ow">and</span> \
+               <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;pyproject.toml&#39;</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid Python project: no setup.py or pyproject.toml found&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Try to read plugin_info.json</span>
+            <span class="n">plugin_info</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">plugin_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;plugin_info.json&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="p">])</span>
+            <span class="n">update_plugin_manifest</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;pypi&#39;</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">])</span>
+            <span class="n">update_plugin_manifest</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="s1">&#39;pypi&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            
+        <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">source_path</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;source_path (repo/name[:tag]) required for GitHub installation&quot;</span><span class="p">)</span>
+            
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">source_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="n">repo_path</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+            
+            <span class="n">plugin_dir</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">download_github_files</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">plugin_dir</span><span class="p">])</span>
+            
+            <span class="n">update_plugin_manifest</span><span class="p">(</span>
+                <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;github&#39;</span><span class="p">,</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">),</span>
+                <span class="n">remote_source</span><span class="o">=</span><span class="n">repo_path</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span> 
+                <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span>
+            <span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported installation source: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin installation failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plugin_update">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.plugin_update">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plugin_update</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an installed plugin.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_name (str): Name of the plugin to update</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if update successful</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This is a synchronous function that can&#39;t use the async plugin_install directly</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Just use pip directly for now</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;--upgrade&#39;</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># Import pkg_resources here to avoid circular imports</span>
+<div class="viewcode-block" id="install_recommended_plugins">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.install_recommended_plugins">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_recommended_plugins</span><span class="p">(</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Install plugins recommended for an agent based on its required_plugins list.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        agent_name (str): Name of the agent</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Results of plugin installation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load agent data</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+        <span class="n">agent_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/agents/local/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/agent.json&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">agent_path</span><span class="p">):</span>
+            <span class="n">agent_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;data/agents/shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/agent.json&quot;</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">agent_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">}</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">agent_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">agent_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            
+        <span class="c1"># Get recommended plugins (check both fields for backward compatibility)</span>
+        <span class="n">recommended_plugins</span> <span class="o">=</span> <span class="n">agent_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;recommended_plugins&#39;</span><span class="p">,</span> <span class="n">agent_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;required_plugins&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+
+        <span class="c1"># Get plugin sources from check_recommended_plugins endpoint</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Implement the same logic as check_recommended_plugins directly here</span>
+            <span class="c1"># to avoid circular imports</span>
+            <span class="n">plugin_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">plugin_sources</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="c1"># Define indices directory path</span>
+            <span class="c1"># Try multiple possible locations for indices</span>
+            <span class="n">possible_locations</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">),</span>
+                <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/indices&quot;</span><span class="p">),</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span> <span class="o">/</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span>
+                <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/files/mindroot/indices&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+            
+            <span class="n">indices_dir</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="c1"># Determine which indices directory exists</span>
+            <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">possible_locations</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking for indices in: </span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">location</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="c1"># Check if it has any .json files</span>
+                    <span class="n">indices_dir</span> <span class="o">=</span> <span class="n">location</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">location</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found indices directory at: </span><span class="si">{</span><span class="n">indices_dir</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">location</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.json&#39;</span><span class="p">)))</span><span class="si">}</span><span class="s2"> JSON files&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">indices_dir</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Could not find indices directory in any of the expected locations&quot;</span><span class="p">)</span>
+                <span class="n">indices_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">)</span>  <span class="c1"># Fallback to default            </span>
+            <span class="c1"># Get all available indices</span>
+            <span class="n">available_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">index_file</span> <span class="ow">in</span> <span class="n">indices_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">):</span>
+                <span class="c1"># Also try looking for indices in subdirectories</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found index file: </span><span class="si">{</span><span class="n">index_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading index file for plugin sources: </span><span class="si">{</span><span class="n">index_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">index_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                        <span class="n">available_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_data</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading index file </span><span class="si">{</span><span class="n">index_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Also check for indices in subdirectories</span>
+            <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">indices_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*/&quot;</span><span class="p">):</span>
+                <span class="c1"># Also try looking for indices in subdirectories</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking for index files in subdirectory: </span><span class="si">{</span><span class="n">subdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Look for index.json in the subdirectory</span>
+                <span class="n">index_file_path</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">/</span> <span class="s2">&quot;index.json&quot;</span>
+                <span class="k">if</span> <span class="n">index_file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading index file: </span><span class="si">{</span><span class="n">index_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">index_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                            <span class="n">available_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_data</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading index file </span><span class="si">{</span><span class="n">index_file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No index.json found in </span><span class="si">{</span><span class="n">subdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">available_indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> indices with </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plugins&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">available_indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total plugins&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Look for each recommended plugin in the indices</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Looking for recommended plugins: </span><span class="si">{</span><span class="n">recommended_plugins</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">plugin_source</span> <span class="ow">in</span> <span class="n">recommended_plugins</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">available_indices</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plugins&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">remote_source</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;remote_source&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking index plugin </span><span class="si">{</span><span class="n">remote_source</span><span class="si">}</span><span class="s2"> against recommended </span><span class="si">{</span><span class="n">plugin_source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">remote_source</span> <span class="o">==</span> <span class="n">plugin_source</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">remote_source</span> <span class="ow">and</span> <span class="s1">&#39;github.com/&#39;</span> <span class="ow">in</span> <span class="n">remote_source</span><span class="p">:</span>
+                                <span class="n">github_path</span> <span class="o">=</span> <span class="n">remote_source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;github.com/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted GitHub path for </span><span class="si">{</span><span class="n">plugin_source</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">github_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">plugin_sources</span><span class="p">[</span><span class="n">plugin_source</span><span class="p">]</span> <span class="o">=</span> <span class="n">github_path</span>
+                            <span class="k">elif</span> <span class="n">remote_source</span><span class="p">:</span>
+                                <span class="n">plugin_sources</span><span class="p">[</span><span class="n">plugin_source</span><span class="p">]</span> <span class="o">=</span> <span class="n">remote_source</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found plugin sources: </span><span class="si">{</span><span class="n">plugin_sources</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="n">plugin_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;plugin_sources&quot;</span><span class="p">:</span> <span class="n">plugin_sources</span><span class="p">}</span>
+            <span class="n">plugin_sources</span> <span class="o">=</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plugin_sources&quot;</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="n">plugin_info</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting plugin sources: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">plugin_sources</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Install each recommended plugin</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">plugin_source</span> <span class="ow">in</span> <span class="n">recommended_plugins</span><span class="p">:</span>
+            <span class="c1"># Check if plugin is already installed</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Try to import the plugin to check if it&#39;s installed</span>
+                <span class="n">plugin_name</span> <span class="o">=</span> <span class="n">plugin_source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Use pkg_resources to check if package is installed</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">pkg_resources</span>
+                    <span class="n">pkg_resources</span><span class="o">.</span><span class="n">get_distribution</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
+                    <span class="c1"># Plugin is already installed</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;already_installed&quot;</span><span class="p">})</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plugin already installed:&quot;</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">DistributionNotFound</span><span class="p">:</span>
+                    <span class="c1"># Plugin is not installed, get source info and install it</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Get the source information for this plugin</span>
+                        <span class="n">source_info</span> <span class="o">=</span> <span class="n">plugin_source</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Installing plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2"> from source: </span><span class="si">{</span><span class="n">source_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="c1"># Determine installation source and path</span>
+                        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">source_info</span><span class="p">:</span>  <span class="c1"># GitHub repo format (user/repo)</span>
+                            <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;github&#39;</span>
+                            <span class="n">source_path</span> <span class="o">=</span> <span class="n">source_info</span>
+                            <span class="n">remote_source</span> <span class="o">=</span> <span class="n">source_info</span>
+                        <span class="k">else</span><span class="p">:</span>  <span class="c1"># PyPI package</span>
+                            <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;pypi&#39;</span>
+                            <span class="n">source_path</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">remote_source</span> <span class="o">=</span> <span class="kc">None</span>
+                        
+                        <span class="c1"># Install the plugin</span>
+                        <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span>
+                            <span class="n">plugin_name</span><span class="p">,</span>
+                            <span class="n">source</span><span class="p">,</span>
+                            <span class="n">source_path</span><span class="p">,</span>
+                            <span class="n">remote_source</span>
+                        <span class="p">)</span>
+                        
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
+                            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+                            <span class="s2">&quot;source_path&quot;</span><span class="p">:</span> <span class="n">source_path</span>
+                        <span class="p">})</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
+                            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                            <span class="s2">&quot;source_info&quot;</span><span class="p">:</span> <span class="n">source_info</span>
+                        <span class="p">})</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error checking installation: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">})</span>
+                
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

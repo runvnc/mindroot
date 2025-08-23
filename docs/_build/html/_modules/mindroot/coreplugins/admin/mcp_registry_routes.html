@@ -1,0 +1,623 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.mcp_registry_routes &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.mcp_registry_routes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.mcp_registry_routes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;MCP Registry Integration Routes</span>
+
+<span class="sd">Handles browsing and installing MCP servers from the registry.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+
+<span class="c1"># Create router with admin role requirement</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span>
+    <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)]</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="RegistryServerInstallRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.RegistryServerInstallRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RegistryServerInstallRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">registry_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">server_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Override name if desired</span></div>
+
+
+<div class="viewcode-block" id="RegistryBrowseRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.RegistryBrowseRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RegistryBrowseRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">category</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span></div>
+
+
+<div class="viewcode-block" id="browse_registry_servers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.browse_registry_servers">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/browse&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">browse_registry_servers</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Browse MCP servers from the registry.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get registry settings</span>
+        <span class="n">registry_url</span> <span class="o">=</span> <span class="s2">&quot;https://registry.mindroot.io&quot;</span>  <span class="c1"># Default</span>
+        <span class="n">registry_token</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">settings_file</span> <span class="o">=</span> <span class="s1">&#39;data/registry_settings.json&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">registry_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_url&quot;</span><span class="p">,</span> <span class="n">registry_url</span><span class="p">)</span>
+                    <span class="n">registry_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_token&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Try environment variable if no token in file</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">registry_token</span><span class="p">:</span>
+                <span class="n">registry_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REGISTRY_TOKEN&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading registry settings: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Build query parameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+            <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span> <span class="n">category</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;filter_category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">category</span>
+        <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">search</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">registry_token</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Query registry</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s2">/browse&quot;</span><span class="p">,</span>
+                <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry query failed: </span><span class="si">{</span><span class="n">error_detail</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            
+            <span class="c1"># Filter and format MCP servers</span>
+            <span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">:</span>
+                    <span class="n">server_data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s2">&quot;registry_id&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                        <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;server_type&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;transport&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;transport&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                        <span class="s2">&quot;auth_type&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auth_type&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;updated_at&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">)</span>
+                    <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="n">servers</span><span class="p">,</span>
+                <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">servers</span><span class="p">),</span>
+                <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+                <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span>
+            <span class="p">}</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry browse failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_registry_server_details">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.get_registry_server_details">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/server/</span><span class="si">{registry_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_registry_server_details</span><span class="p">(</span><span class="n">registry_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get detailed information about a specific registry server.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get registry settings</span>
+        <span class="n">registry_url</span> <span class="o">=</span> <span class="s2">&quot;https://registry.mindroot.io&quot;</span>  <span class="c1"># Default</span>
+        <span class="n">registry_token</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">settings_file</span> <span class="o">=</span> <span class="s1">&#39;data/registry_settings.json&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">registry_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_url&quot;</span><span class="p">,</span> <span class="n">registry_url</span><span class="p">)</span>
+                    <span class="n">registry_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_token&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">registry_token</span><span class="p">:</span>
+                <span class="n">registry_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REGISTRY_TOKEN&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading registry settings: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">registry_token</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Get server details from registry</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s2">/item/</span><span class="si">{</span><span class="n">registry_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry server lookup failed: </span><span class="si">{</span><span class="n">error_detail</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">item</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Item is not an MCP server&quot;</span><span class="p">)</span>
+            
+            <span class="n">server_data</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;server&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;registry_id&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;server_type&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;transport&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;transport&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="s2">&quot;auth_type&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auth_type&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;updated_at&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry server lookup failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="install_registry_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.install_registry_server">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/install&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_registry_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">RegistryServerInstallRequest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install an MCP server from the registry.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># First get server details from registry</span>
+        <span class="n">server_details_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_registry_server_details</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">registry_id</span><span class="p">)</span>
+        <span class="n">server_info</span> <span class="o">=</span> <span class="n">server_details_response</span><span class="p">[</span><span class="s2">&quot;server&quot;</span><span class="p">]</span>
+        
+        <span class="c1"># Determine server name</span>
+        <span class="n">server_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">or</span> <span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Get MCP manager</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Check if server already exists</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Server &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; already exists&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create server configuration based on type</span>
+        <span class="k">if</span> <span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;server_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;remote&quot;</span><span class="p">:</span>
+            <span class="c1"># Remote server - use OAuth if needed</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.mcp_.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPServer</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+            
+            <span class="c1"># Get BASE_URL for callback</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;BASE_URL&#39;</span><span class="p">,</span> <span class="s1">&#39;http://localhost:3000&#39;</span><span class="p">)</span>
+            
+            <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">server_name</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Not used for remote servers</span>
+                <span class="n">transport</span><span class="o">=</span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">],</span>
+                <span class="n">auth_type</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auth_type&quot;</span><span class="p">,</span> <span class="s2">&quot;oauth2&quot;</span><span class="p">),</span>
+                <span class="n">redirect_uri</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/mcp_oauth_cb&quot;</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Add server to manager</span>
+            <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+            
+            <span class="c1"># Try to connect (will handle OAuth if needed)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="c1"># Check if OAuth flow is pending</span>
+                <span class="n">oauth_status</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">get_oauth_status</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="s2">&quot;oauth_flow&quot;</span> <span class="ow">in</span> <span class="n">oauth_status</span> <span class="ow">and</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awaiting_authorization&quot;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{</span>
+                        <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">&quot;requires_oauth&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;auth_url&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;auth_url&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;flow_id&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth authorization required to complete installation.&quot;</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Remove failed server</span>
+                    <span class="n">mcp_manager</span><span class="o">.</span><span class="n">remove_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Failed to connect to remote server&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Success - server is connected</span>
+            <span class="n">tools_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+            
+            <span class="c1"># Mark as installed (will only save to config if local)</span>
+            <span class="n">mcp_manager</span><span class="o">.</span><span class="n">mark_server_as_installed</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">registry_id</span><span class="p">)</span>
+            <span class="n">is_local</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Successfully installed &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="n">tools_count</span><span class="si">}</span><span class="s2"> tools.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="n">tools_count</span><span class="p">,</span>
+                <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="s2">&quot;local&quot;</span> <span class="k">if</span> <span class="n">is_local</span> <span class="k">else</span> <span class="s2">&quot;remote&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;persisted&quot;</span><span class="p">:</span> <span class="n">is_local</span><span class="p">,</span>
+                <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="kc">True</span>
+            <span class="p">}</span>
+            
+        <span class="k">elif</span> <span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;server_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+            <span class="c1"># Local server - use enhanced manager for installation</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">enhanced_mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">enhanced_mcp_manager</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Enhanced MCP manager service not available&quot;</span><span class="p">)</span>
+                
+                <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.mcp_.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPServer</span>
+                
+                <span class="c1"># Create enhanced server configuration</span>
+                <span class="n">enhanced_server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>                    <span class="n">name</span><span class="o">=</span><span class="n">server_name</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                    <span class="n">command</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">],</span>
+                    <span class="n">args</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                    <span class="n">env</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="n">install_method</span><span class="o">=</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>  <span class="c1"># Registry servers are pre-configured</span>
+                    <span class="n">auto_install</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Add to enhanced manager</span>
+                <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">enhanced_server</span><span class="p">)</span>
+                
+                <span class="c1"># Connect to server</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">remove_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Failed to connect to local server&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Get tools count</span>
+                <span class="n">server</span> <span class="o">=</span> <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+                <span class="n">tools_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+                
+                <span class="c1"># Mark as installed (will only save to config if local)</span>
+                <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">mark_server_as_installed</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">registry_id</span><span class="p">)</span>
+                <span class="n">is_local</span> <span class="o">=</span> <span class="n">enhanced_mcp_manager</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+                
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Successfully installed &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="n">tools_count</span><span class="si">}</span><span class="s2"> tools.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                    <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="n">tools_count</span><span class="p">,</span>
+                    <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="s2">&quot;local&quot;</span> <span class="k">if</span> <span class="n">is_local</span> <span class="k">else</span> <span class="s2">&quot;remote&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;persisted&quot;</span><span class="p">:</span> <span class="n">is_local</span><span class="p">,</span>
+                    <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="kc">True</span>
+                <span class="p">}</span>
+                
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Local server installation failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Unsupported server type: </span><span class="si">{</span><span class="n">server_info</span><span class="p">[</span><span class="s1">&#39;server_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry server installation failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="complete_registry_oauth">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.complete_registry_oauth">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/complete-oauth&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete_registry_oauth</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete OAuth flow for registry server installation.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the MCP manager service</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Complete the OAuth flow</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">complete_oauth_flow</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Failed to complete OAuth flow&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Wait a moment for the OAuth flow to complete</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Check if server is now connected</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;connected&quot;</span><span class="p">:</span>
+                <span class="n">tools</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">resources</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">prompts</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;OAuth completed successfully. Registry server &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; installed with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resources, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompts.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                    <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">),</span>
+                    <span class="s2">&quot;resources_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">),</span>
+                    <span class="s2">&quot;prompts_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+                <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth flow completed, but server connection is still pending.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span>
+        <span class="p">}</span>
+        
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;OAuth completion failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_installation_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.get_installation_status">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/installation-status&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_installation_status</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get installation status of all registry servers.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;installed_servers&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        
+        <span class="n">installed_servers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Include servers with registry_id OR servers that are marked as installed</span>
+            <span class="n">has_registry_id</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;registry_id&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">registry_id</span>
+            <span class="n">is_installed</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;installed&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">installed</span>
+            
+            <span class="k">if</span> <span class="n">has_registry_id</span> <span class="ow">or</span> <span class="n">is_installed</span><span class="p">:</span>
+                <span class="n">installed_servers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;registry_id&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;registry_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+                    <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="s2">&quot;local&quot;</span> <span class="k">if</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;remote&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;persisted&quot;</span><span class="p">:</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">_is_local_server</span><span class="p">(</span><span class="n">server</span><span class="p">),</span>
+                    <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;installed_servers&quot;</span><span class="p">:</span> <span class="n">installed_servers</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;installed_servers&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="get_registry_categories">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.get_registry_categories">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/categories&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_registry_categories</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get available MCP server categories from the registry.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get registry settings</span>
+        <span class="n">registry_url</span> <span class="o">=</span> <span class="s2">&quot;https://registry.mindroot.io&quot;</span>  <span class="c1"># Default</span>
+        <span class="n">registry_token</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">settings_file</span> <span class="o">=</span> <span class="s1">&#39;data/registry_settings.json&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">registry_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_url&quot;</span><span class="p">,</span> <span class="n">registry_url</span><span class="p">)</span>
+                    <span class="n">registry_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_token&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">registry_token</span><span class="p">:</span>
+                <span class="n">registry_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REGISTRY_TOKEN&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading registry settings: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">registry_token</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Get categories from registry</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s2">/categories&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="c1"># Fallback to default categories if endpoint doesn&#39;t exist</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;utilities&quot;</span><span class="p">,</span> <span class="s2">&quot;development&quot;</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">,</span> <span class="s2">&quot;communication&quot;</span><span class="p">,</span> <span class="s2">&quot;ai&quot;</span><span class="p">,</span> <span class="s2">&quot;automation&quot;</span><span class="p">]</span>
+                <span class="p">}</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;categories&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="p">}</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># Fallback to default categories</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;utilities&quot;</span><span class="p">,</span> <span class="s2">&quot;development&quot;</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">,</span> <span class="s2">&quot;communication&quot;</span><span class="p">,</span> <span class="s2">&quot;ai&quot;</span><span class="p">,</span> <span class="s2">&quot;automation&quot;</span><span class="p">]</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="mark_server_installed">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.mark_server_installed">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/registry/mark-installed&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mark_server_installed</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">registry_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manually mark a server as installed (for testing/fixing).&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Server &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
+        
+        <span class="n">mcp_manager</span><span class="o">.</span><span class="n">mark_server_as_installed</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">registry_id</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Server &#39;</span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; marked as installed&quot;</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

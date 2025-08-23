@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.mcp_.catalog_manager &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.mcp_.catalog_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.mcp_.catalog_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+
+<div class="viewcode-block" id="MCPCatalogManager">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MCPCatalogManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages MCP server catalog and process detection&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Default plugin_dir to the directory containing this module</span>
+        <span class="k">if</span> <span class="n">plugin_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plugin_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">)</span>
+        
+        <span class="c1"># Use process working directory for data files</span>
+        <span class="k">if</span> <span class="n">working_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">working_dir</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;mcp&quot;</span> <span class="o">/</span> <span class="s2">&quot;servers.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;default_mcp_servers.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_catalog_exists</span><span class="p">()</span>
+        
+    
+<div class="viewcode-block" id="MCPCatalogManager.ensure_catalog_exists">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.ensure_catalog_exists">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ensure_catalog_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure catalog file exists, create from default if needed&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">init_catalog_from_default</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_empty_catalog</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.init_catalog_from_default">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.init_catalog_from_default">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_catalog_from_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize catalog from default servers&quot;&quot;&quot;</span>
+        <span class="c1"># Ensure the target directory exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">default_servers</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            
+            <span class="n">catalog</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;_metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-06-02&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP Server Catalog for MindRoot&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;utilities&quot;</span><span class="p">,</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;development&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">,</span> <span class="s2">&quot;communication&quot;</span><span class="p">,</span> <span class="s2">&quot;cloud&quot;</span><span class="p">,</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span> <span class="s2">&quot;ai&quot;</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">}</span>
+            
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">default_servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">server</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;available&quot;</span>
+                <span class="n">server</span><span class="p">[</span><span class="s2">&quot;installed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">server</span><span class="p">[</span><span class="s2">&quot;running&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+            
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">catalog</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error initializing catalog: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_empty_catalog</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.create_empty_catalog">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.create_empty_catalog">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_empty_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create empty catalog structure&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;_metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2025-06-02&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP Server Catalog for MindRoot&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">catalog</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.load_catalog">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.load_catalog">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the server catalog&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading catalog: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;_metadata&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">{}}</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.save_catalog">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.save_catalog">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">catalog</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the server catalog&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">catalog</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving catalog: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.get_running_processes">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_running_processes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_running_processes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get list of running processes with details&quot;&quot;&quot;</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">([</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;cmdline&#39;</span><span class="p">]):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;pid&#39;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;cmdline&#39;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;cmdline&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]</span>
+                    <span class="p">})</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">):</span>
+                    <span class="k">continue</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting processes: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">processes</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.detect_running_servers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.detect_running_servers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_running_servers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect which MCP servers are currently running&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">running_status</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_running_processes</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">server_name</span><span class="p">,</span> <span class="n">server_info</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">process_names</span> <span class="o">=</span> <span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;process_names&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            
+            <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+                <span class="c1"># Check process name</span>
+                <span class="k">if</span> <span class="n">proc</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">process_names</span><span class="p">:</span>
+                    <span class="n">is_running</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                
+                <span class="c1"># Check command line for MCP server patterns</span>
+                <span class="n">cmdline_str</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proc</span><span class="p">[</span><span class="s1">&#39;cmdline&#39;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">process_name</span> <span class="ow">in</span> <span class="n">process_names</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">process_name</span> <span class="ow">in</span> <span class="n">cmdline_str</span><span class="p">:</span>
+                        <span class="n">is_running</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                
+                <span class="c1"># Check for specific patterns</span>
+                <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">cmdline_str</span> <span class="ow">or</span> <span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;install_package&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cmdline_str</span><span class="p">:</span>
+                    <span class="n">is_running</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                
+                <span class="k">if</span> <span class="n">is_running</span><span class="p">:</span>
+                    <span class="k">break</span>
+            
+            <span class="n">running_status</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_running</span>
+        
+        <span class="k">return</span> <span class="n">running_status</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.update_server_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.update_server_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_server_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update running status for all servers in catalog&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">running_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_running_servers</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">server_name</span><span class="p">,</span> <span class="n">is_running</span> <span class="ow">in</span> <span class="n">running_status</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+                <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="n">server_name</span><span class="p">][</span><span class="s2">&quot;running&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_running</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_catalog</span><span class="p">(</span><span class="n">catalog</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">catalog</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.get_servers_by_category">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_servers_by_category">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_servers_by_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get servers filtered by category&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        
+        <span class="k">if</span> <span class="n">category</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">servers</span>
+        
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">category</span><span class="p">:</span>
+                <span class="n">filtered</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+        
+        <span class="k">return</span> <span class="n">filtered</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.get_server_info">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_server_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_server_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get detailed info for a specific server&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.mark_server_installed">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.mark_server_installed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mark_server_installed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">installed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark a server as installed or not&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="n">server_name</span><span class="p">][</span><span class="s2">&quot;installed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">installed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_catalog</span><span class="p">(</span><span class="n">catalog</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.add_custom_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.add_custom_server">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_custom_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a custom server to the catalog&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">server_name</span> <span class="o">=</span> <span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">server_name</span><span class="p">:</span>
+            <span class="c1"># Add default fields if missing</span>
+            <span class="n">server_info</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;custom&quot;</span><span class="p">)</span>
+            <span class="n">server_info</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;installed&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">server_info</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">server_info</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;custom&quot;</span><span class="p">)</span>
+            <span class="n">server_info</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            
+            <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="n">server_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server_info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_catalog</span><span class="p">(</span><span class="n">catalog</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.remove_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.remove_server">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a server from the catalog&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">del</span> <span class="n">catalog</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_catalog</span><span class="p">(</span><span class="n">catalog</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.search_servers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.search_servers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">search_servers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search servers by name, description, or tags&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="n">query_lower</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Search in name</span>
+            <span class="k">if</span> <span class="n">query_lower</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Search in display name</span>
+            <span class="k">if</span> <span class="n">query_lower</span> <span class="ow">in</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Search in description</span>
+            <span class="k">if</span> <span class="n">query_lower</span> <span class="ow">in</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Search in tags</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">query_lower</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">server</span>
+                <span class="k">continue</span>
+        
+        <span class="k">return</span> <span class="n">results</span></div>
+
+    
+<div class="viewcode-block" id="MCPCatalogManager.get_categories">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_categories">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get list of all categories&quot;&quot;&quot;</span>
+        <span class="n">catalog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;categories&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        
+        <span class="c1"># Add categories from servers</span>
+        <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">category</span><span class="p">:</span>
+                <span class="n">categories</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">categories</span><span class="p">))</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

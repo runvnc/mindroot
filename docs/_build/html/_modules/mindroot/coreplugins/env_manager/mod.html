@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.env_manager.mod &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.env_manager.mod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.env_manager.mod</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_enabled</span><span class="p">,</span> <span class="n">get_plugin_path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mindroot.coreplugins</span>
+
+
+<div class="viewcode-block" id="should_skip_directory">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.should_skip_directory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">should_skip_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a directory should be skipped during scanning.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory (str): Path to check</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the directory should be skipped, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Directories to skip</span>
+    <span class="n">skip_dirs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;__pycache__&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;node_modules&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;static/js&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;static/css&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;venv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;env&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;.env&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;virtualenv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dist-packages&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;.git&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;.idea&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;.vscode&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;build&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dist&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;egg-info&#39;</span>
+    <span class="p">]</span>
+    
+    <span class="c1"># Special handling for site-packages - only skip if it&#39;s not mindroot related</span>
+    <span class="k">if</span> <span class="s1">&#39;site-packages&#39;</span> <span class="ow">in</span> <span class="n">directory</span><span class="p">:</span>
+        <span class="c1"># Allow mindroot core plugins in site-packages</span>
+        <span class="k">if</span> <span class="s1">&#39;mindroot/coreplugins&#39;</span> <span class="ow">in</span> <span class="n">directory</span> <span class="ow">or</span> <span class="s1">&#39;mindroot/lib&#39;</span> <span class="ow">in</span> <span class="n">directory</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># Skip other site-packages content</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="c1"># Check if any part of the path contains a directory to skip</span>
+    <span class="n">path_parts</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
+    <span class="k">for</span> <span class="n">skip_dir</span> <span class="ow">in</span> <span class="n">skip_dirs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">skip_dir</span> <span class="ow">in</span> <span class="n">path_parts</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+            
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="scan_directory_for_env_vars">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.scan_directory_for_env_vars">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_directory_for_env_vars</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan a directory for environment variable references using grep.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory (str): Path to the directory to scan</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        set: Set of environment variable names found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">env_vars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    
+    <span class="c1"># Skip if this is a directory we should ignore</span>
+    <span class="k">if</span> <span class="n">should_skip_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">env_vars</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Use grep to find os.environ references - much faster than parsing each file</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;grep&#39;</span><span class="p">,</span> <span class="s1">&#39;-r&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;-E&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;(os\.environ(\.get\(|\[)|os\.getenv\(|getenv\()&quot;</span><span class="p">,</span> 
+            <span class="s1">&#39;--include=*.py&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;--exclude-dir=venv&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;--exclude-dir=env&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--exclude-dir=.env&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--exclude-dir=site-packages&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--exclude-dir=dist-packages&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--exclude-dir=__pycache__&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--exclude-dir=node_modules&#39;</span><span class="p">,</span>
+            <span class="n">directory</span>
+        <span class="p">]</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>  <span class="c1"># 0 = matches found, 1 = no matches</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error running grep on </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">env_vars</span>
+            
+        <span class="c1"># Extract variable names using regex</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s2">&quot;os\.environ\.get\([&#39;</span><span class="se">\&quot;</span><span class="s2">]([A-Za-z0-9_]+)[&#39;</span><span class="se">\&quot;</span><span class="s2">]&quot;</span><span class="p">,</span>  <span class="c1"># os.environ.get(&#39;VAR_NAME&#39;)</span>
+            <span class="sa">r</span><span class="s2">&quot;os\.environ\[[&#39;</span><span class="se">\&quot;</span><span class="s2">]([A-Za-z0-9_]+)[&#39;</span><span class="se">\&quot;</span><span class="s2">]\]&quot;</span><span class="p">,</span>    <span class="c1"># os.environ[&#39;VAR_NAME&#39;]</span>
+            <span class="sa">r</span><span class="s2">&quot;os\.getenv\([&#39;</span><span class="se">\&quot;</span><span class="s2">]([A-Za-z0-9_]+)[&#39;</span><span class="se">\&quot;</span><span class="s2">]&quot;</span><span class="p">,</span>      <span class="c1"># os.getenv(&#39;VAR_NAME&#39;)</span>
+            <span class="sa">r</span><span class="s2">&quot;(?&lt;!os\.)getenv\([&#39;</span><span class="se">\&quot;</span><span class="s2">]([A-Za-z0-9_]+)[&#39;</span><span class="se">\&quot;</span><span class="s2">]&quot;</span><span class="p">,</span>  <span class="c1"># getenv(&#39;VAR_NAME&#39;) without os. prefix</span>
+        <span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+            <span class="c1"># Skip lines that are comments containing example patterns</span>
+            <span class="k">if</span> <span class="s1">&#39;# os.environ.get(&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s1">&#39;# os.environ[&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s1">&#39;# os.getenv(&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">continue</span>
+            
+            <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+                    <span class="n">var_name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="c1"># Filter out obvious false positives</span>
+                    <span class="k">if</span> <span class="n">var_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;VAR_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;VARIABLE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;ENV_VAR&#39;</span><span class="p">]:</span>
+                        <span class="n">env_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+    
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error scanning directory </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">env_vars</span></div>
+
+
+<div class="viewcode-block" id="scan_env_vars">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.scan_env_vars">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_env_vars</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan all enabled plugins for environment variable references.</span>
+<span class="sd">    </span>
+<span class="sd">    Debug logs added to help troubleshoot path resolution and scanning.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary with plugin names as keys and environment variable info as values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_env_vars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Starting scan_env_vars&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Current working directory: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Get all enabled plugins</span>
+    <span class="n">enabled_plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">enabled_plugins</span><span class="p">)</span><span class="si">}</span><span class="s2"> enabled plugins: </span><span class="si">{</span><span class="p">[</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">cat</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">enabled_plugins</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">enabled_plugins</span><span class="p">:</span>
+        <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: path = </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plugin_path</span><span class="p">:</span>
+            <span class="c1"># If plugin_path is a file, get its directory</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">):</span>
+                <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: converted to directory = </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+            <span class="c1"># Skip scanning if this is a directory we should ignore</span>
+            <span class="k">if</span> <span class="n">should_skip_directory</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: skipping directory </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+                
+            <span class="c1"># Scan the plugin directory for environment variable references</span>
+            <span class="n">env_vars</span> <span class="o">=</span> <span class="n">scan_directory_for_env_vars</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span><span class="si">}</span><span class="s2"> env vars: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">env_vars</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">plugin_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;plugin_name&#39;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
+                    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span>
+                    <span class="s1">&#39;env_vars&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="n">all_env_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">: no path found&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Also scan the lib directory (but not coreplugins since individual plugins are already scanned)</span>
+    <span class="n">lib_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] lib.__file__ = </span><span class="si">{</span><span class="n">lib</span><span class="o">.</span><span class="vm">__file__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] lib_path = </span><span class="si">{</span><span class="n">lib_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Scan lib directory for additional core variables</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">lib_path</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Scanning lib directory: </span><span class="si">{</span><span class="n">lib_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lib_vars</span> <span class="o">=</span> <span class="n">scan_directory_for_env_vars</span><span class="p">(</span><span class="n">lib_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Lib vars found: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">lib_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">lib_vars</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;lib&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;plugin_name&#39;</span><span class="p">:</span> <span class="s1">&#39;lib&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;core&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;env_vars&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lib_vars</span><span class="p">))</span>
+            <span class="p">}</span>
+            <span class="n">all_env_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lib_vars</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Added lib section to results&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Lib directory not found: </span><span class="si">{</span><span class="n">lib_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Note: We don&#39;t scan the entire coreplugins directory separately because</span>
+    <span class="c1"># individual core plugins are already being scanned above in the enabled_plugins loop.</span>
+    <span class="c1"># This prevents duplicate entries that would show up as &quot;Multiple Plugins&quot;.</span>
+
+    <span class="c1"># Get current environment variables</span>
+    <span class="n">current_env</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">all_env_vars</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="c1"># Mask sensitive values</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">sensitive</span> <span class="ow">in</span> <span class="n">var_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">sensitive</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;secret&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;token&#39;</span><span class="p">]):</span>  
+                <span class="n">current_env</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;********&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_env</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Include variables not in environment with empty value</span>
+            <span class="n">current_env</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="c1"># Add current environment variables to results</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;current_env&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_env</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Results structure: </span><span class="si">{</span><span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;env_vars&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="nb">dict</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="s1">&#39;env_vars&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Final results keys: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[ENV_MANAGER DEBUG] Total unique env vars: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_env_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="load_env_file">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.load_env_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_env_file</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load environment variables from .env file.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of environment variables from .env file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">env_vars</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">env_file</span> <span class="o">=</span> <span class="s1">&#39;.env&#39;</span>
+    
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">env_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">env_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">line</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">env_vars</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">env_vars</span></div>
+
+
+
+<div class="viewcode-block" id="save_env_file">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.save_env_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_env_file</span><span class="p">(</span><span class="n">env_vars</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save environment variables to .env file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        env_vars (dict): Dictionary of environment variables to save</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if successful, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load existing .env file to preserve variables not being updated</span>
+        <span class="n">existing_vars</span> <span class="o">=</span> <span class="n">load_env_file</span><span class="p">()</span>
+        
+        <span class="c1"># Update with new values</span>
+        <span class="n">existing_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+        
+        <span class="c1"># Write to .env file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">existing_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving .env file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="update_env_var">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.env_manager.html#mindroot.coreplugins.env_manager.mod.update_env_var">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_env_var</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">var_value</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an environment variable.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        var_name (str): Name of the environment variable</span>
+<span class="sd">        var_value (str): Value to set</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Status of the operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Update the environment variable in the current process</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_value</span>
+        
+        <span class="c1"># Save to .env file for persistence across restarts</span>
+        <span class="n">save_success</span> <span class="o">=</span> <span class="n">save_env_file</span><span class="p">({</span><span class="n">var_name</span><span class="p">:</span> <span class="n">var_value</span><span class="p">})</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Environment variable </span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> updated successfully&quot;</span> <span class="o">+</span> 
+                      <span class="p">(</span><span class="s2">&quot; and saved to .env file&quot;</span> <span class="k">if</span> <span class="n">save_success</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error updating environment variable: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

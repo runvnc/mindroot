@@ -1,0 +1,428 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.persona_router &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.persona_router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.persona_router</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">UploadFile</span><span class="p">,</span> <span class="n">File</span><span class="p">,</span> <span class="n">Form</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.asset_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">asset_manager</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+
+<span class="n">BASE_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;personas&#39;</span><span class="p">)</span>
+<span class="n">local_dir</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;local&quot;</span>
+<span class="n">shared_dir</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;shared&quot;</span>
+<span class="n">local_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">shared_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Registry directory for namespaced personas</span>
+<span class="n">registry_dir</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;registry&quot;</span>
+<span class="n">registry_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="read_persona">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.read_persona">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/personas/</span><span class="si">{scope}</span><span class="s1">/</span><span class="si">{name}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_persona</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">,</span> <span class="s1">&#39;registry&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Invalid scope&#39;</span><span class="p">)</span>
+    <span class="n">persona_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="n">scope</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona not found&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">persona</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;moderated&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">persona</span><span class="p">:</span>
+        <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;moderated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">persona</span></div>
+
+
+
+<div class="viewcode-block" id="list_personas">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.list_personas">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/personas/</span><span class="si">{scope}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_personas</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">,</span> <span class="s1">&#39;registry&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Invalid scope&#39;</span><span class="p">)</span>
+    <span class="n">scope_dir</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="n">scope</span>
+    <span class="n">personas</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">scope_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read personas from dir </span><span class="si">{</span><span class="n">scope_dir</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">personas</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">personas</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="read_persona_by_path">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.read_persona_by_path">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/personas/{persona_path:path}&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_persona_by_path</span><span class="p">(</span><span class="n">persona_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read persona by full path (supports registry/owner/name format)&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Handle registry personas: registry/owner/name</span>
+        <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;registry/&#39;</span><span class="p">):</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="n">persona_path</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Handle simple names: check local first, then shared</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;local&#39;</span> <span class="o">/</span> <span class="n">persona_path</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">full_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;shared&#39;</span> <span class="o">/</span> <span class="n">persona_path</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona not found&#39;</span><span class="p">)</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Persona not found: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_registry_persona">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.create_registry_persona">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/personas/registry&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_registry_persona</span><span class="p">(</span><span class="n">persona</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a registry persona with owner namespace&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">persona_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">persona</span><span class="p">)</span>
+        <span class="n">persona_name</span> <span class="o">=</span> <span class="n">persona_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona name is required&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">owner</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Owner is required for registry personas&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Create registry persona path: personas/registry/owner/name/</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;registry&#39;</span> <span class="o">/</span> <span class="n">owner</span> <span class="o">/</span> <span class="n">persona_name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        
+        <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="c1"># Update existing persona instead of failing</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating existing registry persona: </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">persona_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;registry/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating registry persona: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Internal server error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_registry_persona_with_assets">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.create_registry_persona_with_assets">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/personas/registry/with-assets&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_registry_persona_with_assets</span><span class="p">(</span><span class="n">persona</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> 
+                                       <span class="n">faceref</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">avatar</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a registry persona with deduplicated asset storage&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received persona data (first 200 chars): </span><span class="si">{</span><span class="n">persona</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received owner: </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received faceref: </span><span class="si">{</span><span class="n">faceref</span><span class="o">.</span><span class="n">filename</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">faceref</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;None&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received avatar: </span><span class="si">{</span><span class="n">avatar</span><span class="o">.</span><span class="n">filename</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">avatar</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;None&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">persona_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">persona</span><span class="p">)</span>
+        <span class="n">persona_name</span> <span class="o">=</span> <span class="n">persona_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona name is required&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">owner</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Owner is required for registry personas&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Store assets with deduplication</span>
+        <span class="n">asset_hashes</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="n">faceref</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">faceref</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">file_hash</span><span class="p">,</span> <span class="n">was_new</span> <span class="o">=</span> <span class="n">asset_manager</span><span class="o">.</span><span class="n">store_content</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">faceref</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;faceref&quot;</span><span class="p">)</span>
+            <span class="n">asset_hashes</span><span class="p">[</span><span class="s1">&#39;faceref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_hash</span>
+            
+        <span class="k">if</span> <span class="n">avatar</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">avatar</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">file_hash</span><span class="p">,</span> <span class="n">was_new</span> <span class="o">=</span> <span class="n">asset_manager</span><span class="o">.</span><span class="n">store_content</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">avatar</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;avatar&quot;</span><span class="p">)</span>
+            <span class="n">asset_hashes</span><span class="p">[</span><span class="s1">&#39;avatar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_hash</span>
+        
+        <span class="c1"># Add asset references to persona data</span>
+        <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;asset_hashes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">asset_hashes</span>
+        
+        <span class="c1"># For registry personas, update the name to include the owner namespace</span>
+        <span class="c1"># This ensures the chat UI can find the images at the correct path</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">persona_data</span><span class="p">:</span>
+            <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># Create registry persona path first</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;registry&#39;</span> <span class="o">/</span> <span class="n">owner</span> <span class="o">/</span> <span class="n">persona_name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># ALSO copy assets to traditional locations for compatibility</span>
+        <span class="k">if</span> <span class="n">faceref</span><span class="p">:</span>
+            <span class="n">faceref_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;faceref.png&#39;</span>
+            <span class="n">faceref_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">faceref_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">faceref</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Reset file pointer</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">faceref</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                
+        <span class="k">if</span> <span class="n">avatar</span><span class="p">:</span>
+            <span class="n">avatar_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;avatar.png&#39;</span>
+            <span class="n">avatar_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">avatar_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">avatar</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Reset file pointer</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">avatar</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">persona_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;registry/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;asset_hashes&#39;</span><span class="p">:</span> <span class="n">asset_hashes</span>
+        <span class="p">}</span>
+        
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON decode error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid JSON received: </span><span class="si">{</span><span class="n">persona</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Invalid JSON in persona data: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating registry persona with assets: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Internal server error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="serve_asset">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.serve_asset">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/assets/</span><span class="si">{asset_hash}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">serve_asset</span><span class="p">(</span><span class="n">asset_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve a deduplicated asset by hash&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">asset_path</span> <span class="o">=</span> <span class="n">asset_manager</span><span class="o">.</span><span class="n">get_asset_path</span><span class="p">(</span><span class="n">asset_hash</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">asset_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Asset not found&#39;</span><span class="p">)</span>
+        
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">asset_manager</span><span class="o">.</span><span class="n">get_asset_metadata</span><span class="p">(</span><span class="n">asset_hash</span><span class="p">)</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">asset_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        
+        <span class="c1"># Determine content type based on metadata</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;image/png&quot;</span> <span class="k">if</span> <span class="n">metadata</span> <span class="ow">and</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;avatar&#39;</span><span class="p">,</span> <span class="s1">&#39;faceref&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;application/octet-stream&quot;</span>
+        
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Asset not found: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_persona">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.create_persona">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/personas/</span><span class="si">{scope}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_persona</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">persona</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">faceref</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">avatar</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;In create_persona&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;scope is &quot;</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+        <span class="n">persona</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">persona</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona is &quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Invalid scope&#39;</span><span class="p">)</span>
+        <span class="n">persona_name</span> <span class="o">=</span> <span class="n">persona</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona name is required&#39;</span><span class="p">)</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="n">scope</span> <span class="o">/</span> <span class="n">persona_name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona already exists&#39;</span><span class="p">)</span>
+        <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;static/personas&#39;</span> <span class="o">/</span> <span class="n">persona_name</span>
+
+        <span class="n">target_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[93m&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">faceref</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to save faceref&quot;</span><span class="p">)</span>
+            <span class="n">faceref_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;faceref.png&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;faceref path is &quot;</span><span class="p">,</span> <span class="n">faceref_path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">faceref_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;opened file for writing&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">faceref</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="c1"># Copy faceref to new location</span>
+            <span class="n">new_faceref_path</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s1">&#39;faceref.png&#39;</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">faceref_path</span><span class="p">,</span> <span class="n">new_faceref_path</span><span class="p">)</span>
+            <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;faceref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_faceref_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">avatar</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to save avatar&quot;</span><span class="p">)</span>
+            <span class="n">avatar_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;avatar.png&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">avatar_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;opened file for writing&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">avatar</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="c1"># Copy avatar to new location</span>
+            <span class="n">new_avatar_path</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s1">&#39;avatar.png&#39;</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">avatar_path</span><span class="p">,</span> <span class="n">new_avatar_path</span><span class="p">)</span>
+            <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;avatar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_avatar_path</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">persona</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">}</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in create_persona&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Internal server error &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="update_persona">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_router.update_persona">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s1">&#39;/personas/</span><span class="si">{scope}</span><span class="s1">/</span><span class="si">{name}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_persona</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">persona</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Form</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">faceref</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">avatar</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+     
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;In update_persona&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;scope is &quot;</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;name is &quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BASE_DIR is &quot;</span><span class="p">,</span> <span class="n">BASE_DIR</span><span class="p">)</span>
+        <span class="n">persona</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">persona</span><span class="p">)</span>
+        <span class="n">persona_name</span> <span class="o">=</span> <span class="n">persona</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona is &quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Invalid scope&#39;</span><span class="p">)</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="n">scope</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona not found&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;moderated&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">persona</span><span class="p">:</span>
+            <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;moderated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;static/personas&#39;</span> <span class="o">/</span> <span class="n">persona_name</span>
+
+        <span class="n">target_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[93m&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[93m&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_dir</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="n">faceref</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to save faceref&quot;</span><span class="p">)</span>
+            <span class="n">faceref_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;faceref.png&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;faceref path is &quot;</span><span class="p">,</span> <span class="n">faceref_path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">faceref_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;opened file for writing&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">faceref</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="c1"># Copy faceref to new location</span>
+            <span class="n">new_faceref_path</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s1">&#39;faceref.png&#39;</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">faceref_path</span><span class="p">,</span> <span class="n">new_faceref_path</span><span class="p">)</span>
+            <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;faceref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_faceref_path</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">avatar</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to save avatar&quot;</span><span class="p">)</span>
+            <span class="n">avatar_path</span> <span class="o">=</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;avatar.png&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">avatar_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;opened file for writing&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">avatar</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="c1"># Copy avatar to new location</span>
+            <span class="n">new_avatar_path</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s1">&#39;avatar.png&#39;</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">avatar_path</span><span class="p">,</span> <span class="n">new_avatar_path</span><span class="p">)</span>
+            <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;avatar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_avatar_path</span><span class="p">)</span>
+ 
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">persona</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in update_persona&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Internal server error &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

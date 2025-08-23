@@ -1,0 +1,181 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.parent_templates &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.parent_templates</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.parent_templates</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Parent template environment with single template per filename.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jinja2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">FileSystemLoader</span><span class="p">,</span> <span class="n">ChoiceLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_enabled</span><span class="p">,</span> <span class="n">get_plugin_path</span>
+
+
+<div class="viewcode-block" id="FirstMatchLoader">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.parent_templates.FirstMatchLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FirstMatchLoader</span><span class="p">(</span><span class="n">ChoiceLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom loader that only returns the first matching template.&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loaders</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">loaders</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_template_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="FirstMatchLoader.get_source">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.parent_templates.FirstMatchLoader.get_source">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">environment</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get template source, returning only first match for each template name.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">template</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template_cache</span><span class="p">[</span><span class="n">template</span><span class="p">]</span>
+
+        <span class="c1"># Try each loader until we find the first match</span>
+        <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaders</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_source</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_template_cache</span><span class="p">[</span><span class="n">template</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+                <span class="k">return</span> <span class="n">source</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">continue</span>
+                
+        <span class="c1"># If we get here, no loader could find the template</span>
+        <span class="k">raise</span> <span class="n">TemplateNotFound</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="get_parent_templates_env">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.parent_templates.get_parent_templates_env">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_parent_templates_env</span><span class="p">(</span><span class="n">plugins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up Jinja2 environment that only loads first matching template.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugins (list, optional): List of plugin names. Defaults to enabled plugins.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Environment: Configured Jinja2 environment with FirstMatchLoader</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">plugins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">template_paths</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Use list to maintain order</span>
+    
+    <span class="c1"># Add plugin template paths in priority order</span>
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+        <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
+            <span class="k">continue</span>
+            
+        <span class="c1"># Add main template directory</span>
+        <span class="n">template_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">,</span> <span class="s1">&#39;templates&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_dir</span><span class="p">):</span>
+            <span class="n">template_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template_dir</span><span class="p">)</span>
+            
+        <span class="c1"># Add parent directories to handle absolute paths</span>
+        <span class="c1"># if it doesn&#39;t already exist in the list</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">template_paths</span><span class="p">:</span>
+            <span class="n">template_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">template_paths</span><span class="p">:</span>
+            <span class="n">template_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)))</span>
+    
+    <span class="c1"># Add default templates directory last</span>
+    <span class="n">template_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;templates&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;**************************************************************************************&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading templates from:&quot;</span><span class="p">,</span> <span class="n">template_paths</span><span class="p">)</span>
+
+    <span class="c1"># Create environment with FirstMatchLoader</span>
+    <span class="n">loaders</span> <span class="o">=</span> <span class="p">[</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">template_paths</span><span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">FirstMatchLoader</span><span class="p">(</span><span class="n">loaders</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">env</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

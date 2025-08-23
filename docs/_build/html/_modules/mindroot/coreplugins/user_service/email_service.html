@@ -1,0 +1,204 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.user_service.email_service &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.user_service.email_service</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.user_service.email_service</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">REQUIRE_EMAIL_VERIFY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REQUIRE_EMAIL_VERIFY&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BASE_URL&#39;</span><span class="p">,</span> <span class="s1">&#39;http://localhost:8011&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="send_verification_email">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.email_service.send_verification_email">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_verification_email</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">verification_token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send email verification link to user.&quot;&quot;&quot;</span>
+    <span class="n">verification_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/verify-email?token=</span><span class="si">{</span><span class="n">verification_token</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="n">email_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;html&gt;</span>
+<span class="s2">    &lt;body&gt;</span>
+<span class="s2">        &lt;h1&gt;Welcome to MindRoot!&lt;/h1&gt;</span>
+<span class="s2">        &lt;p&gt;Please verify your email address by clicking the link below:&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;a href=&quot;</span><span class="si">{</span><span class="n">verification_url</span><span class="si">}</span><span class="s2">&quot; style=&quot;background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;&quot;&gt;Verify Email&lt;/a&gt;&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;Or copy and paste this link into your browser:&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">verification_url</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;This link will expire in 24 hours.&lt;/p&gt;</span>
+<span class="s2">        &lt;br&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;small&gt;If you did not create this account, please ignore this email.&lt;/small&gt;&lt;/p&gt;</span>
+<span class="s2">    &lt;/body&gt;</span>
+<span class="s2">    &lt;/html&gt;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">send_email</span><span class="p">(</span>
+            <span class="n">to</span><span class="o">=</span><span class="n">email</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;Verify Your MindRoot Account&quot;</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">email_html</span>  <span class="c1"># HTML content will be auto-detected</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Verification email sent successfully to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to send verification email to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception sending verification email to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="send_password_reset_email">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.email_service.send_password_reset_email">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_password_reset_email</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reset_token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send password reset email to user.&quot;&quot;&quot;</span>
+    <span class="n">reset_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/reset-password?token=</span><span class="si">{</span><span class="n">reset_token</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="n">email_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;html&gt;</span>
+<span class="s2">    &lt;body&gt;</span>
+<span class="s2">        &lt;h1&gt;Password Reset Request&lt;/h1&gt;</span>
+<span class="s2">        &lt;p&gt;Hello </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">,&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;You have requested to reset your password for your MindRoot account.&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;Click the link below to reset your password:&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;a href=&quot;</span><span class="si">{</span><span class="n">reset_url</span><span class="si">}</span><span class="s2">&quot; style=&quot;background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;&quot;&gt;Reset Password&lt;/a&gt;&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;Or copy and paste this link into your browser:&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">reset_url</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;/p&gt;</span>
+<span class="s2">        &lt;p&gt;This link will expire in 1 hour.&lt;/p&gt;</span>
+<span class="s2">        &lt;br&gt;</span>
+<span class="s2">        &lt;p&gt;&lt;small&gt;If you did not request this password reset, please ignore this email.&lt;/small&gt;&lt;/p&gt;</span>
+<span class="s2">    &lt;/body&gt;</span>
+<span class="s2">    &lt;/html&gt;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">send_email</span><span class="p">(</span>
+            <span class="n">to</span><span class="o">=</span><span class="n">email</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;Password Reset Request - MindRoot&quot;</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">email_html</span>  <span class="c1"># HTML content will be auto-detected</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Password reset email sent successfully to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to send password reset email to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception sending password reset email to </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="setup_verification">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.email_service.setup_verification">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_verification</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Setup email verification token and expiry.</span>
+<span class="sd">    Returns: (token, expiry timestamp, verified status)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REQUIRE_EMAIL_VERIFY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span>
+        
+    <span class="n">verification_token</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">token_urlsafe</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">verification_expires</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">))</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">verification_token</span><span class="p">,</span> <span class="n">verification_expires</span><span class="p">,</span> <span class="kc">False</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

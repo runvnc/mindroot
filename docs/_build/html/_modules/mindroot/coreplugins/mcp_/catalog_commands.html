@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.mcp_.catalog_commands &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.mcp_.catalog_commands</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.mcp_.catalog_commands</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.catalog_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPCatalogManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcp_manager</span><span class="p">,</span> <span class="n">MCPServer</span>
+
+<span class="c1"># Global catalog manager</span>
+<span class="c1"># Use current working directory for data files</span>
+<span class="n">catalog_manager</span> <span class="o">=</span> <span class="n">MCPCatalogManager</span><span class="p">(</span><span class="n">working_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="mcp_catalog_list">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_list">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_list</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List MCP servers from catalog</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_list&quot;: {} }</span>
+<span class="sd">    { &quot;mcp_catalog_list&quot;: { &quot;category&quot;: &quot;utilities&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Update running status first</span>
+    <span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">update_server_status</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">category</span><span class="p">:</span>
+        <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_servers_by_category</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    
+    <span class="c1"># Format for display</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;display_name&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;install_method&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;install_method&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;installed&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+        <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">),</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_categories</span><span class="p">()</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_search">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_search">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_search</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Search MCP servers in catalog</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_search&quot;: { &quot;query&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    { &quot;mcp_catalog_search&quot;: { &quot;query&quot;: &quot;database&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">search_servers</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;display_name&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;installed&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span>
+        <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_install">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_install</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install an MCP server from catalog</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_install&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">server_info</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_server_info</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">server_info</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> not found in catalog&quot;</span>
+    
+    <span class="c1"># Create server config from catalog info</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+        <span class="n">command</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">],</span>
+        <span class="n">args</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">],</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Add to manager</span>
+    <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+    
+    <span class="c1"># Install server if needed (for uvx/npx packages)</span>
+    <span class="n">install_method</span> <span class="o">=</span> <span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;install_method&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">)</span>
+    <span class="n">install_package</span> <span class="o">=</span> <span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;install_package&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">install_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;uvx&quot;</span><span class="p">,</span> <span class="s2">&quot;npx&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">install_package</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+            <span class="k">if</span> <span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;uvx&quot;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;uvx&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;uvx not available. Please install uv first.&quot;</span>
+            <span class="k">elif</span> <span class="n">install_method</span> <span class="o">==</span> <span class="s2">&quot;npx&quot;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;npx&quot;</span><span class="p">,</span> <span class="s2">&quot;--version&quot;</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;npx not available. Please install Node.js first.&quot;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error checking </span><span class="si">{</span><span class="n">install_method</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="c1"># Mark as installed (basic implementation)</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># For now, assume installation succeeds    </span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="n">catalog_manager</span><span class="o">.</span><span class="n">mark_server_installed</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully installed </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to install </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_install_and_run">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install_and_run">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_install_and_run</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install and run an MCP server from catalog</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_install_and_run&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get server info from catalog</span>
+        <span class="n">server_info</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_server_info</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">server_info</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> not found in catalog&quot;</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Installing and running </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create server configuration</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating server configuration for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        
+        <span class="n">server_config</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">server_name</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;MCP Server: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">server_info</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">],</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;args&#39;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;env&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">install_method</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;install_method&#39;</span><span class="p">,</span> <span class="s1">&#39;manual&#39;</span><span class="p">),</span>
+            <span class="n">install_package</span><span class="o">=</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;install_package&#39;</span><span class="p">),</span>
+            <span class="n">auto_install</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">installed</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Add server to manager</span>
+        <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">server_config</span><span class="p">)</span>
+        
+        <span class="c1"># Connect to the server</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="c1"># Get final server status</span>
+            <span class="n">catalog_manager</span><span class="o">.</span><span class="n">update_server_status</span><span class="p">()</span>
+            
+            <span class="c1"># Import and call the refresh function to update dynamic commands</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcp_refresh_dynamic_commands</span>
+                <span class="k">await</span> <span class="n">mcp_refresh_dynamic_commands</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not refresh dynamic commands: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully installed and connected to </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">. MCP tools are now available as commands.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Installed </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> but failed to connect. Check server configuration.&quot;</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in mcp_catalog_install_and_run: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error installing and running </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_stop">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_stop">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_stop</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stop an MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_stop&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="n">catalog_manager</span><span class="o">.</span><span class="n">update_server_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully stopped </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to stop </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_status">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_status</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get status of all catalog servers</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_status&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">update_server_status</span><span class="p">()</span>
+    <span class="n">servers</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    
+    <span class="n">status_summary</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">servers</span><span class="p">),</span>
+        <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;available&quot;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">}</span>
+    
+    <span class="n">server_status</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">installed</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;installed&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">installed</span><span class="p">:</span>
+            <span class="n">status_summary</span><span class="p">[</span><span class="s2">&quot;installed&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">running</span><span class="p">:</span>
+            <span class="n">status_summary</span><span class="p">[</span><span class="s2">&quot;running&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;available&quot;</span><span class="p">:</span>
+            <span class="n">status_summary</span><span class="p">[</span><span class="s2">&quot;available&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="n">server_status</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;display_name&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="s2">&quot;installed&quot;</span><span class="p">:</span> <span class="n">installed</span><span class="p">,</span>
+            <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="n">running</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+        <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">status_summary</span><span class="p">,</span>
+        <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="n">server_status</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_info">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_info">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_info</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get detailed info about a catalog server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_info&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">server_info</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_server_info</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">server_info</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> not found in catalog&quot;</span>
+    
+    <span class="c1"># Update running status</span>
+    <span class="n">running_status</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">detect_running_servers</span><span class="p">()</span>
+    <span class="n">server_info</span><span class="p">[</span><span class="s2">&quot;running&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">running_status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">server_info</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_categories">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_categories">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_categories</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get list of server categories</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_categories&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">get_categories</span><span class="p">()</span>
+    <span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">()</span>
+    
+    <span class="c1"># Count servers per category</span>
+    <span class="n">category_counts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+        <span class="n">category_counts</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="n">category_counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="n">categories</span><span class="p">,</span>
+        <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="n">category_counts</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_add_custom">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_add_custom">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_add_custom</span><span class="p">(</span><span class="n">server_info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a custom server to the catalog</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_add_custom&quot;: {</span>
+<span class="sd">        &quot;server_info&quot;: {</span>
+<span class="sd">            &quot;name&quot;: &quot;my_server&quot;,</span>
+<span class="sd">            &quot;display_name&quot;: &quot;My Custom Server&quot;,</span>
+<span class="sd">            &quot;description&quot;: &quot;Custom MCP server&quot;,</span>
+<span class="sd">            &quot;command&quot;: &quot;python&quot;,</span>
+<span class="sd">            &quot;args&quot;: [&quot;-m&quot;, &quot;my_mcp_server&quot;],</span>
+<span class="sd">            &quot;category&quot;: &quot;custom&quot;,</span>
+<span class="sd">            &quot;install_method&quot;: &quot;manual&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">    }}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">add_custom_server</span><span class="p">(</span><span class="n">server_info</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully added custom server </span><span class="si">{</span><span class="n">server_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Failed to add custom server - missing required fields&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_catalog_refresh">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_refresh">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_catalog_refresh</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refresh catalog and update server status</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_catalog_refresh&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog_manager</span><span class="o">.</span><span class="n">update_server_status</span><span class="p">()</span>
+    <span class="n">running_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> 
+                       <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Catalog refreshed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;total_servers&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;servers&quot;</span><span class="p">,</span> <span class="p">{})),</span>
+        <span class="s2">&quot;running_servers&quot;</span><span class="p">:</span> <span class="n">running_count</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

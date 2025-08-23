@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.check_list package &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.check_list package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/mindroot.coreplugins.check_list.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mindroot-coreplugins-check-list-package">
+<h1>mindroot.coreplugins.check_list package<a class="headerlink" href="#mindroot-coreplugins-check-list-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mindroot.coreplugins.check_list.mod">
+<span id="mindroot-coreplugins-check-list-mod-module"></span><h2>mindroot.coreplugins.check_list.mod module<a class="headerlink" href="#module-mindroot.coreplugins.check_list.mod" title="Link to this heading"></a></h2>
+<p>checklist helper for an LLM‑agent system
+—————————————————————————————————————————————————————————————————————————————
+Purpose
+——-
+• Parse a Markdown “##  Checklist” section where each subtask is</p>
+<blockquote>
+<div><p>written as a task‑list line:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>[ ] label of subtask</dt><dd><p>arbitrary markdown body… (until next task or heading)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<ul class="simple">
+<li><p>Store parsed tasks + cursor in <cite>context.data[‘checklist’]</cite>.</p></li>
+<li><dl class="simple">
+<dt>Runtime helpers:</dt><dd><p>load_checklist(md, ctx)   → parse markdown + reset state
+complete_subtask(subtask_id, context)  → mark subtask done, advance cursor
+goto_subtask(subtask_id, context)  → move to a specific subtask
+clear_subtask(subtask_id, context)  → mark a subtask as incomplete
+get_checklist_status(context)  → show the full checklist status</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p><cite>complete_subtask</cite> and other commands live at module level so the agent can call them
+as tools. No third‑party deps—only Python’s <cite>re</cite> module.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.clear_subtask">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">clear_subtask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtask_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#clear_subtask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.clear_subtask" title="Link to this definition"></a></dt>
+<dd><p>Mark a subtask as incomplete (not done).</p>
+<p>Parameters:
+- subtask_id: Optional. The subtask to clear, specified by:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The exact subtask label text</p></li>
+<li><p>Omit to clear the current subtask</p></li>
+</ul>
+</div></blockquote>
+<p>Example:
+{ “clear_subtask”: {} }  # Clear current subtask
+{ “clear_subtask”: { “subtask_id”: “Review documents” } }  # Clear by label</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.complete_subtask">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">complete_subtask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtask_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#complete_subtask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.complete_subtask" title="Link to this definition"></a></dt>
+<dd><p>Mark a subtask complete and return a Markdown status message.</p>
+<p>Parameters:
+- subtask_id: Optional. The subtask to complete, specified by:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The exact subtask label text</p></li>
+<li><p>Omit to complete the current subtask</p></li>
+</ul>
+</div></blockquote>
+<p>Example:
+{ “complete_subtask”: {} }  # Complete current subtask
+{ “complete_subtask”: { “subtask_id”: “Review documents” } }  # Complete by label</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.extract_checklist_section">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">extract_checklist_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#extract_checklist_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.extract_checklist_section" title="Link to this definition"></a></dt>
+<dd><p>Extract the checklist section from larger text.</p>
+<p>Looks for a heading like ‘# Checklist’, ‘## Checklist’, etc., and extracts
+all content from that heading until the next heading of the same or lower level,
+or the end of the text.</p>
+<p>Returns the extracted section, or the original text if no checklist section is found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.get_checklist_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">get_checklist_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#get_checklist_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.get_checklist_status" title="Link to this definition"></a></dt>
+<dd><p>Show the full status of the checklist.</p>
+<p>Example:
+{ “get_checklist_status”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.goto_subtask">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">goto_subtask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtask_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#goto_subtask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.goto_subtask" title="Link to this definition"></a></dt>
+<dd><p>Move to a specific subtask without changing its completion status.</p>
+<p>Parameters:
+- subtask_id: Required. The subtask to navigate to, specified by:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The exact subtask label text</p></li>
+</ul>
+</div></blockquote>
+<p>Example:
+{ “goto_subtask”: { “subtask_id”: “Data analysis” } }  # Go to by label</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.load_checklist">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">load_checklist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#load_checklist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.load_checklist" title="Link to this definition"></a></dt>
+<dd><p>Parse markdown and reset cursor to first unchecked subtask.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.check_list.mod.load_checklist_from_instructions">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.check_list.mod.</span></span><span class="sig-name descname"><span class="pre">load_checklist_from_instructions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/check_list/mod.html#load_checklist_from_instructions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.check_list.mod.load_checklist_from_instructions" title="Link to this definition"></a></dt>
+<dd><p>Extract checklist section from instructions and load it.</p>
+<p>Looks for a section starting with ‘# Checklist’ or similar heading.</p>
+<p>Example:
+{ “load_checklist_from_instructions”: { “md”: “Full instructions with embedded checklist” } }</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.check_list">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.coreplugins.check_list" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

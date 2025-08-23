@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.registry package &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">mindroot.registry package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mindroot.registry.component_manager">mindroot.registry.component_manager module</a><ul>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager"><code class="docutils literal notranslate"><span class="pre">ComponentManager</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager.get_component_metadata"><code class="docutils literal notranslate"><span class="pre">ComponentManager.get_component_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager.is_component_activated"><code class="docutils literal notranslate"><span class="pre">ComponentManager.is_component_activated()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager.is_component_installed"><code class="docutils literal notranslate"><span class="pre">ComponentManager.is_component_installed()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager.list_components"><code class="docutils literal notranslate"><span class="pre">ComponentManager.list_components()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.component_manager.ComponentManager.register_component"><code class="docutils literal notranslate"><span class="pre">ComponentManager.register_component()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.registry.data_access">mindroot.registry.data_access module</a><ul>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess"><code class="docutils literal notranslate"><span class="pre">DataAccess</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.add_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.add_plugin()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.add_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.add_provider()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.get_model"><code class="docutils literal notranslate"><span class="pre">DataAccess.get_model()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.get_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.get_provider()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_equivalent_flags"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_equivalent_flags()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_json"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_json()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_models()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_plugins"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_plugins()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_preferred_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_preferred_models()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.read_providers"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_providers()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.remove_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.remove_plugin()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.remove_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.remove_provider()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.update_model"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_model()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.update_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_plugin()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.update_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_provider()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_equivalent_flags"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_equivalent_flags()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_json"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_json()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_models()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_plugins"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_plugins()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_preferred_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_preferred_models()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.registry.data_access.DataAccess.write_providers"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_providers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.registry">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mindroot.registry package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/mindroot.registry.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mindroot-registry-package">
+<h1>mindroot.registry package<a class="headerlink" href="#mindroot-registry-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mindroot.registry.component_manager">
+<span id="mindroot-registry-component-manager-module"></span><h2>mindroot.registry.component_manager module<a class="headerlink" href="#module-mindroot.registry.component_manager" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.registry.component_manager.</span></span><span class="sig-name descname"><span class="pre">ComponentManager</span></span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager.get_component_metadata">
+<span class="sig-name descname"><span class="pre">get_component_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager.get_component_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager.get_component_metadata" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager.is_component_activated">
+<span class="sig-name descname"><span class="pre">is_component_activated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager.is_component_activated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager.is_component_activated" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager.is_component_installed">
+<span class="sig-name descname"><span class="pre">is_component_installed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager.is_component_installed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager.is_component_installed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager.list_components">
+<span class="sig-name descname"><span class="pre">list_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager.list_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager.list_components" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.component_manager.ComponentManager.register_component">
+<span class="sig-name descname"><span class="pre">register_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/component_manager.html#ComponentManager.register_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.component_manager.ComponentManager.register_component" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.registry.data_access">
+<span id="mindroot-registry-data-access-module"></span><h2>mindroot.registry.data_access module<a class="headerlink" href="#module-mindroot.registry.data_access" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.registry.data_access.</span></span><span class="sig-name descname"><span class="pre">DataAccess</span></span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.add_plugin">
+<span class="sig-name descname"><span class="pre">add_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.add_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.add_plugin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.add_provider">
+<span class="sig-name descname"><span class="pre">add_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">provider_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.add_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.add_provider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.get_model">
+<span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.get_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.get_provider">
+<span class="sig-name descname"><span class="pre">get_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">provider_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.get_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.get_provider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_equivalent_flags">
+<span class="sig-name descname"><span class="pre">read_equivalent_flags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_equivalent_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_equivalent_flags" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_json">
+<span class="sig-name descname"><span class="pre">read_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_models">
+<span class="sig-name descname"><span class="pre">read_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_plugins">
+<span class="sig-name descname"><span class="pre">read_plugins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_plugins" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_preferred_models">
+<span class="sig-name descname"><span class="pre">read_preferred_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_preferred_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_preferred_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.read_providers">
+<span class="sig-name descname"><span class="pre">read_providers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.read_providers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.read_providers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.remove_plugin">
+<span class="sig-name descname"><span class="pre">remove_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.remove_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.remove_plugin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.remove_provider">
+<span class="sig-name descname"><span class="pre">remove_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">provider_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.remove_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.remove_provider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.update_model">
+<span class="sig-name descname"><span class="pre">update_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.update_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.update_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.update_plugin">
+<span class="sig-name descname"><span class="pre">update_plugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.update_plugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.update_plugin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.update_provider">
+<span class="sig-name descname"><span class="pre">update_provider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">provider_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.update_provider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.update_provider" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_equivalent_flags">
+<span class="sig-name descname"><span class="pre">write_equivalent_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_equivalent_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_equivalent_flags" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_json">
+<span class="sig-name descname"><span class="pre">write_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_models">
+<span class="sig-name descname"><span class="pre">write_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_plugins">
+<span class="sig-name descname"><span class="pre">write_plugins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_plugins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_plugins" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_preferred_models">
+<span class="sig-name descname"><span class="pre">write_preferred_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_preferred_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_preferred_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.registry.data_access.DataAccess.write_providers">
+<span class="sig-name descname"><span class="pre">write_providers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">providers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/registry/data_access.html#DataAccess.write_providers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.registry.data_access.DataAccess.write_providers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.registry">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.registry" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

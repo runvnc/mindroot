@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.plugins.manifest &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.plugins.manifest</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.plugins.manifest</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Central definition of manifest file location</span>
+<span class="n">MANIFEST_FILE</span> <span class="o">=</span> <span class="s1">&#39;data/plugin_manifest.json&#39;</span>
+
+<span class="c1"># Setup logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_absolute_paths</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get absolute paths for all manifest-related files.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: (manifest_abs_path, root_manifest_abs_path, data_dir_abs_path)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">manifest_abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">MANIFEST_FILE</span><span class="p">))</span>
+    <span class="n">root_manifest_abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;plugin_manifest.json&#39;</span><span class="p">))</span>
+    <span class="n">data_dir_abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">root_manifest_abs_path</span><span class="p">,</span> <span class="n">data_dir_abs_path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_backup_manifest</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a backup of the existing manifest file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        manifest_path (str): Absolute path to the manifest file</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to backup file, or None if backup failed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">_%H%M%S&#39;</span><span class="p">)</span>
+        <span class="n">backup_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2">.backup_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="n">backup_path</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created manifest backup: </span><span class="si">{</span><span class="n">backup_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">backup_path</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create manifest backup: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_atomic_write_manifest</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="n">manifest_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Atomically write manifest data to file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        manifest_path (str): Absolute path to the manifest file</span>
+<span class="sd">        manifest_data (dict): Manifest data to write</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if successful, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Ensure directory exists</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Write to temporary file first</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.tmp&#39;</span><span class="p">,</span> 
+                                       <span class="nb">dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">),</span> 
+                                       <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_file</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">manifest_data</span><span class="p">,</span> <span class="n">tmp_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">tmp_path</span> <span class="o">=</span> <span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span>
+        
+        <span class="c1"># Atomic move to final location</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">manifest_path</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atomically wrote manifest to: </span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to atomically write manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Clean up temp file if it exists</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;tmp_path&#39;</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_manifest</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate that a manifest file exists and contains valid JSON.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        manifest_path (str): Absolute path to the manifest file</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: (is_valid, manifest_data_or_none)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            
+        <span class="c1"># Basic structure validation</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manifest_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest is not a dict: </span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+            
+        <span class="k">if</span> <span class="s1">&#39;plugins&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">manifest_data</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest missing &#39;plugins&#39; key: </span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+            
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">manifest_data</span>
+        
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest contains invalid JSON: </span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error validating manifest: </span><span class="si">{</span><span class="n">manifest_path</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_migrate_manifest_from_root</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Migrate manifest from root directory to data directory if needed.</span>
+<span class="sd">    </span>
+<span class="sd">    This function consolidates the migration logic and uses absolute paths.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if migration was successful or not needed, False if failed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">root_manifest_abs_path</span><span class="p">,</span> <span class="n">data_dir_abs_path</span> <span class="o">=</span> <span class="n">_get_absolute_paths</span><span class="p">()</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking for manifest migration:&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Target: </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Source: </span><span class="si">{</span><span class="n">root_manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># If target already exists and is valid, no migration needed</span>
+    <span class="n">is_valid</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_validate_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Valid manifest already exists at: </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="c1"># If target exists but is invalid, back it up</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid manifest found at </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">, backing up&quot;</span><span class="p">)</span>
+        <span class="n">_backup_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    
+    <span class="c1"># Check if source manifest exists and is valid</span>
+    <span class="n">is_valid</span><span class="p">,</span> <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">_validate_manifest</span><span class="p">(</span><span class="n">root_manifest_abs_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Migrating manifest from </span><span class="si">{</span><span class="n">root_manifest_abs_path</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Ensure data directory exists</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_dir_abs_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Atomic write to new location</span>
+        <span class="k">if</span> <span class="n">_atomic_write_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">manifest_data</span><span class="p">):</span>
+            <span class="c1"># Remove old file only after successful write</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">root_manifest_abs_path</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully migrated manifest and removed old file&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest migrated but failed to remove old file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to write migrated manifest&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No valid manifest found to migrate from </span><span class="si">{</span><span class="n">root_manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Not an error - just no migration needed</span>
+
+<div class="viewcode-block" id="create_default_plugin_manifest">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.create_default_plugin_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_default_plugin_manifest</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new default manifest file.</span>
+<span class="sd">    </span>
+<span class="sd">    This function first attempts migration, then creates from default template if needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data_dir_abs_path</span> <span class="o">=</span> <span class="n">_get_absolute_paths</span><span class="p">()</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating default plugin manifest at: </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># First attempt migration from root directory</span>
+    <span class="k">if</span> <span class="n">_migrate_manifest_from_root</span><span class="p">():</span>
+        <span class="c1"># Check if migration was successful</span>
+        <span class="n">is_valid</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_validate_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest successfully migrated from root directory&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+    
+    <span class="c1"># Migration didn&#39;t work, create from default template</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating manifest from default template&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Backup existing file if it exists (even if invalid)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">):</span>
+        <span class="n">_backup_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Read default template</span>
+        <span class="n">default_manifest_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;default_plugin_manifest.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">default_manifest_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">default_manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="c1"># Ensure data directory exists</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_dir_abs_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Atomic write</span>
+        <span class="k">if</span> <span class="n">_atomic_write_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">default_manifest</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully created default manifest&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create default manifest&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to write default manifest&quot;</span><span class="p">)</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create default manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span></div>
+
+
+<div class="viewcode-block" id="load_plugin_manifest">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.load_plugin_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_plugin_manifest</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the plugin manifest file.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The manifest data structure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_get_absolute_paths</span><span class="p">()</span>
+    
+    <span class="c1"># Validate existing manifest</span>
+    <span class="n">is_valid</span><span class="p">,</span> <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">_validate_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded valid manifest from: </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">manifest_data</span>
+    
+    <span class="c1"># Manifest is missing or invalid, create default</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifest missing or invalid at </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">, creating default&quot;</span><span class="p">)</span>
+    <span class="n">create_default_plugin_manifest</span><span class="p">()</span>
+    
+    <span class="c1"># Load the newly created manifest</span>
+    <span class="n">is_valid</span><span class="p">,</span> <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">_validate_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">manifest_data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create valid default manifest&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not load or create valid plugin manifest&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_plugin_manifest">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.save_plugin_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_plugin_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save the plugin manifest file.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        manifest (dict): The manifest data structure to save</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_get_absolute_paths</span><span class="p">()</span>
+    
+    <span class="c1"># Backup existing manifest before saving</span>
+    <span class="n">_backup_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">)</span>
+    
+    <span class="c1"># Atomic write</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_atomic_write_manifest</span><span class="p">(</span><span class="n">manifest_abs_path</span><span class="p">,</span> <span class="n">manifest</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to save plugin manifest&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to save plugin manifest&quot;</span><span class="p">)</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully saved manifest to: </span><span class="si">{</span><span class="n">manifest_abs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="update_plugin_manifest">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.update_plugin_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plugin_manifest</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">source_path</span><span class="p">,</span> <span class="n">remote_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update or add a plugin entry in the manifest.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_name (str): Name of the plugin</span>
+<span class="sd">        source (str): Source type (&#39;core&#39;, &#39;local&#39;, &#39;github&#39;)</span>
+<span class="sd">        source_path (str): Path to the plugin</span>
+<span class="sd">        remote_source (str, optional): GitHub repository reference</span>
+<span class="sd">        version (str, optional): Plugin version</span>
+<span class="sd">        metadata (dict, optional): Plugin metadata including commands and services</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;installed&#39;</span> <span class="k">if</span> <span class="n">source</span> <span class="o">!=</span> <span class="s1">&#39;core&#39;</span> <span class="k">else</span> <span class="s1">&#39;core&#39;</span>
+    
+    <span class="c1"># Try to read plugin_info.json if metadata not provided</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span> <span class="ow">and</span> <span class="n">source_path</span><span class="p">:</span>
+        <span class="n">plugin_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;plugin_info.json&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+                <span class="n">metadata</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">][</span><span class="n">plugin_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+        <span class="s1">&#39;source_path&#39;</span><span class="p">:</span> <span class="n">source_path</span><span class="p">,</span>
+        <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+        <span class="s1">&#39;commands&#39;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;commands&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="p">[],</span>
+        <span class="s1">&#39;services&#39;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="p">[],</span>
+        <span class="s1">&#39;dependencies&#39;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dependencies&#39;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">remote_source</span><span class="p">:</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">][</span><span class="n">plugin_name</span><span class="p">][</span><span class="s1">&#39;remote_source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">remote_source</span>
+    
+    <span class="n">save_plugin_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="toggle_plugin_state">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.toggle_plugin_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">toggle_plugin_state</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Toggle a plugin&#39;s enabled state.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        plugin_name (str): Name of the plugin</span>
+<span class="sd">        enabled (bool): New enabled state</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if successful, False if plugin not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">plugin_name</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">]:</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">][</span><span class="n">plugin_name</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+            <span class="n">save_plugin_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="list_enabled">
+<a class="viewcode-back" href="../../../../source/mindroot.lib.plugins.html#mindroot.lib.plugins.list_enabled">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_enabled</span><span class="p">(</span><span class="n">include_category</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all enabled plugins.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        include_category (bool): Whether to include the category in results</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of enabled plugins, optionally with categories</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">enabled_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">include_category</span><span class="p">:</span>
+                    <span class="n">enabled_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">plugin_name</span><span class="p">,</span> <span class="n">category</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">enabled_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">enabled_list</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

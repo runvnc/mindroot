@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.subscriptions.subscription_manager &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.subscriptions.subscription_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.subscriptions.subscription_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionPlan</span><span class="p">,</span> <span class="n">UserSubscription</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubscriptionStorage</span>
+
+<div class="viewcode-block" id="SubscriptionManager">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubscriptionManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">:</span> <span class="n">SubscriptionStorage</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span> <span class="o">=</span> <span class="n">base_path</span>
+    
+    <span class="c1"># Plan management methods</span>
+    
+<div class="viewcode-block" id="SubscriptionManager.create_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.create_plan">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SubscriptionPlan</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new subscription plan&quot;&quot;&quot;</span>
+        <span class="c1"># Generate a plan ID if not provided</span>
+        <span class="k">if</span> <span class="s1">&#39;plan_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plan_data</span><span class="p">:</span>
+            <span class="n">plan_data</span><span class="p">[</span><span class="s1">&#39;plan_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;plan_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># Validate required fields</span>
+        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="s1">&#39;credits_per_cycle&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plan_data</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required field: </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create plan object</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="n">SubscriptionPlan</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">plan_data</span><span class="p">)</span>
+        
+        <span class="c1"># Store plan</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store_plan</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">plan</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.get_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.get_plan">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SubscriptionPlan</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subscription plan by ID&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.list_plans">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.list_plans">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_plans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SubscriptionPlan</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all subscription plans&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_all_plans</span><span class="p">(</span><span class="n">active_only</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.update_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.update_plan">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plan_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SubscriptionPlan</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update an existing subscription plan&quot;&quot;&quot;</span>
+        <span class="n">existing_plan</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">existing_plan</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Update fields</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">plan_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">existing_plan</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">existing_plan</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># Store updated plan</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_plan</span><span class="p">(</span><span class="n">existing_plan</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">existing_plan</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.deactivate_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.deactivate_plan">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">deactivate_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deactivate a subscription plan&quot;&quot;&quot;</span>
+        <span class="n">existing_plan</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">existing_plan</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">existing_plan</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_plan</span><span class="p">(</span><span class="n">existing_plan</span><span class="p">)</span></div>
+
+    
+    <span class="c1"># Subscription management methods</span>
+    
+<div class="viewcode-block" id="SubscriptionManager.create_subscription">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.create_subscription">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">provider_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">UserSubscription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new user subscription&quot;&quot;&quot;</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan not found: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plan is not active: </span><span class="si">{</span><span class="n">plan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create subscription object</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">UserSubscription</span><span class="p">(</span>
+            <span class="n">subscription_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sub_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">plan_id</span><span class="o">=</span><span class="n">plan_id</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span>
+            <span class="n">current_period_start</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+            <span class="n">current_period_end</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>  <span class="c1"># Will be updated with provider data</span>
+            <span class="n">payment_provider</span><span class="o">=</span><span class="n">provider_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;provider&#39;</span><span class="p">,</span> <span class="s1">&#39;stripe&#39;</span><span class="p">),</span>
+            <span class="n">provider_subscription_id</span><span class="o">=</span><span class="n">provider_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;provider_subscription_id&#39;</span><span class="p">),</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;plan_name&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;plan_price&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
+                <span class="s1">&#39;plan_currency&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">currency</span><span class="p">,</span>
+                <span class="s1">&#39;plan_interval&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+                <span class="s1">&#39;credits_per_cycle&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="o">.</span><span class="n">credits_per_cycle</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Store subscription</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">subscription</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.cancel_subscription">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.cancel_subscription">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UserSubscription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel a user subscription&quot;&quot;&quot;</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscription</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subscription not found: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">at_period_end</span><span class="p">:</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="n">cancel_at_period_end</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;canceled&#39;</span>
+        
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">subscription</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.update_subscription_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.update_subscription_status">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_subscription_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UserSubscription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a subscription&#39;s status&quot;&quot;&quot;</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscription</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subscription not found: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">subscription</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">subscription</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.get_user_subscriptions">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.get_user_subscriptions">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_subscriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">UserSubscription</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all subscriptions for a user&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">username</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SubscriptionManager.get_subscriptions_by_provider_id">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.get_subscriptions_by_provider_id">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_subscriptions_by_provider_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">provider_subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">UserSubscription</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get subscriptions by provider subscription ID&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_subscriptions_by_provider_id</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">provider_subscription_id</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SubscriptionManager.update_subscription_period">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.subscription_manager.SubscriptionManager.update_subscription_period">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_subscription_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                                       <span class="n">period_start</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> 
+                                       <span class="n">period_end</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UserSubscription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a subscription&#39;s billing period&quot;&quot;&quot;</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subscription</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subscription not found: </span><span class="si">{</span><span class="n">subscription_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="n">subscription</span><span class="o">.</span><span class="n">current_period_start</span> <span class="o">=</span> <span class="n">period_start</span>
+        <span class="n">subscription</span><span class="o">.</span><span class="n">current_period_end</span> <span class="o">=</span> <span class="n">period_end</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">update_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">subscription</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

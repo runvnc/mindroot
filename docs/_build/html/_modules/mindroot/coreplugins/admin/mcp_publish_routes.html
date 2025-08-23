@@ -1,0 +1,581 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.mcp_publish_routes &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.mcp_publish_routes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.mcp_publish_routes</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="c1"># Create router with admin role requirement</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span>
+    <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)]</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="McpServerPublishRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.McpServerPublishRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">McpServerPublishRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">server_type</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;local&#39; or &#39;remote&#39;</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+    <span class="c1"># Local server fields</span>
+    <span class="n">command</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Remote server fields</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="McpTestRemoteRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.McpTestRemoteRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">McpTestRemoteRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="McpTestLocalRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.McpTestLocalRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">McpTestLocalRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">command</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="McpCompleteOAuthRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.McpCompleteOAuthRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">McpCompleteOAuthRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="publish_mcp_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.publish_mcp_server">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/publish&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">publish_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpServerPublishRequest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Publish an MCP server to the registry.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Validate request based on server type</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">command</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Command is required for local servers&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span> <span class="o">==</span> <span class="s1">&#39;remote&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;URL is required for remote servers&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Server type must be &#39;local&#39; or &#39;remote&#39;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Prepare registry publish data</span>
+        <span class="n">publish_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span><span class="p">],</span>
+            <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Prepare server data for registry</span>
+        <span class="n">server_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">&quot;transport&quot;</span><span class="p">:</span> <span class="s2">&quot;stdio&quot;</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span> <span class="k">else</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;auth_type&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span> <span class="k">else</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span>
+            <span class="s2">&quot;server_type&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Add type-specific configuration</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="n">server_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span> <span class="ow">or</span> <span class="p">[],</span>
+                <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">env</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">server_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span>
+            <span class="p">})</span>
+
+        <span class="c1"># Prepare registry publish data</span>
+        <span class="n">publish_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="s2">&quot;mcp_server&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">server_data</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">server_type</span><span class="p">],</span>
+            <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Get registry settings</span>
+        <span class="n">registry_url</span> <span class="o">=</span> <span class="s2">&quot;https://registry.mindroot.io&quot;</span>  <span class="c1"># Default</span>
+        <span class="n">registry_token</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+            <span class="n">settings_file</span> <span class="o">=</span> <span class="s1">&#39;data/registry_settings.json&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings_file</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">registry_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_url&quot;</span><span class="p">,</span> <span class="n">registry_url</span><span class="p">)</span>
+                    <span class="n">registry_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry_token&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Try environment variable if no token in file</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">registry_token</span><span class="p">:</span>
+                <span class="n">registry_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;REGISTRY_TOKEN&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading registry settings: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">registry_token</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> 
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Registry authentication token not configured. Please set REGISTRY_TOKEN or configure in registry settings.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Publish to registry</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s2">/publish&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">},</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">publish_data</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Registry publishing failed: </span><span class="si">{</span><span class="n">error_detail</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP Server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; published successfully!&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">result</span>
+            <span class="p">}</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_local_mcp_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.test_local_mcp_server">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/test-local&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_local_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpTestLocalRequest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test connection to a local MCP server and list its capabilities.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the MCP manager service</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_mcp_server: Testing local server </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> with command </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">command</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Use the new testing method from MCPManager</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">test_local_server_capabilities</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">env</span>
+        <span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: test_local_mcp_server: Result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+        
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Local server test failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_remote_mcp_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.test_remote_mcp_server">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/test-remote&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_remote_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpTestRemoteRequest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test connection to a remote MCP server and list its tools using MCP manager OAuth flow.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the MCP manager service</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing remote MCP server connection: &quot;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Generate a unique temporary server name</span>
+        <span class="n">temp_server_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;temp_publish_test_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">server_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">temp_server_name</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using server name: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.mcp_.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPServer</span>
+            
+            <span class="c1"># Check if server already exists (from registry install flow)</span>
+            <span class="n">existing_server</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="n">existing_server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found existing server configuration for </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Existing server auth_type: </span><span class="si">{</span><span class="n">existing_server</span><span class="o">.</span><span class="n">auth_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Existing server client_id: </span><span class="si">{</span><span class="n">existing_server</span><span class="o">.</span><span class="n">client_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">existing_server</span><span class="p">:</span>
+                <span class="c1"># Use existing server configuration (registry install flow)</span>
+                <span class="n">server_to_test</span> <span class="o">=</span> <span class="n">existing_server</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing server config with auth_type=</span><span class="si">{</span><span class="n">server_to_test</span><span class="o">.</span><span class="n">auth_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Create temporary server configuration for testing (publish flow)</span>
+                <span class="n">temp_server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">server_name</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Temporary server for testing </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">command</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Not used for remote servers</span>
+                    <span class="n">transport</span><span class="o">=</span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
+                    <span class="n">url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+                    <span class="n">auth_type</span><span class="o">=</span><span class="s2">&quot;oauth2&quot;</span>  <span class="c1"># Assume OAuth2 for remote servers</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Add temporary server to MCP manager</span>
+                <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="n">temp_server</span><span class="p">)</span>
+                <span class="n">server_to_test</span> <span class="o">=</span> <span class="n">temp_server</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created temporary server config for publish flow&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Note: OAuth client_id will be discovered during the OAuth flow</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connecting to remote MCP server: &quot;</span><span class="p">,</span> <span class="n">server_name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server URL: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MCP manager is: &quot;</span><span class="p">,</span> <span class="n">mcp_manager</span><span class="p">)</span>
+            <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MCP manager after re-fetch: &quot;</span><span class="p">,</span> <span class="n">mcp_manager</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running sanity test&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sanity_test</span><span class="p">()</span>
+            <span class="c1"># Try to connect (this will handle OAuth flow if needed)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connection result: &quot;</span><span class="p">,</span> <span class="n">success</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="c1"># Check if OAuth flow is pending</span>
+                <span class="n">oauth_status</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">get_oauth_status</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="s2">&quot;oauth_flow&quot;</span> <span class="ow">in</span> <span class="n">oauth_status</span> <span class="ow">and</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;awaiting_authorization&quot;</span><span class="p">:</span>
+                    <span class="c1"># OAuth flow is pending - return the auth URL for frontend to handle</span>
+                    <span class="k">return</span> <span class="p">{</span>
+                        <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">&quot;requires_oauth&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;auth_url&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;auth_url&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;flow_id&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth authorization required. Please complete the authorization flow.&quot;</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Try without OAuth first to see if it&#39;s a 401</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">await</span> <span class="n">test_direct_connection</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">HTTPException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+                            <span class="c1"># Server requires auth - try OAuth connection</span>
+                            <span class="n">oauth_success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_oauth_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">oauth_success</span><span class="p">:</span>
+                                <span class="n">oauth_status</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">get_oauth_status</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="s2">&quot;oauth_flow&quot;</span> <span class="ow">in</span> <span class="n">oauth_status</span><span class="p">:</span>
+                                    <span class="k">return</span> <span class="p">{</span>
+                                        <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                                        <span class="s2">&quot;requires_oauth&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                        <span class="s2">&quot;auth_url&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;auth_url&quot;</span><span class="p">],</span>
+                                        <span class="s2">&quot;flow_id&quot;</span><span class="p">:</span> <span class="n">oauth_status</span><span class="p">[</span><span class="s2">&quot;oauth_flow&quot;</span><span class="p">][</span><span class="s2">&quot;flow_id&quot;</span><span class="p">],</span>
+                                        <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+                                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth authorization required. Please complete the authorization flow.&quot;</span>
+                                    <span class="p">}</span>
+                        <span class="k">raise</span> <span class="n">e</span>
+            
+            <span class="c1"># Get server capabilities (tools, resources, prompts)</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="n">tools</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">resources</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">prompts</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Successfully connected to remote MCP server. Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resources, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompts.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">tools</span><span class="p">,</span>
+                <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="n">resources</span><span class="p">,</span>
+                <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="n">prompts</span><span class="p">,</span>
+                <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span>
+            <span class="p">}</span>
+            
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Clean up temporary server</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Only clean up if we created a temporary server (not existing one)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">existing_server</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                    <span class="n">mcp_manager</span><span class="o">.</span><span class="n">remove_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cleaned up temporary server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">cleanup_error</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error cleaning up temporary server </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cleanup_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HTTPException occurred during MCP server test.&quot;</span><span class="p">)</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span> 
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Connection test failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_direct_connection">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.test_direct_connection">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_direct_connection</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test direct connection to MCP server without OAuth to check if auth is required.&quot;&quot;&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Initialize connection</span>
+    <span class="n">init_request</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonrpc&quot;</span><span class="p">:</span> <span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;initialize&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;protocolVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-11-05&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;capabilities&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;clientInfo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;mindroot-tester&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">init_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">init_request</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">init_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Server requires authentication&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">init_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">init_response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to initialize: </span><span class="si">{</span><span class="n">init_response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># List tools</span>
+        <span class="n">tools_request</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;jsonrpc&quot;</span><span class="p">:</span> <span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;tools/list&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+
+        <span class="n">tools_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">tools_request</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">tools_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">tools_response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to list tools: </span><span class="si">{</span><span class="n">tools_response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">tools_data</span> <span class="o">=</span> <span class="n">tools_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="n">tools_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">return</span> <span class="n">tools</span></div>
+
+
+<div class="viewcode-block" id="complete_oauth_flow">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.complete_oauth_flow">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/complete-oauth&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete_oauth_flow</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpCompleteOAuthRequest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete OAuth flow for MCP server testing.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the enhanced MCP manager service</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Complete the OAuth flow</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">complete_oauth_flow</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Failed to complete OAuth flow&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Wait a bit longer for the background task to complete the connection</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        
+        <span class="c1"># Check if server is now connected</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: complete-oauth: server entry found for &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;, status=</span><span class="si">{</span><span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">, tools=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;connected&quot;</span><span class="p">:</span>
+                <span class="n">tools</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">resources</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">prompts</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;OAuth completed successfully. Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">resources</span><span class="p">)</span><span class="si">}</span><span class="s2"> resources, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span><span class="si">}</span><span class="s2"> prompts.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="n">tools</span><span class="p">,</span>
+                    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="n">resources</span><span class="p">,</span>
+                    <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="n">prompts</span>
+                <span class="p">}</span>
+
+            <span class="c1"># Not yet connected; surface pending status so frontend can poll</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">get_oauth_status</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: complete-oauth: oauth-status for &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; -&gt; </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pending&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth flow completed, but server connection is still pending.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">)</span>
+            <span class="p">}</span>
+
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;OAuth flow completed, but server connection is still pending.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pending&quot;</span>
+        <span class="p">}</span>
+        
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;OAuth completion failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_oauth_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.get_oauth_status">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/oauth-status/</span><span class="si">{server_name}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_oauth_status</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get OAuth flow status for a server.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the enhanced MCP manager service</span>
+        <span class="n">mcp_manager</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP manager service not available&quot;</span><span class="p">)</span>
+        
+        <span class="n">status</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">get_oauth_status</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to get OAuth status: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

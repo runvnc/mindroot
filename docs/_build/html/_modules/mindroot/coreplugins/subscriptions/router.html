@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.subscriptions.router &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.subscriptions.router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.subscriptions.router</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">Query</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLResponse</span><span class="p">,</span> <span class="n">JSONResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mod</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_subscription_plan</span><span class="p">,</span>
+    <span class="n">get_subscription_plans</span><span class="p">,</span>
+    <span class="n">get_subscription_plan</span><span class="p">,</span>
+    <span class="n">update_subscription_plan</span><span class="p">,</span>
+    <span class="n">deactivate_subscription_plan</span><span class="p">,</span>
+    <span class="n">activate_subscription_plan</span><span class="p">,</span>
+    <span class="n">get_available_features</span><span class="p">,</span>
+    <span class="n">create_plan_feature</span><span class="p">,</span>
+    <span class="n">update_plan_feature</span><span class="p">,</span>
+    <span class="n">deactivate_plan_feature</span><span class="p">,</span>
+    <span class="n">activate_plan_feature</span><span class="p">,</span>
+    <span class="n">get_page_templates</span><span class="p">,</span>
+    <span class="n">create_page_template</span><span class="p">,</span>
+    <span class="n">update_page_template</span><span class="p">,</span>
+    <span class="n">set_default_template</span><span class="p">,</span>
+    <span class="n">process_subscription_event</span><span class="p">,</span>
+    <span class="n">get_user_subscriptions</span><span class="p">,</span>
+    <span class="n">cancel_subscription</span>
+<span class="p">)</span>
+
+<span class="c1"># Define common error responses</span>
+<span class="n">INVALID_REQUEST</span> <span class="o">=</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid request parameters&quot;</span><span class="p">)</span>
+<span class="n">UNAUTHORIZED</span> <span class="o">=</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unauthorized&quot;</span><span class="p">)</span>
+<span class="n">NOT_FOUND</span> <span class="o">=</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Resource not found&quot;</span><span class="p">)</span>
+<span class="n">SERVER_ERROR</span> <span class="o">=</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Internal server error&quot;</span><span class="p">)</span>
+
+<span class="c1"># Admin routes</span>
+<span class="n">router_admin</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)],</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/admin/subscriptions&quot;</span><span class="p">)</span>
+
+<span class="c1"># Public routes</span>
+<span class="n">router_public</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/subscriptions&quot;</span><span class="p">)</span>
+
+<span class="c1"># Admin API routes - Plans</span>
+
+<div class="viewcode-block" id="api_create_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_create_plan">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/plans&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_create_plan</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new subscription plan&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_subscription_plan</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;plan&quot;</span><span class="p">:</span> <span class="n">plan</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating plan: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_get_all_plans">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_get_all_plans">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/plans&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_get_all_plans</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all subscription plans&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">plans</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_subscription_plans</span><span class="p">(</span><span class="n">active_only</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;plans&quot;</span><span class="p">:</span> <span class="n">plans</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting plans: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_update_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_update_plan">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/plans/</span><span class="si">{plan_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_update_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing subscription plan&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">update_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;plan&quot;</span><span class="p">:</span> <span class="n">plan</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating plan: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_deactivate_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_deactivate_plan">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/plans/</span><span class="si">{plan_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_deactivate_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deactivate a subscription plan&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">deactivate_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error deactivating plan: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_activate_plan">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_activate_plan">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/plans/</span><span class="si">{plan_id}</span><span class="s2">/activate&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_activate_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Activate a subscription plan&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">activate_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error activating plan: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<span class="c1"># Admin API routes - Features</span>
+
+<div class="viewcode-block" id="api_get_features">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_get_features">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/features/list&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_get_features</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">active_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all plan features&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_available_features</span><span class="p">(</span><span class="n">active_only</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">features</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting features: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_create_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_create_feature">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/features&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_create_feature</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new plan feature&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_plan_feature</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating feature: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_update_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_update_feature">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/features/</span><span class="si">{feature_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_update_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing plan feature&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="k">await</span> <span class="n">update_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating feature: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_deactivate_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_deactivate_feature">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/features/</span><span class="si">{feature_id}</span><span class="s2">/deactivate&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_deactivate_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deactivate a plan feature&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">deactivate_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error deactivating feature: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_activate_feature">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_activate_feature">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/features/</span><span class="si">{feature_id}</span><span class="s2">/activate&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_activate_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Activate a plan feature&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">activate_plan_feature</span><span class="p">(</span><span class="n">feature_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error activating feature: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<span class="c1"># Admin API routes - Templates</span>
+
+<div class="viewcode-block" id="api_get_templates">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_get_templates">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/templates/list&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_get_templates</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all page templates&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">templates</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_page_templates</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;templates&quot;</span><span class="p">:</span> <span class="n">templates</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting templates: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_create_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_create_template">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/templates&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_create_template</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new page template&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_page_template</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="n">template</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_update_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_update_template">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/templates/</span><span class="si">{template_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_update_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update an existing page template&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="k">await</span> <span class="n">update_page_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="n">template</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_set_default_template">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_set_default_template">[docs]</a>
+<span class="nd">@router_admin</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/templates/</span><span class="si">{template_id}</span><span class="s2">/set-default&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_set_default_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a template as the default&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">set_default_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error setting default template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<span class="c1"># Public API routes</span>
+
+<div class="viewcode-block" id="api_get_plans">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_get_plans">[docs]</a>
+<span class="nd">@router_public</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/plans&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_get_plans</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get available subscription plans&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">plans</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_subscription_plans</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;plans&quot;</span><span class="p">:</span> <span class="n">plans</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting plans: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_create_checkout">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_create_checkout">[docs]</a>
+<span class="nd">@router_public</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/checkout/</span><span class="si">{plan_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_create_checkout</span><span class="p">(</span><span class="n">plan_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                            <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> 
+                            <span class="n">provider</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="s1">&#39;stripe&#39;</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create checkout session for subscription&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checkout&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unauthorized&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UNAUTHORIZED</span>
+            
+        <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+        
+        <span class="c1"># Get plan details</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_subscription_plan</span><span class="p">(</span><span class="n">plan_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;could not find plan&quot;</span><span class="p">,</span><span class="n">plan_id</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NOT_FOUND</span>
+        
+        <span class="c1"># Call provider-specific checkout service</span>
+        <span class="c1"># The service name is &#39;subscription_checkout&#39; for all providers</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">checkout_url</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">subscription_checkout</span><span class="p">(</span>
+                <span class="n">user_id</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">plan_name</span><span class="o">=</span><span class="n">plan</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                <span class="n">amount</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plan</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">])),</span>
+                <span class="n">interval</span><span class="o">=</span><span class="n">plan</span><span class="p">[</span><span class="s1">&#39;interval&#39;</span><span class="p">],</span>
+                <span class="n">currency</span><span class="o">=</span><span class="n">plan</span><span class="p">[</span><span class="s1">&#39;currency&#39;</span><span class="p">],</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;plan_id&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="p">[</span><span class="s1">&#39;plan_id&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;credits_per_cycle&#39;</span><span class="p">:</span> <span class="n">plan</span><span class="p">[</span><span class="s1">&#39;credits_per_cycle&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="s1">&#39;subscription_plugin&#39;</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">checkout_url</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Payment provider &#39;</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">&#39; not available&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Payment provider &#39;</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">&#39; not available&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating checkout: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SERVER_ERROR</span>
+            
+    <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating checkout: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_get_my_subscriptions">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_get_my_subscriptions">[docs]</a>
+<span class="nd">@router_public</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/my&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_get_my_subscriptions</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get current user&#39;s subscriptions&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UNAUTHORIZED</span>
+            
+        <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;subscriptions&quot;</span><span class="p">:</span> <span class="n">subscriptions</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting subscriptions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="api_cancel_subscription">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.api_cancel_subscription">[docs]</a>
+<span class="nd">@router_public</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/cancel/</span><span class="si">{subscription_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_cancel_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cancel a subscription&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UNAUTHORIZED</span>
+            
+        <span class="c1"># Get subscription to check ownership</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">subscription_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub</span><span class="p">[</span><span class="s1">&#39;subscription_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">]</span>
+        
+        <span class="c1"># Only allow cancellation if user owns the subscription or is admin</span>
+        <span class="k">if</span> <span class="n">subscription_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subscription_ids</span> <span class="ow">and</span> <span class="s1">&#39;admin&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UNAUTHORIZED</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cancel_subscription</span><span class="p">(</span><span class="n">subscription_id</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;subscription&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error cancelling subscription: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<div class="viewcode-block" id="subscription_page">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.router.subscription_page">[docs]</a>
+<span class="nd">@router_public</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/page&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">HTMLResponse</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">subscription_page</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Public subscription page&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get active plans</span>
+        <span class="n">plans</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_subscription_plans</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        
+        <span class="c1"># Get user&#39;s subscriptions if logged in</span>
+        <span class="n">user_subscriptions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="n">user_subscriptions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_user_subscriptions</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        
+        <span class="n">template_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;plans&quot;</span><span class="p">:</span> <span class="n">plans</span><span class="p">,</span>
+            <span class="s2">&quot;user_subscriptions&quot;</span><span class="p">:</span> <span class="n">user_subscriptions</span>
+        <span class="p">}</span>
+        
+        <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">render</span><span class="p">(</span><span class="s1">&#39;subscription_page&#39;</span><span class="p">,</span> <span class="n">template_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HTMLResponse</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error rendering subscription page: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n\n</span><span class="s2"> </span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SERVER_ERROR</span></div>
+
+
+<span class="c1"># Combine all routers</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">router_admin</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">router_public</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

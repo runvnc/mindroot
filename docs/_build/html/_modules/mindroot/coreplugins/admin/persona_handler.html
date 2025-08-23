@@ -1,0 +1,195 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.persona_handler &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.persona_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.persona_handler</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="import_persona_from_index">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_handler.import_persona_from_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">import_persona_from_index</span><span class="p">(</span><span class="n">index</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">persona</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Import a persona from the persona index.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        index: Path to the persona index file</span>
+<span class="sd">        persona: Name of the persona to import</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;import_persona_from_index&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;index = &quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona = &quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
+    <span class="c1"># copy dir from indices/{index}/personas/{persona}</span>
+    <span class="c1"># to personas/local/{persona}</span>
+    <span class="n">index_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;indices&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">index</span> <span class="o">/</span> <span class="s1">&#39;personas&#39;</span> <span class="o">/</span> <span class="n">persona</span>
+    <span class="n">persona_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;personas&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;local&#39;</span> <span class="o">/</span> <span class="n">persona</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Copying persona from&quot;</span><span class="p">,</span> <span class="n">index_path</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">persona_path</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="n">persona_path</span><span class="p">)</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully imported persona &#39;</span><span class="si">{</span><span class="n">persona</span><span class="si">}</span><span class="s2">&#39; from index &#39;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully imported persona&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">,</span> <span class="s2">&quot;from index&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_persona_import">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.persona_handler.handle_persona_import">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_persona_import</span><span class="p">(</span><span class="n">persona_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle importing a persona from embedded data in agent configuration.</span>
+<span class="sd">    Returns the persona name to be used in agent configuration.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        persona_data: Dictionary containing persona data or string with persona name</span>
+<span class="sd">        scope: &#39;local&#39; or &#39;shared&#39;</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Name of the persona to reference in agent config</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># If persona_data is already a string, just return it</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">persona_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">persona_data</span>
+        
+    <span class="c1"># Validate persona data</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">persona_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona data must be either a string name or a dictionary&#39;</span>
+        <span class="p">)</span>
+    
+    <span class="n">persona_name</span> <span class="o">=</span> <span class="n">persona_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">persona_name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Persona name required in persona data&#39;</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># For registry installs, use namespaced path</span>
+    <span class="k">if</span> <span class="n">owner</span> <span class="ow">and</span> <span class="n">scope</span> <span class="o">==</span> <span class="s1">&#39;registry&#39;</span><span class="p">:</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;personas/registry/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s1">/persona.json&#39;</span><span class="p">)</span>
+        <span class="n">return_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;registry/</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">persona_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;personas&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">scope</span> <span class="o">/</span> <span class="n">persona_name</span> <span class="o">/</span> <span class="s1">&#39;persona.json&#39;</span>
+        <span class="n">return_name</span> <span class="o">=</span> <span class="n">persona_name</span>
+    
+    <span class="c1"># Check if persona already exists</span>
+    <span class="k">if</span> <span class="n">persona_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="c1"># For registry personas with owner, we should allow overwrite to support updates</span>
+        <span class="k">if</span> <span class="n">owner</span> <span class="ow">and</span> <span class="n">scope</span> <span class="o">==</span> <span class="s1">&#39;registry&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overwriting existing registry persona &#39;</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&#39; for owner &#39;</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Persona &#39;</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&#39; already exists in </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2"> scope - skipping import&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">return_name</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Create persona directory and save data</span>
+        <span class="n">persona_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">persona_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully imported persona &#39;</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&#39; to </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2"> scope&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_name</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to import persona &#39;</span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to import persona: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

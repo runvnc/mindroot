@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.l8n.utils &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.l8n.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.l8n.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># need to import Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.l8n_constants</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Set up logging for l8n warnings</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;l8n&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c1"># Create console handler with formatting</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+    <span class="n">console_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">console_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[91m[L8N WARNING]</span><span class="se">\033</span><span class="s1">[0m </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">console_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
+
+<div class="viewcode-block" id="extract_plugin_root">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.extract_plugin_root">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_plugin_root</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract the plugin root from an absolute path.</span>
+<span class="sd">    </span>
+<span class="sd">    For core plugins: everything after &#39;coreplugins/&#39;</span>
+<span class="sd">    For external plugins: everything after &#39;src/[plugin_name]/&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">    - /files/mindroot/src/mindroot/coreplugins/chat/templates/chat.jinja2 -&gt; chat/templates/chat.jinja2</span>
+<span class="sd">    - /some/path/src/my_plugin/templates/page.jinja2 -&gt; my_plugin/templates/page.jinja2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">)</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">parts</span>
+    
+    <span class="c1"># Find coreplugins in the path</span>
+    <span class="k">if</span> <span class="s1">&#39;coreplugins&#39;</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+        <span class="n">coreplugins_idx</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;coreplugins&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">coreplugins_idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="n">coreplugins_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+    
+    <span class="c1"># Find src/[plugin_name] pattern for external plugins</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="s1">&#39;src&#39;</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>
+            <span class="c1"># Check if this looks like a plugin (has templates, static, etc.)</span>
+            <span class="n">potential_plugin</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>  <span class="c1"># Has more path after src/plugin_name</span>
+                <span class="k">return</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+    
+    <span class="c1"># Fallback: return the filename</span>
+    <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="extract_translation_keys">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.extract_translation_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_translation_keys</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all __TRANSLATE_key__ placeholders from content.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        content: Content to scan for translation keys</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Set of translation keys found in the content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;__TRANSLATE_([a-z0-9_]+)__&#39;</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="replace_placeholders">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.replace_placeholders">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">replace_placeholders</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugin_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace __TRANSLATE_key__ placeholders with actual translations.</span>
+<span class="sd">    </span>
+<span class="sd">    This function now validates that ALL required translations are available</span>
+<span class="sd">    for the specified language. If any translations are missing, it logs</span>
+<span class="sd">    a strong warning and returns None to indicate fallback is needed.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        content: Template content with placeholders</span>
+<span class="sd">        language: Language code for translations</span>
+<span class="sd">        plugin_path: Path to the localized file (used to determine which plugin&#39;s translations to use)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Content with placeholders replaced by translations, or None if translations are incomplete</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
+        <span class="c1"># No plugin path provided, return content unchanged</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No plugin path provided for translation replacement.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">content</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Extract all translation keys from the content</span>
+        <span class="n">required_keys</span> <span class="o">=</span> <span class="n">extract_translation_keys</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required_keys</span><span class="p">:</span>
+            <span class="c1"># No translation keys found, return content as-is</span>
+            <span class="k">return</span> <span class="n">content</span>
+        
+        <span class="c1"># Extract plugin name from the localized file path</span>
+        <span class="c1"># Path format: .../localized_files/[coreplugins|external_plugins]/[plugin_name]/...</span>
+        <span class="n">path_parts</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
+        
+        <span class="c1"># Find &#39;localized_files&#39; in the path</span>
+        <span class="k">if</span> <span class="s1">&#39;localized_files&#39;</span> <span class="ow">in</span> <span class="n">path_parts</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">path_parts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;localized_files&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_parts</span><span class="p">):</span>
+                <span class="c1"># Get plugin name (should be at idx+2)</span>
+                <span class="n">plugin_type</span> <span class="o">=</span> <span class="n">path_parts</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># &#39;coreplugins&#39; or &#39;external_plugins&#39;</span>
+                <span class="n">plugin_name</span> <span class="o">=</span> <span class="n">path_parts</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                
+                <span class="c1"># Load translations for this plugin</span>
+                <span class="n">translations_path</span> <span class="o">=</span> <span class="n">TRANSLATIONS_DIR</span> <span class="o">/</span> <span class="n">plugin_type</span> <span class="o">/</span> <span class="n">plugin_name</span> <span class="o">/</span> <span class="s2">&quot;translations.json&quot;</span>
+                <span class="n">plugin_translations</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">translations_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">translations_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                             <span class="n">plugin_translations</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load translations from </span><span class="si">{</span><span class="n">translations_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Fallback to original file</span>
+                
+                <span class="k">if</span> <span class="n">language</span> <span class="ow">in</span> <span class="n">plugin_translations</span><span class="p">:</span>
+                    <span class="n">translations</span> <span class="o">=</span> <span class="n">plugin_translations</span><span class="p">[</span><span class="n">language</span><span class="p">]</span>
+                    
+                    <span class="c1"># Check if ALL required translations are available</span>
+                    <span class="n">missing_keys</span> <span class="o">=</span> <span class="n">required_keys</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">translations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                    
+                    <span class="k">if</span> <span class="n">missing_keys</span><span class="p">:</span>
+                        <span class="c1"># Some translations are missing - log strong warning and return None</span>
+                        <span class="n">missing_list</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing_keys</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;MISSING TRANSLATIONS DETECTED!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;Plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;Language: </span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;Missing keys: </span><span class="si">{</span><span class="n">missing_list</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;Falling back to original file to avoid showing placeholders.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                            <span class="sa">f</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span>
+                        <span class="p">)</span>
+                        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Signal that fallback is needed</span>
+                    
+                    <span class="c1"># All translations are available - proceed with replacement</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">replace_match</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">translations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># This shouldn&#39;t happen now</span>
+                    
+                    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;__TRANSLATE_([a-z0-9_]+)__&#39;</span><span class="p">,</span> <span class="n">replace_match</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># No translations for this language</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;NO TRANSLATIONS FOR LANGUAGE!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;Plugin: </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;Language: </span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;File: </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;Required keys: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">required_keys</span><span class="p">))</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;Falling back to original file.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                        <span class="sa">f</span><span class="s2">&quot;=&quot;</span><span class="o">*</span><span class="mi">80</span>
+                    <span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Signal that fallback is needed</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not extract plugin info from path: </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path does not contain &#39;localized_files&#39;: </span><span class="si">{</span><span class="n">plugin_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in replace_placeholders: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Fallback to original file on any error</span></div>
+
+       
+<div class="viewcode-block" id="get_localized_file_path">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.get_localized_file_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_localized_file_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an original file path to its localized version path.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">    - chat/templates/chat.jinja2 -&gt; localized_files/coreplugins/chat/templates/chat.i18n.jinja2</span>
+<span class="sd">    - my_plugin/templates/page.jinja2 -&gt; localized_files/external_plugins/my_plugin/templates/page.i18n.jinja2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugin_root</span> <span class="o">=</span> <span class="n">extract_plugin_root</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_root</span><span class="p">)</span>
+    
+    <span class="c1"># Determine if this is a core plugin or external plugin based on the absolute path</span>
+    <span class="k">if</span> <span class="s1">&#39;coreplugins&#39;</span> <span class="ow">in</span> <span class="n">original_path</span><span class="p">:</span>
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">LOCALIZED_FILES_DIR</span> <span class="o">/</span> <span class="s2">&quot;coreplugins&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">LOCALIZED_FILES_DIR</span> <span class="o">/</span> <span class="s2">&quot;external_plugins&quot;</span>
+    
+    <span class="c1"># Add .i18n before the file extension</span>
+    <span class="n">stem</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span>
+    <span class="n">new_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.i18n</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="n">localized_path</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">new_filename</span>
+    <span class="k">return</span> <span class="n">localized_path</span></div>
+
+
+
+<div class="viewcode-block" id="load_plugin_translations">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.load_plugin_translations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_plugin_translations</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load translations for a specific plugin from disk.&quot;&quot;&quot;</span>
+
+    <span class="n">translations_file</span> <span class="o">=</span> <span class="n">get_plugin_translations_path</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">translations_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">translations_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load translations from </span><span class="si">{</span><span class="n">translations_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Translations file does not exist at </span><span class="si">{</span><span class="n">translations_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="get_plugin_translations_path">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.utils.get_plugin_translations_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_plugin_translations_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the path where translations should be stored for a given file.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    /files/mindroot/src/mindroot/coreplugins/check_list/inject/admin.jinja2</span>
+<span class="sd">    -&gt; translations/coreplugins/check_list/translations.json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugin_root</span> <span class="o">=</span> <span class="n">extract_plugin_root</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
+    
+    <span class="c1"># Determine if this is a core plugin or external plugin based on the absolute path</span>
+    <span class="k">if</span> <span class="s1">&#39;coreplugins&#39;</span> <span class="ow">in</span> <span class="n">original_path</span><span class="p">:</span>
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">TRANSLATIONS_DIR</span> <span class="o">/</span> <span class="s2">&quot;coreplugins&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">TRANSLATIONS_DIR</span> <span class="o">/</span> <span class="s2">&quot;external_plugins&quot;</span>
+    
+    <span class="c1"># Get just the plugin name (first part of plugin_root)</span>
+    <span class="n">plugin_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plugin_root</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="n">plugin_name</span> <span class="o">/</span> <span class="s2">&quot;translations.json&quot;</span></div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

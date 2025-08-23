@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.streamcmd &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.streamcmd</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.streamcmd</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">AsyncGenerator</span>
+
+<span class="c1"># ANSI color codes for terminal output</span>
+<span class="n">COLORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;reset&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;green&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[32m&#39;</span><span class="p">,</span>  <span class="c1"># stdout</span>
+    <span class="s1">&#39;yellow&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[33m&#39;</span><span class="p">,</span>  <span class="c1"># stderr/warning</span>
+    <span class="s1">&#39;blue&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[34m&#39;</span><span class="p">,</span>    <span class="c1"># info</span>
+    <span class="s1">&#39;red&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[31m&#39;</span>      <span class="c1"># error</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="read_stream">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.streamcmd.read_stream">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_stream</span><span class="p">(</span><span class="n">stream</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read from stream line by line and call the callback for each line.&quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="k">await</span> <span class="n">stream</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">callback</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="run_command_with_streaming">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.streamcmd.run_command_with_streaming">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_command_with_streaming</span><span class="p">(</span>
+    <span class="n">cmd</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">stdout_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">stderr_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a command asynchronously and stream its output.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cmd: Command to run as a list of strings</span>
+<span class="sd">        stdout_callback: Callback for stdout lines</span>
+<span class="sd">        stderr_callback: Callback for stderr lines</span>
+<span class="sd">        cwd: Working directory for the command</span>
+<span class="sd">        env: Environment variables for the command</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Exit code of the command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">cmd</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="n">cwd</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Create tasks to read from stdout and stderr</span>
+        <span class="n">stdout_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">read_stream</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stdout_callback</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">stderr_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">read_stream</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">stderr_callback</span><span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Wait for the process to complete and streams to be fully read</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">stdout_task</span><span class="p">,</span> <span class="n">stderr_task</span><span class="p">)</span>
+        <span class="n">exit_code</span> <span class="o">=</span> <span class="k">await</span> <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">exit_code</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to run command: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="stream_command_as_events">
+<a class="viewcode-back" href="../../../source/mindroot.lib.html#mindroot.lib.streamcmd.stream_command_as_events">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_command_as_events</span><span class="p">(</span>
+    <span class="n">cmd</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncGenerator</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a command and yield its output as events.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cmd: Command to run as a list of strings</span>
+<span class="sd">        cwd: Working directory for the command</span>
+<span class="sd">        env: Environment variables for the command</span>
+<span class="sd">        </span>
+<span class="sd">    Yields:</span>
+<span class="sd">        Events with type and data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Debug output</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[DEBUG] Running command: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Send initial event</span>
+    <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Running command: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    
+    <span class="c1"># Create queues for stdout and stderr</span>
+    <span class="n">output_queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+    
+    <span class="c1"># Define callbacks for stdout and stderr</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stdout_callback</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;green&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[STDOUT] </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">output_queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">((</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">stderr_callback</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="c1"># Determine if this is a warning or an error</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;WARNING:&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> 
+                <span class="s2">&quot;DEPRECATION:&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> 
+                <span class="s2">&quot;A new release of pip is available&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;yellow&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[WARNING] </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">output_queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">((</span><span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[ERROR] </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">output_queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">((</span><span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+    
+    <span class="c1"># Run the command in a separate task</span>
+    <span class="n">run_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+        <span class="n">run_command_with_streaming</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">stdout_callback</span><span class="p">,</span> <span class="n">stderr_callback</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Stream events from the queue while the command is running</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">run_task</span><span class="o">.</span><span class="n">done</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">output_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">event_type</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">output_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">}</span>
+        <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+            <span class="c1"># No output available, just continue</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    
+    <span class="c1"># Get the exit code</span>
+    <span class="n">exit_code</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_task</span>
+    
+    <span class="c1"># Send completion event</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[INFO] Command completed with exit code </span><span class="si">{</span><span class="n">exit_code</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;complete&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;Command completed successfully&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">[ERROR] Command failed with exit code </span><span class="si">{</span><span class="n">exit_code</span><span class="si">}{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Command failed with exit code </span><span class="si">{</span><span class="n">exit_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

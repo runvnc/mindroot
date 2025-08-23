@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.l8n.test_enhanced &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.l8n.test_enhanced</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.l8n.test_enhanced</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Enhanced test script for the l8n localization plugin with language detection.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Add the current directory to Python path for imports</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">test_l8n_standalone</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">write_localized_file</span><span class="p">,</span>
+    <span class="n">set_translations</span><span class="p">,</span>
+    <span class="n">replace_placeholders</span><span class="p">,</span>
+    <span class="n">TRANSLATIONS</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_current_language_from_request</span><span class="p">,</span>
+    <span class="n">get_fallback_language</span><span class="p">,</span>
+    <span class="n">set_language_for_request</span><span class="p">,</span>
+    <span class="n">get_supported_languages</span><span class="p">,</span>
+    <span class="n">is_language_supported</span><span class="p">,</span>
+    <span class="n">_parse_accept_language_header</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="test_language_detection">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_enhanced.test_language_detection">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_language_detection</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the enhanced language detection functionality.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing Enhanced Language Detection...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 1: Default language detection</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Testing default language detection...&quot;</span><span class="p">)</span>
+    <span class="n">default_lang</span> <span class="o">=</span> <span class="n">get_current_language_from_request</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Default language: </span><span class="si">{</span><span class="n">default_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 2: Environment variable override</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Testing environment variable override...&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;es&#39;</span>
+    <span class="n">env_lang</span> <span class="o">=</span> <span class="n">get_current_language_from_request</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Language with MINDROOT_LANGUAGE=es: </span><span class="si">{</span><span class="n">env_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 3: Language fallback system</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. Testing language fallback system...&quot;</span><span class="p">)</span>
+    <span class="n">supported</span> <span class="o">=</span> <span class="n">get_supported_languages</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Supported languages: </span><span class="si">{</span><span class="n">supported</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="n">test_languages</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">,</span> <span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="s1">&#39;zh-cn&#39;</span><span class="p">,</span> <span class="s1">&#39;pt-br&#39;</span><span class="p">,</span> <span class="s1">&#39;invalid-lang&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">test_languages</span><span class="p">:</span>
+        <span class="n">fallback</span> <span class="o">=</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">supported_check</span> <span class="o">=</span> <span class="n">is_language_supported</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">lang</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">fallback</span><span class="si">}</span><span class="s2"> (supported: </span><span class="si">{</span><span class="n">supported_check</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 4: Accept-Language header parsing</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">4. Testing Accept-Language header parsing...&quot;</span><span class="p">)</span>
+    <span class="n">test_headers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;en-US,en;q=0.9,es;q=0.8,fr;q=0.7&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;es-ES,es;q=0.9,en;q=0.8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fr-FR,fr;q=0.9&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;de-DE,de;q=0.8,en;q=0.5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;zh-CN,zh;q=0.9,en;q=0.1&#39;</span>
+    <span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">test_headers</span><span class="p">:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">_parse_accept_language_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   &#39;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">&#39; -&gt; </span><span class="si">{</span><span class="n">parsed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 5: Set language for request</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">5. Testing set_language_for_request...&quot;</span><span class="p">)</span>
+    <span class="n">set_language_for_request</span><span class="p">(</span><span class="s1">&#39;fr&#39;</span><span class="p">)</span>
+    <span class="n">current_lang</span> <span class="o">=</span> <span class="n">get_current_language_from_request</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   After setting to &#39;fr&#39;: </span><span class="si">{</span><span class="n">current_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Reset for next tests</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Language detection tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_integrated_translation">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_enhanced.test_integrated_translation">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_integrated_translation</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the integrated translation system with language detection.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Integrated Translation System...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Set up translations for multiple languages</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Setting up translations...&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># English (default)</span>
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;welcome_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Welcome to MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Home&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Settings&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_save&#39;</span><span class="p">:</span> <span class="s1">&#39;Save&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_cancel&#39;</span><span class="p">:</span> <span class="s1">&#39;Cancel&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Spanish</span>
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;welcome_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Bienvenido a MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Inicio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Configuración&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_save&#39;</span><span class="p">:</span> <span class="s1">&#39;Guardar&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_cancel&#39;</span><span class="p">:</span> <span class="s1">&#39;Cancelar&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># French</span>
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;fr&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;welcome_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Bienvenue à MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Accueil&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Paramètres&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_save&#39;</span><span class="p">:</span> <span class="s1">&#39;Enregistrer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_cancel&#39;</span><span class="p">:</span> <span class="s1">&#39;Annuler&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># German</span>
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;welcome_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Willkommen bei MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Startseite&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Einstellungen&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_save&#39;</span><span class="p">:</span> <span class="s1">&#39;Speichern&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;button_cancel&#39;</span><span class="p">:</span> <span class="s1">&#39;Abbrechen&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Set up translations for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">TRANSLATIONS</span><span class="p">)</span><span class="si">}</span><span class="s2"> languages&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test template with placeholders</span>
+    <span class="n">template_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;html&gt;</span>
+<span class="s2">&lt;head&gt;</span>
+<span class="s2">    &lt;title&gt;__TRANSLATE_welcome_title__&lt;/title&gt;</span>
+<span class="s2">&lt;/head&gt;</span>
+<span class="s2">&lt;body&gt;</span>
+<span class="s2">    &lt;nav&gt;</span>
+<span class="s2">        &lt;a href=&quot;/&quot;&gt;__TRANSLATE_nav_home__&lt;/a&gt;</span>
+<span class="s2">        &lt;a href=&quot;/settings&quot;&gt;__TRANSLATE_nav_settings__&lt;/a&gt;</span>
+<span class="s2">    &lt;/nav&gt;</span>
+<span class="s2">    &lt;main&gt;</span>
+<span class="s2">        &lt;h1&gt;__TRANSLATE_welcome_title__&lt;/h1&gt;</span>
+<span class="s2">        &lt;div class=&quot;actions&quot;&gt;</span>
+<span class="s2">            &lt;button&gt;__TRANSLATE_button_save__&lt;/button&gt;</span>
+<span class="s2">            &lt;button&gt;__TRANSLATE_button_cancel__&lt;/button&gt;</span>
+<span class="s2">        &lt;/div&gt;</span>
+<span class="s2">    &lt;/main&gt;</span>
+<span class="s2">&lt;/body&gt;</span>
+<span class="s2">&lt;/html&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    
+    <span class="c1"># Test translation for each language</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Testing translation for each language...&quot;</span><span class="p">)</span>
+    
+    <span class="n">test_languages</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">,</span> <span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">]</span>  <span class="c1"># pt should fallback to en</span>
+    
+    <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">test_languages</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">   Language: </span><span class="si">{</span><span class="n">lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Set the language</span>
+        <span class="n">set_language_for_request</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        
+        <span class="c1"># Get the fallback language</span>
+        <span class="n">fallback_lang</span> <span class="o">=</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Fallback: </span><span class="si">{</span><span class="n">fallback_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Translate the template</span>
+        <span class="n">translated</span> <span class="o">=</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">template_content</span><span class="p">,</span> <span class="n">fallback_lang</span><span class="p">)</span>
+        
+        <span class="c1"># Show a snippet of the translation</span>
+        <span class="n">title_line</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">translated</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;&lt;title&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">h1_line</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">translated</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;&lt;h1&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Title: </span><span class="si">{</span><span class="n">title_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   H1: </span><span class="si">{</span><span class="n">h1_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Integrated translation tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_file_integration">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_enhanced.test_file_integration">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_file_integration</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test creating localized files and using language detection.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing File Integration...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Create a localized template file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Creating localized template file...&quot;</span><span class="p">)</span>
+    
+    <span class="n">template_path</span> <span class="o">=</span> <span class="s2">&quot;/files/mindroot/src/mindroot/coreplugins/admin/templates/admin.jinja2&quot;</span>
+    <span class="n">template_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;!DOCTYPE html&gt;</span>
+<span class="s2">&lt;html&gt;</span>
+<span class="s2">&lt;head&gt;</span>
+<span class="s2">    &lt;title&gt;__TRANSLATE_admin_title__&lt;/title&gt;</span>
+<span class="s2">&lt;/head&gt;</span>
+<span class="s2">&lt;body&gt;</span>
+<span class="s2">    &lt;header&gt;</span>
+<span class="s2">        &lt;h1&gt;__TRANSLATE_admin_header__&lt;/h1&gt;</span>
+<span class="s2">        &lt;nav&gt;</span>
+<span class="s2">            &lt;a href=&quot;/admin/users&quot;&gt;__TRANSLATE_nav_users__&lt;/a&gt;</span>
+<span class="s2">            &lt;a href=&quot;/admin/settings&quot;&gt;__TRANSLATE_nav_settings__&lt;/a&gt;</span>
+<span class="s2">            &lt;a href=&quot;/admin/logs&quot;&gt;__TRANSLATE_nav_logs__&lt;/a&gt;</span>
+<span class="s2">        &lt;/nav&gt;</span>
+<span class="s2">    &lt;/header&gt;</span>
+<span class="s2">    &lt;main&gt;</span>
+<span class="s2">        &lt;section&gt;</span>
+<span class="s2">            &lt;h2&gt;__TRANSLATE_section_overview__&lt;/h2&gt;</span>
+<span class="s2">            &lt;p&gt;__TRANSLATE_overview_description__&lt;/p&gt;</span>
+<span class="s2">        &lt;/section&gt;</span>
+<span class="s2">        &lt;div class=&quot;actions&quot;&gt;</span>
+<span class="s2">            &lt;button class=&quot;primary&quot;&gt;__TRANSLATE_button_create__&lt;/button&gt;</span>
+<span class="s2">            &lt;button class=&quot;secondary&quot;&gt;__TRANSLATE_button_refresh__&lt;/button&gt;</span>
+<span class="s2">        &lt;/div&gt;</span>
+<span class="s2">    &lt;/main&gt;</span>
+<span class="s2">&lt;/body&gt;</span>
+<span class="s2">&lt;/html&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">write_localized_file</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">template_content</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Set up admin-specific translations</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Setting up admin translations...&quot;</span><span class="p">)</span>
+    
+    <span class="n">admin_translations</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;en&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;admin_title&#39;</span><span class="p">:</span> <span class="s1">&#39;MindRoot Administration&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;admin_header&#39;</span><span class="p">:</span> <span class="s1">&#39;Admin Dashboard&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_users&#39;</span><span class="p">:</span> <span class="s1">&#39;Users&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Settings&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_logs&#39;</span><span class="p">:</span> <span class="s1">&#39;Logs&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;section_overview&#39;</span><span class="p">:</span> <span class="s1">&#39;System Overview&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;overview_description&#39;</span><span class="p">:</span> <span class="s1">&#39;Manage your MindRoot installation from this dashboard.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_create&#39;</span><span class="p">:</span> <span class="s1">&#39;Create New&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_refresh&#39;</span><span class="p">:</span> <span class="s1">&#39;Refresh Data&#39;</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;es&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;admin_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Administración de MindRoot&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;admin_header&#39;</span><span class="p">:</span> <span class="s1">&#39;Panel de Administración&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_users&#39;</span><span class="p">:</span> <span class="s1">&#39;Usuarios&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Configuración&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_logs&#39;</span><span class="p">:</span> <span class="s1">&#39;Registros&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;section_overview&#39;</span><span class="p">:</span> <span class="s1">&#39;Resumen del Sistema&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;overview_description&#39;</span><span class="p">:</span> <span class="s1">&#39;Gestiona tu instalación de MindRoot desde este panel.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_create&#39;</span><span class="p">:</span> <span class="s1">&#39;Crear Nuevo&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_refresh&#39;</span><span class="p">:</span> <span class="s1">&#39;Actualizar Datos&#39;</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;fr&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;admin_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Administration MindRoot&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;admin_header&#39;</span><span class="p">:</span> <span class="s1">&#39;Tableau de Bord Admin&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_users&#39;</span><span class="p">:</span> <span class="s1">&#39;Utilisateurs&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Paramètres&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nav_logs&#39;</span><span class="p">:</span> <span class="s1">&#39;Journaux&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;section_overview&#39;</span><span class="p">:</span> <span class="s1">&#39;Aperçu du Système&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;overview_description&#39;</span><span class="p">:</span> <span class="s1">&#39;Gérez votre installation MindRoot depuis ce tableau de bord.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_create&#39;</span><span class="p">:</span> <span class="s1">&#39;Créer Nouveau&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;button_refresh&#39;</span><span class="p">:</span> <span class="s1">&#39;Actualiser les Données&#39;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">translations</span> <span class="ow">in</span> <span class="n">admin_translations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">translations</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test the complete workflow</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. Testing complete localization workflow...&quot;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">   Testing </span><span class="si">{</span><span class="n">lang</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> localization:&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Set language</span>
+        <span class="n">set_language_for_request</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">get_current_language_from_request</span><span class="p">()</span>
+        <span class="n">fallback</span> <span class="o">=</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+        
+        <span class="c1"># Translate template</span>
+        <span class="n">translated</span> <span class="o">=</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">template_content</span><span class="p">,</span> <span class="n">fallback</span><span class="p">)</span>
+        
+        <span class="c1"># Extract and show key elements</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">translated</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="s1">&#39;&lt;title&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="s1">&#39;&lt;h1&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;     Language: </span><span class="si">{</span><span class="n">current</span><span class="si">}</span><span class="s2"> -&gt; Fallback: </span><span class="si">{</span><span class="n">fallback</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;     </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;     </span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ File integration tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_enhanced.main">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run all enhanced tests.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MindRoot l8n Plugin - Enhanced Testing Suite&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">test_language_detection</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">test_integrated_translation</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">test_file_integration</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ All enhanced tests completed successfully!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

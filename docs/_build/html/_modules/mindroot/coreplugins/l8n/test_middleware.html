@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.l8n.test_middleware &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.l8n.test_middleware</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.l8n.test_middleware</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test script for the l8n middleware functionality.</span>
+
+<span class="sd">This script simulates FastAPI request objects to test the middleware.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span>
+
+<span class="c1"># Mock FastAPI Request for testing</span>
+<div class="viewcode-block" id="MockRequest">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockRequest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MockRequest</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">query_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cookies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_params</span> <span class="o">=</span> <span class="n">query_params</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">cookies</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span></div>
+
+
+<span class="c1"># Mock Response for testing</span>
+<div class="viewcode-block" id="MockResponse">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MockResponse</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies_set</span> <span class="o">=</span> <span class="p">{}</span>
+    
+<div class="viewcode-block" id="MockResponse.set_cookie">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse.set_cookie">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">httponly</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">samesite</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookies_set</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+            <span class="s1">&#39;max_age&#39;</span><span class="p">:</span> <span class="n">max_age</span><span class="p">,</span>
+            <span class="s1">&#39;httponly&#39;</span><span class="p">:</span> <span class="n">httponly</span><span class="p">,</span>
+            <span class="s1">&#39;samesite&#39;</span><span class="p">:</span> <span class="n">samesite</span>
+        <span class="p">}</span></div>
+</div>
+
+
+<span class="c1"># Import the middleware functions with sys.path manipulation</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="c1"># Now import with absolute imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">middleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_accept_language_header</span><span class="p">,</span> <span class="n">get_fallback_language</span>
+
+<span class="c1"># Create aliases for easier use</span>
+<span class="n">middleware_func</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">middleware</span>
+<span class="n">detect_language_from_request</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">detect_language_from_request</span>
+<span class="n">get_request_language</span> <span class="o">=</span> <span class="n">middleware</span><span class="o">.</span><span class="n">get_request_language</span>
+
+<div class="viewcode-block" id="mock_call_next">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.mock_call_next">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mock_call_next</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mock the next handler in the middleware chain.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">MockResponse</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="test_language_detection">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.test_language_detection">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_language_detection</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test language detection from various request sources.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing Language Detection from Requests...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 1: URL parameter</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Testing URL parameter detection...&quot;</span><span class="p">)</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/chat&quot;</span><span class="p">,</span>
+        <span class="n">query_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">detected</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   URL param &#39;lang=es&#39; -&gt; </span><span class="si">{</span><span class="n">detected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 2: Cookie value</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Testing cookie detection...&quot;</span><span class="p">)</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/admin&quot;</span><span class="p">,</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">:</span> <span class="s1">&#39;fr&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">detected</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Cookie &#39;mindroot_language=fr&#39; -&gt; </span><span class="si">{</span><span class="n">detected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 3: Accept-Language header</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. Testing Accept-Language header...&quot;</span><span class="p">)</span>
+    <span class="n">test_headers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;en-US,en;q=0.9,es;q=0.8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;es-ES,es;q=0.9,en;q=0.8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fr-FR,fr;q=0.9&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;de-DE,de;q=0.8,en;q=0.5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;zh-CN,zh;q=0.9,en;q=0.1&#39;</span>
+    <span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">test_headers</span><span class="p">:</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/test&quot;</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="n">header</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">detected</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   &#39;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">&#39; -&gt; </span><span class="si">{</span><span class="n">detected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 4: Environment variable</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">4. Testing environment variable...&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;de&#39;</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/test&quot;</span><span class="p">)</span>
+    <span class="n">detected</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   MINDROOT_LANGUAGE=de -&gt; </span><span class="si">{</span><span class="n">detected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 5: Priority order (URL param should override everything)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">5. Testing priority order...&quot;</span><span class="p">)</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/test&quot;</span><span class="p">,</span>
+        <span class="n">query_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span><span class="p">},</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">:</span> <span class="s1">&#39;fr&#39;</span><span class="p">},</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="s1">&#39;de-DE,de;q=0.9&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">detected</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   URL=es, Cookie=fr, Header=de -&gt; </span><span class="si">{</span><span class="n">detected</span><span class="si">}</span><span class="s2"> (should be es)&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Clean up</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Language detection tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_middleware_functionality">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.test_middleware_functionality">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_middleware_functionality</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the complete middleware functionality.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Middleware Functionality...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 1: Basic middleware flow</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Testing basic middleware flow...&quot;</span><span class="p">)</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/chat&quot;</span><span class="p">,</span>
+        <span class="n">query_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span><span class="p">},</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="s1">&#39;en-US,en;q=0.9&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">middleware_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mock_call_next</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Request language set to: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Global language: </span><span class="si">{</span><span class="n">get_request_language</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Cookie set: </span><span class="si">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">response</span><span class="o">.</span><span class="n">cookies_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;mindroot_language&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">cookies_set</span><span class="p">:</span>
+        <span class="n">cookie_info</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">cookies_set</span><span class="p">[</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Cookie value: </span><span class="si">{</span><span class="n">cookie_info</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Cookie max_age: </span><span class="si">{</span><span class="n">cookie_info</span><span class="p">[</span><span class="s1">&#39;max_age&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 2: Different language sources</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Testing different language sources...&quot;</span><span class="p">)</span>
+    
+    <span class="n">test_cases</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Accept-Language only&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;request&#39;</span><span class="p">:</span> <span class="n">MockRequest</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/admin&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="s1">&#39;fr-FR,fr;q=0.9,en;q=0.8&#39;</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;expected&#39;</span><span class="p">:</span> <span class="s1">&#39;fr&#39;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Cookie preference&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;request&#39;</span><span class="p">:</span> <span class="n">MockRequest</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/settings&quot;</span><span class="p">,</span>
+                <span class="n">cookies</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">:</span> <span class="s1">&#39;de&#39;</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;expected&#39;</span><span class="p">:</span> <span class="s1">&#39;de&#39;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;URL override&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;request&#39;</span><span class="p">:</span> <span class="n">MockRequest</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">,</span>
+                <span class="n">query_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span><span class="p">},</span>
+                <span class="n">cookies</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">:</span> <span class="s1">&#39;fr&#39;</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;expected&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">test_cases</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">   Testing: </span><span class="si">{</span><span class="n">case</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">middleware_func</span><span class="p">(</span><span class="n">case</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">],</span> <span class="n">mock_call_next</span><span class="p">)</span>
+        <span class="n">actual</span> <span class="o">=</span> <span class="n">case</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">case</span><span class="p">[</span><span class="s1">&#39;expected&#39;</span><span class="p">]</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;✅&quot;</span> <span class="k">if</span> <span class="n">actual</span> <span class="o">==</span> <span class="n">expected</span> <span class="k">else</span> <span class="s2">&quot;❌&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2"> Expected: </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2">, Got: </span><span class="si">{</span><span class="n">actual</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Test 3: Error handling</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. Testing error handling...&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Create a request that might cause issues</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">MockRequest</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/test&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="s1">&#39;invalid-header-format&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">middleware_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mock_call_next</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   ✅ Error handled gracefully, language: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   ❌ Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Middleware functionality tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_integration_with_templates">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.test_integration_with_templates">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_integration_with_templates</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test integration with the template system.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Integration with Template System...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Import template-related functions</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">test_l8n_standalone</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_translations</span><span class="p">,</span> <span class="n">replace_placeholders</span>
+    
+    <span class="c1"># Set up some translations</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Setting up translations...&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;page_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Welcome to MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Home&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Settings&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;page_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Bienvenido a MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Inicio&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Configuración&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="k">await</span> <span class="n">set_translations</span><span class="p">(</span><span class="s1">&#39;fr&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;page_title&#39;</span><span class="p">:</span> <span class="s1">&#39;Bienvenue à MindRoot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_home&#39;</span><span class="p">:</span> <span class="s1">&#39;Accueil&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nav_settings&#39;</span><span class="p">:</span> <span class="s1">&#39;Paramètres&#39;</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Template content</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&lt;title&gt;__TRANSLATE_page_title__&lt;/title&gt;&lt;nav&gt;&lt;a&gt;__TRANSLATE_nav_home__&lt;/a&gt;&lt;a&gt;__TRANSLATE_nav_settings__&lt;/a&gt;&lt;/nav&gt;&quot;</span>
+    
+    <span class="c1"># Test different language requests</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. Testing template translation with different requests...&quot;</span><span class="p">)</span>
+    
+    <span class="n">test_requests</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;English (default)&#39;</span><span class="p">,</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;Spanish (URL param)&#39;</span><span class="p">,</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">query_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="s1">&#39;es&#39;</span><span class="p">})),</span>
+        <span class="p">(</span><span class="s1">&#39;French (cookie)&#39;</span><span class="p">,</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">cookies</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">:</span> <span class="s1">&#39;fr&#39;</span><span class="p">})),</span>
+        <span class="p">(</span><span class="s1">&#39;German (header)&#39;</span><span class="p">,</span> <span class="n">MockRequest</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;accept-language&#39;</span><span class="p">:</span> <span class="s1">&#39;de-DE,de;q=0.9,en;q=0.8&#39;</span><span class="p">}))</span>
+    <span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">test_requests</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">   Testing: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Process request through middleware</span>
+        <span class="k">await</span> <span class="n">middleware_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mock_call_next</span><span class="p">)</span>
+        
+        <span class="c1"># Get the detected language</span>
+        <span class="n">detected_lang</span> <span class="o">=</span> <span class="n">get_request_language</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Detected language: </span><span class="si">{</span><span class="n">detected_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Translate the template</span>
+        <span class="n">translated</span> <span class="o">=</span> <span class="n">replace_placeholders</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">detected_lang</span><span class="p">)</span>
+        
+        <span class="c1"># Extract title for display</span>
+        <span class="n">title_start</span> <span class="o">=</span> <span class="n">translated</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;&lt;title&gt;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span>
+        <span class="n">title_end</span> <span class="o">=</span> <span class="n">translated</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;&lt;/title&gt;&#39;</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">translated</span><span class="p">[</span><span class="n">title_start</span><span class="p">:</span><span class="n">title_end</span><span class="p">]</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Translated title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ Template integration tests completed!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.main">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run all middleware tests.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MindRoot l8n Plugin - Middleware Testing Suite&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">test_language_detection</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">test_middleware_functionality</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">test_integration_with_templates</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ All middleware tests completed successfully!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

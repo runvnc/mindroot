@@ -1,0 +1,510 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.mcp_.mod &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.mcp_.mod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.mcp_.mod</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_qs</span><span class="p">,</span> <span class="n">urlparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncExitStack</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mcp_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPManager</span><span class="p">,</span> <span class="n">MCPServer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.server_installer</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPServerInstaller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dynamic_commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPDynamicCommands</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.oauth_storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCPTokenStorage</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientSession</span><span class="p">,</span> <span class="n">StdioServerParameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.stdio</span><span class="w"> </span><span class="kn">import</span> <span class="n">stdio_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.streamable_http</span><span class="w"> </span><span class="kn">import</span> <span class="n">streamablehttp_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.sse</span><span class="w"> </span><span class="kn">import</span> <span class="n">sse_client</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuthClientProvider</span><span class="p">,</span> <span class="n">TokenStorage</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.shared.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuthClientMetadata</span><span class="p">,</span> <span class="n">OAuthToken</span><span class="p">,</span> <span class="n">OAuthClientInformationFull</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnyUrl</span>
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># MCP not installed yet</span>
+    <span class="n">ClientSession</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">StdioServerParameters</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stdio_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">streamablehttp_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sse_client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientProvider</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientMetadata</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthToken</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">OAuthClientInformationFull</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">AnyUrl</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="handle_redirect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.handle_redirect">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_redirect</span><span class="p">(</span><span class="n">auth_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Visit: </span><span class="si">{</span><span class="n">auth_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_callback">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.handle_callback">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_callback</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="n">callback_url</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Paste callback URL: &quot;</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">callback_url</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<span class="c1"># Global MCP manager instance</span>
+<span class="n">mcp_manager</span> <span class="o">=</span> <span class="n">MCPManager</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="mcp_manager_service">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_manager_service">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Service to access the MCP manager&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;returning mcp_manager&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mcp_manager</span></div>
+
+
+<div class="viewcode-block" id="enhanced_mcp_manager_service">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.enhanced_mcp_manager_service">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enhanced_mcp_manager_service</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Service to access enhanced MCP manager (same as mcp_manager_service now)&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;returning enhanced MCP manager service&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mcp_manager</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_connect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_connect">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_connect</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect to an MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_connect&quot;: { &quot;server_name&quot;: &quot;filesystem&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully connected to MCP server: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to connect to MCP server: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_disconnect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_disconnect">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_disconnect</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Disconnect from an MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_disconnect&quot;: { &quot;server_name&quot;: &quot;filesystem&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully disconnected from MCP server: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to disconnect from MCP server: </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_list_servers">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_list_servers">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_list_servers</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all configured MCP servers</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_list_servers&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s2">&quot;transport&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span>
+            <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="p">[])),</span>
+            <span class="s2">&quot;resources_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="p">[])),</span>
+            <span class="s2">&quot;prompts_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">servers</span></div>
+
+
+
+<span class="c1"># Enhanced commands from enhanced_mod.py</span>
+<div class="viewcode-block" id="mcp_enhanced_connect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_enhanced_connect">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_enhanced_connect</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect to MCP server with enhanced features</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_enhanced_connect&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully connected to </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2"> with enhanced features&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to connect to </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_enhanced_disconnect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_enhanced_disconnect">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_enhanced_disconnect</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Disconnect from MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_enhanced_disconnect&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Successfully disconnected from </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Failed to disconnect from </span><span class="si">{</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_install_uvx_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_install_uvx_server">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_install_uvx_server</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">package</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install and configure a uvx-based MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_install_uvx_server&quot;: {</span>
+<span class="sd">        &quot;name&quot;: &quot;calculator&quot;,</span>
+<span class="sd">        &quot;package&quot;: &quot;mcp-server-calculator&quot;,</span>
+<span class="sd">        &quot;description&quot;: &quot;Calculator server&quot;</span>
+<span class="sd">    } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;MCP server: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">command</span><span class="o">=</span><span class="s2">&quot;uvx&quot;</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">package</span><span class="p">],</span>
+        <span class="n">install_method</span><span class="o">=</span><span class="s2">&quot;uvx&quot;</span><span class="p">,</span>
+        <span class="n">install_package</span><span class="o">=</span><span class="n">package</span><span class="p">,</span>
+        <span class="n">auto_install</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    
+    <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Configured uvx server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> with package </span><span class="si">{</span><span class="n">package</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_install_npx_server">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_install_npx_server">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_install_npx_server</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">package</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Install and configure an npx-based MCP server</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_install_npx_server&quot;: {</span>
+<span class="sd">        &quot;name&quot;: &quot;github&quot;,</span>
+<span class="sd">        &quot;package&quot;: &quot;@modelcontextprotocol/server-github&quot;,</span>
+<span class="sd">        &quot;description&quot;: &quot;GitHub server&quot;</span>
+<span class="sd">    } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;MCP server: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">command</span><span class="o">=</span><span class="s2">&quot;npx&quot;</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-y&quot;</span><span class="p">,</span> <span class="n">package</span><span class="p">],</span>
+        <span class="n">install_method</span><span class="o">=</span><span class="s2">&quot;npx&quot;</span><span class="p">,</span>
+        <span class="n">install_package</span><span class="o">=</span><span class="n">package</span><span class="p">,</span>
+        <span class="n">auto_install</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    
+    <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Configured npx server </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> with package </span><span class="si">{</span><span class="n">package</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_debug_connection">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_debug_connection">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_debug_connection</span><span class="p">(</span><span class="n">server_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Debug MCP server connection and dynamic command registration</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_debug_connection&quot;: { &quot;server_name&quot;: &quot;calculator&quot; } }</span>
+<span class="sd">    { &quot;mcp_debug_connection&quot;: { &quot;server_name&quot;: &quot;github&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.catalog_commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcp_catalog_info</span><span class="p">,</span> <span class="n">mcp_catalog_install_and_run</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command_manager</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    
+    <span class="n">debug_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;server_name&quot;</span><span class="p">:</span> <span class="n">server_name</span><span class="p">,</span>
+        <span class="s2">&quot;steps&quot;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Step 1: Check initial state</span>
+    <span class="n">initial_commands</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;mcp_&#39;</span><span class="p">)]</span>
+    <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;1_initial_state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;initial_mcp_commands_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_commands</span><span class="p">),</span>
+        <span class="s2">&quot;dynamic_commands&quot;</span><span class="p">:</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">get_registered_commands</span><span class="p">()</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Step 2: Get server info</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">server_info</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_catalog_info</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+        <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;2_server_info&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;server_info&quot;</span><span class="p">:</span> <span class="n">server_info</span>
+        <span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;2_server_info&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">debug_info</span>
+    
+    <span class="c1"># Step 3: Install and run</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_catalog_install_and_run</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+        <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;3_install_and_run&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span>
+        <span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;3_install_and_run&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">debug_info</span>
+    
+    <span class="c1"># Step 4: Check server status</span>
+    <span class="n">server_status</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">server_status</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s2">&quot;capabilities&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="p">,</span>
+            <span class="s2">&quot;has_session&quot;</span><span class="p">:</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sessions</span>
+        <span class="p">}</span>
+    
+    <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;4_server_status&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;server_found&quot;</span><span class="p">:</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">,</span>
+        <span class="s2">&quot;server_status&quot;</span><span class="p">:</span> <span class="n">server_status</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Step 5: Check dynamic commands</span>
+    <span class="n">final_commands</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;mcp_&#39;</span><span class="p">)]</span>
+    <span class="n">new_commands</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmd</span> <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">final_commands</span> <span class="k">if</span> <span class="n">cmd</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">initial_commands</span><span class="p">]</span>
+    
+    <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;5_dynamic_commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;total_mcp_commands&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_commands</span><span class="p">),</span>
+        <span class="s2">&quot;new_commands&quot;</span><span class="p">:</span> <span class="n">new_commands</span><span class="p">,</span>
+        <span class="s2">&quot;dynamic_commands_tracker&quot;</span><span class="p">:</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">get_registered_commands</span><span class="p">()</span>
+    <span class="p">})</span>
+    
+    <span class="c1"># Step 6: Analyze tools</span>
+    <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tools&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">tool_analysis</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">:</span>
+            <span class="n">tool_name</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+            <span class="c1">#expected_cmd = f&quot;mcp_{server_name}_{tool_name}&quot;</span>
+            <span class="n">expecte_cmd</span> <span class="o">=</span> <span class="s2">&quot;mcp_&quot;</span><span class="o">+</span><span class="n">tool_name</span>
+            <span class="n">is_registered</span> <span class="o">=</span> <span class="n">expected_cmd</span> <span class="ow">in</span> <span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span>
+            <span class="n">tool_analysis</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;tool_name&quot;</span><span class="p">:</span> <span class="n">tool_name</span><span class="p">,</span>
+                <span class="s2">&quot;expected_command&quot;</span><span class="p">:</span> <span class="n">expected_cmd</span><span class="p">,</span>
+                <span class="s2">&quot;is_registered&quot;</span><span class="p">:</span> <span class="n">is_registered</span><span class="p">,</span>
+                <span class="s2">&quot;tool_details&quot;</span><span class="p">:</span> <span class="n">tool</span>
+            <span class="p">})</span>
+        
+        <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;6_tool_analysis&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tools_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">),</span>
+            <span class="s2">&quot;tool_analysis&quot;</span><span class="p">:</span> <span class="n">tool_analysis</span>
+        <span class="p">})</span>
+    
+    <span class="c1"># Step 7: Manual verification if session exists</span>
+    <span class="k">if</span> <span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">session</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">server_name</span><span class="p">]</span>
+            <span class="n">tools_result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+            <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;7_manual_verification&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;direct_tools_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tools_result</span><span class="o">.</span><span class="n">tools</span><span class="p">),</span>
+                <span class="s2">&quot;direct_tools&quot;</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">tool</span><span class="o">.</span><span class="n">description</span>
+                <span class="p">}</span> <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools_result</span><span class="o">.</span><span class="n">tools</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">debug_info</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;7_manual_verification&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">debug_info</span></div>
+
+
+<div class="viewcode-block" id="mcp_check_tools">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_check_tools">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_check_tools</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check availability of installation tools</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_check_tools&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">MCPServerInstaller</span><span class="o">.</span><span class="n">check_tools</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tools</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_list_dynamic_commands">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_list_dynamic_commands">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_list_dynamic_commands</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List dynamically registered MCP commands</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_list_dynamic_commands&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">commands</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">get_registered_commands</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dynamic_commands&quot;</span><span class="p">:</span> <span class="n">commands</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">commands</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="mcp_refresh_dynamic_commands">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mod.mcp_refresh_dynamic_commands">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mcp_refresh_dynamic_commands</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refresh dynamic command registration for all connected servers</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;mcp_refresh_dynamic_commands&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">refreshed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sessions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">register_tools</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span>
+        <span class="n">refreshed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="si">}</span><span class="s2"> tools&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;refreshed_servers&quot;</span><span class="p">:</span> <span class="n">refreshed</span><span class="p">,</span> <span class="s2">&quot;total_dynamic_commands&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">mcp_manager</span><span class="o">.</span><span class="n">dynamic_commands</span><span class="o">.</span><span class="n">get_registered_commands</span><span class="p">())}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

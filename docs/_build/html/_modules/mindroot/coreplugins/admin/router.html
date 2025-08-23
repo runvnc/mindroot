@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.admin.router &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.admin.router</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.admin.router</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLResponse</span><span class="p">,</span> <span class="n">RedirectResponse</span><span class="p">,</span> <span class="n">JSONResponse</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_enabled</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugin_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">plugin_manager_router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_git_version_info</span>
+
+<span class="c1"># Create separate routers for public and admin routes</span>
+<span class="n">public_router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>  <span class="c1"># No dependencies - for OAuth callbacks etc.</span>
+<span class="n">admin_router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)])</span>  <span class="c1"># Admin only</span>
+
+<span class="c1"># === PUBLIC ROUTES (no authentication required) ===</span>
+<span class="c1"># Import and include the OAuth callback router in public router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.oauth_callback_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">oauth_callback_router</span>
+<span class="n">public_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">oauth_callback_router</span><span class="p">)</span>
+
+<span class="c1"># === ADMIN ROUTES (authentication required) ===</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">plugin_manager_router</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/plugin-manager&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plugin-manager&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="get_admin_html">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.router.get_admin_html">[docs]</a>
+<span class="nd">@admin_router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">HTMLResponse</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_admin_html</span><span class="p">():</span>
+    <span class="n">log_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+    <span class="n">plugins</span> <span class="o">=</span> <span class="n">list_enabled</span><span class="p">()</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">render</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">html</span></div>
+
+
+<div class="viewcode-block" id="get_model_preferences_v2_html">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.router.get_model_preferences_v2_html">[docs]</a>
+<span class="nd">@admin_router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin/model-preferences-v2&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">HTMLResponse</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_model_preferences_v2_html</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve the new Model Preferences V2 page&quot;&quot;&quot;</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">render</span><span class="p">(</span><span class="s1">&#39;model-preferences-v2&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">html</span></div>
+
+
+<div class="viewcode-block" id="get_version_info">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.router.get_version_info">[docs]</a>
+<span class="nd">@admin_router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/admin/get-version-info&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_version_info</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get version information, trying git first, then falling back to cached file.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the path to this file to determine where to store version.txt</span>
+        <span class="n">current_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="n">version_file</span> <span class="o">=</span> <span class="n">current_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;version.txt&quot;</span>
+        
+        <span class="c1"># Try to get fresh git info using the command</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_git_version_info</span><span class="p">:</span>
+                <span class="n">git_info</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_git_version_info</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">git_info</span><span class="p">:</span>
+                    <span class="c1"># Write to version.txt</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">version_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">git_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">git_info</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get git info: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Fall back to reading from version.txt</span>
+        <span class="k">if</span> <span class="n">version_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">version_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">cached_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="c1"># Add note that this is cached</span>
+                <span class="n">cached_info</span><span class="p">[</span><span class="s1">&#39;note&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Cached version (git not available)&#39;</span>
+                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">cached_info</span><span class="p">)</span>
+        
+        <span class="c1"># No version info available</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span>
+            <span class="s1">&#39;commit_hash&#39;</span><span class="p">:</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;commit_date&#39;</span><span class="p">:</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;retrieved_at&#39;</span><span class="p">:</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;note&#39;</span><span class="p">:</span> <span class="s1">&#39;Version information not available&#39;</span>
+        <span class="p">})</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Error getting version info: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.logging.log_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">log_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">log_router</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.command_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">command_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">command_router</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.settings_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">settings_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">settings_router</span><span class="p">)</span>
+
+<span class="c1"># Use the fixed plugin router instead of the old one</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugin_router_fixed</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">plugin_router_fixed</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">plugin_router_fixed</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/admin&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">,</span> <span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
+
+<span class="c1"># Keep the old plugin router for backward compatibility if needed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plugin_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">plugin_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">plugin_router</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/admin/legacy&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;legacy-plugins&quot;</span><span class="p">])</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.persona_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">persona_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">persona_router</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.agent_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">agent_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">agent_router</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.server_router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">server_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">server_router</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/admin/server&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;server&quot;</span><span class="p">])</span>
+
+<span class="c1"># Import and include the env_manager router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coreplugins.env_manager.router</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">env_manager_router</span>
+<span class="n">admin_router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">env_manager_router</span><span class="p">)</span>
+
+<div class="viewcode-block" id="update_mindroot">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.router.update_mindroot">[docs]</a>
+<span class="nd">@admin_router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/admin/update-mindroot&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_mindroot</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update MindRoot using pip install --upgrade mindroot&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Run pip install --upgrade mindroot in the current environment</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;pip&quot;</span><span class="p">,</span> <span class="s2">&quot;install&quot;</span><span class="p">,</span> <span class="s2">&quot;--upgrade&quot;</span><span class="p">,</span> <span class="s2">&quot;mindroot&quot;</span><span class="p">],</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span>  <span class="c1"># 5 minute timeout</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MindRoot updated successfully&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+                <span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="s2">&quot;Restart the application to use the updated version&quot;</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Failed to update MindRoot&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+            <span class="p">})</span>
+            
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Update timed out after 5 minutes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Process timed out&quot;</span>
+        <span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span>
+            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Error during update&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="p">})</span></div>
+
+
+<span class="c1"># === MAIN ROUTER COMBINING PUBLIC AND ADMIN ===</span>
+<span class="c1"># Create main router that combines both public and admin routes</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">public_router</span><span class="p">)</span>  <span class="c1"># Public routes first (no auth)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">admin_router</span><span class="p">)</span>   <span class="c1"># Admin routes (with auth)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

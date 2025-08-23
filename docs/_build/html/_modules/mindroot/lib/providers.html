@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.lib.providers &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.lib.providers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.lib.providers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..db.preferences</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_preferred_models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..db.organize_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">uses_models</span><span class="p">,</span> <span class="n">matching_models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.check_args</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span>
+
+<span class="c1"># Import the new v2 preferences system with try/except for backward compatibility</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.model_preferences_v2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelPreferencesV2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">ModelPreferencesV2</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ProviderManager">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProviderManager</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="ProviderManager.register_function">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.register_function">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">implementation</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">docstring</span><span class="p">,</span> <span class="n">flags</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">provider</span> <span class="ow">in</span> <span class="p">[</span><span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]]:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;say&#39;</span><span class="p">:</span>
+            <span class="n">debug_box</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REGISTER:&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">provider</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span> <span class="n">implementation</span><span class="p">,</span> <span class="s1">&#39;docstring&#39;</span><span class="p">:</span> <span class="n">docstring</span><span class="p">,</span> <span class="s1">&#39;flags&#39;</span><span class="p">:</span> <span class="n">flags</span><span class="p">,</span> <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="n">provider</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.exec_with_provider">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.exec_with_provider">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">exec_with_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+        <span class="n">func_info</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">provider</span><span class="p">:</span>
+                <span class="n">func_info</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">break</span>
+        
+        <span class="n">implementation</span> <span class="o">=</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">implementation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found for provider &#39;</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">implementation</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.execute">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.execute">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">check_empty_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; called with empty arguments.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+        <span class="n">preferred_models</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">preferred_provider</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">preferred_providers</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">found_context</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;ChatContext&#39;</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;agent&#39;</span><span class="p">):</span>
+                <span class="n">found_context</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="n">arg</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">found_context</span> <span class="ow">and</span> <span class="s1">&#39;context&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span>
+            <span class="n">found_context</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">found_context</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="s1">&#39;context&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
+
+        <span class="n">need_model</span> <span class="o">=</span> <span class="k">await</span> <span class="n">uses_models</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># DEBUG: Check what we have for model selection</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== MODEL SELECTION DEBUG for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> ===&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;args[0]: </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;kwargs.get(&#39;model&#39;): </span><span class="si">{</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s1">&#39;agent&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent service_models: </span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service_models&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No agent context or service_models&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== END DEBUG ===&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No model specified, checking service_models&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;service_models&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span>
+                <span class="n">service_models</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;service_models&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">service_models</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found service_models in agent&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;set model (args[0]) to&quot;</span><span class="p">,</span> <span class="n">service_models</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">service_models</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;provider&#39;</span><span class="p">]:</span>
+                            <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">service_models</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;model&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                            <span class="k">return</span> <span class="k">await</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: provider </span><span class="si">{</span><span class="n">service_models</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">][</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> specified for service </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, but provider not enabled not enabled.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;did not find service_models in agent&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;context.agent:&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">)</span>
+                
+                <span class="c1"># NEW V2 PREFERENCES LOGIC - Only as fallback when no agent-specific model</span>
+                <span class="k">if</span> <span class="n">ModelPreferencesV2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No agent-specific model found, trying V2 system preferences...&quot;</span><span class="p">)</span>
+                        <span class="n">prefs_manager</span> <span class="o">=</span> <span class="n">ModelPreferencesV2</span><span class="p">()</span>
+                        <span class="n">ordered_providers</span> <span class="o">=</span> <span class="n">prefs_manager</span><span class="o">.</span><span class="n">get_ordered_providers_for_service</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                        
+                        <span class="k">if</span> <span class="n">ordered_providers</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found V2 preferences for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">ordered_providers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            
+                            <span class="k">for</span> <span class="n">provider_name</span><span class="p">,</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">ordered_providers</span><span class="p">:</span>
+                                <span class="c1"># Check if this provider is available for this function</span>
+                                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+                                    <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                                        <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">provider_name</span><span class="p">:</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trying V2 provider </span><span class="si">{</span><span class="n">provider_name</span><span class="si">}</span><span class="s2"> with model </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                                <span class="c1"># Set the model as first argument if needed</span>
+                                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                                                    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                                                <span class="k">elif</span> <span class="s1">&#39;model&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                                                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_name</span>
+                                                
+                                                <span class="k">return</span> <span class="k">await</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;V2 provider </span><span class="si">{</span><span class="n">provider_name</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, trying next...&quot;</span><span class="p">)</span>
+                                                <span class="k">continue</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;V2 preferences failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, continuing with existing logic&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found possible model in zeroth arg:&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">coreplugins.admin.service_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_get_service_models</span>
+
+                <span class="n">all_service_models</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cached_get_service_models</span><span class="p">()</span>
+                <span class="n">this_service_models</span> <span class="o">=</span> <span class="n">all_service_models</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">model_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;__&#39;</span> <span class="ow">in</span> <span class="n">model_name</span><span class="p">:</span>
+                        <span class="c1">#provider = model_name.split(&#39;__&#39;)[0]</span>
+                        <span class="n">model_name</span> <span class="o">=</span> <span class="n">model_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                        
+                    <span class="k">for</span> <span class="n">provider</span><span class="p">,</span> <span class="n">model_list</span> <span class="ow">in</span> <span class="n">this_service_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">model_list</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found provider&quot;</span><span class="p">,</span> <span class="n">provider</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                                <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">provider</span><span class="p">:</span>
+                                    <span class="k">return</span> <span class="k">await</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+        <span class="n">required_plugins</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s1">&#39;agent&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span>
+            <span class="n">required_plugins</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;required_plugins&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">required_plugins</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">required_plugins</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">plugin</span><span class="p">:</span>
+                        <span class="n">function_info</span> <span class="o">=</span> <span class="n">func_info</span>
+                        <span class="k">return</span> <span class="k">await</span> <span class="n">function_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">preferred_providers_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s1">&#39;agent&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span>
+            <span class="n">preferred_providers</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;preferred_providers&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preferred_providers</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">preferred_providers_list</span> <span class="o">=</span> <span class="n">preferred_providers</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preferred_providers</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">preferred_providers</span><span class="p">:</span>
+                    <span class="n">preferred_provider</span> <span class="o">=</span> <span class="n">preferred_providers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">preferred_provider</span><span class="p">:</span>
+                            <span class="n">function_info</span> <span class="o">=</span> <span class="n">func_info</span>
+                            <span class="k">return</span> <span class="k">await</span> <span class="n">function_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;stream_chat&#39;</span> <span class="ow">and</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;stream_chat, context is None&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;stream_chat&#39;</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;stream_chat, context.agent is None&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;stream_chat&#39;</span><span class="p">:</span>
+            <span class="n">debug_box</span><span class="p">(</span><span class="s1">&#39;execute stream_chat &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;PREFERRED_PROVIDER&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">preferred_providers_list</span> <span class="o">=</span> <span class="p">[</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;PREFERRED_PROVIDER&#39;</span><span class="p">]</span> <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">preferred_providers_list</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">preferred_providers_list</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="k">await</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">preferred_providers</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">preferred_providers</span><span class="p">:</span>
+            <span class="n">preferred_provider</span> <span class="o">=</span> <span class="n">preferred_providers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">preferred_provider</span><span class="p">:</span>
+                    <span class="n">function_info</span> <span class="o">=</span> <span class="n">func_info</span>
+                    <span class="k">return</span> <span class="k">await</span> <span class="n">function_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;ChatContext&#39;</span><span class="p">:</span>
+            <span class="n">preferred_models</span> <span class="o">=</span> <span class="k">await</span> <span class="n">find_preferred_models</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">need_model</span> <span class="ow">and</span> <span class="n">preferred_models</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">preferred_models</span> <span class="o">=</span> <span class="k">await</span> <span class="n">matching_models</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">preferred_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">preferred_models</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preferred_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">preferred_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">preferred_models</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">preferred_provider</span> <span class="o">=</span> <span class="n">preferred_models</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">preferred_provider</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">function_info</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">need_model</span> <span class="ow">and</span> <span class="n">preferred_provider</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">preferred_provider</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">preferred_provider</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">func_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">func_info</span><span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">preferred_provider</span><span class="p">:</span>
+                    <span class="n">function_info</span> <span class="o">=</span> <span class="n">func_info</span>
+                    <span class="k">break</span>
+            <span class="n">function_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">function_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;1. function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. preferred_provider is &#39;</span><span class="si">{</span><span class="n">preferred_provider</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="n">implementation</span> <span class="o">=</span> <span class="n">function_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">implementation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;2. function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found. preferred_provider is &#39;</span><span class="si">{</span><span class="n">preferred_provider</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">implementation</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.get_docstring">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.get_docstring">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_docstring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;docstring for &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;docstring&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.get_detailed_functions">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.get_detailed_functions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_detailed_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.get_functions">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.get_functions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.get_docstrings">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.get_docstrings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_docstrings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+
+
+<div class="viewcode-block" id="ProviderManager.get_some_docstrings">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.get_some_docstrings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_some_docstrings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;-------------------------&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Get some doc strings&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.functions&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;agent function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">filtered</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">method</span></div>
+
+
+<div class="viewcode-block" id="HookManager">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HookManager</span><span class="p">:</span>
+    <span class="n">_instance</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">_hook_manager</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_hook_manager</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">nanoid</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="HookManager.register_hook">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.register_hook">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">implementation</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">docstring</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span> <span class="n">implementation</span><span class="p">,</span> <span class="s1">&#39;docstring&#39;</span><span class="p">:</span> <span class="n">docstring</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="HookManager.execute_hooks">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.execute_hooks">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">hook_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="n">implementation</span> <span class="o">=</span> <span class="n">hook_info</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">implementation</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="HookManager.get_docstring">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.get_docstring">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_docstring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hook &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">hook_info</span><span class="p">[</span><span class="s1">&#39;docstring&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hook_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="HookManager.get_hooks">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.get_hooks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="HookManager.get_docstrings">
+<a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.get_docstrings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_docstrings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute_hooks</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">method</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

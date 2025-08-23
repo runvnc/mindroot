@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.email.imap_handler &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.email.imap_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.email.imap_handler</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">imaplib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">email</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">chardet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IMAPHandler">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IMAPHandler</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imap_server</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;imap_server&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imap_port</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;imap_port&#39;</span><span class="p">,</span> <span class="mi">993</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;batch_size&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_max_messages</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_messages&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IMAPHandler.connect">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.connect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">imaplib</span><span class="o">.</span><span class="n">IMAP4</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Establish IMAP connection&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">imaplib</span><span class="o">.</span><span class="n">IMAP4_SSL</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imap_server</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">imap_port</span><span class="p">)</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">server</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IMAP Connection error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span></div>
+
+
+<div class="viewcode-block" id="IMAPHandler.build_search_criteria">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.build_search_criteria">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_search_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">last_uid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build IMAP search criteria string&quot;&quot;&quot;</span>
+        <span class="n">search_terms</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Add UID range if we&#39;re paginating</span>
+        <span class="k">if</span> <span class="n">last_uid</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;UID 1:</span><span class="si">{</span><span class="n">last_uid</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">criteria</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;unread_only&#39;</span><span class="p">):</span>
+                <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;UNSEEN&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;since_date&#39;</span><span class="p">):</span>
+                <span class="n">date_str</span> <span class="o">=</span> <span class="n">criteria</span><span class="p">[</span><span class="s1">&#39;since_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y&quot;</span><span class="p">)</span>
+                <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SINCE &quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from&#39;</span><span class="p">):</span>
+                <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;FROM &quot;</span><span class="si">{</span><span class="n">criteria</span><span class="p">[</span><span class="s2">&quot;from&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">):</span>
+                <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SUBJECT &quot;</span><span class="si">{</span><span class="n">criteria</span><span class="p">[</span><span class="s2">&quot;subject&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Default to messages from the last 30 days</span>
+            <span class="n">thirty_days_ago</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y&quot;</span><span class="p">)</span>
+            <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SINCE &quot;</span><span class="si">{</span><span class="n">thirty_days_ago</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">search_terms</span><span class="p">)</span> <span class="k">if</span> <span class="n">search_terms</span> <span class="k">else</span> <span class="s1">&#39;ALL&#39;</span></div>
+
+
+<div class="viewcode-block" id="IMAPHandler.decode_text">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.decode_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_bytes</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Safely decode text bytes to string, trying multiple encodings&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text_bytes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+            
+        <span class="c1"># Try UTF-8 first</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Try to detect encoding</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">detected</span> <span class="o">=</span> <span class="n">chardet</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">text_bytes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">detected</span> <span class="ow">and</span> <span class="n">detected</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="n">text_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">detected</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Fallback encodings</span>
+        <span class="k">for</span> <span class="n">encoding</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;latin1&#39;</span><span class="p">,</span> <span class="s1">&#39;iso-8859-1&#39;</span><span class="p">,</span> <span class="s1">&#39;cp1252&#39;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">text_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># Last resort: decode with replacement</span>
+        <span class="k">return</span> <span class="n">text_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IMAPHandler.get_email_body">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.get_email_body">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_email_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email_message</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract email body with better encoding handling&quot;&quot;&quot;</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">email_message</span><span class="o">.</span><span class="n">is_multipart</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">email_message</span><span class="o">.</span><span class="n">walk</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">get_content_type</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">:</span>
+                    <span class="n">payload</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(</span><span class="n">decode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
+                        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_text</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+                        <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">email_message</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(</span><span class="n">decode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_text</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">body</span></div>
+
+
+<div class="viewcode-block" id="IMAPHandler.check_emails">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.check_emails">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_emails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INBOX&quot;</span><span class="p">,</span>
+                          <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">max_messages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">start_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check for emails in specified folder with pagination using UIDs&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_batch_size</span>
+            <span class="n">max_messages</span> <span class="o">=</span> <span class="n">max_messages</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_max_messages</span>
+            
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+            
+            <span class="c1"># Build search criteria</span>
+            <span class="n">search_criteria</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_search_criteria</span><span class="p">(</span><span class="n">criteria</span><span class="p">,</span> <span class="n">start_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using search criteria: </span><span class="si">{</span><span class="n">search_criteria</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Use UID SEARCH instead of regular SEARCH</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">uid</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">search_criteria</span><span class="p">)</span>
+            <span class="n">message_uids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            
+            <span class="c1"># Sort UIDs in descending order (newest first)</span>
+            <span class="n">message_uids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">message_uids</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">total_messages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">message_uids</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">total_messages</span><span class="si">}</span><span class="s2"> total messages&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Take the next batch of UIDs</span>
+            <span class="n">batch_uids</span> <span class="o">=</span> <span class="n">message_uids</span><span class="p">[:</span><span class="n">batch_size</span><span class="p">]</span>
+            
+            <span class="n">email_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">batch_uids</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Use UID FETCH instead of regular FETCH</span>
+                    <span class="n">_</span><span class="p">,</span> <span class="n">msg_data</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">uid</span><span class="p">(</span><span class="s1">&#39;fetch&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">uid</span><span class="p">),</span> <span class="s1">&#39;(RFC822)&#39;</span><span class="p">)</span>
+                    <span class="n">email_body</span> <span class="o">=</span> <span class="n">msg_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">email_message</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">message_from_bytes</span><span class="p">(</span><span class="n">email_body</span><span class="p">)</span>
+
+                    <span class="c1"># Extract body with safe decoding</span>
+                    <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_email_body</span><span class="p">(</span><span class="n">email_message</span><span class="p">)</span>
+
+                    <span class="n">email_data</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uid</span><span class="p">),</span>  <span class="c1"># Use UID as the message ID</span>
+                        <span class="s2">&quot;message_id&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;Message-ID&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;in_reply_to&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;In-Reply-To&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;to&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;to&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">email_message</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span>
+                        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">body</span>
+                    <span class="p">}</span>
+
+                    <span class="n">email_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">email_data</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing message UID </span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="n">server</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+
+            <span class="c1"># Determine if there are more messages and next starting point</span>
+            <span class="n">has_more</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">message_uids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">batch_size</span>
+            <span class="n">next_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_uids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">has_more</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">email_list</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;pagination&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;total_messages&quot;</span><span class="p">:</span> <span class="n">total_messages</span><span class="p">,</span>
+                    <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
+                    <span class="s2">&quot;next_id&quot;</span><span class="p">:</span> <span class="n">next_id</span><span class="p">,</span>
+                    <span class="s2">&quot;has_more&quot;</span><span class="p">:</span> <span class="n">has_more</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error checking emails: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="s2">&quot;pagination&quot;</span><span class="p">:</span> <span class="kc">None</span>
+            <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="IMAPHandler.mark_as_processed">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.mark_as_processed">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mark_as_processed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                              <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INBOX&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark messages as processed/read using UIDs&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+
+            <span class="n">processed</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">failed</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">msg_id</span> <span class="ow">in</span> <span class="n">message_ids</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Use UID STORE instead of regular STORE</span>
+                    <span class="n">server</span><span class="o">.</span><span class="n">uid</span><span class="p">(</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">msg_id</span><span class="p">,</span> <span class="s1">&#39;+FLAGS&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">Seen&#39;</span><span class="p">)</span>
+                    <span class="n">processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error marking message UID </span><span class="si">{</span><span class="n">msg_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_id</span><span class="p">)</span>
+
+            <span class="n">server</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s2">&quot;processed&quot;</span><span class="p">:</span> <span class="n">processed</span><span class="p">,</span>
+                <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="n">failed</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;Some messages failed to mark&quot;</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error marking messages: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;processed&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="n">message_ids</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

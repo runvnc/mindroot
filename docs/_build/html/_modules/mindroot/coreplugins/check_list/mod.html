@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.check_list.mod &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.check_list.mod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.check_list.mod</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">checklist helper for an LLM‑agent system</span>
+<span class="sd">—————————————————————————————————————————————————————————————————————————————</span>
+<span class="sd">Purpose</span>
+<span class="sd">-------</span>
+<span class="sd">• Parse a Markdown &quot;##\tChecklist&quot; section where each subtask is</span>
+<span class="sd">  written as a task‑list line:</span>
+
+<span class="sd">      - [ ] label of subtask</span>
+<span class="sd">          arbitrary markdown body… (until next task or heading)</span>
+
+<span class="sd">• Store parsed tasks + cursor in `context.data[&#39;checklist&#39;]`.</span>
+
+<span class="sd">• Runtime helpers:</span>
+<span class="sd">    load_checklist(md, ctx)   → parse markdown + reset state</span>
+<span class="sd">    complete_subtask(subtask_id, context)  → mark subtask done, advance cursor</span>
+<span class="sd">    goto_subtask(subtask_id, context)  → move to a specific subtask</span>
+<span class="sd">    clear_subtask(subtask_id, context)  → mark a subtask as incomplete</span>
+<span class="sd">    get_checklist_status(context)  → show the full checklist status</span>
+
+<span class="sd">`complete_subtask` and other commands live at module level so the agent can call them</span>
+<span class="sd">as tools. No third‑party deps—only Python&#39;s `re` module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="c1"># ---------- parsing ------------------------------------------------------</span>
+
+<span class="n">TASK_RE</span>   <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^-\s*\[(?P&lt;done&gt;[ xX])\]\s*(?P&lt;label&gt;.*?)\s*$&#39;</span><span class="p">)</span>
+<span class="n">HEADER_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^#{1,6}\s&#39;</span><span class="p">)</span>           <span class="c1"># any Markdown heading</span>
+<span class="n">CHECKLIST_HEADER_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^#{1,6}\s+Checklist\b&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>  <span class="c1"># Checklist heading</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract tasks as a list of dicts: {label, body, done}.&quot;&quot;&quot;</span>
+    <span class="n">lines</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(),</span> <span class="p">[],</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">TASK_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>                            <span class="c1"># not a task‑list line</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+
+        <span class="n">done</span>  <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;✓&quot;</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># collect everything until next task or heading</span>
+        <span class="n">body_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">TASK_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">or</span> <span class="n">HEADER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="n">body_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+            <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body_lines</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">done</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">tasks</span>
+
+
+<div class="viewcode-block" id="extract_checklist_section">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.extract_checklist_section">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_checklist_section</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the checklist section from larger text.</span>
+<span class="sd">    </span>
+<span class="sd">    Looks for a heading like &#39;# Checklist&#39;, &#39;## Checklist&#39;, etc., and extracts</span>
+<span class="sd">    all content from that heading until the next heading of the same or lower level,</span>
+<span class="sd">    or the end of the text.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns the extracted section, or the original text if no checklist section is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">checklist_level</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1"># Find the checklist heading</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">CHECKLIST_HEADER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">start_idx</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="c1"># Count the number of # to determine heading level</span>
+            <span class="n">checklist_level</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">))</span>
+            <span class="k">break</span>
+    
+    <span class="k">if</span> <span class="n">start_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">md</span>  <span class="c1"># No checklist section found, return original text</span>
+    
+    <span class="c1"># Find the end of the section (next heading of same or lower level)</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">HEADER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">checklist_level</span><span class="p">:</span>
+            <span class="n">end_idx</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+    
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">])</span></div>
+
+
+
+<span class="c1"># ---------- state helpers ------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_state</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the mutable checklist state in ctx.data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;checklist&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;tasks&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;cursor&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+<div class="viewcode-block" id="load_checklist">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.load_checklist">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_checklist</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse markdown and reset cursor to first unchecked subtask.&quot;&quot;&quot;</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+    <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">_parse</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+    <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]),</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]),</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_checklist_from_instructions">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.load_checklist_from_instructions">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_checklist_from_instructions</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract checklist section from instructions and load it.</span>
+<span class="sd">    </span>
+<span class="sd">    Looks for a section starting with &#39;# Checklist&#39; or similar heading.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;load_checklist_from_instructions&quot;: { &quot;md&quot;: &quot;Full instructions with embedded checklist&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">checklist_section</span> <span class="o">=</span> <span class="n">extract_checklist_section</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+    <span class="n">load_checklist</span><span class="p">(</span><span class="n">checklist_section</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Loaded checklist from instructions.</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<span class="c1"># ---------- helper functions ---------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_subtask_id</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a subtask_id to an index (0-based).</span>
+<span class="sd">    </span>
+<span class="sd">    subtask_id can be:</span>
+<span class="sd">    - A number (1-based index, converted to 0-based)</span>
+<span class="sd">    - A string matching a subtask label</span>
+<span class="sd">    - None/default (-1) to use the current cursor position</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    
+    <span class="c1"># Default to current cursor position</span>
+    <span class="k">if</span> <span class="n">subtask_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">subtask_id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span>
+    
+    <span class="c1"># If it&#39;s a number, convert from 1-based to 0-based</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">subtask_id</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># It&#39;s a string, try to find a matching label</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">subtask_id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">i</span>
+        <span class="c1"># No match found</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="n">idx</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format the full checklist status as a markdown string.&quot;&quot;&quot;</span>
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;_No checklist found. Make sure to include a checklist in your instructions._&quot;</span>
+    
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;### Checklist Status</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+        <span class="c1"># Determine status indicator</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;➡️ &quot;</span> <span class="c1"># Current task</span>
+        <span class="k">elif</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;✅ &quot;</span> <span class="c1"># Completed</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;❌ &quot;</span> <span class="c1"># Not completed</span>
+        
+        <span class="c1"># Add task line</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">**Subtask**: </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="c1"># ---------- module‑level tool commands ----------------------------------</span>
+
+<div class="viewcode-block" id="complete_subtask">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.complete_subtask">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete_subtask</span><span class="p">(</span><span class="n">subtask_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mark a subtask complete and return a Markdown status message.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - subtask_id: Optional. The subtask to complete, specified by:</span>
+<span class="sd">                 - The exact subtask label text</span>
+<span class="sd">                 - Omit to complete the current subtask</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;complete_subtask&quot;: {} }  # Complete current subtask</span>
+<span class="sd">    { &quot;complete_subtask&quot;: { &quot;subtask_id&quot;: &quot;Review documents&quot; } }  # Complete by label</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;_Context is required._&quot;</span>
+        
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading checklist from instructions...&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Agent is&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">)</span>
+            <span class="n">instructions</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s2">&quot;instructions&quot;</span><span class="p">]</span>
+            <span class="k">await</span> <span class="n">load_checklist_from_instructions</span><span class="p">(</span><span class="n">instructions</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading checklist: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;_No checklist found. Make sure to include a checklist in your instructions._&quot;</span>
+    
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">_resolve_subtask_id</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;_Invalid subtask identifier._&quot;</span>
+
+    <span class="c1"># mark as done</span>
+    <span class="n">done_task</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">done_task</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># advance cursor to next open subtask</span>
+    <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">][</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]),</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># build markdown response</span>
+    <span class="n">completed</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Completed Subtask </span><span class="si">{</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">: - [x] </span><span class="si">{</span><span class="n">done_task</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">completed</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">All subtasks complete ✅</span><span class="se">\n\n</span><span class="si">{</span><span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">next_task</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">][</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;cursor&#39;</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">completed</span><span class="si">}</span>
+
+<span class="s2">            Next subtask (Subtask </span><span class="si">{</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;cursor&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">)</span>
+<span class="s2">            - [ ] </span><span class="si">{</span><span class="n">next_task</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">next_task</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]</span><span class="si">}</span>
+
+<span class="s2">            </span><span class="si">{</span><span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">            &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="goto_subtask">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.goto_subtask">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">goto_subtask</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Move to a specific subtask without changing its completion status.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - subtask_id: Required. The subtask to navigate to, specified by:</span>
+<span class="sd">                 - The exact subtask label text</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;goto_subtask&quot;: { &quot;subtask_id&quot;: &quot;Data analysis&quot; } }  # Go to by label</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;_Context is required._&quot;</span>
+        
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;_No checklist found. Make sure to include a checklist in your instructions._&quot;</span>
+    
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">_resolve_subtask_id</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;_Invalid subtask identifier._&quot;</span>
+    
+    <span class="c1"># Update cursor position</span>
+    <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+    
+    <span class="c1"># Get the current task</span>
+    <span class="n">current_task</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+    
+    <span class="c1"># Build response</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;✅&quot;</span> <span class="k">if</span> <span class="n">current_task</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;❌&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Moved to Subtask </span><span class="si">{</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">current_task</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">current_task</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="clear_subtask">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.clear_subtask">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">clear_subtask</span><span class="p">(</span><span class="n">subtask_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mark a subtask as incomplete (not done).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    - subtask_id: Optional. The subtask to clear, specified by:</span>
+<span class="sd">                 - The exact subtask label text</span>
+<span class="sd">                 - Omit to clear the current subtask</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;clear_subtask&quot;: {} }  # Clear current subtask</span>
+<span class="sd">    { &quot;clear_subtask&quot;: { &quot;subtask_id&quot;: &quot;Review documents&quot; } }  # Clear by label</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;_Context is required._&quot;</span>
+        
+    <span class="n">st</span> <span class="o">=</span> <span class="n">_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;_No checklist found. Make sure to include a checklist in your instructions._&quot;</span>
+    
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">_resolve_subtask_id</span><span class="p">(</span><span class="n">subtask_id</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;_Invalid subtask identifier._&quot;</span>
+    
+    <span class="c1"># Mark as not done</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;tasks&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">was_done</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]</span>
+    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1"># If we cleared the current or earlier task, update cursor</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;=</span> <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]:</span>
+        <span class="n">st</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+    
+    <span class="c1"># Build response</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;Cleared&quot;</span> <span class="k">if</span> <span class="n">was_done</span> <span class="k">else</span> <span class="s2">&quot;Already clear&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> Subtask </span><span class="si">{</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">: - [ ] </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Current subtask is now Subtask </span><span class="si">{</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;cursor&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_checklist_status">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.get_checklist_status">[docs]</a>
+<span class="nd">@command</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show the full status of the checklist.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    { &quot;get_checklist_status&quot;: {} }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;_Context is required._&quot;</span>
+    
+    <span class="k">return</span> <span class="n">_format_checklist_status</span><span class="p">(</span><span class="n">context</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

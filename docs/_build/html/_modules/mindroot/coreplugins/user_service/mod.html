@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mindroot.coreplugins.user_service.mod &mdash; MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MindRoot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MindRoot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mindroot.coreplugins.user_service.mod</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mindroot.coreplugins.user_service.mod</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserAuth</span><span class="p">,</span> <span class="n">UserCreate</span><span class="p">,</span> <span class="n">UserBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.email_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">send_verification_email</span><span class="p">,</span> <span class="n">setup_verification</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.role_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">has_role</span><span class="p">,</span> <span class="n">add_role</span><span class="p">,</span> <span class="n">remove_role</span><span class="p">,</span> <span class="n">get_user_roles</span>
+<span class="c1">#from .admin_init import initialize_admin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bcrypt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span> 
+
+<span class="n">USER_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;data/users&quot;</span>
+
+
+<div class="viewcode-block" id="create_user">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.mod.create_user">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">user_data</span><span class="p">:</span> <span class="n">UserCreate</span><span class="p">,</span> <span class="n">roles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_verification</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UserBase</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new user directory and auth file&quot;&quot;&quot;</span>
+    <span class="n">user_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">user_data</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    
+    <span class="c1"># Ensure user data root exists</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="c1"># Check if user exists</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">user_dir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Username already exists&quot;</span><span class="p">)</span>
+        
+    <span class="c1"># Create user directory</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">user_dir</span><span class="p">)</span>
+    
+    <span class="c1"># Handle verification</span>
+    <span class="n">verification_token</span><span class="p">,</span> <span class="n">verification_expires</span><span class="p">,</span> <span class="n">email_verified</span> <span class="o">=</span> <span class="n">setup_verification</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">verification_token</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">skip_verification</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">send_verification_email</span><span class="p">(</span><span class="n">user_data</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">verification_token</span><span class="p">)</span>
+    
+    <span class="c1"># Setup roles (always include &#39;user&#39; role)</span>
+    <span class="k">if</span> <span class="n">roles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">roles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Create auth data</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="n">auth_data</span> <span class="o">=</span> <span class="n">UserAuth</span><span class="p">(</span>
+        <span class="n">username</span><span class="o">=</span><span class="n">user_data</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+        <span class="n">email</span><span class="o">=</span><span class="n">user_data</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+        <span class="n">password_hash</span><span class="o">=</span><span class="n">bcrypt</span><span class="o">.</span><span class="n">hashpw</span><span class="p">(</span><span class="n">user_data</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">bcrypt</span><span class="o">.</span><span class="n">gensalt</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
+        <span class="n">created_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+        <span class="n">last_login</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">email_verified</span><span class="o">=</span><span class="n">email_verified</span><span class="p">,</span>
+        <span class="n">verification_token</span><span class="o">=</span><span class="n">verification_token</span><span class="p">,</span>
+        <span class="n">verification_expires</span><span class="o">=</span><span class="n">verification_expires</span><span class="p">,</span>
+        <span class="n">roles</span><span class="o">=</span><span class="n">roles</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Save auth data</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_dir</span><span class="p">,</span> <span class="s2">&quot;auth.json&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">auth_data</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+        
+    <span class="c1"># Initialize empty settings and workspace</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_dir</span><span class="p">,</span> <span class="s2">&quot;settings.json&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">({},</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_dir</span><span class="p">,</span> <span class="s2">&quot;workspace.json&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">({},</span> <span class="n">f</span><span class="p">)</span>
+    
+    <span class="c1"># Return safe user data</span>
+    <span class="k">return</span> <span class="n">UserBase</span><span class="p">(</span><span class="o">**</span><span class="n">auth_data</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="verify_user">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.mod.verify_user">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_user</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify user credentials and update last login&quot;&quot;&quot;</span>
+    <span class="n">auth_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;auth.json&quot;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">auth_file</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;user not found&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="n">auth_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;working dir&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+        <span class="k">return</span> <span class="kc">False</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">UserAuth</span><span class="p">(</span><span class="o">**</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">bcrypt</span><span class="o">.</span><span class="n">checkpw</span><span class="p">(</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">auth_data</span><span class="o">.</span><span class="n">password_hash</span><span class="o">.</span><span class="n">encode</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;check pw passed&quot;</span><span class="p">)</span>
+        <span class="c1"># Update last login</span>
+        <span class="n">auth_data</span><span class="o">.</span><span class="n">last_login</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">auth_data</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checkpw failed,&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;auth_data&quot;</span><span class="p">,</span> <span class="n">auth_data</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;password:&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="get_user_data">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.mod.get_user_data">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_data</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_email</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">UserBase</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get user data excluding sensitive info&quot;&quot;&quot;</span>
+    <span class="n">auth_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;auth.json&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">auth_file</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">auth_data</span> <span class="o">=</span> <span class="n">UserAuth</span><span class="p">(</span><span class="o">**</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_email</span><span class="p">:</span>
+        <span class="n">auth_data</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">return</span> <span class="n">UserBase</span><span class="p">(</span><span class="o">**</span><span class="n">auth_data</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="verify_email">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.mod.verify_email">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_email</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify a user&#39;s email using their verification token&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;REQUIRE_EMAIL_VERIFY&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+        
+    <span class="c1"># Search through user directories for matching token</span>
+    <span class="k">for</span> <span class="n">username</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">):</span>
+        <span class="n">auth_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;auth.json&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">auth_file</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">auth_data</span> <span class="o">=</span> <span class="n">UserAuth</span><span class="p">(</span><span class="o">**</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">auth_data</span><span class="o">.</span><span class="n">verification_token</span> <span class="o">==</span> <span class="n">token</span> <span class="ow">and</span> 
+                <span class="n">auth_data</span><span class="o">.</span><span class="n">verification_expires</span> <span class="ow">and</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">auth_data</span><span class="o">.</span><span class="n">verification_expires</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()):</span>
+                
+                <span class="c1"># Update user as verified</span>
+                <span class="n">auth_data</span><span class="o">.</span><span class="n">email_verified</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">auth_data</span><span class="o">.</span><span class="n">verification_token</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">auth_data</span><span class="o">.</span><span class="n">verification_expires</span> <span class="o">=</span> <span class="kc">None</span>
+                
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">auth_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">auth_data</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+                
+                <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="list_users">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.user_service.html#mindroot.coreplugins.user_service.mod.list_users">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all usernames&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">USER_DATA_ROOT</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Livesay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
