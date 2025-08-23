@@ -1,0 +1,19 @@
+/* Additional dark mode customizations */
+
+[data-theme="dark"] {
+    --color-background-primary: #1a1a1a;
+    --color-background-secondary: #2d2d2d;
+    --color-background-hover: #343434;
+    --color-foreground-primary: #ffffff;
+    --color-foreground-secondary: #a0a0a0;
+}
+
+/* Make code blocks look better in dark mode */
+[data-theme="dark"] .highlight {
+    background-color: #2d2d2d;
+    border: 1px solid #404040;
+}
+
+[data-theme="dark"] .highlight pre {
+    color: #e6e6e6;
+}

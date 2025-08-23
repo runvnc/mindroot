@@ -34,11 +34,21 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+# Switch to Furo theme for built-in dark mode
+html_theme = 'furo'
 html_theme_options = {
-    'style_nav_header_background': '#343131',
+    'light_css_variables': {
+        'color-brand-primary': '#007acc',
+        'color-brand-content': '#007acc',
+    },
+    'dark_css_variables': {
+        'color-brand-primary': '#ff7b72',
+        'color-brand-content': '#ff7b72',
+    },
+    'sidebar_hide_name': True,
 }
 
 html_static_path = ['_static']
 
-
+# Add custom CSS for additional dark mode styling
+html_css_files = ['custom.css']
