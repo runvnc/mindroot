@@ -1,34 +1,52 @@
 Getting Started
 ===============
 
-Welcome to the project!
-
-If MindRoot is already installed and running, skip to LLM Plugin Installation.
-If using pre-configured MindRoot hosting, skip to LLM API Key.
+If MindRoot is already installed and running, skip to `LLM Plugin Installation`_.
+If using pre-configured MindRoot hosting, skip to `LLM API Key`_.
 
 .. todo:: Add getting started content here
 
 Installation
 ------------
 
-.. todo:: Add installation instructions
+Usually you need to create a python virtual environment:
 
+``python -m venv .venv``
+
+And activate:
+
+``source .venv/bin/activate``
+
+Then just install with pip:
+
+``pip install mindroot``
 
 Starting MindRoot
 -----------------
 
+The first time you can specify the admin user and password:
 
+``mindroot -u admin -pw password``
 
-
+The server defaults to `http://0.0.0.0:8010/ <http://0.0.0.0:8010/>`_ .
+You will need to log in.
 
 LLM Plugin Installation
 -----------------------
 
-
 - Go to the `/admin` page by clicking the Admin link at the top of the home page.
 
-- 
+- Go to the Install/Registry tab
 
+- Search for 'OpenRouter' and click Install next to the result that comes up.
+
+.. image:: installopenrouter.png
+
+- A dialog will show the log of the installation.
+
+- Restart: Server Settings | Server Control | Restart
+
+.. image:: restart.png
 
 LLM API Key
 -----------
@@ -44,16 +62,24 @@ First, make sure the OpenRouter Plugin is installed:
 
 - OpenRouter/ah_openrouter should show up
 
+.. image:: openrouter.png
+
 Now, enter your OpenRouter API key:
 
 - Go to Admin | Advanced | Environment Variables
 
-- Find the ah_openrouter section and enter your API key in the `OPENROUTER_API_KEY` field and Save.
+.. image:: envvar.png
+
+- Find the ah_openrouter section and the `OPENROUTER_KEY` field; click Edit.
+
+- Enter your key and press Save.
 
 Finally, restart MindRoot:
 
 - Go to Admin | Server Settings |  Server Control 
 - Click on Restart Server
+
+.. image:: restart.png
 
 Basic Usage
 -----------

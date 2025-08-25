@@ -248,9 +248,64 @@
         <article role="main" id="furo-main-content">
           <section id="getting-started">
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
-<p>Welcome to the project!</p>
+<p>If MindRoot is already installed and running, skip to <a class="reference internal" href="#llm-plugin-installation">LLM Plugin Installation</a>.
+If using pre-configured MindRoot hosting, skip to <a class="reference internal" href="#llm-api-key">LLM API Key</a>.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>Usually you need to create a python virtual environment:</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">.venv</span></code></p>
+<p>And activate:</p>
+<p><code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">.venv/bin/activate</span></code></p>
+<p>Then just install with pip:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mindroot</span></code></p>
+</section>
+<section id="starting-mindroot">
+<h2>Starting MindRoot<a class="headerlink" href="#starting-mindroot" title="Link to this heading">¶</a></h2>
+<p>The first time you can specify the admin user and password:</p>
+<p><code class="docutils literal notranslate"><span class="pre">mindroot</span> <span class="pre">-u</span> <span class="pre">admin</span> <span class="pre">-pw</span> <span class="pre">password</span></code></p>
+<p>The server defaults to <a class="reference external" href="http://0.0.0.0:8010/">http://0.0.0.0:8010/</a> .
+You will need to log in.</p>
+</section>
+<section id="llm-plugin-installation">
+<h2>LLM Plugin Installation<a class="headerlink" href="#llm-plugin-installation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Go to the <cite>/admin</cite> page by clicking the Admin link at the top of the home page.</p></li>
+<li><p>Go to the Install/Registry tab</p></li>
+<li><p>Search for ‘OpenRouter’ and click Install next to the result that comes up.</p></li>
+</ul>
+<img alt="_images/installopenrouter.png" src="_images/installopenrouter.png" />
+<ul class="simple">
+<li><p>A dialog will show the log of the installation.</p></li>
+<li><p>Restart: Server Settings | Server Control | Restart</p></li>
+</ul>
+<img alt="_images/restart.png" src="_images/restart.png" />
+</section>
+<section id="llm-api-key">
+<h2>LLM API Key<a class="headerlink" href="#llm-api-key" title="Link to this heading">¶</a></h2>
+<p>For this section you will need an API key from an LLM provider.
+We will assume OpenRouter for this example.</p>
+<p>First, make sure the OpenRouter Plugin is installed:</p>
+<ul class="simple">
+<li><p>Go to the /admin page (Admin link on home page)</p></li>
+<li><p>Expand the Advanced section and click on Plugins</p></li>
+<li><p>OpenRouter/ah_openrouter should show up</p></li>
+</ul>
+<img alt="_images/openrouter.png" src="_images/openrouter.png" />
+<p>Now, enter your OpenRouter API key:</p>
+<ul class="simple">
+<li><p>Go to Admin | Advanced | Environment Variables</p></li>
+</ul>
+<img alt="_images/envvar.png" src="_images/envvar.png" />
+<ul class="simple">
+<li><p>Find the ah_openrouter section and the <cite>OPENROUTER_KEY</cite> field; click Edit.</p></li>
+<li><p>Enter your key and press Save.</p></li>
+</ul>
+<p>Finally, restart MindRoot:</p>
+<ul class="simple">
+<li><p>Go to Admin | Server Settings |  Server Control</p></li>
+<li><p>Click on Restart Server</p></li>
+</ul>
+<img alt="_images/restart.png" src="_images/restart.png" />
 </section>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
@@ -306,6 +361,9 @@
             <ul>
 <li><a class="reference internal" href="#">Getting Started</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#starting-mindroot">Starting MindRoot</a></li>
+<li><a class="reference internal" href="#llm-plugin-installation">LLM Plugin Installation</a></li>
+<li><a class="reference internal" href="#llm-api-key">LLM API Key</a></li>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 </ul>
 </li>
