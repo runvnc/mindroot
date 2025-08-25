@@ -82,7 +82,35 @@ Finally, restart MindRoot:
 
 .. image:: restart.png
 
-Basic Usage
------------
+Chat with Assistant
+-------------------
 
-.. todo:: Add basic usage examples
+- On the home page, click the Assistant button.
+
+- A new tab will open with a chat UI.
+
+- Try requesting something from the assistant, for example:
+
+  "Create a mood tracker table showing daily activities with emoji ratings and star scores for each day of the work week."
+
+Install Plugins with Tools
+--------------------------
+
+(Note: if you are using MindRoot hosting, these tools are already installed).
+
+- Go to Admin | Install/Registry
+
+- Install the runvnc/ah_shell and runvnc/ah_files plugins:
+
+- Click on Plugins.
+
+- Enter e.g. "Files" in the Search input
+
+- Click Install
+
+- Repeat for Shell (execute commands)
+
+
+
+
+

@@ -54,7 +54,7 @@
         "source": "core"
       },
       "signup": {
-        "enabled": true,
+        "enabled": false,
         "source": "core"
       },
       "email": {

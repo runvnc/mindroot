@@ -1,8 +1,8 @@
 {
   "stream_chat": [
     ["ah_anthropic", "claude-sonnet-4-20250514"],
-    ["ah_openrouter","anthropic/claude-sonnet-4"],
+    ["ah_openrouter","deepseek/deepseek-chat-v3.1"],
     ["mr_gemini", "models/gemini-2.5-pro"],
-    ["ah_openai", "gpt-5"],
+    ["ah_openai", "gpt-5"]
   ]
 }
