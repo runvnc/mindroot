@@ -291,7 +291,7 @@ You will need to log in.</p>
 <h2>LLM API Key<a class="headerlink" href="#llm-api-key" title="Link to this heading">¶</a></h2>
 <p>For this section you will need an API key from an LLM provider.
 We will assume OpenRouter for this example.</p>
-<p>Now, enter your OpenRouter API key:</p>
+<p>Now, enter your <a class="reference external" href="https://openrouter.ai/settings/keys">OpenRouter API key</a>:</p>
 <ul class="simple">
 <li><p>Go to <cite>/admin</cite> (Admin link on home page) Advanced | Environment Variables</p></li>
 </ul>
@@ -307,8 +307,45 @@ We will assume OpenRouter for this example.</p>
 </ul>
 <img alt="_images/restart.png" src="_images/restart.png" />
 </section>
-<section id="basic-usage">
-<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
+<section id="chat-with-assistant">
+<h2>Chat with Assistant<a class="headerlink" href="#chat-with-assistant" title="Link to this heading">¶</a></h2>
+<ul>
+<li><p>On the home page, click the Assistant button.</p></li>
+<li><p>A new tab will open with a chat UI.</p></li>
+<li><p>Try requesting something from the assistant, for example:</p>
+<p>“Create a mood tracker table showing daily activities with emoji ratings and star scores for each day of the work week.”</p>
+</li>
+</ul>
+<img alt="_images/mood.png" src="_images/mood.png" />
+<p>(Note: shown is typical output from DeepSeek Chat 3.1)</p>
+</section>
+<section id="install-plugins-with-tools">
+<h2>Install Plugins with Tools<a class="headerlink" href="#install-plugins-with-tools" title="Link to this heading">¶</a></h2>
+<p>(Note: if you are using MindRoot hosting, these tools are already installed).</p>
+<ul class="simple">
+<li><p>Go to Admin | Install/Registry</p></li>
+<li><p>Install the runvnc/ah_shell and runvnc/ah_files plugins:</p></li>
+<li><p>Click on Plugins.</p></li>
+<li><p>Enter e.g. “Files” in the Search input</p></li>
+</ul>
+<img alt="_images/files.png" src="_images/files.png" />
+<ul class="simple">
+<li><p>Click Install</p></li>
+<li><p>Repeat for Shell (execute commands)</p></li>
+<li><p>Restart MindRoot:</p></li>
+<li><p>Go to Admin | Server Settings |  Server Control</p></li>
+<li><p>Click on Restart Server</p></li>
+</ul>
+<img alt="_images/restart.png" src="_images/restart.png" />
+</section>
+<section id="give-assistant-a-programming-task">
+<h2>Give Assistant a Programming Task<a class="headerlink" href="#give-assistant-a-programming-task" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>On the home page, click the Assistant button to open a new chat.</p></li>
+<li><p>“Create a simple but beautiful web page about the phases of the moon. Save to ./imgs/moon.html and provide a clickable link to /imgs/moon.html”</p></li>
+</ul>
+<img alt="_images/moon.png" src="_images/moon.png" />
+<p>(Note: shown is typical output from DeepSeek Chat 3.1)</p>
 </section>
 </section>
 
@@ -364,7 +401,9 @@ We will assume OpenRouter for this example.</p>
 <li><a class="reference internal" href="#starting-mindroot">Starting MindRoot</a></li>
 <li><a class="reference internal" href="#llm-plugin-installation">LLM Plugin Installation</a></li>
 <li><a class="reference internal" href="#llm-api-key">LLM API Key</a></li>
-<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#chat-with-assistant">Chat with Assistant</a></li>
+<li><a class="reference internal" href="#install-plugins-with-tools">Install Plugins with Tools</a></li>
+<li><a class="reference internal" href="#give-assistant-a-programming-task">Give Assistant a Programming Task</a></li>
 </ul>
 </li>
 </ul>

@@ -65,7 +65,7 @@ LLM API Key
 For this section you will need an API key from an LLM provider.
 We will assume OpenRouter for this example.
 
-Now, enter your OpenRouter API key:
+Now, enter your `OpenRouter API key <https://openrouter.ai/settings/keys>`_:
 
 - Go to `/admin` (Admin link on home page) Advanced | Environment Variables
 
@@ -93,6 +93,10 @@ Chat with Assistant
 
   "Create a mood tracker table showing daily activities with emoji ratings and star scores for each day of the work week."
 
+.. image:: mood.png
+
+(Note: shown is typical output from DeepSeek Chat 3.1)
+
 Install Plugins with Tools
 --------------------------
 
@@ -106,17 +110,29 @@ Install Plugins with Tools
 
 - Enter e.g. "Files" in the Search input
 
+.. image:: files.png
+
 - Click Install
 
 - Repeat for Shell (execute commands)
+
+- Restart MindRoot:
+
+- Go to Admin | Server Settings |  Server Control
+- Click on Restart Server
+
+.. image:: restart.png
 
 Give Assistant a Programming Task
 ---------------------------------
 
 - On the home page, click the Assistant button to open a new chat.
 
--
+- "Create a simple but beautiful web page about the phases of the moon. Save to ./imgs/moon.html and provide a clickable link to /imgs/moon.html"
 
+.. image:: moon.png
+
+(Note: shown is typical output from DeepSeek Chat 3.1)
 
 
 
