@@ -48,13 +48,8 @@ LLM Plugin Installation
 
 .. image:: restart.png
 
-LLM API Key
------------
 
-For this section you will need an API key from an LLM provider.
-We will assume OpenRouter for this example.
-
-First, make sure the OpenRouter Plugin is installed:
+If you want, you can make sure the OpenRouter Plugin is installed:
 
 - Go to the /admin page (Admin link on home page)
 
@@ -64,9 +59,15 @@ First, make sure the OpenRouter Plugin is installed:
 
 .. image:: openrouter.png
 
+LLM API Key
+-----------
+
+For this section you will need an API key from an LLM provider.
+We will assume OpenRouter for this example.
+
 Now, enter your OpenRouter API key:
 
-- Go to Admin | Advanced | Environment Variables
+- Go to `/admin` (Admin link on home page) Advanced | Environment Variables
 
 .. image:: envvar.png
 
