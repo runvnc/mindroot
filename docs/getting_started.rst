@@ -110,6 +110,13 @@ Install Plugins with Tools
 
 - Repeat for Shell (execute commands)
 
+Give Assistant a Programming Task
+---------------------------------
+
+- On the home page, click the Assistant button to open a new chat.
+
+-
+
 
 
 
