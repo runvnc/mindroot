@@ -470,7 +470,7 @@ class ModelPreferencesV2 extends BaseEl {
         <div class="section">
           <h3>
             <span class="material-icons">tune</span>
-            Model Preferences V2 (Ordered Fallback)
+            Model Preferences
           </h3>
           
           <div class="service-selector">

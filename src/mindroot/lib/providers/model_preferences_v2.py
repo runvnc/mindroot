@@ -13,7 +13,7 @@ class ModelPreferencesV2:
         self.preferences_file = self.data_dir / 'preferred_models_v2.json'
         
         # Locate template file relative to this script's location
-        script_dir = Path(__file__).parent.parent.parent / 'coreplugins' / 'admin'
+        script_dir = Path(__file__)
         self.template_file = script_dir / 'default_preferred_models.json'
         
     def ensure_preferences_exist(self) -> None:
@@ -29,8 +29,10 @@ class ModelPreferencesV2:
                 # Create minimal default if template doesn't exist
                 default_prefs = {
                     "stream_chat": [
-                        ["ah_anthropic", "claude-3-5-sonnet-20240620"],
-                        ["ah_openai", "gpt-4o"]
+                        ["ah_anthropic", "claude-sonnet-4-0"]
+                        ['ah_openrouter', 'deepseek/deepseek-chat-v3.1'],
+                        ["mr_gemini", "models/gemini-2.5-pro"], 
+                        ["ah_openai", "gpt-5"]
                     ],
                     "text_to_image": [
                         ["ah_flux", "flux-dev"]
