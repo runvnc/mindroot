@@ -9,28 +9,31 @@ class ModelPreferencesV2:
     
     def __init__(self):
         # Use current working directory for data (supports multiple installations)
+        print("Hello from Model preferences V2!")
         self.data_dir = Path.cwd() / 'data'
         self.preferences_file = self.data_dir / 'preferred_models_v2.json'
         
         # Locate template file relative to this script's location
         script_dir = Path(__file__)
-        self.template_file = script_dir / 'default_preferred_models.json'
+        self.template_file = script_dir.parent / 'default_preferred_models.json'
         
     def ensure_preferences_exist(self) -> None:
         """Copy template preferences file to data directory if it doesn't exist."""
         # Ensure data directory exists
         self.data_dir.mkdir(exist_ok=True)
-        
+        print("Ensuring preferences v2 file exists...")
         # If preferences file doesn't exist, copy from template
         if not self.preferences_file.exists():
+            print("Preferences v2 file not found. Creating from template.")
             if self.template_file.exists():
+                print("Copying template preferences v2 file to location data/preferred_models_v2.json")
                 shutil.copy2(self.template_file, self.preferences_file)
             else:
                 # Create minimal default if template doesn't exist
                 default_prefs = {
                     "stream_chat": [
-                        ["ah_anthropic", "claude-sonnet-4-0"]
-                        ['ah_openrouter', 'deepseek/deepseek-chat-v3.1'],
+                        ["ah_anthropic", "claude-sonnet-4-0"],
+                        ["ah_openrouter", "deepseek/deepseek-chat-v3.1"],
                         ["mr_gemini", "models/gemini-2.5-pro"], 
                         ["ah_openai", "gpt-5"]
                     ],
@@ -38,10 +41,13 @@ class ModelPreferencesV2:
                         ["ah_flux", "flux-dev"]
                     ]
                 }
+                print("Template preferences v2 file not found. Creating minimal default preferences.")
                 self.save_preferences(default_prefs)
+                print("File saved to data/preferred_models_v2.json")
     
     def get_preferences(self) -> Dict[str, List[List[str]]]:
         """Get preferences in new format: {service: [[provider, model], ...]}"""
+        print("Getting preferences v2...")
         self.ensure_preferences_exist()
         
         try:

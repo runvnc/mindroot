@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import List, Dict
 import json
 import os
+import sys
+import traceback
 from lib.providers.commands import command, command_manager
 from lib.providers import services
 from lib.providers.commands import command_manager
@@ -178,7 +180,11 @@ async def get_settings_v2():
         prefs_manager = ModelPreferencesV2()
         return prefs_manager.get_preferences()
     except Exception as e:
-        print(f"Error getting v2 preferences: {e}")
+        trace = traceback.format_exc()
+        print(f"Error getting v2 preferences: {e}\n\n{trace}")
+        print(e)
+        print(trace)
+        sys.exit(1)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post('/settings_v2')
