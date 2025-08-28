@@ -32,8 +32,8 @@ class ModelPreferencesV2:
                 # Create minimal default if template doesn't exist
                 default_prefs = {
                     "stream_chat": [
-                        ["ah_anthropic", "claude-sonnet-4-0"],
                         ["ah_openrouter", "deepseek/deepseek-chat-v3.1"],
+                        ["ah_anthropic", "claude-sonnet-4-0"],
                         ["mr_gemini", "models/gemini-2.5-pro"], 
                         ["ah_openai", "gpt-5"]
                     ],
