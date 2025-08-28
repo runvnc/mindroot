@@ -1,0 +1,811 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+        <title>mindroot package - MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=f4b9d74b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #007acc;
+  --color-brand-content: #007acc;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">MindRoot 9.10.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../starting_mindroot.html">Starting MindRoot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_plugin_installation.html">LLM Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_api_key.html">LLM API Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chat_with_assistant.html">Chat with Assistant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_plugins_with_tools.html">Install Plugins with Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programming_task.html">Give Assistant a Programming Task</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/source/mindroot.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="mindroot-package">
+<h1>mindroot package<a class="headerlink" href="#mindroot-package" title="Link to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mindroot.lib.html">mindroot.lib package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.auth.html">mindroot.lib.auth package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.auth.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.auth.html#module-mindroot.lib.auth.api_key">mindroot.lib.auth.api_key module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.auth.html#module-mindroot.lib.auth.auth">mindroot.lib.auth.auth module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.auth.html#module-mindroot.lib.auth">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.json_str_block.html">mindroot.lib.json_str_block package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.json_str_block.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.json_str_block.html#module-mindroot.lib.json_str_block.json_str_block">mindroot.lib.json_str_block.json_str_block module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.json_str_block.html#module-mindroot.lib.json_str_block">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.plugins.html">mindroot.lib.plugins package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.installation">mindroot.lib.plugins.installation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.l8n_static_handler">mindroot.lib.plugins.l8n_static_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.loader">mindroot.lib.plugins.loader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.loader_with_l8n">mindroot.lib.plugins.loader_with_l8n module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.manifest">mindroot.lib.plugins.manifest module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.mapping">mindroot.lib.plugins.mapping module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins.paths">mindroot.lib.plugins.paths module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.plugins.html#module-mindroot.lib.plugins">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.providers.html">mindroot.lib.providers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers.commands">mindroot.lib.providers.commands module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers.hooks">mindroot.lib.providers.hooks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers.missing">mindroot.lib.providers.missing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers.model_preferences_v2">mindroot.lib.providers.model_preferences_v2 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers.services">mindroot.lib.providers.services module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.providers.html#module-mindroot.lib.providers">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.buchatlog">mindroot.lib.buchatlog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog"><code class="docutils literal notranslate"><span class="pre">ChatLog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.add_message"><code class="docutils literal notranslate"><span class="pre">ChatLog.add_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.delete_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.delete_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.get_history"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.get_recent"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_recent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.load_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.load_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog.ChatLog.save_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.save_log()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.buchatlog2">mindroot.lib.buchatlog2 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog"><code class="docutils literal notranslate"><span class="pre">ChatLog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.add_message"><code class="docutils literal notranslate"><span class="pre">ChatLog.add_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.count_tokens"><code class="docutils literal notranslate"><span class="pre">ChatLog.count_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.delete_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.delete_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.get_history"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.get_recent"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_recent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.load_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.load_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.ChatLog.save_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.save_log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.count_tokens_for_log_id"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.extract_delegate_task_log_ids"><code class="docutils literal notranslate"><span class="pre">extract_delegate_task_log_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.find_chatlog_file"><code class="docutils literal notranslate"><span class="pre">find_chatlog_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.get_cache_path"><code class="docutils literal notranslate"><span class="pre">get_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.get_cached_token_counts"><code class="docutils literal notranslate"><span class="pre">get_cached_token_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.buchatlog2.save_token_counts_to_cache"><code class="docutils literal notranslate"><span class="pre">save_token_counts_to_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.butemplates">mindroot.lib.butemplates module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.collect_content"><code class="docutils literal notranslate"><span class="pre">collect_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.find_parent_template"><code class="docutils literal notranslate"><span class="pre">find_parent_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.load_plugin_templates"><code class="docutils literal notranslate"><span class="pre">load_plugin_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.render_combined_template"><code class="docutils literal notranslate"><span class="pre">render_combined_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.butemplates.setup_template_environment"><code class="docutils literal notranslate"><span class="pre">setup_template_environment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.chatcontext">mindroot.lib.chatcontext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.BaseCommandSet"><code class="docutils literal notranslate"><span class="pre">BaseCommandSet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.BaseService"><code class="docutils literal notranslate"><span class="pre">BaseService</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext"><code class="docutils literal notranslate"><span class="pre">ChatContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.cmds"><code class="docutils literal notranslate"><span class="pre">ChatContext.cmds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.delete"><code class="docutils literal notranslate"><span class="pre">ChatContext.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.delete_session_by_id"><code class="docutils literal notranslate"><span class="pre">ChatContext.delete_session_by_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.load_context"><code class="docutils literal notranslate"><span class="pre">ChatContext.load_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.proto"><code class="docutils literal notranslate"><span class="pre">ChatContext.proto()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.save_context"><code class="docutils literal notranslate"><span class="pre">ChatContext.save_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.ChatContext.save_context_data"><code class="docutils literal notranslate"><span class="pre">ChatContext.save_context_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatcontext.get_context"><code class="docutils literal notranslate"><span class="pre">get_context()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.chatlog">mindroot.lib.chatlog module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog"><code class="docutils literal notranslate"><span class="pre">ChatLog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.add_message"><code class="docutils literal notranslate"><span class="pre">ChatLog.add_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.add_message_async"><code class="docutils literal notranslate"><span class="pre">ChatLog.add_message_async()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.count_tokens"><code class="docutils literal notranslate"><span class="pre">ChatLog.count_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.get_history"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.get_recent"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_recent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.load_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.load_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.ChatLog.save_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.save_log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.count_tokens_for_log_id"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.extract_delegate_task_log_ids"><code class="docutils literal notranslate"><span class="pre">extract_delegate_task_log_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.find_chatlog_file"><code class="docutils literal notranslate"><span class="pre">find_chatlog_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.find_child_logs_by_parent_id"><code class="docutils literal notranslate"><span class="pre">find_child_logs_by_parent_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.get_cache_path"><code class="docutils literal notranslate"><span class="pre">get_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.get_cached_token_counts"><code class="docutils literal notranslate"><span class="pre">get_cached_token_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog.save_token_counts_to_cache"><code class="docutils literal notranslate"><span class="pre">save_token_counts_to_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.chatlog_optimized">mindroot.lib.chatlog_optimized module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog"><code class="docutils literal notranslate"><span class="pre">ChatLog</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.add_message"><code class="docutils literal notranslate"><span class="pre">ChatLog.add_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.count_tokens"><code class="docutils literal notranslate"><span class="pre">ChatLog.count_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.get_history"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.get_recent"><code class="docutils literal notranslate"><span class="pre">ChatLog.get_recent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.load_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.load_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.ChatLog.save_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.save_log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.count_tokens_for_log_id"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.count_tokens_for_log_id_optimized"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id_optimized()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.extract_delegate_task_log_ids"><code class="docutils literal notranslate"><span class="pre">extract_delegate_task_log_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.find_chatlog_file"><code class="docutils literal notranslate"><span class="pre">find_chatlog_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.find_child_logs_by_parent_id"><code class="docutils literal notranslate"><span class="pre">find_child_logs_by_parent_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.get_cache_path"><code class="docutils literal notranslate"><span class="pre">get_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.get_cached_token_counts"><code class="docutils literal notranslate"><span class="pre">get_cached_token_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.chatlog_optimized.save_token_counts_to_cache"><code class="docutils literal notranslate"><span class="pre">save_token_counts_to_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.json_escape">mindroot.lib.json_escape module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.json_escape.escape_for_json"><code class="docutils literal notranslate"><span class="pre">escape_for_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#mindroot-lib-model-selector-module">mindroot.lib.model_selector module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.parent_templates">mindroot.lib.parent_templates module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.parent_templates.FirstMatchLoader"><code class="docutils literal notranslate"><span class="pre">FirstMatchLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.parent_templates.FirstMatchLoader.get_source"><code class="docutils literal notranslate"><span class="pre">FirstMatchLoader.get_source()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.parent_templates.get_parent_templates_env"><code class="docutils literal notranslate"><span class="pre">get_parent_templates_env()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.plugins">mindroot.lib.plugins module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.check_plugin_dependencies"><code class="docutils literal notranslate"><span class="pre">check_plugin_dependencies()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.get_plugin_import_path"><code class="docutils literal notranslate"><span class="pre">get_plugin_import_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.get_plugin_path"><code class="docutils literal notranslate"><span class="pre">get_plugin_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.install_plugin_dependencies"><code class="docutils literal notranslate"><span class="pre">install_plugin_dependencies()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.list_enabled"><code class="docutils literal notranslate"><span class="pre">list_enabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.load_plugin_manifest"><code class="docutils literal notranslate"><span class="pre">load_plugin_manifest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.plugin_install"><code class="docutils literal notranslate"><span class="pre">plugin_install()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.plugin_update"><code class="docutils literal notranslate"><span class="pre">plugin_update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.pre_load"><code class="docutils literal notranslate"><span class="pre">pre_load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.save_plugin_manifest"><code class="docutils literal notranslate"><span class="pre">save_plugin_manifest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.toggle_plugin_state"><code class="docutils literal notranslate"><span class="pre">toggle_plugin_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins.update_plugin_manifest"><code class="docutils literal notranslate"><span class="pre">update_plugin_manifest()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.plugins_install">mindroot.lib.plugins_install module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins_install.install_plugins"><code class="docutils literal notranslate"><span class="pre">install_plugins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins_install.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.plugins_install.update_plugins_json"><code class="docutils literal notranslate"><span class="pre">update_plugins_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.route_decorators">mindroot.lib.route_decorators module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.route_decorators.add_public_static"><code class="docutils literal notranslate"><span class="pre">add_public_static()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.route_decorators.public_route"><code class="docutils literal notranslate"><span class="pre">public_route()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.route_decorators.requires_all_roles"><code class="docutils literal notranslate"><span class="pre">requires_all_roles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.route_decorators.requires_any_role"><code class="docutils literal notranslate"><span class="pre">requires_any_role()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.route_decorators.requires_role"><code class="docutils literal notranslate"><span class="pre">requires_role()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.session_files">mindroot.lib.session_files module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.session_files.load_session_data"><code class="docutils literal notranslate"><span class="pre">load_session_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.session_files.save_session_data"><code class="docutils literal notranslate"><span class="pre">save_session_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.streamcmd">mindroot.lib.streamcmd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.streamcmd.read_stream"><code class="docutils literal notranslate"><span class="pre">read_stream()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.streamcmd.run_command_with_streaming"><code class="docutils literal notranslate"><span class="pre">run_command_with_streaming()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.streamcmd.stream_command_as_events"><code class="docutils literal notranslate"><span class="pre">stream_command_as_events()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.templates">mindroot.lib.templates module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.apply_translations_to_content"><code class="docutils literal notranslate"><span class="pre">apply_translations_to_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.check_for_localized_template"><code class="docutils literal notranslate"><span class="pre">check_for_localized_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.collect_content"><code class="docutils literal notranslate"><span class="pre">collect_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.find_parent_template"><code class="docutils literal notranslate"><span class="pre">find_parent_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.find_plugin_template"><code class="docutils literal notranslate"><span class="pre">find_plugin_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.get_current_language"><code class="docutils literal notranslate"><span class="pre">get_current_language()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.load_plugin_templates"><code class="docutils literal notranslate"><span class="pre">load_plugin_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.load_template_with_translation"><code class="docutils literal notranslate"><span class="pre">load_template_with_translation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.render_combined_template"><code class="docutils literal notranslate"><span class="pre">render_combined_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.render_direct_template"><code class="docutils literal notranslate"><span class="pre">render_direct_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.templates.setup_template_environment"><code class="docutils literal notranslate"><span class="pre">setup_template_environment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib.token_counter">mindroot.lib.token_counter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.count_tokens_for_log_id"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.extract_delegate_task_log_ids"><code class="docutils literal notranslate"><span class="pre">extract_delegate_task_log_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.find_chatlog_file"><code class="docutils literal notranslate"><span class="pre">find_chatlog_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.get_cache_dir"><code class="docutils literal notranslate"><span class="pre">get_cache_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.get_cache_path"><code class="docutils literal notranslate"><span class="pre">get_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.get_cached_token_counts"><code class="docutils literal notranslate"><span class="pre">get_cached_token_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.lib.html#mindroot.lib.token_counter.save_token_counts_to_cache"><code class="docutils literal notranslate"><span class="pre">save_token_counts_to_cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.lib.html#module-mindroot.lib">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mindroot.registry.html">mindroot.registry package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.registry.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.registry.html#module-mindroot.registry.component_manager">mindroot.registry.component_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager"><code class="docutils literal notranslate"><span class="pre">ComponentManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager.get_component_metadata"><code class="docutils literal notranslate"><span class="pre">ComponentManager.get_component_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager.is_component_activated"><code class="docutils literal notranslate"><span class="pre">ComponentManager.is_component_activated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager.is_component_installed"><code class="docutils literal notranslate"><span class="pre">ComponentManager.is_component_installed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager.list_components"><code class="docutils literal notranslate"><span class="pre">ComponentManager.list_components()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.component_manager.ComponentManager.register_component"><code class="docutils literal notranslate"><span class="pre">ComponentManager.register_component()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.registry.html#module-mindroot.registry.data_access">mindroot.registry.data_access module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess"><code class="docutils literal notranslate"><span class="pre">DataAccess</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.add_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.add_plugin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.add_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.add_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.get_model"><code class="docutils literal notranslate"><span class="pre">DataAccess.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.get_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.get_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_equivalent_flags"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_equivalent_flags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_json"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_plugins"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_plugins()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_preferred_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_preferred_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.read_providers"><code class="docutils literal notranslate"><span class="pre">DataAccess.read_providers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.remove_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.remove_plugin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.remove_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.remove_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.update_model"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.update_plugin"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_plugin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.update_provider"><code class="docutils literal notranslate"><span class="pre">DataAccess.update_provider()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_equivalent_flags"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_equivalent_flags()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_json"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_plugins"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_plugins()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_preferred_models"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_preferred_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.registry.html#mindroot.registry.data_access.DataAccess.write_providers"><code class="docutils literal notranslate"><span class="pre">DataAccess.write_providers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.registry.html#module-mindroot.registry">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.migrate">
+<span id="mindroot-migrate-module"></span><h2>mindroot.migrate module<a class="headerlink" href="#module-mindroot.migrate" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.migrate.migrate_plugin_manifest">
+<span class="sig-prename descclassname"><span class="pre">mindroot.migrate.</span></span><span class="sig-name descname"><span class="pre">migrate_plugin_manifest</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/migrate.html#migrate_plugin_manifest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.migrate.migrate_plugin_manifest" title="Link to this definition">¶</a></dt>
+<dd><p>Migrate plugin_manifest.json from root to data/ directory if needed.</p>
+<p>This function now delegates to the consolidated manifest handling logic.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.migrate.run_migrations">
+<span class="sig-prename descclassname"><span class="pre">mindroot.migrate.</span></span><span class="sig-name descname"><span class="pre">run_migrations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/migrate.html#run_migrations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.migrate.run_migrations" title="Link to this definition">¶</a></dt>
+<dd><p>Run all necessary migrations.</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.server">
+<span id="mindroot-server-module"></span><h2>mindroot.server module<a class="headerlink" href="#module-mindroot.server" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.server.HeaderMiddleware">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">HeaderMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispatch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#HeaderMiddleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.HeaderMiddleware" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHTTPMiddleware</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.server.HeaderMiddleware.dispatch">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#HeaderMiddleware.dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.HeaderMiddleware.dispatch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.create_directories">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">create_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#create_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.create_directories" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.find_available_port">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">find_available_port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#find_available_port"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.find_available_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.get_project_root">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">get_project_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#get_project_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.get_project_root" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.is_port_in_use">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">is_port_in_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#is_port_in_use"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.is_port_in_use" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.main">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.parse_args">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.parse_args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server.setup_app_internal">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server.</span></span><span class="sig-name descname"><span class="pre">setup_app_internal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server.html#setup_app_internal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server.setup_app_internal" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot.server_missing_normal_args">
+<span id="mindroot-server-missing-normal-args-module"></span><h2>mindroot.server_missing_normal_args module<a class="headerlink" href="#module-mindroot.server_missing_normal_args" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.HeaderMiddleware">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">HeaderMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispatch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#HeaderMiddleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.HeaderMiddleware" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHTTPMiddleware</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.HeaderMiddleware.dispatch">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#HeaderMiddleware.dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.HeaderMiddleware.dispatch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.create_directories">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">create_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#create_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.create_directories" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.find_available_port">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">find_available_port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#find_available_port"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.find_available_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.get_project_root">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">get_project_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#get_project_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.get_project_root" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.is_port_in_use">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">is_port_in_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#is_port_in_use"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.is_port_in_use" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.main">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.parse_args">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.parse_args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_missing_normal_args.setup_app_internal">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server_missing_normal_args.</span></span><span class="sig-name descname"><span class="pre">setup_app_internal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_missing_normal_args.html#setup_app_internal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_missing_normal_args.setup_app_internal" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot.server_prev">
+<span id="mindroot-server-prev-module"></span><h2>mindroot.server_prev module<a class="headerlink" href="#module-mindroot.server_prev" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.server_prev.HeaderMiddleware">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">HeaderMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dispatch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Request</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Awaitable</span><span class="p"><span class="pre">[</span></span><span class="pre">Response</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#HeaderMiddleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.HeaderMiddleware" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHTTPMiddleware</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.server_prev.HeaderMiddleware.dispatch">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#HeaderMiddleware.dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.HeaderMiddleware.dispatch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.create_directories">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">create_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#create_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.create_directories" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.find_available_port">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">find_available_port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#find_available_port"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.find_available_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.get_project_root">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">get_project_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#get_project_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.get_project_root" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.is_port_in_use">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">is_port_in_use</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#is_port_in_use"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.is_port_in_use" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.main">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.parse_args">
+<span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.parse_args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.server_prev.setup_app_internal">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.server_prev.</span></span><span class="sig-name descname"><span class="pre">setup_app_internal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/server_prev.html#setup_app_internal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.server_prev.setup_app_internal" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Jason Livesay
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">mindroot package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mindroot.migrate">mindroot.migrate module</a><ul>
+<li><a class="reference internal" href="#mindroot.migrate.migrate_plugin_manifest"><code class="docutils literal notranslate"><span class="pre">migrate_plugin_manifest()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.migrate.run_migrations"><code class="docutils literal notranslate"><span class="pre">run_migrations()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.server">mindroot.server module</a><ul>
+<li><a class="reference internal" href="#mindroot.server.HeaderMiddleware"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.server.HeaderMiddleware.dispatch"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware.dispatch()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.server.create_directories"><code class="docutils literal notranslate"><span class="pre">create_directories()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.find_available_port"><code class="docutils literal notranslate"><span class="pre">find_available_port()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.get_project_root"><code class="docutils literal notranslate"><span class="pre">get_project_root()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.is_port_in_use"><code class="docutils literal notranslate"><span class="pre">is_port_in_use()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server.setup_app_internal"><code class="docutils literal notranslate"><span class="pre">setup_app_internal()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.server_missing_normal_args">mindroot.server_missing_normal_args module</a><ul>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.HeaderMiddleware"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.HeaderMiddleware.dispatch"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware.dispatch()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.create_directories"><code class="docutils literal notranslate"><span class="pre">create_directories()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.find_available_port"><code class="docutils literal notranslate"><span class="pre">find_available_port()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.get_project_root"><code class="docutils literal notranslate"><span class="pre">get_project_root()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.is_port_in_use"><code class="docutils literal notranslate"><span class="pre">is_port_in_use()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_missing_normal_args.setup_app_internal"><code class="docutils literal notranslate"><span class="pre">setup_app_internal()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.server_prev">mindroot.server_prev module</a><ul>
+<li><a class="reference internal" href="#mindroot.server_prev.HeaderMiddleware"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.server_prev.HeaderMiddleware.dispatch"><code class="docutils literal notranslate"><span class="pre">HeaderMiddleware.dispatch()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.server_prev.create_directories"><code class="docutils literal notranslate"><span class="pre">create_directories()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.find_available_port"><code class="docutils literal notranslate"><span class="pre">find_available_port()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.get_project_root"><code class="docutils literal notranslate"><span class="pre">get_project_root()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.is_port_in_use"><code class="docutils literal notranslate"><span class="pre">is_port_in_use()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.server_prev.setup_app_internal"><code class="docutils literal notranslate"><span class="pre">setup_app_internal()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=3c16008f"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

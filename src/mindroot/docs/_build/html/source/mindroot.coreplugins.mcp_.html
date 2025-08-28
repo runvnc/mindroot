@@ -1,0 +1,1271 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+        <title>mindroot.coreplugins.mcp_ package - MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=f4b9d74b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #007acc;
+  --color-brand-content: #007acc;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">MindRoot 9.10.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../starting_mindroot.html">Starting MindRoot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_plugin_installation.html">LLM Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_api_key.html">LLM API Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chat_with_assistant.html">Chat with Assistant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_plugins_with_tools.html">Install Plugins with Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programming_task.html">Give Assistant a Programming Task</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/source/mindroot.coreplugins.mcp_.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="mindroot-coreplugins-mcp-package">
+<h1>mindroot.coreplugins.mcp_ package<a class="headerlink" href="#mindroot-coreplugins-mcp-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.mcp_.catalog_commands">
+<span id="mindroot-coreplugins-mcp-catalog-commands-module"></span><h2>mindroot.coreplugins.mcp_.catalog_commands module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.catalog_commands" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_add_custom">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_add_custom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_add_custom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_add_custom" title="Link to this definition">¶</a></dt>
+<dd><p>Add a custom server to the catalog</p>
+<p>Example:
+{ “mcp_catalog_add_custom”: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“server_info”: {</dt><dd><p>“name”: “my_server”,
+“display_name”: “My Custom Server”,
+“description”: “Custom MCP server”,
+“command”: “python”,
+“args”: [“-m”, “my_mcp_server”],
+“category”: “custom”,
+“install_method”: “manual”</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}}</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_categories">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_categories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_categories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_categories" title="Link to this definition">¶</a></dt>
+<dd><p>Get list of server categories</p>
+<p>Example:
+{ “mcp_catalog_categories”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_info" title="Link to this definition">¶</a></dt>
+<dd><p>Get detailed info about a catalog server</p>
+<p>Example:
+{ “mcp_catalog_info”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_install"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install" title="Link to this definition">¶</a></dt>
+<dd><p>Install an MCP server from catalog</p>
+<p>Example:
+{ “mcp_catalog_install”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install_and_run">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_install_and_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_install_and_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install_and_run" title="Link to this definition">¶</a></dt>
+<dd><p>Install and run an MCP server from catalog</p>
+<p>Example:
+{ “mcp_catalog_install_and_run”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_list">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_list" title="Link to this definition">¶</a></dt>
+<dd><p>List MCP servers from catalog</p>
+<p>Example:
+{ “mcp_catalog_list”: {} }
+{ “mcp_catalog_list”: { “category”: “utilities” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_refresh">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_refresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_refresh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_refresh" title="Link to this definition">¶</a></dt>
+<dd><p>Refresh catalog and update server status</p>
+<p>Example:
+{ “mcp_catalog_refresh”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_search">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_search" title="Link to this definition">¶</a></dt>
+<dd><p>Search MCP servers in catalog</p>
+<p>Example:
+{ “mcp_catalog_search”: { “query”: “calculator” } }
+{ “mcp_catalog_search”: { “query”: “database” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_status">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_status" title="Link to this definition">¶</a></dt>
+<dd><p>Get status of all catalog servers</p>
+<p>Example:
+{ “mcp_catalog_status”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_stop">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_commands.</span></span><span class="sig-name descname"><span class="pre">mcp_catalog_stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_commands.html#mcp_catalog_stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_stop" title="Link to this definition">¶</a></dt>
+<dd><p>Stop an MCP server</p>
+<p>Example:
+{ “mcp_catalog_stop”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.catalog_manager">
+<span id="mindroot-coreplugins-mcp-catalog-manager-module"></span><h2>mindroot.coreplugins.mcp_.catalog_manager module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.catalog_manager" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.catalog_manager.</span></span><span class="sig-name descname"><span class="pre">MCPCatalogManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manages MCP server catalog and process detection</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.add_custom_server">
+<span class="sig-name descname"><span class="pre">add_custom_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.add_custom_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.add_custom_server" title="Link to this definition">¶</a></dt>
+<dd><p>Add a custom server to the catalog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.create_empty_catalog">
+<span class="sig-name descname"><span class="pre">create_empty_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.create_empty_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.create_empty_catalog" title="Link to this definition">¶</a></dt>
+<dd><p>Create empty catalog structure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.detect_running_servers">
+<span class="sig-name descname"><span class="pre">detect_running_servers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.detect_running_servers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.detect_running_servers" title="Link to this definition">¶</a></dt>
+<dd><p>Detect which MCP servers are currently running</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.ensure_catalog_exists">
+<span class="sig-name descname"><span class="pre">ensure_catalog_exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.ensure_catalog_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.ensure_catalog_exists" title="Link to this definition">¶</a></dt>
+<dd><p>Ensure catalog file exists, create from default if needed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_categories">
+<span class="sig-name descname"><span class="pre">get_categories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.get_categories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_categories" title="Link to this definition">¶</a></dt>
+<dd><p>Get list of all categories</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_running_processes">
+<span class="sig-name descname"><span class="pre">get_running_processes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.get_running_processes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_running_processes" title="Link to this definition">¶</a></dt>
+<dd><p>Get list of running processes with details</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_server_info">
+<span class="sig-name descname"><span class="pre">get_server_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.get_server_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_server_info" title="Link to this definition">¶</a></dt>
+<dd><p>Get detailed info for a specific server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_servers_by_category">
+<span class="sig-name descname"><span class="pre">get_servers_by_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.get_servers_by_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_servers_by_category" title="Link to this definition">¶</a></dt>
+<dd><p>Get servers filtered by category</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.init_catalog_from_default">
+<span class="sig-name descname"><span class="pre">init_catalog_from_default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.init_catalog_from_default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.init_catalog_from_default" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize catalog from default servers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.load_catalog">
+<span class="sig-name descname"><span class="pre">load_catalog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.load_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.load_catalog" title="Link to this definition">¶</a></dt>
+<dd><p>Load the server catalog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.mark_server_installed">
+<span class="sig-name descname"><span class="pre">mark_server_installed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">installed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.mark_server_installed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.mark_server_installed" title="Link to this definition">¶</a></dt>
+<dd><p>Mark a server as installed or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.remove_server">
+<span class="sig-name descname"><span class="pre">remove_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.remove_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.remove_server" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a server from the catalog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.save_catalog">
+<span class="sig-name descname"><span class="pre">save_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.save_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.save_catalog" title="Link to this definition">¶</a></dt>
+<dd><p>Save the server catalog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.search_servers">
+<span class="sig-name descname"><span class="pre">search_servers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.search_servers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.search_servers" title="Link to this definition">¶</a></dt>
+<dd><p>Search servers by name, description, or tags</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.update_server_status">
+<span class="sig-name descname"><span class="pre">update_server_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/catalog_manager.html#MCPCatalogManager.update_server_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.update_server_status" title="Link to this definition">¶</a></dt>
+<dd><p>Update running status for all servers in catalog</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.dynamic_commands">
+<span id="mindroot-coreplugins-mcp-dynamic-commands-module"></span><h2>mindroot.coreplugins.mcp_.dynamic_commands module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.dynamic_commands" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.dynamic_commands.</span></span><span class="sig-name descname"><span class="pre">MCPDynamicCommands</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/dynamic_commands.html#MCPDynamicCommands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Handles dynamic registration of MCP tools as MindRoot commands</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.get_registered_commands">
+<span class="sig-name descname"><span class="pre">get_registered_commands</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/dynamic_commands.html#MCPDynamicCommands.get_registered_commands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.get_registered_commands" title="Link to this definition">¶</a></dt>
+<dd><p>Get list of registered command names</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.register_tools">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register_tools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/dynamic_commands.html#MCPDynamicCommands.register_tools"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.register_tools" title="Link to this definition">¶</a></dt>
+<dd><p>Register MCP tools as dynamic MindRoot commands</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.set_sessions">
+<span class="sig-name descname"><span class="pre">set_sessions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/dynamic_commands.html#MCPDynamicCommands.set_sessions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.set_sessions" title="Link to this definition">¶</a></dt>
+<dd><p>Set reference to MCP sessions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.unregister_server_tools">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unregister_server_tools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/dynamic_commands.html#MCPDynamicCommands.unregister_server_tools"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.unregister_server_tools" title="Link to this definition">¶</a></dt>
+<dd><p>Unregister all tools for a server</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.mcp_manager">
+<span id="mindroot-coreplugins-mcp-mcp-manager-module"></span><h2>mindroot.coreplugins.mcp_.mcp_manager module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.mcp_manager" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mcp_manager.</span></span><span class="sig-name descname"><span class="pre">MCPManager</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manages MCP server connections and operations</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.add_server">
+<span class="sig-name descname"><span class="pre">add_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer" title="mindroot.coreplugins.mcp_.mcp_manager.MCPServer"><span class="pre">MCPServer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.add_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.add_server" title="Link to this definition">¶</a></dt>
+<dd><p>Add a new server configuration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.call_tool">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call_tool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.call_tool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.call_tool" title="Link to this definition">¶</a></dt>
+<dd><p>Call a tool on an MCP server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.complete_oauth_flow">
+<span class="sig-name descname"><span class="pre">complete_oauth_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.complete_oauth_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.complete_oauth_flow" title="Link to this definition">¶</a></dt>
+<dd><p>Complete OAuth flow with authorization code.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_oauth_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_oauth_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.connect_oauth_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_oauth_server" title="Link to this definition">¶</a></dt>
+<dd><p>Connect to an OAuth-protected MCP server.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_remote_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_remote_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.connect_remote_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_remote_server" title="Link to this definition">¶</a></dt>
+<dd><p>Connect to a remote MCP server (HTTP/SSE).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secrets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.connect_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_server" title="Link to this definition">¶</a></dt>
+<dd><p>Connect to an MCP server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.disconnect_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">disconnect_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.disconnect_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.disconnect_server" title="Link to this definition">¶</a></dt>
+<dd><p>Disconnect from an MCP server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.get_oauth_status">
+<span class="sig-name descname"><span class="pre">get_oauth_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.get_oauth_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.get_oauth_status" title="Link to this definition">¶</a></dt>
+<dd><p>Get OAuth flow status for a server.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.install_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">install_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.install_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.install_server" title="Link to this definition">¶</a></dt>
+<dd><p>Install an MCP server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.load_config">
+<span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.load_config" title="Link to this definition">¶</a></dt>
+<dd><p>Load server configurations from file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.mark_server_as_installed">
+<span class="sig-name descname"><span class="pre">mark_server_as_installed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registry_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.mark_server_as_installed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.mark_server_as_installed" title="Link to this definition">¶</a></dt>
+<dd><p>Mark server as installed (in-memory only for remote servers)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.read_resource">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.read_resource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.read_resource" title="Link to this definition">¶</a></dt>
+<dd><p>Read a resource from an MCP server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.remove_server">
+<span class="sig-name descname"><span class="pre">remove_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.remove_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.remove_server" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a server configuration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.sanity_test">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sanity_test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.sanity_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.sanity_test" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.save_config">
+<span class="sig-name descname"><span class="pre">save_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.save_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.save_config" title="Link to this definition">¶</a></dt>
+<dd><p>Save server configurations to file - LOCAL SERVERS ONLY</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.start_oauth_flow">
+<span class="sig-name descname"><span class="pre">start_oauth_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.start_oauth_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.start_oauth_flow" title="Link to this definition">¶</a></dt>
+<dd><p>Start OAuth flow and return authorization URL.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPManager.test_local_server_capabilities">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_local_server_capabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secrets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPManager.test_local_server_capabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.test_local_server_capabilities" title="Link to this definition">¶</a></dt>
+<dd><p>Test connection to a local MCP server and return its capabilities.</p>
+<p>This method creates a temporary server, connects to it, extracts capabilities,
+and cleans up. It follows the same pattern as the working catalog system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Display name for the server (for error messages)</p></li>
+<li><p><strong>command</strong> – Command to run the MCP server</p></li>
+<li><p><strong>args</strong> – Arguments for the command</p></li>
+<li><p><strong>env</strong> – Environment variables</p></li>
+<li><p><strong>secrets</strong> – A dictionary of secrets to substitute into placeholders.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict containing success status, message, and capabilities (tools, resources, prompts)</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If MCP SDK is not available or connection fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mcp_manager.</span></span><span class="sig-name descname"><span class="pre">MCPServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'stdio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provider_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transport_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">authorization_server_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scopes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redirect_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_expires_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'disconnected'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secrets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capabilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">install_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'manual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">install_package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_install</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">installed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mcp_manager.html#MCPServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Model for MCP server configuration</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.access_token">
+<span class="sig-name descname"><span class="pre">access_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.access_token" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.args">
+<span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_headers">
+<span class="sig-name descname"><span class="pre">auth_headers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_headers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_type">
+<span class="sig-name descname"><span class="pre">auth_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.authorization_server_url">
+<span class="sig-name descname"><span class="pre">authorization_server_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.authorization_server_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auto_install">
+<span class="sig-name descname"><span class="pre">auto_install</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auto_install" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.capabilities">
+<span class="sig-name descname"><span class="pre">capabilities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.capabilities" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_id">
+<span class="sig-name descname"><span class="pre">client_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_secret">
+<span class="sig-name descname"><span class="pre">client_secret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_secret" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.command">
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.env">
+<span class="sig-name descname"><span class="pre">env</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.env" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_method">
+<span class="sig-name descname"><span class="pre">install_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_method" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_package">
+<span class="sig-name descname"><span class="pre">install_package</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_package" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.installed">
+<span class="sig-name descname"><span class="pre">installed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.installed" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.provider_url">
+<span class="sig-name descname"><span class="pre">provider_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.provider_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.redirect_uri">
+<span class="sig-name descname"><span class="pre">redirect_uri</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.redirect_uri" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.refresh_token">
+<span class="sig-name descname"><span class="pre">refresh_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.refresh_token" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.scopes">
+<span class="sig-name descname"><span class="pre">scopes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.scopes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.secrets">
+<span class="sig-name descname"><span class="pre">secrets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.secrets" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.token_expires_at">
+<span class="sig-name descname"><span class="pre">token_expires_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.token_expires_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport">
+<span class="sig-name descname"><span class="pre">transport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_type">
+<span class="sig-name descname"><span class="pre">transport_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_url">
+<span class="sig-name descname"><span class="pre">transport_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mcp_manager.MCPServer.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.mod">
+<span id="mindroot-coreplugins-mcp-mod-module"></span><h2>mindroot.coreplugins.mcp_.mod module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.mod" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.enhanced_mcp_manager_service">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">enhanced_mcp_manager_service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#enhanced_mcp_manager_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.enhanced_mcp_manager_service" title="Link to this definition">¶</a></dt>
+<dd><p>Service to access enhanced MCP manager (same as mcp_manager_service now)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.handle_callback">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">handle_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#handle_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.handle_callback" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.handle_redirect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">handle_redirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#handle_redirect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.handle_redirect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_check_tools">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_check_tools</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_check_tools"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_check_tools" title="Link to this definition">¶</a></dt>
+<dd><p>Check availability of installation tools</p>
+<p>Example:
+{ “mcp_check_tools”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_connect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_connect" title="Link to this definition">¶</a></dt>
+<dd><p>Connect to an MCP server</p>
+<p>Example:
+{ “mcp_connect”: { “server_name”: “filesystem” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_debug_connection">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_debug_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_debug_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_debug_connection" title="Link to this definition">¶</a></dt>
+<dd><p>Debug MCP server connection and dynamic command registration</p>
+<p>Example:
+{ “mcp_debug_connection”: { “server_name”: “calculator” } }
+{ “mcp_debug_connection”: { “server_name”: “github” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_disconnect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_disconnect" title="Link to this definition">¶</a></dt>
+<dd><p>Disconnect from an MCP server</p>
+<p>Example:
+{ “mcp_disconnect”: { “server_name”: “filesystem” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_enhanced_connect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_enhanced_connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_enhanced_connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_enhanced_connect" title="Link to this definition">¶</a></dt>
+<dd><p>Connect to MCP server with enhanced features</p>
+<p>Example:
+{ “mcp_enhanced_connect”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_enhanced_disconnect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_enhanced_disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_enhanced_disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_enhanced_disconnect" title="Link to this definition">¶</a></dt>
+<dd><p>Disconnect from MCP server</p>
+<p>Example:
+{ “mcp_enhanced_disconnect”: { “server_name”: “calculator” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_install_npx_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_install_npx_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_install_npx_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_install_npx_server" title="Link to this definition">¶</a></dt>
+<dd><p>Install and configure an npx-based MCP server</p>
+<p>Example:
+{ “mcp_install_npx_server”: {</p>
+<blockquote>
+<div><p>“name”: “github”,
+“package”: “&#64;modelcontextprotocol/server-github”,
+“description”: “GitHub server”</p>
+</div></blockquote>
+<p>} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_install_uvx_server">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_install_uvx_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_install_uvx_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_install_uvx_server" title="Link to this definition">¶</a></dt>
+<dd><p>Install and configure a uvx-based MCP server</p>
+<p>Example:
+{ “mcp_install_uvx_server”: {</p>
+<blockquote>
+<div><p>“name”: “calculator”,
+“package”: “mcp-server-calculator”,
+“description”: “Calculator server”</p>
+</div></blockquote>
+<p>} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_list_dynamic_commands">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_list_dynamic_commands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_list_dynamic_commands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_list_dynamic_commands" title="Link to this definition">¶</a></dt>
+<dd><p>List dynamically registered MCP commands</p>
+<p>Example:
+{ “mcp_list_dynamic_commands”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_list_servers">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_list_servers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_list_servers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_list_servers" title="Link to this definition">¶</a></dt>
+<dd><p>List all configured MCP servers</p>
+<p>Example:
+{ “mcp_list_servers”: {} }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_manager_service">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_manager_service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_manager_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_manager_service" title="Link to this definition">¶</a></dt>
+<dd><p>Service to access the MCP manager</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.mod.mcp_refresh_dynamic_commands">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.mod.</span></span><span class="sig-name descname"><span class="pre">mcp_refresh_dynamic_commands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/mod.html#mcp_refresh_dynamic_commands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.mod.mcp_refresh_dynamic_commands" title="Link to this definition">¶</a></dt>
+<dd><p>Refresh dynamic command registration for all connected servers</p>
+<p>Example:
+{ “mcp_refresh_dynamic_commands”: {} }</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.oauth_storage">
+<span id="mindroot-coreplugins-mcp-oauth-storage-module"></span><h2>mindroot.coreplugins.mcp_.oauth_storage module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.oauth_storage" title="Link to this heading">¶</a></h2>
+<p>OAuth token storage implementation for MCP servers.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.oauth_storage.</span></span><span class="sig-name descname"><span class="pre">MCPTokenStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcp_manager</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TokenStorage</span></code></p>
+<p>Token storage implementation for MCP OAuth flows.</p>
+<p>Stores tokens and client information in the MCP server configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.clear_tokens">
+<span class="sig-name descname"><span class="pre">clear_tokens</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage.clear_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.clear_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Clear stored tokens for the server.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_client_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_client_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OAuthClientInformationFull</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage.get_client_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_client_info" title="Link to this definition">¶</a></dt>
+<dd><p>Get stored OAuth client information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_tokens">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_tokens</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OAuthToken</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage.get_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Get stored OAuth tokens for the server.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_client_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_client_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OAuthClientInformationFull</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage.set_client_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_client_info" title="Link to this definition">¶</a></dt>
+<dd><p>Store OAuth client information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_tokens">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OAuthToken</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/oauth_storage.html#MCPTokenStorage.set_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Store OAuth tokens for the server.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_.server_installer">
+<span id="mindroot-coreplugins-mcp-server-installer-module"></span><h2>mindroot.coreplugins.mcp_.server_installer module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.server_installer" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.server_installer.</span></span><span class="sig-name descname"><span class="pre">MCPServerInstaller</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Handles installation of MCP servers via different methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.check_tools">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_tools</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller.check_tools"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.check_tools" title="Link to this definition">¶</a></dt>
+<dd><p>Check if installation tools are available</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npm">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">install_with_npm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller.install_with_npm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npm" title="Link to this definition">¶</a></dt>
+<dd><p>Install package with npm</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npx">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">install_with_npx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller.install_with_npx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npx" title="Link to this definition">¶</a></dt>
+<dd><p>Install package with npx (similar to uvx, runs without global install)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_pip">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">install_with_pip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller.install_with_pip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_pip" title="Link to this definition">¶</a></dt>
+<dd><p>Install package with pip</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_uvx">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">install_with_uvx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/server_installer.html#MCPServerInstaller.install_with_uvx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_uvx" title="Link to this definition">¶</a></dt>
+<dd><p>Install package with uvx</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mindroot-coreplugins-mcp-setup-module">
+<h2>mindroot.coreplugins.mcp_.setup module<a class="headerlink" href="#mindroot-coreplugins-mcp-setup-module" title="Link to this heading">¶</a></h2>
+</section>
+<section id="mindroot-coreplugins-mcp-test-dynamic-commands-module">
+<h2>mindroot.coreplugins.mcp_.test_dynamic_commands module<a class="headerlink" href="#mindroot-coreplugins-mcp-test-dynamic-commands-module" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.mcp_.testmcpclient">
+<span id="mindroot-coreplugins-mcp-testmcpclient-module"></span><h2>mindroot.coreplugins.mcp_.testmcpclient module<a class="headerlink" href="#module-mindroot.coreplugins.mcp_.testmcpclient" title="Link to this heading">¶</a></h2>
+<p>Before running, specify running MCP RS server URL.
+To spin up RS server locally, see</p>
+<blockquote>
+<div><p>examples/servers/simple-auth/README.md</p>
+</div></blockquote>
+<dl class="simple">
+<dt>cd to the <cite>examples/snippets</cite> directory and run:</dt><dd><p>uv run oauth-client</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.testmcpclient.</span></span><span class="sig-name descname"><span class="pre">InMemoryTokenStorage</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#InMemoryTokenStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TokenStorage</span></code></p>
+<p>Demo In-memory token storage implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_client_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_client_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OAuthClientInformationFull</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#InMemoryTokenStorage.get_client_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_client_info" title="Link to this definition">¶</a></dt>
+<dd><p>Get stored client information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_tokens">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_tokens</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OAuthToken</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#InMemoryTokenStorage.get_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Get stored tokens.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_client_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_client_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OAuthClientInformationFull</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#InMemoryTokenStorage.set_client_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_client_info" title="Link to this definition">¶</a></dt>
+<dd><p>Store client information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_tokens">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OAuthToken</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#InMemoryTokenStorage.set_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>Store tokens.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.handle_callback">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.testmcpclient.</span></span><span class="sig-name descname"><span class="pre">handle_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#handle_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.handle_callback" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.handle_redirect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.testmcpclient.</span></span><span class="sig-name descname"><span class="pre">handle_redirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#handle_redirect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.handle_redirect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.main">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.testmcpclient.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.main" title="Link to this definition">¶</a></dt>
+<dd><p>Run the OAuth client example.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.mcp_.testmcpclient.run">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.mcp_.testmcpclient.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/mcp_/testmcpclient.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.mcp_.testmcpclient.run" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.mcp_">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.coreplugins.mcp_" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Jason Livesay
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">mindroot.coreplugins.mcp_ package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.catalog_commands">mindroot.coreplugins.mcp_.catalog_commands module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_add_custom"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_add_custom()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_categories"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_categories()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_info"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_install()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_install_and_run"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_install_and_run()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_list"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_list()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_refresh"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_refresh()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_search"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_search()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_status"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_status()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_commands.mcp_catalog_stop"><code class="docutils literal notranslate"><span class="pre">mcp_catalog_stop()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.catalog_manager">mindroot.coreplugins.mcp_.catalog_manager module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.add_custom_server"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.add_custom_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.create_empty_catalog"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.create_empty_catalog()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.detect_running_servers"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.detect_running_servers()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.ensure_catalog_exists"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.ensure_catalog_exists()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_categories"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.get_categories()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_running_processes"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.get_running_processes()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_server_info"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.get_server_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.get_servers_by_category"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.get_servers_by_category()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.init_catalog_from_default"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.init_catalog_from_default()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.load_catalog"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.load_catalog()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.mark_server_installed"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.mark_server_installed()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.remove_server"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.remove_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.save_catalog"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.save_catalog()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.search_servers"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.search_servers()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.catalog_manager.MCPCatalogManager.update_server_status"><code class="docutils literal notranslate"><span class="pre">MCPCatalogManager.update_server_status()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.dynamic_commands">mindroot.coreplugins.mcp_.dynamic_commands module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands"><code class="docutils literal notranslate"><span class="pre">MCPDynamicCommands</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.get_registered_commands"><code class="docutils literal notranslate"><span class="pre">MCPDynamicCommands.get_registered_commands()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.register_tools"><code class="docutils literal notranslate"><span class="pre">MCPDynamicCommands.register_tools()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.set_sessions"><code class="docutils literal notranslate"><span class="pre">MCPDynamicCommands.set_sessions()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.dynamic_commands.MCPDynamicCommands.unregister_server_tools"><code class="docutils literal notranslate"><span class="pre">MCPDynamicCommands.unregister_server_tools()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.mcp_manager">mindroot.coreplugins.mcp_.mcp_manager module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager"><code class="docutils literal notranslate"><span class="pre">MCPManager</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.add_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.add_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.call_tool"><code class="docutils literal notranslate"><span class="pre">MCPManager.call_tool()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.complete_oauth_flow"><code class="docutils literal notranslate"><span class="pre">MCPManager.complete_oauth_flow()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_oauth_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.connect_oauth_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_remote_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.connect_remote_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.connect_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.disconnect_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.disconnect_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.get_oauth_status"><code class="docutils literal notranslate"><span class="pre">MCPManager.get_oauth_status()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.install_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.install_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.load_config"><code class="docutils literal notranslate"><span class="pre">MCPManager.load_config()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.mark_server_as_installed"><code class="docutils literal notranslate"><span class="pre">MCPManager.mark_server_as_installed()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.read_resource"><code class="docutils literal notranslate"><span class="pre">MCPManager.read_resource()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.remove_server"><code class="docutils literal notranslate"><span class="pre">MCPManager.remove_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.sanity_test"><code class="docutils literal notranslate"><span class="pre">MCPManager.sanity_test()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.save_config"><code class="docutils literal notranslate"><span class="pre">MCPManager.save_config()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.start_oauth_flow"><code class="docutils literal notranslate"><span class="pre">MCPManager.start_oauth_flow()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.test_local_server_capabilities"><code class="docutils literal notranslate"><span class="pre">MCPManager.test_local_server_capabilities()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer"><code class="docutils literal notranslate"><span class="pre">MCPServer</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.access_token"><code class="docutils literal notranslate"><span class="pre">MCPServer.access_token</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.args"><code class="docutils literal notranslate"><span class="pre">MCPServer.args</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_headers"><code class="docutils literal notranslate"><span class="pre">MCPServer.auth_headers</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auth_type"><code class="docutils literal notranslate"><span class="pre">MCPServer.auth_type</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.authorization_server_url"><code class="docutils literal notranslate"><span class="pre">MCPServer.authorization_server_url</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.auto_install"><code class="docutils literal notranslate"><span class="pre">MCPServer.auto_install</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.capabilities"><code class="docutils literal notranslate"><span class="pre">MCPServer.capabilities</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_id"><code class="docutils literal notranslate"><span class="pre">MCPServer.client_id</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.client_secret"><code class="docutils literal notranslate"><span class="pre">MCPServer.client_secret</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.command"><code class="docutils literal notranslate"><span class="pre">MCPServer.command</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.description"><code class="docutils literal notranslate"><span class="pre">MCPServer.description</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.env"><code class="docutils literal notranslate"><span class="pre">MCPServer.env</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_method"><code class="docutils literal notranslate"><span class="pre">MCPServer.install_method</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.install_package"><code class="docutils literal notranslate"><span class="pre">MCPServer.install_package</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.installed"><code class="docutils literal notranslate"><span class="pre">MCPServer.installed</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.model_config"><code class="docutils literal notranslate"><span class="pre">MCPServer.model_config</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.name"><code class="docutils literal notranslate"><span class="pre">MCPServer.name</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.provider_url"><code class="docutils literal notranslate"><span class="pre">MCPServer.provider_url</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.redirect_uri"><code class="docutils literal notranslate"><span class="pre">MCPServer.redirect_uri</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.refresh_token"><code class="docutils literal notranslate"><span class="pre">MCPServer.refresh_token</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.scopes"><code class="docutils literal notranslate"><span class="pre">MCPServer.scopes</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.secrets"><code class="docutils literal notranslate"><span class="pre">MCPServer.secrets</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.status"><code class="docutils literal notranslate"><span class="pre">MCPServer.status</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.token_expires_at"><code class="docutils literal notranslate"><span class="pre">MCPServer.token_expires_at</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport"><code class="docutils literal notranslate"><span class="pre">MCPServer.transport</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_type"><code class="docutils literal notranslate"><span class="pre">MCPServer.transport_type</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.transport_url"><code class="docutils literal notranslate"><span class="pre">MCPServer.transport_url</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.url"><code class="docutils literal notranslate"><span class="pre">MCPServer.url</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.mod">mindroot.coreplugins.mcp_.mod module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.enhanced_mcp_manager_service"><code class="docutils literal notranslate"><span class="pre">enhanced_mcp_manager_service()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.handle_callback"><code class="docutils literal notranslate"><span class="pre">handle_callback()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.handle_redirect"><code class="docutils literal notranslate"><span class="pre">handle_redirect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_check_tools"><code class="docutils literal notranslate"><span class="pre">mcp_check_tools()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_connect"><code class="docutils literal notranslate"><span class="pre">mcp_connect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_debug_connection"><code class="docutils literal notranslate"><span class="pre">mcp_debug_connection()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_disconnect"><code class="docutils literal notranslate"><span class="pre">mcp_disconnect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_enhanced_connect"><code class="docutils literal notranslate"><span class="pre">mcp_enhanced_connect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_enhanced_disconnect"><code class="docutils literal notranslate"><span class="pre">mcp_enhanced_disconnect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_install_npx_server"><code class="docutils literal notranslate"><span class="pre">mcp_install_npx_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_install_uvx_server"><code class="docutils literal notranslate"><span class="pre">mcp_install_uvx_server()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_list_dynamic_commands"><code class="docutils literal notranslate"><span class="pre">mcp_list_dynamic_commands()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_list_servers"><code class="docutils literal notranslate"><span class="pre">mcp_list_servers()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_manager_service"><code class="docutils literal notranslate"><span class="pre">mcp_manager_service()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.mod.mcp_refresh_dynamic_commands"><code class="docutils literal notranslate"><span class="pre">mcp_refresh_dynamic_commands()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.oauth_storage">mindroot.coreplugins.mcp_.oauth_storage module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.clear_tokens"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage.clear_tokens()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_client_info"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage.get_client_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.get_tokens"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage.get_tokens()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_client_info"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage.set_client_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.oauth_storage.MCPTokenStorage.set_tokens"><code class="docutils literal notranslate"><span class="pre">MCPTokenStorage.set_tokens()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.server_installer">mindroot.coreplugins.mcp_.server_installer module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.check_tools"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller.check_tools()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npm"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller.install_with_npm()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_npx"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller.install_with_npx()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_pip"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller.install_with_pip()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.server_installer.MCPServerInstaller.install_with_uvx"><code class="docutils literal notranslate"><span class="pre">MCPServerInstaller.install_with_uvx()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot-coreplugins-mcp-setup-module">mindroot.coreplugins.mcp_.setup module</a></li>
+<li><a class="reference internal" href="#mindroot-coreplugins-mcp-test-dynamic-commands-module">mindroot.coreplugins.mcp_.test_dynamic_commands module</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_.testmcpclient">mindroot.coreplugins.mcp_.testmcpclient module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage"><code class="docutils literal notranslate"><span class="pre">InMemoryTokenStorage</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_client_info"><code class="docutils literal notranslate"><span class="pre">InMemoryTokenStorage.get_client_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.get_tokens"><code class="docutils literal notranslate"><span class="pre">InMemoryTokenStorage.get_tokens()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_client_info"><code class="docutils literal notranslate"><span class="pre">InMemoryTokenStorage.set_client_info()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.InMemoryTokenStorage.set_tokens"><code class="docutils literal notranslate"><span class="pre">InMemoryTokenStorage.set_tokens()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.handle_callback"><code class="docutils literal notranslate"><span class="pre">handle_callback()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.handle_redirect"><code class="docutils literal notranslate"><span class="pre">handle_redirect()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.mcp_.testmcpclient.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.mcp_">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=3c16008f"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

@@ -1,0 +1,1185 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+        <title>mindroot.coreplugins.chat package - MindRoot 9.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=f4b9d74b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #007acc;
+  --color-brand-content: #007acc;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #ff7b72;
+  --color-brand-content: #ff7b72;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">MindRoot 9.10.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../starting_mindroot.html">Starting MindRoot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_plugin_installation.html">LLM Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../llm_api_key.html">LLM API Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chat_with_assistant.html">Chat with Assistant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_plugins_with_tools.html">Install Plugins with Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../programming_task.html">Give Assistant a Programming Task</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/source/mindroot.coreplugins.chat.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="mindroot-coreplugins-chat-package">
+<h1>mindroot.coreplugins.chat package<a class="headerlink" href="#mindroot-coreplugins-chat-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.chat.commands">
+<span id="mindroot-coreplugins-chat-commands-module"></span><h2>mindroot.coreplugins.chat.commands module<a class="headerlink" href="#module-mindroot.coreplugins.chat.commands" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.converse_with_agent">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">converse_with_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contextual_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#converse_with_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.converse_with_agent" title="Link to this definition">¶</a></dt>
+<dd><p>IMPORTANT: Wait for the system to return the sub_log_id from the initiate_agent_session() command before using this command.
+Have a conversation with an agent in an existing chat session.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Do</span> <span class="ow">not</span> <span class="n">use</span> <span class="n">this</span> <span class="n">command</span> <span class="n">again</span> <span class="n">to</span> <span class="n">send</span> <span class="n">more</span> <span class="n">messages</span> <span class="n">to</span> <span class="n">the</span> <span class="n">agent</span><span class="o">.</span>
+<span class="n">Again</span><span class="p">,</span> <span class="n">IMPORTANT</span><span class="p">:</span> <span class="n">do</span> <span class="n">NOT</span> <span class="n">use</span> <span class="n">this</span> <span class="n">command</span> <span class="kn">from</span><span class="w"> </span><span class="nn">within</span> <span class="n">a</span> <span class="n">subconversation</span><span class="o">.</span>
+<span class="n">You</span> <span class="n">only</span> <span class="n">issue</span> <span class="n">this</span> <span class="n">command</span> <span class="n">ONCE</span><span class="p">,</span> <span class="n">then</span> <span class="n">the</span> <span class="n">conversation</span> <span class="n">occurs</span> <span class="ow">in</span> <span class="n">another</span> <span class="n">subcontext</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Parameters:
+agent_name - String. The name of the agent to converse with.
+sub_log_id - String. The log_id of the existing chat session with a secondary agent.</p>
+<p>first_message - String. The first message to the agent.
+contextual_info - String. Relevant details that may come up.
+exit_criteria - String. The criteria for ending the conversation.</p>
+<p>Return: String. Contains a concise summary of relevant details of conversation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.delegate_task">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">delegate_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#delegate_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.delegate_task" title="Link to this definition">¶</a></dt>
+<dd><p>Delegate a task to another agent.</p>
+<p>Example:</p>
+<p>{ “delegate_task”: { “log_id”: “poem.moon.03_22_2024.4PM.1”, “instructions”: “Write a poem about the moon”, “agent_name”: “poet” } }</p>
+<p>Note: do not specify any other arguments than those in the example.
+In particular, ‘context’ is not a valid argument!</p>
+<p>log_id is optional, if you specify it you must use something unique.</p>
+<p>You can also let the system assign log_id automatically:</p>
+<p>Example:</p>
+<p>{ “delegate_task”: { “instructions”: “Write a poem about the moon”, “agent_name”: “poet” } }</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.exit_conversation">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">exit_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#exit_conversation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.exit_conversation" title="Link to this definition">¶</a></dt>
+<dd><p>Exit a chat session with another agent. Use this when exit criteria are met.
+Use this command when you are finished with an agent. You may not initiate another conversation whie in a chat session with an agent.</p>
+<p>Parameters:
+output - String :</p>
+<blockquote>
+<div><p>ALL relevant details of the conversation.
+IMPORTANT: if the output of the conversation is a deliverable
+in the form of text, then depending on the wording of the user’s
+instructions, you may need to include the ALL the text
+of the deliverable here!
+If the user asked for only a summary, then provide a summary.
+If there was work output to a file, this must include the full filename.
+Etc.</p>
+<p>This should be EVERY detail that is needed to continue, but none of
+any intermediary details of the conversation that aren’t relevant.
+Such as greetings, intermediary work steps, etc.
+But assume that you will not be able to refer back to this conversation
+other than the takeaways listed here. So err on the side of caution of
+including MORE information. But be concise without losing ANY potentially
+relevant detail.</p>
+<p>Example: discussion was about a shopping list that was requested from the user.
+The output should be the full shopping list verbatim (but you can use abbreviations)</p>
+<p>Example: discussion was about a long process ending in a file being created.
+The output should be the full filename and path.</p>
+<p>Example: user requested to have an agent install some software. The output should be
+whether the software was successfully installed or not, and how to start and configure it.
+The output in this case should not include all of the steps involved or files installed.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.initiate_agent_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">initiate_agent_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#initiate_agent_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.initiate_agent_session" title="Link to this definition">¶</a></dt>
+<dd><p>Initiate a chat session with another agent.
+IMPORTANT NOTE: You may not use this command while already in conversation with another agent.
+You must exit the current conversation and then the parent context will continue.</p>
+<p>Parameters:
+agent_name - String. The name of the agent to start a session with.</p>
+<p>Important: wait for the system to return the log_id for the new chat session before using the converse_with_agent() command.
+Return: String. The log_id for the new chat session.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.insert_image">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">insert_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#insert_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.insert_image" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.markdown_await_user">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">markdown_await_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#markdown_await_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.markdown_await_user" title="Link to this definition">¶</a></dt>
+<dd><p>Output some markdown text to the user or chat room and then wait for the user’s reply.
+Use this for any somewhat longer text that the user can read and
+and doesn’t necessarily need to be spoken out loud.</p>
+<p>You can write as much text/sentences etc. as you need.</p>
+<p>Use the special RAW format with START_RAW and END_RAW to output raw markdown.</p>
+<p>Parameters:</p>
+<p>markdown - String. Insert using RAW mode.</p>
+<p>Note that you can use Katex for math rendering in markdown, but remember to
+use ‘aligned’ instead of ‘align’. Always use ‘math’ code blocks for this.
+Be careful of limitations with KaTeX such as macros etc.</p>
+<p>Also, IMPORTANT: if you need to do other formatting in math sections such as
+a list of steps or a table, use the KaTeX formatting for this
+rather than trying to add LaTeX in the middle of markdown lists
+or tables etc.</p>
+<p>Also, you can use HTML in the typical way it is inserted into markdown,
+including, for example, embedding YouTube videos.</p>
+<p># Basic Example</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{ “markdown_await_user”:</dt><dd><p>{ “markdown”: START_RAW</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>## Section 1</p>
+<ul class="simple">
+<li><p>item 1</p></li>
+<li><p>item 2</p></li>
+</ul>
+<dl>
+<dt>END_RAW</dt><dd><blockquote>
+<div><p>}</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>NOTE: Do NOT start a new command list if there already is one!!</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.send_to_parent_chat">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">send_to_parent_chat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#send_to_parent_chat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.send_to_parent_chat" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Send a message to the parent chat session.
+This must only be used within a subconversation initiated by converse_with_agent().
+It is useful for things like informing the user about task status or requesting that the user provide a file, etc.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session.</strong> (<em>message - String. The message to send to the parent chat</em>)</p></li>
+<li><p><strong>Return</strong> – None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.task_result">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">task_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#task_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.task_result" title="Link to this definition">¶</a></dt>
+<dd><p>Return the result of a task to the user.</p>
+<p>This should be the final output of a task that the user requested.</p>
+<p>Note: if you have this command defined, you MUST use it at the end of a task.
+Be sure to include the full output of the task, unless they specified
+that they only want a brief or final answer.</p>
+<p>If you do not call this, the task will be repeated.</p>
+<p>Parameters:</p>
+<p>output - Array OR Object OR String. The output of the task, such as analysis, structured data,
+report, answer, etc.</p>
+<p>IMPORTANT: If the user requests JSON output or provides a schema, you must
+output ONLY the data in the format requested.</p>
+<p>Unless otherwise indicated for your model, use the special
+RAW format with START_RAW and END_RAW to output raw markdown.</p>
+<p>Example:</p>
+<dl>
+<dt>User: Please output the addresses from the following document</dt><dd><p>using this format (e.g.):
+[{ “address1”: “Main St.”, “state”: “CA”, “zip: “90210” }]</p>
+<p>(… document …)</p>
+</dd>
+</dl>
+<p>you would output something like this:</p>
+<dl>
+<dt>{ “task_result”: {</dt><dd><dl class="simple">
+<dt>“output”: [</dt><dd><p>{ “address1”: “First St.”, “state”: “TX”, “zip: “78573” },
+{ “address2”: “Second St.”, “state”: “TX”, “zip: “78001” }</p>
+</dd>
+</dl>
+<p>] }</p>
+</dd>
+</dl>
+<p>}</p>
+<p>___</p>
+<p>In the case that the user requested a formatted report:</p>
+<p>Example:</p>
+<p>User: What is the answer to the universe?</p>
+<p>you would output something like this:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{ “task_result”:</dt><dd><p>{ “output”: START_RAW</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>## Answer</p>
+<p>The answer is 42.</p>
+<p>END_RAW</p>
+<blockquote>
+<div><blockquote>
+<div><p>}</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.tell_and_continue">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">tell_and_continue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#tell_and_continue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.tell_and_continue" title="Link to this definition">¶</a></dt>
+<dd><p>Say something to the user or chat room, then CONTINUE processing.
+One sentence per command. If you want to say multiple sentences, use multiple commands.
+This is for providing the user with a status update without stopping.</p>
+<p>Parameters:
+text - String. The text to say.</p>
+<p>Return: True</p>
+<p>## Example 1</p>
+<dl class="simple">
+<dt>[</dt><dd><p>{ “tell_and_continue”: { “text”: “Hello, user. I will make that directory for you and then continue with the task..” } },
+{ “mkdir”: { “absolute_path”: “/new/dir” } }</p>
+</dd>
+</dl>
+<p>]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.commands.wait_for_user_reply">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.commands.</span></span><span class="sig-name descname"><span class="pre">wait_for_user_reply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/commands.html#wait_for_user_reply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.commands.wait_for_user_reply" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Say something to the user or chat room, then STOP processing and wait for them to reply.
+One sentence per command. If you want to say multiple sentences, use multiple commands.</p>
+<p>Parameters:
+text - String. The text to say.</p>
+<dl class="simple">
+<dt>Return: No return value. After executing commands in the command list, the</dt><dd><p>system will wait for the user to reply, UNLESS you include a command
+in your list that returns a value. Therefore, do not use this with
+other commands that return a value instead of waiting.</p>
+</dd>
+</dl>
+<p>## Example 1</p>
+</div></blockquote>
+<p>(in this example we issue multiple commands, but are finished with commands after that)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>[</dt><dd><p>{ “wait_for_user_reply”: { “text”: “Hello, user. Here is some more info on that:” } },
+{ “markdown_await_user”: { “text”: “[A few paragraphs of info, using RAW encoding]” } },
+{ “task_complete”: {} }</p>
+</dd>
+</dl>
+<p>]</p>
+<p>(The system waits for the user reply)</p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat.format_result_msgs">
+<span id="mindroot-coreplugins-chat-format-result-msgs-module"></span><h2>mindroot.coreplugins.chat.format_result_msgs module<a class="headerlink" href="#module-mindroot.coreplugins.chat.format_result_msgs" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.chat.mod">
+<span id="mindroot-coreplugins-chat-mod-module"></span><h2>mindroot.coreplugins.chat.mod module<a class="headerlink" href="#module-mindroot.coreplugins.chat.mod" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.mod.startup">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.mod.</span></span><span class="sig-name descname"><span class="pre">startup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/mod.html#startup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.mod.startup" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat.models">
+<span id="mindroot-coreplugins-chat-models-module"></span><h2>mindroot.coreplugins.chat.models module<a class="headerlink" href="#module-mindroot.coreplugins.chat.models" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.ImageMessagePart">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.models.</span></span><span class="sig-name descname"><span class="pre">ImageMessagePart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'image'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/models.html#ImageMessagePart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.models.ImageMessagePart" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.ImageMessagePart.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.ImageMessagePart.data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.ImageMessagePart.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.ImageMessagePart.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.ImageMessagePart.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'image'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.ImageMessagePart.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.TextMessagePart">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.models.</span></span><span class="sig-name descname"><span class="pre">TextMessagePart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'text'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/models.html#TextMessagePart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.models.TextMessagePart" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.TextMessagePart.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.TextMessagePart.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.TextMessagePart.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.TextMessagePart.text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.models.TextMessagePart.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'text'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mindroot.coreplugins.chat.models.TextMessagePart.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat.router">
+<span id="mindroot-coreplugins-chat-router-module"></span><h2>mindroot.coreplugins.chat.router module<a class="headerlink" href="#module-mindroot.coreplugins.chat.router" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.TaskRequest">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">TaskRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#TaskRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.TaskRequest" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.TaskRequest.instructions">
+<span class="sig-name descname"><span class="pre">instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.router.TaskRequest.instructions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.TaskRequest.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.router.TaskRequest.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.cancel_chat">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">cancel_chat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#cancel_chat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.cancel_chat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.chat_events">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">chat_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#chat_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.chat_events" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.chat_history">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">chat_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#chat_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.chat_history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.chat_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">chat_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Query(False)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#chat_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.chat_session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.context1">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">context1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#context1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.context1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.delete_chat_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">delete_chat_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(require_user)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#delete_chat_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.delete_chat_session" title="Link to this definition">¶</a></dt>
+<dd><p>Delete a chat session by log_id, including chat logs, context files, and all child sessions.</p>
+<p>Parameters:
+- log_id: The log ID of the session to delete</p>
+<p>Returns:
+- JSON with success status and message</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.get_chat_html">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">get_chat_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Query(None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Query(False)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#get_chat_html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.get_chat_html" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.get_persona_avatar">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">get_persona_avatar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">persona_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#get_persona_avatar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.get_persona_avatar" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.get_persona_faceref">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">get_persona_faceref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">persona_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#get_persona_faceref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.get_persona_faceref" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.get_token_count">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">get_token_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#get_token_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.get_token_count" title="Link to this definition">¶</a></dt>
+<dd><p>Get token counts for a chat log identified by log_id, including any delegated tasks.</p>
+<p>Parameters:
+- log_id: The log ID to count tokens for</p>
+<p>Returns:
+- JSON with token counts or error message if log not found</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.get_token_count_alt">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">get_token_count_alt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#get_token_count_alt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.get_token_count_alt" title="Link to this definition">¶</a></dt>
+<dd><p>Alternative token count endpoint using token_counter module.</p>
+<p>Parameters:
+- log_id: The log ID to count tokens for</p>
+<p>Returns:
+- JSON with token counts or error message if log not found</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.make_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">make_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#make_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.make_session" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new chat session for the specified agent.
+Returns a redirect to the chat session page.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.run_task_route">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">run_task_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.chat.router.TaskRequest" title="mindroot.coreplugins.chat.router.TaskRequest"><span class="pre">TaskRequest</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#run_task_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.run_task_route" title="Link to this definition">¶</a></dt>
+<dd><p>Run a task for an agent with the given instructions.
+This endpoint allows programmatic interaction with agents without a full chat session.</p>
+<p>Parameters:
+- agent_name: The name of the agent to run the task
+- instructions: The instructions/prompt to send to the agent</p>
+<p>Returns:
+- JSON with results and log_id for tracking</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.send_message">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">send_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart" title="mindroot.coreplugins.chat.models.TextMessagePart"><span class="pre">TextMessagePart</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart" title="mindroot.coreplugins.chat.models.ImageMessagePart"><span class="pre">ImageMessagePart</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#send_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.send_message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.router.upload_file">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.router.</span></span><span class="sig-name descname"><span class="pre">upload_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UploadFile</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">File(PydanticUndefined)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/router.html#upload_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.router.upload_file" title="Link to this definition">¶</a></dt>
+<dd><p>Upload a file and store it in a user-specific directory.
+Returns the file path that can be used in messages.</p>
+</dd></dl>
+
+</section>
+<section id="mindroot-coreplugins-chat-router-dedup-patch-module">
+<h2>mindroot.coreplugins.chat.router_dedup_patch module<a class="headerlink" href="#mindroot-coreplugins-chat-router-dedup-patch-module" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.chat.services">
+<span id="mindroot-coreplugins-chat-services-module"></span><h2>mindroot.coreplugins.chat.services module<a class="headerlink" href="#module-mindroot.coreplugins.chat.services" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.add_current_time">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">add_current_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#add_current_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.add_current_time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.agent_output">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">agent_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#agent_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.agent_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.append_message">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">append_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#append_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.append_message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.close_chat_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">close_chat_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#close_chat_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.close_chat_session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.command_result">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">command_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#command_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.command_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.finished_chat">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">finished_chat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#finished_chat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.finished_chat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.get_chat_history">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">get_chat_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#get_chat_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.get_chat_history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.init_chat_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">init_chat_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#init_chat_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.init_chat_session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.partial_command">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">partial_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#partial_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.partial_command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.process_result">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">process_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatted_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#process_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.process_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.prompt">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.prompt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.quit">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#quit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.quit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.results_output">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">results_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#results_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.results_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.results_text">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">results_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#results_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.results_text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.results_text_output">
+<span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">results_text_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#results_text_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.results_text_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.run_task">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">run_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_log_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">llm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#run_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.run_task" title="Link to this definition">¶</a></dt>
+<dd><p>Run a task with the given instructions
+IMPORTANT NOTE: agent must have the task_result() command enabled.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.running_command">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">running_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#running_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.running_command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.send_message_to_agent">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">send_message_to_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart" title="mindroot.coreplugins.chat.models.TextMessagePart"><span class="pre">TextMessagePart</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart" title="mindroot.coreplugins.chat.models.ImageMessagePart"><span class="pre">ImageMessagePart</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#send_message_to_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.send_message_to_agent" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.services.subscribe_to_agent_messages">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.services.</span></span><span class="sig-name descname"><span class="pre">subscribe_to_agent_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/services.html#subscribe_to_agent_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.services.subscribe_to_agent_messages" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat.utils">
+<span id="mindroot-coreplugins-chat-utils-module"></span><h2>mindroot.coreplugins.chat.utils module<a class="headerlink" href="#module-mindroot.coreplugins.chat.utils" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-mindroot.coreplugins.chat.widget_manager">
+<span id="mindroot-coreplugins-chat-widget-manager-module"></span><h2>mindroot.coreplugins.chat.widget_manager module<a class="headerlink" href="#module-mindroot.coreplugins.chat.widget_manager" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_manager.</span></span><span class="sig-name descname"><span class="pre">WidgetManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widgets_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'data/widgets'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manages secure widget tokens for chat embedding.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager.create_widget_token">
+<span class="sig-name descname"><span class="pre">create_widget_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">styling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager.create_widget_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.create_widget_token" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new widget token and store its configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> – The API key to use for authentication</p></li>
+<li><p><strong>agent_name</strong> – The agent to use for chat sessions</p></li>
+<li><p><strong>base_url</strong> – The base URL for the MindRoot instance</p></li>
+<li><p><strong>created_by</strong> – Username of the creator</p></li>
+<li><p><strong>description</strong> – Optional description for the widget</p></li>
+<li><p><strong>styling</strong> – Optional styling configuration</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated widget token</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager.delete_widget_token">
+<span class="sig-name descname"><span class="pre">delete_widget_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager.delete_widget_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.delete_widget_token" title="Link to this definition">¶</a></dt>
+<dd><p>Delete a widget token and its configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> – The widget token to delete</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if deleted successfully, False if not found</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager.get_widget_config">
+<span class="sig-name descname"><span class="pre">get_widget_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager.get_widget_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.get_widget_config" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve widget configuration by token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> – The widget token</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Widget configuration dict if found, None otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager.list_widget_tokens">
+<span class="sig-name descname"><span class="pre">list_widget_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">created_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager.list_widget_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.list_widget_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>List all widget tokens, optionally filtered by creator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>created_by</strong> – Optional username to filter by</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of widget configurations (with API keys hidden)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_manager.WidgetManager.validate_token">
+<span class="sig-name descname"><span class="pre">validate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_manager.html#WidgetManager.validate_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.validate_token" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a widget token is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> – The widget token to validate</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if valid, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat.widget_routes">
+<span id="mindroot-coreplugins-chat-widget-routes-module"></span><h2>mindroot.coreplugins.chat.widget_routes module<a class="headerlink" href="#module-mindroot.coreplugins.chat.widget_routes" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">WidgetTokenCreate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">styling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#WidgetTokenCreate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.agent_name">
+<span class="sig-name descname"><span class="pre">agent_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.agent_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.api_key">
+<span class="sig-name descname"><span class="pre">api_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.api_key" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.base_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.styling">
+<span class="sig-name descname"><span class="pre">styling</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.styling" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">WidgetTokenResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">styling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#WidgetTokenResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.agent_name">
+<span class="sig-name descname"><span class="pre">agent_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.agent_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.base_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_by">
+<span class="sig-name descname"><span class="pre">created_by</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.styling">
+<span class="sig-name descname"><span class="pre">styling</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.styling" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.token">
+<span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.token" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.create_widget_session">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">create_widget_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#create_widget_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.create_widget_session" title="Link to this definition">¶</a></dt>
+<dd><p>Create a secure chat session for a widget token.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.create_widget_token">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">create_widget_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widget_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate" title="mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate"><span class="pre">WidgetTokenCreate</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#create_widget_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.create_widget_token" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new widget token.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.delete_widget_token">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">delete_widget_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#delete_widget_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.delete_widget_token" title="Link to this definition">¶</a></dt>
+<dd><p>Delete a widget token.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.get_embed_script">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">get_embed_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#get_embed_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.get_embed_script" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the secure embed script for a widget token.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.chat.widget_routes.list_widget_tokens">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.chat.widget_routes.</span></span><span class="sig-name descname"><span class="pre">list_widget_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/chat/widget_routes.html#list_widget_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.chat.widget_routes.list_widget_tokens" title="Link to this definition">¶</a></dt>
+<dd><p>List widget tokens for the current user.</p>
+</dd></dl>
+
+</section>
+<section id="module-mindroot.coreplugins.chat">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.coreplugins.chat" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Jason Livesay
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">mindroot.coreplugins.chat package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.commands">mindroot.coreplugins.chat.commands module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.converse_with_agent"><code class="docutils literal notranslate"><span class="pre">converse_with_agent()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.delegate_task"><code class="docutils literal notranslate"><span class="pre">delegate_task()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.exit_conversation"><code class="docutils literal notranslate"><span class="pre">exit_conversation()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.initiate_agent_session"><code class="docutils literal notranslate"><span class="pre">initiate_agent_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.insert_image"><code class="docutils literal notranslate"><span class="pre">insert_image()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.markdown_await_user"><code class="docutils literal notranslate"><span class="pre">markdown_await_user()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.send_to_parent_chat"><code class="docutils literal notranslate"><span class="pre">send_to_parent_chat()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.task_result"><code class="docutils literal notranslate"><span class="pre">task_result()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.tell_and_continue"><code class="docutils literal notranslate"><span class="pre">tell_and_continue()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.commands.wait_for_user_reply"><code class="docutils literal notranslate"><span class="pre">wait_for_user_reply()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.format_result_msgs">mindroot.coreplugins.chat.format_result_msgs module</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.mod">mindroot.coreplugins.chat.mod module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.mod.startup"><code class="docutils literal notranslate"><span class="pre">startup()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.models">mindroot.coreplugins.chat.models module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart"><code class="docutils literal notranslate"><span class="pre">ImageMessagePart</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart.data"><code class="docutils literal notranslate"><span class="pre">ImageMessagePart.data</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart.model_config"><code class="docutils literal notranslate"><span class="pre">ImageMessagePart.model_config</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.ImageMessagePart.type"><code class="docutils literal notranslate"><span class="pre">ImageMessagePart.type</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart"><code class="docutils literal notranslate"><span class="pre">TextMessagePart</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart.model_config"><code class="docutils literal notranslate"><span class="pre">TextMessagePart.model_config</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart.text"><code class="docutils literal notranslate"><span class="pre">TextMessagePart.text</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.models.TextMessagePart.type"><code class="docutils literal notranslate"><span class="pre">TextMessagePart.type</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.router">mindroot.coreplugins.chat.router module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.TaskRequest"><code class="docutils literal notranslate"><span class="pre">TaskRequest</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.TaskRequest.instructions"><code class="docutils literal notranslate"><span class="pre">TaskRequest.instructions</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.TaskRequest.model_config"><code class="docutils literal notranslate"><span class="pre">TaskRequest.model_config</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.cancel_chat"><code class="docutils literal notranslate"><span class="pre">cancel_chat()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.chat_events"><code class="docutils literal notranslate"><span class="pre">chat_events()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.chat_history"><code class="docutils literal notranslate"><span class="pre">chat_history()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.chat_session"><code class="docutils literal notranslate"><span class="pre">chat_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.context1"><code class="docutils literal notranslate"><span class="pre">context1()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.delete_chat_session"><code class="docutils literal notranslate"><span class="pre">delete_chat_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.get_chat_html"><code class="docutils literal notranslate"><span class="pre">get_chat_html()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.get_persona_avatar"><code class="docutils literal notranslate"><span class="pre">get_persona_avatar()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.get_persona_faceref"><code class="docutils literal notranslate"><span class="pre">get_persona_faceref()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.get_token_count"><code class="docutils literal notranslate"><span class="pre">get_token_count()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.get_token_count_alt"><code class="docutils literal notranslate"><span class="pre">get_token_count_alt()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.make_session"><code class="docutils literal notranslate"><span class="pre">make_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.run_task_route"><code class="docutils literal notranslate"><span class="pre">run_task_route()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.send_message"><code class="docutils literal notranslate"><span class="pre">send_message()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.router.upload_file"><code class="docutils literal notranslate"><span class="pre">upload_file()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot-coreplugins-chat-router-dedup-patch-module">mindroot.coreplugins.chat.router_dedup_patch module</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.services">mindroot.coreplugins.chat.services module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.add_current_time"><code class="docutils literal notranslate"><span class="pre">add_current_time()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.agent_output"><code class="docutils literal notranslate"><span class="pre">agent_output()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.append_message"><code class="docutils literal notranslate"><span class="pre">append_message()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.close_chat_session"><code class="docutils literal notranslate"><span class="pre">close_chat_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.command_result"><code class="docutils literal notranslate"><span class="pre">command_result()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.finished_chat"><code class="docutils literal notranslate"><span class="pre">finished_chat()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.get_chat_history"><code class="docutils literal notranslate"><span class="pre">get_chat_history()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.init_chat_session"><code class="docutils literal notranslate"><span class="pre">init_chat_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.partial_command"><code class="docutils literal notranslate"><span class="pre">partial_command()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.process_result"><code class="docutils literal notranslate"><span class="pre">process_result()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.prompt"><code class="docutils literal notranslate"><span class="pre">prompt()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.quit"><code class="docutils literal notranslate"><span class="pre">quit()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.results_output"><code class="docutils literal notranslate"><span class="pre">results_output()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.results_text"><code class="docutils literal notranslate"><span class="pre">results_text()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.results_text_output"><code class="docutils literal notranslate"><span class="pre">results_text_output()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.run_task"><code class="docutils literal notranslate"><span class="pre">run_task()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.running_command"><code class="docutils literal notranslate"><span class="pre">running_command()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.send_message_to_agent"><code class="docutils literal notranslate"><span class="pre">send_message_to_agent()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.services.subscribe_to_agent_messages"><code class="docutils literal notranslate"><span class="pre">subscribe_to_agent_messages()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.utils">mindroot.coreplugins.chat.utils module</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.widget_manager">mindroot.coreplugins.chat.widget_manager module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager"><code class="docutils literal notranslate"><span class="pre">WidgetManager</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.create_widget_token"><code class="docutils literal notranslate"><span class="pre">WidgetManager.create_widget_token()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.delete_widget_token"><code class="docutils literal notranslate"><span class="pre">WidgetManager.delete_widget_token()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.get_widget_config"><code class="docutils literal notranslate"><span class="pre">WidgetManager.get_widget_config()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.list_widget_tokens"><code class="docutils literal notranslate"><span class="pre">WidgetManager.list_widget_tokens()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_manager.WidgetManager.validate_token"><code class="docutils literal notranslate"><span class="pre">WidgetManager.validate_token()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat.widget_routes">mindroot.coreplugins.chat.widget_routes module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.agent_name"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.agent_name</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.api_key"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.api_key</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.base_url"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.base_url</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.description"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.description</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.model_config"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.model_config</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.styling"><code class="docutils literal notranslate"><span class="pre">WidgetTokenCreate.styling</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.agent_name"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.agent_name</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.base_url"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.base_url</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_at"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.created_at</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.created_by"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.created_by</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.description"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.description</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.model_config"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.model_config</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.styling"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.styling</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.token"><code class="docutils literal notranslate"><span class="pre">WidgetTokenResponse.token</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.create_widget_session"><code class="docutils literal notranslate"><span class="pre">create_widget_session()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.create_widget_token"><code class="docutils literal notranslate"><span class="pre">create_widget_token()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.delete_widget_token"><code class="docutils literal notranslate"><span class="pre">delete_widget_token()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.get_embed_script"><code class="docutils literal notranslate"><span class="pre">get_embed_script()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.chat.widget_routes.list_widget_tokens"><code class="docutils literal notranslate"><span class="pre">list_widget_tokens()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.chat">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=3c16008f"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
