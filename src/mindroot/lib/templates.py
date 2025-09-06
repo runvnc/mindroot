@@ -1,6 +1,7 @@
 import os
 import logging
 from jinja2 import Environment, FileSystemLoader, ChoiceLoader
+import re
 from .plugins import list_enabled, get_plugin_path
 from .parent_templates import get_parent_templates_env
 import traceback
@@ -227,6 +228,7 @@ async def find_parent_template(page_name, plugins):
                                 return rel_path
                     return alt_path
     return None
+
 async def find_plugin_template(page_name, plugins):
     """Find a template in a plugin's templates directory.
     
@@ -306,9 +308,6 @@ async def load_plugin_templates(page_name, plugins):
                         #print(f"Found inject template at: {path}")
                         templates.append({'type': 'inject', 'template': env.from_string(content)})
                         break
-                #else:
-                #
-                #    print(f"Inject template not found at: {path}")
             
             # Check override templates
             override_paths = [
@@ -323,8 +322,16 @@ async def load_plugin_templates(page_name, plugins):
                     # Load template content with translation support
                     content = load_template_with_translation(path)
                     if content:
-                        #print(f"Found override template at: {path}")
-                        templates.append({'type': 'override', 'template': env.from_string(content)})
+                        # Detect top-of-file pragma to assume unspecified blocks are blank
+                        # Accepted forms (case-insensitive):
+                        #   {# assume-blank #}, {# assume_blank #}, {# assume-blank: true #}, {# assume_blank: true #}
+                        assume_blank = False
+                        head = content[:2048]
+                        pragma_re = re.compile(r"^\s*\{#\s*(assume[-_]blank)(?:\s*true)?\s*#\}\s*", re.IGNORECASE | re.MULTILINE)
+                        if pragma_re.search(head):
+                            assume_blank = True
+                            content = pragma_re.sub("", content, count=1)
+                        templates.append({'type': 'override', 'template': env.from_string(content), 'assume_blank': assume_blank})
                         break
                         
         except Exception as e:
@@ -332,7 +339,7 @@ async def load_plugin_templates(page_name, plugins):
             continue
     return templates
 
-async def collect_content(template, blocks, template_type, data):
+async def collect_content(template, blocks, template_type, data, assume_blank=False):
     """Collect content from child templates.
     
     Args:
@@ -340,19 +347,30 @@ async def collect_content(template, blocks, template_type, data):
         blocks (list): List of block names
         template_type (str): Type of template ('inject' or 'override')
         data (dict): Template context data
+        assume_blank (bool): If True and type is 'override', unspecified blocks are blanked
         
     Returns:
         dict: Collected content by block
     """
     content = {block: {'inject': [], 'override': None} for block in blocks}
+    
+    # Get blocks that are actually defined in this template
+    defined_blocks = set(template.blocks.keys())
+    
     for block in blocks:
-        if block in template.blocks:
+        if block in defined_blocks:
+            # Block is explicitly defined in the template
             block_content = ''.join(template.blocks[block](template.new_context(data)))
- 
+            
             if template_type == 'override':
                 content[block]['override'] = block_content
             else:
                 content[block]['inject'].append(block_content)
+        elif template_type == 'override' and assume_blank:
+            # Block is NOT defined in override template, but assume_blank is True
+            # So we treat it as if it was defined but empty
+            content[block]['override'] = ''
+    
     return content
 
 async def render_combined_template(page_name, plugins, context):
@@ -366,6 +384,35 @@ async def render_combined_template(page_name, plugins, context):
     Returns:
         str: Rendered HTML
     """
+    # Check for assume-blank pragma and render directly if found
+    for plugin in plugins:
+        plugin_path = get_plugin_path(plugin)
+        if not plugin_path:
+            continue
+            
+        last_part = plugin_path.split('/')[-1]
+        override_paths = [
+            os.path.join(plugin_path, 'override', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', plugin, 'override', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', 'override', f'{page_name}.jinja2'),
+            os.path.join(plugin_path, 'src', last_part, 'override', f'{page_name}.jinja2')
+        ]
+        
+        for path in override_paths:
+            if os.path.exists(path):
+                content = load_template_with_translation(path)
+                if content:
+                    # Check for assume-blank pragma
+                    head = content[:2048]
+                    pragma_re = re.compile(r"^\s*\{#\s*(assume[-_]blank)(?:\s*true)?\s*#\}\s*", re.IGNORECASE | re.MULTILINE)
+                    if pragma_re.search(head):
+                        # Found assume-blank! Just render this template directly
+                        print(f"Found assume-blank pragma in {path}, rendering directly without parent")
+                        content = pragma_re.sub("", content, count=1)  # Remove pragma
+                        template = env.from_string(content)
+                        return template.render(**context)  # Return early!
+    
+    # If no assume-blank pragma found, continue with normal processing
     # Load parent template with translation support
     parent_template = None
     parent_template_path = None
@@ -410,21 +457,23 @@ async def render_combined_template(page_name, plugins, context):
 
     for child_template_info in child_templates:
         print("calling collect_content")
+        # Pass assume_blank flag to collect_content
         child_content = await collect_content(
             child_template_info['template'],
             parent_blocks,
             child_template_info['type'],
-            context
+            context,
+            child_template_info.get('assume_blank', False)
         )
         for block, content in child_content.items():
-            if content['override']:
+            if content['override'] is not None:  # Check for None specifically, empty string is valid
                 all_content[block]['override'] = content['override']
             else:
                 all_content[block]['inject'].extend(content['inject'])
 
     combined_template_str = '{% extends layout_template %}\n'
     for block in all_content:
-        if all_content[block]['override']:
+        if all_content[block]['override'] is not None:  # Check for None, empty string is valid override
             combined_template_str += f'{{% block {block} %}}\n    {{{{ combined_{block}_override|safe }}}}\n{{% endblock %}}\n'
         else:
             combined_template_str += f'{{% block {block} %}}\n  {{{{ super() }}}}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
@@ -446,7 +495,7 @@ async def render_combined_template(page_name, plugins, context):
         else:
             combined_inject[f'combined_{block}_inject'] = ''
 
-        if 'override' in content and content['override']:
+        if 'override' in content and content['override'] is not None:
             combined_override[f'combined_{block}_override'] = content['override']
 
     print("in render combined, context is", context)

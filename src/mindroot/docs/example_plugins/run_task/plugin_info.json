@@ -1,0 +1,7 @@
+{
+  "name": "Run Task example",
+  "version": "0.1.0",
+  "description": "Shows how to submit and wait for an agent to complete a task and display the result",
+  "services": [],
+  "commands": []
+}

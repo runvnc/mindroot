@@ -1,0 +1,73 @@
+{# assume-blank #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Task</title>
+
+<style>
+
+html, body, * {
+  color: white;
+  background: black;
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  margin: 20px;
+  padding: 20px;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+div, textarea, button {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+</style>
+
+</head>
+<body>
+What should the agent display below?
+<textarea id="task" rows="4" cols="50"></textarea>
+
+<button id="go">Run Task</button>
+
+<div id="spinner" class="spinner" style="display:none;"></div>
+
+<div id="result"></div>
+
+<script type="module">
+  import axios from 'https://cdn.skypack.dev/redaxios';
+  const $ = (id) => document.getElementById(id);
+
+  $('go').addEventListener('click', async () => {
+    const instructions = `Output ONLY html snippet to display "${$('task').value}" (be brief)`;
+    try {
+      $('spinner').style.display = 'block';
+      const {data: {results}} = await axios.post('/task/Assistant', { instructions });
+      $('spinner').style.display = 'none';
+      $('result').innerHTML = results;
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
+
+</script>
+</body>
+</html>
