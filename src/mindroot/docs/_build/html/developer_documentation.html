@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="User Documentation" href="user_documentation.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Give Assistant a Programming Task" href="programming_task.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
         <title>Developer Documentation - MindRoot 9.10.0 documentation</title>
@@ -205,7 +205,16 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="user_documentation.html">User Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="starting_mindroot.html">Starting MindRoot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="llm_plugin_installation.html">LLM Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="llm_api_key.html">LLM API Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chat_with_assistant.html">Chat with Assistant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_plugins_with_tools.html">Install Plugins with Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="programming_task.html">Give Assistant a Programming Task</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul class="current">
@@ -253,6 +262,36 @@
           <section id="developer-documentation">
 <h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Link to this heading">¶</a></h1>
 <p>This section contains documentation for developers working with MindRoot.</p>
+<section id="plugin-examples">
+<h2>Plugin Examples<a class="headerlink" href="#plugin-examples" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container" id="id2">
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Example Plugins</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 40.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Override Home Page example</p></td>
+<td><p>Demonstrates how to override the default home page template.</p></td>
+<td><p><a class="reference external" href="https://github.com/runvnc/mindroot/blob/main/src/mindroot/docs/example_plugins/override_home/src/override_home/override/home.jinja2">home.jinja2</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Run Task example</p></td>
+<td><p>Shows how to submit a task to an agent, wait for completion, and display the result.</p></td>
+<td><p><a class="reference external" href="https://github.com/runvnc/mindroot/blob/main/src/mindroot/docs/example_plugins/run_task/src/run_task/override/home.jinja2">home.jinja2</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note the specific directory structure.</p>
+</section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
 </section>
@@ -273,14 +312,14 @@
         
         <div class="related-pages">
           
-          <a class="prev-page" href="user_documentation.html">
+          <a class="prev-page" href="programming_task.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">User Documentation</div>
+                <div class="title">Give Assistant a Programming Task</div>
                 
               </div>
             </a>
@@ -315,6 +354,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Developer Documentation</a><ul>
+<li><a class="reference internal" href="#plugin-examples">Plugin Examples</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 <li><a class="reference internal" href="#plugin-development">Plugin Development</a></li>
 <li><a class="reference internal" href="#contributing">Contributing</a></li>

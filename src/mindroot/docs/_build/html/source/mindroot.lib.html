@@ -1516,7 +1516,7 @@ await load(app)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.lib.templates.collect_content">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.lib.templates.</span></span><span class="sig-name descname"><span class="pre">collect_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/lib/templates.html#collect_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.templates.collect_content" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.lib.templates.</span></span><span class="sig-name descname"><span class="pre">collect_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_blank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/lib/templates.html#collect_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.templates.collect_content" title="Link to this definition">¶</a></dt>
 <dd><p>Collect content from child templates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1525,6 +1525,7 @@ await load(app)</p>
 <li><p><strong>blocks</strong> (<em>list</em>) – List of block names</p></li>
 <li><p><strong>template_type</strong> (<em>str</em>) – Type of template (‘inject’ or ‘override’)</p></li>
 <li><p><strong>data</strong> (<em>dict</em>) – Template context data</p></li>
+<li><p><strong>assume_blank</strong> (<em>bool</em>) – If True and type is ‘override’, unspecified blocks are blanked</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
