@@ -347,16 +347,49 @@ async def delegate_subtask(subtask_id, details:str, agent=None, context=None):
     If agent is not specified, the current agent name will be used for the subtask.
    
     Example:
+
+    Given a checklist with subtasks like:
+      
+      - Research 
+         ...
+    
+      - Draft
+         ...
+    
+      - Complete
+         ..
+
+    Suppose you had already created /data/sess_1234.
+    You might initiate work on the first subtask with this command:
+
     { "delegate_subtask": { "subtask_id": "Research", 
                             "details": "Session data in /data/sess_1234/" }} 
 
     """
-        current_task = st["tasks"][idx]
-        subtask = current_task["body"]
-        instructions = f"You are working as part of a multi-step process. Please complete the following subtask:\n\n{subtask}"
-        if agent is None:
-            agent_name = context.agent["name"]
-        else:
-            agent_name = agent
-        return await command_manager.delegate_task(instructions, agent_name, context=context)
- 
+    st = _state(context)
+    if not st["tasks"]:
+        try:
+            print("Loading checklist from instructions...")
+            print("Agent is")
+            print(context.agent)
+            instructions = context.agent["instructions"]
+            await load_checklist_from_instructions(instructions, context)
+        except Exception as e:
+            print(f"Error loading checklist: {e}")
+            trace = traceback.format_exc()
+            print(trace)
+            return "_No checklist found. Make sure to include a checklist in your instructions._"
+    idx = _resolve_subtask_id(subtask_id, context)
+    if idx < 0 or idx >= len(st["tasks"]):
+        return "_Invalid subtask identifier._"
+    current_task = st["tasks"][idx]
+    subtask = current_task["body"]
+    reminder = """Important: you may see instructions for the full process. However, you are to ONLY 
+do the specified part of the process and then return a task result."""
+    instructions = f"You are working as part of a multi-step process. Please complete the following subtask:\n\n{subtask}\n\n{details}\n\n{reminder}\n"
+    if agent is None:
+        agent_name = context.agent["name"]
+    else:
+        agent_name = agent
+    return await command_manager.delegate_task(instructions, agent_name, context=context)
+
