@@ -23,7 +23,7 @@ as tools. No third‑party deps—only Python's `re` module.
 """
 
 import re
-from lib.providers.commands import command
+from lib.providers.commands import command, command_manager
 from lib.providers.services import service
 import traceback
 
@@ -336,3 +336,27 @@ async def get_checklist_status(context=None):
         return "_Context is required._"
     
     return _format_checklist_status(context)
+
+
+@command()
+async def delegate_subtask(subtask_id, details:str, agent=None, context=None):
+    """
+    Delegate a subtask to an agent, automatically passing the subtask body as
+    instructions, along with any details you add.
+
+    If agent is not specified, the current agent name will be used for the subtask.
+   
+    Example:
+    { "delegate_subtask": { "subtask_id": "Research", 
+                            "details": "Session data in /data/sess_1234/" }} 
+
+    """
+        current_task = st["tasks"][idx]
+        subtask = current_task["body"]
+        instructions = f"You are working as part of a multi-step process. Please complete the following subtask:\n\n{subtask}"
+        if agent is None:
+            agent_name = context.agent["name"]
+        else:
+            agent_name = agent
+        return await command_manager.delegate_task(instructions, agent_name, context=context)
+ 
