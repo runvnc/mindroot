@@ -365,6 +365,8 @@ async def delegate_subtask(subtask_id, details:str, agent=None, context=None):
     { "delegate_subtask": { "subtask_id": "Research", 
                             "details": "Session data in /data/sess_1234/" }} 
 
+    Note that you do not need to repeat the text of the subtask item from the checklist
+    in your details.
     """
     st = _state(context)
     if not st["tasks"]:
