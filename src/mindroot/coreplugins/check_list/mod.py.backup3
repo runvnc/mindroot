@@ -1,16 +1,25 @@
 """
-checklist helper for an LLM-agent system
-————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+checklist helper for an LLM‑agent system
+—————————————————————————————————————————————————————————————————————————————
 Purpose
 -------
+• Parse a Markdown "##\tChecklist" section where each subtask is
+  written as a task‑list line:
 
-• Parse a Markdown checklist section where each subtask is written as a task-list line
-• Store parsed tasks + cursor in `context.data['checklist']`
-• Support nested subtasks within parent task bodies
-• Runtime helpers for managing both top-level and nested subtasks
+      - [ ] label of subtask
+          arbitrary markdown body… (until next task or heading)
+
+• Store parsed tasks + cursor in `context.data['checklist']`.
+
+• Runtime helpers:
+    load_checklist(md, ctx)   → parse markdown + reset state
+    complete_subtask(subtask_id, context)  → mark subtask done, advance cursor
+    goto_subtask(subtask_id, context)  → move to a specific subtask
+    clear_subtask(subtask_id, context)  → mark a subtask as incomplete
+    get_checklist_status(context)  → show the full checklist status
 
 `complete_subtask` and other commands live at module level so the agent can call them
-as tools. No third-party deps—only Python's `re` module.
+as tools. No third‑party deps—only Python's `re` module.
 """
 
 import re
@@ -18,14 +27,6 @@ from lib.providers.commands import command, command_manager
 from lib.providers.services import service
 import traceback
 from collections import Counter
-from .helpers import (
-    find_nested_subtask, 
-    update_nested_subtask_status,
-    resolve_subtask_id_with_nesting,
-    format_nested_task_status,
-    get_next_incomplete_task,
-    has_incomplete_nested_tasks
-)
 
 # ---------- simple parsing -----------------------------------------------
 
@@ -149,6 +150,9 @@ async def load_checklist_from_instructions(md: str, context=None):
     """Load checklist from instructions.
     
     Processes the entire text and extracts top-level checklist items.
+    
+    Example:
+    { "load_checklist_from_instructions": { "md": "Full instructions with embedded checklist" } }
     """
     checklist_section = extract_checklist_section(md)
     load_checklist(checklist_section, context)
@@ -158,17 +162,31 @@ async def load_checklist_from_instructions(md: str, context=None):
 # ---------- helper functions ---------------------------------------------
 
 def _resolve_subtask_id(subtask_id, context):
-    """Resolve a subtask_id to an index (0-based) with nested task support.
+    """Resolve a subtask_id to an index (0-based).
     
     subtask_id can be:
     - A number (1-based index, converted to 0-based)
-    - A string matching a subtask label (top-level or nested)
+    - A string matching a subtask label
     - None/default (-1) to use the current cursor position
-    
-    Returns tuple of (index, nested_info) where nested_info is None for top-level tasks
     """
     st = _state(context)
-    return resolve_subtask_id_with_nesting(subtask_id, st["tasks"], st["cursor"])
+    
+    # Default to current cursor position
+    if subtask_id is None or subtask_id == -1:
+        return st["cursor"]
+    
+    # If it's a number, convert from 1-based to 0-based
+    if isinstance(subtask_id, int):
+        idx = subtask_id - 1
+    else:
+        # It's a string, try to find a matching label
+        for i, task in enumerate(st["tasks"]):
+            if task["label"] == subtask_id:
+                return i
+        # No match found
+        return -1
+    
+    return idx
 
 
 def _format_checklist_status(context):
@@ -190,34 +208,25 @@ def _format_checklist_status(context):
         
         # Add task line
         lines.append(f"{status}**Subtask**: {task['label']}")
-        
-        # Show nested task status if any
-        nested_tasks = _parse(task['body'])
-        if nested_tasks:
-            for nested_task in nested_tasks:
-                nested_status = "✅" if nested_task["done"] else "❌"
-                lines.append(f"  {nested_status} {nested_task['label']}")
     
     return "\n".join(lines)
 
 
-# ---------- module-level tool commands ----------------------------------
+# ---------- module‑level tool commands ----------------------------------
 
 @command()
 async def complete_subtask(subtask_id=None, context=None):
     """
     Mark a subtask complete and return a Markdown status message.
-    Now supports both top-level and nested subtasks.
     
     Parameters:
     - subtask_id: Optional. The subtask to complete, specified by:
-                 - The exact subtask label text (top-level or nested)
+                 - The exact subtask label text
                  - Omit to complete the current subtask
     
     Example:
     { "complete_subtask": {} }  # Complete current subtask
     { "complete_subtask": { "subtask_id": "Review documents" } }  # Complete by label
-    { "complete_subtask": { "subtask_id": "USP" } }  # Complete nested subtask
     """
     if context is None:
         return "_Context is required._"
@@ -236,56 +245,19 @@ async def complete_subtask(subtask_id=None, context=None):
             print(trace)
             return "_No checklist found. Make sure to include a checklist in your instructions._"
     
-    idx, nested_info = _resolve_subtask_id(subtask_id, context)
+    idx = _resolve_subtask_id(subtask_id, context)
     if idx < 0 or idx >= len(st["tasks"]):
         return "_Invalid subtask identifier._"
 
-    # Handle nested subtask completion
-    if nested_info is not None:
-        # Mark nested subtask as done
-        nested_info['nested_task']['done'] = True
-        
-        # Update the parent task's body with the new nested task status
-        parent_task = st["tasks"][idx]
-        updated_body = update_nested_subtask_status(
-            parent_task, 
-            nested_info['nested_index'], 
-            nested_info['parent_nested_tasks'], 
-            True
-        )
-        parent_task['body'] = updated_body
-        
-        # Check if all nested tasks in this parent are complete
-        all_nested_complete = all(task['done'] for task in nested_info['parent_nested_tasks'])
-        if all_nested_complete:
-            parent_task['done'] = True
-            # Advance cursor to next incomplete top-level task
-            st["cursor"] = get_next_incomplete_task(st["tasks"], idx + 1)
-        
-        completed_msg = f"Completed Nested Subtask: - [x] {nested_info['nested_task']['label']} (within '{parent_task['label']}')"
-        
-        if all_nested_complete:
-            completed_msg += f"\n\nParent task '{parent_task['label']}' is now complete!"
-        
-        # Show next task info
-        if st["cursor"] >= len(st["tasks"]):
-            return f"{completed_msg}\n\nAll subtasks complete ✅\n\n{_format_checklist_status(context)}"
-        
-        next_task = st["tasks"][st['cursor']]
-        return f"""{completed_msg}
-
-Next subtask (Subtask {st['cursor']+1})
-- [ ] {next_task['label']}
-{next_task['body']}
-
-{_format_checklist_status(context)}"""
-    
-    # Handle top-level subtask completion
+    # mark as done
     done_task = st["tasks"][idx]
     done_task["done"] = True
 
     # advance cursor to next open subtask
-    st["cursor"] = get_next_incomplete_task(st["tasks"], idx + 1)
+    st["cursor"] = next(
+        (i for i, t in enumerate(st["tasks"][idx + 1:], idx + 1) if not t["done"]),
+        len(st["tasks"]),
+    )
 
     # build markdown response
     completed = f"Completed Subtask {idx+1}: - [x] {done_task['label']}"
@@ -293,28 +265,27 @@ Next subtask (Subtask {st['cursor']+1})
         return f"{completed}\n\nAll subtasks complete ✅\n\n{_format_checklist_status(context)}"
 
     next_task = st["tasks"][st['cursor']]
-    return f"""{completed}
+    return f"""
+            {completed}
 
-Next subtask (Subtask {st['cursor']+1})
-- [ ] {next_task['label']}
-{next_task['body']}
+            Next subtask (Subtask {st['cursor']+1})
+            - [ ] {next_task['label']}
+            {next_task['body']}
 
-{_format_checklist_status(context)}"""
-
+            {_format_checklist_status(context)}
+            """
 
 @command()
 async def goto_subtask(subtask_id, context=None):
     """
     Move to a specific subtask without changing its completion status.
-    Now supports both top-level and nested subtasks.
     
     Parameters:
     - subtask_id: Required. The subtask to navigate to, specified by:
-                 - The exact subtask label text (top-level or nested)
+                 - The exact subtask label text
     
     Example:
-    { "goto_subtask": { "subtask_id": "Data analysis" } }  # Go to top-level task
-    { "goto_subtask": { "subtask_id": "USP" } }  # Go to nested task
+    { "goto_subtask": { "subtask_id": "Data analysis" } }  # Go to by label
     """
     if context is None:
         return "_Context is required._"
@@ -323,22 +294,17 @@ async def goto_subtask(subtask_id, context=None):
     if not st["tasks"]:
         return "_No checklist found. Make sure to include a checklist in your instructions._"
     
-    idx, nested_info = _resolve_subtask_id(subtask_id, context)
+    idx = _resolve_subtask_id(subtask_id, context)
     if idx < 0 or idx >= len(st["tasks"]):
         return "_Invalid subtask identifier._"
     
-    # Update cursor position to the parent task
+    # Update cursor position
     st["cursor"] = idx
     
-    # Handle nested subtask navigation
-    if nested_info is not None:
-        return (
-            f"Moved to Nested Subtask: {format_nested_task_status(nested_info)}\n\n"
-            f"{_format_checklist_status(context)}"
-        )
-    
-    # Handle top-level subtask navigation
+    # Get the current task
     current_task = st["tasks"][idx]
+    
+    # Build response
     status = "✅" if current_task["done"] else "❌"
     return (
         f"Moved to Subtask {idx+1}: {status} {current_task['label']}\n"
@@ -351,17 +317,15 @@ async def goto_subtask(subtask_id, context=None):
 async def clear_subtask(subtask_id=None, context=None):
     """
     Mark a subtask as incomplete (not done).
-    Now supports both top-level and nested subtasks.
     
     Parameters:
     - subtask_id: Optional. The subtask to clear, specified by:
-                 - The exact subtask label text (top-level or nested)
+                 - The exact subtask label text
                  - Omit to clear the current subtask
     
     Example:
     { "clear_subtask": {} }  # Clear current subtask
-    { "clear_subtask": { "subtask_id": "Review documents" } }  # Clear top-level by label
-    { "clear_subtask": { "subtask_id": "USP" } }  # Clear nested subtask
+    { "clear_subtask": { "subtask_id": "Review documents" } }  # Clear by label
     """
     if context is None:
         return "_Context is required._"
@@ -370,43 +334,11 @@ async def clear_subtask(subtask_id=None, context=None):
     if not st["tasks"]:
         return "_No checklist found. Make sure to include a checklist in your instructions._"
     
-    idx, nested_info = _resolve_subtask_id(subtask_id, context)
+    idx = _resolve_subtask_id(subtask_id, context)
     if idx < 0 or idx >= len(st["tasks"]):
         return "_Invalid subtask identifier._"
     
-    # Handle nested subtask clearing
-    if nested_info is not None:
-        # Mark nested subtask as not done
-        nested_task = nested_info['nested_task']
-        was_done = nested_task['done']
-        nested_task['done'] = False
-        
-        # Update the parent task's body
-        parent_task = st["tasks"][idx]
-        updated_body = update_nested_subtask_status(
-            parent_task, 
-            nested_info['nested_index'], 
-            nested_info['parent_nested_tasks'], 
-            False
-        )
-        parent_task['body'] = updated_body
-        
-        # If parent was complete but now has incomplete nested tasks, mark parent incomplete
-        if parent_task['done'] and has_incomplete_nested_tasks(parent_task):
-            parent_task['done'] = False
-        
-        # Update cursor to this parent task if needed
-        if idx <= st["cursor"]:
-            st["cursor"] = idx
-        
-        action = "Cleared" if was_done else "Already clear"
-        return (
-            f"{action} Nested Subtask: - [ ] {nested_task['label']} (within '{parent_task['label']}')\n"
-            f"Current subtask is now Subtask {st['cursor']+1}\n\n"
-            f"{_format_checklist_status(context)}"
-        )
-    
-    # Handle top-level subtask clearing
+    # Mark as not done
     task = st["tasks"][idx]
     was_done = task["done"]
     task["done"] = False
@@ -442,7 +374,6 @@ async def get_checklist_status(context=None):
 async def get_parsed_subtasks(subtask_id=None, context=None):
     """
     Return parsed subtasks with their name/id and body for verification.
-    Now supports getting nested subtasks from within parent tasks.
     
     Parameters:
     - subtask_id: Optional. If provided, parse subtasks from the body of this specific subtask.
@@ -457,7 +388,6 @@ async def get_parsed_subtasks(subtask_id=None, context=None):
     Example:
     { "get_parsed_subtasks": {} }  # Get all top-level subtasks
     { "get_parsed_subtasks": { "subtask_id": "Research phase" } }  # Get nested subtasks from "Research phase"
-    { "get_parsed_subtasks": { "subtask_id": "Core" } }  # Get nested subtasks from "Core"
     """
     if context is None:
         return "_Context is required._"
@@ -489,20 +419,13 @@ async def get_parsed_subtasks(subtask_id=None, context=None):
         }
     
     # Find the specified subtask and parse its body for nested subtasks
-    idx, nested_info = _resolve_subtask_id(subtask_id, context)
+    idx = _resolve_subtask_id(subtask_id, context)
     if idx < 0 or idx >= len(st["tasks"]):
         return "_Invalid subtask identifier._"
     
-    # If it's a nested subtask, get its nested tasks
-    if nested_info is not None:
-        target_task = nested_info['nested_task']
-        source_desc = f"nested subtasks from '{target_task['label']}' (within '{nested_info['parent_task']['label']}')"
-    else:
-        target_task = st["tasks"][idx]
-        source_desc = f"nested subtasks from '{target_task['label']}'"
-    
+    parent_task = st["tasks"][idx]
     print("Parsing nested subtasks from:", subtask_id)
-    nested_tasks = _parse(target_task["body"])
+    nested_tasks = _parse(parent_task["body"])
     
     result = []
     for i, task in enumerate(nested_tasks):
@@ -514,30 +437,42 @@ async def get_parsed_subtasks(subtask_id=None, context=None):
         })
     
     return {
-        "source": source_desc,
+        "source": f"nested subtasks from '{parent_task['label']}'",
         "parent_task": {
             "index": idx,
-            "label": target_task["label"],
-            "done": target_task["done"]
+            "label": parent_task["label"],
+            "done": parent_task["done"]
         },
         "subtasks": result
     }
 
 
 @command()
-async def delegate_subtask(subtask_id, details: str, agent=None, context=None):
+async def delegate_subtask(subtask_id, details:str, agent=None, context=None):
     """
     Delegate a subtask to an agent, automatically passing the subtask body as
     instructions, along with any details you add.
-    Now supports both top-level and nested subtasks.
 
     If agent is not specified, the current agent name will be used for the subtask.
    
     Example:
+
+    Given a checklist with subtasks like:
+      
+      - Research 
+         ...
+    
+      - Draft
+         ...
+    
+      - Complete
+         ..
+
+    Suppose you had already created /data/sess_1234.
+    You might initiate work on the first subtask with this command:
+
     { "delegate_subtask": { "subtask_id": "Research", 
                             "details": "Session data in /data/sess_1234/" }} 
-    { "delegate_subtask": { "subtask_id": "USP", 
-                            "details": "Focus on unique selling proposition analysis" }} 
 
     Note that you do not need to repeat the text of the subtask item from the checklist
     in your details.
@@ -555,33 +490,17 @@ async def delegate_subtask(subtask_id, details: str, agent=None, context=None):
             trace = traceback.format_exc()
             print(trace)
             return "_No checklist found. Make sure to include a checklist in your instructions._"
-    
-    idx, nested_info = _resolve_subtask_id(subtask_id, context)
+    idx = _resolve_subtask_id(subtask_id, context)
     if idx < 0 or idx >= len(st["tasks"]):
         return "_Invalid subtask identifier._"
-    
-    # Get the appropriate task body for delegation
-    if nested_info is not None:
-        # Delegating a nested subtask
-        current_task = nested_info['nested_task']
-        task_context = f"nested subtask '{current_task['label']}' within parent task '{nested_info['parent_task']['label']}'"
-    else:
-        # Delegating a top-level subtask
-        current_task = st["tasks"][idx]
-        task_context = f"subtask '{current_task['label']}'"
-    
-    subtask_body = current_task["body"]
-    
-    reminder = f"""Important: you may see instructions for the full process. However, you are to ONLY 
-do the specified part of the process and then return a task result.
-
-You are working on {task_context}."""
-    
-    instructions = f"You are working as part of a multi-step process. Please complete the following subtask:\n\n{subtask_body}\n\n{details}\n\n{reminder}\n"
-    
+    current_task = st["tasks"][idx]
+    subtask = current_task["body"]
+    reminder = """Important: you may see instructions for the full process. However, you are to ONLY 
+do the specified part of the process and then return a task result."""
+    instructions = f"You are working as part of a multi-step process. Please complete the following subtask:\n\n{subtask}\n\n{details}\n\n{reminder}\n"
     if agent is None:
         agent_name = context.agent["name"]
     else:
         agent_name = agent
-    
     return await command_manager.delegate_task(instructions, agent_name, context=context)
+
