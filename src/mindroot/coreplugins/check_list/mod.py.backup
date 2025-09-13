@@ -26,97 +26,46 @@ import re
 from lib.providers.commands import command, command_manager
 from lib.providers.services import service
 import traceback
-from collections import Counter
 
-# ---------- simple parsing -----------------------------------------------
+# ---------- parsing ------------------------------------------------------
 
-def _parse(text):
-    """Simple, robust checklist parser.
-    
-    Finds checklist items (- [ ] or - [x]) at any indentation level,
-    but only processes items at the same indentation as the first one found.
-    
-    Returns list of {label, body, done} dicts.
-    """
-    print("parsing:")
-    print("---------------------------------------------")
-    print(text)
-    print('---------------------------------------------')
-    lines = text.splitlines()
-    tasks = []
-    i = 0
-    first_task_indent = None
-    
-    # Find all task lines and their indentations first
-    task_indents = []
-    for line in lines:
-        stripped = line.lstrip()
-        if stripped.startswith('- [ ]') or stripped.startswith('- [x]') or stripped.startswith('- [X]'):
-            indent = len(line) - len(stripped)
-            task_indents.append(indent)
-    
-    if not task_indents:
-        return tasks
-    
-    # Use the SMALLEST indentation level as reference (top-level tasks)
-    reference_indent = min(task_indents)
-    print("reference indent:", reference_indent)
+# Only match top-level checklist items (no indentation at start of line)
+TASK_RE   = re.compile(r'^-\s*\[(?P<done>[ xX])\]\s*(?P<label>.*?)\s*$')
+HEADER_RE = re.compile(r'^#{1,6}\s')           # any Markdown heading
+CHECKLIST_HEADER_RE = re.compile(r'^#{1,6}\s+Checklist\b', re.IGNORECASE)  # Checklist heading
+
+def _parse(md: str):
+    """Extract tasks as a list of dicts: {label, body, done}."""
+    lines, tasks, i = md.splitlines(), [], 0
     while i < len(lines):
-        line = lines[i]
-        stripped = line.lstrip()
-        print(i)
-        # Check if this line is a checklist item
-        if stripped.startswith('- [ ]') or stripped.startswith('- [x]') or stripped.startswith('- [X]'):
-            # Calculate indentation
-            current_indent = len(line) - len(stripped)
-            print("found task at indent:", current_indent)
-            print("reference indent:", reference_indent)
-            # Only process tasks at the reference indentation level
-            if current_indent == reference_indent:
-                # Extract task info
-                done = stripped.startswith('- [x]') or stripped.startswith('- [X]')
-                
-                # Extract label (everything after the checkbox)
-                if stripped.startswith('- [ ]'):
-                    label = stripped[5:].strip()
-                else:  # - [x] or - [X]
-                    label = stripped[5:].strip()
-                
-                # Collect body lines until next task at same level or end
-                body_lines = []
-                i += 1
-                
-                while i < len(lines):
-                    print("checking line for body:",i, lines[i])
-                    next_line = lines[i]
-                    next_stripped = next_line.lstrip()
-                    next_indent = len(next_line) - len(next_stripped)
-                    print("next_stripped:", next_stripped)
-                    print("next_indent:", next_indent)
-                    print("reference_indent:", reference_indent)
-                    # Stop if we hit another task at the same indentation level
-                    if ((next_stripped.startswith('- [ ]') or 
-                         next_stripped.startswith('- [x]') or 
-                         next_stripped.startswith('- [X]')) and 
-                        next_indent <= reference_indent):
-                        break
-                    
-                    # Stop if we hit a markdown heading
-                    if next_stripped.startswith('#'):
-                        break
-                        
-                    body_lines.append(next_line)
-                    i += 1
-                
-                tasks.append({
-                    'label': label,
-                    'body': '\n'.join(body_lines), #.strip(),
-                    'done': done
-                })
-                continue
-        
+        # Skip lines that start with whitespace (nested items)
+        if lines[i].startswith(' ') or lines[i].startswith('\t'):
+            i += 1
+            continue
+        m = TASK_RE.match(lines[i])
+        if not m:                            # not a task‑list line
+            i += 1
+            continue
+
+        done  = m.group("done").strip().lower() in ("x", "✓")
+        label = m.group("label").strip()
+
+        # collect everything until next task or heading
+        body_lines = []
         i += 1
-    
+        while i < len(lines) and not (
+            # Stop at next top-level task or heading
+            (TASK_RE.match(lines[i]) and not (lines[i].startswith(' ') or lines[i].startswith('\t'))) or 
+            HEADER_RE.match(lines[i])
+        ):
+            body_lines.append(lines[i])
+            i += 1
+
+        tasks.append({
+            "label": label,
+            "body": "\n".join(body_lines).strip(),
+            "done": done,
+        })
     return tasks
 
 
@@ -126,7 +75,7 @@ def extract_checklist_section(md: str):
     No longer requires a specific 'Checklist' heading - processes the entire text
     and extracts only top-level checklist items, leaving nested ones intact.
     """
-    return md
+    return md  # Return the entire text for processing
 
 
 # ---------- state helpers ------------------------------------------------
@@ -368,83 +317,6 @@ async def get_checklist_status(context=None):
         return "_Context is required._"
     
     return _format_checklist_status(context)
-
-
-@command()
-async def get_parsed_subtasks(subtask_id=None, context=None):
-    """
-    Return parsed subtasks with their name/id and body for verification.
-    
-    Parameters:
-    - subtask_id: Optional. If provided, parse subtasks from the body of this specific subtask.
-                 If omitted, returns all top-level subtasks from the main checklist.
-    
-    Returns a list of dictionaries with:
-    - label: The subtask name/label
-    - body: The subtask body content
-    - done: Whether the subtask is marked as complete
-    - index: The 0-based index of the subtask
-    
-    Example:
-    { "get_parsed_subtasks": {} }  # Get all top-level subtasks
-    { "get_parsed_subtasks": { "subtask_id": "Research phase" } }  # Get nested subtasks from "Research phase"
-    """
-    if context is None:
-        return "_Context is required._"
-    
-    st = _state(context)
-    if not st["tasks"]:
-        try:
-            print("Loading checklist from instructions...")
-            instructions = context.agent["instructions"]
-            await load_checklist_from_instructions(instructions, context)
-            st = _state(context)  # Refresh state after loading
-        except Exception as e:
-            print(f"Error loading checklist: {e}")
-            return "_No checklist found. Make sure to include a checklist in your instructions._"
-    
-    # If no subtask_id provided, return all top-level subtasks
-    if subtask_id is None:
-        result = []
-        for i, task in enumerate(st["tasks"]):
-            result.append({
-                "index": i,
-                "label": task["label"],
-                "body": task["body"],
-                "done": task["done"]
-            })
-        return {
-            "source": "top-level checklist",
-            "subtasks": result
-        }
-    
-    # Find the specified subtask and parse its body for nested subtasks
-    idx = _resolve_subtask_id(subtask_id, context)
-    if idx < 0 or idx >= len(st["tasks"]):
-        return "_Invalid subtask identifier._"
-    
-    parent_task = st["tasks"][idx]
-    print("Parsing nested subtasks from:", subtask_id)
-    nested_tasks = _parse(parent_task["body"])
-    
-    result = []
-    for i, task in enumerate(nested_tasks):
-        result.append({
-            "index": i,
-            "label": task["label"],
-            "body": task["body"],
-            "done": task["done"]
-        })
-    
-    return {
-        "source": f"nested subtasks from '{parent_task['label']}'",
-        "parent_task": {
-            "index": idx,
-            "label": parent_task["label"],
-            "done": parent_task["done"]
-        },
-        "subtasks": result
-    }
 
 
 @command()

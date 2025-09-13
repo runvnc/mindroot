@@ -1,0 +1,14 @@
+{
+  "name": "Checklist Helper",
+  "version": "1.0.0",
+  "description": "Checklist helper for LLM-agent system with support for parsing, managing, and delegating subtasks",
+  "services": ["load_checklist_from_instructions"],
+  "commands": [
+    "complete_subtask",
+    "goto_subtask", 
+    "clear_subtask",
+    "get_checklist_status",
+    "get_parsed_subtasks",
+    "delegate_subtask"
+  ]
+}
