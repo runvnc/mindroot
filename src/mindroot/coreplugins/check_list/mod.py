@@ -572,8 +572,9 @@ async def delegate_subtask(subtask_id, details: str, agent=None, context=None):
     
     subtask_body = current_task["body"]
     
-    reminder = f"""Important: you may see instructions for the full process. However, you are to ONLY 
-do the specified part of the process and then return a task result.
+    reminder = f"""Important: you may see system instructions for the full process. However, you are to ONLY 
+do (or delegate) the specified part of the process and then return a task result. If you have a sub-checklist assigned,
+use delegate_subtask as needed for complex checklist items or per user instructions.
 
 You are working on {task_context}."""
     
