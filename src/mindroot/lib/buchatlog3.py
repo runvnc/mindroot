@@ -428,43 +428,7 @@ async def build_token_hierarchy(log_id: str, user: str = None, visited: set = No
         content = await f.read()
         log_data = json.loads(content)
     
-    # Check if we have cached individual counts for this specific session
-    cached_individual = await get_cached_token_counts(log_id, chatlog_path)
-    if cached_individual and 'input_tokens_sequence' in cached_individual:
-        print(f"Using cached individual token counts for session {log_id}")
-        individual_counts = {
-            'input_tokens_sequence': cached_individual['input_tokens_sequence'],
-            'output_tokens_sequence': cached_individual['output_tokens_sequence'],
-            'input_tokens_total': cached_individual['input_tokens_total']
-        }
-    else:
-        # Calculate individual counts for this session
-        if user is None:
-            try:
-                path_parts = chatlog_path.split(os.sep)
-                if len(path_parts) >= 4 and path_parts[-4] == 'chat':
-                    user = path_parts[-3]
-                else:
-                    user = "system"
-            except Exception:
-                user = "system"
-        
-        temp_log = ChatLog(log_id=log_id, user=user, agent=log_data.get('agent', 'unknown'))
-        temp_log.messages = log_data.get('messages', [])
-        
-        # Count tokens for this log only
-        individual_counts = temp_log.count_tokens()
-        
-        # Cache the individual session counts
-        individual_cache_data = {
-            'input_tokens_sequence': individual_counts['input_tokens_sequence'],
-            'output_tokens_sequence': individual_counts['output_tokens_sequence'],
-            'input_tokens_total': individual_counts['input_tokens_total']
-        }
-        await save_token_counts_to_cache(log_id, individual_cache_data)
-        print(f"Cached individual token counts for session {log_id}")
-    
-    # Find all child log IDs
+    # Create a temporary ChatLog instance to count tokens
     if user is None:
         try:
             path_parts = chatlog_path.split(os.sep)
@@ -477,6 +441,11 @@ async def build_token_hierarchy(log_id: str, user: str = None, visited: set = No
     
     temp_log = ChatLog(log_id=log_id, user=user, agent=log_data.get('agent', 'unknown'))
     temp_log.messages = log_data.get('messages', [])
+    
+    # Count tokens for this log only
+    individual_counts = temp_log.count_tokens()
+    
+    # Find all child log IDs
     delegated_log_ids = extract_delegate_task_log_ids(temp_log.messages)
     child_logs_by_parent = await find_child_logs_by_parent_id(log_id)
     all_child_log_ids = list(set(delegated_log_ids) | set(child_logs_by_parent))

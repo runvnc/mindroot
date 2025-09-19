@@ -17,7 +17,7 @@ if (!window.lastScrolled) window.lastScrolled = Date.now();
 
 window.lastScrolled = Date.now();
 
-const commandHandlers = {};
+window.commandHandlers = {};
 
 // Function to register command handlers
 window.registerCommandHandler = function(command, handler) {
@@ -205,7 +205,18 @@ class Chat extends BaseEl {
   }
 
   textParam (data) {
-    if (data.params.text) {
+    console.log('textParam', data);
+    if (typeof(data) == 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+      console.error('Could not parse data string:', e);
+      return data;
+      }
+    }
+    if (data.args.text) {
+      return data.args.text;
+    } else if (data.params.text) {
       return data.params.text;
       } else if (data.params.markdown) {
       return data.params.markdown;

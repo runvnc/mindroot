@@ -531,8 +531,14 @@ async def delegate_subtask(subtask_id, details: str, agent=None, context=None):
     instructions, along with any details you add.
     Now supports both top-level and nested subtasks.
 
+    IMPORTANT: You can only delegate ONE task a time.
+    You must wait for this task delegation to complete before issuing 
+    more delegate_subtask commands.
+
     If agent is not specified, the current agent name will be used for the subtask.
    
+    IMPORTANT: Subtask ID may only contain alphanumerics; all other special characters are invalid.
+
     Example:
     { "delegate_subtask": { "subtask_id": "Research", 
                             "details": "Session data in /data/sess_1234/" }} 
@@ -586,3 +592,4 @@ You are working on {task_context}."""
         agent_name = agent
     
     return await command_manager.delegate_task(instructions, agent_name, context=context)
+

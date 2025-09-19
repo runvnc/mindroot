@@ -465,7 +465,7 @@ class ChatForm extends BaseEl {
     if (this.messageEl.value.trim()) {
       messageContent.push({
         type: 'text',
-        text: this.messageEl.value.replaceAll("\n", "\n\n")
+        text: "\n" + this.messageEl.value.replaceAll("\n", "\n\n")
       })
     }
     
