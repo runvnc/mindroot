@@ -213,6 +213,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../chat_with_assistant.html">Chat with Assistant</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install_plugins_with_tools.html">Install Plugins with Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../programming_task.html">Give Assistant a Programming Task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../embed_chat.html">Embed Agent Chat on Your Website</a></li>
 </ul>
 </li>
 </ul>
@@ -850,15 +851,44 @@ Creates the directory if it doesn’t exist.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mindroot.lib.chatlog.build_token_hierarchy">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.lib.chatlog.</span></span><span class="sig-name descname"><span class="pre">build_token_hierarchy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visited</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/mindroot/lib/chatlog.html#build_token_hierarchy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.chatlog.build_token_hierarchy" title="Link to this definition">¶</a></dt>
+<dd><p>Build a hierarchical token count structure for a log and its children.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_id</strong> – The log ID to build hierarchy for</p></li>
+<li><p><strong>user</strong> – User for the log</p></li>
+<li><p><strong>visited</strong> – Set of already visited log IDs to prevent infinite recursion</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>log_id: The log ID</p></li>
+<li><p>individual_counts: Token counts for this log only</p></li>
+<li><p>cumulative_counts: Token counts including all children</p></li>
+<li><p>children: List of child hierarchies</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with hierarchical structure containing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mindroot.lib.chatlog.count_tokens_for_log_id">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.lib.chatlog.</span></span><span class="sig-name descname"><span class="pre">count_tokens_for_log_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/lib/chatlog.html#count_tokens_for_log_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.chatlog.count_tokens_for_log_id" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.lib.chatlog.</span></span><span class="sig-name descname"><span class="pre">count_tokens_for_log_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hierarchical</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/lib/chatlog.html#count_tokens_for_log_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.chatlog.count_tokens_for_log_id" title="Link to this definition">¶</a></dt>
 <dd><p>Count tokens for a chat log identified by log_id, including any delegated tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>log_id</strong> – The log ID to count tokens for</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary with token counts or None if log not found</p>
+<dd class="field-even"><p>Dictionary with token counts or None if log not found.
+If hierarchical=True, includes ‘hierarchy’ key with tree structure.
+If hierarchical=False (default), returns flat structure for backwards compatibility.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -866,7 +896,7 @@ Creates the directory if it doesn’t exist.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.lib.chatlog.extract_delegate_task_log_ids">
 <span class="sig-prename descclassname"><span class="pre">mindroot.lib.chatlog.</span></span><span class="sig-name descname"><span class="pre">extract_delegate_task_log_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mindroot/lib/chatlog.html#extract_delegate_task_log_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.chatlog.extract_delegate_task_log_ids" title="Link to this definition">¶</a></dt>
-<dd><p>Extract log IDs from delegate_task commands in messages.</p>
+<dd><p>Extract log IDs from delegate_task and delegate_subtask commands in messages.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>messages</strong> – List of chat messages</p>
@@ -1898,6 +1928,7 @@ Creates the directory if it doesn’t exist.</p>
 <li><a class="reference internal" href="#mindroot.lib.chatlog.ChatLog.save_log"><code class="docutils literal notranslate"><span class="pre">ChatLog.save_log()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#mindroot.lib.chatlog.build_token_hierarchy"><code class="docutils literal notranslate"><span class="pre">build_token_hierarchy()</span></code></a></li>
 <li><a class="reference internal" href="#mindroot.lib.chatlog.count_tokens_for_log_id"><code class="docutils literal notranslate"><span class="pre">count_tokens_for_log_id()</span></code></a></li>
 <li><a class="reference internal" href="#mindroot.lib.chatlog.extract_delegate_task_log_ids"><code class="docutils literal notranslate"><span class="pre">extract_delegate_task_log_ids()</span></code></a></li>
 <li><a class="reference internal" href="#mindroot.lib.chatlog.find_chatlog_file"><code class="docutils literal notranslate"><span class="pre">find_chatlog_file()</span></code></a></li>

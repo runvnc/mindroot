@@ -214,13 +214,13 @@ class Chat extends BaseEl {
       return data;
       }
     }
-    if (data.args.text) {
+    if (data?.args?.text) {
       return data.args.text;
-    } else if (data.params.text) {
+    } else if (data?.params?.text) {
       return data.params.text;
       } else if (data.params.markdown) {
-      return data.params.markdown;
-      } else if (data.params.extensive_chain_of_thoughts) {
+      return data?.params?.markdown;
+      } else if (data?.params?.extensive_chain_of_thoughts) {
       return data.params.extensive_chain_of_thoughts;
       }
     return JSON.stringify(data.params);

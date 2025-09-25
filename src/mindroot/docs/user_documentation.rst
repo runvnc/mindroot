@@ -3,6 +3,8 @@ User Documentation
 
 This section covers everything you need to get started with MindRoot as a user.
 
+Test
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -14,3 +16,6 @@ This section covers everything you need to get started with MindRoot as a user.
    chat_with_assistant
    install_plugins_with_tools
    programming_task
+   embed_chat 
+
+

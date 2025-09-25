@@ -22,7 +22,7 @@ Plugin Examples
      - Shows how to submit a task to an agent, wait for completion, and display the result.
      - `home.jinja2 <https://github.com/runvnc/mindroot/blob/main/src/mindroot/docs/example_plugins/run_task/src/run_task/override/home.jinja2>`_
 
-Note the specific directory structure.
+Note the specific directory structure, and the `{# assume-blank #}` comment at the top.
 
 
 API Reference

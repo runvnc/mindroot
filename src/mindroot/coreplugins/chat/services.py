@@ -297,8 +297,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                         context.current_model = context.data['llm']
     
                 parse_error = False
-
-                results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent())
+                max_tokens = os.environ.get("MR_MAX_TOKENS", 4000)
+                results, full_cmds = await agent_.chat_commands(context.current_model, context, messages=context.chat_log.get_recent(), max_tokens=max_tokens)
                 if results is not None:
                     try:
                         for result in results:
