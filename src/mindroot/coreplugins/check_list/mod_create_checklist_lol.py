@@ -204,6 +204,57 @@ def _format_checklist_status(context):
 # ---------- module-level tool commands ----------------------------------
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
+    if not tasks or not isinstance(tasks, list):
+        return "_Tasks parameter must be a non-empty list of task descriptions._"
+    
+    # Check if we should replace existing checklist
+    st = _state(context)
+    if not replace and st["tasks"]:
+        return "_Checklist already exists. Use replace=True to overwrite it._"
+    
+    # Convert task list to markdown checklist format
+    markdown_lines = []
+    if title:
+        markdown_lines.append(f"# {title}\n")
+    
+    for task_desc in tasks:
+        if not isinstance(task_desc, str):
+            return "_All tasks must be strings._"
+        markdown_lines.append(f"- [ ] {task_desc.strip()}")
+    
+    markdown_text = "\n".join(markdown_lines)
+    
+    # Use existing load_checklist function to parse and store
+    load_checklist(markdown_text, context)
+    
+    # Build response
+    title_text = f" '{title}'" if title else ""
+    return f"Created checklist{title_text} with {len(tasks)} tasks.\n\n{_format_checklist_status(context)}"
+
+
+@command()
 async def complete_subtask(subtask_id=None, context=None):
     """
     Mark a subtask complete and return a Markdown status message.
@@ -303,6 +354,28 @@ Next subtask (Subtask {st['cursor']+1})
 
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
 async def goto_subtask(subtask_id, context=None):
     """
     Move to a specific subtask without changing its completion status.
@@ -348,6 +421,28 @@ async def goto_subtask(subtask_id, context=None):
 
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
 async def clear_subtask(subtask_id=None, context=None):
     """
     Mark a subtask as incomplete (not done).
@@ -425,6 +520,28 @@ async def clear_subtask(subtask_id=None, context=None):
 
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
 async def get_checklist_status(context=None):
     """
     Show the full status of the checklist.
@@ -439,6 +556,28 @@ async def get_checklist_status(context=None):
 
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
 async def get_parsed_subtasks(subtask_id=None, context=None):
     """
     Return parsed subtasks with their name/id and body for verification.
@@ -525,6 +664,28 @@ async def get_parsed_subtasks(subtask_id=None, context=None):
 
 
 @command()
+async def create_checklist(tasks, title=None, replace=True, context=None):
+    """
+    Create a new checklist dynamically from a list of task descriptions.
+    
+    Parameters:
+    - tasks: Required. List of task description strings
+    - title: Optional. Title for the checklist (for display purposes)
+    - replace: Optional. Whether to replace existing checklist (default: True)
+    
+    Example:
+    { "create_checklist": { 
+        "tasks": [
+            "Research the topic",
+            "Create outline", 
+            "Write first draft",
+            "Review and edit"
+        ],
+        "title": "Article Writing Process"
+    }}
+    """
+    if context is None:
+        return "_Context is required._"
 async def delegate_subtask(subtask_id, details: str, agent=None, context=None):
     """
     Delegate a subtask to an agent, automatically passing the subtask body as
@@ -593,55 +754,3 @@ You are working on {task_context}."""
     
     return await command_manager.delegate_task(instructions, agent_name, context=context)
 
-
-
-@command()
-async def create_checklist(tasks, title=None, replace=True, context=None):
-    """
-    Create a new checklist dynamically from a list of task descriptions.
-    
-    Parameters:
-    - tasks: Required. List of task description strings
-    - title: Optional. Title for the checklist (for display purposes)
-    - replace: Optional. Whether to replace existing checklist (default: True)
-    
-    Example:
-    { "create_checklist": { 
-        "tasks": [
-            "Research the topic",
-            "Create outline", 
-            "Write first draft",
-            "Review and edit"
-        ],
-        "title": "Article Writing Process"
-    }}
-    """
-    if context is None:
-        return "_Context is required._"
-    
-    if not tasks or not isinstance(tasks, list):
-        return "_Tasks parameter must be a non-empty list of task descriptions._"
-    
-    # Check if we should replace existing checklist
-    st = _state(context)
-    if not replace and st["tasks"]:
-        return "_Checklist already exists. Use replace=True to overwrite it._"
-    
-    # Convert task list to markdown checklist format
-    markdown_lines = []
-    if title:
-        markdown_lines.append(f"# {title}\n")
-    
-    for task_desc in tasks:
-        if not isinstance(task_desc, str):
-            return "_All tasks must be strings._"
-        markdown_lines.append(f"- [ ] {task_desc.strip()}")
-    
-    markdown_text = "\n".join(markdown_lines)
-    
-    # Use existing load_checklist function to parse and store
-    load_checklist(markdown_text, context)
-    
-    # Build response
-    title_text = f" '{title}'" if title else ""
-    return f"Created checklist{title_text} with {len(tasks)} tasks.\n\n{_format_checklist_status(context)}"

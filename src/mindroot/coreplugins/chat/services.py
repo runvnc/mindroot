@@ -22,6 +22,7 @@ from io import BytesIO
 import base64
 import nanoid
 sse_clients = {}
+from lib.chatcontext import get_context
 
 @service()
 async def prompt(model: str, instructions: str, temperature=0, max_tokens=400, json=False, context=None):
@@ -485,3 +486,37 @@ async def command_result(command: str, result, context=None):
     agent_ = context.agent
     await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'] })
 
+@service()
+async def backend_user_message(message: str, context=None):
+    """
+    Insert a user message from the backend and signal the frontend to display it.
+    This allows backend processes to inject messages into the chat without user interaction.
+    """
+    agent_ = context.agent
+    persona = 'user'
+    await context.agent_output("backend_user_message", { 
+        "content": message, 
+        "sender": "user",
+        "persona": persona
+    })
+
+@service()
+async def cancel_active_response(log_id: str, context=None):
+    """
+    Cancel active AI response for eager end of turn processing.
+    Sets the finished_conversation flag to stop the agent processing loop.
+    """
+    if context is None:
+        # Get context from log_id - we need the username, but for SIP calls it might be 'system'
+        # Try to load context, fallback to system user if needed
+        try:
+            context = await get_context(log_id, 'system')
+        except Exception as e:
+            print(f"Error getting context for cancellation: {e}")
+            return {"status": "error", "message": f"Could not load context: {e}"}
+    
+    context.data['finished_conversation'] = True
+    await context.save_context()
+    
+    print(f"Cancelled active response for session {log_id}")
+    return {"status": "cancelled", "log_id": log_id}

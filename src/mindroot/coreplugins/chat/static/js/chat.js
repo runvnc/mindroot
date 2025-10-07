@@ -117,6 +117,7 @@ class Chat extends BaseEl {
     this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
     this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));
     this.sse.addEventListener('system_error', e=> thisError(e).catch(console.error));
+    this.sse.addEventListener('backend_user_message', this._backendUserMessage.bind(this));
 
     // when the user scrolls in the chat log, stop auto-scrolling to the bottom
     const chatLog = this.shadowRoot.querySelector('.chat-log');
@@ -144,6 +145,27 @@ class Chat extends BaseEl {
     showNotification('error', data.error);
   }
 
+  _backendUserMessage(event) {
+    console.log('Backend user message received:', event);
+    const data = JSON.parse(event.data);
+    const { content, sender, persona } = data;
+    
+    // Parse the content as markdown
+    const parsed = tryParse(content);
+    
+    // Add the message to the chat log
+    this.messages = [...this.messages, { 
+      content: parsed, 
+      spinning: 'no', 
+      sender: sender || 'user', 
+      persona: persona || 'user' 
+    }];
+    
+    // Scroll to show the new message
+    setTimeout(() => {
+      this._scrollToBottom();
+    }, 100);
+  }
   
 
   _addMessage(event) {
