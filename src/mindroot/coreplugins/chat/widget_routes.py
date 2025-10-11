@@ -241,6 +241,7 @@ async def get_embed_script(token: str):
                     iframe.style.cssText = "width: 100%; height: 100%; border: none; border-radius: 12px;";
                 }}
                 iframe.src = config.baseUrl + "/chat/widget/" + config.token + "/session";
+                iframe.allow = "microphone autoplay"
                 chatContainer.appendChild(iframe);
                 isLoaded = true;
             }}
