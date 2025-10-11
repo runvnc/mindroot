@@ -133,12 +133,6 @@ async def get_embed_script(token: str):
     let chatContainer = null;
     let chatIcon = null;
     let isLoaded = false;
-    let isMobile = false;
-
-    function detectMobile() {{
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera || "";
-        return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
-    }}
     
     function createChatIcon() {{
         if (chatIcon) return;
@@ -147,15 +141,13 @@ async def get_embed_script(token: str):
         chatIcon.id = "mindroot-chat-icon-" + config.token;
         chatIcon.innerHTML = "💬";
         
-        const iconSize = isMobile ? 80 : 60;
-        const fontSize = isMobile ? 28 : 24;
         const iconStyles = {{
             position: "fixed",
-            bottom: isMobile ? "30px" : "20px",
+            bottom: "20px",
             right: config.position.includes("left") ? "auto" : "20px",
             left: config.position.includes("left") ? "20px" : "auto",
-            width: iconSize + "px",
-            height: iconSize + "px",
+            width: "60px",
+            height: "60px",
             background: "#2196F3",
             borderRadius: "50%",
             display: "flex",
@@ -164,7 +156,7 @@ async def get_embed_script(token: str):
             cursor: "pointer",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
             zIndex: "10000",
-            fontSize: fontSize + "px",
+            fontSize: "24px",
             color: "white",
             transition: "all 0.3s ease"
         }};
@@ -180,22 +172,7 @@ async def get_embed_script(token: str):
         chatContainer = document.createElement("div");
         chatContainer.id = "mindroot-chat-container-" + config.token;
         
-        const containerStyles = isMobile ? {{
-            position: "fixed",
-            top: "0px",
-            left: "0",
-            right: "0",
-            bottom: "0",
-            width: "100vw",
-            height: "100vh",
-            background: "white",
-            borderRadius: "0",
-            boxShadow: "none",
-            zIndex: "10001",
-            display: "none",
-            flexDirection: "column",
-            overflow: "hidden"
-        }} : {{
+        const containerStyles = {{
             position: "fixed",
             bottom: "90px",
             right: config.position.includes("left") ? "auto" : "20px",
@@ -221,46 +198,26 @@ async def get_embed_script(token: str):
         
         if (isVisible) {{
             chatContainer.style.display = "none";
-            if (isMobile) {{
-                document.body.style.removeProperty("overflow");
-            }}
         }} else {{
             if (!isLoaded) {{
                 // Create iframe and load the secure session
                 const iframe = document.createElement("iframe");
-                if (isMobile) {{
-                    iframe.style.cssText = "width: 100%; height: 100%; border: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;";
-                    // Add viewport meta tag if not present
-                    if (!document.querySelector('meta[name="viewport"]')) {{
-                        const meta = document.createElement('meta');
-                        meta.name = 'viewport';
-                        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-                        document.head.appendChild(meta);
-                    }}
-                }} else {{
-                    iframe.style.cssText = "width: 100%; height: 100%; border: none; border-radius: 12px;";
-                }}
+                iframe.style.cssText = "width: 100%; height: 100%; border: none; border-radius: 12px;";
                 iframe.src = config.baseUrl + "/chat/widget/" + config.token + "/session";
                 chatContainer.appendChild(iframe);
                 isLoaded = true;
             }}
             chatContainer.style.display = "block";
-            if (isMobile) {{
-                document.body.style.overflow = "hidden";
-            }}
         }}
     }}
     
     function init() {{
-        const boot = () => {{
-            isMobile = detectMobile();
-            createChatIcon();
-        }};
-
         if (document.readyState === "loading") {{
-            document.addEventListener("DOMContentLoaded", boot);
+            document.addEventListener("DOMContentLoaded", function() {{
+                createChatIcon();
+            }});
         }} else {{
-            boot();
+            createChatIcon();
         }}
     }}
     

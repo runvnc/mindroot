@@ -1,4 +1,5 @@
 /* Mobile-specific styles */
+
 @media screen and (max-width: 768px) {
   .page-container {
     position: relative;
@@ -132,6 +133,42 @@
     padding: 8px 12px;
   }
 
+  /* Fix for mobile chat layout - ensure chat form is visible */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .page-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  chat-ai {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 60px; /* Space for hamburger menu */
+    padding-bottom: 10px;
+  }
+  
+  .chat-log {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  chat-form {
+    flex-shrink: 0;
+  }
+  
   /* Ensure images in markdown content are also responsive */
   .message p img {
     max-width: 100%;

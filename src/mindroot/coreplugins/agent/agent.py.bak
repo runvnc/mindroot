@@ -142,8 +142,7 @@ class Agent:
         #await asyncio.sleep(1)
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
-        # Check both permanent finish and temporary cancellation
-        if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
+        if 'finished_conversation' in context.data and context.data['finished_conversation']:
             logger.warning("Conversation is finished, not executing command")
             print("\033[91mConversation is finished, not executing command\033[0m")
             return None
@@ -296,11 +295,7 @@ class Agent:
 
             logger.debug(f"commands: {commands}, partial_cmd: {partial_cmd}")
 
-            # Check for cancellation (either permanent or current turn)
-            if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
-                # Clear the temporary cancel flag so next turn can proceed
-                if 'cancel_current_turn' in context.data:
-                    del context.data['cancel_current_turn']
+            if 'finished_conversation' in context.data and context.data['finished_conversation']:
                 logger.warning("Conversation is finished or halted, exiting stream parsing")
                 debug_box(f"""Conversation is finished or halted, exiting stream""")
                 debug_box(str(context))
@@ -340,18 +335,7 @@ class Agent:
                         logger.debug(f"Processing command: {cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
 
-                        # Create a task for the command so it can be cancelled
-                        cmd_task = asyncio.create_task(
-                            self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
-                        )
-                        context.data['active_command_task'] = cmd_task
-                        try:
-                            result = await cmd_task
-                        finally:
-                            # Clear the task from context once it's done or cancelled
-                            if context.data.get('active_command_task') == cmd_task:
-                                del context.data['active_command_task']
-
+                        result = await self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         await context.command_result(cmd_name, result)
                         sys_header = "Note: tool command results follow, not user replies" 
                         sys_header = ""

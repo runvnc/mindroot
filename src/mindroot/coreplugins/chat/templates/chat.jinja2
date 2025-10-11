@@ -36,7 +36,7 @@
 
   {% block head_extra %}{% endblock %}
 </head>
-<body>
+<body{% if embed_mode %} class="embedded"{% endif %}>
   {% block body_init %}
   <script>
     // print a big colorful header annoucing data init section
