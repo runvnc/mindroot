@@ -10,7 +10,8 @@ class PersonaEditor extends BaseEl {
     personas: { type: Array, reflect: true },
     newPersona: { type: Boolean, reflect: true },
     facerefFileName: { type: String, reflect: true },
-    avatarFileName: { type: String, reflect: true }
+    avatarFileName: { type: String, reflect: true },
+    voiceId: { type: String, reflect: true }
   };
 
   static styles = [
@@ -130,6 +131,7 @@ class PersonaEditor extends BaseEl {
     this.newPersona = false;
     this.facerefFileName = '';
     this.avatarFileName = '';
+    this.voiceId = '';
     this.fetchPersonas();
   }
 
@@ -168,13 +170,16 @@ class PersonaEditor extends BaseEl {
       if (this.scope === 'registry') {
         // For registry personas, use the full path format
         const response = await fetch(`/personas/registry/${this.name}`);
+        this.voiceId = this.persona.voice_id || '';
         this.persona = await response.json();
       } else {
         const response = await fetch(`/personas/${this.scope}/${this.name}`);
         this.persona = await response.json();
+        this.voiceId = this.persona.voice_id || '';
       }
     } else {
       this.persona = {};
+      this.voiceId = '';
     }
   }
 
@@ -194,11 +199,15 @@ class PersonaEditor extends BaseEl {
     this.persona = {};
     this.facerefFileName = '';
     this.avatarFileName = '';
+    this.voiceId = '';
   }
 
   handleInputChange(event) {
     const { name, value, type, checked } = event.target;
     const inputValue = type === 'checkbox' ? checked : value;
+    if (name === 'voice_id') {
+      this.voiceId = value;
+    }
     this.persona = { ...this.persona, [name]: inputValue };
   }
 
@@ -279,6 +288,10 @@ class PersonaEditor extends BaseEl {
           <div class="form-group">
             <label>Negative Appearance:</label>
             <textarea class="text_lg" name="negative_appearance" .value=${this.persona.negative_appearance || ''} @input=${this.handleInputChange}></textarea>
+          </div>
+          <div class="form-group">
+            <label>Voice ID:</label>
+            <input class="text_inp" type="text" name="voice_id" .value=${this.voiceId || ''} @input=${this.handleInputChange} placeholder="Optional voice identifier for TTS" />
           </div>
           <div class="form-group">
         <label>

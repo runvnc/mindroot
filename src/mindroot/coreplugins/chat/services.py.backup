@@ -217,25 +217,8 @@ def process_result(result, formatted_results):
 
     return formatted_results
 
-in_progress = {}
-
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
-    global in_progress
-    existing_session = in_progress.get(session_id, False)
-    print(existing_session)
-
-    if existing_session:
-        context_ = await get_context(session_id, user)
-        context.data['finished_conversation'] = True
-        await asyncio.sleep(0.4)
-    else:
-        print('starting')
-
-    print('ok')
-    in_progress[session_id] = True
-
-    print('b')
     if os.environ.get("MR_MAX_ITERATIONS") is not None:
         max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
     if not user:
@@ -416,12 +399,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
 
         await context.finished_chat()
-        in_progress.pop(session_id, None)
         return [results, full_results]
     except Exception as e:
         print("Error in send_message_to_agent: ", e)
         print(traceback.format_exc())
-        in_progress.pop(session_id, None)
         return []
 
 @pipe(name='process_results', priority=5)
