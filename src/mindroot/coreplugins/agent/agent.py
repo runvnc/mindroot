@@ -340,7 +340,8 @@ class Agent:
                         logger.debug(f"Processing command: {cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
 
-                        # Create a task for the command so it can be cancelled
+                        self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+ 
                         cmd_task = asyncio.create_task(
                             self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
                         )
@@ -355,6 +356,14 @@ class Agent:
                         await context.command_result(cmd_name, result)
                         sys_header = "Note: tool command results follow, not user replies" 
                         sys_header = ""
+
+                        if result == "SYSTEM: WARNING - Command interrupted!\n\n":
+                            logger.warning("Command was interrupted. Skipping any extra commands in list.")
+                            await context.chat_log.drop_last('assistant')
+                            return results, full_cmds
+                            break
+
+
                         full_cmds.append({ "SYSTEM": sys_header, "cmd": cmd_name, "args": cmd_args, "result": result})
                         if result is not None:
                             results.append({"SYSTEM": sys_header, "cmd": cmd_name, "args": { "omitted": "(see command msg.)"}, "result": result})

@@ -133,6 +133,7 @@ class ChatLog:
             debug_box("5")
             self.messages.append(message)
         self._save_log_sync()
+
     async def add_message_async(self, message: Dict[str, str]) -> None:
         """Async version for new code that needs non-blocking operations"""
         should_save = self._add_message_impl(message)
@@ -145,6 +146,13 @@ class ChatLog:
                 len(self.messages[-1]['content']) > 0 and 
                 self.messages[-1]['content'][0].get('type') == 'image'):
                 await self.save_log()
+    
+    async def drop_last(self, role) -> None:
+        if len(self.messages) == 0:
+            return
+        if self.messages[-1]['role'] == role:
+            self.messages = self.messages[:-1]
+            await self.save_log()
 
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
