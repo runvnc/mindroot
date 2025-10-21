@@ -658,7 +658,14 @@ class AgentForm extends BaseEl {
     }
     console.log('before',this.agent)
     // Handle all other inputs
-    const inputValue = type === 'checkbox' ? checked : value;
+    let inputValue;
+    if (type === 'checkbox') {
+      inputValue = checked;
+    } else if (type === 'number') {
+      inputValue = value === '' ? null : Number(value);
+    } else {
+      inputValue = value;
+    }
     this.agent = { ...this.agent, [name]: inputValue };
     console.log('after', this.agent)
   }
@@ -1272,6 +1279,24 @@ class AgentForm extends BaseEl {
               ${this.renderServiceModels()}
             </details>
           </div> 
+
+          <div class="form-group commands-section">
+            <details>
+              <summary>Max Tokens</summary>
+              <div class="commands-category">
+                <div class="form-group">
+                  <label>Maximum Tokens:</label>
+                  <input 
+                    type="number" 
+                    name="max_tokens" 
+                    .value=${agentForRender.max_tokens || ''}
+                    placeholder="Leave empty for model default"
+                    @input=${this.handleInputChange}
+                  >
+                </div>
+              </div>
+            </details>
+          </div>
 
           <div class="form-group commands-section">
             <details>

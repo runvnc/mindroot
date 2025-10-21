@@ -482,6 +482,7 @@ class Agent:
             tmp_data = { "messages": new_messages }
             debug_box("Filtering messages")
             #debug_box(tmp_data)
+
             tmp_data = await pipeline_manager.filter_messages(tmp_data, context=context)
             new_messages = tmp_data['messages']
         except Exception as e:
@@ -495,6 +496,12 @@ class Agent:
 
         if not isinstance(context.agent, dict):
             context.agent = await get_agent_data(context.agent, context=context)
+
+        if 'max_tokens' in context.agent and context.agent['max_tokens'] is not None and context.agent['max_tokens'] != '':
+            logger.info(f"Using agent max tokens {max_tokens}")
+            max_tokens = context.agent['max_tokens']
+        else:
+            logger.info(f"Using default max tokens {max_tokens}")
 
         if model is None:
             if 'service_models' in context.agent and context.agent['service_models'] is not None:
