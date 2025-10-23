@@ -24,6 +24,9 @@ import nanoid
 sse_clients = {}
 from lib.chatcontext import get_context
 
+# Track active processing tasks per session
+active_tasks = {}
+
 @service()
 async def prompt(model: str, instructions: str, temperature=0, max_tokens=400, json=False, context=None):
     messages = [
@@ -68,7 +71,7 @@ def results_output(results):
     text = ""
     for result in results:
         if 'output' in result['args']:
-            return result['args']['output']
+            return str(result['args']['output'])
 
 def results_text_output(results):
     text = ""
@@ -135,6 +138,9 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
 
     while retried < retries:
         [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        print('#####################################################33')
+        print("Full results: ", full_results)
+        print("Results: ", results)
         text = results_output(full_results)
         if text == "":
             retried += 1
@@ -217,27 +223,53 @@ def process_result(result, formatted_results):
 
     return formatted_results
 
+# Deprecated - use active_tasks instead
 in_progress = {}
+
+
+@service()
+async def cancel_and_wait(session_id: str, user:str, context=None):
+    global in_progress, active_tasks
+    if not in_progress.get(session_id, False):
+        print(f"SEND_MESSAGE No active processing for session {session_id} to cancel.")
+        return
+    try:
+        existing_context = await get_context(session_id, user)
+        existing_context.data['cancel_current_turn'] = True
+        existing_context.data['finished_conversation'] = True
+        existing_context.save_context()
+        # Cancel any active command task
+        if 'active_command_task' in existing_context.data:
+            cmd_task = existing_context.data['active_command_task']
+            if cmd_task and not cmd_task.done():
+                cmd_task.cancel()
+        
+        await existing_context.save_context()
+    except Exception as e:
+        print(f"SEND_MESSAGE Error setting cancellation flags: {e}")
+    
+    # Cancel the main task
+    existing_task.cancel()
+    
+    # Wait for it to actually finish (with timeout)
+    try:
+        await asyncio.wait_for(existing_task, timeout=2.0)
+    except (asyncio.CancelledError, asyncio.TimeoutError):
+        pass  # Expected
+   
+    start_wait = time.time()
+    while in_progress.get(session_id, False) and (time.time() - start_wait) < 5.0:
+        print(f"SEND_MESSAGE Waiting for cancellation of session {session_id} to complete...")
+        await asyncio.sleep(0.1)
+
 
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
-    global in_progress
-    existing_session = in_progress.get(session_id, False)
-    print(existing_session)
+    global in_progress, active_tasks
+    
+    # Check if there's an active task for this session
+    existing_task = active_tasks.get(session_id)
 
-    if existing_session:
-        context_ = await get_context(session_id, user)
-        context.data['finished_conversation'] = True
-        await asyncio.sleep(0.4)
-    else:
-        print('starting')
-
-    print('ok')
-    in_progress[session_id] = True
-
-    print('b')
-    if os.environ.get("MR_MAX_ITERATIONS") is not None:
-        max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
     if not user:
         # check context
         if not context.username:
@@ -248,14 +280,62 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         if hasattr(user, "dict"):
             user = user.dict()
 
+    # If there's an existing task, cancel it and wait for it to finish
+    if existing_task and not existing_task.done():
+        print("SEND_MESSAGE  rejecting because active task, but sneaking in new user message")
+        if type(message) is str:
+            #context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
+            context.chat_log.add_message({"role": "user", "content": message })
+ 
+        return []
+        print(f"SEND_MESSAGE: Cancelling existing task for session {session_id}")
+        
+        # Load the context to set cancellation flags
+        try:
+            existing_context = await get_context(session_id, user)
+            existing_context.data['cancel_current_turn'] = True
+            existing_context.data['finished_conversation'] = True
+            existing_context.save_context()
+            # Cancel any active command task
+            if 'active_command_task' in existing_context.data:
+                cmd_task = existing_context.data['active_command_task']
+                if cmd_task and not cmd_task.done():
+                    cmd_task.cancel()
+            
+            await existing_context.save_context()
+        except Exception as e:
+            print(f"SEND_MESSAGE Error setting cancellation flags: {e}")
+        
+        # Cancel the main task
+        existing_task.cancel()
+        
+        # Wait for it to actually finish (with timeout)
+        try:
+            await asyncio.wait_for(existing_task, timeout=2.0)
+        except (asyncio.CancelledError, asyncio.TimeoutError):
+            pass  # Expected
+        
+        print(f"SEND_MESSAGE Previous task cancelled for session {session_id}")
+    
+    in_progress[session_id] = True
+    asyncio.sleep(0.2)
+
+    print('b')
+    if os.environ.get("MR_MAX_ITERATIONS") is not None:
+        max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
     try:
         if type(message) is list:
             message = [m.dict() for m in message]
 
         if session_id is None or session_id == "" or message is None or message == "":
-            print("Invalid session_id or message")
+            print("SEND_MESSAGE Invalid session_id or message")
             return []
 
+        # Create the main processing task and store it
+        processing_task = asyncio.current_task()
+        active_tasks[session_id] = processing_task
+
+        print("SEND_MESSAGE proceeding with message processing")
         print("send_message_to_agent: ", session_id, message, max_iterations)
         if context is None:
             context = ChatContext(command_manager, service_manager, user)
@@ -390,9 +470,12 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     context.chat_log.add_message({"role": "user", "content": formatted_results})
                     results.append(out_results) 
                 else:
-                    print("Processing iteration: ", iterations, "no message added")
+                    print("SEND_MESSAGE Processing iteration: ", iterations, "no message added")
                 if context.data.get('finished_conversation') is True:
                     termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                    if context.data.get('task_result') is not None:
+                        task_result = context.data.get('task_result')
+                        full_results.append({ "cmd": "task_result", "args": { "result": task_result } })
                     continue_processing = False
             except Exception as e:
                 continue_processing = False
@@ -417,7 +500,18 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
         await context.finished_chat()
         in_progress.pop(session_id, None)
+        active_tasks.pop(session_id, None)
+        if len(results) == 0:
+            if context.data.get('task_result') is not None:
+                task_result = context.data.get('task_result')
+                results.append(task_result)
+        print("SEND_MESSAGE Done")
         return [results, full_results]
+    except asyncio.CancelledError:
+        print(f"Task cancelled for session {session_id}")
+        in_progress.pop(session_id, None)
+        active_tasks.pop(session_id, None)
+        raise  # Re-raise to properly handle cancellation
     except Exception as e:
         print("Error in send_message_to_agent: ", e)
         print(traceback.format_exc())
@@ -508,8 +602,7 @@ async def command_result(command: str, result, context=None):
 @service()
 async def backend_user_message(message: str, context=None):
     """
-    Insert a user message from the backend and signal the frontend to display it.
-    This allows backend processes to inject messages into the chat without user interaction.
+    Signal the frontend to display a user message.
     """
     agent_ = context.agent
     persona = 'user'
@@ -568,3 +661,4 @@ async def cancel_active_response(log_id: str, context=None):
     
     print(f"Cancelled active response for session {log_id}")
     return {"status": "cancelled", "log_id": log_id}
+

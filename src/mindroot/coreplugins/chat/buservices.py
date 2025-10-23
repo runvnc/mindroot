@@ -24,6 +24,9 @@ import nanoid
 sse_clients = {}
 from lib.chatcontext import get_context
 
+# Track active processing tasks per session
+active_tasks = {}
+
 @service()
 async def prompt(model: str, instructions: str, temperature=0, max_tokens=400, json=False, context=None):
     messages = [
@@ -68,7 +71,7 @@ def results_output(results):
     text = ""
     for result in results:
         if 'output' in result['args']:
-            return result['args']['output']
+            return str(result['args']['output'])
 
 def results_text_output(results):
     text = ""
@@ -135,6 +138,9 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
 
     while retried < retries:
         [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        print('#####################################################33')
+        print("Full results: ", full_results)
+        print("Results: ", results)
         text = results_output(full_results)
         if text == "":
             retried += 1
@@ -217,10 +223,24 @@ def process_result(result, formatted_results):
 
     return formatted_results
 
+# Deprecated - use active_tasks instead
+in_progress = {}
+
+
+# seems like sometimes it's too late to cancel
+# so I tried just aborting
+# but then the other one got cancelled by the interruption
+# and since this was cancelled, we never responded
+#
+# but if we try to continue, we end up with both running
+
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
-    if os.environ.get("MR_MAX_ITERATIONS") is not None:
-        max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
+    global in_progress, active_tasks
+    
+    # Check if there's an active task for this session
+    existing_task = active_tasks.get(session_id)
+
     if not user:
         # check context
         if not context.username:
@@ -231,6 +251,41 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         if hasattr(user, "dict"):
             user = user.dict()
 
+    # If there's an existing task, cancel it and wait for it to finish
+    if existing_task and not existing_task.done():
+        print(f"SEND_MESSAGE: Cancelling existing task for session {session_id}")
+        
+        # Load the context to set cancellation flags
+        try:
+            existing_context = await get_context(session_id, user)
+            existing_context.data['cancel_current_turn'] = True
+            
+            # Cancel any active command task
+            if 'active_command_task' in existing_context.data:
+                cmd_task = existing_context.data['active_command_task']
+                if cmd_task and not cmd_task.done():
+                    cmd_task.cancel()
+            
+            await existing_context.save_context()
+        except Exception as e:
+            print(f"Error setting cancellation flags: {e}")
+        
+        # Cancel the main task
+        existing_task.cancel()
+        
+        # Wait for it to actually finish (with timeout)
+        try:
+            await asyncio.wait_for(existing_task, timeout=2.0)
+        except (asyncio.CancelledError, asyncio.TimeoutError):
+            pass  # Expected
+        
+        print(f"Previous task cancelled for session {session_id}")
+    
+    in_progress[session_id] = True
+
+    print('b')
+    if os.environ.get("MR_MAX_ITERATIONS") is not None:
+        max_iterations = int(os.environ.get("MR_MAX_ITERATIONS"))
     try:
         if type(message) is list:
             message = [m.dict() for m in message]
@@ -238,6 +293,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         if session_id is None or session_id == "" or message is None or message == "":
             print("Invalid session_id or message")
             return []
+
+        # Create the main processing task and store it
+        processing_task = asyncio.current_task()
+        active_tasks[session_id] = processing_task
 
         print("send_message_to_agent: ", session_id, message, max_iterations)
         if context is None:
@@ -376,6 +435,9 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     print("Processing iteration: ", iterations, "no message added")
                 if context.data.get('finished_conversation') is True:
                     termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
+                    if context.data.get('task_result') is not None:
+                        task_result = context.data.get('task_result')
+                        full_results.append({ "cmd": "task_result", "args": { "result": task_result } })
                     continue_processing = False
             except Exception as e:
                 continue_processing = False
@@ -399,10 +461,22 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         print("Exiting send_message_to_agent: ", session_id, message, max_iterations)
 
         await context.finished_chat()
+        in_progress.pop(session_id, None)
+        active_tasks.pop(session_id, None)
+        if len(results) == 0:
+            if context.data.get('task_result') is not None:
+                task_result = context.data.get('task_result')
+                results.append(task_result)
         return [results, full_results]
+    except asyncio.CancelledError:
+        print(f"Task cancelled for session {session_id}")
+        in_progress.pop(session_id, None)
+        active_tasks.pop(session_id, None)
+        raise  # Re-raise to properly handle cancellation
     except Exception as e:
         print("Error in send_message_to_agent: ", e)
         print(traceback.format_exc())
+        in_progress.pop(session_id, None)
         return []
 
 @pipe(name='process_results', priority=5)
@@ -489,8 +563,7 @@ async def command_result(command: str, result, context=None):
 @service()
 async def backend_user_message(message: str, context=None):
     """
-    Insert a user message from the backend and signal the frontend to display it.
-    This allows backend processes to inject messages into the chat without user interaction.
+    Signal the frontend to display a user message.
     """
     agent_ = context.agent
     persona = 'user'
@@ -515,8 +588,38 @@ async def cancel_active_response(log_id: str, context=None):
             print(f"Error getting context for cancellation: {e}")
             return {"status": "error", "message": f"Could not load context: {e}"}
     
-    context.data['finished_conversation'] = True
+    # Set flag to stop current processing loop iteration
+    # But don't permanently mark conversation as finished - just this turn
+    context.data['cancel_current_turn'] = True
+    
+    # DEBUG TRACE
+    print("\033[91;107m[DEBUG TRACE 5/6] Core cancel_active_response service executed.\033[0m")
+    
+    # Cancel any active TTS streams (ElevenLabs)
+    try:
+        # Import here to avoid circular dependency
+        from mr_eleven_stream.mod import _active_tts_streams
+        for stream_id, stop_event in list(_active_tts_streams.items()):
+            stop_event.set()
+            logger.info(f"Cancelled TTS stream {stream_id}")
+            print("\033[91;107m[DEBUG TRACE 5.5/6] Cancelled active TTS stream.\033[0m")
+    except ImportError:
+        logger.debug("ElevenLabs TTS plugin not available for cancellation")
+    
+    # Also, cancel any active command task (like speak())
+    if 'active_command_task' in context.data:
+        active_task = context.data['active_command_task']
+        if active_task and not active_task.done():
+            try:
+                active_task.cancel()
+                # DEBUG TRACE
+                print("\033[91;107m[DEBUG TRACE 6/6] Active command task found and cancelled.\033[0m")
+                print(f"Cancelled active command task for session {log_id}")
+            except Exception as e:
+                print(f"Error cancelling active command task: {e}")
+    
     await context.save_context()
     
     print(f"Cancelled active response for session {log_id}")
     return {"status": "cancelled", "log_id": log_id}
+

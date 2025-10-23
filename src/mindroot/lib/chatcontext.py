@@ -9,6 +9,7 @@ from .chatlog import ChatLog
 from .chatlog import extract_delegate_task_log_ids, find_child_logs_by_parent_id, find_chatlog_file
 from typing import TypeVar, Type, Protocol, runtime_checkable, Set
 from .utils.debug import debug_box
+
 contexts = {}
 
 async def get_context(log_id, user):

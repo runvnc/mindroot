@@ -143,14 +143,9 @@ class Agent:
 
     async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
         # Check both permanent finish and temporary cancellation
-        if context.data.get('cancel_current_turn'):
-            logger.warning("Turn cancelled, not executing command")
-            print("\033[91mTurn cancelled, not executing command\033[0m")
-            raise asyncio.CancelledError("Turn cancelled")
-        
-        if context.data.get('finished_conversation'):
-            logger.warning("Conversation finished, not executing command")
-            print("\033[91mConversation finished, not executing command\033[0m")
+        if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
+            logger.warning("Conversation is finished, not executing command")
+            print("\033[91mConversation is finished, not executing command\033[0m")
             return None
 
         logger.info("Command execution: {command}", command=cmd_name)
@@ -303,23 +298,19 @@ class Agent:
 
             # Check for cancellation (either permanent or current turn)
             if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
+                # Clear the temporary cancel flag so next turn can proceed
+                if 'cancel_current_turn' in context.data:
+                    del context.data['cancel_current_turn']
                 logger.warning("Conversation is finished or halted, exiting stream parsing")
                 debug_box(f"""Conversation is finished or halted, exiting stream""")
                 debug_box(str(context))
-                
-                # Add partial command to chat log if present
+                # stream is actually a generator
                 if partial_cmd is not None:
                     cmd_name = next(iter(partial_cmd))
                     if cmd_name in ["say", "json_encoded_md", "think"]:
                         context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd[cmd_name])})
                     else:
                         context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd) + "(Interrupted)"})
-                
-                # Clear the temporary cancel flag so next turn can proceed
-                if 'cancel_current_turn' in context.data:
-                    del context.data['cancel_current_turn']
-                    await context.save_context()
-                
                 try:
                     stream.close()
                 except Exception as e:
@@ -348,6 +339,8 @@ class Agent:
                         cmd_args = cmd[cmd_name]
                         logger.debug(f"Processing command: {cmd}")
                         await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+
+                        self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
  
                         cmd_task = asyncio.create_task(
                             self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
@@ -355,8 +348,6 @@ class Agent:
                         context.data['active_command_task'] = cmd_task
                         try:
                             result = await cmd_task
-                        except asyncio.CancelledError:
-                            raise  # Propagate cancellation up
                         finally:
                             # Clear the task from context once it's done or cancelled
                             if context.data.get('active_command_task') == cmd_task:
@@ -367,10 +358,10 @@ class Agent:
                         sys_header = ""
 
                         if result == "SYSTEM: WARNING - Command interrupted!\n\n":
-                            logger.warning("Command was interrupted. Stopping processing.")
+                            logger.warning("Command was interrupted. Skipping any extra commands in list.")
                             await context.chat_log.drop_last('assistant')
-                            break
                             return results, full_cmds
+                            break
 
 
                         full_cmds.append({ "SYSTEM": sys_header, "cmd": cmd_name, "args": cmd_args, "result": result})
@@ -523,13 +514,8 @@ class Agent:
                                         max_tokens=max_tokens,
                                         messages=new_messages,
                                         context=context)
-        
-        try:
-            ret, full_cmds = await self.parse_cmd_stream(stream, context)
-        except asyncio.CancelledError:
-            logger.info("Command stream parsing cancelled")
-            raise  # Propagate cancellation
-        
+
+        ret, full_cmds = await self.parse_cmd_stream(stream, context)
         logger.debug("System message was:")
         logger.debug(await self.render_system_msg())
 

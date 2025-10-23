@@ -1,6 +1,7 @@
 from lib.providers.commands import command, command_manager
 from lib.providers.services import service_manager
 from lib.chatcontext import ChatContext
+from lib.chatlog import ChatLog
 from .services import init_chat_session, send_message_to_agent, subscribe_to_agent_messages
 import asyncio
 import json
@@ -150,6 +151,9 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
     (text, full_results, xx) = await service_manager.run_task(instructions, user=context.username, log_id=log_id,
                                                               parent_log_id = context.log_id,
                                                               llm=llm, agent_name=agent_name, retries=retries, context=None)
+    if text is None or text == "" or text == [] or text == '[]':
+        chatlog = ChatLog(log_id=context.log_id, user=context.username, agent=agent_name)
+        text = json.dumps(chatlog.messages)
     return f"""<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed with log ID: {log_id}</a>\nResults:\n\n{text}"""
 
 

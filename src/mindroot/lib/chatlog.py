@@ -62,6 +62,8 @@ class ChatLog:
                 self.agent = log_data.get('agent')
                 self.messages = log_data.get('messages', [])
                 self.parent_log_id = log_data.get('parent_log_id', None)
+            # we need the last modification time of the file
+            self.last_modified = os.path.getmtime(log_file)
             print("Loaded log file at ", log_file)
             print("Message length: ", len(self.messages))
         else:
@@ -71,12 +73,14 @@ class ChatLog:
     def _save_log_sync(self) -> None:
         """Synchronous version for backward compatibility"""
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
+        self.last_modified = time.time()
         with open(log_file, 'w') as f:
             json.dump(self._get_log_data(), f, indent=2)
 
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
         should_save = self._add_message_impl(message)
+        self.last_modified = time.time()
         if should_save:
             self._save_log_sync()
         else:
@@ -156,6 +160,25 @@ class ChatLog:
 
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
+
+
+    def parsed_commands(self) -> List[Dict[str, any]]:
+        commands = []
+        filtered = [m for m in self.messages if m['role'] == 'assistant']
+        for message in filtered:
+            content = message['content']
+            if isinstance(content, list) and len(content) > 0 and 'text' in content[0]:
+                text = content[0]['text']
+            else:
+                continue
+            try:
+                cmd_list = json.loads(text)
+                if not isinstance(cmd_list, list):
+                    cmd_list = [cmd_list]
+                commands.extend(cmd_list)
+            except (json.JSONDecodeError, TypeError):
+                continue
+        return commands
 
     def get_recent(self, max_tokens: int = 4096) -> List[Dict[str, str]]:
         recent_messages = []
