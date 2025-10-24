@@ -230,10 +230,13 @@ in_progress = {}
 @service()
 async def cancel_and_wait(session_id: str, user:str, context=None):
     global in_progress, active_tasks
+    existing_task = active_tasks.get(session_id)
+
     if not in_progress.get(session_id, False):
         print(f"SEND_MESSAGE No active processing for session {session_id} to cancel.")
         return
     try:
+        print(f"SEND_MESSAGE Cancelling active task for session {session_id}...")
         existing_context = await get_context(session_id, user)
         existing_context.data['cancel_current_turn'] = True
         existing_context.data['finished_conversation'] = True
@@ -262,6 +265,7 @@ async def cancel_and_wait(session_id: str, user:str, context=None):
         print(f"SEND_MESSAGE Waiting for cancellation of session {session_id} to complete...")
         await asyncio.sleep(0.1)
 
+    print(f"SEND_MESSAGE Cancellation complete for session {session_id}")
 
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
@@ -273,6 +277,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
     if not user:
         # check context
         if not context.username:
+            print("SEND_MESSAGE No user provided and context has no username")
             raise Exception("User required")
         else:
             user = {"user": context.username }
@@ -282,12 +287,12 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
 
     # If there's an existing task, cancel it and wait for it to finish
     if existing_task and not existing_task.done():
-        print("SEND_MESSAGE  rejecting because active task, but sneaking in new user message")
-        if type(message) is str:
+        #print("SEND_MESSAGE  rejecting because active task, but sneaking in new user message")
+        #if type(message) is str:
             #context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
-            context.chat_log.add_message({"role": "user", "content": message })
+            #context.chat_log.add_message_role({"role": "user", "content": message })
  
-        return []
+        #return []
         print(f"SEND_MESSAGE: Cancelling existing task for session {session_id}")
         
         # Load the context to set cancellation flags
@@ -314,9 +319,19 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             await asyncio.wait_for(existing_task, timeout=2.0)
         except (asyncio.CancelledError, asyncio.TimeoutError):
             pass  # Expected
-        
+
+        start_wait = time.time()
+        while in_progress.get(session_id, False) and (time.time() - start_wait) < 5.0:
+            print(f"SEND_MESSAGE Waiting for cancellation of session {session_id} to complete...")
+            await asyncio.sleep(0.1)
+
+
         print(f"SEND_MESSAGE Previous task cancelled for session {session_id}")
-    
+
+    context.data['cancel_current_turn'] = False
+    context.data['finished_conversation'] = False
+    context.save_context()
+
     in_progress[session_id] = True
     asyncio.sleep(0.2)
 

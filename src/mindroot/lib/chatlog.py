@@ -77,6 +77,15 @@ class ChatLog:
         with open(log_file, 'w') as f:
             json.dump(self._get_log_data(), f, indent=2)
 
+
+    def add_message_role(self, message: Dict[str, str]) -> None:
+        for i in range(len(self.messages)-1, -1, -1):
+            if self.messages[i]['role'] == message.get('role'):
+                self.messages[i]['content'].append(message)
+                self.last_modified = time.time()
+                self._save_log_sync()
+                return
+
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
         should_save = self._add_message_impl(message)
