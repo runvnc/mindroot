@@ -669,9 +669,13 @@ async def cancel_active_response(log_id: str, context=None):
                 # DEBUG TRACE
                 print("\033[91;107m[DEBUG TRACE 6/6] Active command task found and cancelled.\033[0m")
                 print(f"Cancelled active command task for session {log_id}")
+                print(f"Removing last assistant message from chat log for session {log_id}")
+                await context.chat_log.drop_last('assistant')
+
             except Exception as e:
                 print(f"Error cancelling active command task: {e}")
-    
+
+ 
     await context.save_context()
     
     print(f"Cancelled active response for session {log_id}")
