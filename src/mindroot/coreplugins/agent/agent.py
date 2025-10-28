@@ -369,6 +369,7 @@ class Agent:
                         if result == "SYSTEM: WARNING - Command interrupted!\n\n":
                             logger.warning("Command was interrupted. Stopping processing.")
                             await context.chat_log.drop_last('assistant')
+                            await asyncio.sleep(0.5)
                             break
                             return results, full_cmds
 

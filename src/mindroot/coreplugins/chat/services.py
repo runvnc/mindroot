@@ -286,7 +286,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             user = user.dict()
 
     # If there's an existing task, cancel it and wait for it to finish
-    if existing_task and not existing_task.done():
+    if False and existing_task and not existing_task.done():
         #print("SEND_MESSAGE  rejecting because active task, but sneaking in new user message")
         #if type(message) is str:
             #context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
