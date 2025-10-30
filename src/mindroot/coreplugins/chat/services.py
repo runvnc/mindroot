@@ -263,7 +263,7 @@ async def cancel_and_wait(session_id: str, user:str, context=None):
     start_wait = time.time()
     while in_progress.get(session_id, False) and (time.time() - start_wait) < 5.0:
         print(f"SEND_MESSAGE Waiting for cancellation of session {session_id} to complete...")
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.025)
 
     print(f"SEND_MESSAGE Cancellation complete for session {session_id}")
 
@@ -333,7 +333,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
     context.save_context()
 
     in_progress[session_id] = True
-    asyncio.sleep(0.2)
+    asyncio.sleep(0.05)
 
     print('b')
     if os.environ.get("MR_MAX_ITERATIONS") is not None:
