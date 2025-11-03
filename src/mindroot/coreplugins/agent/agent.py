@@ -449,15 +449,7 @@ class Agent:
             "formatted_datetime": formatted_time,
             "context_data": self.context.data
         }
-        # is say in the command_manager
-        if 'say' in command_manager.functions.keys():
-            print("I found say! in the functions!")
-        else:
-            print("Say is not in the functions!")
-        if 'say' in data['command_docs'].keys():
-            print("I found say in the command docs!")
-    
-        # we need to be doubly sure to remove anything from command_docs that is not in command_manager.functions.keys()
+   
         for cmd in data['command_docs']:
             if cmd not in command_manager.functions.keys():
                 print("Removing " + cmd + " from command_docs")
