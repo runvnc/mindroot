@@ -27,9 +27,13 @@ window.registerCommandHandler = function(command, handler) {
 
 registerDelegate()
 
-function tryParse(markdown) {
+
+function tryParse_(markdown) {
     return markdownRenderer.parse(markdown);
 }
+
+const tryParse = throttle(tryParse_, 200)
+
 
 const noAction = [ 'say', 'json_encoded_md', 'wait_for_user_reply', 'markdown_await_user', 'tell_and_continue', 'think' ]
 
@@ -105,7 +109,8 @@ class Chat extends BaseEl {
       this.sse = new EventSource(`/chat/${this.sessionid}/events`);
     }
   
-    const thisPartial = this._partialCmd.bind(this)
+    const thisPartial_ = this._partialCmd.bind(this)
+    const thisPartial = throttle(thisPartial_, 300)
     const thisRunning = this._runningCmd.bind(this)
     const thisResult = this._cmdResult.bind(this)
     const thisFinished = this._finished.bind(this)
@@ -151,7 +156,7 @@ class Chat extends BaseEl {
     const { content, sender, persona } = data;
     
     // Parse the content as markdown
-    const parsed = tryParse(content);
+    const parsed = tryParse_(content);
     
     // Add the message to the chat log
     this.messages = [...this.messages, { 
@@ -175,14 +180,14 @@ class Chat extends BaseEl {
       let combinedContent = '';
       for (let item of content) {
         if (item.type === 'text') {
-          combinedContent += tryParse(item.text);
+          combinedContent += tryParse_(item.text);
         } else if (item.type === 'image') {
           combinedContent += `<img src="${item.data}" class="image_input" alt="pasted image">`;
         }
       }
       this.messages = [...this.messages, { content: combinedContent, spinning:'no', sender, persona }];
     } else {
-      const parsed = tryParse(content);
+      const parsed = tryParse_(content);
       this.messages = [...this.messages, { content: parsed, spinning:'no', sender, persona }];
       content = [{ type: 'text', text: content }]
     }
@@ -355,7 +360,7 @@ class Chat extends BaseEl {
     }
 
     if (data.args?.markdown?.split('\n').length < 3) {
-        this.messages[this.messages.length - 1].content = tryParse(data.args.markdown);
+        this.messages[this.messages.length - 1].content = tryParse_(data.args.markdown);
     }
     
     console.log(event);
@@ -375,7 +380,7 @@ class Chat extends BaseEl {
       if (!noAction.includes(data.command)) {
         this.messages[this.messages.length - 1].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" result=""></action-component>`;
       } else {
-        this.messages[this.messages.length - 1].content = tryParse(this.textParam(data));
+        this.messages[this.messages.length - 1].content = tryParse_(this.textParam(data));
       }
     }
     window.initializeCodeCopyButtons();
