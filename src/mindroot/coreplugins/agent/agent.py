@@ -100,6 +100,7 @@ def find_new_substring(s1, s2):
         return s2.replace(s1, '', 1)
     return s2
 
+
 class Agent:
 
     def __init__(self, model=None, sys_core_template=None, agent=None, clear_model=False, commands=[], context=None):

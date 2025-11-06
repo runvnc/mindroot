@@ -6,14 +6,16 @@ export function throttle(func, wait) {
         const now = Date.now();
 
         if (now - lastCall >= wait) {
-            func(...args);
+            const res = func(...args);
             lastCall = now;
+            return res
         } else {
             // Optional: ensure the last call still happens
             clearTimeout(timeout);
             timeout = setTimeout(() => {
-                func(...args);
+                const res2 = func(...args);
                 lastCall = Date.now();
+                return res2
             }, wait - (now - lastCall));
         }
     };

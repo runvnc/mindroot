@@ -8,6 +8,7 @@ from typing import List
 from lib.utils.dataurl import dataurl_to_pil
 from .models import MessageParts
 from coreplugins.agent import agent
+from coreplugins.agent.speech_to_speech import SpeechToSpeechAgent
 from lib.utils.debug import debug_box
 import os
 import sys
@@ -171,6 +172,11 @@ async def init_chat_session(user:str, agent_name: str, log_id: str, context=None
         print("context.agent_name: ", context.agent_name)
         await context.save_context()
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
+
+    if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat']:
+        agent = SpeechToSpeechAgent(agent_name, context=context)
+        await agent.connect()
+
     return log_id
 
 @service()
@@ -285,55 +291,12 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         if hasattr(user, "dict"):
             user = user.dict()
 
-    # If there's an existing task, cancel it and wait for it to finish
-    if False and existing_task and not existing_task.done():
-        #print("SEND_MESSAGE  rejecting because active task, but sneaking in new user message")
-        #if type(message) is str:
-            #context.chat_log.add_message({"role": "user", "content": [{"type": "text", "text": message}]})
-            #context.chat_log.add_message_role({"role": "user", "content": message })
- 
-        #return []
-        print(f"SEND_MESSAGE: Cancelling existing task for session {session_id}")
-        
-        # Load the context to set cancellation flags
-        try:
-            existing_context = await get_context(session_id, user)
-            existing_context.data['cancel_current_turn'] = True
-            existing_context.data['finished_conversation'] = True
-            existing_context.save_context()
-            # Cancel any active command task
-            if 'active_command_task' in existing_context.data:
-                cmd_task = existing_context.data['active_command_task']
-                if cmd_task and not cmd_task.done():
-                    cmd_task.cancel()
-            
-            await existing_context.save_context()
-        except Exception as e:
-            print(f"SEND_MESSAGE Error setting cancellation flags: {e}")
-        
-        # Cancel the main task
-        existing_task.cancel()
-        
-        # Wait for it to actually finish (with timeout)
-        try:
-            await asyncio.wait_for(existing_task, timeout=2.0)
-        except (asyncio.CancelledError, asyncio.TimeoutError):
-            pass  # Expected
-
-        start_wait = time.time()
-        while in_progress.get(session_id, False) and (time.time() - start_wait) < 5.0:
-            print(f"SEND_MESSAGE Waiting for cancellation of session {session_id} to complete...")
-            await asyncio.sleep(0.1)
-
-
-        print(f"SEND_MESSAGE Previous task cancelled for session {session_id}")
-
     context.data['cancel_current_turn'] = False
     context.data['finished_conversation'] = False
-    context.save_context()
+    await context.save_context()
 
     in_progress[session_id] = True
-    asyncio.sleep(0.05)
+    await asyncio.sleep(0.05)
 
     print('b')
     if os.environ.get("MR_MAX_ITERATIONS") is not None:
@@ -356,7 +319,18 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             context = ChatContext(command_manager, service_manager, user)
             await context.load_context(session_id)
 
-        agent_ = agent.Agent(agent=context.agent)
+        if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat']:
+            agent_ = SpeechToSpeechAgent(context.agent_name, context=context)
+            print('Using SpeechToSpeechAgent for live/realtime chat')
+            print()
+            print()
+            print()
+            print('message: ', message)
+            results = await agent_.send_message(message)
+            return results, []
+        else:
+            agent_ = agent.Agent(agent=context.agent)
+
         if user is not None and hasattr(user, "keys"):
             for key in user.keys():
                 context.data[key] = user[key]

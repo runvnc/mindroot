@@ -32,7 +32,8 @@ function tryParse_(markdown) {
     return markdownRenderer.parse(markdown);
 }
 
-const tryParse = throttle(tryParse_, 200)
+//const tryParse = throttle(tryParse_, 200)
+const tryParse = tryParse_;
 
 
 const noAction = [ 'say', 'json_encoded_md', 'wait_for_user_reply', 'markdown_await_user', 'tell_and_continue', 'think' ]
@@ -108,8 +109,8 @@ class Chat extends BaseEl {
     } else {
       this.sse = new EventSource(`/chat/${this.sessionid}/events`);
     }
-  
-    const thisPartial_ = this._partialCmd.bind(this)
+ 
+    const thisPartial_ = this._partialCmd.bind(this) 
     const thisPartial = throttle(thisPartial_, 300)
     const thisRunning = this._runningCmd.bind(this)
     const thisResult = this._cmdResult.bind(this)
@@ -117,7 +118,7 @@ class Chat extends BaseEl {
     const thisError = this._showError.bind(this)
 
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', e => thisPartial(e).catch(console.error));
+    this.sse.addEventListener('partial_command', e => thisPartial(e));
     this.sse.addEventListener('running_command', e => thisRunning(e).catch(console.error));
     this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
     this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));
@@ -254,95 +255,99 @@ class Chat extends BaseEl {
   }
 
   async _partialCmd(event) {
-    console.log('Event received');
-    console.log(event);
-    let content = null
-    const data = JSON.parse(event.data);
-    data.event = 'partial'
-    console.log("data:", data)
-    const handler = commandHandlers[data.command];
-    if (handler) {
-      content = await handler(data);
-    } 
-    if (this.messages[this.messages.length - 1]?.sender != 'ai' || this.startNewMsg) {
-      console.log('adding message');
-      this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
-      this.startNewMsg = false
-    }
-
-    if (noAction.includes(data.command)) {
-      // Check if there's a registered handler for this command
+    try {
+      console.log('Event received');
+      console.log(event);
+      let content = null
+      const data = JSON.parse(event.data);
+      data.event = 'partial'
+      console.log("data:", data)
+      const handler = commandHandlers[data.command];
       if (handler) {
-        console.log('Used registered handler for', data.command);
-        this.msgSoFar = null
-      } else {
-        this.msgSoFar = this.textParam(data);
+        content = await handler(data);
+      } 
+      if (this.messages[this.messages.length - 1]?.sender != 'ai' || this.startNewMsg) {
+        console.log('adding message');
+        this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
+        this.startNewMsg = false
       }
 
-      try {
-        if (!window.lastParsed) window.lastParsed = Date.now();
-        if (content) {
-          this.messages[this.messages.length - 1].content = content
-        } else if (this.msgSoFar) {
-          let elapsed_ = Date.now() - window.lastParsed;
-          if (elapsed_ > 40 || this.msgSoFar + '' == '[object Object]' ) {
-            const parsed_ = tryParse(this.msgSoFar);
-            if (false && parsed_+'' == '[object Object]') {
-              console.log('msgSoFar is an object, not parsing:', this.msgSoFar);
+      if (noAction.includes(data.command)) {
+        // Check if there's a registered handler for this command
+        if (handler) {
+          console.log('Used registered handler for', data.command);
+          this.msgSoFar = null
+        } else {
+          this.msgSoFar = this.textParam(data);
+        }
+
+        try {
+          if (!window.lastParsed) window.lastParsed = Date.now();
+          if (content) {
+            this.messages[this.messages.length - 1].content = content
+          } else if (this.msgSoFar) {
+            let elapsed_ = Date.now() - window.lastParsed;
+            if (elapsed_ > 40 || this.msgSoFar + '' == '[object Object]' ) {
+              const parsed_ = tryParse(this.msgSoFar);
+              if (false && parsed_+'' == '[object Object]') {
+                console.log('msgSoFar is an object, not parsing:', this.msgSoFar);
+              } else {
+                this.messages[this.messages.length - 1].content = parsed_;
+                console.log(' parsed ', elapsed_);
+                window.lastParsed = Date.now();
+              }
             } else {
-              this.messages[this.messages.length - 1].content = parsed_;
-              console.log(' parsed ', elapsed_);
-              window.lastParsed = Date.now();
+              console.log('********************************* only ',elapsed_);
             }
-          } else {
-            console.log('********************************* only ',elapsed_);
+          }
+        } catch (e) {
+          console.error("Could not parse markdown:", e)
+          console.log('msgSoFar:')
+          console.log(this.msgSoFar)
+          this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
+        }
+      } else {
+        console.log('partial. data.params', data.params)
+        console.log("command is", data.command)
+        if (handler) {
+          data.event = 'partial'
+          console.log('handler:', handler)
+          content = handler(data);
+          this.requestUpdate();
+        } else {
+          console.warn('No handler for command:', data.command)
+          console.warn(commandHandlers)
+        }
+
+        if (typeof(data.params) == 'array') {
+          data.params = {"val": data.params}
+        } else if (typeof(data.params) == 'string') {
+          data.params = {"val": data.params}
+        } else if (typeof(data.params) == 'object') {
+          data.params = {"val": data.params}
+        }
+        const paramStr = JSON.stringify(data.params)
+        const escaped = escapeJsonForHtml(paramStr)
+        if (content) {
+          console.log('found content, not using action component')
+          this.messages[this.messages.length - 1].content = content
+        } else {
+          if (this.messages[this.messages.length - 1].content == '' ||
+              Date.now()- window.lastParsed > 40) {
+            window.lastParsed = Date.now();
+            this.messages[this.messages.length - 1].content = `
+            <action-component funcName="${data.command}" params="${escaped}" 
+                                result="">
+              </action-component>`; 
           }
         }
-      } catch (e) {
-        console.error("Could not parse markdown:", e)
-        console.log('msgSoFar:')
-        console.log(this.msgSoFar)
-        this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
       }
-    } else {
-      console.log('partial. data.params', data.params)
-      console.log("command is", data.command)
-      if (handler) {
-        data.event = 'partial'
-        console.log('handler:', handler)
-        content = handler(data);
-        this.requestUpdate();
-      } else {
-        console.warn('No handler for command:', data.command)
-        console.warn(commandHandlers)
-      }
-
-      if (typeof(data.params) == 'array') {
-        data.params = {"val": data.params}
-      } else if (typeof(data.params) == 'string') {
-        data.params = {"val": data.params}
-      } else if (typeof(data.params) == 'object') {
-        data.params = {"val": data.params}
-      }
-      const paramStr = JSON.stringify(data.params)
-      const escaped = escapeJsonForHtml(paramStr)
-      if (content) {
-        console.log('found content, not using action component')
-        this.messages[this.messages.length - 1].content = content
-      } else {
-        if (this.messages[this.messages.length - 1].content == '' ||
-            Date.now()- window.lastParsed > 40) {
-          window.lastParsed = Date.now();
-          this.messages[this.messages.length - 1].content = `
-           <action-component funcName="${data.command}" params="${escaped}" 
-                               result="">
-            </action-component>`; 
-        }
-      }
+      this.requestUpdate();
+      this._scrollToBottom()
+      window.initializeCodeCopyButtons();
+    } catch (e) {
+      console.error("Error in partialCmd", e)
     }
-    this.requestUpdate();
-    this._scrollToBottom()
-    window.initializeCodeCopyButtons();
   }
 
   async _runningCmd(event) {
