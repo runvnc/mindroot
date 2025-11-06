@@ -1,3 +1,8 @@
+/* Import JetBrains Mono from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Base styles */
+
 html, body {
   background-color: #101020;
   color: #f0f0f0;
@@ -1020,3 +1025,87 @@ tbody tr {
 .left-side {
   overflow-y: auto;
 }
+
+/* Enhanced Shell/Terminal output styling */
+pre.shellout {
+  background: linear-gradient(to bottom, #2d2d2d 0%, #1e1e1e 30px, #1a1a1a 100%);
+  border: 1px solid #404040;
+  border-radius: 12px;
+  padding: 0;
+  margin: 15px 0;
+  overflow-x: auto;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  position: relative;
+}
+
+/* Mock terminal title bar */
+pre.shellout::before {
+  content: '';
+  display: block;
+  height: 30px;
+  background: linear-gradient(to bottom, #3a3a3a, #2d2d2d);
+  border-bottom: 1px solid #1a1a1a;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Terminal window controls (dots) */
+pre.shellout::after {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  background: #ff5f56;
+  border-radius: 50%;
+  box-shadow: 
+    20px 0 0 #ffbd2e,
+    40px 0 0 #27c93f,
+    0 0 0 1px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+/* Code element inside shellout pre */
+pre.shellout code {
+  background-color: transparent;
+  color: #e8e8e8;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 15px 20px;
+  padding-top: 10px;
+  margin: 0;
+  border: none;
+  white-space: pre-wrap;
+  display: block;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* Custom scrollbar for terminal */
+pre.shellout::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+pre.shellout::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 0 0 12px 0;
+}
+
+pre.shellout::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 5px;
+  border: 2px solid #1a1a1a;
+}
+
+pre.shellout::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+

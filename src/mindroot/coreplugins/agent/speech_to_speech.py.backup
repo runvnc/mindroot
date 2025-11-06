@@ -9,33 +9,11 @@ class SpeechToSpeechAgent(Agent):
         self.context = context
         if agent_name:
             self.agent_name = agent_name
-        self.on_sip_call = False  # Track if we're on a SIP call
-
-    async def on_audio_chunk_callback(self, audio_bytes: bytes, context=None):
-        """Route audio output to SIP if on a call."""
-        if self.on_sip_call:
-            try:
-                # Send audio to active SIP session
-                from lib.providers.services import service_manager
-                await service_manager.sip_audio_out_chunk(
-                    audio_chunk=audio_bytes,
-                    context=self.context
-                )
-            except Exception as e:
-                print(f"Error routing audio to SIP: {e}")
-        # If not on call, audio plays locally (handled by ah_openai)
 
     async def handle_s2s_cmd(self, cmd:dict, context=None):
         try:
             print('Received S2S command:')
             print(json.dumps(cmd, indent=2))
-            
-            # Track call state for audio routing
-            if 'call' in cmd:
-                self.on_sip_call = True
-            elif 'hangup' in cmd:
-                self.on_sip_call = False
-            
             json_str = json.dumps(cmd)
             buffer = ''
             results = await self.parse_single_cmd(json_str, self.context, buffer)
@@ -59,16 +37,10 @@ class SpeechToSpeechAgent(Agent):
         self.agent = await get_agent_data(self.context.agent_name)
         sys_msg = await self.render_system_msg()
  
-        # Pass audio callback to route output to SIP when on call
-        await self.context.start_s2s(
-            self.model, 
-            sys_msg, 
-            self.handle_s2s_cmd,
-            on_audio_chunk=self.on_audio_chunk_callback,
-            context=self.context
-        )
+        await self.context.start_s2s(self.model, sys_msg, self.handle_s2s_cmd, context=self.context)
 
     async def send_message(self, content, context=None):
         msg = { "role": "user", "content": content }
         print("calling send_s2s_message", msg)
         await self.context.send_s2s_message(msg)
+            

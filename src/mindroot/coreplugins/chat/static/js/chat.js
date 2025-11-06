@@ -15,6 +15,9 @@ import showNotification from './notification.js';
 if (!window.lastParsed) window.lastParsed = Date.now();
 if (!window.lastScrolled) window.lastScrolled = Date.now();
 
+// Initialize ansi_up for ANSI color code rendering
+const ansi_up = new AnsiUp();
+
 window.lastScrolled = Date.now();
 
 window.commandHandlers = {};
@@ -399,6 +402,21 @@ class Chat extends BaseEl {
     data.event = 'result'
     if (handler) {
       await handler(data);
+    } else {
+      try {
+        if (data.command == 'execute_command' || data.command == 'run_python') {
+          let skipWarning = data.result?.replace(' command result, NOT user reply','');
+          // Convert ANSI codes to HTML
+          const htmlOutput = ansi_up.ansi_to_html(skipWarning);
+          
+          this.messages.push( {
+            role: 'user',
+            content: `<pre class="shellout"><code>${htmlOutput}</code></pre>`,
+          })
+        }
+      } catch (e) {
+        console.error("Could not parse command result:", e)
+      }
     }
     for (let msg of this.messages) {
       msg.spinning = 'no'
