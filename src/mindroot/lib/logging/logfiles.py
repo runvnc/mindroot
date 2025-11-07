@@ -23,8 +23,8 @@ def json_sink(message):
 
 logger.info("This is a test log message")
 
-#logger.add(json_sink, level="DEBUG")
-logger.add(json_sink, level="ERROR")
+logger.add(json_sink, level="DEBUG")
+#logger.add(json_sink, level="ERROR")
 
 def generate_file_name(timestamp):
     return f"logs/log_{timestamp.strftime('%Y-%m-%d_%H')}.json"
