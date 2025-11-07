@@ -64,6 +64,7 @@ class SpeechToSpeechAgent(Agent):
             self.model, 
             sys_msg, 
             self.handle_s2s_cmd,
+            play_local=False,
             on_audio_chunk=self.on_audio_chunk_callback,
             context=self.context
         )
@@ -72,3 +73,5 @@ class SpeechToSpeechAgent(Agent):
         msg = { "role": "user", "content": content }
         print("calling send_s2s_message", msg)
         await self.context.send_s2s_message(msg)
+
+
