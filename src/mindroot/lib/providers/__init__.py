@@ -63,6 +63,24 @@ class ProviderManager:
         if name in self.fast_path_services:
             if name not in self.functions:
                 raise ValueError(f"function '{name}' not found.")
+            
+            # Ensure context is in kwargs for fast path services
+            if 'context' not in kwargs:
+                # Try to find context in args
+                found_context = False
+                for arg in args:
+                    if arg.__class__.__name__ == 'ChatContext' or hasattr(arg, 'agent'):
+                        kwargs['context'] = arg
+                        found_context = True
+                        break
+                
+                # If still no context, use self.context
+                if not found_context:
+                    if hasattr(self, 'context'):
+                        kwargs['context'] = self.context
+                    else:
+                        raise ValueError(f"No context available for service '{name}'")
+            
             return await self.functions[name][0]['implementation'](*args, **kwargs)
         
         if name not in self.functions:
