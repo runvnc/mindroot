@@ -79,7 +79,7 @@ class SpeechToSpeechAgent(Agent):
  
         # Pass audio callback to route output to SIP when on call
         await self.context.start_s2s(
-            self.model, 
+            'gpt-realtime', # self.model
             sys_msg, 
             self.handle_s2s_cmd,
             play_local=False,
