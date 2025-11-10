@@ -75,11 +75,12 @@ class SpeechToSpeechAgent(Agent):
         
     async def connect(self):
         self.agent = await get_agent_data(self.context.agent_name)
+        model = self.agent['service_models']['stream_chat']['model']
         sys_msg = await self.render_system_msg()
  
         # Pass audio callback to route output to SIP when on call
         await self.context.start_s2s(
-            'gpt-realtime', # self.model
+            model,
             sys_msg, 
             self.handle_s2s_cmd,
             play_local=False,
