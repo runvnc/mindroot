@@ -18,6 +18,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Declare global capabilities array
+declare -gA CAPS
+
 # Configuration
 PROFILE="moderate"
 BACKUP_DIR="/root/network-optimization-backup-$(date +%Y%m%d-%H%M%S)"

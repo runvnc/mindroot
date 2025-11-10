@@ -235,16 +235,24 @@ apply_all_optimizations() {
     generate_sysctl_config "$profile" "$sysctl_config"
     
     # Apply each optimization
-    local success_count=0
-    local total_count=0
+    local success_count
+    local total_count
+    success_count=0
+    total_count=0
     
-    ((total_count++)); apply_sysctl "$sysctl_config" && ((success_count++))
-    ((total_count++)); apply_bbr && ((success_count++))
-    ((total_count++)); apply_thp_disable && ((success_count++))
-    ((total_count++)); apply_network_offloads && ((success_count++))
-    ((total_count++)); apply_cpu_governor && ((success_count++))
-    ((total_count++)); apply_fd_limits && ((success_count++))
-    ((total_count++)); apply_dns_optimization && ((success_count++))
+    total_count=$((total_count + 1)); apply_sysctl "$sysctl_config" && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_bbr && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_thp_disable && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_network_offloads && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_cpu_governor && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_fd_limits && success_count=$((success_count + 1)) || true
+    echo ""
+    total_count=$((total_count + 1)); apply_dns_optimization && success_count=$((success_count + 1)) || true
     
     echo ""
     echo -e "${BLUE}========================================${NC}"
