@@ -10,10 +10,12 @@ class SpeechToSpeechAgent(Agent):
         if agent_name:
             self.agent_name = agent_name
         self.on_sip_call = False  # Track if we're on a SIP call
+        self.call_answered = False  # Track if call is actually answered
 
     async def on_audio_chunk_callback(self, audio_bytes: bytes, context=None):
-        """Route audio output to SIP if on a call."""
-        if self.on_sip_call:
+        """Route audio output to SIP if call is answered."""
+        # Only route audio if call is answered (not just dialing)
+        if self.on_sip_call and self.call_answered:
             try:
                 # Send audio to active SIP session
                 from lib.providers.services import service_manager
@@ -23,22 +25,38 @@ class SpeechToSpeechAgent(Agent):
                 )
             except Exception as e:
                 print(f"Error routing audio to SIP: {e}")
-        # If not on call, audio plays locally (handled by ah_openai)
+        # Otherwise discard audio (before call answered or after hangup)
 
     async def handle_s2s_cmd(self, cmd:dict, context=None):
         try:
             print('Received S2S command:')
             print(json.dumps(cmd, indent=2))
             
-            # Track call state for audio routing
             if 'call' in cmd:
                 self.on_sip_call = True
+                self.call_answered = False
+                
+                # Execute call command - this blocks until call is answered
+                json_str = json.dumps(cmd)
+                buffer = ''
+                results = await self.parse_single_cmd(json_str, self.context, buffer)
+                
+                # If we get here, call was answered successfully
+                self.call_answered = True
+                print("Call answered! Audio routing enabled.")
+                
             elif 'hangup' in cmd:
                 self.on_sip_call = False
+                self.call_answered = False
+                json_str = json.dumps(cmd)
+                buffer = ''
+                results = await self.parse_single_cmd(json_str, self.context, buffer)
+            else:
+                # Other commands
+                json_str = json.dumps(cmd)
+                buffer = ''
+                results = await self.parse_single_cmd(json_str, self.context, buffer)
             
-            json_str = json.dumps(cmd)
-            buffer = ''
-            results = await self.parse_single_cmd(json_str, self.context, buffer)
             print()
             print()
             print('#########################################')
