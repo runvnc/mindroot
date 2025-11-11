@@ -34,7 +34,7 @@ class SpeechToSpeechAgent(Agent):
             # Save to chat log
             self.context.chat_log.add_message({
                 "role": role, 
-                "content": [ { "type": "text"
+                "content": [ { "type": "text",
                                "text": transcript
                              } ]
             })
