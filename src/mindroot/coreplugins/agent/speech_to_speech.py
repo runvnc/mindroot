@@ -27,6 +27,23 @@ class SpeechToSpeechAgent(Agent):
                 print(f"Error routing audio to SIP: {e}")
         # Otherwise discard audio (before call answered or after hangup)
 
+    async def on_transcript_callback(self, role: str, transcript: str, context=None):
+        """Handle transcripts from S2S conversation."""
+        try:
+            # Save to chat log
+            self.context.chat_log.add_message({
+                "role": role, 
+                "content": transcript
+            })
+            
+            # Send to frontend
+            if role == 'user':
+                await self.context.backend_user_message(transcript)
+            elif role == 'assistant':
+                await self.context.backend_assistant_message(transcript)
+        except Exception as e:
+            print(f"Error handling transcript: {e}")
+
     async def handle_s2s_cmd(self, cmd:dict, context=None):
         try:
             print('Received S2S command:')
@@ -85,6 +102,7 @@ class SpeechToSpeechAgent(Agent):
             self.handle_s2s_cmd,
             play_local=False,
             on_audio_chunk=self.on_audio_chunk_callback,
+            on_transcript=self.on_transcript_callback,
             context=self.context
         )
 

@@ -602,6 +602,19 @@ async def backend_user_message(message: str, context=None):
     })
 
 @service()
+async def backend_assistant_message(message: str, context=None):
+    """
+    Signal the frontend to display an assistant message.
+    """
+    agent_ = context.agent
+    persona = 'assistant'
+    await context.agent_output("backend_assistant_message", { 
+        "content": message, 
+        "sender": "assistant",
+        "persona": persona
+    })
+
+@service()
 async def cancel_active_response(log_id: str, context=None):
     """
     Cancel active AI response for eager end of turn processing.
