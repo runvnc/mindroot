@@ -168,6 +168,12 @@ export class ChatHistory {
                       
             }
         } catch (e) {
+            // just show plain text content
+            this.chat.messages = [...this.chat.messages, {
+                content: part.text,
+                sender: 'ai',
+                persona: persona
+            }];
             console.error('Error processing assistant message:', e);
         }
     }
