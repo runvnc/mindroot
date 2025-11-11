@@ -34,9 +34,12 @@ class SpeechToSpeechAgent(Agent):
             # Save to chat log
             self.context.chat_log.add_message({
                 "role": role, 
-                "content": transcript
-            })
-            
+                "content": [
+                    { "type": "text"
+                      "text": transcript
+                    }
+                ])
+
             # Send to frontend
             if role == 'user':
                 await self.context.backend_user_message(transcript)
@@ -44,6 +47,20 @@ class SpeechToSpeechAgent(Agent):
                 await self.context.backend_assistant_message(transcript)
         except Exception as e:
             print(f"Error handling transcript: {e}")
+
+    async def on_interrupt(self, context=None):
+        """Handle interruption from OpenAI (user started speaking)."""
+        try:
+            print("[INTERRUPT] User interrupted - clearing audio queue")
+            
+            # Clear any queued audio to stop current response immediately
+            from lib.providers.services import service_manager
+            result = await service_manager.sip_clear_audio_queue(
+                context=self.context
+            )
+            print(f"[INTERRUPT] Audio queue cleared: {result}")
+        except Exception as e:
+            print(f"Error handling interrupt: {e}")
 
     async def handle_s2s_cmd(self, cmd:dict, context=None):
         try:
@@ -104,6 +121,7 @@ class SpeechToSpeechAgent(Agent):
             play_local=False,
             on_audio_chunk=self.on_audio_chunk_callback,
             on_transcript=self.on_transcript_callback,
+            on_interrupt=self.on_interrupt,
             context=self.context
         )
 
