@@ -34,12 +34,10 @@ class SpeechToSpeechAgent(Agent):
             # Save to chat log
             self.context.chat_log.add_message({
                 "role": role, 
-                "content": [
-                    { "type": "text"
-                      "text": transcript
-                    }
-                ])
-
+                "content": [ { "type": "text"
+                               "text": transcript
+                             } ]
+            })
             # Send to frontend
             if role == 'user':
                 await self.context.backend_user_message(transcript)
