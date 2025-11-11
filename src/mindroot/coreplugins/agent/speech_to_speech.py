@@ -30,6 +30,7 @@ class SpeechToSpeechAgent(Agent):
     async def on_transcript_callback(self, role: str, transcript: str, context=None):
         """Handle transcripts from S2S conversation."""
         try:
+            print("received transcript item")
             # Save to chat log
             self.context.chat_log.add_message({
                 "role": role, 
