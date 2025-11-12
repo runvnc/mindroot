@@ -1,3 +1,18 @@
+import logging
+
+# Configure logging levels for the entire application
+# Suppress verbose output from various libraries
+logging.getLogger('uvicorn').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.access').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.error').setLevel(logging.WARNING)
+logging.getLogger('fastapi').setLevel(logging.WARNING)
+logging.getLogger('starlette').setLevel(logging.WARNING)
+logging.getLogger('websockets').setLevel(logging.WARNING)
+logging.getLogger('asyncio').setLevel(logging.WARNING)
+logging.getLogger('mindroot').setLevel(logging.WARNING)
+# Set root logger to ERROR - only show errors and critical messages
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
