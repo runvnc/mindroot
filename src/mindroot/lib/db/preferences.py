@@ -2,9 +2,6 @@ import logging
 from typing import List, Dict, Optional
 from mindroot.registry import data_access
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
 async def load_models() -> Optional[Dict]:
     try:
         models = data_access.read_models()
@@ -48,7 +45,7 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str]) 
             matching_models.append(setting)
 
     if not matching_models:
-        logging.debug('No matching models found')
+        # No matching models - this is normal, not an error
         return None
 
     providers = await load_provider_data()
