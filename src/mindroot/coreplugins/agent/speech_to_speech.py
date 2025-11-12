@@ -94,11 +94,12 @@ class SpeechToSpeechAgent(Agent):
             print()
             print('#########################################')
             print(results)
-            info = results[0]
+            info_array = results[0]
+            info = info_array[0]
             if info['result'] is not None:
                 await self.send_message([{
                     "type": "text",
-                    "text": f"[SYSTEM: Command executed successfully]\n{json.dumps(str(results))}"
+                    "text": f"[SYSTEM: Command executed successfully]\n{json.dumps(info['result'])}"
                 }])
         except Exception as e:
             trace = traceback.format_exc()
