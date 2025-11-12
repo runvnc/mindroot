@@ -73,7 +73,7 @@ class SpeechToSpeechAgent(Agent):
                 json_str = json.dumps(cmd)
                 buffer = ''
                 results = await self.parse_single_cmd(json_str, self.context, buffer)
-                
+                # [cmd], buffer 
                 # If we get here, call was answered successfully
                 self.call_answered = True
                 print("Call answered! Audio routing enabled.")
@@ -94,10 +94,12 @@ class SpeechToSpeechAgent(Agent):
             print()
             print('#########################################')
             print(results)
-            await self.send_message([{
-                "type": "text",
-                "text": f"[SYSTEM: Command executed successfully]\n{json.dumps(str(results))}"
-            }])
+            info = results[0]
+            if info['result'] is not None:
+                await self.send_message([{
+                    "type": "text",
+                    "text": f"[SYSTEM: Command executed successfully]\n{json.dumps(str(results))}"
+                }])
         except Exception as e:
             trace = traceback.format_exc()
             print(f"Error executing S2S command: {e}")
