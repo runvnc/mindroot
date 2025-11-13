@@ -2,6 +2,7 @@ from .agent import Agent, get_agent_data
 import traceback
 import json
 import time
+import asyncio
 
 class SpeechToSpeechAgent(Agent):
 
@@ -66,7 +67,9 @@ class SpeechToSpeechAgent(Agent):
             print('Received S2S command:')
             print(json.dumps(cmd, indent=2))
             
-            if 'call' in cmd:
+            if 'say' in cmd:
+                raise Exception("'say' is not a valid command. Use audio ouput only to communicate with user/callee!")
+            elif 'call' in cmd:
                 self.on_sip_call = True
                 self.call_answered = False
                 
@@ -127,15 +130,20 @@ class SpeechToSpeechAgent(Agent):
         )
 
     async def send_message(self, content, context=None, wait_for_task_result=False):
-        msg = { "role": "user", "content": [ { "type": "text", "text": content} ] }
-        print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
-        await self.context.send_s2s_message(msg)
-        if wait_for_task_result:
-            started = time.time()
-            while time.time() - started < 1400:
-                if context.data['finished_conversation'] == True:
-                    return [context.data['task_result'], []]
-                asyncio.sleep(1)
+        try:
+            msg = { "role": "user", "content": [ { "type": "text", "text": content} ] }
+            print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
+            await self.context.send_s2s_message(msg)
+            if wait_for_task_result:
+                started = time.time()
+                while time.time() - started < 1400:
+                    if context.data['finished_conversation'] == True:
+                        return [context.data['task_result'], []]
+                    await asyncio.sleep(1)
+                return [None, []]
             return [None, []]
-        return [None, []]
+        except Exception as e:
+            trace = traceback.format_exc()
+            print(f"Error sending S2S message: {e} {trace}")
+            return [f"Error sending S2S message {e} {trace}", []]
 
