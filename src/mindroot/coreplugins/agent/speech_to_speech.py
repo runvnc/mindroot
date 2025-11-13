@@ -1,6 +1,7 @@
 from .agent import Agent, get_agent_data
 import traceback
 import json
+import time
 
 class SpeechToSpeechAgent(Agent):
 
@@ -125,9 +126,14 @@ class SpeechToSpeechAgent(Agent):
             context=self.context
         )
 
-    async def send_message(self, content, context=None):
+    async def send_message(self, content, context=None, wait_for_task_result=False):
         msg = { "role": "user", "content": content }
         print("calling send_s2s_message", msg)
         await self.context.send_s2s_message(msg)
-
+        if wait_for_task_result:
+            started = time.time()
+            while time.time() - started < 1400:
+                if context.data['finished_conversation'] == True:
+                    return [context.data['task_result'], []]
+            return [None, []]
 

@@ -138,7 +138,8 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     instructions = instructions + msg
 
     while retried < retries:
-        [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context,
+                                                            assume_wait_for_task_result=True)
         print('#####################################################33')
         print("Full results: ", full_results)
         print("Results: ", results)
@@ -274,7 +275,8 @@ async def cancel_and_wait(session_id: str, user:str, context=None):
     print(f"SEND_MESSAGE Cancellation complete for session {session_id}")
 
 @service()
-async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None):
+async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None,
+                                assume_wait_for_task_result=False)
     global in_progress, active_tasks
     
     # Check if there's an active task for this session
@@ -326,8 +328,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             print()
             print()
             print('message: ', message)
-            results = await agent_.send_message(message)
-            return results, []
+            res = await agent_.send_message(message, wait_for_task_result=assume_wait_for_task_result)
+            return res
         else:
             agent_ = agent.Agent(agent=context.agent)
 
