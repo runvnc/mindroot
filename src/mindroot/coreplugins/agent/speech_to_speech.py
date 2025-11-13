@@ -127,7 +127,7 @@ class SpeechToSpeechAgent(Agent):
         )
 
     async def send_message(self, content, context=None, wait_for_task_result=False):
-        msg = { "role": "user", "content": content }
+        msg = { "role": "user", "content": [ { "type": "text", "text": content} ] }
         print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
         await self.context.send_s2s_message(msg)
         if wait_for_task_result:
