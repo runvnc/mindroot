@@ -321,7 +321,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             context = ChatContext(command_manager, service_manager, user)
             await context.load_context(session_id)
 
-        if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat']:
+        if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat'] or assume_wait_for_task_result==True:
             agent_ = SpeechToSpeechAgent(context.agent_name, context=context)
             print('Using SpeechToSpeechAgent for live/realtime chat')
             print()
