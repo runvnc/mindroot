@@ -138,12 +138,8 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
     instructions = instructions + msg
 
     while retried < retries:
-        res_array =
-        #[results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context,
+        [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context,
  
-        res_array = await send_message_to_agent(context.log_id, instructions, context=context,
-                                                             assume_wait_for_task_result=True)
-        print("res_array: ", res_array)
         print('#####################################################33')
         print("Full results: ", full_results)
         print("Results: ", results)
