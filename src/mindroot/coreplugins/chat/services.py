@@ -328,7 +328,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             print()
             print()
             print('message: ', message)
-            [results, full_results] = await agent_.send_message(message, wait_for_task_result=assume_wait_for_task_result)
+            [results, full_results] = await agent_.send_message(message, wait_for_task_result=True)
             return [results, full_results]
         else:
             agent_ = agent.Agent(agent=context.agent)

@@ -128,12 +128,14 @@ class SpeechToSpeechAgent(Agent):
 
     async def send_message(self, content, context=None, wait_for_task_result=False):
         msg = { "role": "user", "content": content }
-        print("calling send_s2s_message", msg)
+        print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
         await self.context.send_s2s_message(msg)
         if wait_for_task_result:
             started = time.time()
             while time.time() - started < 1400:
                 if context.data['finished_conversation'] == True:
                     return [context.data['task_result'], []]
+                asyncio.sleep(1)
             return [None, []]
+        return [None, []]
 
