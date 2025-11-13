@@ -276,7 +276,7 @@ async def cancel_and_wait(session_id: str, user:str, context=None):
 
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None,
-                                assume_wait_for_task_result=False)
+                                assume_wait_for_task_result=False):
     global in_progress, active_tasks
     
     # Check if there's an active task for this session
