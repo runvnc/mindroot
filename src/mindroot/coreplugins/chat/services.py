@@ -139,7 +139,7 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
 
     while retried < retries:
         [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context,
-                                                            assume_wait_for_task_result=True)
+                                                             assume_wait_for_task_result=True)
         print('#####################################################33')
         print("Full results: ", full_results)
         print("Results: ", results)
@@ -328,8 +328,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             print()
             print()
             print('message: ', message)
-            res = await agent_.send_message(message, wait_for_task_result=assume_wait_for_task_result)
-            return res
+            [results, full_results] = await agent_.send_message(message, wait_for_task_result=assume_wait_for_task_result)
+            return [results, full_results]
         else:
             agent_ = agent.Agent(agent=context.agent)
 
