@@ -452,6 +452,16 @@ async def render_combined_template(page_name, plugins, context):
     
     # Ensure context is a dictionary
     context = context or {}
+    
+    # Pre-render parent blocks and add them to context
+    parent_block_content = {}
+    for block in parent_blocks:
+        if block in parent_template.blocks:
+            # Render the parent block with current context
+            rendered = ''.join(parent_template.blocks[block](parent_template.new_context(context)))
+            parent_block_content[f'parent_block_{block}'] = rendered
+    
+    context = {**context, **parent_block_content}
 
     print("child_templates", child_templates)
 

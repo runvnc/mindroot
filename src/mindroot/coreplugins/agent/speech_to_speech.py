@@ -134,14 +134,15 @@ class SpeechToSpeechAgent(Agent):
             msg = { "role": "user", "content": [ { "type": "text", "text": content} ] }
             print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
             await self.context.send_s2s_message(msg)
-            if wait_for_task_result:
-                started = time.time()
-                while time.time() - started < 1400:
-                    if context.data['finished_conversation'] == True:
-                        return [context.data['task_result'], []]
-                    await asyncio.sleep(1)
-                return [None, []]
-            return [None, []]
+            # delegate_call_task handles waiting
+            #if wait_for_task_result:
+            #    started = time.time()
+            #    while time.time() - started < 1400:
+            #        if context.data['finished_conversation'] == True:
+            #            return [context.data['task_result'], []]
+            #        await asyncio.sleep(1)
+            #    return [None, []]
+            #return [None, []]
         except Exception as e:
             trace = traceback.format_exc()
             print(f"Error sending S2S message: {e} {trace}")
