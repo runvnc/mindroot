@@ -71,8 +71,14 @@ def results_text(results):
 def results_output(results):
     text = ""
     for result in results:
-        if 'output' in result['args']:
-            return str(result['args']['output'])
+        # we want to exclude the string 'output' and find a dict with
+        # an 'output' key
+        if result['args'] is not None and isinstance(result['args'], dict) and 'output' in result['args']:
+            try:
+                return str(result['args']['output'])
+            except Exception as e:
+                print("Error converting output to string: ", e)
+                return result
 
 def results_text_output(results):
     text = ""

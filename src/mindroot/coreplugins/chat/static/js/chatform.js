@@ -285,23 +285,59 @@ class ChatForm extends BaseEl {
     console.log('File upload complete, file preview container:', this.shadowRoot.querySelector('.file-preview-container'))
   }
 
+  _scheduleResize() {
+    // Cancel any pending resize
+    
+    if (this._resizeTimeout) {
+      clearTimeout(this._resizeTimeout);
+    }
+    if (this._resizeFrame) {
+      cancelAnimationFrame(this._resizeFrame);
+    }
+    
+    // Debounce: wait 50ms after last keystroke
+    this._resizeTimeout = setTimeout(() => {  
+      // Use requestAnimationFrame to batch DOM operations
+      this._resizeFrame = requestAnimationFrame(() => {
+        this._resizeTextarea();
+      });
+    }, 250);
+  }
+
   _resizeTextarea() {
     if (this.autoSizeInput) {
       const textarea = this.messageEl;
+      if (!textarea) return;
+      
+      // Prevent recursive calls from ResizeObserver
+      if (this._isResizing) return;
+      this._isResizing = true;
+      
+      // IMPORTANT: Set height to 'auto' FIRST to get accurate scrollHeight
+      // Otherwise scrollHeight returns current height, not content height
       textarea.style.height = 'auto';
+      
+      // Now read the actual content height
       const newHeight = Math.min(Math.max(textarea.scrollHeight, 72), 640);
-      if (textarea.clientHeight != newHeight) {
-        console.log("height does not match. current height: ", textarea.style.height, " new height: ", `${newHeight}px`)
-        textarea.style.height = `${newHeight}px`;
+      
+      // Always set the final height (since we set it to 'auto' above)
+      textarea.style.height = `${newHeight}px`;
+      
+      // Update container if height changed
+      if (this.previousHeight !== newHeight) {
+        const container = this.containerEl;
+        const containerHeight = newHeight + 5;
+        if (container) {
+          container.style.height = `${containerHeight}px`;
+        }
+        
+        this.previousHeight = newHeight;
       }
-      const container = this.shadowRoot.querySelector('.message-container');
-      if (container && container.clientHeight != (newHeight + 5)) {
-          container.style.height = (newHeight + 5) + 'px';
-      }
-      this.previousHeight = newHeight;
+      
+      this._isResizing = false;
     }
   }
-
+  
   async _processImage(file) {
     if (this.isLoading) return
 
@@ -408,6 +444,7 @@ class ChatForm extends BaseEl {
   firstUpdated() {
     this.messageEl = this.shadowRoot.getElementById('inp_message');
     this.fileUploadEl = this.shadowRoot.getElementById('fileUpload');
+    this.containerEl = this.shadowRoot.querySelector('.message-container');
     
     // Initialize file preview container
     const filePreviewContainer = this.shadowRoot.querySelector('.file-preview-container');
@@ -434,8 +471,10 @@ class ChatForm extends BaseEl {
     observer.observe(this.shadowRoot, { childList: true, subtree: true });
     
     this.messageEl.value = '';   
-    this.messageEl.addEventListener('input', () => this._resizeTextarea());
-    new ResizeObserver(() => this._resizeTextarea()).observe(this.messageEl);
+    this.messageEl.addEventListener('input', () => this._scheduleResize());
+    // ResizeObserver removed - was causing feedback loop and performance issues
+    // Input event listener above handles all text changes
+    // new ResizeObserver(() => this._resizeTextarea()).observe(this.messageEl);
   }
 
   async _cancelChat() {

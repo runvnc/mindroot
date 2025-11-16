@@ -1045,6 +1045,87 @@ class AgentForm extends BaseEl {
     `;
   }
 
+  async handleDuplicateAgent() {
+    console.log('[Duplicate Agent] === START ===');
+    console.log('[Duplicate Agent] Button clicked, agent:', this.agent);
+    
+    if (!this.agent?.name) {
+      console.error('[Duplicate Agent] ERROR: No agent selected');
+      showNotification('error', 'No agent selected for duplication');
+      return;
+    }
+    
+    console.log('[Duplicate Agent] Current agent name:', this.agent.name);
+    
+    // Prompt user for new agent name
+    const newName = prompt('Enter a name for the duplicated agent:');
+    console.log('[Duplicate Agent] User input:', newName);
+    
+    if (!newName || !newName.trim()) {
+      console.log('[Duplicate Agent] User cancelled or entered empty name');
+      return;
+    }
+    
+    const trimmedName = newName.trim();
+    console.log('[Duplicate Agent] Trimmed name:', trimmedName);
+    
+    // Validate the new name
+    if (trimmedName === this.agent.name) {
+      console.error('[Duplicate Agent] ERROR: New name same as original:', trimmedName);
+      showNotification('error', 'New name must be different from the original');
+      return;
+    }
+    
+    if (trimmedName.includes('/') || trimmedName.includes('\\')) {
+      console.error('[Duplicate Agent] ERROR: Invalid name contains path separators:', trimmedName);
+      showNotification('error', 'Agent name cannot contain path separators');
+      return;
+    }
+    
+    try {
+      this.loading = true;
+      console.log('[Duplicate Agent] Starting API call with new name:', trimmedName);
+      
+      const response = await fetch(`/agents/local/${this.agent.name}/duplicate`, {
+        method: 'POST',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          new_name: trimmedName,
+          scope: 'local'
+        })
+      });
+      
+      const result = await response.json();
+      console.log('[Duplicate Agent] API response status:', response.status);
+      console.log('[Duplicate Agent] API response data:', result);
+      
+      if (!response.ok) {
+        console.error('[Duplicate Agent] API ERROR:', result);
+        throw new Error(result.detail || 'Failed to duplicate agent');
+      }
+      
+      console.log('[Duplicate Agent] SUCCESS:', result.message);
+      showNotification('success', result.message);
+      
+      // Refresh agent list and select the new agent
+      console.log('[Duplicate Agent] Refreshing agent list...');
+      await this.fetchAgents();
+      console.log('[Duplicate Agent] Selecting new agent:', trimmedName);
+      this.selectedAgentName = trimmedName;
+      await this.handleAgentChange({ target: { value: trimmedName } });
+      
+    } catch (error) {
+      console.error('[Duplicate Agent] CATCH ERROR:', error);
+      showNotification('error', `Error duplicating agent: ${error.message}`);
+    } finally {
+      console.log('[Duplicate Agent] === FINISHED ===');
+      this.loading = false;
+    }
+  }
+
   async handleExportAgent() {
     if (!this.agent?.name) {
       showNotification('error', 'No agent selected for export');
@@ -1126,6 +1207,9 @@ class AgentForm extends BaseEl {
         </select>
         <button class="btn btn-secondary" @click=${this.handleNewAgent}>
           New Agent
+        </button>
+        <button class="btn btn-secondary" @click=${this.handleDuplicateAgent} ?disabled=${!this.agent}>
+          Duplicate Agent
         </button>
         <button class="btn btn-secondary" @click=${this.handleExportAgent} ?disabled=${!this.agent}>
           Export Agent

@@ -2,9 +2,9 @@ import logging
 
 # Set root logger to CRITICAL - only show critical errors from all modules
 # This applies to ALL loggers unless explicitly overridden
-logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # Disable all existing loggers to ensure clean slate
-logging.disable(logging.ERROR)  # Disable everything below CRITICAL
+#logging.disable(logging.ERROR)  # Disable everything below CRITICAL
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles

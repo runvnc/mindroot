@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import json
 from .agent_importer import scan_and_import_agents, import_github_agent
+import shutil
 from lib.providers.commands import command_manager
 from .persona_handler import handle_persona_import, import_persona_from_index
 import traceback
@@ -22,6 +23,10 @@ local_dir = BASE_DIR / "local"
 shared_dir = BASE_DIR / "shared"
 local_dir.mkdir(parents=True, exist_ok=True)
 shared_dir.mkdir(parents=True, exist_ok=True)
+
+class DuplicateAgentRequest(BaseModel):
+    new_name: str
+    scope: str = "local"
 
 # Cache for agent ownership info
 _agent_ownership_cache = None
@@ -466,3 +471,59 @@ async def import_agent_zip(scope: str, file: UploadFile = File(...)):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error importing zip: {str(e)}")
+
+@router.post('/agents/{scope}/{name}/duplicate')
+def duplicate_agent(scope: str, name: str, request: DuplicateAgentRequest):
+    """Duplicate an agent with a new name"""
+    if scope not in ['local', 'shared']:
+        raise HTTPException(status_code=400, detail='Invalid scope')
+    
+    if request.scope not in ['local', 'shared']:
+        raise HTTPException(status_code=400, detail='Invalid target scope')
+    
+    # Validate new name
+    new_name = request.new_name.strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail='New agent name is required')
+    
+    if '/' in new_name or '\\' in new_name:
+        raise HTTPException(status_code=400, detail='Agent name cannot contain path separators')
+    
+    # Check if source agent exists
+    source_dir = BASE_DIR / scope / name
+    if not source_dir.exists():
+        raise HTTPException(status_code=404, detail='Source agent not found')
+    
+    # Check if target agent already exists
+    target_dir = BASE_DIR / request.scope / new_name
+    if target_dir.exists():
+        raise HTTPException(status_code=400, detail=f'Agent {new_name} already exists')
+    
+    try:
+        # Copy entire directory
+        shutil.copytree(source_dir, target_dir)
+        
+        # Update agent.json with new name
+        agent_json_path = target_dir / 'agent.json'
+        if agent_json_path.exists():
+            with open(agent_json_path, 'r') as f:
+                agent_data = json.load(f)
+            
+            # Update the name field
+            agent_data['name'] = new_name
+            
+            with open(agent_json_path, 'w') as f:
+                json.dump(agent_data, f, indent=2)
+        
+        return {
+            'success': True,
+            'message': f'Agent {name} duplicated successfully as {new_name}',
+            'new_agent_name': new_name,
+            'new_agent_scope': request.scope
+        }
+        
+    except Exception as e:
+        # Clean up if something went wrong
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        raise HTTPException(status_code=500, detail=f"Error duplicating agent: {str(e)}")

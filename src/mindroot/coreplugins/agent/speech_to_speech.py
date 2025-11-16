@@ -51,14 +51,14 @@ class SpeechToSpeechAgent(Agent):
     async def on_interrupt(self, context=None):
         """Handle interruption from OpenAI (user started speaking)."""
         try:
-            print("[INTERRUPT] User interrupted - clearing audio queue")
+            print("[INTERRUPT] User interrupted - not clearing audio queue")
             
             # Clear any queued audio to stop current response immediately
-            from lib.providers.services import service_manager
-            result = await service_manager.sip_clear_audio_queue(
-                context=self.context
-            )
-            print(f"[INTERRUPT] Audio queue cleared: {result}")
+            #from lib.providers.services import service_manager
+            #result = await service_manager.sip_clear_audio_queue(
+            #    context=self.context
+            #)
+            #print(f"[INTERRUPT] Audio queue cleared: {result}")
         except Exception as e:
             print(f"Error handling interrupt: {e}")
 
@@ -130,8 +130,10 @@ class SpeechToSpeechAgent(Agent):
         )
 
     async def send_message(self, content, context=None, wait_for_task_result=False):
-        try:
+        try:            
             msg = { "role": "user", "content": [ { "type": "text", "text": content} ] }
+            if isinstance(content, list):
+                msg = { "role": "user", "content": content }
             print("calling send_s2s_message", msg, "wait for task result:", wait_for_task_result)
             await self.context.send_s2s_message(msg)
             # delegate_call_task handles waiting
@@ -142,7 +144,7 @@ class SpeechToSpeechAgent(Agent):
             #            return [context.data['task_result'], []]
             #        await asyncio.sleep(1)
             #    return [None, []]
-            #return [None, []]
+            return [None, []]
         except Exception as e:
             trace = traceback.format_exc()
             print(f"Error sending S2S message: {e} {trace}")
