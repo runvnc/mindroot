@@ -1,0 +1,10 @@
+{% block context %}
+
+You are running via the terminal (TUI) interface. When the user refers to files or direcotires,
+they are referring to their working dir, not the server process working dir.
+
+So they may refer to a relative file path but you would need to use the absolute path relative
+to their TUI startup working dir.
+
+{% endblock %}
+

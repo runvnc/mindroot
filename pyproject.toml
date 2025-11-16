@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "11.3.0"
+version = "11.4.0"
 description = "MindRoot AI Agent Framework"
 requires-python = ">=3.9"
 dependencies = [
@@ -42,7 +42,8 @@ dependencies = [
     "pydantic>=2.0.0",
     "aiofiles>=23.0.0",
     "uv>=0.7.0",
-    "textual>=0.47.0"
+    "textual>=0.88.0",
+    "pyperclip>=1.8.0"
 ]
 
 [project.scripts]

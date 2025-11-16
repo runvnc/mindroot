@@ -209,6 +209,7 @@ async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(
     log_id = nanoid.generate()
     plugins = list_enabled()
     print("Init chat with user", user)
+    print("User type:", type(user))
     print(f"Init chat with {agent_name}")
     await init_chat_session(user, agent_name, log_id)
 
@@ -220,6 +221,27 @@ async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(
         debug_box("Access token saved to session file")
     else:
         debug_box("No access token found in request state")
+    
+    # Initialize session data from query parameters
+    # Skip standard parameters that are used for other purposes
+    skip_params = {'api_key', 'embed'}
+    session_params = {k: v for k, v in request.query_params.items() if k not in skip_params}
+    
+    if session_params:
+        # Initialize session data with query parameters
+        context = await get_context(log_id, user.username if hasattr(user, 'username') else user['username'])
+        
+        if 'session' not in context.data:
+            context.data['session'] = {}
+        
+        # Add all query parameters to session data
+        context.data['session'].update(session_params)
+        
+        # Always add server working directory
+        context.data['session']['server_working_directory'] = os.getcwd()
+        
+        await context.save_context_data()
+        print(f"Initialized session data from query params for {log_id}: {session_params}")
     
     # If embed mode is requested, redirect to embed session
     if embed:
@@ -334,6 +356,29 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
         return {"status": "error", "message": "No instructions provided"}
     
     task_result, full_results, log_id = await run_task(instructions=instructions, agent_name=agent_name, user=user)
+    
+    # Initialize session data from query parameters after task creation
+    # Skip standard parameters that are used for other purposes
+    skip_params = {'api_key'}
+    session_params = {k: v for k, v in request.query_params.items() if k not in skip_params}
+    
+    if session_params and log_id:
+        try:
+            context = await get_context(log_id, user)
+            if 'session' not in context.data:
+                context.data['session'] = {}
+            
+            # Add all query parameters to session data
+            context.data['session'].update(session_params)
+            
+            # Always add server working directory
+            context.data['session']['server_working_directory'] = os.getcwd()
+            
+            await context.save_context_data()
+            print(f"Updated task session data from query params for {log_id}: {session_params}")
+        except Exception as e:
+            print(f"Error updating TUI session data: {e}")
+    
     print(task_result)
     print(full_results)
     print(log_id)
