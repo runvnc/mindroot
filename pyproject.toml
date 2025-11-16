@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mindroot"
-version = "11.1.1"
+version = "11.3.0"
 description = "MindRoot AI Agent Framework"
 requires-python = ">=3.9"
 dependencies = [
@@ -41,8 +41,10 @@ dependencies = [
     "httpx>=0.24.0",
     "pydantic>=2.0.0",
     "aiofiles>=23.0.0",
-    "uv>=0.7.0"
+    "uv>=0.7.0",
+    "textual>=0.47.0"
 ]
 
 [project.scripts]
 mindroot = "mindroot.server:main"
+mr = "mindroot.coreplugins.tui.cli:main"

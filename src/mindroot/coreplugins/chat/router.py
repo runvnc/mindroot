@@ -148,7 +148,29 @@ async def chat_events(log_id: str):
 
 @router.post("/chat/{log_id}/send")
 async def send_message(request: Request, log_id: str, message_parts: List[MessageParts] ):
-    user = request.state.user
+    # Check for API key in Authorization header (Bearer token)
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        api_key = auth_header[7:]  # Remove "Bearer " prefix
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            # Create a mock user object for API key users
+            class MockUser:
+                def __init__(self, username):
+                    self.username = username
+            user = MockUser(user_data['username'])
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        # Use regular session authentication
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        user = request.state.user
+    
     debug_box("send_message")
 
     context = await get_context(log_id, user.username)
@@ -269,7 +291,7 @@ class TaskRequest(BaseModel):
     instructions: str
 
 @router.post("/task/{agent_name}")
-async def run_task_route(request: Request, agent_name: str, task_request: TaskRequest = None):
+async def run_task_route(request: Request, agent_name: str, task_request: TaskRequest = None, api_key: str = Query(None)):
     """
     Run a task for an agent with the given instructions.
     This endpoint allows programmatic interaction with agents without a full chat session.
@@ -282,7 +304,27 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
     - JSON with results and log_id for tracking
     """
     
-    user = request.state.user.username
+    # Handle API key authentication if provided
+    if api_key:
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            # Create a mock user object for API key users
+            class MockUser:
+                def __init__(self, username):
+                    self.username = username
+            user_obj = MockUser(user_data['username'])
+            user = user_obj.username
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        # Use regular session authentication
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        user = request.state.user.username
     
     instructions = None
     if task_request is not None:

@@ -237,6 +237,27 @@ async def middleware(request: Request, call_next):
                 print(e)
 
         if token:
+            # First check if the bearer token is an API key (not a JWT)
+            token_str = token.credentials if hasattr(token, 'credentials') else token
+            
+            # Try to validate as API key first
+            key_data = api_key_manager.validate_key(token_str)
+            if key_data:
+                print("Bearer token is a valid API key")
+                username = key_data['username']
+                user_data = await service_manager.get_user_data(username)
+                
+                if user_data:
+                    request.state.user = user_data
+                    # Create JWT token for persistent session
+                    jwt_token = create_access_token({"sub": username})
+                    request.state.access_token = jwt_token
+                    return await call_next(request)
+                else:
+                    print(f"User {username} for API key not found")
+                    return RedirectResponse(url="/login")
+            
+            # If not an API key, try to decode as JWT token
             if hasattr(token, 'credentials'):
                 payload = decode_token(token.credentials)
             else:
