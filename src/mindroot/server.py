@@ -232,7 +232,8 @@ def main():
     app.add_middleware(HeaderMiddleware)
     
     # Add profiling middleware
-    app.add_middleware(PyInstrumentMiddleware)
+    if os.environ.get('PYINSTRUMENT_ENABLE', 'false').lower() == 'true':
+        app.add_middleware(PyInstrumentMiddleware)
 
     try:
         print(colored(f"Starting server on port {port}", "green"))
