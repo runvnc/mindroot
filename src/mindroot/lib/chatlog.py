@@ -36,7 +36,7 @@ class ChatLog:
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         # For backward compatibility, we'll load synchronously in constructor
-        # but provide async methods for new code
+        # Run blocking I/O in thread pool to avoid blocking event loop
         self._load_log_sync()
         
     def _get_log_data(self) -> Dict[str, any]:
@@ -50,8 +50,8 @@ class ChatLog:
     def _calculate_message_length(self, message: Dict[str, str]) -> int:
         return len(json.dumps(message)) // 3
 
-    def _load_log_sync(self, log_id=None) -> None:
-        """Synchronous version for backward compatibility"""
+    def _load_log_impl(self, log_id=None) -> None:
+        """Internal implementation that does the actual file I/O"""
         if log_id is None:
             log_id = self.log_id
         self.log_id = log_id
@@ -69,14 +69,31 @@ class ChatLog:
         else:
             print("Could not find log file at ", log_file)
             self.messages = []
+    
+    def _load_log_sync(self, log_id=None) -> None:
+        """Synchronous version - just calls implementation directly"""
+        self._load_log_impl(log_id)
+    
+    async def _load_log_async(self, log_id=None) -> None:
+        """Async version - runs implementation in thread pool"""
+        await asyncio.to_thread(self._load_log_impl, log_id)
 
+    def _write_log_file(self, log_file: str) -> None:
+        """Helper to write log file - can be run in thread pool"""
+        with open(log_file, 'w') as f:
+            json.dump(self._get_log_data(), f, indent=2)
+    
     def _save_log_sync(self) -> None:
         """Synchronous version for backward compatibility"""
         log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
         self.last_modified = time.time()
-        with open(log_file, 'w') as f:
-            json.dump(self._get_log_data(), f, indent=2)
+        self._write_log_file(log_file)
 
+    async def _save_log_async(self) -> None:
+        """Async version - runs in thread pool to avoid blocking"""
+        log_file = os.path.join(self.log_dir, f'chatlog_{self.log_id}.json')
+        self.last_modified = time.time()
+        await asyncio.to_thread(self._write_log_file, log_file)
 
     def add_message_role(self, message: Dict[str, str]) -> None:
         for i in range(len(self.messages)-1, -1, -1):

@@ -9,11 +9,10 @@ from .models import CreditTransaction, CreditRatioConfig
 from .storage import CreditStorage
 from .ledger import CreditLedger
 from .conversion import CreditUsageHandler, CreditPolicy
-
-# Global handler for usage tracking
 _usage_handler = None
 
 class CreditsPlugin:
+
     def __init__(self, base_path: str):
         self.base_path = base_path
 
@@ -24,7 +23,7 @@ class CreditsPlugin:
         ledger = CreditLedger(storage)
         credit_policy = CreditPolicy(ledger, ratio_config, self.base_path)
         usage_handler = CreditUsageHandler(ledger, ratio_config, self.base_path)
-        return storage, ledger, ratio_config, credit_policy, usage_handler
+        return (storage, ledger, ratio_config, credit_policy, usage_handler)
 
 def get_base_path(context) -> str:
     """Get the base path for credit data storage"""
@@ -33,35 +32,24 @@ def get_base_path(context) -> str:
 @hook()
 async def startup(app, context=None):
     """Startup tasks"""
-    # Initialize components
     plugin = CreditsPlugin(get_base_path(context))
     _, _, _, _, usage_handler = plugin.create_components()
-    
-    # Store usage handler globally for the handle_usage service
     global _usage_handler
     _usage_handler = usage_handler
 
-
 @hook()
-async def handle_usage(plugin_id: str, cost_type_id: str, quantity: float,
-                    metadata: dict, context=None, model_id: Optional[str] = None):
+async def handle_usage(plugin_id: str, cost_type_id: str, quantity: float, metadata: dict, context=None, model_id: Optional[str]=None):
     """Handle usage tracking for credits system.
     This service is called by the usage plugin after tracking usage.
     """
     global _usage_handler
     if not _usage_handler:
-        raise RuntimeError("Credits plugin not properly initialized")
-    print(cost_type_id) 
-    print("quantity:", quantity)
-    debug_box("Recording credit usage: {} {} {}".format(plugin_id, cost_type_id, quantity))
-    await _usage_handler.handle_usage(plugin_id, cost_type_id, quantity,
-                                    metadata, context, model_id)
+        raise RuntimeError('Credits plugin not properly initialized')
+    debug_box('Recording credit usage: {} {} {}'.format(plugin_id, cost_type_id, quantity))
+    await _usage_handler.handle_usage(plugin_id, cost_type_id, quantity, metadata, context, model_id)
 
 @service()
-async def allocate_credits(username: str, amount: float,
-                          source: str, reference_id: str,
-                          metadata: Optional[Dict] = None,
-                          context=None) -> float:
+async def allocate_credits(username: str, amount: float, source: str, reference_id: str, metadata: Optional[Dict]=None, context=None) -> float:
     """Allocate credits to a user.
     
     Args:
@@ -86,9 +74,7 @@ async def allocate_credits(username: str, amount: float,
     """
     plugin = CreditsPlugin(get_base_path(context))
     _, ledger, _, _, _ = plugin.create_components()
-    return await ledger.record_allocation(
-        username, amount, source, reference_id, metadata
-    )
+    return await ledger.record_allocation(username, amount, source, reference_id, metadata)
 
 @service()
 async def get_credit_balance(username: str, context=None) -> float:
@@ -102,8 +88,7 @@ async def get_credit_balance(username: str, context=None) -> float:
     return await ledger.get_balance(username)
 
 @service()
-async def check_credits_available(username: str, required_amount: float,
-                                context=None) -> Dict:
+async def check_credits_available(username: str, required_amount: float, context=None) -> Dict:
     """Check if user has sufficient credits.
     
     Returns:
@@ -111,20 +96,11 @@ async def check_credits_available(username: str, required_amount: float,
     """
     plugin = CreditsPlugin(get_base_path(context))
     _, ledger, _, _, _ = plugin.create_components()
-    
-    has_sufficient, balance = await ledger.check_credits_available(
-        username, required_amount
-    )
-    return {
-        'has_sufficient': has_sufficient,
-        'current_balance': balance
-    }
+    has_sufficient, balance = await ledger.check_credits_available(username, required_amount)
+    return {'has_sufficient': has_sufficient, 'current_balance': balance}
 
 @service()
-async def set_credit_ratio(ratio: float, plugin_id: Optional[str] = None,
-                          cost_type_id: Optional[str] = None,
-                          model_id: Optional[str] = None,
-                          context=None):
+async def set_credit_ratio(ratio: float, plugin_id: Optional[str]=None, cost_type_id: Optional[str]=None, model_id: Optional[str]=None, context=None):
     """Set credit ratio for cost conversion.
     
     Args:
@@ -157,10 +133,7 @@ async def get_credit_ratios(context=None) -> Dict:
     return await ratio_config.get_config()
 
 @service()
-async def get_credit_report(username: str,
-                           start_date: Optional[str] = None,
-                           end_date: Optional[str] = None,
-                           context=None) -> Dict:
+async def get_credit_report(username: str, start_date: Optional[str]=None, end_date: Optional[str]=None, context=None) -> Dict:
     """Get detailed credit report for a user.
     
     Args:
@@ -176,25 +149,15 @@ async def get_credit_report(username: str,
     """
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
-    
     plugin = CreditsPlugin(get_base_path(context))
     _, ledger, _, _, _ = plugin.create_components()
     transactions = await ledger.get_transactions(username, start, end)
     summary = await ledger.get_usage_summary(username, start, end)
     current_balance = await ledger.get_balance(username)
-    
-    return {
-        'username': username,
-        'current_balance': current_balance,
-        'summary': summary,
-        'transactions': [t.to_dict() for t in transactions]
-    }
+    return {'username': username, 'current_balance': current_balance, 'summary': summary, 'transactions': [t.to_dict() for t in transactions]}
 
 @service()
-async def estimate_credits(plugin_id: str, cost_type_id: str,
-                         estimated_cost: float,
-                         model_id: Optional[str] = None,
-                         context=None) -> Dict:
+async def estimate_credits(plugin_id: str, cost_type_id: str, estimated_cost: float, model_id: Optional[str]=None, context=None) -> Dict:
     """Estimate credits needed for an operation.
     
     Example:
@@ -207,12 +170,5 @@ async def estimate_credits(plugin_id: str, cost_type_id: str,
     """
     plugin = CreditsPlugin(get_base_path(context))
     _, _, _, credit_policy, _ = plugin.create_components()
-    credits = await credit_policy.estimate_credits_needed(
-        plugin_id, cost_type_id, estimated_cost, model_id
-    )
-    
-    return {
-        'estimated_cost': estimated_cost,
-        'credits_required': credits,
-        'ratio_used': credits / estimated_cost
-    }
+    credits = await credit_policy.estimate_credits_needed(plugin_id, cost_type_id, estimated_cost, model_id)
+    return {'estimated_cost': estimated_cost, 'credits_required': credits, 'ratio_used': credits / estimated_cost}

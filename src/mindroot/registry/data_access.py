@@ -2,6 +2,7 @@ import json
 import os
 
 class DataAccess:
+
     def __init__(self):
         self.data_dir = 'data'
         self.models_file = os.path.join(self.data_dir, 'models.json')
@@ -18,7 +19,6 @@ class DataAccess:
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=2)
 
-    # Models
     def read_models(self):
         return self.read_json(self.models_file)
 
@@ -37,7 +37,6 @@ class DataAccess:
                 break
         self.write_models(models)
 
-    # Providers
     def read_providers(self):
         return self.read_json(self.providers_file)
 
@@ -66,28 +65,19 @@ class DataAccess:
                 break
         self.write_providers(providers)
 
-    # Plugins
     def read_plugins(self):
         try:
             manifest = self.read_json(self.plugins_file)
             all_plugins = []
             for category in ['core', 'local', 'installed']:
                 for plugin_name, plugin_info in manifest['plugins'].get(category, {}).items():
-                    all_plugins.append({
-                        'name': plugin_name,
-                        'enabled': plugin_info.get('enabled', False),
-                        'category': category,
-                        **plugin_info
-                    })
+                    all_plugins.append({'name': plugin_name, 'enabled': plugin_info.get('enabled', False), 'category': category, **plugin_info})
             return all_plugins
         except FileNotFoundError:
-            print(f"Warning: {self.plugins_file} not found. Returning empty list.")
             return []
         except json.JSONDecodeError:
-            print(f"Error: {self.plugins_file} is not a valid JSON file. Returning empty list.")
             return []
         except KeyError:
-            print(f"Error: {self.plugins_file} does not have the expected structure. Returning empty list.")
             return []
 
     def write_plugins(self, plugins):
@@ -121,14 +111,12 @@ class DataAccess:
                 self.write_json(self.plugins_file, manifest)
                 return
 
-    # Equivalent Flags
     def read_equivalent_flags(self):
         return self.read_json(self.equivalent_flags_file)
 
     def write_equivalent_flags(self, flags):
         self.write_json(self.equivalent_flags_file, flags)
 
-    # Preferred Models
     def read_preferred_models(self):
         if not os.path.exists(self.preferred_models_file):
             self.write_json(self.preferred_models_file, [])

@@ -2,42 +2,28 @@ import os
 import re
 import json
 from pathlib import Path
-
-# Try to import from lib first (for same instance), fallback to mindroot.lib
 try:
     from lib.providers.commands import command, command_manager
-    print("l8n: Using lib.providers.commands (same instance)")
 except ImportError:
     from mindroot.lib.providers.commands import command, command_manager
-    print("l8n: Using mindroot.lib.providers.commands (fallback)")
-
 from .utils import extract_plugin_root, get_localized_file_path, load_plugin_translations, get_plugin_translations_path
 from mindroot.lib.utils.debug import debug_box
-
-debug_box("l8n: Top of mod.py")
-
+debug_box('l8n: Top of mod.py')
 from .l8n_constants import *
 
 def save_plugin_translations(plugin_path: str, translations: dict):
     """Save translations for a specific plugin to disk."""
     translations_file = get_plugin_translations_path(plugin_path)
-    
     try:
-        # Ensure directory exists
         translations_file.parent.mkdir(parents=True, exist_ok=True)
         with open(translations_file, 'w', encoding='utf-8') as f:
             json.dump(translations, f, indent=2, ensure_ascii=False)
         return True
     except Exception as e:
-        print(f"Warning: Could not save translations to {translations_file}: {e}")
         return False
-
-
-debug_box("l8n: defining command")
-
-# Debug: Check if command_manager has functions
-debug_box(f"l8n: command_manager has {len(command_manager.functions)} functions before registration")
-debug_box(f"l8n: command_manager instance ID: {id(command_manager)}")
+debug_box('l8n: defining command')
+debug_box(f'l8n: command_manager has {len(command_manager.functions)} functions before registration')
+debug_box(f'l8n: command_manager instance ID: {id(command_manager)}')
 
 @command()
 async def write_localized_file(original_path: str, content: str, context=None):
@@ -73,18 +59,12 @@ async def write_localized_file(original_path: str, content: str, context=None):
     """
     try:
         localized_path = get_localized_file_path(original_path)
-        
-        # Create directory if it doesn't exist
         localized_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Write the content
         with open(localized_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        
-        return f"Localized file written to: {localized_path}"
-    
+        return f'Localized file written to: {localized_path}'
     except Exception as e:
-        return f"Error writing localized file: {str(e)}"
+        return f'Error writing localized file: {str(e)}'
 
 @command()
 async def append_localized_file(original_path: str, content: str, context=None):
@@ -114,18 +94,12 @@ async def append_localized_file(original_path: str, content: str, context=None):
     """
     try:
         localized_path = get_localized_file_path(original_path)
-        
-        # Create directory if it doesn't exist
         localized_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Append the content
         with open(localized_path, 'a', encoding='utf-8') as f:
             f.write(content)
-        
-        return f"Content appended to: {localized_path}"
-    
+        return f'Content appended to: {localized_path}'
     except Exception as e:
-        return f"Error appending to localized file: {str(e)}"
+        return f'Error appending to localized file: {str(e)}'
 
 @command()
 async def set_translations(original_path: str, language: str, translations: dict, context=None):
@@ -166,42 +140,28 @@ async def set_translations(original_path: str, language: str, translations: dict
     """
     try:
         if not isinstance(translations, dict):
-            return "Error: translations must be a dictionary"
-        
-        # Get the plugin-specific translations path
+            return 'Error: translations must be a dictionary'
         plugin_key = str(get_plugin_translations_path(original_path))
-        
-        # Load existing translations for this plugin
         plugin_translations = load_plugin_translations(original_path)
-        
-        # Validate translation keys (should match placeholder format)
         invalid_keys = []
         for key in translations.keys():
-            if not re.match(r'^[a-z0-9_]+$', key):
+            if not re.match('^[a-z0-9_]+$', key):
                 invalid_keys.append(key)
-        
         if invalid_keys:
-            return f"Error: Invalid translation keys (use lowercase, numbers, underscores only): {invalid_keys}"
-        
-        # Update translations for this language
+            return f'Error: Invalid translation keys (use lowercase, numbers, underscores only): {invalid_keys}'
         if language not in plugin_translations:
             plugin_translations[language] = {}
-        
         plugin_translations[language].update(translations)
-        
-        # Save translations to disk
         if save_plugin_translations(original_path, plugin_translations):
-            # Update cache
             TRANSLATIONS[plugin_key] = plugin_translations
             return f"Set {len(translations)} translations for language '{language}' in {Path(plugin_key).parent.name} plugin"
         else:
-            return f"Error: Could not save translations"
-    
+            return f'Error: Could not save translations'
     except Exception as e:
-        return f"Error setting translations: {str(e)}"
+        return f'Error setting translations: {str(e)}'
 
 @command()
-async def get_translations(original_path: str = None, language: str = None, context=None):
+async def get_translations(original_path: str=None, language: str=None, context=None):
     """
     Get translations for a specific plugin and language.
     
@@ -231,23 +191,17 @@ async def get_translations(original_path: str = None, language: str = None, cont
     """
     try:
         if original_path:
-            # Load translations for specific plugin
             plugin_translations = load_plugin_translations(original_path)
-            
-            # Update cache
             plugin_key = str(get_plugin_translations_path(original_path))
             TRANSLATIONS[plugin_key] = plugin_translations
-            
             if language:
                 return plugin_translations.get(language, {})
             else:
                 return plugin_translations
         else:
-            # Return all cached translations
             return TRANSLATIONS
-        
     except Exception as e:
-        return f"Error getting translations: {str(e)}"
+        return f'Error getting translations: {str(e)}'
 
 @command()
 async def list_localized_files(context=None):
@@ -259,19 +213,11 @@ async def list_localized_files(context=None):
     """
     try:
         localized_files = []
-        
         if LOCALIZED_FILES_DIR.exists():
-            for file_path in LOCALIZED_FILES_DIR.rglob("*.i18n.*"):
+            for file_path in LOCALIZED_FILES_DIR.rglob('*.i18n.*'):
                 localized_files.append(str(file_path.relative_to(LOCALIZED_FILES_DIR)))
-        
-        return {
-            "count": len(localized_files),
-            "files": sorted(localized_files)
-        }
-    
+        return {'count': len(localized_files), 'files': sorted(localized_files)}
     except Exception as e:
-        return f"Error listing localized files: {str(e)}"
-
-debug_box(f"l8n: command_manager has {len(command_manager.functions)} functions after registration")
-
-debug_box("l8n: End of mod.py")
+        return f'Error listing localized files: {str(e)}'
+debug_box(f'l8n: command_manager has {len(command_manager.functions)} functions after registration')
+debug_box('l8n: End of mod.py')

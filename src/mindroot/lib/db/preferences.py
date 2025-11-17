@@ -22,35 +22,23 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str]) 
     if not isinstance(service_or_command_name, str) or not service_or_command_name:
         logging.error('Invalid service_or_command_name')
         return None
-    if not isinstance(flags, list) or not all(isinstance(flag, str) for flag in flags):
+    if not isinstance(flags, list) or not all((isinstance(flag, str) for flag in flags)):
         logging.error('Invalid flags')
         return None
-
     try:
         settings = data_access.read_preferred_models()
     except Exception as e:
         logging.error(f'Error reading settings file: {e}')
         return None
-
     matching_models = []
-    # filter by service_or_command_name
     settings = [setting for setting in settings if setting['service_or_command_name'] == service_or_command_name]
-
-    # example settings
     for setting in settings:
-        print("setting: ", setting)
-
-        #if setting['flag'] is in flags
         if setting['flag'] in flags:
             matching_models.append(setting)
-
     if not matching_models:
-        # No matching models - this is normal, not an error
         return None
-
     providers = await load_provider_data()
     models = await load_models()
-
     for model in matching_models:
         for provider in providers:
             for provider_model in provider['models']:
@@ -61,9 +49,7 @@ async def find_preferred_models(service_or_command_name: str, flags: List[str]) 
                         if model['name'] == model['model']:
                             model.update(model_entry)
                             break
-
                     if 'meta' in model:
                         model.update(model['meta'])
-
     logging.debug(f'Matching models found: {matching_models}')
     return matching_models

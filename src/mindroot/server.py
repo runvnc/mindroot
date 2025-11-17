@@ -2,9 +2,12 @@ import logging
 
 # Set root logger to CRITICAL - only show critical errors from all modules
 # This applies to ALL loggers unless explicitly overridden
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#
 # Disable all existing loggers to ensure clean slate
-logging.disable(logging.WARNING)  # Disable everything below CRITICAL
+logging.disable(logging.CRITICAL)  # Disable everything below CRITICAL
+#logging.disable(logging.WARNING)  # Disable everything below CRITICAL
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
@@ -28,6 +31,8 @@ from .migrate import run_migrations
 
 # import for file copy
 from shutil import copyfile
+from pyinstrument import Profiler
+from datetime import datetime
 
 # Load environment variables from .env file at the start
 # Set override=True to make .env variables override existing environment variables
@@ -145,6 +150,33 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         
         return response
 
+class PyInstrumentMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Skip profiling for static files
+        if request.url.path.startswith('/static') or request.url.path.startswith('/imgs'):
+            return await call_next(request)
+        
+        profiler = Profiler()
+        profiler.start()
+        
+        response = await call_next(request)
+        
+        profiler.stop()
+        
+        # Save profile to file if enabled
+        if os.environ.get('PYINSTRUMENT_SAVE', 'false').lower() == 'true':
+            profile_dir = Path('data/profiles')
+            profile_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            profile_path = profile_dir / f"profile_{timestamp}_{request.url.path.replace('/', '_')}.html"
+            with open(profile_path, 'w') as f:
+                f.write(profiler.output_html())
+        
+        # Optionally add profile output to response headers for debugging
+        # response.headers["X-Profile"] = profiler.output_text(unicode=True, color=False)[:1000]
+        
+        return response
+
 def main():
     global app
     
@@ -198,6 +230,9 @@ def main():
     )
 
     app.add_middleware(HeaderMiddleware)
+    
+    # Add profiling middleware
+    app.add_middleware(PyInstrumentMiddleware)
 
     try:
         print(colored(f"Starting server on port {port}", "green"))

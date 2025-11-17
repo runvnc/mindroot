@@ -3,7 +3,6 @@ import json
 import logging
 from fastapi import HTTPException
 import shutil
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -13,21 +12,12 @@ def import_persona_from_index(index: str, persona: str):
         index: Path to the persona index file
         persona: Name of the persona to import
     """
-    print("import_persona_from_index")
-    print("index = ", index)
-    print("persona = ", persona)
-    # copy dir from indices/{index}/personas/{persona}
-    # to personas/local/{persona}
     index_path = Path('indices') / index / 'personas' / persona
     persona_path = Path('personas') / 'local' / persona
-    print("Copying persona from", index_path, "to", persona_path)
     shutil.copytree(index_path, persona_path)
-    
     logger.info(f"Successfully imported persona '{persona}' from index '{index}'")
-    print("Successfully imported persona", persona, "from index", index)
 
-
-def handle_persona_import(persona_data: dict, scope: str, owner: str = None) -> str:
+def handle_persona_import(persona_data: dict, scope: str, owner: str=None) -> str:
     """Handle importing a persona from embedded data in agent configuration.
     Returns the persona name to be used in agent configuration.
     
@@ -38,54 +28,31 @@ def handle_persona_import(persona_data: dict, scope: str, owner: str = None) -> 
     Returns:
         str: Name of the persona to reference in agent config
     """
-    
-    # If persona_data is already a string, just return it
     if isinstance(persona_data, str):
         return persona_data
-        
-    # Validate persona data
     if not isinstance(persona_data, dict):
-        raise HTTPException(
-            status_code=400,
-            detail='Persona data must be either a string name or a dictionary'
-        )
-    
+        raise HTTPException(status_code=400, detail='Persona data must be either a string name or a dictionary')
     persona_name = persona_data.get('name')
     if not persona_name:
-        raise HTTPException(
-            status_code=400,
-            detail='Persona name required in persona data'
-        )
-    
-    # For registry installs, use namespaced path
+        raise HTTPException(status_code=400, detail='Persona name required in persona data')
     if owner and scope == 'registry':
         persona_path = Path(f'personas/registry/{owner}/{persona_name}/persona.json')
         return_name = f'registry/{owner}/{persona_name}'
     else:
         persona_path = Path('personas') / scope / persona_name / 'persona.json'
         return_name = persona_name
-    
-    # Check if persona already exists
     if persona_path.exists():
-        # For registry personas with owner, we should allow overwrite to support updates
         if owner and scope == 'registry':
             logger.info(f"Overwriting existing registry persona '{persona_name}' for owner '{owner}'")
         else:
             logger.warning(f"Persona '{persona_name}' already exists in {scope} scope - skipping import")
             return return_name
-    
     try:
-        # Create persona directory and save data
         persona_path.parent.mkdir(parents=True, exist_ok=True)
         with open(persona_path, 'w') as f:
             json.dump(persona_data, f, indent=2)
-        
         logger.info(f"Successfully imported persona '{persona_name}' to {scope} scope")
         return return_name
-        
     except Exception as e:
         logger.error(f"Failed to import persona '{persona_name}': {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to import persona: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f'Failed to import persona: {str(e)}')
