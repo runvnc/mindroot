@@ -14,12 +14,13 @@ class SpeechToSpeechAgent(Agent):
         self.on_sip_call = False  # Track if we're on a SIP call
         self.call_answered = False  # Track if call is actually answered
 
-    async def on_audio_chunk_callback(self, audio_bytes: bytes, context=None):
+    async def on_audio_chunk_callback(self, audio_bytes: bytes, timestamp=None, context=None):
         """Route audio output to SIP if call is answered."""
         # Only route audio if call is answered (not just dialing)
         if self.on_sip_call and self.call_answered:
             try:
                 # Send audio to active SIP session
+                # timestamp is when this audio should start playing (from AudioPacer)
                 from lib.providers.services import service_manager
                 await service_manager.sip_audio_out_chunk(
                     audio_chunk=audio_bytes,

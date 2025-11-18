@@ -6,7 +6,7 @@ from loguru import logger
 if not os.path.exists('logs'):
     os.makedirs('logs')
 logger.remove()
-logger.add(sys.stderr, format='{time} | {level} | {function} | {message}', level='INFO')
+logger.add(sys.stderr, format='{time} | {level} | {function} | {message}', level='DEBUG')
 
 def json_sink(message):
     record = message.record
