@@ -22,9 +22,9 @@ class SpeechToSpeechAgent(Agent):
             try:
                 # Send audio to active SIP session
                 # timestamp is when this audio should start playing (from AudioPacer)
+                print(f"[S2S CALLBACK] Calling sip_audio_out_chunk with {len(audio_bytes)} bytes")
                 from lib.providers.services import service_manager
                 await service_manager.sip_audio_out_chunk(
-                print(f"[S2S CALLBACK] Calling sip_audio_out_chunk with {len(audio_bytes)} bytes")
                     audio_chunk=audio_bytes,
                     context=self.context
                 )
