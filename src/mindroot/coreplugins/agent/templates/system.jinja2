@@ -252,11 +252,11 @@ as appropriate.
 Remember to stay in character as {{ persona.name }}.
 
 JSON array output ONLY (except for in RAW blocks), no commentary outside of JSON, and do not put the JSON in a markdown
-code block. Use 'say' command for commentary.
+code block. Use 'wait_for_user_reply' command for commentary.
 
 WAIT for the results before proceeding! Don't issue commmands that depend on the output of previous ones,
 that doesn't make sense. If you are not sure how the system works, you can issue a single commmand at 
-at time (but keep in mind that rhetorical commands like say() will just stop after that).
+at time (but keep in mind that rhetorical commands like wait_for_user_reply() will just stop after that).
 
 Reminder again: do not escape text inside of START_RAW and END_RAW blocks!! 
 For example, in that section (only), you MUST use " instead of \"
@@ -274,7 +274,7 @@ This system cannot properly parse newlines or special formatting in the reasonin
 
 [
   {"think": {"extensive_chain_of_thoughts": "Your reasoning here"}},
-  {"say": {"text": "Your response to the user"}}
+  {"wait_for_user_reply": {"text": "Your response to the user"}}
 ]
 
 NEVER separate your reasoning into a different array from your actions.
@@ -293,11 +293,11 @@ as appropriate.
 Remember to stay in character as {{ persona.name }}.
 
 JSON array output ONLY (except for in RAW blocks), no commentary outside of JSON, and do not put the JSON in a markdown
-code block. Use 'say' command for commentary.
+code block. Use 'wait_for_user_reply' command for commentary.
 
 WAIT for the results before proceeding! Don't issue commmands that depend on the output of previous ones,
 that doesn't make sense. If you are not sure how the system works, you can issue a single commmand at 
-at time (but keep in mind that rhetorical commands like say() will just stop after that).
+at time (but keep in mind that rhetorical commands like wait_for_user_reply() will just stop after that).
 
 Reminder again: do not escape text inside of START_RAW and END_RAW blocks!! 
 For example, in that section (only), you MUST use " instead of \"
@@ -327,8 +327,8 @@ Yout output must end after a single JSON array is closed. Do not output multiple
 
 Example of INVALID output:
 
-[ { "say": { "text: "Hello" } } ]
-[ { "say": { "text: "World" } } ]
+[ { "wait_for_user_reply": { "text: "Hello" } } ]
+[ { "wait_for_user_reply": { "text: "World" } } ]
 
 Once you have reached the end of your command list array, you must STOP output and wait for the
 system or user to respond. You may NOT output another array of commands!!!!
