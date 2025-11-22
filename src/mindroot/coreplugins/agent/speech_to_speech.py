@@ -58,11 +58,11 @@ class SpeechToSpeechAgent(Agent):
             print("[INTERRUPT] User interrupted - not clearing audio queue")
             
             # Clear any queued audio to stop current response immediately
-            #from lib.providers.services import service_manager
-            #result = await service_manager.sip_clear_audio_queue(
-            #    context=self.context
-            #)
-            #print(f"[INTERRUPT] Audio queue cleared: {result}")
+            from lib.providers.services import service_manager
+            result = await service_manager.sip_clear_audio_queue(
+                context=self.context
+            )
+            print(f"[INTERRUPT] Audio queue cleared: {result}")
         except Exception as e:
             print(f"Error handling interrupt: {e}")
 
