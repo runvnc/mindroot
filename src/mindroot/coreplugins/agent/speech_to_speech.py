@@ -3,6 +3,7 @@ import traceback
 import json
 import time
 import asyncio
+from lib.providers.services import service_manager
 
 class SpeechToSpeechAgent(Agent):
 
@@ -16,14 +17,13 @@ class SpeechToSpeechAgent(Agent):
 
     async def on_audio_chunk_callback(self, audio_bytes: bytes, timestamp=None, context=None):
         """Route audio output to SIP if call is answered."""
-        print(f"[S2S CALLBACK] Received {len(audio_bytes)} bytes, timestamp={timestamp}, on_sip_call={self.on_sip_call}, call_answered={self.call_answered}")
+        #print(f"[S2S CALLBACK] Received {len(audio_bytes)} bytes, timestamp={timestamp}, on_sip_call={self.on_sip_call}, call_answered={self.call_answered}")
         # Only route audio if call is answered (not just dialing)
         if self.on_sip_call and self.call_answered:
             try:
                 # Send audio to active SIP session
                 # timestamp is when this audio should start playing (from AudioPacer)
-                print(f"[S2S CALLBACK] Calling sip_audio_out_chunk with {len(audio_bytes)} bytes, timestamp={timestamp}")
-                from lib.providers.services import service_manager
+                #print(f"[S2S CALLBACK] Calling sip_audio_out_chunk with {len(audio_bytes)} bytes, timestamp={timestamp}")
                 await service_manager.sip_audio_out_chunk(
                     audio_chunk=audio_bytes,
                     timestamp=timestamp,

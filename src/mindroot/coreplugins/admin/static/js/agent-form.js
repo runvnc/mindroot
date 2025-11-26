@@ -21,7 +21,13 @@ class AgentForm extends BaseEl {
     showInstructionsEditor: { type: Boolean },
     showTechnicalInstructionsEditor: { type: Boolean },
     indexedAgentsVisible: { type: Boolean },
-    selectedAgentName: { type: String }
+    selectedAgentName: { type: String },
+    envVars: { type: Array },
+    showEnvEditor: { type: Boolean },
+    knownEnvVars: { type: Object },
+    envSearchTerm: { type: String },
+    loadingEnvVars: { type: Boolean },
+    envFilterTerm: { type: String }
   };
 
   static styles = css`
@@ -135,6 +141,135 @@ class AgentForm extends BaseEl {
     .markdown-preview ul {
       list-style-type: none;
       padding-left: 0;
+    }
+
+    .env-vars-section {
+      margin-top: 10px;
+    }
+
+    .env-var-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .env-var-row input {
+      flex: 1;
+    }
+
+    .env-var-row input.env-key {
+      max-width: 200px;
+    }
+
+    .env-var-row input.env-value {
+      flex: 2;
+    }
+
+    .env-var-row button {
+      padding: 6px 12px;
+      background: rgba(255, 100, 100, 0.2);
+      border: 1px solid rgba(255, 100, 100, 0.3);
+      border-radius: 4px;
+      color: #ff6b6b;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .env-var-row button:hover {
+      background: rgba(255, 100, 100, 0.3);
+    }
+
+    .add-env-btn {
+      padding: 8px 16px;
+      background: rgba(100, 200, 100, 0.2);
+      border: 1px solid rgba(100, 200, 100, 0.3);
+      border-radius: 4px;
+      color: #6bff6b;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .add-env-btn:hover {
+      background: rgba(100, 200, 100, 0.3);
+    }
+
+    .env-info {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .env-search-box {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #f0f0f0;
+      font-size: 0.95rem;
+    }
+
+    .known-env-vars {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .known-env-section {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .known-env-section:last-child {
+      border-bottom: none;
+    }
+
+    .known-env-plugin-header {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: 500;
+      color: #aaa;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .known-env-plugin-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .known-env-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px 6px 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .known-env-item:hover {
+      background: rgba(100, 200, 100, 0.1);
+    }
+
+    .known-env-item.already-added {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .known-env-item.already-added:hover {
+      background: transparent;
+    }
+
+    .known-env-name {
+      font-family: monospace;
+    }
+
+    .known-env-status {
+      font-size: 0.8rem;
+      color: #888;
     }
     
     .markdown-preview input[type="checkbox"] {
@@ -360,6 +495,12 @@ class AgentForm extends BaseEl {
     this.pendingPlugins = [];
     this.selectedAgentName = '';
     
+    this.envVars = [];
+    this.showEnvEditor = false;
+    this.knownEnvVars = null;
+    this.envSearchTerm = '';
+    this.loadingEnvVars = false;
+    this.envFilterTerm = '';
     this.fetchAgents();
     this.fetchPersonas();
     this.resetEditors();
@@ -390,6 +531,7 @@ class AgentForm extends BaseEl {
         this.agent = agent;
         this.newAgent = false;
         this.resetEditors();
+        this.loadEnvVars();
         this.dispatchEvent(new CustomEvent('agent-selected', {
           detail: agent,
           bubbles: true,
@@ -419,12 +561,43 @@ class AgentForm extends BaseEl {
     };
     this.newAgent = true;
     this.selectedAgentName = '';
+    this.envVars = [];
+    this.showEnvEditor = false;
     this.resetEditors();
+    this.envFilterTerm = '';
     
     // Update the select to show no selection
     const select = this.shadowRoot.querySelector('.agent-selector select');
     if (select) {
       select.value = '';
+    }
+  }
+
+  loadEnvVars() {
+    // Convert agent.env object to array of {key, value} for easier editing
+    if (this.agent?.env && typeof this.agent.env === 'object') {
+      this.envVars = Object.entries(this.agent.env).map(([key, value]) => ({
+        key,
+        value: value || ''
+      }));
+    } else {
+      this.envVars = [];
+    }
+  }
+
+  async fetchKnownEnvVars() {
+    if (this.knownEnvVars) return; // Already loaded
+    this.loadingEnvVars = true;
+    try {
+      const response = await fetch('/env_vars/scan');
+      const result = await response.json();
+      if (result.success) {
+        this.knownEnvVars = result.data;
+      }
+    } catch (error) {
+      console.error('Error fetching known env vars:', error);
+    } finally {
+      this.loadingEnvVars = false;
     }
   }
 
@@ -484,6 +657,7 @@ class AgentForm extends BaseEl {
   resetEditors() {
     this.showInstructionsEditor = false;
     this.showTechnicalInstructionsEditor = false;
+    this.showEnvEditor = false;
   }
 
   async fetchServiceModels() {
@@ -668,6 +842,126 @@ class AgentForm extends BaseEl {
     }
     this.agent = { ...this.agent, [name]: inputValue };
     console.log('after', this.agent)
+  }
+
+  handleEnvKeyChange(index, newKey) {
+    this.envVars = this.envVars.map((item, i) => 
+      i === index ? { ...item, key: newKey } : item
+    );
+    this.syncEnvToAgent();
+  }
+
+  handleEnvValueChange(index, newValue) {
+    this.envVars = this.envVars.map((item, i) => 
+      i === index ? { ...item, value: newValue } : item
+    );
+    this.syncEnvToAgent();
+  }
+
+  addEnvVar() {
+    this.envVars = [...this.envVars, { key: '', value: '' }];
+  }
+
+  removeEnvVar(index) {
+    this.envVars = this.envVars.filter((_, i) => i !== index);
+    this.syncEnvToAgent();
+  }
+
+  syncEnvToAgent() {
+    // Convert envVars array back to object and update agent
+    const envObj = {};
+    for (const item of this.envVars) {
+      if (item.key && item.key.trim()) {
+        envObj[item.key.trim()] = item.value;
+      }
+    }
+    this.agent = { ...this.agent, env: envObj };
+  }
+
+  renderEnvVarsPreview() {
+    if (!this.envVars || this.envVars.length === 0) {
+      return html`<div class="env-info">No environment variables configured.</div>`;
+    }
+    return html`
+      <ul>
+        ${this.envVars.map(item => html`<li><strong>${item.key}</strong>: ${item.value ? '••••••••' : '(empty)'}</li>`)}
+      </ul>
+    `;
+  }
+
+  handleEnvSearchChange(e) {
+    this.envSearchTerm = e.target.value;
+  }
+
+  addKnownEnvVar(varName) {
+    // Check if already added
+    if (this.envVars.some(v => v.key === varName)) return;
+    
+    // Get current value from knownEnvVars if available
+    const currentValue = this.knownEnvVars?.current_env?.[varName] || '';
+    // Don't use masked values
+    const value = currentValue === '********' ? '' : currentValue;
+    
+    this.envVars = [...this.envVars, { key: varName, value }];
+    this.syncEnvToAgent();
+  }
+
+  renderKnownEnvVars() {
+    if (this.loadingEnvVars) {
+      return html`<div class="env-info">Loading known environment variables...</div>`;
+    }
+    
+    if (!this.knownEnvVars) {
+      return html`<div class="env-info">No known environment variables loaded.</div>`;
+    }
+
+    const searchTerm = this.envSearchTerm.toLowerCase();
+    const addedKeys = new Set(this.envVars.map(v => v.key));
+    
+    // Group vars by plugin
+    const sections = [];
+    for (const [pluginName, pluginInfo] of Object.entries(this.knownEnvVars)) {
+      if (pluginName === 'current_env') continue;
+      if (!pluginInfo.env_vars || pluginInfo.env_vars.length === 0) continue;
+      
+      // Filter by search term
+      const filteredVars = pluginInfo.env_vars.filter(varName => 
+        !searchTerm || 
+        varName.toLowerCase().includes(searchTerm) ||
+        pluginName.toLowerCase().includes(searchTerm)
+      );
+      
+      if (filteredVars.length === 0) continue;
+      
+      sections.push({
+        pluginName,
+        vars: filteredVars.sort()
+      });
+    }
+    
+    // Sort sections by plugin name
+    sections.sort((a, b) => a.pluginName.localeCompare(b.pluginName));
+    
+    if (sections.length === 0) {
+      return html`<div class="env-info">No matching environment variables found.</div>`;
+    }
+    
+    return html`
+      <div class="known-env-vars">
+        ${sections.map(section => html`
+          <div class="known-env-section">
+            <div class="known-env-plugin-header">${section.pluginName}</div>
+            ${section.vars.map(varName => html`
+              <div class="known-env-item ${addedKeys.has(varName) ? 'already-added' : ''}"
+                   @click=${() => !addedKeys.has(varName) && this.addKnownEnvVar(varName)}>
+                <span class="known-env-name">${varName}</span>
+                <span class="known-env-status">${addedKeys.has(varName) ? '✓ Added' : 'Click to add'}</span>
+              </div>
+            `)}
+          </div>
+        `)}
+      </div>
+    `;
   }
 
   handlePreferredProviderChange(e) {
@@ -1304,6 +1598,72 @@ class AgentForm extends BaseEl {
             ` : html`
               <div class="markdown-preview">
                 ${unsafeHTML(this.renderMarkdown(agentForRender.technicalInstructions || ''))}
+              </div>
+            `}
+          </div>
+
+          <div class="form-group">
+            <div class="form-group-header">
+              <label>Environment Variables:</label>
+              <div class="form-group-actions">
+                ${this.showEnvEditor ? html`
+                  <button type="button" class="icon-button" @click=${() => {
+                    this.syncEnvToAgent();
+                    this.showEnvEditor = false;
+                    this.envSearchTerm = '';
+                  }}>
+                    <span class="material-icons">check</span>
+                  </button>
+                ` : html`
+                  <button type="button" class="icon-button" @click=${() => {
+                    this.showEnvEditor = true;
+                  }}>
+                    <span class="material-icons">edit</span>
+                  </button>
+                `}
+              </div>
+            </div>
+            ${this.showEnvEditor ? html`
+              <div class="env-vars-section">
+                <div class="env-info">Set per-agent environment variable overrides. These will be used instead of system environment variables when this agent runs.</div>
+                
+                <details open>
+                  <summary style="cursor: pointer; margin-bottom: 10px; color: #aaa;">Browse Known Variables</summary>
+                  <input type="text" 
+                       class="env-search-box" 
+                       placeholder="Search known environment variables..." 
+                       .value=${this.envSearchTerm}
+                       @input=${this.handleEnvSearchChange}
+                       @focus=${() => this.fetchKnownEnvVars()}>
+                  ${this.renderKnownEnvVars()}
+                </details>
+                
+                <h4 style="margin: 15px 0 10px 0; color: #f0f0f0; font-size: 0.95rem;">Agent Environment Overrides</h4>
+                <input type="text" 
+                       class="env-search-box" 
+                       placeholder="Filter configured variables..." 
+                       .value=${this.envFilterTerm || ''}
+                       @input=${(e) => this.envFilterTerm = e.target.value}>
+                ${this.envVars.map((item, originalIndex) => ({ item, originalIndex })).filter(({ item }) => 
+                  !this.envFilterTerm || 
+                  item.key.toLowerCase().includes((this.envFilterTerm || '').toLowerCase()) ||
+                  item.value.toLowerCase().includes((this.envFilterTerm || '').toLowerCase())
+                ).map(({ item, originalIndex }) => html`
+                  <div class="env-var-row">
+                    <input type="text" class="env-key" placeholder="Variable name" 
+                           .value=${item.key}
+                           @input=${(e) => this.handleEnvKeyChange(originalIndex, e.target.value)}>
+                    <input type="text" class="env-value" placeholder="Value"
+                           .value=${item.value}
+                           @input=${(e) => this.handleEnvValueChange(originalIndex, e.target.value)}>
+                    <button type="button" @click=${() => this.removeEnvVar(originalIndex)}>Remove</button>
+                  </div>
+                `)}
+                <button type="button" class="add-env-btn" @click=${this.addEnvVar}>+ Add Variable</button>
+              </div>
+            ` : html`
+              <div class="markdown-preview">
+                ${this.renderEnvVarsPreview()}
               </div>
             `}
           </div>

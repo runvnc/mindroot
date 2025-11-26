@@ -38,6 +38,9 @@ from datetime import datetime
 # Set override=True to make .env variables override existing environment variables
 load_dotenv(override=True)
 
+# Patch os.environ to check context.env for per-session overrides
+from .lib.context_environ import patch_environ  # Auto-patches on import
+
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description="Run the MindRoot server or manage plugins.", allow_abbrev=False)

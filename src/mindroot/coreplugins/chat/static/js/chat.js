@@ -66,6 +66,7 @@ class Chat extends BaseEl {
     this.userScrolling = false;
     this.lastSender = null;
     this.hideChatLog = false;
+    this.messagesByCmdId = new Map(); // Track message index by command ID
     window.userScrolling = false;
     console.log('Chat component created');
     this.history = new ChatHistory(this);
@@ -247,14 +248,16 @@ class Chat extends BaseEl {
     }
     if (data?.args?.text) {
       return data.args.text;
+    } else if (data?.args?.markdown) {
+      return data.args.markdown;
     } else if (data?.params?.text) {
       return data.params.text;
-      } else if (data.params.markdown) {
-      return data?.params?.markdown;
+      } else if (data?.params?.markdown) {
+      return data.params.markdown;
       } else if (data?.params?.extensive_chain_of_thoughts) {
       return data.params.extensive_chain_of_thoughts;
       }
-    return JSON.stringify(data.params);
+    return JSON.stringify(data.params || data.args);
   }
 
   async _partialCmd(event) {
@@ -269,10 +272,29 @@ class Chat extends BaseEl {
       if (handler) {
         content = await handler(data);
       } 
-      if (this.messages[this.messages.length - 1]?.sender != 'ai' || this.startNewMsg) {
-        console.log('adding message');
+      
+      // Check if we already have a message for this command ID
+      let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+      
+      if (messageIndex === undefined) {
+        // Create a new message for this command
+        messageIndex = this.messages.length;
+        this.messages = [...this.messages, { 
+          content: '', 
+          sender: 'ai', 
+          persona: data.persona,
+          cmd_id: data.cmd_id 
+        }];
+        this.messagesByCmdId.set(data.cmd_id, messageIndex);
+        console.log(`Created new message at index ${messageIndex} for cmd_id ${data.cmd_id}`);
+      }
+      
+      const lastMsg = this.messages[this.messages.length - 1];
+      // If no cmd_id (shouldn't happen with new code, but handle legacy), fall back to old logic
+      if (!data.cmd_id && (!lastMsg || lastMsg.sender !== 'ai')) {
+        messageIndex = this.messages.length;
         this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
-        this.startNewMsg = false
+        console.log('Legacy: adding message without cmd_id');
       }
 
       if (noAction.includes(data.command)) {
@@ -287,7 +309,7 @@ class Chat extends BaseEl {
         try {
           if (!window.lastParsed) window.lastParsed = Date.now();
           if (content) {
-            this.messages[this.messages.length - 1].content = content
+            this.messages[messageIndex].content = content
           } else if (this.msgSoFar) {
             let elapsed_ = Date.now() - window.lastParsed;
             if (elapsed_ > 40 || this.msgSoFar + '' == '[object Object]' ) {
@@ -295,7 +317,7 @@ class Chat extends BaseEl {
               if (false && parsed_+'' == '[object Object]') {
                 console.log('msgSoFar is an object, not parsing:', this.msgSoFar);
               } else {
-                this.messages[this.messages.length - 1].content = parsed_;
+                this.messages[messageIndex].content = parsed_;
                 console.log(' parsed ', elapsed_);
                 window.lastParsed = Date.now();
               }
@@ -307,7 +329,7 @@ class Chat extends BaseEl {
           console.error("Could not parse markdown:", e)
           console.log('msgSoFar:')
           console.log(this.msgSoFar)
-          this.messages[this.messages.length - 1].content = `<pre><code>${this.msgSoFar}</code></pre>`
+          this.messages[messageIndex].content = `<pre><code>${this.msgSoFar}</code></pre>`
         }
       } else {
         console.log('partial. data.params', data.params)
@@ -333,13 +355,13 @@ class Chat extends BaseEl {
         const escaped = escapeJsonForHtml(paramStr)
         if (content) {
           console.log('found content, not using action component')
-          this.messages[this.messages.length - 1].content = content
+          this.messages[messageIndex].content = content
         } else {
-          if (this.messages[this.messages.length - 1].content == '' ||
+          if (this.messages[messageIndex].content == '' ||
               Date.now()- window.lastParsed > 40) {
             window.lastParsed = Date.now();
-            this.messages[this.messages.length - 1].content = `
-            <action-component funcName="${data.command}" params="${escaped}" 
+            this.messages[messageIndex].content = `
+            <action-component funcName="${data.command}" params="${escaped}" cmd_id="${data.cmd_id}"
                                 result="">
               </action-component>`; 
           }
@@ -355,21 +377,38 @@ class Chat extends BaseEl {
 
   async _runningCmd(event) {
     const data = JSON.parse(event.data);
-    // Only start a new message for commands that aren't streaming display commands
-    this.startNewMsg = !noAction.includes(data.command);
     console.log('Running command');
-    this.messages[this.messages.length - 1].spinning = 'yes'
-    console.log('Spinner set to true:', this.messages[this.messages.length - 1]);
+    
+    // Get the message index for this command ID
+    let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+    
+    if (messageIndex === undefined) {
+      // Create new message if we don't have one yet (shouldn't happen normally)
+      console.log('_runningCmd: creating new message for cmd_id:', data.cmd_id);
+      messageIndex = this.messages.length;
+      this.messages = [...this.messages, { 
+        content: '', 
+        sender: 'ai', 
+        persona: data.persona, 
+        spinning: 'yes',
+        cmd_id: data.cmd_id 
+      }];
+      this.messagesByCmdId.set(data.cmd_id, messageIndex);
+    }
+    
+    // Set spinner for this specific message
+    this.messages[messageIndex].spinning = 'yes';
+    console.log('Spinner set to true for message at index:', messageIndex);
     
     // Check if the command is 'say' or 'json_encoded_md' and has a registered handler
     console.log('running command:', data)
     if ((data.command === 'say' || data.command === 'json_encoded_md') && commandHandlers[data.command]) {
       // Don't show the spinner for these commands if they have handlers
-      this.messages[this.messages.length - 1].spinning = 'no';
+      this.messages[messageIndex].spinning = 'no';
     }
 
     if (data.args?.markdown && data.args.markdown.split('\n').length < 3) {
-        this.messages[this.messages.length - 1].content = tryParse_(data.args.markdown);
+        this.messages[messageIndex].content = tryParse_(data.args.markdown);
     }
     
     console.log(event);
@@ -382,16 +421,16 @@ class Chat extends BaseEl {
       console.log('handler:', handler)
       const result = await handler(data);
       if (result) {
-        this.messages[this.messages.length - 1].content = result
+        this.messages[messageIndex].content = result
       }
     } else {
       console.warn('No handler for command:', data.command)
       if (!noAction.includes(data.command)) {
-        this.messages[this.messages.length - 1].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" result=""></action-component>`;
-      } else if (!this.messages[this.messages.length - 1].content || 
-                 this.messages[this.messages.length - 1].content === '') {
+        this.messages[messageIndex].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" cmd_id="${data.cmd_id}" result=""></action-component>`;
+      } else if (!this.messages[messageIndex].content || 
+                 this.messages[messageIndex].content === '') {
         // Only set content if it hasn't been set by _partialCmd already
-        this.messages[this.messages.length - 1].content = tryParse_(this.textParam(data));
+        this.messages[messageIndex].content = tryParse_(this.textParam(data));
       }
     }
     window.initializeCodeCopyButtons();
@@ -403,19 +442,25 @@ class Chat extends BaseEl {
     const data = JSON.parse(event.data);
     const handler = commandHandlers[data.command];
     data.event = 'result'
+    
+    // Get the message index for this command ID
+    let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+    
     if (handler) {
       await handler(data);
     } else {
       try {
+        // Handle execute_command and run_python results
         if (data.command == 'execute_command' || data.command == 'run_python') {
           let skipWarning = data.result?.replace(' command result, NOT user reply','');
           // Convert ANSI codes to HTML
           const htmlOutput = ansi_up.ansi_to_html(skipWarning);
           
-          this.messages.push( {
+          // Always add shell output as a new message (simpler and avoids race conditions)
+          this.messages = [...this.messages, {
             role: 'user',
             content: `<pre class="shellout"><code>${htmlOutput}</code></pre>`,
-          })
+          }];
         }
       } catch (e) {
         console.error("Could not parse command result:", e)

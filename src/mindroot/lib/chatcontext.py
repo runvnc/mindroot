@@ -72,6 +72,7 @@ class ChatContext:
         self.agent_name = None
         self.name = None
         self.log_id = None
+        self.env = {}  # Per-agent environment variable overrides
         self.parent_log_id = None
         if log_id is not None:
             self.log_id = log_id
@@ -152,6 +153,10 @@ class ChatContext:
                 self.data['thinking_level'] = self.agent['thinking_level']
             else:
                 pass
+            # Load per-agent environment variable overrides
+            if 'env' in self.agent and isinstance(self.agent['env'], dict):
+                self.env = self.agent['env']
+            
             self.flags = self.agent.get('flags', [])
             self.data['log_id'] = log_id
             parent_log_id = None

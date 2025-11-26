@@ -201,6 +201,9 @@ class ActionComponent extends BaseEl {
 
   _render() {
     let {funcName, params, result} = this;
+    // Unescape the result (it was escaped for HTML attribute storage)
+    result = unescapeHtmlForJson(result);
+    
     params = unescapeHtmlForJson(params)
     try {
       params = JSON.parse(params)
@@ -221,14 +224,14 @@ class ActionComponent extends BaseEl {
     console.log('paramshtml', paramshtml)
     let res = '';
     if (result != '()' && result != '' && result != undefined) {
-      let lines = result.split("\n");
+      let lines = result.split('\n');
       if (false && lines.length == 1) {
-        res = html`<div class="one_line_result">${result}</div>`;
+        res = html`<div class="one_line_result">${unsafeHTML(result)}</div>`;
       } else {
         res = html`
         <details class="block fn_result">
-          <summary>${lines[0]} ...</summary>
-          <div>${result}</div>
+          <summary>${unsafeHTML(lines[0])} ...</summary>
+          <div>${unsafeHTML(result)}</div>
         </details>`;
       }
     }

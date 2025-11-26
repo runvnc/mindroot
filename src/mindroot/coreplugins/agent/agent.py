@@ -23,6 +23,7 @@ from .init_models import *
 from lib.chatcontext import ChatContext
 from .cmd_start_example import *
 from lib.templates import render
+import nanoid
 
 
 error_result = """
@@ -142,7 +143,7 @@ class Agent:
         #await use_ollama.unload(self.model)
         #await asyncio.sleep(1)
 
-    async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None):
+    async def handle_cmds(self, cmd_name, cmd_args, json_cmd=None, context=None, cmd_id=None):
         # Check both permanent finish and temporary cancellation
         if context.data.get('cancel_current_turn'):
             logger.warning("Turn cancelled, not executing command")
@@ -173,17 +174,17 @@ class Agent:
                 #filter out empty strings
                 cmd_args = [x for x in cmd_args if x != '']
                 logger.debug("Executing command with list arguments", extra={"step": 1})
-                await context.running_command(cmd_name, cmd_args)
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
                 logger.debug("Executing command with list arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, *cmd_args)
             elif isinstance(cmd_args, dict):
                 logger.debug("Executing command with dict arguments", extra={"step": 1})
-                await context.running_command(cmd_name, cmd_args)
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
                 logger.debug("Executing command with dict arguments", extra={"step": 2})
                 return await command_manager.execute(cmd_name, **cmd_args)
             else:
                 logger.debug("Executing command with single argument", extra={"step": 1})
-                await context.running_command(cmd_name, cmd_args)
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
                 logger.debug("Executing command with single argument", extra={"step": 2})
                 return await command_manager.execute(cmd_name, cmd_args)
 
@@ -259,7 +260,8 @@ class Agent:
         buffer = ""
         results = []
         full_cmds = []
-
+        
+        command_ids = {}  # Track command IDs: {command_index: command_id}
         num_processed = 0
         parse_failed = False
         debug_box("Parsing command stream")
@@ -347,11 +349,16 @@ class Agent:
                             cmd = json.loads(cmd)
                             cmd_name = next(iter(cmd))
                         cmd_args = cmd[cmd_name]
+                        
+                        # Use existing ID if we have one, otherwise generate new
+                        cmd_id = command_ids.get(i, nanoid.generate())
+                        command_ids[i] = cmd_id
+                        
                         logger.debug(f"Processing command: {cmd}")
-                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args, cmd_id=cmd_id)
  
                         cmd_task = asyncio.create_task(
-                            self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context)
+                            self.handle_cmds(cmd_name, cmd_args, json_cmd=json.dumps(cmd), context=context, cmd_id=cmd_id)
                         )
                         context.data['active_command_task'] = cmd_task
                         try:
@@ -363,7 +370,7 @@ class Agent:
                             if context.data.get('active_command_task') == cmd_task:
                                 del context.data['active_command_task']
 
-                        await context.command_result(cmd_name, result)
+                        await context.command_result(cmd_name, result, cmd_id=cmd_id)
                         sys_header = "Note: tool command results follow, not user replies" 
                         sys_header = ""
 
@@ -396,8 +403,13 @@ class Agent:
                     try:
                         cmd_name = next(iter(partial_cmd))
                         cmd_args = partial_cmd[cmd_name]
+                        
+                        # Use existing ID if we have one, otherwise generate new
+                        cmd_id = command_ids.get(num_processed, nanoid.generate())
+                        command_ids[num_processed] = cmd_id
+                        
                         logger.debug(f"Partial command detected: {partial_cmd}")
-                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args)
+                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args, cmd_id=cmd_id)
                     except Exception as de:
                         logger.error("Failed to parse partial command")
                         logger.error(str(de))

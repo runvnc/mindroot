@@ -21,6 +21,7 @@ import termcolor
 from PIL import Image
 from io import BytesIO
 import base64
+from pathlib import Path
 import nanoid
 sse_clients = {}
 from lib.chatcontext import get_context
@@ -114,6 +115,9 @@ async def run_task(instructions: str, agent_name:str = None, user:str = None, lo
         context.log_id = log_id
         context.parent_log_id = parent_log_id
         context.agent = await service_manager.get_agent_data(agent_name)
+        # Load per-agent environment variable overrides
+        if 'env' in context.agent and isinstance(context.agent['env'], dict):
+            context.env = context.agent['env']
         context.data['llm'] = llm
         context.current_model = llm
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user, parent_log_id=parent_log_id)
@@ -174,9 +178,21 @@ async def init_chat_session(user:str, agent_name: str, log_id: str, context=None
         context.name = agent_name
         context.log_id = log_id
         context.agent = await service_manager.get_agent_data(agent_name)
+        # Load per-agent environment variable overrides
+        if 'env' in context.agent and isinstance(context.agent['env'], dict):
+            context.env = context.agent['env']
         context.chat_log = ChatLog(log_id=log_id, agent=agent_name, user=user)
         print("context.agent_name: ", context.agent_name)
         await context.save_context()
+    
+    # Touch marker file to track last usage time
+    try:
+        marker_path = Path(f"data/agents/local/{agent_name}/.last_used")
+        if not marker_path.parent.exists():
+            marker_path = Path(f"data/agents/shared/{agent_name}/.last_used")
+        marker_path.touch()
+    except Exception as e:
+        print(f"Warning: Could not update last_used marker for {agent_name}: {e}")
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
 
     if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat']:
@@ -580,20 +596,20 @@ async def append_message(role: str, content, context=None):
     await context.chat_log.add_message({"role": role, "content": content})
 
 @service()
-async def partial_command(command: str, chunk: str, params, context=None):
+async def partial_command(command: str, chunk: str, params, cmd_id=None, context=None):
     agent_ = context.agent
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
-                                                    "persona": agent_['persona']['name'] })
+                                                    "persona": agent_['persona']['name'], "cmd_id": cmd_id })
 
 @service()
-async def running_command(command: str, args, context=None):
+async def running_command(command: str, args, cmd_id=None, context=None):
     agent_ = context.agent
-    await context.agent_output("running_command", { "command": command, "args": args, "persona": agent_['persona']['name'] })
+    await context.agent_output("running_command", { "command": command, "args": args, "persona": agent_['persona']['name'], "cmd_id": cmd_id })
 
 @service()
-async def command_result(command: str, result, context=None):
+async def command_result(command: str, result, cmd_id=None, context=None):
     agent_ = context.agent
-    await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'] })
+    await context.agent_output("command_result", { "command": command, "result": result, "persona": agent_['persona']['name'], "cmd_id": cmd_id })
 
 @service()
 async def backend_user_message(message: str, context=None):

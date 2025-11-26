@@ -8,6 +8,7 @@ import glob
 import json
 from lib.providers.services import service_manager
 from datetime import datetime
+from pathlib import Path
 import time
 
 router = APIRouter()
@@ -31,9 +32,37 @@ async def home(request: Request):
         shared_agents = [agent for agent in os.listdir("data/agents/shared") if os.path.isdir(os.path.join("data/agents/shared", agent))]
         agent_dirs.extend(shared_agents)
     
-    # Get agent data with persona information
+    # Sort agents by last usage time using marker files
+    agent_access_times = []
+    for agent in agent_dirs:
+        # Check for .last_used marker file
+        marker_path = Path(f"data/agents/local/{agent}/.last_used")
+        if not marker_path.exists():
+            marker_path = Path(f"data/agents/shared/{agent}/.last_used")
+        
+        if marker_path.exists():
+            last_used = marker_path.stat().st_mtime
+        else:
+            # If no marker exists, fall back to agent.json modification time
+            agent_file = os.path.join("data/agents/local", agent, "agent.json")
+            if not os.path.exists(agent_file):
+                agent_file = os.path.join("data/agents/shared", agent, "agent.json")
+            if os.path.exists(agent_file):
+                last_used = os.path.getmtime(agent_file)
+            else:
+                last_used = 0  # Default to oldest if no file found
+        
+        agent_access_times.append((agent, last_used))
+    
+    # Sort by last used time (most recent first)
+    agent_access_times.sort(key=lambda x: x[1], reverse=True)
+    
+    # Extract just the agent names in sorted order
+    agents = [agent for agent, _ in agent_access_times]
+    
+    # Get agent data with persona information in sorted order
     agents_with_personas = []
-    for agent_name in agent_dirs:
+    for agent_name in agents:
         try:
             agent_data = await service_manager.get_agent_data(agent_name)
             # Get the original persona reference from the agent.json file directly
@@ -54,35 +83,6 @@ async def home(request: Request):
         except Exception as e:
             # Fallback if agent data can't be loaded
             agents_with_personas.append({'name': agent_name, 'persona': agent_name})
-    
-    # Try to sort agents by last access time
-    agent_access_times = []
-    chatlog_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
-    for agent in agent_dirs:
-        # Look for the most recent log file for this agent
-        # Search across all user directories for this agent's logs
-        log_pattern = f"{chatlog_dir}/*/{agent}/chatlog_*.json"
-        log_files = glob.glob(log_pattern)
-        
-        if log_files:
-            # Get the most recent log file's modification time
-            latest_log = max(log_files, key=os.path.getmtime)
-            mtime = os.path.getmtime(latest_log)
-        else:
-            # If no logs, use the agent.json file's modification time
-            agent_file = os.path.join("data/agents/local", agent, "agent.json")
-            if os.path.exists(agent_file):
-                mtime = os.path.getmtime(agent_file)
-            else:
-                mtime = 0  # Default to oldest if no file found
-        
-        agent_access_times.append((agent, mtime))
-    
-    # Sort by modification time (most recent first)
-    agent_access_times.sort(key=lambda x: x[1], reverse=True)
-    
-    # Extract just the agent names in sorted order
-    agents = [agent for agent, _ in agent_access_times]
     
     user = request.state.user
     html = await render('home', {"user": user, "request": request, "agents": agents, "agents_with_personas": agents_with_personas })
