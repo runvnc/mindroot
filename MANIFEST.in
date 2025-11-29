@@ -30,6 +30,7 @@ recursive-include src/mindroot/coreplugins/persona *
 recursive-include src/mindroot/coreplugins/login *
 recursive-include src/mindroot/coreplugins/api_keys *
 recursive-include src/mindroot/coreplugins/env_manager *
+recursive-include src/mindroot/coreplugins/scheduler *
 recursive-include src/mindroot/lib/plugins *.json
 
 recursive-include src/mindroot/coreplugins/google_auth *

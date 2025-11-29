@@ -487,7 +487,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     termcolor.cprint("Finished conversation, exiting send_message_to_agent", "red")
                     if context.data.get('task_result') is not None:
                         task_result = context.data.get('task_result')
-                        full_results.append({ "cmd": "task_result", "args": { "result": task_result } })
+                        # Include both 'output' (for results_output) and 'result' (for backward compatibility)
+                        full_results.append({ "cmd": "task_result", "args": { "output": task_result, "result": task_result } })
                     continue_processing = False
             except Exception as e:
                 continue_processing = False

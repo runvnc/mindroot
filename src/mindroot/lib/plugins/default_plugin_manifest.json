@@ -73,6 +73,10 @@
         "enabled": true,
         "source": "core"
       },
+      "scheduler": {
+        "enabled": true,
+        "source": "core"
+      },
       "usage": {
           "enabled": true,
           "source": "core"

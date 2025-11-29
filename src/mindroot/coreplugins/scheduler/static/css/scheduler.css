@@ -1,0 +1,346 @@
+/* Scheduler Manager Styles */
+
+scheduler-manager {
+  display: block;
+  padding: 1rem;
+  color: var(--text-color, #e0e0e0);
+}
+
+.scheduler-container {
+  max-width: 100%;
+}
+
+.scheduler-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.scheduler-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-color, #e0e0e0);
+}
+
+.scheduler-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--primary-color, #4a9eff);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover, #3a8eef);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-bg, #3a3a3a);
+  color: var(--text-color, #e0e0e0);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--secondary-hover, #4a4a4a);
+}
+
+.btn-danger {
+  background-color: var(--danger-color, #dc3545);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--danger-hover, #c82333);
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Schedule List */
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.schedule-item {
+  background: var(--card-bg, #2a2a2a);
+  border: 1px solid var(--border-color, #3a3a3a);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: border-color 0.2s;
+}
+
+.schedule-item:hover {
+  border-color: var(--primary-color, #4a9eff);
+}
+
+.schedule-item.paused {
+  opacity: 0.7;
+  border-left: 3px solid var(--warning-color, #ffc107);
+}
+
+.schedule-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-color, #e0e0e0);
+}
+
+.schedule-status {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.schedule-status.active {
+  background-color: var(--success-bg, #28a74533);
+  color: var(--success-color, #28a745);
+}
+
+.schedule-status.paused {
+  background-color: var(--warning-bg, #ffc10733);
+  color: var(--warning-color, #ffc107);
+}
+
+.schedule-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted, #888);
+}
+
+.schedule-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-detail-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #666);
+  text-transform: uppercase;
+}
+
+.schedule-detail-value {
+  color: var(--text-color, #e0e0e0);
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #3a3a3a);
+}
+
+/* Create Schedule Form */
+.create-schedule-form {
+  background: var(--card-bg, #2a2a2a);
+  border: 1px solid var(--border-color, #3a3a3a);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted, #888);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #3a3a3a);
+  border-radius: 4px;
+  background: var(--input-bg, #1a1a1a);
+  color: var(--text-color, #e0e0e0);
+  font-size: 0.875rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #4a9eff);
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* History */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  background: var(--card-bg, #2a2a2a);
+  border: 1px solid var(--border-color, #3a3a3a);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.history-item.success {
+  border-left: 3px solid var(--success-color, #28a745);
+}
+
+.history-item.failed {
+  border-left: 3px solid var(--danger-color, #dc3545);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.history-command {
+  font-weight: 500;
+}
+
+.history-time {
+  color: var(--text-muted, #888);
+  font-size: 0.75rem;
+}
+
+.history-error {
+  color: var(--danger-color, #dc3545);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Tabs */
+.scheduler-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #3a3a3a);
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.tab-btn:hover {
+  color: var(--text-color, #e0e0e0);
+}
+
+.tab-btn.active {
+  color: var(--primary-color, #4a9eff);
+  background: var(--card-bg, #2a2a2a);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted, #888);
+}
+
+.empty-state .material-icons {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted, #888);
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--border-color, #3a3a3a);
+  border-top-color: var(--primary-color, #4a9eff);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .scheduler-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .schedule-item-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

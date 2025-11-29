@@ -1,0 +1,16 @@
+{% block head %}
+<link rel="stylesheet" href="/scheduler/static/css/scheduler.css">
+<script type="module" src="/scheduler/static/js/scheduler.js"></script>
+{% endblock %}
+
+{% block content %}
+<details>
+  <summary>
+    <span class="material-icons">schedule</span>
+    <span>Scheduled Tasks</span>
+  </summary>
+  <div class="details-content">
+    <scheduler-manager></scheduler-manager>
+  </div>
+</details>
+{% endblock %}
