@@ -71,6 +71,29 @@ class Chat extends BaseEl {
     console.log('Chat component created');
     this.history = new ChatHistory(this);
     console.log(this);
+    
+    // Register global sendChat function
+    this._registerGlobalSendChat();
+  }
+
+  _registerGlobalSendChat() {
+    const self = this;
+    window.sendChat = function(text) {
+      const messageContent = [{ type: 'text', text: '\n' + text.replaceAll('\n', '\n\n') }];
+      
+      const event = new CustomEvent('addmessage', {
+        detail: {
+          content: messageContent,
+          sender: 'user',
+          persona: 'user'
+        },
+        bubbles: true,
+        composed: true
+      });
+      
+      self._addMessage(event);
+      return true;
+    };
   }
 
   

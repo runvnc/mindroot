@@ -23,11 +23,172 @@ from lib.chatcontext import ChatContext
 import shutil
 from pydantic import BaseModel
 from lib.auth.api_key import verify_api_key
+from lib.providers.commands import command_manager
 
 router = APIRouter()
 
 # Global dictionary to store tasks
 tasks = {}
+
+class CommandRequest(BaseModel):
+    command: str
+    args: dict = {}
+
+
+@router.post("/cmd/{log_id}")
+async def execute_command_with_session(request: Request, log_id: str, cmd_request: CommandRequest):
+    """
+    Execute a command using an existing session's context.
+    
+    Parameters:
+    - log_id: The session log_id to use for context
+    - command: The command name to execute
+    - args: Dictionary of arguments to pass to the command
+    
+    Returns:
+    - JSON with command result or error
+    """
+    # Handle authentication
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        api_key = auth_header[7:]
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            username = user_data['username']
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        username = request.state.user.username
+    
+    # Get the context for this session
+    try:
+        context = await get_context(log_id, username)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Session not found: {str(e)}")
+    
+    # Check if command exists
+    if cmd_request.command not in command_manager.functions:
+        raise HTTPException(status_code=404, detail=f"Command '{cmd_request.command}' not found")
+    
+    # Execute the command
+    try:
+        # Add context to args
+        args = cmd_request.args.copy()
+        args['context'] = context
+        
+        result = await command_manager.execute(cmd_request.command, **args)
+        return {"status": "ok", "result": result}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e)}
+
+
+@router.get("/cmd/{log_id}")
+async def execute_command_get(request: Request, log_id: str, command: str = Query(...), args: str = Query("{}")):
+    """
+    Execute a command using GET request (useful for data-table retrieve-url).
+    
+    Parameters:
+    - log_id: The session log_id to use for context
+    - command: The command name to execute (query param)
+    - args: JSON-encoded arguments (query param, default: {})
+    
+    Returns:
+    - Direct command result (for use with data-table component)
+    """
+    # Handle authentication
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        api_key = auth_header[7:]
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            username = user_data['username']
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        username = request.state.user.username
+    
+    # Get the context for this session
+    try:
+        context = await get_context(log_id, username)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Session not found: {str(e)}")
+    
+    # Check if command exists
+    if command not in command_manager.functions:
+        raise HTTPException(status_code=404, detail=f"Command '{command}' not found")
+    
+    # Parse args from JSON
+    try:
+        parsed_args = json.loads(args)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON in args parameter")
+    
+    # Execute the command
+    try:
+        parsed_args['context'] = context
+        result = await command_manager.execute(command, **parsed_args)
+        # Return result directly for data-table compatibility
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/session/{agent_name}/{log_id}/cmd")
+async def execute_command_session_get(request: Request, agent_name: str, log_id: str, command: str = Query(...), args: str = Query("{}")):
+    """
+    Execute a command using GET request from session URL (for relative URLs in components).
+    
+    Parameters:
+    - agent_name: The agent name (from URL path)
+    - log_id: The session log_id to use for context
+    - command: The command name to execute (query param)
+    - args: JSON-encoded arguments (query param, default: {})
+    
+    Returns:
+    - Direct command result (for use with data-table component)
+    """
+    # Handle authentication
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        api_key = auth_header[7:]
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            username = user_data['username']
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        username = request.state.user.username
+    
+    # Forward to the existing GET handler logic
+    return await execute_command_get(
+        request=request,
+        log_id=log_id,
+        command=command,
+        args=args
+    )
+
 
 @router.post("/chat/{log_id}/{task_id}/cancel")
 async def cancel_chat(request: Request, log_id: str, task_id: str):
@@ -279,6 +440,15 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
     return history
 
 @router.get("/session/{agent_name}/{log_id}")
+async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
+    """Redirect to trailing slash version for proper relative URL resolution."""
+    # Check if there are query params to preserve
+    query_string = str(request.query_params)
+    if query_string:
+        return RedirectResponse(f"/session/{agent_name}/{log_id}/?{query_string}")
+    return RedirectResponse(f"/session/{agent_name}/{log_id}/")
+
+@router.get("/session/{agent_name}/{log_id}/")
 async def chat_session(request: Request, agent_name: str, log_id: str, embed: bool = Query(False)):
     # Check authentication (API key or regular user)
     plugins = list_enabled()

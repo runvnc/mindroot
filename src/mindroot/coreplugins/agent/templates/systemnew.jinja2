@@ -404,10 +404,7 @@ The GET endpoint returns the command result directly (not wrapped), making it
 compatible with data-table's expected JSON array format.
 
 Example with data-table (in HTML output):
-
-{% raw %}
-&lt;data-table retrieve-url="/cmd/${window.log_id}?command=query_db&args={%22table%22:%22verification_jobs%22}"&gt;&lt;/data-table&gt;
-{% endraw %}
+<data-table retrieve-url="/cmd/${window.log_id}?command=query_db&args={%22table%22:%22verification_jobs%22}"></data-table>
 
 ## Relative URL Endpoint (Recommended for UI Components)
 
@@ -420,10 +417,7 @@ relative URLs like `cmd?command=...` resolve correctly. This is the recommended
 approach for UI components as it doesn't require JavaScript to construct the URL.
 
 Example with data-table using relative URL (in HTML output):
-
-{% raw %}
-&lt;data-table retrieve-url="cmd?command=query_db&args={%22table%22:%22verification_jobs%22}" &gt; &lt;/data-table&gt;
-{% endraw %}
+<data-table retrieve-url="cmd?command=query_db&args={%22table%22:%22verification_jobs%22}"></data-table>
 
 {% endblock %}
 
