@@ -147,13 +147,33 @@ class ChatLog:
             except Exception as e:
                 # assume previous mesage was not a command, was a string
                 debug_box("4")
-                print("Could not combine commands, probably normal if user message and previous system output, assuming string", e)
+                
+                print("Could not combine commands, checking for eager end-of-turn overlap", e)
+                
+                # Get the text from both messages
                 if type(self.messages[-1]['content']) == str:
-                    new_msg_text = self.messages[-1]['content'] + message['content'][0]['text']
+                    old_text = self.messages[-1]['content']
                 else:
-                    new_msg_text = self.messages[-1]['content'][0]['text'] + message['content'][0]['text']
-                self.messages.append({'role': message['role'], 'content': [{'type': 'text', 'text': new_msg_text}]})
-                #print('could not combine commands. probably normal if user message and previous system output', e)
+                    old_text = self.messages[-1]['content'][0]['text']
+                new_text = message['content'][0]['text']
+                
+                # Strip out error messages that can get injected during eager end-of-turn
+                # These interrupt processing and cause false non-matches
+                error_patterns = ['coroutine raised StopIteration']
+                old_text_clean = old_text
+                for pattern in error_patterns:
+                    old_text_clean = old_text_clean.replace(pattern, '')
+                
+                # Check for eager end-of-turn overlap: new message starts with old message text
+                # This happens when voice recognition sends partial then complete transcription
+                if new_text.startswith(old_text) or new_text.startswith(old_text_clean):
+                    # New message is a continuation/correction - replace old with new
+                    print(f"Detected eager end-of-turn overlap, using newer complete message")
+                    self.messages[-1] = {'role': message['role'], 'content': [{'type': 'text', 'text': new_text}]}
+                else:
+                    # Truly different messages - concatenate as before
+                    new_msg_text = old_text + new_text
+                    self.messages[-1] = {'role': message['role'], 'content': [{'type': 'text', 'text': new_msg_text}]}
                 #print(self.messages[-1])
                 #print(message)
                 #raise e
