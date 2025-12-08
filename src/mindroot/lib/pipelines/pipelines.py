@@ -20,17 +20,15 @@ class PipelineManager:
         self.pipes[name].sort(key=lambda x: x['priority'])
 
     async def execute_pipeline(self, name: str, data: Any, context=None) -> Any:
-        # print debug in yellow
-        # print all debugs in yellow
-        print(termcolor.colored(f"Executing pipeline '{name}'", 'yellow'))
+        #print(termcolor.colored(f"Executing pipeline '{name}'", 'yellow'))
         if name not in self.pipes:
-            print(termcolor.colored(f"Pipeline '{name}' not found", 'red'))
+            #print(termcolor.colored(f"Pipeline '{name}' not found", 'red'))
             return data
-        print(termcolor.colored(f"Pipeline '{name}' found", 'yellow'))
-        print(self.pipes[name])
+        #print(termcolor.colored(f"Pipeline '{name}' found", 'yellow'))
+        #print(self.pipes[name])
         for pipe_info in self.pipes[name]:
             implementation = pipe_info['implementation']
-            print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))
+            #print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))
             try:
                 if asyncio.iscoroutinefunction(implementation):
                     data = await implementation(data, context)
