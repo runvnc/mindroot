@@ -1,0 +1,11 @@
+@service()
+async def partial_command(command: str, chunk: str, params, cmd_id=None, context=None):
+    print(f"DEBUG partial_command: command={command}, params keys={list(params.keys()) if isinstance(params, dict) else type(params)}")
+    agent_ = context.agent
+    # Allow plugins to hook into partial commands via pipeline
+    await pipeline_manager.execute_pipeline('partial_command', 
+        {'command': command, 'chunk': chunk, 'params': params, 'cmd_id': cmd_id},
+        context=context
+    )
+    await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
+                                                    "persona": agent_['persona']['name'], "cmd_id": cmd_id })
