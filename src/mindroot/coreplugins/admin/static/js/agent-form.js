@@ -27,7 +27,13 @@ class AgentForm extends BaseEl {
     knownEnvVars: { type: Object },
     envSearchTerm: { type: String },
     loadingEnvVars: { type: Boolean },
-    envFilterTerm: { type: String }
+    envFilterTerm: { type: String },
+    uiComponentsList: { type: Array },
+    uiPagesList: { type: Array },
+    editingPageName: { type: String },
+    editingPageHtml: { type: String },
+    showPageEditor: { type: Boolean },
+    uiPluginAvailable: { type: Boolean }
   };
 
   static styles = css`
@@ -501,12 +507,60 @@ class AgentForm extends BaseEl {
     this.envSearchTerm = '';
     this.loadingEnvVars = false;
     this.envFilterTerm = '';
+
+    // UI section state
+    this.uiComponentsList = [];
+    this.uiPagesList = [];
+    this.editingPageName = '';
+    this.editingPageHtml = '';
+    this.showPageEditor = false;
+    this.uiPluginAvailable = true;
     this.fetchAgents();
     this.fetchPersonas();
     this.resetEditors();
     this.fetchCommands();
     this.fetchServiceModels();
     this.fetchPlugins();
+    this.fetchUiComponents();
+    this.fetchUiPages();
+  }
+
+  async fetchUiComponents() {
+    try {
+      const resp = await fetch('/mr_ui/api/components');
+      if (!resp.ok) {
+        console.warn('UI plugin appears unavailable (components endpoint failed)');
+        this.uiPluginAvailable = false;
+        return;
+      }
+      const data = await resp.json();
+      this.uiComponentsList = data.components || [];
+    } catch (e) {
+      console.warn('Failed to fetch UI components list', e);
+      this.uiPluginAvailable = false;
+    }
+  }
+
+  async fetchUiPages() {
+    try {
+      const resp = await fetch('cmd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'list_pages', args: {} })
+      });
+      if (!resp.ok) {
+        console.warn('UI plugin appears unavailable (list_pages command failed)');
+        this.uiPluginAvailable = false;
+        return;
+      }
+      const result = await resp.json();
+      // Depending on /cmd wrapper, result may be direct or wrapped; handle common shapes
+      const pages = result.pages || (result.result && result.result.pages) || [];
+      this.uiPagesList = pages;
+    } catch (e) {
+      console.warn('Failed to fetch UI pages list', e);
+      this.uiPluginAvailable = false;
+    }
   }
 
   async fetchAgents() {
@@ -532,6 +586,13 @@ class AgentForm extends BaseEl {
         this.newAgent = false;
         this.resetEditors();
         this.loadEnvVars();
+        // Ensure ui_components/ui_pages fields exist
+        if (!Array.isArray(this.agent.ui_components)) {
+          this.agent.ui_components = [];
+        }
+        if (!Array.isArray(this.agent.ui_pages)) {
+          this.agent.ui_pages = [];
+        }
         this.dispatchEvent(new CustomEvent('agent-selected', {
           detail: agent,
           bubbles: true,
@@ -557,7 +618,9 @@ class AgentForm extends BaseEl {
       persona: '',
       recommended_plugins: [],
       instructions: '',
-      technicalInstructions: ''
+      technicalInstructions: '',
+      ui_components: [],
+      ui_pages: []
     };
     this.newAgent = true;
     this.selectedAgentName = '';
@@ -565,6 +628,14 @@ class AgentForm extends BaseEl {
     this.showEnvEditor = false;
     this.resetEditors();
     this.envFilterTerm = '';
+
+    // UI section state
+    this.uiComponentsList = [];
+    this.uiPagesList = [];
+    this.editingPageName = '';
+    this.editingPageHtml = '';
+    this.showPageEditor = false;
+    this.uiPluginAvailable = true;
     
     // Update the select to show no selection
     const select = this.shadowRoot.querySelector('.agent-selector select');
@@ -650,6 +721,13 @@ class AgentForm extends BaseEl {
       if (this.agent?.name) {
         this.fetchMissingCommands();
         this.checkRecommendedPlugins();
+        // Refresh UI lists when switching agents
+        if (!Array.isArray(this.agent.ui_components)) {
+          this.agent.ui_components = [];
+        }
+        if (!Array.isArray(this.agent.ui_pages)) {
+          this.agent.ui_pages = [];
+        }
       }
     }
   }
@@ -842,6 +920,108 @@ class AgentForm extends BaseEl {
     }
     this.agent = { ...this.agent, [name]: inputValue };
     console.log('after', this.agent)
+  }
+
+  // === UI Components & Pages Handlers ===
+
+  handleUiComponentToggle(name, checked) {
+    if (!Array.isArray(this.agent.ui_components)) {
+      this.agent.ui_components = [];
+    }
+    const value = String(name).trim().toLowerCase();
+    if (checked) {
+      if (!this.agent.ui_components.includes(value)) {
+        this.agent.ui_components = [...this.agent.ui_components, value];
+      }
+    } else {
+      this.agent.ui_components = this.agent.ui_components.filter(c => c !== value);
+    }
+    this.agent = { ...this.agent };
+  }
+
+  startNewPage() {
+    this.editingPageName = '';
+    this.editingPageHtml = '<!DOCTYPE html>\n<html>\n  <head>\n    <title>New Agent Page</title>\n  </head>\n  <body>\n    <h1>New Agent Page</h1>\n  </body>\n</html>'; 
+    this.showPageEditor = true;
+  }
+
+  editPage(pageName) {
+    const name = String(pageName).trim().toLowerCase();
+    this.editingPageName = name;
+    this.loadPageHtml(name);
+  }
+
+  async loadPageHtml(name) {
+    try {
+      const resp = await fetch('cmd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'read_page', args: { page_name: name } })
+      });
+      if (!resp.ok) throw new Error('Failed to read page');
+      const result = await resp.json();
+      const html = result.html || (result.result && result.result.html) || '';
+      this.editingPageHtml = html;
+      this.showPageEditor = true;
+      this.requestUpdate();
+    } catch (e) {
+      console.error('Error loading page HTML', e);
+      showNotification('error', `Error loading page '${name}': ${e.message}`);
+    }
+  }
+
+  handlePageNameInput(e) {
+    this.editingPageName = e.target.value;
+  }
+
+  handlePageHtmlInput(e) {
+    this.editingPageHtml = e.target.value;
+  }
+
+  async savePageFromEditor() {
+    const rawName = (this.editingPageName || '').trim().toLowerCase();
+    if (!rawName) {
+      showNotification('error', 'Page name is required');
+      return;
+    }
+    if (!/^[a-z0-9_-]+$/.test(rawName)) {
+      showNotification('error', 'Page name must be a-z, 0-9, hyphen or underscore only');
+      return;
+    }
+    try {
+      const resp = await fetch('cmd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          command: 'create_page',
+          args: { page_name: rawName, html: this.editingPageHtml, agent: this.agent?.name || null }
+        })
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      showNotification('success', `Saved page '${rawName}'`);
+
+      // Ensure agent.ui_pages contains this name
+      if (!Array.isArray(this.agent.ui_pages)) {
+        this.agent.ui_pages = [];
+      }
+      if (!this.agent.ui_pages.includes(rawName)) {
+        this.agent.ui_pages = [...this.agent.ui_pages, rawName];
+      }
+      this.agent = { ...this.agent };
+
+      // Refresh global list
+      await this.fetchUiPages();
+      this.showPageEditor = false;
+    this.uiPluginAvailable = true;
+    } catch (e) {
+      console.error('Error saving page', e);
+      showNotification('error', `Error saving page '${rawName}': ${e.message}`);
+    }
+  }
+
+  cancelPageEditor() {
+    this.showPageEditor = false;
+    this.uiPluginAvailable = true;
   }
 
   handleEnvKeyChange(index, newKey) {
@@ -1746,6 +1926,9 @@ class AgentForm extends BaseEl {
             <details>
               <summary>Recommended Plugins</summary>
               ${this.renderRequiredPlugins()}
+
+          <!-- UI section: components + pages -->
+          ${this.renderUiSection()}
             </details>
           </div>
 

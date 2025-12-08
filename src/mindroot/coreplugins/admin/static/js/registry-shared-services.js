@@ -578,14 +578,26 @@ class RegistrySharedServices {
 
   async installAgent(item) {
     console.log('Installing agent from registry:', item);
-    
+
+    // 1) Install persona (if bundled)
     if (item.data.persona_data && item.data.persona_ref) {
       const personaAssets = await this.extractPersonaAssets(item.data.persona_ref, item.data.persona_data);
       await this.installPersonaFromRegistry(item.data.persona_ref, item.data.persona_data, personaAssets);
     }
-    
+
+    // 2) Install any bundled UI components
+    if (item.data.ui_components && Array.isArray(item.data.ui_components)) {
+      await this.installUiComponentsFromItem(item);
+    }
+
+    // 3) Install any bundled UI pages
+    if (item.data.ui_pages && Array.isArray(item.data.ui_pages)) {
+      await this.installUiPagesFromItem(item);
+    }
+
+    // 4) Install the agent itself
     const agentData = this.buildAgentData(item);
-    
+
     const response = await fetch('/agents/local', {
       method: 'POST',
       headers: {
@@ -634,6 +646,19 @@ class RegistrySharedServices {
       installed_from_registry: true,
       installed_at: new Date().toISOString()
     };
+
+    // Optional bookkeeping: record UI artifacts associated with this agent
+    if (Array.isArray(item.data.ui_components)) {
+      agentData.ui_components = item.data.ui_components
+        .filter(c => c && c.name)
+        .map(c => String(c.name).trim().toLowerCase());
+    }
+
+    if (Array.isArray(item.data.ui_pages)) {
+      agentData.ui_pages = item.data.ui_pages
+        .filter(p => p && p.name)
+        .map(p => String(p.name).trim().toLowerCase());
+    }
 
     if (item.data.persona_ref && item.data.persona_data) {
       const owner = item.data.persona_ref.owner;
