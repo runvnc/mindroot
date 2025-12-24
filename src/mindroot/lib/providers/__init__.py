@@ -2,7 +2,7 @@ import inspect
 import traceback
 import json
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type, TypeVar, cast
 from ..db.preferences import find_preferred_models
 from ..db.organize_models import uses_models, matching_models
 from ..utils.check_args import *
@@ -11,11 +11,24 @@ import sys
 import nanoid
 from termcolor import colored
 
+# Import protocol support
+try:
+    from .protocols.registry import ServiceProxy, get_protocol, list_protocols
+    PROTOCOLS_AVAILABLE = True
+except ImportError:
+    PROTOCOLS_AVAILABLE = False
+    ServiceProxy = None
+    get_protocol = None
+    list_protocols = None
+
 # Import the new v2 preferences system with try/except for backward compatibility
 try:
     from .model_preferences_v2 import ModelPreferencesV2
 except ImportError:
     ModelPreferencesV2 = None
+
+# TypeVar for Protocol typing
+P = TypeVar('P')
 
 class ProviderManager:
 
@@ -269,10 +282,60 @@ class ProviderManager:
         return {name: self.get_docstring(name) for name in filtered}
 
     def __getattr__(self, name):
+        # Handle special protocol-related methods
+        if name == 'typed':
+            return self._typed
+        if name == 'get_protocol':
+            return self._get_protocol
+        if name == 'list_protocols':
+            return self._list_protocols
 
         async def method(*args, **kwargs):
             return await self.execute(name, *args, **kwargs)
         return method
+    
+    def _typed(self, protocol: Type[P]) -> P:
+        """Get a typed proxy for a service protocol.
+        
+        This enables IDE autocomplete and type checking for services.
+        
+        Args:
+            protocol: A Protocol class defining the service interface
+            
+        Returns:
+            A proxy object typed as the Protocol, delegating to service_manager
+            
+        Example:
+            from lib.providers.protocols import LLM
+            llm: LLM = service_manager.typed(LLM)
+            stream = await llm.stream_chat('gpt-4', messages=[...])
+        """
+        if not PROTOCOLS_AVAILABLE:
+            raise RuntimeError("Protocol support not available. Check protocols module installation.")
+        return cast(P, ServiceProxy(self, protocol))
+    
+    def _get_protocol(self, name: str):
+        """Get a registered Protocol by name.
+        
+        Args:
+            name: The protocol name (e.g., 'llm', 'sip')
+            
+        Returns:
+            The Protocol class, or None if not found
+        """
+        if not PROTOCOLS_AVAILABLE:
+            return None
+        return get_protocol(name)
+    
+    def _list_protocols(self) -> Dict[str, type]:
+        """List all registered Protocols.
+        
+        Returns:
+            Dict mapping protocol names to Protocol classes
+        """
+        if not PROTOCOLS_AVAILABLE:
+            return {}
+        return list_protocols()
 
 class HookManager:
     _instance = None
