@@ -92,10 +92,6 @@
       "startup": {
         "enabled": true,
         "source": "core"
-      },
-      "ui": {
-        "enabled": true,
-        "source": "core"
       }
     },
     "installed": {
