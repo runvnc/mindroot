@@ -1655,6 +1655,10 @@ class AgentForm extends BaseEl {
     }
   }
 
+  renderUiSection() {
+    return ''
+  }
+
   _render() {
     // Default structure for rendering when this.agent is null
     // This ensures the DOM structure is present but hidden.
@@ -1929,7 +1933,7 @@ class AgentForm extends BaseEl {
 
           <!-- UI section: components + pages -->
           ${this.renderUiSection()}
-            </details>
+            </details> 
           </div>
 
           ${this.agent?.name && this.missingCommands && Object.keys(this.missingCommands).length > 0 ? html`

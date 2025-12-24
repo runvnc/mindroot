@@ -195,7 +195,8 @@ async def init_chat_session(user:str, agent_name: str, log_id: str, context=None
         print(f"Warning: Could not update last_used marker for {agent_name}: {e}")
     print("initiated_chat_session: ", log_id, agent_name, context.agent_name, context.agent)
 
-    if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat']:
+    stream_chat = context.agent.get('stream_chat', '')
+    if 'live' in stream_chat or 'realtime' in stream_chat:
         agent = SpeechToSpeechAgent(agent_name, context=context)
         await agent.connect()
 
@@ -342,7 +343,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             context = ChatContext(command_manager, service_manager, user)
             await context.load_context(session_id)
 
-        if 'live' in context.agent['stream_chat'] or 'realtime' in context.agent['stream_chat'] or assume_wait_for_task_result==True:
+        stream_chat = context.agent.get('stream_chat', '')
+        if 'live' in stream_chat or 'realtime' in stream_chat or assume_wait_for_task_result==True:
             agent_ = SpeechToSpeechAgent(context.agent_name, context=context)
             print('Using SpeechToSpeechAgent for live/realtime chat')
             print()
@@ -606,7 +608,7 @@ async def partial_command(command: str, chunk: str, params, cmd_id=None, context
         context=context
     )
     await context.agent_output("partial_command", { "command": command, "chunk": chunk, "params": params,
-                                                    "persona": agent_['persona']['name'], "cmd_id": cmd_id })
+                                                    "persona": agent_['persona']['name'], "cmd_id": cmd_id }, context=context)
 
 @service()
 async def running_command(command: str, args, cmd_id=None, context=None):

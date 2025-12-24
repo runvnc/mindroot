@@ -173,12 +173,12 @@ class ChatContext:
         else:
             pass
         if name in self._services:
-            self.service_manager.context = self
+            self.service_manager.set_context(self)
             return getattr(self.service_manager, name)
         else:
             pass
         if name in self._commands:
-            self.command_manager.context = self
+            self.command_manager.set_context(self)
             return getattr(self.command_manager, name)
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 

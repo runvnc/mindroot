@@ -2,7 +2,7 @@ import inspect
 import traceback
 import json
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type, TypeVar, cast
 from ..db.preferences import find_preferred_models
 from ..db.organize_models import uses_models, matching_models
 from ..utils.check_args import *
@@ -10,12 +10,20 @@ from ..utils.debug import debug_box
 import sys
 import nanoid
 from termcolor import colored
+# Note: getcontext is imported lazily in ProviderManager.__init__ to avoid circular imports
+# Note: Protocols temporarily disabled for debugging
+
+# Import protocol support - TEMPORARILY DISABLED for debugging
+PROTOCOLS_AVAILABLE = False
 
 # Import the new v2 preferences system with try/except for backward compatibility
 try:
     from .model_preferences_v2 import ModelPreferencesV2
 except ImportError:
     ModelPreferencesV2 = None
+
+# TypeVar for Protocol typing
+P = TypeVar('P')
 
 class ProviderManager:
 
@@ -36,6 +44,22 @@ class ProviderManager:
         if provider in [func_info['provider'] for func_info in self.functions[name]]:
             return
         self.functions[name].append({'implementation': implementation, 'docstring': docstring, 'flags': flags, 'provider': provider})
+    
+   # @property
+   # def context(self):
+   #     """Lazily create system context to avoid circular imports."""
+   #     if self.context is None:
+   #         try:
+   #             from lib.chatcontext import getcontext
+   #             import asyncio
+   #             self.context = asyncio.get_event_loop().run_until_complete(
+   #                 getcontext(nanoid.generate(), 'system'))
+   #         except Exception:
+   #             self.context = None
+   #     return self.context
+
+    async def setcontext(self, context):
+        self.context = context
 
     async def exec_with_provider(self, name, provider, *args, **kwargs):
         if name not in self.functions:
@@ -67,15 +91,15 @@ class ProviderManager:
             # Ensure context is in kwargs for fast path services
             if 'context' not in kwargs:
                 # Try to find context in args
-                found_context = False
+                foundcontext = False
                 for arg in args:
                     if arg.__class__.__name__ == 'ChatContext' or hasattr(arg, 'agent'):
                         kwargs['context'] = arg
-                        found_context = True
+                        foundcontext = True
                         break
                 
                 # If still no context, use self.context
-                if not found_context:
+                if not foundcontext:
                     if hasattr(self, 'context'):
                         kwargs['context'] = self.context
                     else:
@@ -89,19 +113,20 @@ class ProviderManager:
         preferred_models = None
         preferred_provider = None
         preferred_providers = None
-        found_context = False
+        foundcontext = False
         context = None
 
         for arg in args:
             if arg.__class__.__name__ == 'ChatContext' or hasattr(arg, 'agent'):
-                found_context = True
+                foundcontext = True
                 context = arg
                 break
-        if not found_context and 'context' in kwargs:
-            context = kwargs['context']
-            found_context = True
 
-        if not found_context and (not 'context' in kwargs):
+        if not foundcontext and 'context' in kwargs:
+            context = kwargs['context']
+            foundcontext = True
+
+        if not foundcontext and (not 'context' in kwargs):
             kwargs['context'] = self.context
             context = self.context
 
@@ -269,10 +294,60 @@ class ProviderManager:
         return {name: self.get_docstring(name) for name in filtered}
 
     def __getattr__(self, name):
+        # Handle special protocol-related methods
+        if name == 'typed':
+            return self._typed
+        if name == 'get_protocol':
+            return self._get_protocol
+        if name == 'list_protocols':
+            return self._list_protocols
 
         async def method(*args, **kwargs):
             return await self.execute(name, *args, **kwargs)
         return method
+    
+    def _typed(self, protocol: Type[P]) -> P:
+        """Get a typed proxy for a service protocol.
+        
+        This enables IDE autocomplete and type checking for services.
+        
+        Args:
+            protocol: A Protocol class defining the service interface
+            
+        Returns:
+            A proxy object typed as the Protocol, delegating to service_manager
+            
+        Example:
+            from lib.providers.protocols import LLM
+            llm: LLM = service_manager.typed(LLM)
+            stream = await llm.stream_chat('gpt-4', messages=[...])
+        """
+        if not PROTOCOLS_AVAILABLE:
+            raise RuntimeError("Protocol support not available. Check protocols module installation.")
+        return cast(P, ServiceProxy(self, protocol))
+    
+    def _get_protocol(self, name: str):
+        """Get a registered Protocol by name.
+        
+        Args:
+            name: The protocol name (e.g., 'llm', 'sip')
+            
+        Returns:
+            The Protocol class, or None if not found
+        """
+        if not PROTOCOLS_AVAILABLE:
+            return None
+        return get_protocol(name)
+    
+    def _list_protocols(self) -> Dict[str, type]:
+        """List all registered Protocols.
+        
+        Returns:
+            Dict mapping protocol names to Protocol classes
+        """
+        if not PROTOCOLS_AVAILABLE:
+            return {}
+        return list_protocols()
 
 class HookManager:
     _instance = None

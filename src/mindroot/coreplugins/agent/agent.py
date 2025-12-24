@@ -539,14 +539,6 @@ class Agent:
         logger.debug("System message was:")
         logger.debug(await self.render_system_msg())
 
-        # use green text
-        print("\033[92m" + "Just after stream chat, last two messages in chat log:")
-        print("------------------------------------")
-        print(context.chat_log.messages[-1])
-        print(context.chat_log.messages[-2])
-        # switch back to normal text
-        print("\033[0m")
-
         return ret, full_cmds
 
 @service()
