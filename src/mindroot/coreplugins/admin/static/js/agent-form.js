@@ -1928,7 +1928,6 @@ class AgentForm extends BaseEl {
               ${this.renderRequiredPlugins()}
 
           <!-- UI section: components + pages -->
-          ${this.renderUiSection()}
             </details>
           </div>
 
