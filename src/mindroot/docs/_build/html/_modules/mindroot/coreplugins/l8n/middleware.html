@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.l8n.middleware - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,31 +243,17 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for mindroot.coreplugins.l8n.middleware</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
-
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-        <span class="n">_parse_accept_language_header</span><span class="p">,</span>
-        <span class="n">get_fallback_language</span><span class="p">,</span>
-        <span class="n">set_language_for_request</span>
-    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_accept_language_header</span><span class="p">,</span> <span class="n">get_fallback_language</span><span class="p">,</span> <span class="n">set_language_for_request</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="c1"># For standalone testing</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-        <span class="n">_parse_accept_language_header</span><span class="p">,</span>
-        <span class="n">get_fallback_language</span><span class="p">,</span>
-        <span class="n">set_language_for_request</span>
-    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">language_detection</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_accept_language_header</span><span class="p">,</span> <span class="n">get_fallback_language</span><span class="p">,</span> <span class="n">set_language_for_request</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-
-<span class="c1"># Global variable to store the current request language</span>
-<span class="c1"># This will be set by the middleware for each request</span>
 <span class="n">_current_request_language</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="get_request_language">
@@ -288,13 +269,8 @@
 <span class="sd">        Language code for the current request</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_current_request_language</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Current request language is &#39;</span><span class="si">{</span><span class="n">_current_request_language</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="c1"># If we have a request-specific language, use it</span>
     <span class="k">if</span> <span class="n">_current_request_language</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_current_request_language</span>
-    
-    <span class="c1"># Fallback to environment variable or default</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;L8n: No request language set, falling back to environment variable or default&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">,</span> <span class="s1">&#39;en&#39;</span><span class="p">)</span></div>
 
 
@@ -317,36 +293,20 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Detected language code</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># 1. Check URL parameter first (highest priority)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Checking URL parameters for language: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">url_lang</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lang&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">url_lang</span><span class="p">:</span>
-
         <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">url_lang</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-    
-    <span class="c1"># 2. Check cookie value</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Checking cookies for language: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">cookies</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">cookie_lang</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cookie_lang</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Found language in cookie: </span><span class="si">{</span><span class="n">cookie_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">cookie_lang</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-    
-    <span class="c1"># 3. Check Accept-Language header</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Accept-Language header: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accept-language&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">accept_language</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accept-language&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">accept_language</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Parsing Accept-Language header: </span><span class="si">{</span><span class="n">accept_language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">parsed_lang</span> <span class="o">=</span> <span class="n">_parse_accept_language_header</span><span class="p">(</span><span class="n">accept_language</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parsed_lang</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Parsed language from header: </span><span class="si">{</span><span class="n">parsed_lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">parsed_lang</span><span class="p">)</span>
-    
-    <span class="c1"># 4. Check environment variable</span>
     <span class="n">env_lang</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MINDROOT_LANGUAGE&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">env_lang</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">get_fallback_language</span><span class="p">(</span><span class="n">env_lang</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-    
-    <span class="c1"># 5. Default to English</span>
     <span class="k">return</span> <span class="s1">&#39;en&#39;</span></div>
 
 
@@ -370,48 +330,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_current_request_language</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;L8n middleware: Starting language detection&quot;</span><span class="p">)</span>
-        <span class="c1"># Detect the language for this request</span>
         <span class="n">detected_language</span> <span class="o">=</span> <span class="n">detect_language_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Detected language &#39;</span><span class="si">{</span><span class="n">detected_language</span><span class="si">}</span><span class="s2">&#39; for </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="c1"># Store it globally for the template system</span>
         <span class="n">_current_request_language</span> <span class="o">=</span> <span class="n">detected_language</span>
-        
-        <span class="c1"># Also store it in request state for other components</span>
         <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">detected_language</span>
-        
-        <span class="c1"># Set it using the language detection system</span>
         <span class="n">set_language_for_request</span><span class="p">(</span><span class="n">detected_language</span><span class="p">)</span>
-        
-        <span class="c1"># Debug logging (can be removed in production)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n: Detected language &#39;</span><span class="si">{</span><span class="n">detected_language</span><span class="si">}</span><span class="s2">&#39; for </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
-        <span class="c1"># Process the request</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        
-        <span class="c1"># Optionally set a cookie to remember the language preference</span>
-        <span class="c1"># Only set if it was explicitly requested via URL parameter</span>
         <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lang&#39;</span><span class="p">):</span>
-            <span class="n">response</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span>
-                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;mindroot_language&quot;</span><span class="p">,</span>
-                <span class="n">value</span><span class="o">=</span><span class="n">detected_language</span><span class="p">,</span>
-                <span class="n">max_age</span><span class="o">=</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>  <span class="c1"># 30 days</span>
-                <span class="n">httponly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">samesite</span><span class="o">=</span><span class="s2">&quot;lax&quot;</span>
-            <span class="p">)</span>
-        
+            <span class="n">response</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;mindroot_language&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">detected_language</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">30</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="n">httponly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">samesite</span><span class="o">=</span><span class="s1">&#39;lax&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">response</span>
-        
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L8n middleware error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="c1"># If there&#39;s an error, continue with default language</span>
         <span class="n">_current_request_language</span> <span class="o">=</span> <span class="s1">&#39;en&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="s1">&#39;en&#39;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-    
     <span class="k">finally</span><span class="p">:</span>
-        <span class="c1"># Clean up the global variable after the request</span>
         <span class="n">_current_request_language</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 </pre></div>
@@ -447,8 +378,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

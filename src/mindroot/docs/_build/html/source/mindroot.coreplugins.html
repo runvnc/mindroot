@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins package - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=f4b9d74b" />
     
@@ -25,16 +25,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -151,14 +151,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -168,8 +164,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -177,8 +172,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -186,8 +180,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -205,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -219,7 +212,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -246,8 +242,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -255,8 +250,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -279,6 +273,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.admin.html#module-mindroot.coreplugins.admin.agent_router">mindroot.coreplugins.admin.agent_router module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest"><code class="docutils literal notranslate"><span class="pre">DuplicateAgentRequest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.model_config"><code class="docutils literal notranslate"><span class="pre">DuplicateAgentRequest.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.new_name"><code class="docutils literal notranslate"><span class="pre">DuplicateAgentRequest.new_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.scope"><code class="docutils literal notranslate"><span class="pre">DuplicateAgentRequest.scope</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest"><code class="docutils literal notranslate"><span class="pre">GitHubImportRequest</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.model_config"><code class="docutils literal notranslate"><span class="pre">GitHubImportRequest.model_config</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.repo_path"><code class="docutils literal notranslate"><span class="pre">GitHubImportRequest.repo_path</span></code></a></li>
@@ -293,6 +293,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.create_agent"><code class="docutils literal notranslate"><span class="pre">create_agent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.duplicate_agent"><code class="docutils literal notranslate"><span class="pre">duplicate_agent()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.export_agent_zip"><code class="docutils literal notranslate"><span class="pre">export_agent_zip()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.get_agent_ownership_info"><code class="docutils literal notranslate"><span class="pre">get_agent_ownership_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.get_command_providers"><code class="docutils literal notranslate"><span class="pre">get_command_providers()</span></code></a></li>
@@ -716,6 +717,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.chat.html#module-mindroot.coreplugins.chat.router">mindroot.coreplugins.chat.router module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest"><code class="docutils literal notranslate"><span class="pre">CommandRequest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.args"><code class="docutils literal notranslate"><span class="pre">CommandRequest.args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.command"><code class="docutils literal notranslate"><span class="pre">CommandRequest.command</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.model_config"><code class="docutils literal notranslate"><span class="pre">CommandRequest.model_config</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.TaskRequest"><code class="docutils literal notranslate"><span class="pre">TaskRequest</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.TaskRequest.instructions"><code class="docutils literal notranslate"><span class="pre">TaskRequest.instructions</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.TaskRequest.model_config"><code class="docutils literal notranslate"><span class="pre">TaskRequest.model_config</span></code></a></li>
@@ -725,8 +732,12 @@
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_events"><code class="docutils literal notranslate"><span class="pre">chat_events()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_history"><code class="docutils literal notranslate"><span class="pre">chat_history()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_session"><code class="docutils literal notranslate"><span class="pre">chat_session()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_session_redirect"><code class="docutils literal notranslate"><span class="pre">chat_session_redirect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.context1"><code class="docutils literal notranslate"><span class="pre">context1()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.delete_chat_session"><code class="docutils literal notranslate"><span class="pre">delete_chat_session()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_get"><code class="docutils literal notranslate"><span class="pre">execute_command_get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_session_get"><code class="docutils literal notranslate"><span class="pre">execute_command_session_get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_with_session"><code class="docutils literal notranslate"><span class="pre">execute_command_with_session()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_chat_html"><code class="docutils literal notranslate"><span class="pre">get_chat_html()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_persona_avatar"><code class="docutils literal notranslate"><span class="pre">get_persona_avatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.get_persona_faceref"><code class="docutils literal notranslate"><span class="pre">get_persona_faceref()</span></code></a></li>
@@ -743,6 +754,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.add_current_time"><code class="docutils literal notranslate"><span class="pre">add_current_time()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.agent_output"><code class="docutils literal notranslate"><span class="pre">agent_output()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.append_message"><code class="docutils literal notranslate"><span class="pre">append_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_assistant_message"><code class="docutils literal notranslate"><span class="pre">backend_assistant_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_user_message"><code class="docutils literal notranslate"><span class="pre">backend_user_message()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_active_response"><code class="docutils literal notranslate"><span class="pre">cancel_active_response()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_and_wait"><code class="docutils literal notranslate"><span class="pre">cancel_and_wait()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.close_chat_session"><code class="docutils literal notranslate"><span class="pre">close_chat_session()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.command_result"><code class="docutils literal notranslate"><span class="pre">command_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.finished_chat"><code class="docutils literal notranslate"><span class="pre">finished_chat()</span></code></a></li>
@@ -813,6 +828,7 @@
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.check_list.html#module-mindroot.coreplugins.check_list.mod">mindroot.coreplugins.check_list.mod module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.clear_subtask"><code class="docutils literal notranslate"><span class="pre">clear_subtask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.complete_subtask"><code class="docutils literal notranslate"><span class="pre">complete_subtask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.create_checklist"><code class="docutils literal notranslate"><span class="pre">create_checklist()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.delegate_subtask"><code class="docutils literal notranslate"><span class="pre">delegate_subtask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.extract_checklist_section"><code class="docutils literal notranslate"><span class="pre">extract_checklist_section()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.get_checklist_status"><code class="docutils literal notranslate"><span class="pre">get_checklist_status()</span></code></a></li>
@@ -1119,7 +1135,16 @@
 <li class="toctree-l1"><a class="reference internal" href="mindroot.coreplugins.l8n.html">mindroot.coreplugins.l8n package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#module-mindroot.coreplugins.l8n.debug_loader">mindroot.coreplugins.l8n.debug_loader module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#module-mindroot.coreplugins.l8n.debug_middleware">mindroot.coreplugins.l8n.debug_middleware module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#module-mindroot.coreplugins.l8n.debug_middleware">mindroot.coreplugins.l8n.debug_middleware module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockRequest"><code class="docutils literal notranslate"><span class="pre">MockRequest</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockResponse"><code class="docutils literal notranslate"><span class="pre">MockResponse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockResponse.set_cookie"><code class="docutils literal notranslate"><span class="pre">MockResponse.set_cookie()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.mock_call_next"><code class="docutils literal notranslate"><span class="pre">mock_call_next()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.test_middleware"><code class="docutils literal notranslate"><span class="pre">test_middleware()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#module-mindroot.coreplugins.l8n.l8n_constants">mindroot.coreplugins.l8n.l8n_constants module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mindroot.coreplugins.l8n.html#module-mindroot.coreplugins.l8n.language_detection">mindroot.coreplugins.l8n.language_detection module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.language_detection.get_current_language_from_request"><code class="docutils literal notranslate"><span class="pre">get_current_language_from_request()</span></code></a></li>
@@ -1781,8 +1806,8 @@
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

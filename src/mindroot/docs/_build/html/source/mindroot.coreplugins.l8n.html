@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.l8n package - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=f4b9d74b" />
     
@@ -25,16 +25,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -151,14 +151,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -168,8 +164,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -177,8 +172,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -186,8 +180,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -205,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -219,7 +212,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -246,8 +242,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -255,8 +250,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -272,6 +266,33 @@
 <section id="module-mindroot.coreplugins.l8n.debug_middleware">
 <span id="mindroot-coreplugins-l8n-debug-middleware-module"></span><h2>mindroot.coreplugins.l8n.debug_middleware module<a class="headerlink" href="#module-mindroot.coreplugins.l8n.debug_middleware" title="Link to this heading">¶</a></h2>
 <p>Debug script to test middleware import and functionality.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.l8n.debug_middleware.MockRequest">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.debug_middleware.</span></span><span class="sig-name descname"><span class="pre">MockRequest</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/debug_middleware.html#MockRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.debug_middleware.MockRequest" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mindroot.coreplugins.l8n.debug_middleware.MockResponse">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.debug_middleware.</span></span><span class="sig-name descname"><span class="pre">MockResponse</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/debug_middleware.html#MockResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.debug_middleware.MockResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mindroot.coreplugins.l8n.debug_middleware.MockResponse.set_cookie">
+<span class="sig-name descname"><span class="pre">set_cookie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/debug_middleware.html#MockResponse.set_cookie"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.debug_middleware.MockResponse.set_cookie" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.l8n.debug_middleware.mock_call_next">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.debug_middleware.</span></span><span class="sig-name descname"><span class="pre">mock_call_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/debug_middleware.html#mock_call_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.debug_middleware.mock_call_next" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.coreplugins.l8n.debug_middleware.test_middleware">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.debug_middleware.</span></span><span class="sig-name descname"><span class="pre">test_middleware</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/debug_middleware.html#test_middleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.debug_middleware.test_middleware" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
 <section id="module-mindroot.coreplugins.l8n.l8n_constants">
 <span id="mindroot-coreplugins-l8n-l8n-constants-module"></span><h2>mindroot.coreplugins.l8n.l8n_constants module<a class="headerlink" href="#module-mindroot.coreplugins.l8n.l8n_constants" title="Link to this heading">¶</a></h2>
@@ -386,7 +407,7 @@ language for template translation.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.middleware.middleware">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.middleware.</span></span><span class="sig-name descname"><span class="pre">middleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/middleware.html#middleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.middleware.middleware" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.middleware.</span></span><span class="sig-name descname"><span class="pre">middleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/middleware.html#middleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.middleware.middleware" title="Link to this definition">¶</a></dt>
 <dd><p>L8n middleware for language detection and setting.</p>
 <p>This middleware runs early in the request pipeline to:
 1. Detect the preferred language for the request
@@ -410,7 +431,7 @@ language for template translation.</p>
 <span id="mindroot-coreplugins-l8n-mod-module"></span><h2>mindroot.coreplugins.l8n.mod module<a class="headerlink" href="#module-mindroot.coreplugins.l8n.mod" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.mod.append_localized_file">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">append_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#append_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.append_localized_file" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">append_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#append_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.append_localized_file" title="Link to this definition">¶</a></dt>
 <dd><p>Append content to an existing localized file.</p>
 <p>Use this for large files that need to be built incrementally.
 Follow the same placeholder format rules as write_localized_file.</p>
@@ -442,7 +463,7 @@ await append_localized_file(</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.mod.get_translations">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">get_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#get_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.get_translations" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">get_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#get_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.get_translations" title="Link to this definition">¶</a></dt>
 <dd><p>Get translations for a specific plugin and language.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -477,7 +498,7 @@ all_cached = await get_translations()</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.mod.list_localized_files">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">list_localized_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#list_localized_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.list_localized_files" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">list_localized_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#list_localized_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.list_localized_files" title="Link to this definition">¶</a></dt>
 <dd><p>List all localized files that have been created.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -494,7 +515,7 @@ all_cached = await get_translations()</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.mod.set_translations">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">set_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#set_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.set_translations" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">set_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#set_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.set_translations" title="Link to this definition">¶</a></dt>
 <dd><p>Set translations for a specific language and plugin.</p>
 <p>This command stores the translation mappings that will be used to replace
 __TRANSLATE_key__ placeholders in localized files. Translations are stored
@@ -541,7 +562,7 @@ per plugin based on the provided file path.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.mod.write_localized_file">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">write_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#write_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.write_localized_file" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.mod.</span></span><span class="sig-name descname"><span class="pre">write_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/mod.html#write_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.mod.write_localized_file" title="Link to this definition">¶</a></dt>
 <dd><p>Write a localized version of a file with static placeholders.</p>
 <p>This command creates a localized version of a template or source file
 with __TRANSLATE_key__ placeholders that will be replaced with actual
@@ -585,25 +606,25 @@ translations when the file is loaded.</p>
 <p>Enhanced test script for the l8n localization plugin with language detection.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_enhanced.main">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.main" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.main" title="Link to this definition">¶</a></dt>
 <dd><p>Run all enhanced tests.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_enhanced.test_file_integration">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_file_integration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_file_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_file_integration" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_file_integration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_file_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_file_integration" title="Link to this definition">¶</a></dt>
 <dd><p>Test creating localized files and using language detection.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_enhanced.test_integrated_translation">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_integrated_translation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_integrated_translation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_integrated_translation" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_integrated_translation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_integrated_translation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_integrated_translation" title="Link to this definition">¶</a></dt>
 <dd><p>Test the integrated translation system with language detection.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_enhanced.test_language_detection">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_language_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_language_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_language_detection" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_enhanced.</span></span><span class="sig-name descname"><span class="pre">test_language_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_enhanced.html#test_language_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_enhanced.test_language_detection" title="Link to this definition">¶</a></dt>
 <dd><p>Test the enhanced language detection functionality.</p>
 </dd></dl>
 
@@ -617,7 +638,7 @@ translations when the file is loaded.</p>
 <p>This script tests the core functionality without MindRoot dependencies.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.append_localized_file">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">append_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#append_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.append_localized_file" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">append_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#append_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.append_localized_file" title="Link to this definition">¶</a></dt>
 <dd><p>Append content to an existing localized file.</p>
 </dd></dl>
 
@@ -640,13 +661,13 @@ translations when the file is loaded.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.get_translations">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">get_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#get_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.get_translations" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">get_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#get_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.get_translations" title="Link to this definition">¶</a></dt>
 <dd><p>Get translations for a specific language or all languages.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.list_localized_files">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">list_localized_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#list_localized_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.list_localized_files" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">list_localized_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#list_localized_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.list_localized_files" title="Link to this definition">¶</a></dt>
 <dd><p>List all localized files that have been created.</p>
 </dd></dl>
 
@@ -658,19 +679,19 @@ translations when the file is loaded.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.set_translations">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">set_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#set_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.set_translations" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">set_translations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#set_translations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.set_translations" title="Link to this definition">¶</a></dt>
 <dd><p>Set translations for a specific language.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.test_basic_functionality">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">test_basic_functionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#test_basic_functionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.test_basic_functionality" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">test_basic_functionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#test_basic_functionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.test_basic_functionality" title="Link to this definition">¶</a></dt>
 <dd><p>Test the basic l8n functionality.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_l8n_standalone.write_localized_file">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">write_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#write_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.write_localized_file" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_l8n_standalone.</span></span><span class="sig-name descname"><span class="pre">write_localized_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_l8n_standalone.html#write_localized_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_l8n_standalone.write_localized_file" title="Link to this definition">¶</a></dt>
 <dd><p>Write a localized version of a file with static placeholders.</p>
 </dd></dl>
 
@@ -681,13 +702,13 @@ translations when the file is loaded.</p>
 <p>This script simulates FastAPI request objects to test the middleware.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.MockRequest">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">MockRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cookies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#MockRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.MockRequest" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">MockRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cookies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#MockRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.MockRequest" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.MockResponse">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">MockResponse</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#MockResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.MockResponse" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">MockResponse</span></span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#MockResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.MockResponse" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.MockResponse.set_cookie">
@@ -698,31 +719,31 @@ translations when the file is loaded.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.main">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.main" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.main" title="Link to this definition">¶</a></dt>
 <dd><p>Run all middleware tests.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.mock_call_next">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">mock_call_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#mock_call_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.mock_call_next" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">mock_call_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#mock_call_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.mock_call_next" title="Link to this definition">¶</a></dt>
 <dd><p>Mock the next handler in the middleware chain.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.test_integration_with_templates">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_integration_with_templates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_integration_with_templates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_integration_with_templates" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_integration_with_templates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_integration_with_templates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_integration_with_templates" title="Link to this definition">¶</a></dt>
 <dd><p>Test integration with the template system.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.test_language_detection">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_language_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_language_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_language_detection" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_language_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_language_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_language_detection" title="Link to this definition">¶</a></dt>
 <dd><p>Test language detection from various request sources.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mindroot.coreplugins.l8n.test_middleware.test_middleware_functionality">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_middleware_functionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_middleware_functionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_middleware_functionality" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mindroot.coreplugins.l8n.test_middleware.</span></span><span class="sig-name descname"><span class="pre">test_middleware_functionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/coreplugins/l8n/test_middleware.html#test_middleware_functionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.coreplugins.l8n.test_middleware.test_middleware_functionality" title="Link to this definition">¶</a></dt>
 <dd><p>Test the complete middleware functionality.</p>
 </dd></dl>
 
@@ -845,7 +866,16 @@ a strong warning and returns None to indicate fallback is needed.</p>
 <li><a class="reference internal" href="#">mindroot.coreplugins.l8n package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-mindroot.coreplugins.l8n.debug_loader">mindroot.coreplugins.l8n.debug_loader module</a></li>
-<li><a class="reference internal" href="#module-mindroot.coreplugins.l8n.debug_middleware">mindroot.coreplugins.l8n.debug_middleware module</a></li>
+<li><a class="reference internal" href="#module-mindroot.coreplugins.l8n.debug_middleware">mindroot.coreplugins.l8n.debug_middleware module</a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.l8n.debug_middleware.MockRequest"><code class="docutils literal notranslate"><span class="pre">MockRequest</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.l8n.debug_middleware.MockResponse"><code class="docutils literal notranslate"><span class="pre">MockResponse</span></code></a><ul>
+<li><a class="reference internal" href="#mindroot.coreplugins.l8n.debug_middleware.MockResponse.set_cookie"><code class="docutils literal notranslate"><span class="pre">MockResponse.set_cookie()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mindroot.coreplugins.l8n.debug_middleware.mock_call_next"><code class="docutils literal notranslate"><span class="pre">mock_call_next()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.coreplugins.l8n.debug_middleware.test_middleware"><code class="docutils literal notranslate"><span class="pre">test_middleware()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-mindroot.coreplugins.l8n.l8n_constants">mindroot.coreplugins.l8n.l8n_constants module</a></li>
 <li><a class="reference internal" href="#module-mindroot.coreplugins.l8n.language_detection">mindroot.coreplugins.l8n.language_detection module</a><ul>
 <li><a class="reference internal" href="#mindroot.coreplugins.l8n.language_detection.get_current_language_from_request"><code class="docutils literal notranslate"><span class="pre">get_current_language_from_request()</span></code></a></li>
@@ -927,8 +957,8 @@ a strong warning and returns None to indicate fallback is needed.</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

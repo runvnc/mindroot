@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.persona.mod - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,8 +243,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -261,62 +255,41 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">.init_persona</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-
 
 <div class="viewcode-block" id="get_persona_data">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.persona.html#mindroot.coreplugins.persona.mod.get_persona_data">[docs]</a>
 <span class="nd">@service</span><span class="p">()</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_persona_data</span><span class="p">(</span><span class="n">persona_name</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona name is&quot;</span><span class="p">,</span> <span class="n">persona_name</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
     <span class="n">pwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    
-    <span class="c1"># Handle registry personas: registry/owner/name</span>
     <span class="k">if</span> <span class="n">persona_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;registry/&#39;</span><span class="p">):</span>
         <span class="n">persona_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pwd</span><span class="p">,</span> <span class="s1">&#39;personas&#39;</span><span class="p">,</span> <span class="n">persona_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Legacy support: check local first, then shared</span>
         <span class="n">persona_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pwd</span><span class="p">,</span> <span class="s1">&#39;personas&#39;</span><span class="p">,</span> <span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">persona_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_path</span><span class="p">):</span>
             <span class="n">persona_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pwd</span><span class="p">,</span> <span class="s1">&#39;personas&#39;</span><span class="p">,</span> <span class="s1">&#39;shared&#39;</span><span class="p">,</span> <span class="n">persona_name</span><span class="p">)</span>
-    
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_path</span><span class="p">):</span>
-        <span class="c1"># need to raise an error here</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Persona </span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># read the persona data</span>
-    <span class="c1"># use blue background and yellow text</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[44m</span><span class="se">\033</span><span class="s2">[33m&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading persona data from </span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-
-
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Persona </span><span class="si">{</span><span class="n">persona_name</span><span class="si">}</span><span class="s1"> not found in </span><span class="si">{</span><span class="n">persona_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">persona_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;persona.json&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_file</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{}</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">persona_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">persona_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
     <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;avatar_image_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;avatar.png&#39;</span><span class="p">)</span>
     <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;face_ref_image_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="s1">&#39;faceref.png&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;face_ref_image_path&#39;</span><span class="p">]):</span>
         <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;face_ref_image_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;avatar_image_path&#39;</span><span class="p">]</span>
-
     <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;voice_samples&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">persona_path</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.wav&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.wav&#39;</span><span class="p">):</span>
             <span class="n">persona_data</span><span class="p">[</span><span class="s1">&#39;voice_samples&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">persona_path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona data is&quot;</span><span class="p">,</span> <span class="n">persona_data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">persona_data</span></div>
 
 
 <div class="viewcode-block" id="pic_of_me">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.persona.html#mindroot.coreplugins.persona.mod.pic_of_me">[docs]</a>
 <span class="nd">@command</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">pic_of_me</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">pic_of_me</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;pic_of_me</span>
 
 <span class="sd">    Generate a picture of the persona given a detailed description of what they</span>
@@ -341,30 +314,23 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">persona</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona:&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
     <span class="n">negative_appearance</span> <span class="o">=</span> <span class="s1">&#39;split-view, diptych, side-by-side, 2girl, 2boy&#39;</span>
     <span class="k">if</span> <span class="s1">&#39;negative_appearance&#39;</span> <span class="ow">in</span> <span class="n">persona</span><span class="p">:</span>
         <span class="n">negative_appearance</span> <span class="o">=</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;negative_appearance&#39;</span><span class="p">]</span>
-
-    <span class="n">img</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">text_to_image</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">:1.25), &quot;</span> <span class="o">+</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;appearance&#39;</span><span class="p">],</span> <span class="n">negative_appearance</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;img = &quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">text_to_image</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s1">:1.25), &#39;</span> <span class="o">+</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;appearance&#39;</span><span class="p">],</span> <span class="n">negative_appearance</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
     <span class="n">img_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">persona</span><span class="p">[</span><span class="s1">&#39;face_ref_image_path&#39;</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">swapped</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">swap_face</span><span class="p">(</span><span class="n">img_dir</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error swapping face:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
         <span class="n">swapped</span> <span class="o">=</span> <span class="n">img</span>
-    <span class="c1">#await context.insert_image(&quot;/&quot;+swapped)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;swapped:&quot;</span><span class="p">,</span> <span class="n">swapped</span><span class="p">)</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;markdown&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;![pic_of_me](/</span><span class="si">{</span><span class="n">swapped</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="p">}</span>
-    <span class="c1">#await context.partial_command(&#39;json_encoded_md&#39;, obj)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;markdown&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;![pic_of_me](/</span><span class="si">{</span><span class="n">swapped</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">}</span>
     <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;json_encoded_md&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="video_of_me">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.persona.html#mindroot.coreplugins.persona.mod.video_of_me">[docs]</a>
 <span class="nd">@command</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">video_of_me</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">video_of_me</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;video_of_me</span>
 <span class="sd">    </span>
 <span class="sd">    Generate a video of the persona based on a detailed description. </span>
@@ -390,46 +356,24 @@
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">persona</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;persona:&quot;</span><span class="p">,</span> <span class="n">persona</span><span class="p">)</span>
     <span class="n">negative_appearance</span> <span class="o">=</span> <span class="s1">&#39;split-view, diptych, side-by-side, 2girl, 2boy&#39;</span>
     <span class="k">if</span> <span class="s1">&#39;negative_appearance&#39;</span> <span class="ow">in</span> <span class="n">persona</span><span class="p">:</span>
         <span class="n">negative_appearance</span> <span class="o">=</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;negative_appearance&#39;</span><span class="p">]</span>
-
-    <span class="c1"># Generate the initial image</span>
-    <span class="n">img</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">text_to_image</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">:1.25), &quot;</span> <span class="o">+</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;appearance&#39;</span><span class="p">],</span> <span class="n">negative_appearance</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;img = &quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
-    
-    <span class="c1"># Face swapping process</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">text_to_image</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s1">:1.25), &#39;</span> <span class="o">+</span> <span class="n">persona</span><span class="p">[</span><span class="s1">&#39;appearance&#39;</span><span class="p">],</span> <span class="n">negative_appearance</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
     <span class="n">img_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">persona</span><span class="p">[</span><span class="s1">&#39;face_ref_image_path&#39;</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">swapped</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">swap_face</span><span class="p">(</span><span class="n">img_dir</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error swapping face:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
         <span class="n">swapped</span> <span class="o">=</span> <span class="n">img</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;swapped:&quot;</span><span class="p">,</span> <span class="n">swapped</span><span class="p">)</span>
-    
-    <span class="c1"># Convert image to video using the image_to_video service</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Get the absolute path of the swapped image</span>
         <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
         <span class="n">swapped_abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">swapped</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;swapped_abs_path:&quot;</span><span class="p">,</span> <span class="n">swapped_abs_path</span><span class="p">)</span>
-        
-        <span class="c1"># Load the image with PIL</span>
         <span class="n">pil_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">swapped_abs_path</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loaded image with PIL&quot;</span><span class="p">)</span>
-        <span class="c1"># Use the image_to_video service with the PIL image</span>
         <span class="n">video</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">image_to_video</span><span class="p">(</span><span class="n">pil_image</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;video:&quot;</span><span class="p">,</span> <span class="n">video</span><span class="p">)</span>
-        
-        <span class="c1"># Return the video in markdown format for display</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;markdown&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;&lt;video width=&#39;100%&#39; controls&gt;&lt;source src=&#39;/</span><span class="si">{</span><span class="n">video</span><span class="si">}</span><span class="s2">&#39; type=&#39;video/mp4&#39;&gt;&lt;/video&gt;&quot;</span><span class="p">}</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;markdown&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;&lt;video width=&#39;100%&#39; controls&gt;&lt;source src=&#39;/</span><span class="si">{</span><span class="n">video</span><span class="si">}</span><span class="s2">&#39; type=&#39;video/mp4&#39;&gt;&lt;/video&gt;&quot;</span><span class="p">}</span>
         <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;markdown_await_user&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error creating video:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-        <span class="c1"># Fallback to displaying the image if video creation fails</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;markdown&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;![pic_of_me](/</span><span class="si">{</span><span class="n">swapped</span><span class="si">}</span><span class="s2">) (Video generation failed)&quot;</span><span class="p">}</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;markdown&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;![pic_of_me](/</span><span class="si">{</span><span class="n">swapped</span><span class="si">}</span><span class="s1">) (Video generation failed)&#39;</span><span class="p">}</span>
         <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;markdown_await_user&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
 
 </pre></div>
@@ -465,8 +409,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

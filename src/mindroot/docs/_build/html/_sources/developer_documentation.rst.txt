@@ -3,7 +3,10 @@ Developer Documentation
 
 This section contains documentation for developers working with MindRoot.
 
-.. todo:: Add developer documentation content here
+.. toctree::
+   :maxdepth: 2
+
+   protocols
 
 Plugin Examples
 ---------------

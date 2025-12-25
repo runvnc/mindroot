@@ -1,12 +1,12 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#"><link rel="search" title="Search" href="search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 --><title>Index - MindRoot 9.10.0 documentation</title>
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 --><title>Index - MindRoot 9.10.0 documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=f4b9d74b" />
     
@@ -23,16 +23,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -149,14 +149,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -166,8 +162,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -175,8 +170,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -184,8 +178,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -203,7 +196,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -217,7 +210,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -238,8 +234,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -247,8 +242,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -298,6 +292,8 @@
 </li>
         </ul></li>
         <li><a href="source/mindroot.lib.html#mindroot.lib.chatlog.ChatLog.add_message_async">add_message_async() (mindroot.lib.chatlog.ChatLog method)</a>
+</li>
+        <li><a href="source/mindroot.lib.html#mindroot.lib.chatlog.ChatLog.add_message_role">add_message_role() (mindroot.lib.chatlog.ChatLog method)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.index.handlers.html#mindroot.coreplugins.index.handlers.add_plugin">add_plugin() (in module mindroot.coreplugins.index.handlers)</a>
 
@@ -412,6 +408,8 @@
 </li>
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.McpServerAddRequest.args">(mindroot.coreplugins.admin.mcp_routes.McpServerAddRequest attribute)</a>
 </li>
+          <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.args">(mindroot.coreplugins.chat.router.CommandRequest attribute)</a>
+</li>
           <li><a href="source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.args">(mindroot.coreplugins.mcp_.mcp_manager.MCPServer attribute)</a>
 </li>
         </ul></li>
@@ -445,6 +443,10 @@
   <h2>B</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_assistant_message">backend_assistant_message() (in module mindroot.coreplugins.chat.services)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_user_message">backend_user_message() (in module mindroot.coreplugins.chat.services)</a>
+</li>
         <li><a href="source/mindroot.coreplugins.credits.html#mindroot.coreplugins.credits.models.CreditTransaction.balance">balance (mindroot.coreplugins.credits.models.CreditTransaction attribute)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate.base_url">base_url (mindroot.coreplugins.chat.widget_routes.WidgetTokenCreate attribute)</a>
@@ -453,10 +455,10 @@
           <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse.base_url">(mindroot.coreplugins.chat.widget_routes.WidgetTokenResponse attribute)</a>
 </li>
         </ul></li>
-        <li><a href="source/mindroot.lib.html#mindroot.lib.chatcontext.BaseCommandSet">BaseCommandSet (class in mindroot.lib.chatcontext)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="source/mindroot.lib.html#mindroot.lib.chatcontext.BaseCommandSet">BaseCommandSet (class in mindroot.lib.chatcontext)</a>
+</li>
         <li><a href="source/mindroot.lib.html#mindroot.lib.chatcontext.BaseService">BaseService (class in mindroot.lib.chatcontext)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_registry_routes.browse_registry_servers">browse_registry_servers() (in module mindroot.coreplugins.admin.mcp_registry_routes)</a>
@@ -481,6 +483,10 @@
 </li>
         <li><a href="source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.call_tool">call_tool() (mindroot.coreplugins.mcp_.mcp_manager.MCPManager method)</a>
 </li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_active_response">cancel_active_response() (in module mindroot.coreplugins.chat.services)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_and_wait">cancel_and_wait() (in module mindroot.coreplugins.chat.services)</a>
+</li>
         <li><a href="source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.models.UserSubscription.cancel_at_period_end">cancel_at_period_end (mindroot.coreplugins.subscriptions.models.UserSubscription attribute)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.cancel_chat">cancel_chat() (in module mindroot.coreplugins.chat.router)</a>
@@ -502,6 +508,8 @@
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_history">chat_history() (in module mindroot.coreplugins.chat.router)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_session">chat_session() (in module mindroot.coreplugins.chat.router)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.chat_session_redirect">chat_session_redirect() (in module mindroot.coreplugins.chat.router)</a>
 </li>
         <li><a href="source/mindroot.lib.html#mindroot.lib.chatcontext.ChatContext">ChatContext (class in mindroot.lib.chatcontext)</a>
 </li>
@@ -592,6 +600,8 @@
 </li>
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.McpServerAddRequest.command">(mindroot.coreplugins.admin.mcp_routes.McpServerAddRequest attribute)</a>
 </li>
+          <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.command">(mindroot.coreplugins.chat.router.CommandRequest attribute)</a>
+</li>
           <li><a href="source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPServer.command">(mindroot.coreplugins.mcp_.mcp_manager.MCPServer attribute)</a>
 </li>
         </ul></li>
@@ -604,6 +614,8 @@
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.command_router.command_plugin_mapping">command_plugin_mapping() (in module mindroot.coreplugins.admin.command_router)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.command_result">command_result() (in module mindroot.coreplugins.chat.services)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest">CommandRequest (class in mindroot.coreplugins.chat.router)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.PluginMetadata.commands">commands (mindroot.coreplugins.admin.plugin_manager.PluginMetadata attribute)</a>
 
@@ -625,14 +637,14 @@
 </li>
         <li><a href="source/mindroot.registry.html#mindroot.registry.component_manager.ComponentManager">ComponentManager (class in mindroot.registry.component_manager)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.imap_handler.IMAPHandler.connect">connect() (mindroot.coreplugins.email.imap_handler.IMAPHandler method)</a>
 
         <ul>
           <li><a href="source/mindroot.coreplugins.email.html#mindroot.coreplugins.email.smtp_handler.SMTPHandler.connect">(mindroot.coreplugins.email.smtp_handler.SMTPHandler method)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.connect_mcp_server">connect_mcp_server() (in module mindroot.coreplugins.admin.mcp_routes)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.connect_oauth_server">connect_oauth_server() (mindroot.coreplugins.mcp_.mcp_manager.MCPManager method)</a>
@@ -674,6 +686,8 @@
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.create_agent">create_agent() (in module mindroot.coreplugins.admin.agent_router)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.api_keys.html#mindroot.coreplugins.api_keys.router.create_api_key">create_api_key() (in module mindroot.coreplugins.api_keys.router)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.check_list.html#mindroot.coreplugins.check_list.mod.create_checklist">create_checklist() (in module mindroot.coreplugins.check_list.mod)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.subscriptions.html#mindroot.coreplugins.subscriptions.stripe_integration.StripeIntegration.create_checkout_session">create_checkout_session() (mindroot.coreplugins.subscriptions.stripe_integration.StripeIntegration method)</a>
 </li>
@@ -904,6 +918,8 @@
         <li><a href="source/mindroot.html#mindroot.server.HeaderMiddleware.dispatch">dispatch() (mindroot.server.HeaderMiddleware method)</a>
 
         <ul>
+          <li><a href="source/mindroot.html#mindroot.server.PyInstrumentMiddleware.dispatch">(mindroot.server.PyInstrumentMiddleware method)</a>
+</li>
           <li><a href="source/mindroot.html#mindroot.server_missing_normal_args.HeaderMiddleware.dispatch">(mindroot.server_missing_normal_args.HeaderMiddleware method)</a>
 </li>
           <li><a href="source/mindroot.html#mindroot.server_prev.HeaderMiddleware.dispatch">(mindroot.server_prev.HeaderMiddleware method)</a>
@@ -917,6 +933,12 @@
           <li><a href="source/mindroot.lib.plugins.html#mindroot.lib.plugins.installation.download_github_files">(in module mindroot.lib.plugins.installation)</a>
 </li>
         </ul></li>
+        <li><a href="source/mindroot.lib.html#mindroot.lib.chatlog.ChatLog.drop_last">drop_last() (mindroot.lib.chatlog.ChatLog method)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.duplicate_agent">duplicate_agent() (in module mindroot.coreplugins.admin.agent_router)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest">DuplicateAgentRequest (class in mindroot.coreplugins.admin.agent_router)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -959,15 +981,21 @@
         </ul></li>
         <li><a href="source/mindroot.lib.html#mindroot.lib.json_escape.escape_for_json">escape_for_json() (in module mindroot.lib.json_escape)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="source/mindroot.coreplugins.credits.html#mindroot.coreplugins.credits.mod.estimate_credits">estimate_credits() (in module mindroot.coreplugins.credits.mod)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.credits.html#mindroot.coreplugins.credits.conversion.CreditPolicy.estimate_credits_needed">estimate_credits_needed() (mindroot.coreplugins.credits.conversion.CreditPolicy method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.exec_with_provider">exec_with_provider() (mindroot.lib.providers.ProviderManager method)</a>
 </li>
         <li><a href="source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager.execute">execute() (mindroot.lib.providers.ProviderManager method)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_get">execute_command_get() (in module mindroot.coreplugins.chat.router)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_session_get">execute_command_session_get() (in module mindroot.coreplugins.chat.router)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.execute_command_with_session">execute_command_with_session() (in module mindroot.coreplugins.chat.router)</a>
 </li>
         <li><a href="source/mindroot.lib.providers.html#mindroot.lib.providers.HookManager.execute_hooks">execute_hooks() (mindroot.lib.providers.HookManager method)</a>
 </li>
@@ -2835,8 +2863,6 @@
           <li><a href="source/mindroot.coreplugins.user_service.html#module-mindroot.coreplugins.user_service.password_reset_service">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     mindroot.coreplugins.user_service.role_service
 
@@ -2844,6 +2870,8 @@
           <li><a href="source/mindroot.coreplugins.user_service.html#module-mindroot.coreplugins.user_service.role_service">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     mindroot.coreplugins.user_service.router
 
@@ -3140,17 +3168,31 @@
         </ul></li>
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.command_router.missing_commands">missing_commands() (in module mindroot.coreplugins.admin.command_router)</a>
 </li>
-        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.mock_call_next">mock_call_next() (in module mindroot.coreplugins.l8n.test_middleware)</a>
-</li>
-        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockRequest">MockRequest (class in mindroot.coreplugins.l8n.test_middleware)</a>
-</li>
-        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse">MockResponse (class in mindroot.coreplugins.l8n.test_middleware)</a>
-</li>
-        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.Setting.model">model (mindroot.coreplugins.admin.settings_router.Setting attribute)</a>
-</li>
-        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.model_config">model_config (mindroot.coreplugins.admin.agent_router.GitHubImportRequest attribute)</a>
+        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.mock_call_next">mock_call_next() (in module mindroot.coreplugins.l8n.debug_middleware)</a>
 
         <ul>
+          <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.mock_call_next">(in module mindroot.coreplugins.l8n.test_middleware)</a>
+</li>
+        </ul></li>
+        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockRequest">MockRequest (class in mindroot.coreplugins.l8n.debug_middleware)</a>
+
+        <ul>
+          <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockRequest">(class in mindroot.coreplugins.l8n.test_middleware)</a>
+</li>
+        </ul></li>
+        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockResponse">MockResponse (class in mindroot.coreplugins.l8n.debug_middleware)</a>
+
+        <ul>
+          <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse">(class in mindroot.coreplugins.l8n.test_middleware)</a>
+</li>
+        </ul></li>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.settings_router.Setting.model">model (mindroot.coreplugins.admin.settings_router.Setting attribute)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.model_config">model_config (mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest attribute)</a>
+
+        <ul>
+          <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.model_config">(mindroot.coreplugins.admin.agent_router.GitHubImportRequest attribute)</a>
+</li>
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.ScanDirectoryRequest.model_config">(mindroot.coreplugins.admin.agent_router.ScanDirectoryRequest attribute)</a>
 </li>
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.McpCompleteOAuthRequest.model_config">(mindroot.coreplugins.admin.mcp_publish_routes.McpCompleteOAuthRequest attribute)</a>
@@ -3206,6 +3248,8 @@
           <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.models.ImageMessagePart.model_config">(mindroot.coreplugins.chat.models.ImageMessagePart attribute)</a>
 </li>
           <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.models.TextMessagePart.model_config">(mindroot.coreplugins.chat.models.TextMessagePart attribute)</a>
+</li>
+          <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.CommandRequest.model_config">(mindroot.coreplugins.chat.router.CommandRequest attribute)</a>
 </li>
           <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.router.TaskRequest.model_config">(mindroot.coreplugins.chat.router.TaskRequest attribute)</a>
 </li>
@@ -3628,6 +3672,10 @@
 </li>
         </ul></li>
     </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.new_name">new_name (mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest attribute)</a>
+</li>
+    </ul></td>
   </tr></table>
 </section>
 
@@ -3661,6 +3709,8 @@
           <li><a href="source/mindroot.html#mindroot.server_prev.parse_args">(in module mindroot.server_prev)</a>
 </li>
         </ul></li>
+        <li><a href="source/mindroot.lib.html#mindroot.lib.chatlog.ChatLog.parsed_commands">parsed_commands() (mindroot.lib.chatlog.ChatLog method)</a>
+</li>
         <li><a href="source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.partial_command">partial_command() (in module mindroot.coreplugins.chat.services)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.jwt_auth.html#mindroot.coreplugins.jwt_auth.router.LoginRequest.password">password (mindroot.coreplugins.jwt_auth.router.LoginRequest attribute)</a>
@@ -3785,6 +3835,8 @@
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_routes.publish_plugin_from_github">(in module mindroot.coreplugins.admin.plugin_routes)</a>
 </li>
         </ul></li>
+        <li><a href="source/mindroot.html#mindroot.server.PyInstrumentMiddleware">PyInstrumentMiddleware (class in mindroot.server)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -4063,9 +4115,11 @@
 </li>
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.ScanDirectoryRequest">ScanDirectoryRequest (class in mindroot.coreplugins.admin.agent_router)</a>
 </li>
-        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.scope">scope (mindroot.coreplugins.admin.agent_router.GitHubImportRequest attribute)</a>
+        <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest.scope">scope (mindroot.coreplugins.admin.agent_router.DuplicateAgentRequest attribute)</a>
 
         <ul>
+          <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.GitHubImportRequest.scope">(mindroot.coreplugins.admin.agent_router.GitHubImportRequest attribute)</a>
+</li>
           <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.agent_router.ScanDirectoryRequest.scope">(mindroot.coreplugins.admin.agent_router.ScanDirectoryRequest attribute)</a>
 </li>
         </ul></li>
@@ -4149,8 +4203,12 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="source/mindroot.coreplugins.credits.html#mindroot.coreplugins.credits.models.CreditRatioConfig.set_config">set_config() (mindroot.coreplugins.credits.models.CreditRatioConfig method)</a>
 </li>
-        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse.set_cookie">set_cookie() (mindroot.coreplugins.l8n.test_middleware.MockResponse method)</a>
+        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.MockResponse.set_cookie">set_cookie() (mindroot.coreplugins.l8n.debug_middleware.MockResponse method)</a>
+
+        <ul>
+          <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.MockResponse.set_cookie">(mindroot.coreplugins.l8n.test_middleware.MockResponse method)</a>
 </li>
+        </ul></li>
         <li><a href="source/mindroot.coreplugins.usage.html#mindroot.coreplugins.usage.mod.set_cost">set_cost() (in module mindroot.coreplugins.usage.mod)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.credits.html#mindroot.coreplugins.credits.mod.set_credit_ratio">set_credit_ratio() (in module mindroot.coreplugins.credits.mod)</a>
@@ -4340,6 +4398,8 @@
         <li><a href="source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_publish_routes.test_local_mcp_server">test_local_mcp_server() (in module mindroot.coreplugins.admin.mcp_publish_routes)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.mcp_.html#mindroot.coreplugins.mcp_.mcp_manager.MCPManager.test_local_server_capabilities">test_local_server_capabilities() (mindroot.coreplugins.mcp_.mcp_manager.MCPManager method)</a>
+</li>
+        <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.debug_middleware.test_middleware">test_middleware() (in module mindroot.coreplugins.l8n.debug_middleware)</a>
 </li>
         <li><a href="source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.test_middleware.test_middleware_functionality">test_middleware_functionality() (in module mindroot.coreplugins.l8n.test_middleware)</a>
 </li>
@@ -4690,8 +4750,8 @@
     </aside>
   </div>
 </div><script src="_static/documentation_options.js?v=3c16008f"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

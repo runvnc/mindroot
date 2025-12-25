@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.l8n.mod - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,8 +243,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -258,20 +252,13 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="c1"># Try to import from lib first (for same instance), fallback to mindroot.lib</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">command_manager</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;l8n: Using lib.providers.commands (same instance)&quot;</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.providers.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">command_manager</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;l8n: Using mindroot.lib.providers.commands (fallback)&quot;</span><span class="p">)</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_plugin_root</span><span class="p">,</span> <span class="n">get_localized_file_path</span><span class="p">,</span> <span class="n">load_plugin_translations</span><span class="p">,</span> <span class="n">get_plugin_translations_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
-
-<span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;l8n: Top of mod.py&quot;</span><span class="p">)</span>
-
+<span class="n">debug_box</span><span class="p">(</span><span class="s1">&#39;l8n: Top of mod.py&#39;</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.l8n_constants</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="save_plugin_translations">
@@ -279,24 +266,17 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">save_plugin_translations</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">translations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save translations for a specific plugin to disk.&quot;&quot;&quot;</span>
     <span class="n">translations_file</span> <span class="o">=</span> <span class="n">get_plugin_translations_path</span><span class="p">(</span><span class="n">plugin_path</span><span class="p">)</span>
-    
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Ensure directory exists</span>
         <span class="n">translations_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">translations_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">translations</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not save translations to </span><span class="si">{</span><span class="n">translations_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
-
-
-<span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;l8n: defining command&quot;</span><span class="p">)</span>
-
-<span class="c1"># Debug: Check if command_manager has functions</span>
-<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: command_manager has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="p">)</span><span class="si">}</span><span class="s2"> functions before registration&quot;</span><span class="p">)</span>
-<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: command_manager instance ID: </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">command_manager</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">debug_box</span><span class="p">(</span><span class="s1">&#39;l8n: defining command&#39;</span><span class="p">)</span>
+<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;l8n: command_manager has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="p">)</span><span class="si">}</span><span class="s1"> functions before registration&#39;</span><span class="p">)</span>
+<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;l8n: command_manager instance ID: </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">command_manager</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="write_localized_file">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.mod.write_localized_file">[docs]</a>
@@ -334,18 +314,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">localized_path</span> <span class="o">=</span> <span class="n">get_localized_file_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
-        
-        <span class="c1"># Create directory if it doesn&#39;t exist</span>
         <span class="n">localized_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
-        <span class="c1"># Write the content</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">localized_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Localized file written to: </span><span class="si">{</span><span class="n">localized_path</span><span class="si">}</span><span class="s2">&quot;</span>
-    
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Localized file written to: </span><span class="si">{</span><span class="n">localized_path</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error writing localized file: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error writing localized file: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
 
 <div class="viewcode-block" id="append_localized_file">
@@ -378,18 +352,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">localized_path</span> <span class="o">=</span> <span class="n">get_localized_file_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
-        
-        <span class="c1"># Create directory if it doesn&#39;t exist</span>
         <span class="n">localized_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
-        <span class="c1"># Append the content</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">localized_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Content appended to: </span><span class="si">{</span><span class="n">localized_path</span><span class="si">}</span><span class="s2">&quot;</span>
-    
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Content appended to: </span><span class="si">{</span><span class="n">localized_path</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error appending to localized file: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error appending to localized file: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
 
 <div class="viewcode-block" id="set_translations">
@@ -433,45 +401,31 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">translations</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;Error: translations must be a dictionary&quot;</span>
-        
-        <span class="c1"># Get the plugin-specific translations path</span>
+            <span class="k">return</span> <span class="s1">&#39;Error: translations must be a dictionary&#39;</span>
         <span class="n">plugin_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_plugin_translations_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">))</span>
-        
-        <span class="c1"># Load existing translations for this plugin</span>
         <span class="n">plugin_translations</span> <span class="o">=</span> <span class="n">load_plugin_translations</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
-        
-        <span class="c1"># Validate translation keys (should match placeholder format)</span>
         <span class="n">invalid_keys</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">translations</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[a-z0-9_]+$&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;^[a-z0-9_]+$&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="n">invalid_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        
         <span class="k">if</span> <span class="n">invalid_keys</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error: Invalid translation keys (use lowercase, numbers, underscores only): </span><span class="si">{</span><span class="n">invalid_keys</span><span class="si">}</span><span class="s2">&quot;</span>
-        
-        <span class="c1"># Update translations for this language</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error: Invalid translation keys (use lowercase, numbers, underscores only): </span><span class="si">{</span><span class="n">invalid_keys</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="n">language</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plugin_translations</span><span class="p">:</span>
             <span class="n">plugin_translations</span><span class="p">[</span><span class="n">language</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        
         <span class="n">plugin_translations</span><span class="p">[</span><span class="n">language</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">translations</span><span class="p">)</span>
-        
-        <span class="c1"># Save translations to disk</span>
         <span class="k">if</span> <span class="n">save_plugin_translations</span><span class="p">(</span><span class="n">original_path</span><span class="p">,</span> <span class="n">plugin_translations</span><span class="p">):</span>
-            <span class="c1"># Update cache</span>
             <span class="n">TRANSLATIONS</span><span class="p">[</span><span class="n">plugin_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_translations</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Set </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">translations</span><span class="p">)</span><span class="si">}</span><span class="s2"> translations for language &#39;</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">&#39; in </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">plugin_key</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> plugin&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error: Could not save translations&quot;</span>
-    
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error: Could not save translations&#39;</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error setting translations: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error setting translations: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
 
 <div class="viewcode-block" id="get_translations">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.l8n.html#mindroot.coreplugins.l8n.mod.get_translations">[docs]</a>
 <span class="nd">@command</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_translations</span><span class="p">(</span><span class="n">original_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_translations</span><span class="p">(</span><span class="n">original_path</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get translations for a specific plugin and language.</span>
 <span class="sd">    </span>
@@ -501,23 +455,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">original_path</span><span class="p">:</span>
-            <span class="c1"># Load translations for specific plugin</span>
             <span class="n">plugin_translations</span> <span class="o">=</span> <span class="n">load_plugin_translations</span><span class="p">(</span><span class="n">original_path</span><span class="p">)</span>
-            
-            <span class="c1"># Update cache</span>
             <span class="n">plugin_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_plugin_translations_path</span><span class="p">(</span><span class="n">original_path</span><span class="p">))</span>
             <span class="n">TRANSLATIONS</span><span class="p">[</span><span class="n">plugin_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_translations</span>
-            
             <span class="k">if</span> <span class="n">language</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">plugin_translations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">plugin_translations</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Return all cached translations</span>
             <span class="k">return</span> <span class="n">TRANSLATIONS</span>
-        
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error getting translations: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error getting translations: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
 
 <div class="viewcode-block" id="list_localized_files">
@@ -532,23 +480,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">localized_files</span> <span class="o">=</span> <span class="p">[]</span>
-        
         <span class="k">if</span> <span class="n">LOCALIZED_FILES_DIR</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">LOCALIZED_FILES_DIR</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.i18n.*&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">LOCALIZED_FILES_DIR</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s1">&#39;*.i18n.*&#39;</span><span class="p">):</span>
                 <span class="n">localized_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">LOCALIZED_FILES_DIR</span><span class="p">)))</span>
-        
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">localized_files</span><span class="p">),</span>
-            <span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">localized_files</span><span class="p">)</span>
-        <span class="p">}</span>
-    
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">localized_files</span><span class="p">),</span> <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">localized_files</span><span class="p">)}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error listing localized files: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Error listing localized files: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
-
-<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;l8n: command_manager has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="p">)</span><span class="si">}</span><span class="s2"> functions after registration&quot;</span><span class="p">)</span>
-
-<span class="n">debug_box</span><span class="p">(</span><span class="s2">&quot;l8n: End of mod.py&quot;</span><span class="p">)</span>
+<span class="n">debug_box</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;l8n: command_manager has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">command_manager</span><span class="o">.</span><span class="n">functions</span><span class="p">)</span><span class="si">}</span><span class="s1"> functions after registration&#39;</span><span class="p">)</span>
+<span class="n">debug_box</span><span class="p">(</span><span class="s1">&#39;l8n: End of mod.py&#39;</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>
@@ -582,8 +522,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.chat.services - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,8 +243,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -264,6 +258,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">lib.utils.dataurl</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataurl_to_pil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessageParts</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">coreplugins.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">agent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">coreplugins.agent.speech_to_speech</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeechToSpeechAgent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lib.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">debug_box</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -276,8 +271,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
 <span class="n">sse_clients</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.chatcontext</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_context</span>
+
+<span class="c1"># Track active processing tasks per session</span>
+<span class="n">active_tasks</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="prompt">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.prompt">[docs]</a>
@@ -330,8 +330,14 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">results_output</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
     <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;output&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;output&#39;</span><span class="p">]</span></div>
+        <span class="c1"># we want to exclude the string &#39;output&#39; and find a dict with</span>
+        <span class="c1"># an &#39;output&#39; key</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;output&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error converting output to string: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="results_text_output">
@@ -373,6 +379,9 @@
         <span class="n">context</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
         <span class="n">context</span><span class="o">.</span><span class="n">parent_log_id</span> <span class="o">=</span> <span class="n">parent_log_id</span>
         <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">get_agent_data</span><span class="p">(</span><span class="n">agent_name</span><span class="p">)</span>
+        <span class="c1"># Load per-agent environment variable overrides</span>
+        <span class="k">if</span> <span class="s1">&#39;env&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">]</span>
         <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;llm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">llm</span>
         <span class="n">context</span><span class="o">.</span><span class="n">current_model</span> <span class="o">=</span> <span class="n">llm</span>
         <span class="n">context</span><span class="o">.</span><span class="n">chat_log</span> <span class="o">=</span> <span class="n">ChatLog</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">parent_log_id</span><span class="o">=</span><span class="n">parent_log_id</span><span class="p">)</span>
@@ -404,6 +413,9 @@
 
     <span class="k">while</span> <span class="n">retried</span> <span class="o">&lt;</span> <span class="n">retries</span><span class="p">:</span>
         <span class="p">[</span><span class="n">results</span><span class="p">,</span> <span class="n">full_results</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">send_message_to_agent</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span> <span class="n">instructions</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#####################################################33&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Full results: &quot;</span><span class="p">,</span> <span class="n">full_results</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results: &quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">results_output</span><span class="p">(</span><span class="n">full_results</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">retried</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -433,10 +445,27 @@
         <span class="n">context</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">agent_name</span>
         <span class="n">context</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
         <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">get_agent_data</span><span class="p">(</span><span class="n">agent_name</span><span class="p">)</span>
+        <span class="c1"># Load per-agent environment variable overrides</span>
+        <span class="k">if</span> <span class="s1">&#39;env&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">]</span>
         <span class="n">context</span><span class="o">.</span><span class="n">chat_log</span> <span class="o">=</span> <span class="n">ChatLog</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;context.agent_name: &quot;</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+    
+    <span class="c1"># Touch marker file to track last usage time</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">marker_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/agents/local/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/.last_used&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">marker_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">marker_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/agents/shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">/.last_used&quot;</span><span class="p">)</span>
+        <span class="n">marker_path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not update last_used marker for </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;initiated_chat_session: &quot;</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;live&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;stream_chat&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;realtime&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;stream_chat&#39;</span><span class="p">]:</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="n">SpeechToSpeechAgent</span><span class="p">(</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">agent</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
     <span class="k">return</span> <span class="n">log_id</span></div>
 
 
@@ -496,15 +525,67 @@
     <span class="k">return</span> <span class="n">formatted_results</span></div>
 
 
+<span class="c1"># Deprecated - use active_tasks instead</span>
+<span class="n">in_progress</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="cancel_and_wait">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_and_wait">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_and_wait</span><span class="p">(</span><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">in_progress</span><span class="p">,</span> <span class="n">active_tasks</span>
+    <span class="n">existing_task</span> <span class="o">=</span> <span class="n">active_tasks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">in_progress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SEND_MESSAGE No active processing for session </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> to cancel.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SEND_MESSAGE Cancelling active task for session </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">existing_context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_context</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+        <span class="n">existing_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;cancel_current_turn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">existing_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">existing_context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+        <span class="c1"># Cancel any active command task</span>
+        <span class="k">if</span> <span class="s1">&#39;active_command_task&#39;</span> <span class="ow">in</span> <span class="n">existing_context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">cmd_task</span> <span class="o">=</span> <span class="n">existing_context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;active_command_task&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">cmd_task</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cmd_task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+                <span class="n">cmd_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+        
+        <span class="k">await</span> <span class="n">existing_context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SEND_MESSAGE Error setting cancellation flags: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Cancel the main task</span>
+    <span class="n">existing_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+    
+    <span class="c1"># Wait for it to actually finish (with timeout)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">existing_task</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">):</span>
+        <span class="k">pass</span>  <span class="c1"># Expected</span>
+   
+    <span class="n">start_wait</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">in_progress</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_wait</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">5.0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SEND_MESSAGE Waiting for cancellation of session </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> to complete...&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.025</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SEND_MESSAGE Cancellation complete for session </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="send_message_to_agent">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.send_message_to_agent">[docs]</a>
 <span class="nd">@service</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_message_to_agent</span><span class="p">(</span><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">List</span><span class="p">[</span><span class="n">MessageParts</span><span class="p">],</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MR_MAX_ITERATIONS&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">max_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MR_MAX_ITERATIONS&quot;</span><span class="p">))</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_message_to_agent</span><span class="p">(</span><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">List</span><span class="p">[</span><span class="n">MessageParts</span><span class="p">],</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">assume_wait_for_task_result</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">in_progress</span><span class="p">,</span> <span class="n">active_tasks</span>
+    
+    <span class="c1"># Check if there&#39;s an active task for this session</span>
+    <span class="n">existing_task</span> <span class="o">=</span> <span class="n">active_tasks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
         <span class="c1"># check context</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SEND_MESSAGE No user provided and context has no username&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;User required&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">user</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">username</span> <span class="p">}</span>
@@ -512,20 +593,46 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>
             <span class="n">user</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
 
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;cancel_current_turn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+
+    <span class="n">in_progress</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MR_MAX_ITERATIONS&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">max_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MR_MAX_ITERATIONS&quot;</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">message</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">session_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">session_id</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid session_id or message&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SEND_MESSAGE Invalid session_id or message&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
+        <span class="c1"># Create the main processing task and store it</span>
+        <span class="n">processing_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">current_task</span><span class="p">()</span>
+        <span class="n">active_tasks</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">processing_task</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SEND_MESSAGE proceeding with message processing&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;send_message_to_agent: &quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">context</span> <span class="o">=</span> <span class="n">ChatContext</span><span class="p">(</span><span class="n">command_manager</span><span class="p">,</span> <span class="n">service_manager</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
             <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">load_context</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
 
-        <span class="n">agent_</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;live&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;stream_chat&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;realtime&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">[</span><span class="s1">&#39;stream_chat&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">assume_wait_for_task_result</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+            <span class="n">agent_</span> <span class="o">=</span> <span class="n">SpeechToSpeechAgent</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using SpeechToSpeechAgent for live/realtime chat&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;message: &#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+            <span class="p">[</span><span class="n">results</span><span class="p">,</span> <span class="n">full_results</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">agent_</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">wait_for_task_result</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">results</span><span class="p">,</span> <span class="n">full_results</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">agent_</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">agent</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -654,9 +761,13 @@
                     <span class="n">context</span><span class="o">.</span><span class="n">chat_log</span><span class="o">.</span><span class="n">add_message</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">formatted_results</span><span class="p">})</span>
                     <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_results</span><span class="p">)</span> 
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing iteration: &quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="s2">&quot;no message added&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SEND_MESSAGE Processing iteration: &quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="s2">&quot;no message added&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;finished_conversation&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="n">termcolor</span><span class="o">.</span><span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Finished conversation, exiting send_message_to_agent&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;task_result&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">task_result</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;task_result&#39;</span><span class="p">)</span>
+                        <span class="c1"># Include both &#39;output&#39; (for results_output) and &#39;result&#39; (for backward compatibility)</span>
+                        <span class="n">full_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span> <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;task_result&quot;</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">task_result</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">task_result</span> <span class="p">}</span> <span class="p">})</span>
                     <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">continue_processing</span> <span class="o">=</span> <span class="kc">False</span>
@@ -680,10 +791,23 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exiting send_message_to_agent: &quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">)</span>
 
         <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">finished_chat</span><span class="p">()</span>
+        <span class="n">in_progress</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">active_tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;task_result&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">task_result</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;task_result&#39;</span><span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task_result</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SEND_MESSAGE Done&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">results</span><span class="p">,</span> <span class="n">full_results</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task cancelled for session </span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">in_progress</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">active_tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># Re-raise to properly handle cancellation</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in send_message_to_agent: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">in_progress</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
 
@@ -776,26 +900,121 @@
 <div class="viewcode-block" id="partial_command">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.partial_command">[docs]</a>
 <span class="nd">@service</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">partial_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">partial_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cmd_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG partial_command: command=</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">, params keys=</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span><span class="w"> </span><span class="nb">dict</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="nb">type</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">agent_</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span>
+    <span class="c1"># Allow plugins to hook into partial commands via pipeline</span>
+    <span class="k">await</span> <span class="n">pipeline_manager</span><span class="o">.</span><span class="n">execute_pipeline</span><span class="p">(</span><span class="s1">&#39;partial_command&#39;</span><span class="p">,</span> 
+        <span class="p">{</span><span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s1">&#39;chunk&#39;</span><span class="p">:</span> <span class="n">chunk</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;cmd_id&#39;</span><span class="p">:</span> <span class="n">cmd_id</span><span class="p">},</span>
+        <span class="n">context</span><span class="o">=</span><span class="n">context</span>
+    <span class="p">)</span>
     <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;partial_command&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot;chunk&quot;</span><span class="p">:</span> <span class="n">chunk</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
-                                                    <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">})</span></div>
+                                                    <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s2">&quot;cmd_id&quot;</span><span class="p">:</span> <span class="n">cmd_id</span> <span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="running_command">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.running_command">[docs]</a>
 <span class="nd">@service</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">running_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">running_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">cmd_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">agent_</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span>
-    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;running_command&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span> <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">})</span></div>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;running_command&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span> <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s2">&quot;cmd_id&quot;</span><span class="p">:</span> <span class="n">cmd_id</span> <span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="command_result">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.command_result">[docs]</a>
 <span class="nd">@service</span><span class="p">()</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">command_result</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">command_result</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">cmd_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">agent_</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span>
-    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;command_result&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span> <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">})</span></div>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;command_result&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">command</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">,</span> <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">agent_</span><span class="p">[</span><span class="s1">&#39;persona&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s2">&quot;cmd_id&quot;</span><span class="p">:</span> <span class="n">cmd_id</span> <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="backend_user_message">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_user_message">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">backend_user_message</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Signal the frontend to display a user message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agent_</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span>
+    <span class="n">persona</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;backend_user_message&quot;</span><span class="p">,</span> <span class="p">{</span> 
+        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span> 
+        <span class="s2">&quot;sender&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">persona</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="backend_assistant_message">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.backend_assistant_message">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">backend_assistant_message</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Signal the frontend to display an assistant message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agent_</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">agent</span>
+    <span class="n">persona</span> <span class="o">=</span> <span class="s1">&#39;assistant&#39;</span>
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">agent_output</span><span class="p">(</span><span class="s2">&quot;backend_assistant_message&quot;</span><span class="p">,</span> <span class="p">{</span> 
+        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span> 
+        <span class="s2">&quot;sender&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;persona&quot;</span><span class="p">:</span> <span class="n">persona</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="cancel_active_response">
+<a class="viewcode-back" href="../../../../source/mindroot.coreplugins.chat.html#mindroot.coreplugins.chat.services.cancel_active_response">[docs]</a>
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_active_response</span><span class="p">(</span><span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cancel active AI response for eager end of turn processing.</span>
+<span class="sd">    Sets the finished_conversation flag to stop the agent processing loop.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Get context from log_id - we need the username, but for SIP calls it might be &#39;system&#39;</span>
+        <span class="c1"># Try to load context, fallback to system user if needed</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_context</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="s1">&#39;system&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting context for cancellation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Could not load context: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    
+    <span class="c1"># Set flag to stop current processing loop iteration</span>
+    <span class="c1"># But don&#39;t permanently mark conversation as finished - just this turn</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;cancel_current_turn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="c1"># DEBUG TRACE</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[91;107m[DEBUG TRACE 5/6] Core cancel_active_response service executed.</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Cancel any active TTS streams (ElevenLabs)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Import here to avoid circular dependency</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">mr_eleven_stream.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">_active_tts_streams</span>
+        <span class="k">for</span> <span class="n">stream_id</span><span class="p">,</span> <span class="n">stop_event</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">_active_tts_streams</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cancelled TTS stream </span><span class="si">{</span><span class="n">stream_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[91;107m[DEBUG TRACE 5.5/6] Cancelled active TTS stream.</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ElevenLabs TTS plugin not available for cancellation&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Also, cancel any active command task (like speak())</span>
+    <span class="k">if</span> <span class="s1">&#39;active_command_task&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="n">active_task</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;active_command_task&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">active_task</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">active_task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">active_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+                <span class="c1"># DEBUG TRACE</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[91;107m[DEBUG TRACE 6/6] Active command task found and cancelled.</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cancelled active command task for session </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing last assistant message from chat log for session </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">chat_log</span><span class="o">.</span><span class="n">drop_last</span><span class="p">(</span><span class="s1">&#39;assistant&#39;</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error cancelling active command task: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+ 
+    <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">save_context</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cancelled active response for session </span><span class="si">{</span><span class="n">log_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">}</span></div>
 
 
 </pre></div>
@@ -831,8 +1050,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

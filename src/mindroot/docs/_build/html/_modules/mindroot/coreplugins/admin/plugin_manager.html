@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.admin.plugin_manager - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,8 +243,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -261,16 +255,11 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">load_plugin_manifest</span><span class="p">,</span> <span class="n">update_plugin_manifest</span><span class="p">,</span> <span class="n">plugin_install</span><span class="p">,</span>
-    <span class="n">save_plugin_manifest</span><span class="p">,</span> <span class="n">plugin_update</span><span class="p">,</span> <span class="n">toggle_plugin_state</span><span class="p">,</span> <span class="n">get_plugin_path</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugin_manifest</span><span class="p">,</span> <span class="n">update_plugin_manifest</span><span class="p">,</span> <span class="n">plugin_install</span><span class="p">,</span> <span class="n">save_plugin_manifest</span><span class="p">,</span> <span class="n">plugin_update</span><span class="p">,</span> <span class="n">toggle_plugin_state</span><span class="p">,</span> <span class="n">get_plugin_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lib.plugins.installation</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_github_files</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lib.streamcmd</span><span class="w"> </span><span class="kn">import</span> <span class="n">stream_command_as_events</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
-
-
 <span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>
 
 <div class="viewcode-block" id="DirectoryRequest">
@@ -323,19 +312,15 @@
     <span class="n">services</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">dependencies</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">shlex</span>
 
 <div class="viewcode-block" id="stream_install_plugin">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.stream_install_plugin">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/stream-install-plugin&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">EventSourceResponse</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/stream-install-plugin&#39;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">EventSourceResponse</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_install_plugin</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">StreamInstallRequest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream the installation process of a plugin using SSE (POST method).&quot;&quot;&quot;</span>
-    <span class="c1"># Prepare the command based on the source</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stream Install Request:&quot;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github_direct&#39;</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">source_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;https://&#39;</span><span class="p">):</span>
-            <span class="c1"># For direct GitHub URLs, we can use the pip install directly</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
@@ -344,339 +329,214 @@
     <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;pypi&#39;</span><span class="p">:</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid source&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid source&quot;</span><span class="p">}</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Command to execute:&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
-    <span class="c1"># For GitHub installations, use the plugin_install function which handles the download and extraction</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid source&#39;</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Use the streaming approach for GitHub installations</span>
             <span class="n">parts</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">source_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
             <span class="n">repo_path</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">tag</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
-            
-            <span class="nb">print</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_github_install</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dling&quot;</span><span class="p">)</span>
-                <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Downloading GitHub repository </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">}</span>
-                
+                <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Downloading GitHub repository </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">}</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dling 2&quot;</span><span class="p">)</span>
                     <span class="n">plugin_dir</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">download_github_files</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-                    
                     <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">plugin_dir</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
                     <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">stream_command_as_events</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
                         <span class="k">yield</span> <span class="n">event</span>
-                        
-                    <span class="n">update_plugin_manifest</span><span class="p">(</span>
-                        <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">),</span>
-                        <span class="n">remote_source</span><span class="o">=</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span>
-                        <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span>
-                    <span class="p">)</span>
+                    <span class="n">update_plugin_manifest</span><span class="p">(</span><span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">),</span> <span class="n">remote_source</span><span class="o">=</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span> <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                    <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
-            
+                    <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
             <span class="k">return</span> <span class="n">EventSourceResponse</span><span class="p">(</span><span class="n">stream_github_install</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error setting up GitHub installation: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
-    
-    <span class="c1"># For other sources, use our streamcmd module to stream the command output</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stream cmd as events&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error setting up GitHub installation: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">EventSourceResponse</span><span class="p">(</span><span class="n">stream_command_as_events</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="stream_install_plugin_get">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.stream_install_plugin_get">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/stream-install-plugin&quot;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">EventSourceResponse</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/stream-install-plugin&#39;</span><span class="p">,</span> <span class="n">response_class</span><span class="o">=</span><span class="n">EventSourceResponse</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_install_plugin_get</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream the installation process of a plugin using SSE (GET method).&quot;&quot;&quot;</span>
-    <span class="c1"># Extract parameters from query string</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stream Install GET Request:&quot;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span>
-    <span class="n">plugin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plugin&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">source</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">source_path</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    
-    <span class="c1"># Use the new simpler approach</span>
+    <span class="n">plugin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plugin&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_path&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github&#39;</span><span class="p">:</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Installing </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2"> from GitHub repository </span><span class="si">{</span><span class="n">source_path</span><span class="si">}</span><span class="s2">...&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Installing </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1"> from GitHub repository </span><span class="si">{</span><span class="n">source_path</span><span class="si">}</span><span class="s1">...&#39;</span>
     <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Installing from local path: </span><span class="si">{</span><span class="n">source_path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Installing from local path: </span><span class="si">{</span><span class="n">source_path</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;pypi&#39;</span><span class="p">:</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Installing from PyPI: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">else</span><span class="p">:</span>  
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid source&quot;</span><span class="p">}</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Command to execute:&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Installing from PyPI: </span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid source&#39;</span><span class="p">}</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># For GitHub installations, use the plugin_install function which handles the download and extraction</span>
     <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;github&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Use the streaming approach for GitHub installations</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;source_path:&quot;</span><span class="p">,</span> <span class="n">source_path</span><span class="p">)</span>
             <span class="n">parts</span> <span class="o">=</span> <span class="n">source_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
             <span class="n">repo_path</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">tag</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;repo_path:&quot;</span><span class="p">,</span> <span class="n">repo_path</span><span class="p">,</span> <span class="s2">&quot;tag:&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-            <span class="c1"># First yield a message about downloading</span>
-            <span class="c1">#</span>
+
             <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_github_install</span><span class="p">():</span>
-                <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Downloading GitHub repository </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">}</span>
+                <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Downloading GitHub repository </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">}</span>
                 <span class="n">repo_path_</span> <span class="o">=</span> <span class="n">repo_path</span>
                 <span class="n">tag_</span> <span class="o">=</span> <span class="n">tag</span>
-                <span class="c1"># Download and extract the GitHub repository</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">source_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;https://&#39;</span><span class="p">):</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing direct GitHub URL&quot;</span><span class="p">)</span>
                         <span class="n">repo_path_</span> <span class="o">=</span> <span class="n">source_path</span>
                         <span class="n">tag_</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">parts</span> <span class="o">=</span> <span class="n">repo_path_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
-                            <span class="n">repo_path_</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;repo_path_:&quot;</span><span class="p">,</span> <span class="n">repo_path_</span><span class="p">)</span>
+                            <span class="n">repo_path_</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="n">plugin_dir</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">download_github_files</span><span class="p">(</span><span class="n">repo_path_</span><span class="p">,</span> <span class="n">tag_</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ok&#39;</span><span class="p">)</span>
-                    <span class="c1"># Now stream the installation from the local directory</span>
                     <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;pip&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="n">plugin_dir</span><span class="p">,</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-cache-dir&#39;</span><span class="p">]</span>
                     <span class="k">async</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">stream_command_as_events</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
                         <span class="k">yield</span> <span class="n">event</span>
-                        
-                    <span class="c1"># Update the plugin manifest</span>
-                    <span class="n">update_plugin_manifest</span><span class="p">(</span>
-                        <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">),</span>
-                        <span class="n">remote_source</span><span class="o">=</span><span class="n">repo_path_</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span>
-                        <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span>
-                    <span class="p">)</span>
+                    <span class="n">update_plugin_manifest</span><span class="p">(</span><span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">),</span> <span class="n">remote_source</span><span class="o">=</span><span class="n">repo_path_</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span> <span class="n">metadata</span><span class="o">=</span><span class="n">plugin_info</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-                    <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
-            
+                    <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
             <span class="k">return</span> <span class="n">EventSourceResponse</span><span class="p">(</span><span class="n">stream_github_install</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
-    
-    <span class="c1"># Use our new streamcmd module</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">EventSourceResponse</span><span class="p">(</span><span class="n">stream_command_as_events</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_all_plugins">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.get_all_plugins">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/get-all-plugins&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/get-all-plugins&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_all_plugins</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
         <span class="n">plugins</span> <span class="o">=</span> <span class="p">[]</span>
-        
-        <span class="c1"># Process core plugins</span>
         <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="s1">&#39;core&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
-                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;core&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">],</span>
-                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;core&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;remote_source&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
-                <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-            <span class="p">})</span>
-
-        <span class="c1"># Process installed plugins</span>
+            <span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">],</span> <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="s1">&#39;remote_source&#39;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)})</span>
         <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="s1">&#39;installed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span>
-                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;installed&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">],</span>
-                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span>
-                <span class="s2">&quot;remote_source&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;remote_source&#39;</span><span class="p">,</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)),</span>
-                <span class="s2">&quot;source_path&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_path&#39;</span><span class="p">),</span>
-                <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-                <span class="s2">&quot;index_source&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;index_source&#39;</span><span class="p">)</span>
-            <span class="p">})</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">plugins</span><span class="p">}</span>
+            <span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;installed&#39;</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">],</span> <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">],</span> <span class="s1">&#39;remote_source&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;remote_source&#39;</span><span class="p">,</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)),</span> <span class="s1">&#39;source_path&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_path&#39;</span><span class="p">),</span> <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0.1&#39;</span><span class="p">),</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;index_source&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;index_source&#39;</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">plugins</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error fetching plugins: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
-
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error fetching plugins: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="scan_directory">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.scan_directory">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/scan-directory&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/scan-directory&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_directory</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">DirectoryRequest</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">directory</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">directory</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid directory path&quot;</span><span class="p">}</span>
-        
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid directory path&#39;</span><span class="p">}</span>
         <span class="n">discovered_plugins</span> <span class="o">=</span> <span class="n">discover_plugins</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
         <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;discoverd_plugins&quot;</span><span class="p">,</span> <span class="n">discovered_plugins</span><span class="p">)</span>
-        
-        <span class="c1"># Analyze plugins for index compatibility</span>
         <span class="n">addable_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="ow">in</span> <span class="n">discovered_plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Check if plugin has GitHub info</span>
-            <span class="n">has_github</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)</span> <span class="ow">or</span> 
-                <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;remote_source&#39;</span><span class="p">)</span> <span class="ow">or</span>
-                <span class="p">(</span><span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">))</span>
-            <span class="p">)</span>
+            <span class="n">has_github</span> <span class="o">=</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;remote_source&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">has_github</span><span class="p">:</span>
                 <span class="n">addable_count</span> <span class="o">+=</span> <span class="mi">1</span>
-        
-        <span class="c1"># Update installed plugins from discovered ones</span>
         <span class="k">for</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="n">plugin_info</span> <span class="ow">in</span> <span class="n">discovered_plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;local&#39;</span>
-            <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-                <span class="s2">&quot;install_date&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;install_date&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-                <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;commands&#39;</span><span class="p">,</span> <span class="p">[]),</span>
-                <span class="s2">&quot;services&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="p">[])</span>
-            <span class="p">}</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">plugin_info</span><span class="p">)</span>
+            <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{</span><span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;install_date&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;install_date&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;commands&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;commands&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="s1">&#39;services&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="p">[])}</span>
             <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="s1">&#39;installed&#39;</span><span class="p">][</span><span class="n">plugin_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_info</span>
-
-        <span class="c1"># Prepare plugin list for response</span>
-        <span class="n">plugins_list</span> <span class="o">=</span> <span class="p">[{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-        <span class="p">}</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">discovered_plugins</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-        
+        <span class="n">plugins_list</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))}</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">discovered_plugins</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
         <span class="n">save_plugin_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
-        
-        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
-                   <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Scanned </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">discovered_plugins</span><span class="p">)</span><span class="si">}</span><span class="s2"> plugins in </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                   <span class="s2">&quot;plugins&quot;</span><span class="p">:</span> <span class="n">plugins_list</span><span class="p">,</span>
-                   <span class="s2">&quot;addable_to_index&quot;</span><span class="p">:</span> <span class="n">addable_count</span><span class="p">}</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Scanned </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">discovered_plugins</span><span class="p">)</span><span class="si">}</span><span class="s1"> plugins in </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;plugins&#39;</span><span class="p">:</span> <span class="n">plugins_list</span><span class="p">,</span> <span class="s1">&#39;addable_to_index&#39;</span><span class="p">:</span> <span class="n">addable_count</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">addable_count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">discovered_plugins</span><span class="p">):</span>
-            <span class="n">response</span><span class="p">[</span><span class="s2">&quot;warning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">discovered_plugins</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">addable_count</span><span class="si">}</span><span class="s2"> plugins missing GitHub info and cannot be added to indices&quot;</span>
+            <span class="n">response</span><span class="p">[</span><span class="s1">&#39;warning&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">discovered_plugins</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">addable_count</span><span class="si">}</span><span class="s1"> plugins missing GitHub info and cannot be added to indices&#39;</span>
         <span class="k">return</span> <span class="n">response</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error during scan: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error during scan: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="install_local_plugin">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.install_local_plugin">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/install-local-plugin&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/install-local-plugin&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_local_plugin</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">PluginRequest</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">plugin_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">plugin</span>
         <span class="n">plugin_path</span> <span class="o">=</span> <span class="n">get_plugin_path</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
-        
         <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_path</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Plugin path not found&quot;</span><span class="p">}</span>
-        
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Plugin path not found&#39;</span><span class="p">}</span>
         <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">plugin_path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2"> installed successfully&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Plugin </span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s1"> installed successfully&#39;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Installation failed&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Installation failed&#39;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing plugin: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
-
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing plugin: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="install_github_plugin">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.install_github_plugin">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/install-x-github-plugin&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/install-x-github-plugin&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_github_plugin</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">GitHubPluginRequest</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Request:&quot;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">github_url</span>
         <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Plugin installed successfully from GitHub&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Plugin installed successfully from GitHub&#39;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Installation failed&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Installation failed&#39;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing from GitHub: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="install_from_index">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.install_from_index">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/install-from-index&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/install-from-index&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">install_from_index</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">InstallFromIndexRequest</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Load the index to get plugin information</span>
-        <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;indices&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">index_name</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">)</span>
+        <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;indices&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">index_name</span><span class="si">}</span><span class="s1">.json&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">index_path</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Index not found&quot;</span><span class="p">}</span>
-
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Index not found&#39;</span><span class="p">}</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">index_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="c1"># Find plugin in index</span>
         <span class="n">plugin_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">index_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plugins&#39;</span><span class="p">,</span> <span class="p">[]):</span>
             <span class="k">if</span> <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">:</span>
                 <span class="n">plugin_data</span> <span class="o">=</span> <span class="n">plugin</span>
                 <span class="k">break</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Plugin not found in index&quot;</span><span class="p">}</span>
-
-        <span class="c1"># Install the plugin</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Plugin not found in index&#39;</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">plugin_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;github_url&#39;</span><span class="p">):</span>
-            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span>
-                <span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span>
-                <span class="n">source</span><span class="o">=</span><span class="s1">&#39;github&#39;</span><span class="p">,</span>
-                <span class="n">source_path</span><span class="o">=</span><span class="n">plugin_data</span><span class="p">[</span><span class="s1">&#39;github_url&#39;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">plugin_data</span><span class="p">[</span><span class="s1">&#39;github_url&#39;</span><span class="p">])</span>
         <span class="k">elif</span> <span class="n">plugin_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_path&#39;</span><span class="p">):</span>
-            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span>
-                <span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span>
-                <span class="n">source</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">,</span>
-                <span class="n">source_path</span><span class="o">=</span><span class="n">plugin_data</span><span class="p">[</span><span class="s1">&#39;source_path&#39;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">plugin_install</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">plugin_data</span><span class="p">[</span><span class="s1">&#39;source_path&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No valid installation source in index&quot;</span><span class="p">}</span>
-
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;No valid installation source in index&#39;</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="c1"># Update plugin metadata with index information</span>
             <span class="n">manifest</span> <span class="o">=</span> <span class="n">load_plugin_manifest</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">plugin</span> <span class="ow">in</span> <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="s1">&#39;installed&#39;</span><span class="p">]:</span>
                 <span class="n">manifest</span><span class="p">[</span><span class="s1">&#39;plugins&#39;</span><span class="p">][</span><span class="s1">&#39;installed&#39;</span><span class="p">][</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">][</span><span class="s1">&#39;index_source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">index_name</span>
                 <span class="n">save_plugin_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plugin </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="si">}</span><span class="s2"> installed successfully from index&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Plugin </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="si">}</span><span class="s1"> installed successfully from index&#39;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Installation failed&quot;</span><span class="p">}</span>
-
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Installation failed&#39;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error installing from index: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
-
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error installing from index: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="toggle_plugin">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.toggle_plugin">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/toggle-plugin&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/toggle-plugin&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">toggle_plugin</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">TogglePluginRequest</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">success</span> <span class="o">=</span> <span class="n">toggle_plugin_state</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">enabled</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plugin </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">request</span><span class="o">.</span><span class="n">enabled</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="si">}</span><span class="s2"> successfully&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Plugin </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">plugin</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">request</span><span class="o">.</span><span class="n">enabled</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;disabled&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> successfully&quot;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Failed to toggle plugin state&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Failed to toggle plugin state&#39;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error toggling plugin: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Error toggling plugin: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">trace</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span></div>
 
 
-<span class="c1"># Helper function</span>
 <div class="viewcode-block" id="discover_plugins">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.plugin_manager.discover_plugins">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">discover_plugins</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
@@ -684,7 +544,6 @@
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
         <span class="n">item_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
         <span class="n">plugin_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item_path</span><span class="p">,</span> <span class="s1">&#39;plugin_info.json&#39;</span><span class="p">)</span>
-        
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">plugin_info_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -693,9 +552,7 @@
                 <span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;source_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_path</span>
                 <span class="n">discovered</span><span class="p">[</span><span class="n">plugin_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">plugin_info</span>
             <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading plugin info for </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
-
     <span class="k">return</span> <span class="n">discovered</span></div>
 
 
@@ -706,9 +563,8 @@
 <span class="sd">    Fetches plugin_info.json from a GitHub repo and publishes it to the registry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">plugin_info</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># Try to fetch from &#39;main&#39; and then &#39;master&#39; branch</span>
     <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="s1">&#39;master&#39;</span><span class="p">]:</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://raw.githubusercontent.com/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">/plugin_info.json&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;https://raw.githubusercontent.com/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s1">/plugin_info.json&#39;</span>
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
@@ -716,51 +572,20 @@
                     <span class="n">plugin_info</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
                     <span class="k">break</span>
             <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="c1"># This might happen if the repo is private or other network issues</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error fetching from </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_info</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find or access plugin_info.json in repo </span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2"> on &#39;main&#39; or &#39;master&#39; branch.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Construct the payload for the registry&#39;s /publish endpoint</span>
-    <span class="n">publish_data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;plugin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;content_type&quot;</span><span class="p">:</span> <span class="s2">&quot;mindroot_plugin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="s2">&quot;0.1.0&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;github_url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;https://github.com/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pypi_module&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pypi_module&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-        <span class="s2">&quot;services&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;services&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;plugin&quot;</span><span class="p">]),</span>
-        <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dependencies&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;plugin_info&quot;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">,</span>
-            <span class="s2">&quot;installation&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;github&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;source_path&quot;</span><span class="p">:</span> <span class="n">repo</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="c1"># Post the data to the registry</span>
-    <span class="n">publish_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s2">/publish&quot;</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="p">}</span>
+    <span class="n">publish_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="s1">&#39;plugin&#39;</span><span class="p">,</span> <span class="s1">&#39;content_type&#39;</span><span class="p">:</span> <span class="s1">&#39;mindroot_plugin&#39;</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;0.1.0&#39;</span><span class="p">),</span> <span class="s1">&#39;github_url&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;https://github.com/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;pypi_module&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pypi_module&#39;</span><span class="p">),</span> <span class="s1">&#39;commands&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;commands&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="s1">&#39;services&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;plugin&#39;</span><span class="p">]),</span> <span class="s1">&#39;dependencies&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dependencies&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;plugin_info&#39;</span><span class="p">:</span> <span class="n">plugin_info</span><span class="p">,</span> <span class="s1">&#39;installation&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;github&#39;</span><span class="p">,</span> <span class="s1">&#39;source_path&#39;</span><span class="p">:</span> <span class="n">repo</span><span class="p">}}}</span>
+    <span class="n">publish_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">registry_url</span><span class="si">}</span><span class="s1">/publish&#39;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Bearer </span><span class="si">{</span><span class="n">registry_token</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">}</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">publish_url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">publish_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;detail&#39;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">error_detail</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to publish to registry: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">error_detail</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to publish to registry: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">error_detail</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 </pre></div>
@@ -796,8 +621,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

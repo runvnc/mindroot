@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../../../../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
         <title>mindroot.coreplugins.admin.mcp_routes - MindRoot 9.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=f4b9d74b" />
     
@@ -24,16 +24,16 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   --color-brand-primary: #ff7b72;
   --color-brand-content: #ff7b72;
   
@@ -150,14 +150,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -167,8 +163,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -176,8 +171,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -185,8 +179,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -204,7 +197,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of User Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../user_documentation.html">User Documentation</a><input aria-label="Toggle navigation of User Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../starting_mindroot.html">Starting MindRoot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../llm_plugin_installation.html">LLM Plugin Installation</a></li>
@@ -218,7 +211,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Developer Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../developer_documentation.html">Developer Documentation</a><input aria-label="Toggle navigation of Developer Documentation" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../protocols.html">Protocol-Based Typed Service Access</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -239,8 +235,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -248,8 +243,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -259,22 +253,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lib.route_decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
-
-<span class="c1"># Import MCP components - prefer new mcp_ module, fallback to legacy if needed</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.mcp_.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcp_manager</span><span class="p">,</span> <span class="n">MCPServer</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.coreplugins.mcp.mod</span><span class="w"> </span><span class="kn">import</span> <span class="n">mcp_manager</span><span class="p">,</span> <span class="n">MCPServer</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="c1"># Mock objects if MCP plugin is not fully installed, to prevent startup crash</span>
         <span class="n">mcp_manager</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">MCPServer</span> <span class="o">=</span> <span class="kc">None</span>
-
-<span class="c1"># Create router with admin role requirement</span>
-<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span>
-    <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)]</span>
-<span class="p">)</span>
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">requires_role</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)])</span>
 
 <div class="viewcode-block" id="McpLocalTestRequest">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.McpLocalTestRequest">[docs]</a>
@@ -307,14 +294,12 @@
     <span class="n">command</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">transport</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;stdio&quot;</span>
+    <span class="n">transport</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;stdio&#39;</span>
     <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># New URL fields</span>
     <span class="n">provider_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">transport_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">transport_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &quot;sse&quot; | &quot;streamable_http&quot;</span>
-    <span class="c1"># OAuth 2.0 fields</span>
-    <span class="n">auth_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+    <span class="n">transport_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">auth_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
     <span class="n">auth_headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">authorization_server_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">client_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -331,172 +316,97 @@
     <span class="n">state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
-<span class="c1"># --- MCP Server Management Routes ---</span>
-
 <div class="viewcode-block" id="list_mcp_servers">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.list_mcp_servers">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/mcp/list&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/mcp/list&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_mcp_servers</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List all configured MCP servers.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP Plugin not available&quot;</span><span class="p">)</span>
-    
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;MCP Plugin not available&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
-                <span class="s2">&quot;transport&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span>
-                <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
-                <span class="s2">&quot;capabilities&quot;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span>
-            <span class="p">})</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">servers</span><span class="p">}</span>
+            <span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="s1">&#39;transport&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;capabilities&#39;</span><span class="p">:</span> <span class="n">server</span><span class="o">.</span><span class="n">capabilities</span><span class="p">})</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">servers</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="add_mcp_server">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.add_mcp_server">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/add&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/mcp/add&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">add_mcp_server</span><span class="p">(</span><span class="n">server_request</span><span class="p">:</span> <span class="n">McpServerAddRequest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a new MCP server configuration.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP Plugin not available&quot;</span><span class="p">)</span>
-    
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;MCP Plugin not available&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Create MCPServer object</span>
-        <span class="c1"># Validate required fields based on transport type</span>
-        <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s2">&quot;stdio&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">server_request</span><span class="o">.</span><span class="n">command</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Command is required for stdio transport&quot;</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">transport</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;sse&quot;</span><span class="p">,</span> <span class="s2">&quot;websocket&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;URL is required for remote transports&quot;</span><span class="p">)</span>
-        
-        <span class="c1"># More flexible OAuth validation - allow registry servers to be added without client_id initially</span>
-        <span class="c1"># The OAuth configuration might be provided by the registry or discovered during connection</span>
-        <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">auth_type</span> <span class="o">==</span> <span class="s2">&quot;oauth2&quot;</span><span class="p">:</span>
-            <span class="c1"># Log the OAuth configuration for debugging</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Adding OAuth server &#39;</span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: client_id: </span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">client_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: authorization_server_url: </span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">authorization_server_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: scopes: </span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">scopes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># Note: client_id validation removed to allow registry servers with dynamic OAuth discovery</span>
-        
-        <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-            <span class="n">command</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">command</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">args</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">env</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">env</span><span class="p">,</span>
-            <span class="n">transport</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span>
-            <span class="n">url</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
-            <span class="n">auth_type</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">auth_type</span><span class="p">,</span>
-            <span class="n">auth_headers</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">auth_headers</span><span class="p">,</span>
-            <span class="n">authorization_server_url</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">authorization_server_url</span><span class="p">,</span>
-            <span class="n">client_id</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
-            <span class="n">client_secret</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">client_secret</span><span class="p">,</span>
-            <span class="n">scopes</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">scopes</span><span class="p">,</span>
-            <span class="n">redirect_uri</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/oauth/callback&quot;</span> <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">url</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="p">)</span>
-        
-        <span class="c1"># Use BASE_URL for redirect_uri if not explicitly provided</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="ow">and</span> <span class="n">server_request</span><span class="o">.</span><span class="n">auth_type</span> <span class="o">==</span> <span class="s2">&quot;oauth2&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">transport</span> <span class="o">==</span> <span class="s1">&#39;stdio&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">server_request</span><span class="o">.</span><span class="n">command</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Command is required for stdio transport&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">transport</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;sse&#39;</span><span class="p">,</span> <span class="s1">&#39;websocket&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;URL is required for remote transports&#39;</span><span class="p">)</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">MCPServer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">command</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">transport</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">auth_type</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">auth_headers</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">auth_headers</span><span class="p">,</span> <span class="n">authorization_server_url</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">authorization_server_url</span><span class="p">,</span> <span class="n">client_id</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span> <span class="n">client_secret</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">client_secret</span><span class="p">,</span> <span class="n">scopes</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">scopes</span><span class="p">,</span> <span class="n">redirect_uri</span><span class="o">=</span><span class="n">server_request</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="ow">or</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s1">/oauth/callback&#39;</span> <span class="k">if</span> <span class="n">server_request</span><span class="o">.</span><span class="n">url</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="ow">and</span> <span class="n">server_request</span><span class="o">.</span><span class="n">auth_type</span> <span class="o">==</span> <span class="s1">&#39;oauth2&#39;</span><span class="p">:</span>
             <span class="n">base_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;BASE_URL&#39;</span><span class="p">,</span> <span class="s1">&#39;http://localhost:3000&#39;</span><span class="p">)</span>
-            <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/mcp_oauth_cb&quot;</span>
-        
+            <span class="n">server</span><span class="o">.</span><span class="n">redirect_uri</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s1">/mcp_oauth_cb&#39;</span>
         <span class="n">mcp_manager</span><span class="o">.</span><span class="n">add_server</span><span class="p">(</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; added successfully.&quot;</span>
-        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">server_request</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; added successfully.&quot;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="remove_mcp_server">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.remove_mcp_server">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/remove&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/mcp/remove&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">remove_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpServerRequest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove an MCP server configuration.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP Plugin not available&quot;</span><span class="p">)</span>
-    
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;MCP Plugin not available&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># First disconnect if connected</span>
         <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">)</span>
-        
-        <span class="c1"># Remove server configuration</span>
         <span class="n">mcp_manager</span><span class="o">.</span><span class="n">remove_server</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; removed successfully.&quot;</span>
-        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; removed successfully.&quot;</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="connect_mcp_server">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.connect_mcp_server">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/connect&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/mcp/connect&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpConnectRequest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect to an MCP server.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP Plugin not available&quot;</span><span class="p">)</span>
-    
-    <span class="c1"># Persist secrets if provided</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;MCP Plugin not available&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">secrets</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">server_name</span> <span class="ow">in</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
             <span class="n">server</span> <span class="o">=</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">server</span><span class="o">.</span><span class="n">secrets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">server</span><span class="o">.</span><span class="n">secrets</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">server</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">secrets</span><span class="p">)</span>
-            <span class="c1"># This will save the updated server config, including secrets</span>
             <span class="n">mcp_manager</span><span class="o">.</span><span class="n">save_config</span><span class="p">()</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">connect_server</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">,</span> <span class="n">secrets</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">secrets</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span>
-                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; connected successfully.&quot;</span>
-            <span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; connected successfully.&quot;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: Failed to connect to MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> 
-                <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to connect to MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;. Check logs for details.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to connect to MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;. Check logs for details.&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
 
-
 <div class="viewcode-block" id="disconnect_mcp_server">
 <a class="viewcode-back" href="../../../../source/mindroot.coreplugins.admin.html#mindroot.coreplugins.admin.mcp_routes.disconnect_mcp_server">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/mcp/disconnect&quot;</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/mcp/disconnect&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_mcp_server</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">McpServerRequest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Disconnect from an MCP server.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mcp_manager</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;MCP Plugin not available&quot;</span><span class="p">)</span>
-    
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">501</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;MCP Plugin not available&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mcp_manager</span><span class="o">.</span><span class="n">disconnect_server</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span>
-                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> 
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; disconnected successfully.&quot;</span>
-            <span class="p">}</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39; disconnected successfully.&quot;</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> 
-                <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to disconnect from MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Failed to disconnect from MCP server &#39;</span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">server_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
 
@@ -533,8 +443,8 @@
     </aside>
   </div>
 </div><script src="../../../../_static/documentation_options.js?v=3c16008f"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>
