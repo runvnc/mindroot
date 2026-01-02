@@ -12,7 +12,7 @@ this loses type information. The Protocols system restores type safety:
 
 .. code-block:: python
 
-    from lib.providers.protocols import llm, image, tts
+    from mindroot.protocols import llm, image, tts
 
     # Full IDE autocomplete!
     stream = await llm.stream_chat('gpt-4', messages=[...], context=ctx)
@@ -29,7 +29,7 @@ The simplest way to use typed services:
 
 .. code-block:: python
 
-    from lib.providers.protocols import llm, image, tts, stt, web_search
+    from mindroot.protocols import llm, image, tts, stt, web_search
 
     # These are lazy proxies - they initialize on first use
     stream = await llm.stream_chat('gpt-4', messages=[...], context=ctx)
@@ -42,11 +42,78 @@ Alternatively, create a typed proxy explicitly:
 
 .. code-block:: python
 
-    from lib.providers.protocols import LLM
-    from lib.providers.services import service_manager
+    from mindroot.protocols import LLM
+    from mindroot.services import service_manager
 
     llm: LLM = service_manager.typed(LLM)
     stream = await llm.stream_chat('gpt-4', messages=[...], context=ctx)
+
+Implementing Services with Protocols
+------------------------------------
+
+Class-Based Implementation (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use ``@service_class`` to implement a Protocol with full IDE autocomplete:
+
+.. code-block:: python
+
+    from mindroot.services import service_class
+    from mindroot.protocols import LLM
+    from typing import AsyncIterator, Any
+
+    @service_class(LLM)
+    class MyLLM(LLM):
+        """My LLM implementation."""
+        
+        async def stream_chat(
+            self,
+            model: str,
+            messages: list = None,
+            context: Any = None,
+            num_ctx: int = 200000,
+            temperature: float = 0.0,
+            max_tokens: int = 5000,
+            num_gpu_layers: int = 0
+        ) -> AsyncIterator[str]:
+            # IDE autocomplete works here!
+            ...
+        
+        async def chat(self, model: str, messages: list,
+                       context: Any = None) -> str:
+            ...
+        
+        async def format_image_message(self, pil_image: Any,
+                                       context: Any = None) -> dict:
+            ...
+        
+        async def get_service_models(self, context: Any = None) -> dict:
+            return {
+                "stream_chat": ["my-model-1", "my-model-2"],
+                "chat": ["my-model-1", "my-model-2"]
+            }
+
+The ``@service_class`` decorator will:
+
+1. Instantiate the class (must have no required ``__init__`` args)
+2. Find all methods defined in the Protocol
+3. Register each matching method as a service
+
+Function-Based Implementation (Legacy)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The traditional ``@service()`` decorator still works for standalone functions:
+
+.. code-block:: python
+
+    from mindroot.services import service
+
+    @service()
+    async def stream_chat(model, messages=[], context=None, ...):
+        ...
+
+This approach is fully backwards compatible but doesn't provide IDE autocomplete
+for the function signature.
 
 Available Protocols
 -------------------
@@ -143,13 +210,28 @@ Defining a Protocol
         async def sip_audio_out_chunk(self, audio_chunk: bytes,
                                       context = None) -> None: ...
 
+Implementing with service_class
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    # In mr_sip/mod.py
+    from mindroot.services import service_class
+    from .protocols import SIP
+
+    @service_class(SIP)
+    class MySIPProvider(SIP):
+        async def dial_service(self, destination: str, context = None) -> dict:
+            # Implementation with IDE autocomplete
+            ...
+
 Creating a Pre-instantiated Proxy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
     # In mr_sip/__init__.py or mr_sip/protocols.py
-    from lib.providers.protocols.registry import create_lazy_proxy
+    from mindroot.lib.providers.protocols.registry import create_lazy_proxy
     from .protocols import SIP
 
     # Create a lazy proxy for convenient access
@@ -176,7 +258,7 @@ Registering a Protocol
 
 .. code-block:: python
 
-    from lib.providers.protocols import register_protocol
+    from mindroot.protocols import register_protocol
     from .protocols import SIP
 
     register_protocol('sip', SIP)
@@ -186,7 +268,7 @@ Discovering Protocols
 
 .. code-block:: python
 
-    from lib.providers.protocols import get_protocol, list_protocols
+    from mindroot.protocols import get_protocol, list_protocols
 
     # List all registered protocols
     protocols = list_protocols()  # {'llm': LLM, 'image': Image, ...}
@@ -194,6 +276,7 @@ Discovering Protocols
     # Get a specific protocol
     SIP = get_protocol('sip')
     if SIP:
+        from mindroot.services import service_manager
         sip = service_manager.typed(SIP)
 
 Method-to-Service Mapping
@@ -203,7 +286,7 @@ When a Protocol method name differs from the service name, use explicit mapping:
 
 .. code-block:: python
 
-    from lib.providers.protocols import map_method_to_service, Image
+    from mindroot.protocols import map_method_to_service, Image
 
     # Map Image.generate() to the 'image' service
     map_method_to_service(Image, 'generate', 'image')
@@ -216,13 +299,65 @@ The Protocol system is fully backwards compatible. All existing code continues t
 .. code-block:: python
 
     # This still works exactly as before
-    from lib.providers.services import service_manager
+    from mindroot.services import service_manager
 
     stream = await service_manager.stream_chat('gpt-4', messages=[...], context=ctx)
     result = await service_manager.image('a red dragon', context=ctx)
 
+    # Legacy imports also work
+    from lib.providers.services import service_manager
+    from lib.providers.protocols import llm
+
+Import Paths
+------------
+
+MindRoot supports both short and full import paths:
+
+.. code-block:: python
+
+    # Short paths (recommended)
+    from mindroot.services import service, service_class, service_manager
+    from mindroot.protocols import LLM, Image, TTS, llm, image, tts
+
+    # Full paths (also work)
+    from mindroot.lib.providers.services import service, service_class, service_manager
+    from mindroot.lib.providers.protocols import LLM, Image, TTS, llm, image, tts
+
 API Reference
 -------------
+
+@service_class(protocol)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Class decorator that registers all Protocol methods as services.
+
+:param protocol: The Protocol class being implemented
+:param flags: Optional flags to pass to each service registration
+
+.. code-block:: python
+
+    from mindroot.services import service_class
+    from mindroot.protocols import LLM
+
+    @service_class(LLM)
+    class MyLLM(LLM):
+        async def stream_chat(self, model: str, ...) -> AsyncIterator[str]:
+            ...
+
+@service()
+~~~~~~~~~~
+
+Function decorator for registering individual service functions.
+
+:param flags: Optional flags for the service
+
+.. code-block:: python
+
+    from mindroot.services import service
+
+    @service()
+    async def my_function(arg1, context=None):
+        ...
 
 service_manager.typed(protocol)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,6 +368,9 @@ Get a typed proxy for a service protocol.
 :returns: A proxy object typed as the Protocol
 
 .. code-block:: python
+
+    from mindroot.protocols import LLM
+    from mindroot.services import service_manager
 
     llm: LLM = service_manager.typed(LLM)
 
@@ -270,7 +408,7 @@ Create a lazy typed proxy for a Protocol. Useful for plugins.
 
 .. code-block:: python
 
-    from lib.providers.protocols.registry import create_lazy_proxy
+    from mindroot.lib.providers.protocols.registry import create_lazy_proxy
     
     sip: SIP = create_lazy_proxy(SIP)
 
@@ -284,6 +422,8 @@ Register a Protocol class for discovery.
 
 .. code-block:: python
 
+    from mindroot.protocols import register_protocol
+
     register_protocol('sip', SIP)
 
 map_method_to_service(protocol, method_name, service_name)
@@ -296,5 +436,7 @@ Create an explicit mapping from a Protocol method to a service name.
 :param service_name: The actual service name to call
 
 .. code-block:: python
+
+    from mindroot.protocols import map_method_to_service, Image
 
     map_method_to_service(Image, 'generate', 'image')

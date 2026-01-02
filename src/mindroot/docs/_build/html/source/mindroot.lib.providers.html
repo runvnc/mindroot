@@ -373,6 +373,44 @@ New format: {“stream_chat”: [[“ah_anthropic”, “claude-3.5-sonnet”]]}
 <span class="sig-prename descclassname"><span class="pre">mindroot.lib.providers.services.</span></span><span class="sig-name descname"><span class="pre">service</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/lib/providers/services.html#service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.providers.services.service" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="mindroot.lib.providers.services.service_class">
+<span class="sig-prename descclassname"><span class="pre">mindroot.lib.providers.services.</span></span><span class="sig-name descname"><span class="pre">service_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">P</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mindroot/lib/providers/services.html#service_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mindroot.lib.providers.services.service_class" title="Link to this definition">¶</a></dt>
+<dd><p>Class decorator that registers all Protocol methods as services.</p>
+<p>This enables class-based service implementations with IDE autocomplete
+when inheriting from a Protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> – The Protocol class being implemented. Only methods defined
+in this Protocol will be registered as services.</p></li>
+<li><p><strong>flags</strong> – Optional flags to pass to each service registration.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>from mindroot.services import service_class
+from mindroot.protocols import LLM</p>
+<p>&#64;service_class(LLM)
+class DeepSeekLLM(LLM):</p>
+<blockquote>
+<div><dl>
+<dt>async def stream_chat(self, model: str, messages: list = None,</dt><dd><blockquote>
+<div><p>context = None, …) -&gt; AsyncIterator[str]:</p>
+</div></blockquote>
+<p># IDE autocomplete works here!
+…</p>
+</dd>
+<dt>async def format_image_message(self, pil_image, context = None) -&gt; dict:</dt><dd><p>…</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>The decorator will:
+1. Instantiate the class (must have no required __init__ args)
+2. Find all methods that are defined in the Protocol
+3. Register each matching method as a service</p>
+</dd></dl>
+
 </section>
 <section id="module-mindroot.lib.providers">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mindroot.lib.providers" title="Link to this heading">¶</a></h2>
@@ -524,6 +562,7 @@ New format: {“stream_chat”: [[“ah_anthropic”, “claude-3.5-sonnet”]]}
 </li>
 <li><a class="reference internal" href="#module-mindroot.lib.providers.services">mindroot.lib.providers.services module</a><ul>
 <li><a class="reference internal" href="#mindroot.lib.providers.services.service"><code class="docutils literal notranslate"><span class="pre">service()</span></code></a></li>
+<li><a class="reference internal" href="#mindroot.lib.providers.services.service_class"><code class="docutils literal notranslate"><span class="pre">service_class()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-mindroot.lib.providers">Module contents</a><ul>

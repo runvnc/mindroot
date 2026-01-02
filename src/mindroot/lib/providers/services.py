@@ -1,9 +1,19 @@
 import os
+import sys
 import inspect
 from typing import Type, TypeVar, get_type_hints
 from . import ProviderManager
 
-service_manager = ProviderManager()
+# Ensure singleton across different import paths (lib.providers vs mindroot.lib.providers)
+_SINGLETON_KEY = 'mindroot.lib.providers.services._service_manager'
+
+if _SINGLETON_KEY in dir(sys.modules.get('builtins', {})):
+    # Retrieve existing singleton
+    service_manager = getattr(sys.modules['builtins'], _SINGLETON_KEY)
+else:
+    # Create new singleton and store it
+    service_manager = ProviderManager()
+    setattr(sys.modules['builtins'], _SINGLETON_KEY, service_manager)
 
 P = TypeVar('P')  # Protocol type variable
 
@@ -34,8 +44,8 @@ def service_class(protocol: Type[P], *, flags=[]):
         flags: Optional flags to pass to each service registration.
     
     Example:
-        from lib.providers.services import service_class
-        from lib.providers.protocols import LLM
+        from mindroot.services import service_class
+        from mindroot.protocols import LLM
         
         @service_class(LLM)
         class DeepSeekLLM(LLM):

@@ -252,7 +252,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..db.preferences</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_preferred_models</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..db.organize_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">uses_models</span><span class="p">,</span> <span class="n">matching_models</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.check_args</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -261,11 +261,24 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">nanoid</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span>
 
+<span class="c1"># Import protocol support</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.protocols.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceProxy</span><span class="p">,</span> <span class="n">get_protocol</span><span class="p">,</span> <span class="n">list_protocols</span>
+    <span class="n">PROTOCOLS_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">PROTOCOLS_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ServiceProxy</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">get_protocol</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">list_protocols</span> <span class="o">=</span> <span class="kc">None</span>
+
 <span class="c1"># Import the new v2 preferences system with try/except for backward compatibility</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.model_preferences_v2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelPreferencesV2</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">ModelPreferencesV2</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># TypeVar for Protocol typing</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProviderManager">
 <a class="viewcode-back" href="../../../source/mindroot.lib.providers.html#mindroot.lib.providers.ProviderManager">[docs]</a>
@@ -545,10 +558,60 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="c1"># Handle special protocol-related methods</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;typed&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_typed</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;get_protocol&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;list_protocols&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_protocols</span>
 
         <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">method</span></div>
+        <span class="k">return</span> <span class="n">method</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">P</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">P</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a typed proxy for a service protocol.</span>
+<span class="sd">        </span>
+<span class="sd">        This enables IDE autocomplete and type checking for services.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            protocol: A Protocol class defining the service interface</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A proxy object typed as the Protocol, delegating to service_manager</span>
+<span class="sd">            </span>
+<span class="sd">        Example:</span>
+<span class="sd">            from lib.providers.protocols import LLM</span>
+<span class="sd">            llm: LLM = service_manager.typed(LLM)</span>
+<span class="sd">            stream = await llm.stream_chat(&#39;gpt-4&#39;, messages=[...])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PROTOCOLS_AVAILABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Protocol support not available. Check protocols module installation.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">ServiceProxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">))</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a registered Protocol by name.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            name: The protocol name (e.g., &#39;llm&#39;, &#39;sip&#39;)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            The Protocol class, or None if not found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PROTOCOLS_AVAILABLE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">get_protocol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_list_protocols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all registered Protocols.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict mapping protocol names to Protocol classes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PROTOCOLS_AVAILABLE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">list_protocols</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="HookManager">

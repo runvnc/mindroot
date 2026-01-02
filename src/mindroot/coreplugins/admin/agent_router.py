@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from pydantic import Field
 from pathlib import Path
 import json
 from .agent_importer import scan_and_import_agents, import_github_agent
@@ -17,6 +18,8 @@ from typing import Dict, Any
 from datetime import datetime
 router = APIRouter()
 BASE_DIR = Path('data/agents')
+PERSONAS_DIR = Path('personas')
+
 local_dir = BASE_DIR / 'local'
 shared_dir = BASE_DIR / 'shared'
 local_dir.mkdir(parents=True, exist_ok=True)
@@ -64,6 +67,46 @@ def scan_agent_ownership() -> Dict[str, Any]:
             except Exception as e:
                 continue
     return ownership_info
+
+def find_persona_path(persona_name: str) -> Path:
+    """Find the path to a persona by name, checking local, shared, and registry scopes"""
+    if not persona_name:
+        return None
+    
+    # Handle registry personas (format: registry/owner/name)
+    if persona_name.startswith('registry/'):
+        persona_path = PERSONAS_DIR / persona_name / 'persona.json'
+        if persona_path.exists():
+            return persona_path.parent
+        return None
+    
+    # Check local first, then shared
+    for scope in ['local', 'shared']:
+        persona_path = PERSONAS_DIR / scope / persona_name / 'persona.json'
+        if persona_path.exists():
+            return persona_path.parent
+    
+    return None
+
+
+def load_persona_files(persona_dir: Path) -> dict:
+    """Load persona.json and return dict with persona data and list of asset files"""
+    result = {'data': None, 'files': []}
+    
+    persona_json = persona_dir / 'persona.json'
+    if persona_json.exists():
+        with open(persona_json, 'r') as f:
+            result['data'] = json.load(f)
+        result['files'].append(('persona.json', persona_json))
+    
+    # Include avatar and faceref if they exist
+    for asset_name in ['avatar.png', 'faceref.png']:
+        asset_path = persona_dir / asset_name
+        if asset_path.exists():
+            result['files'].append((asset_name, asset_path))
+    
+    return result
+
 
 async def load_persona_data(persona_name: str) -> dict:
     """Load persona data from local or shared directory"""
@@ -273,12 +316,31 @@ def export_agent_zip(scope: str, name: str):
     if not agent_dir.exists():
         raise HTTPException(status_code=404, detail='Agent not found')
     try:
+        # Load agent.json to get persona reference
+        agent_json_path = agent_dir / 'agent.json'
+        persona_name = None
+        if agent_json_path.exists():
+            with open(agent_json_path, 'r') as f:
+                agent_data = json.load(f)
+            persona_name = agent_data.get('persona')
+        
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Add all agent files
             for file_path in agent_dir.rglob('*'):
                 if file_path.is_file():
                     arcname = file_path.relative_to(agent_dir)
                     zip_file.write(file_path, arcname)
+            
+            # Add persona files if persona exists
+            if persona_name:
+                persona_dir = find_persona_path(persona_name)
+                if persona_dir:
+                    persona_files = load_persona_files(persona_dir)
+                    for file_name, file_path in persona_files['files']:
+                        arcname = f'persona/{file_name}'
+                        zip_file.write(file_path, arcname)
+        
         zip_buffer.seek(0)
         return StreamingResponse(io.BytesIO(zip_buffer.read()), media_type='application/zip', headers={'Content-Disposition': f'attachment; filename="{name}_agent.zip"'})
     except Exception as e:
@@ -306,6 +368,33 @@ async def import_agent_zip(scope: str, file: UploadFile=File(...)):
             agent_name = agent_data.get('name')
             if not agent_name:
                 raise HTTPException(status_code=400, detail='Agent name not found in agent.json')
+            
+            # Check for embedded persona in the zip
+            persona_dir_in_zip = temp_path / 'persona'
+            if not persona_dir_in_zip.exists():
+                # Also check if persona folder is inside the extracted agent folder
+                persona_dir_in_zip = agent_json_path.parent / 'persona'
+            
+            if persona_dir_in_zip.exists():
+                persona_json_in_zip = persona_dir_in_zip / 'persona.json'
+                if persona_json_in_zip.exists():
+                    with open(persona_json_in_zip, 'r') as f:
+                        persona_data = json.load(f)
+                    
+                    # Import the persona using the handler
+                    persona_name = handle_persona_import(persona_data, scope)
+                    
+                    # Copy persona assets (avatar, faceref) if they exist
+                    persona_target_dir = PERSONAS_DIR / scope / persona_name
+                    for asset_name in ['avatar.png', 'faceref.png']:
+                        asset_src = persona_dir_in_zip / asset_name
+                        if asset_src.exists():
+                            shutil.copy2(asset_src, persona_target_dir / asset_name)
+                    
+                    # Update agent_data to reference the imported persona by name
+                    agent_data['persona'] = persona_name
+            
+            
             target_dir = BASE_DIR / scope / agent_name
             if target_dir.exists():
                 raise HTTPException(status_code=400, detail=f'Agent {agent_name} already exists. Use the registry manager for updates.')
@@ -315,9 +404,18 @@ async def import_agent_zip(scope: str, file: UploadFile=File(...)):
             for item in source_dir.rglob('*'):
                 if item.is_file():
                     relative_path = item.relative_to(source_dir)
+                    # Skip the persona folder - it's handled separately
+                    if str(relative_path).startswith('persona/'):
+                        continue
                     target_file = target_dir / relative_path
                     target_file.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(item, target_file)
+            
+            # Write the updated agent.json with correct persona reference
+            agent_json_target = target_dir / 'agent.json'
+            with open(agent_json_target, 'w') as f:
+                json.dump(agent_data, f, indent=2)
+        
         return {'success': True, 'message': f'Agent {agent_name} imported successfully', 'agent_name': agent_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error importing zip: {str(e)}')

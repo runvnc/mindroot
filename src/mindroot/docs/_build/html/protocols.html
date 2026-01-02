@@ -262,7 +262,7 @@ and type checking when calling services.</p>
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p>MindRoot services are dynamically registered and called via <code class="docutils literal notranslate"><span class="pre">service_manager</span></code>. While flexible,
 this loses type information. The Protocols system restores type safety:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span>
 
 <span class="c1"># Full IDE autocomplete!</span>
 <span class="n">stream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">llm</span><span class="o">.</span><span class="n">stream_chat</span><span class="p">(</span><span class="s1">&#39;gpt-4&#39;</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
@@ -276,7 +276,7 @@ this loses type information. The Protocols system restores type safety:</p>
 <section id="using-pre-instantiated-proxies-recommended">
 <h3>Using Pre-instantiated Proxies (Recommended)<a class="headerlink" href="#using-pre-instantiated-proxies-recommended" title="Link to this heading">¶</a></h3>
 <p>The simplest way to use typed services:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span><span class="p">,</span> <span class="n">stt</span><span class="p">,</span> <span class="n">web_search</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span><span class="p">,</span> <span class="n">stt</span><span class="p">,</span> <span class="n">web_search</span>
 
 <span class="c1"># These are lazy proxies - they initialize on first use</span>
 <span class="n">stream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">llm</span><span class="o">.</span><span class="n">stream_chat</span><span class="p">(</span><span class="s1">&#39;gpt-4&#39;</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
@@ -287,13 +287,75 @@ this loses type information. The Protocols system restores type safety:</p>
 <section id="creating-your-own-typed-proxy">
 <h3>Creating Your Own Typed Proxy<a class="headerlink" href="#creating-your-own-typed-proxy" title="Link to this heading">¶</a></h3>
 <p>Alternatively, create a typed proxy explicitly:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
 
 <span class="n">llm</span><span class="p">:</span> <span class="n">LLM</span> <span class="o">=</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">typed</span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span>
 <span class="n">stream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">llm</span><span class="o">.</span><span class="n">stream_chat</span><span class="p">(</span><span class="s1">&#39;gpt-4&#39;</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+</section>
+<section id="implementing-services-with-protocols">
+<h2>Implementing Services with Protocols<a class="headerlink" href="#implementing-services-with-protocols" title="Link to this heading">¶</a></h2>
+<section id="class-based-implementation-recommended">
+<h3>Class-Based Implementation (Recommended)<a class="headerlink" href="#class-based-implementation-recommended" title="Link to this heading">¶</a></h3>
+<p>Use <code class="docutils literal notranslate"><span class="pre">&#64;service_class</span></code> to implement a Protocol with full IDE autocomplete:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="nd">@service_class</span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyLLM</span><span class="p">(</span><span class="n">LLM</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;My LLM implementation.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_chat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_ctx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200000</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+        <span class="n">num_gpu_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="c1"># IDE autocomplete works here!</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+                   <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">format_image_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pil_image</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                                   <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_service_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;stream_chat&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-model-1&quot;</span><span class="p">,</span> <span class="s2">&quot;my-model-2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;chat&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-model-1&quot;</span><span class="p">,</span> <span class="s2">&quot;my-model-2&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">&#64;service_class</span></code> decorator will:</p>
+<ol class="arabic simple">
+<li><p>Instantiate the class (must have no required <code class="docutils literal notranslate"><span class="pre">__init__</span></code> args)</p></li>
+<li><p>Find all methods defined in the Protocol</p></li>
+<li><p>Register each matching method as a service</p></li>
+</ol>
+</section>
+<section id="function-based-implementation-legacy">
+<h3>Function-Based Implementation (Legacy)<a class="headerlink" href="#function-based-implementation-legacy" title="Link to this heading">¶</a></h3>
+<p>The traditional <code class="docutils literal notranslate"><span class="pre">&#64;service()</span></code> decorator still works for standalone functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_chat</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[],</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>This approach is fully backwards compatible but doesn’t provide IDE autocomplete
+for the function signature.</p>
 </section>
 </section>
 <section id="available-protocols">
@@ -378,10 +440,24 @@ this loses type information. The Protocols system restores type safety:</p>
 </pre></div>
 </div>
 </section>
+<section id="implementing-with-service-class">
+<h3>Implementing with service_class<a class="headerlink" href="#implementing-with-service-class" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In mr_sip/mod.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">SIP</span>
+
+<span class="nd">@service_class</span><span class="p">(</span><span class="n">SIP</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MySIPProvider</span><span class="p">(</span><span class="n">SIP</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">dial_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="c1"># Implementation with IDE autocomplete</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
 <section id="creating-a-pre-instantiated-proxy">
 <h3>Creating a Pre-instantiated Proxy<a class="headerlink" href="#creating-a-pre-instantiated-proxy" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In mr_sip/__init__.py or mr_sip/protocols.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_lazy_proxy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.providers.protocols.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_lazy_proxy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">SIP</span>
 
 <span class="c1"># Create a lazy proxy for convenient access</span>
@@ -405,7 +481,7 @@ this loses type information. The Protocols system restores type safety:</p>
 <p>Plugins can optionally register their Protocols for discovery:</p>
 <section id="registering-a-protocol">
 <h3>Registering a Protocol<a class="headerlink" href="#registering-a-protocol" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_protocol</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_protocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">SIP</span>
 
 <span class="n">register_protocol</span><span class="p">(</span><span class="s1">&#39;sip&#39;</span><span class="p">,</span> <span class="n">SIP</span><span class="p">)</span>
@@ -414,7 +490,7 @@ this loses type information. The Protocols system restores type safety:</p>
 </section>
 <section id="discovering-protocols">
 <h3>Discovering Protocols<a class="headerlink" href="#discovering-protocols" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_protocol</span><span class="p">,</span> <span class="n">list_protocols</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_protocol</span><span class="p">,</span> <span class="n">list_protocols</span>
 
 <span class="c1"># List all registered protocols</span>
 <span class="n">protocols</span> <span class="o">=</span> <span class="n">list_protocols</span><span class="p">()</span>  <span class="c1"># {&#39;llm&#39;: LLM, &#39;image&#39;: Image, ...}</span>
@@ -422,6 +498,7 @@ this loses type information. The Protocols system restores type safety:</p>
 <span class="c1"># Get a specific protocol</span>
 <span class="n">SIP</span> <span class="o">=</span> <span class="n">get_protocol</span><span class="p">(</span><span class="s1">&#39;sip&#39;</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">SIP</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
     <span class="n">sip</span> <span class="o">=</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">typed</span><span class="p">(</span><span class="n">SIP</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -429,7 +506,7 @@ this loses type information. The Protocols system restores type safety:</p>
 <section id="method-to-service-mapping">
 <h3>Method-to-Service Mapping<a class="headerlink" href="#method-to-service-mapping" title="Link to this heading">¶</a></h3>
 <p>When a Protocol method name differs from the service name, use explicit mapping:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_method_to_service</span><span class="p">,</span> <span class="n">Image</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_method_to_service</span><span class="p">,</span> <span class="n">Image</span>
 
 <span class="c1"># Map Image.generate() to the &#39;image&#39; service</span>
 <span class="n">map_method_to_service</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span> <span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">)</span>
@@ -441,15 +518,69 @@ this loses type information. The Protocols system restores type safety:</p>
 <h2>Backwards Compatibility<a class="headerlink" href="#backwards-compatibility" title="Link to this heading">¶</a></h2>
 <p>The Protocol system is fully backwards compatible. All existing code continues to work:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This still works exactly as before</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
 
 <span class="n">stream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">stream_chat</span><span class="p">(</span><span class="s1">&#39;gpt-4&#39;</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">image</span><span class="p">(</span><span class="s1">&#39;a red dragon&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
+
+<span class="c1"># Legacy imports also work</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">llm</span>
+</pre></div>
+</div>
+</section>
+<section id="import-paths">
+<h2>Import Paths<a class="headerlink" href="#import-paths" title="Link to this heading">¶</a></h2>
+<p>MindRoot supports both short and full import paths:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Short paths (recommended)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span><span class="p">,</span> <span class="n">service_class</span><span class="p">,</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span><span class="p">,</span> <span class="n">Image</span><span class="p">,</span> <span class="n">TTS</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span>
+
+<span class="c1"># Full paths (also work)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.providers.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span><span class="p">,</span> <span class="n">service_class</span><span class="p">,</span> <span class="n">service_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.providers.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span><span class="p">,</span> <span class="n">Image</span><span class="p">,</span> <span class="n">TTS</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">tts</span>
 </pre></div>
 </div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
+<section id="service-class-protocol">
+<h3>&#64;service_class(protocol)<a class="headerlink" href="#service-class-protocol" title="Link to this heading">¶</a></h3>
+<p>Class decorator that registers all Protocol methods as services.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param protocol<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The Protocol class being implemented</p>
+</dd>
+<dt class="field-even">param flags<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional flags to pass to each service registration</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
+
+<span class="nd">@service_class</span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyLLM</span><span class="p">(</span><span class="n">LLM</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="service">
+<h3>&#64;service()<a class="headerlink" href="#service" title="Link to this heading">¶</a></h3>
+<p>Function decorator for registering individual service functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param flags<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional flags for the service</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service</span>
+
+<span class="nd">@service</span><span class="p">()</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</section>
 <section id="service-manager-typed-protocol">
 <h3>service_manager.typed(protocol)<a class="headerlink" href="#service-manager-typed-protocol" title="Link to this heading">¶</a></h3>
 <p>Get a typed proxy for a service protocol.</p>
@@ -461,7 +592,10 @@ this loses type information. The Protocols system restores type safety:</p>
 <dd class="field-even"><p>A proxy object typed as the Protocol</p>
 </dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">llm</span><span class="p">:</span> <span class="n">LLM</span> <span class="o">=</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">typed</span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">service_manager</span>
+
+<span class="n">llm</span><span class="p">:</span> <span class="n">LLM</span> <span class="o">=</span> <span class="n">service_manager</span><span class="o">.</span><span class="n">typed</span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -504,7 +638,7 @@ this loses type information. The Protocols system restores type safety:</p>
 <dd class="field-even"><p>A LazyTypedProxy typed as the Protocol</p>
 </dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lib.providers.protocols.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_lazy_proxy</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.lib.providers.protocols.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_lazy_proxy</span>
 
 <span class="n">sip</span><span class="p">:</span> <span class="n">SIP</span> <span class="o">=</span> <span class="n">create_lazy_proxy</span><span class="p">(</span><span class="n">SIP</span><span class="p">)</span>
 </pre></div>
@@ -521,7 +655,9 @@ this loses type information. The Protocols system restores type safety:</p>
 <dd class="field-even"><p>The Protocol class</p>
 </dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">register_protocol</span><span class="p">(</span><span class="s1">&#39;sip&#39;</span><span class="p">,</span> <span class="n">SIP</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_protocol</span>
+
+<span class="n">register_protocol</span><span class="p">(</span><span class="s1">&#39;sip&#39;</span><span class="p">,</span> <span class="n">SIP</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -539,7 +675,9 @@ this loses type information. The Protocols system restores type safety:</p>
 <dd class="field-odd"><p>The actual service name to call</p>
 </dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">map_method_to_service</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span> <span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindroot.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_method_to_service</span><span class="p">,</span> <span class="n">Image</span>
+
+<span class="n">map_method_to_service</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span> <span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -600,6 +738,11 @@ this loses type information. The Protocols system restores type safety:</p>
 <li><a class="reference internal" href="#creating-your-own-typed-proxy">Creating Your Own Typed Proxy</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#implementing-services-with-protocols">Implementing Services with Protocols</a><ul>
+<li><a class="reference internal" href="#class-based-implementation-recommended">Class-Based Implementation (Recommended)</a></li>
+<li><a class="reference internal" href="#function-based-implementation-legacy">Function-Based Implementation (Legacy)</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#available-protocols">Available Protocols</a><ul>
 <li><a class="reference internal" href="#llm-language-model">LLM (Language Model)</a></li>
 <li><a class="reference internal" href="#image">Image</a></li>
@@ -610,6 +753,7 @@ this loses type information. The Protocols system restores type safety:</p>
 </li>
 <li><a class="reference internal" href="#plugin-defined-protocols">Plugin-Defined Protocols</a><ul>
 <li><a class="reference internal" href="#defining-a-protocol">Defining a Protocol</a></li>
+<li><a class="reference internal" href="#implementing-with-service-class">Implementing with service_class</a></li>
 <li><a class="reference internal" href="#creating-a-pre-instantiated-proxy">Creating a Pre-instantiated Proxy</a></li>
 <li><a class="reference internal" href="#using-plugin-protocols">Using Plugin Protocols</a></li>
 </ul>
@@ -621,7 +765,10 @@ this loses type information. The Protocols system restores type safety:</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#backwards-compatibility">Backwards Compatibility</a></li>
+<li><a class="reference internal" href="#import-paths">Import Paths</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a><ul>
+<li><a class="reference internal" href="#service-class-protocol">&#64;service_class(protocol)</a></li>
+<li><a class="reference internal" href="#service">&#64;service()</a></li>
 <li><a class="reference internal" href="#service-manager-typed-protocol">service_manager.typed(protocol)</a></li>
 <li><a class="reference internal" href="#service-manager-get-protocol-name">service_manager.get_protocol(name)</a></li>
 <li><a class="reference internal" href="#service-manager-list-protocols">service_manager.list_protocols()</a></li>
