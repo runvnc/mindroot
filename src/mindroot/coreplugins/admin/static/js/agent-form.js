@@ -72,6 +72,17 @@ class AgentForm extends BaseEl {
       background: rgba(33, 150, 243, 0.1);
     }
 
+    .btn-danger {
+      border-color: #f44336;
+      color: #f44336;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 67, 54, 0.1);
+      border-color: #d32f2f;
+      color: #d32f2f;
+    }
+
     .agent-form {
       padding: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1655,6 +1666,41 @@ class AgentForm extends BaseEl {
     }
   }
 
+  async handleDeleteAgent() {
+    if (!this.agent?.name) {
+      showNotification('error', 'No agent selected for deletion');
+      return;
+    }
+
+    const confirmed = confirm(`Are you sure you want to delete the agent "${this.agent.name}"? This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      this.loading = true;
+      const response = await fetch(`/agents/local/${this.agent.name}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.detail || 'Failed to delete agent');
+      }
+
+      showNotification('success', `Agent ${this.agent.name} deleted successfully`);
+      
+      // Reset state and refresh agent list
+      this.agent = null;
+      this.selectedAgentName = '';
+      await this.fetchAgents();
+    } catch (error) {
+      showNotification('error', `Error deleting agent: ${error.message}`);
+    } finally {
+      this.loading = false;
+    }
+  }
+
   _render() {
     // Default structure for rendering when this.agent is null
     // This ensures the DOM structure is present but hidden.
@@ -1687,6 +1733,9 @@ class AgentForm extends BaseEl {
         </button>
         <button class="btn btn-secondary" @click=${this.handleExportAgent} ?disabled=${!this.agent}>
           Export Agent
+        </button>
+        <button class="btn btn-secondary btn-danger" @click=${this.handleDeleteAgent} ?disabled=${!this.agent}>
+          Delete Agent
         </button>
         <label class="btn btn-secondary" style="cursor: pointer; display: inline-block;">
           Import Agent

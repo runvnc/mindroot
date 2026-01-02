@@ -452,3 +452,25 @@ def duplicate_agent(scope: str, name: str, request: DuplicateAgentRequest):
         if target_dir.exists():
             shutil.rmtree(target_dir)
         raise HTTPException(status_code=500, detail=f'Error duplicating agent: {str(e)}')
+
+@router.delete('/agents/{scope}/{name}')
+def delete_agent(scope: str, name: str):
+    """Delete an agent"""
+    if scope not in ['local', 'shared']:
+        raise HTTPException(status_code=400, detail='Invalid scope')
+    
+    agent_dir = BASE_DIR / scope / name
+    if not agent_dir.exists():
+        raise HTTPException(status_code=404, detail='Agent not found')
+    
+    try:
+        # Remove the entire agent directory
+        shutil.rmtree(agent_dir)
+        
+        # Invalidate the ownership cache
+        global _agent_ownership_cache
+        _agent_ownership_cache = None
+        
+        return {'success': True, 'message': f'Agent {name} deleted successfully'}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error deleting agent: {str(e)}')
