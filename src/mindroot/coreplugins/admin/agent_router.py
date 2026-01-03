@@ -400,7 +400,6 @@ async def import_agent_zip(scope: str, file: UploadFile=File(...)):
                 raise HTTPException(status_code=400, detail=f'Agent {agent_name} already exists. Use the registry manager for updates.')
             target_dir.mkdir(parents=True, exist_ok=True)
             source_dir = agent_json_path.parent
-            import shutil
             for item in source_dir.rglob('*'):
                 if item.is_file():
                     relative_path = item.relative_to(source_dir)

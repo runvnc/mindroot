@@ -6,6 +6,7 @@ import './missing-commands.js';
 import {markdownRenderer} from './markdown-renderer.js';
 import showNotification from './notification.js';
 import './indexed-agents.js';
+import './model-selector.js';
 
 class AgentForm extends BaseEl {
   static properties = {
@@ -1258,21 +1259,8 @@ class AgentForm extends BaseEl {
 
       console.log('Saving, commands are:', this.agent.commands)
 
-      // Collect service models
-      const selectedModelsEls = this.shadowRoot.querySelectorAll('.service-model-select');
-      console.log('Selected models:', selectedModelsEls, this.agent.service_models);
-      for (const select of selectedModelsEls) {
-        const selectedValue = select.value;
-        const serviceName = select.name;
-        if (selectedValue) {
-          console.log(`Selected value for ${serviceName}:`, selectedValue);
-          const [provider, model] = selectedValue.split('__');
-          if (!this.agent.service_models) {
-            this.agent.service_models = {};
-          }
-          this.agent.service_models[serviceName] = { provider, model }
-        }
-      }
+      // Service models are now handled by model-selector component via _handleModelChange
+      console.log('Service models:', this.agent.service_models);
 
       console.log('Agent before saving:', this.agent);
       const formData = new FormData();
@@ -1442,29 +1430,39 @@ class AgentForm extends BaseEl {
       <div class="commands-grid">
         ${Object.entries(this.serviceModels).map(([serviceName, providers]) => html`
           <div class="command-item">
-        <div class="command-info">
-          <div class="command-name">${serviceName}</div>
-        </div>
-        <select name="${serviceName}" 
-                class="service-model-select"
-                @change=${this.handleInputChange}>
-          ${Object.entries(providers).map(([provider, models]) => html`
-            <optgroup label="${provider}">
-              ${models.map(model => html`
-                <option
-                ?selected=${this.agent?.service_models && 
-               this.agent.service_models[serviceName] && 
-               this.agent.service_models[serviceName].provider == provider && 
-               this.agent.service_models[serviceName].model == model}
-                  value="${provider}__${model}">${model}</option>
-              `)}
-            </optgroup>
-          `)}
-        </select>
+            <div class="command-info">
+              <div class="command-name">${serviceName}</div>
+            </div>
+            <model-selector
+              service-name="${serviceName}"
+              .providers=${providers}
+              .selectedValue=${this._getSelectedModelValue(serviceName)}
+              @model-change=${(e) => this._handleModelChange(serviceName, e.detail)}>
+            </model-selector>
           </div>
         `)}
       </div>
+      </div>
     `
+  }
+
+  _getSelectedModelValue(serviceName) {
+    if (this.agent?.service_models?.[serviceName]) {
+      const { provider, model } = this.agent.service_models[serviceName];
+      return `${provider}__${model}`;
+    }
+    return '';
+  }
+
+  _handleModelChange(serviceName, detail) {
+    if (!this.agent.service_models) {
+      this.agent.service_models = {};
+    }
+    this.agent.service_models[serviceName] = {
+      provider: detail.provider,
+      model: detail.model
+    };
+    this.agent = { ...this.agent };
   }
 
 
