@@ -1,0 +1,40 @@
+global-exclude *.py[cod]
+prune src/ah/local
+prune src/ah/data
+prune src/ah/personas
+prune src/ah/static
+prune src/ah/imgs
+prune src/ah/models
+
+recursive-include src/mindroot/coreplugins/agent *.j2
+recursive-include src/mindroot/coreplugins/chat/templates *
+recursive-include src/mindroot/coreplugins/chat/static *
+recursive-include src/mindroot/coreplugins/chat_avatar/inject *
+recursive-include src/mindroot/coreplugins/admin/templates *
+recursive-include src/mindroot/coreplugins/admin/static *
+recursive-include src/mindroot/coreplugins/index/static *
+recursive-include src/mindroot/coreplugins/index/templates *
+recursive-include src/mindroot/coreplugins/index *.json
+recursive-include src/mindroot/coreplugins/home/static *
+recursive-include src/mindroot/coreplugins/home/templates *
+recursive-include src/mindroot/coreplugins/signup/templates *
+recursive-include src/mindroot/coreplugins/signup/static *
+recursive-include src/mindroot/coreplugins/index *
+recursive-include src/mindroot/coreplugins/check_list *
+recursive-include src/mindroot/coreplugins/agent *
+recursive-include src/mindroot/coreplugins/usage *
+recursive-include src/mindroot/coreplugins/credits *
+recursive-include src/mindroot/coreplugins/subscriptions/templates *
+recursive-include src/mindroot/coreplugins/subscriptions *
+recursive-include src/mindroot/coreplugins/persona *
+recursive-include src/mindroot/coreplugins/login *
+recursive-include src/mindroot/coreplugins/api_keys *
+recursive-include src/mindroot/coreplugins/env_manager *
+recursive-include src/mindroot/coreplugins/scheduler *
+recursive-include src/mindroot/lib/plugins *.json
+
+recursive-include src/mindroot/coreplugins/google_auth *
+
+recursive-include src/mindroot/coreplugins/user_service *
+
+recursive-include src/mindroot/docs *

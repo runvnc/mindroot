@@ -1,0 +1,179 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Credit Ratio Configuration</h1>
+
+    <!-- Current Ratios Section -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Current Credit Ratios</h2>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-medium mb-3">Global Default</h3>
+            <div class="bg-gray-50 p-4 rounded">
+                <p>Default Ratio: {{ credit_ratios.default_ratio }} credits per unit cost</p>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-lg font-medium mb-3">Plugin-Specific Ratios</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-2 text-left">Plugin</th>
+                            <th class="px-4 py-2 text-left">Type</th>
+                            <th class="px-4 py-2 text-left">Model</th>
+                            <th class="px-4 py-2 text-left">Ratio</th>
+                            <th class="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plugin_id, plugin_config in credit_ratios.plugins.items() %}
+                            <!-- Plugin default -->
+                            {% if plugin_config.default_ratio is not none %}
+                            <tr class="border-t">
+                                <td class="px-4 py-2">{{ plugin_id }}</td>
+                                <td class="px-4 py-2">Default</td>
+                                <td class="px-4 py-2">-</td>
+                                <td class="px-4 py-2">{{ plugin_config.default_ratio }}</td>
+                                <td class="px-4 py-2">
+                                    <button onclick="editRatio('{{ plugin_id }}', null, null, {{ plugin_config.default_ratio }})">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endif %}
+
+                            <!-- Cost type specific -->
+                            {% for cost_type, ratio in plugin_config.cost_types.items() %}
+                            <tr class="border-t">
+                                <td class="px-4 py-2">{{ plugin_id }}</td>
+                                <td class="px-4 py-2">{{ cost_type }}</td>
+                                <td class="px-4 py-2">-</td>
+                                <td class="px-4 py-2">{{ ratio }}</td>
+                                <td class="px-4 py-2">
+                                    <button onclick="editRatio('{{ plugin_id }}', '{{ cost_type }}', null, {{ ratio }})">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            <!-- Model specific -->
+                            {% for model_id, model_config in plugin_config.models.items() %}
+                                {% if model_config.default_ratio is not none %}
+                                <tr class="border-t">
+                                    <td class="px-4 py-2">{{ plugin_id }}</td>
+                                    <td class="px-4 py-2">Default</td>
+                                    <td class="px-4 py-2">{{ model_id }}</td>
+                                    <td class="px-4 py-2">{{ model_config.default_ratio }}</td>
+                                    <td class="px-4 py-2">
+                                        <button onclick="editRatio('{{ plugin_id }}', null, '{{ model_id }}', {{ model_config.default_ratio }})">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {% for cost_type, ratio in model_config.cost_types.items() %}
+                                <tr class="border-t">
+                                    <td class="px-4 py-2">{{ plugin_id }}</td>
+                                    <td class="px-4 py-2">{{ cost_type }}</td>
+                                    <td class="px-4 py-2">{{ model_id }}</td>
+                                    <td class="px-4 py-2">{{ ratio }}</td>
+                                    <td class="px-4 py-2">
+                                        <button onclick="editRatio('{{ plugin_id }}', '{{ cost_type }}', '{{ model_id }}', {{ ratio }})">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add/Edit Ratio Form -->
+        <div class="mb-6">
+            <h3 class="text-lg font-medium mb-3">Add/Edit Ratio</h3>
+            <form id="ratioForm" class="space-y-4" onsubmit="updateRatio(event)">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Plugin ID</label>
+                        <input type="text" id="pluginId" name="plugin_id"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <p class="text-sm text-gray-500">Leave empty for global default</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Cost Type</label>
+                        <input type="text" id="costTypeId" name="cost_type_id"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <p class="text-sm text-gray-500">Leave empty for plugin default</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Model ID</label>
+                        <input type="text" id="modelId" name="model_id"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <p class="text-sm text-gray-500">Leave empty if not model-specific</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ratio</label>
+                        <input type="number" id="ratio" name="ratio" step="0.01" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Update Ratio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editRatio(pluginId, costTypeId, modelId, ratio) {
+    document.getElementById('pluginId').value = pluginId || '';
+    document.getElementById('costTypeId').value = costTypeId || '';
+    document.getElementById('modelId').value = modelId || '';
+    document.getElementById('ratio').value = ratio;
+}
+
+async function updateRatio(event) {
+    event.preventDefault();
+    const form = event.target;
+    
+    const data = {
+        ratio: parseFloat(form.ratio.value),
+        plugin_id: form.plugin_id.value || null,
+        cost_type_id: form.cost_type_id.value || null,
+        model_id: form.model_id.value || null
+    };
+
+    try {
+        const response = await fetch('/api/admin/credits/ratios', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('Ratio updated successfully');
+            location.reload();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.detail}`);
+        }
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+</script>
+{% endblock %}

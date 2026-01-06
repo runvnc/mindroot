@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block head_meta %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}
+  {{ agent_name }}
+      {% endblock %}</title>
+  {% endblock %}
+
+  {% block head_styles %}
+  <link rel="stylesheet" href="/chat/static/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  {% endblock %}
+
+  {% block head_scripts %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ansi_up@5.2.1/ansi_up.min.js"></script>
+  <script type="module" src="/chat/static/js/chatmessage.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script> -->
+  <script type="module" src="/chat/static/js/chatform.js"></script>
+  <script type="module" src="/chat/static/js/action.js"></script>
+  <script type="module" src="/chat/static/js/chat.js"></script>
+  <script type="module" src="/chat/static/js/plugin-toggle.js"></script>
+  <script type="module" src="/chat/static/js/mobile-menu.js"></script>
+  {% endblock %}
+
+  {% block head_favicon %}
+  <link rel="apple-touch-icon" sizes="180x180" href="/imgs/logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/imgs/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/imgs/logo.png">
+  {% endblock %}
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body{% if embed_mode %} class="embedded"{% endif %}>
+  {% block body_init %}
+  <script>
+    // print a big colorful header annoucing data init section
+    console.log("%cData Init Section", "color: white; background-color: green; font-size: 24px; padding: 10px;");
+    window.theme = 'default';
+    console.log("Init.");
+    console.log("Log ID: {{ log_id }}");
+    window.log_id = "{{ log_id }}";
+    window.agent_name = "{{ agent_name }}";
+    window.persona = "{{ persona }}";
+    window.access_token = "{{ access_token }}";
+    console.log("agent_name: " + window.agent_name);
+    console.log("access_token: " + window.access_token);
+  </script>
+  {% endblock %}
+ 
+  <button class="hamburger-menu">☰</button>
+  <div class="menu-overlay"></div>
+
+  <div class="page-container">
+    <div class="left-side">
+      {% block pre_content %}
+        &nbsp;
+      {% endblock %}
+    </div>
+
+    {% block insert %}
+    {% endblock %}
+
+    {% block content %}
+    <div class="main">
+        <chat-ai auto-size-input="true" sessionid="{{ log_id }}" agent_name="{{ agent_name }}"></chat-ai>
+    </div>
+    {% endblock %}
+
+    {% block post_content %}
+
+    {% endblock %}
+
+  </div> <!-- page-container -->
+  
+  <script type="module" src="/chat/static/js/code-copy-button.js"></script>
+
+  {% block body_extra %}{% endblock %}
+
+</body>
+</html>

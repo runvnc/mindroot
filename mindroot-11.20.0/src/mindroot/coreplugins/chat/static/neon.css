@@ -1,0 +1,37 @@
+:root {
+  --color-primary: #00ff00; /* Updated to Neon green for primary color */
+  --border-color: #00ff00; /* Updated to Neon green for borders */
+  --shadow-neon-bloom: 0 0 30px rgba(0, 255, 0, 0.8); /* Neon green glow */
+  --border-radius: 20px; /* Slightly increased rounded borders */ 
+  --assistant-avatar: url('static/assistant.png');
+  --user-avatar: url('static/user.png');
+}
+
+.rounded-theme {
+  border-radius: var(--border-radius);
+}
+
+body.dark {
+  background: linear-gradient(to right, #121212, #003300); /* Subtle green gradient */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+}
+
+.neon-effect {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); /* Enhanced neon green inner glow */
+}
+
+.input-text, .button {
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.input-text:focus, .button:hover {
+  background-color: #013301; /* Darker green for contrast */
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.9); /* Stronger glow on hover/focus */
+}
+
+.assistant-text {
+  color: var(--color-secondary);
+  text-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Stronger text shadow for better readability */
+}
+

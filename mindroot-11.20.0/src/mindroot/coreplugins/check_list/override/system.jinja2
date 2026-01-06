@@ -1,0 +1,6 @@
+{% block context %}
+
+{# we cannot output the context.data in the system message because it will change when each #}
+{# subtask is marked as complete and that will wipe out the prompt cache #}
+
+{% endblock %}

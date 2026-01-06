@@ -1,0 +1,13 @@
+{% block head %}
+<script type="module" src="/api_keys/static/js/api-key-manager.js"></script>
+{% endblock %}
+
+{% block content %}
+<details>
+  <summary><span class="material-icons">vpn_key</span>
+  <span>MindRoot API Keys</span></summary>
+  <div class="details-content">
+    <api-key-manager theme="dark" scope="local"></api-key-manager>
+  </div>
+</details>
+{% endblock %}

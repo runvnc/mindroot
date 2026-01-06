@@ -1,0 +1,19 @@
+{
+    "name": "Credits",
+    "version": "1.0.0",
+    "description": "Core plugin for credit allocation, tracking, and usage conversion",
+    "services": [
+        "allocate_credits",
+        "get_credit_balance",
+        "check_credits_available",
+        "set_credit_ratio",
+        "get_credit_ratios"
+    ],
+    "commands": [
+        "get_credit_report",
+        "estimate_credits"
+    ],
+    "dependencies": [
+        "usage"
+    ]
+}

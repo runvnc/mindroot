@@ -1,0 +1,562 @@
+import { LitElement, html, css } from './lit-core.min.js';
+import { unsafeHTML } from './lit-html/directives/unsafe-html.js';
+import { BaseEl } from './base.js';
+import { throttle } from './throttle.js';
+import './action.js';
+import { escapeJsonForHtml } from './property-escape.js';
+import { getAccessToken } from './auth.js';
+import { markdownRenderer } from './markdown-renderer.js';
+import { ChatHistory } from './chat-history.js';
+import { authenticatedFetch } from './authfetch.js';
+import { SSE } from './sse.js';
+import { registerDelegate } from './delegate_task.js'
+import showNotification from './notification.js';
+
+if (!window.lastParsed) window.lastParsed = Date.now();
+if (!window.lastScrolled) window.lastScrolled = Date.now();
+
+// Initialize ansi_up for ANSI color code rendering
+const ansi_up = new AnsiUp();
+
+window.lastScrolled = Date.now();
+
+window.commandHandlers = {};
+
+// Function to register command handlers
+window.registerCommandHandler = function(command, handler) {
+  console.log("Registering command handler for", command)
+  commandHandlers[command] = handler;
+}
+
+registerDelegate()
+
+
+function tryParse_(markdown) {
+    return markdownRenderer.parse(markdown);
+}
+
+//const tryParse = throttle(tryParse_, 200)
+const tryParse = tryParse_;
+
+
+const noAction = [ 'say', 'json_encoded_md', 'wait_for_user_reply', 'markdown_await_user', 'tell_and_continue', 'think' ]
+
+class Chat extends BaseEl {
+  static properties = {
+    sessionid: { type: String },
+    messages: [],
+    agent_name: { type: String },
+    task_id: { type: String },
+    lastSender: { type: String },
+    autoSizeInput: { type: Boolean, attribute: 'auto-size-input', reflect: true },
+    hideChatLog: { type: Boolean, attribute: 'hide-chat-log', reflect: true }
+  }
+
+  static styles = [
+    css`
+    `
+  ];
+
+  constructor(args) {
+    super();
+    console.log({ args });
+    this.attachShadow({mode: 'open'});
+    this.autoSizeInput = true;
+    this.messages = [];
+    this.userScrolling = false;
+    this.lastSender = null;
+    this.hideChatLog = false;
+    this.messagesByCmdId = new Map(); // Track message index by command ID
+    window.userScrolling = false;
+    console.log('Chat component created');
+    this.history = new ChatHistory(this);
+    console.log(this);
+    
+    // Register global sendChat function
+    this._registerGlobalSendChat();
+  }
+
+  _registerGlobalSendChat() {
+    const self = this;
+    window.sendChat = function(text) {
+      const messageContent = [{ type: 'text', text: '\n' + text.replaceAll('\n', '\n\n') }];
+      
+      const event = new CustomEvent('addmessage', {
+        detail: {
+          content: messageContent,
+          sender: 'user',
+          persona: 'user'
+        },
+        bubbles: true,
+        composed: true
+      });
+      
+      self._addMessage(event);
+      return true;
+    };
+  }
+
+  
+  exposeSubcomponents() {
+    // Get all chat-message elements
+    const messages = this.shadowRoot.querySelectorAll('chat-message');
+    messages.forEach(msg => {
+      if (msg.shadowRoot) {
+        msg.shadowRoot.mode = 'open';
+      }
+    });
+    
+    const chatForm = this.shadowRoot.querySelector('chat-form');
+    if (chatForm && chatForm.shadowRoot) {
+      chatForm.shadowRoot.mode = 'open';
+    }
+  }
+
+  shouldShowAvatar(sender) {
+    const showAvatar = this.lastSender !== sender;
+    this.lastSender = sender;
+    return showAvatar;
+  }
+
+
+  firstUpdated() {
+    console.log('First updated');
+    console.log('sessionid: ', this.sessionid);
+    if (this.sessionid.includes('log_id')) {
+      console.log("Not on chat page, chat component not connecting to events.")
+      return
+    }
+    if (window.access_token) {
+      this.sse = new SSE(`/chat/${this.sessionid}/events`, {
+      headers: {
+        'Authorization': `Bearer ${window.access_token}`
+      }
+     });
+     this.sse.stream();
+    } else {
+      this.sse = new EventSource(`/chat/${this.sessionid}/events`);
+    }
+ 
+    const thisPartial_ = this._partialCmd.bind(this) 
+    const thisPartial = throttle(thisPartial_, 300)
+    const thisRunning = this._runningCmd.bind(this)
+    const thisResult = this._cmdResult.bind(this)
+    const thisFinished = this._finished.bind(this)
+    const thisError = this._showError.bind(this)
+
+    this.sse.addEventListener('image', this._imageMsg.bind(this));
+    this.sse.addEventListener('partial_command', e => thisPartial(e));
+    this.sse.addEventListener('running_command', e => thisRunning(e).catch(console.error));
+    this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
+    this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));
+    this.sse.addEventListener('system_error', e=> thisError(e).catch(console.error));
+    this.sse.addEventListener('backend_user_message', this._backendUserMessage.bind(this));
+
+    // when the user scrolls in the chat log, stop auto-scrolling to the bottom
+    const chatLog = this.shadowRoot.querySelector('.chat-log');
+    if (chatLog) {
+      chatLog.addEventListener('scroll', () => {
+        if (chatLog.scrollTop == chatLog.scrollHeight - chatLog.clientHeight) {
+          this.userScrolling = false;
+          window.userScrolling = false;
+        } else {
+          this.userScrolling = true;
+          window.userScrolling = true;
+        }
+      });
+    }
+
+    // Load history after a short delay to ensure components are ready
+    setTimeout(() => {
+      this.history.loadHistory();
+    }, 100);
+  }
+
+  _showError(event) {
+    console.log("NOTIFICATION", event)
+    const data = JSON.parse(event.data);
+    showNotification('error', data.error);
+  }
+
+  _backendUserMessage(event) {
+    console.log('Backend user message received:', event);
+    const data = JSON.parse(event.data);
+    const { content, sender, persona } = data;
+    
+    // Parse the content as markdown
+    const parsed = tryParse_(content);
+    
+    // Add the message to the chat log
+    this.messages = [...this.messages, { 
+      content: parsed, 
+      spinning: 'no', 
+      sender: sender || 'user', 
+      persona: persona || 'user' 
+    }];
+    
+    // Scroll to show the new message
+    setTimeout(() => {
+      this._scrollToBottom();
+    }, 100);
+  }
+  
+
+  _addMessage(event) {
+    const { content, sender, persona } = event.detail;
+    
+    if (Array.isArray(content)) {
+      let combinedContent = '';
+      for (let item of content) {
+        if (item.type === 'text') {
+          combinedContent += tryParse_(item.text);
+        } else if (item.type === 'image') {
+          combinedContent += `<img src="${item.data}" class="image_input" alt="pasted image">`;
+        }
+      }
+      this.messages = [...this.messages, { content: combinedContent, spinning:'no', sender, persona }];
+    } else {
+      const parsed = tryParse_(content);
+      this.messages = [...this.messages, { content: parsed, spinning:'no', sender, persona }];
+      content = [{ type: 'text', text: content }]
+    }
+
+    if (sender === 'user') {
+      this.userScrolling = false;
+      window.userScrolling = false;
+      console.log("Set userScrolling to false")
+      const request = new Request(`/chat/${this.sessionid}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(content)
+      });
+
+      authenticatedFetch(request).then(response => {
+        return response.json();
+      }).then(data => {
+          console.log(data);
+          this.task_id = data.task_id;
+          setTimeout(() => { 
+            this._scrollToBottom();
+            this.userScrolling = false;
+          }, 300)         
+      })      
+    }
+    this.lastMessageTime = Date.now()
+    console.log(`%c ${this.lastMessageTime}`, 'color: red')
+
+    this.msgSoFar = '';
+    setTimeout(() => {
+      this._scrollToBottom();
+    }, 100)
+  }
+
+  async _finished(event) {
+    console.log('Chat finished');
+    this.task_id = null
+    this.userScrolling = false;
+    this._scrollToBottom()
+  }
+
+  textParam (data) {
+    console.log('textParam', data);
+    if (typeof(data) == 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+      console.error('Could not parse data string:', e);
+      return data;
+      }
+    }
+    if (data?.args?.text) {
+      return data.args.text;
+    } else if (data?.args?.markdown) {
+      return data.args.markdown;
+    } else if (data?.params?.text) {
+      return data.params.text;
+      } else if (data?.params?.markdown) {
+      return data.params.markdown;
+      } else if (data?.params?.extensive_chain_of_thoughts) {
+      return data.params.extensive_chain_of_thoughts;
+      }
+    return JSON.stringify(data.params || data.args);
+  }
+
+  async _partialCmd(event) {
+    try {
+      console.log('Event received');
+      console.log(event);
+      let content = null
+      const data = JSON.parse(event.data);
+      data.event = 'partial'
+      console.log("data:", data)
+      const handler = commandHandlers[data.command];
+      if (handler) {
+        content = await handler(data);
+      } 
+      
+      // Check if we already have a message for this command ID
+      let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+      
+      if (messageIndex === undefined) {
+        // Create a new message for this command
+        messageIndex = this.messages.length;
+        this.messages = [...this.messages, { 
+          content: '', 
+          sender: 'ai', 
+          persona: data.persona,
+          cmd_id: data.cmd_id 
+        }];
+        this.messagesByCmdId.set(data.cmd_id, messageIndex);
+        console.log(`Created new message at index ${messageIndex} for cmd_id ${data.cmd_id}`);
+      }
+      
+      const lastMsg = this.messages[this.messages.length - 1];
+      // If no cmd_id (shouldn't happen with new code, but handle legacy), fall back to old logic
+      if (!data.cmd_id && (!lastMsg || lastMsg.sender !== 'ai')) {
+        messageIndex = this.messages.length;
+        this.messages = [...this.messages, { content: '', sender: 'ai', persona: data.persona }];
+        console.log('Legacy: adding message without cmd_id');
+      }
+
+      if (noAction.includes(data.command)) {
+        // Check if there's a registered handler for this command
+        if (handler) {
+          console.log('Used registered handler for', data.command);
+          this.msgSoFar = null
+        } else {
+          this.msgSoFar = this.textParam(data);
+        }
+
+        try {
+          if (!window.lastParsed) window.lastParsed = Date.now();
+          if (content) {
+            this.messages[messageIndex].content = content
+          } else if (this.msgSoFar) {
+            let elapsed_ = Date.now() - window.lastParsed;
+            if (elapsed_ > 40 || this.msgSoFar + '' == '[object Object]' ) {
+              const parsed_ = tryParse(this.msgSoFar);
+              if (false && parsed_+'' == '[object Object]') {
+                console.log('msgSoFar is an object, not parsing:', this.msgSoFar);
+              } else {
+                this.messages[messageIndex].content = parsed_;
+                console.log(' parsed ', elapsed_);
+                window.lastParsed = Date.now();
+              }
+            } else {
+              console.log('********************************* only ',elapsed_);
+            }
+          }
+        } catch (e) {
+          console.error("Could not parse markdown:", e)
+          console.log('msgSoFar:')
+          console.log(this.msgSoFar)
+          this.messages[messageIndex].content = `<pre><code>${this.msgSoFar}</code></pre>`
+        }
+      } else {
+        console.log('partial. data.params', data.params)
+        console.log("command is", data.command)
+        if (handler) {
+          data.event = 'partial'
+          console.log('handler:', handler)
+          content = handler(data);
+          this.requestUpdate();
+        } else {
+          console.warn('No handler for command:', data.command)
+          console.warn(commandHandlers)
+        }
+
+        if (typeof(data.params) == 'array') {
+          data.params = {"val": data.params}
+        } else if (typeof(data.params) == 'string') {
+          data.params = {"val": data.params}
+        } else if (typeof(data.params) == 'object') {
+          data.params = {"val": data.params}
+        }
+        const paramStr = JSON.stringify(data.params)
+        const escaped = escapeJsonForHtml(paramStr)
+        if (content) {
+          console.log('found content, not using action component')
+          this.messages[messageIndex].content = content
+        } else {
+          if (this.messages[messageIndex].content == '' ||
+              Date.now()- window.lastParsed > 40) {
+            window.lastParsed = Date.now();
+            this.messages[messageIndex].content = `
+            <action-component funcName="${data.command}" params="${escaped}" cmd_id="${data.cmd_id}"
+                                result="">
+              </action-component>`; 
+          }
+        }
+      }
+      this.requestUpdate();
+      this._scrollToBottom()
+      window.initializeCodeCopyButtons();
+    } catch (e) {
+      console.error("Error in partialCmd", e)
+    }
+  }
+
+  async _runningCmd(event) {
+    const data = JSON.parse(event.data);
+    console.log('Running command');
+    
+    // Get the message index for this command ID
+    let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+    
+    if (messageIndex === undefined) {
+      // Create new message if we don't have one yet (shouldn't happen normally)
+      console.log('_runningCmd: creating new message for cmd_id:', data.cmd_id);
+      messageIndex = this.messages.length;
+      this.messages = [...this.messages, { 
+        content: '', 
+        sender: 'ai', 
+        persona: data.persona, 
+        spinning: 'yes',
+        cmd_id: data.cmd_id 
+      }];
+      this.messagesByCmdId.set(data.cmd_id, messageIndex);
+    }
+    
+    // Set spinner for this specific message
+    this.messages[messageIndex].spinning = 'yes';
+    console.log('Spinner set to true for message at index:', messageIndex);
+    
+    // Check if the command is 'say' or 'json_encoded_md' and has a registered handler
+    console.log('running command:', data)
+    if ((data.command === 'say' || data.command === 'json_encoded_md') && commandHandlers[data.command]) {
+      // Don't show the spinner for these commands if they have handlers
+      this.messages[messageIndex].spinning = 'no';
+    }
+
+    if (data.args?.markdown && data.args.markdown.split('\n').length < 3) {
+        this.messages[messageIndex].content = tryParse_(data.args.markdown);
+    }
+    
+    console.log(event);
+    //this.requestUpdate();
+
+    console.log("command result (actually running command)", event)
+    data.event = 'running'
+    const handler = commandHandlers[data.command];
+    if (handler) {
+      console.log('handler:', handler)
+      const result = await handler(data);
+      if (result) {
+        this.messages[messageIndex].content = result
+      }
+    } else {
+      console.warn('No handler for command:', data.command)
+      if (!noAction.includes(data.command)) {
+        this.messages[messageIndex].content = `<action-component funcName="${data.command}" params="${escapeJsonForHtml(JSON.stringify(data.args))}" cmd_id="${data.cmd_id}" result=""></action-component>`;
+      } else if (!this.messages[messageIndex].content || 
+                 this.messages[messageIndex].content === '') {
+        // Only set content if it hasn't been set by _partialCmd already
+        this.messages[messageIndex].content = tryParse_(this.textParam(data));
+      }
+    }
+    window.initializeCodeCopyButtons();
+    this.requestUpdate();
+  }
+
+  async _cmdResult(event) {
+    console.log("command result", event)
+    const data = JSON.parse(event.data);
+    const handler = commandHandlers[data.command];
+    data.event = 'result'
+    
+    // Get the message index for this command ID
+    let messageIndex = this.messagesByCmdId.get(data.cmd_id);
+    
+    if (handler) {
+      await handler(data);
+    } else {
+      try {
+        // Handle execute_command and run_python results
+        if (data.command == 'execute_command' || data.command == 'run_python') {
+          let skipWarning = data.result?.replace(' command result, NOT user reply','');
+          // Convert ANSI codes to HTML
+          const htmlOutput = ansi_up.ansi_to_html(skipWarning);
+          
+          // Always add shell output as a new message (simpler and avoids race conditions)
+          this.messages = [...this.messages, {
+            role: 'user',
+            content: `<pre class="shellout"><code>${htmlOutput}</code></pre>`,
+          }];
+        }
+      } catch (e) {
+        console.error("Could not parse command result:", e)
+      }
+    }
+    for (let msg of this.messages) {
+      msg.spinning = 'no'
+      console.log('Spinner set to false:', msg);
+    }
+    window.initializeCodeCopyButtons();
+    this.requestUpdate();
+  }
+
+  _aiMessage(event) {
+    console.log('Event received');
+    console.log(event);
+    const data = JSON.parse(event.data);
+    console.log('aimessage', data);
+    this.messages = [...this.messages, { content: data.content, spinning: 'no', persona: data.persona, sender: 'ai' }];
+  }
+
+  _imageMsg(event) {
+    console.log('Event received');
+    console.log(event);
+    const data = JSON.parse(event.data);
+    const html = `<img src="${data.url}" alt="image">`;
+    this.messages = [...this.messages, { content: html, sender: 'ai', spinning: 'no' }]
+  }
+
+
+  _scrollToBottom(forceInstant = false) {
+    const chatLog = this.shadowRoot.querySelector('.chat-log');
+    if (!chatLog) return;
+    
+    const difference = chatLog.scrollTop - (chatLog.scrollHeight - chatLog.clientHeight)
+    console.log({difference, userScrolling: this.userScrolling, windowUserScrolling: window.userScrolling})
+    const isAtBottom = difference > -250
+    if (isAtBottom || !this.userScrolling) {
+      const lastMessageEls = this.shadowRoot.querySelectorAll('chat-message');
+      const lastEl = lastMessageEls[lastMessageEls.length-1];
+      //lastEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (window.access_token && window.access_token.length > 20) {
+        console.log('this is an embed probably, not scrolling messages')
+      } else {
+        const elapsed = Date.now() - window.lastScrolled;
+        if (elapsed < 300) {
+          console.log('Not scrolling to bottom, too soon after last scroll');
+          return;
+        }
+        window.lastScrolled = Date.now();
+        lastEl.scrollIntoView({ behavior: forceInstant ? 'instant' : 'instant', block: 'end' });
+      }
+
+    } else {
+      console.log('Not scrolling to bottom')
+    }
+  }
+
+  _render() {
+    return html`
+      <div class="chat-log" style="${this.hideChatLog ? 'display: none;' : ''}">
+        ${this.messages.map(({ content, sender, persona, spinning }) => {
+          const showAvatar = this.shouldShowAvatar(sender);
+          return html`
+            <chat-message sender="${sender}" class="${sender}" persona="${persona}" spinning="${spinning}" ?show-avatar="${showAvatar}">
+              ${unsafeHTML(content)}
+            </chat-message>
+          `;
+        })}
+      </div>
+      <chat-form taskid=${this.task_id} @addmessage="${this._addMessage}" auto-size-input="${this.autoSizeInput}" ></chat-form>
+    `;
+  }
+}
+
+customElements.define('chat-ai', Chat);

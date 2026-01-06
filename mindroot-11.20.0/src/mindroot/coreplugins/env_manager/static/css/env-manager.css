@@ -1,0 +1,263 @@
+:host {
+  display: block;
+  width: 100%;
+  color: var(--text-color);
+}
+
+.env-manager {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%; /* Adjust to fit container */
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.section {
+  background: rgb(10, 10, 25);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h3 {
+  margin-top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  padding: 0.5rem;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.env-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  table-layout: fixed; /* Fixed layout for better control */
+}
+
+.env-table th,
+.env-table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Column widths */
+.env-table th:nth-child(1),
+.env-table td:nth-child(1) {
+  width: 40%; /* Variable Name */
+}
+
+.env-table th:nth-child(2),
+.env-table td:nth-child(2) {
+  width: 45%; /* Value */
+}
+
+.env-table th:nth-child(3),
+.env-table td:nth-child(3) {
+  width: 15%; /* Actions */
+  text-align: center;
+}
+
+.env-table th {
+  background: rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+}
+
+.env-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.plugin-header {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.plugin-name {
+  font-weight: 600;
+  padding: 0.75rem;
+  color: #4a90e2;
+  font-size: 1.1em;
+}
+
+.plugin-var td {
+  padding-left: 1.5rem;
+}
+
+.var-name {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+.var-value {
+  font-family: monospace;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.var-value.masked {
+  color: #888;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+button {
+  background: #2a2a40;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #3a3a50;
+}
+
+button.primary {
+  background: #4a90e2;
+}
+
+button.primary:hover {
+  background: #5aa0f2;
+}
+
+button.small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.edit-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.edit-form input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  padding: 0.5rem;
+  border-radius: 4px;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-row input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  padding: 0.5rem;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 0.5rem;
+}
+
+.plugin-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 100%;
+  margin-top: 0.5rem;
+}
+
+.plugin-tag {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  display: inline-block;
+  white-space: nowrap;
+  margin-bottom: 0.25rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-style: italic;
+  color: #888;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.material-icons {
+  font-size: 1.2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .env-table {
+    table-layout: auto;
+  }
+  
+  .env-table th:nth-child(1),
+  .env-table td:nth-child(1),
+  .env-table th:nth-child(2),
+  .env-table td:nth-child(2),
+  .env-table th:nth-child(3),
+  .env-table td:nth-child(3) {
+    width: auto;
+  }
+  
+  .plugin-var td {
+    padding-left: 0.75rem;
+  }
+}

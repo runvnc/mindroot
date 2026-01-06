@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Component Example with Tailwind CSS</title>
+  <link rel="stylesheet" href="/static/css/reset.css">
+  <link rel="stylesheet" href="/static/css/default.css"> 
+  <script type="module" src="/static/js/chatmessage.js" ></script>
+  <script type="module" src="/static/js/chatform.js"></script>
+  <script type="module" src="/static/js/chat.js"></script>
+</head>
+<body>
+    <script>window.theme = 'default';
+            console.log("Init.")
+    </script>
+    <chat-ai sessionid="{{CHAT_ID}}"></chat-ai>
+</body>
+</html>
+

@@ -1,0 +1,32 @@
+/* Action component full width fix - ONLY target action components */
+action-component {
+  display: block !important;
+  width: 100% !important;
+}
+
+action-component .action-details {
+  width: 100% !important;
+  display: block !important;
+}
+
+action-component .action-details summary {
+  width: 100% !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+/* Action summary styling - brighter text */
+action-component .action-summary {
+  background: #333 !important;
+  color: #f0f0f0 !important;
+}
+
+action-component .param-preview {
+  color: #ddd !important;
+}
+
+action-component .fn_name {
+  color: #f0f0f0 !important;
+}
+
+/* DO NOT TOUCH CHAT MESSAGE ALIGNMENT - Let default.css handle it */

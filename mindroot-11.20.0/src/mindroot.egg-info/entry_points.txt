@@ -1,0 +1,3 @@
+[console_scripts]
+mindroot = mindroot.server:main
+mr = mindroot.coreplugins.tui.cli:main

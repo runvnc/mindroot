@@ -1,0 +1,669 @@
+/* Admin Interface Styles */
+
+/* Header Area */
+.admin-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 2rem;
+    background: rgba(10, 10, 25, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.admin-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 64px;
+}
+
+.admin-header .logo:hover {
+    color: #4a9eff;
+}
+
+/* Container Layout */
+.admin-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    min-width: 70%;
+}
+
+/* Section Styling */
+details {
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+details summary {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+details summary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+details summary .material-icons {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.details-content {
+    padding: 1rem;
+}
+
+/* Agent Editor Specific Styles */
+.agent-editor {
+    background: rgba(10, 10, 25, 0.8);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.agent-editor form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.agent-editor .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.agent-editor label {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.agent-editor input[type="text"],
+.agent-editor select,
+.agent-editor textarea {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.agent-editor input[type="text"]:focus,
+.agent-editor select:focus,
+.agent-editor textarea:focus {
+    outline: none;
+    border-color: #4a9eff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.agent-editor textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+/* Command Selection Area */
+.commands-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.commands-category {
+    margin-bottom: 1rem;
+}
+
+.commands-category h4 {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+}
+
+.commands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.command-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.command-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.command-item input[type="checkbox"] {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.command-name {
+    white-space: nowrap;
+    flex: 1;
+    margin-right: 1rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+}
+
+/* Enhanced Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #fff;
+    text-align: left;
+    padding: 0.75rem;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 300px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* GitHub Import Section */
+.github-import {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.github-import h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.github-import-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.github-import input {
+    flex: 1;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #fff;
+}
+
+/* Status Messages */
+.status-message {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    color: #81c784;
+}
+
+.status-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    color: #e57373;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    background: #4a9eff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn:hover {
+    background: #3d8ae0;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Section Headers */
+h2, h3, h4 {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 0 1rem;
+    }
+    
+    .github-import-form {
+        flex-direction: column;
+    }
+    
+    .commands-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-link, .admin-link:visited {
+  color: #ddd;
+}
+
+/* Category Section Styles */
+.category-section {
+    margin-bottom: 2rem;
+    background: rgba(5, 5, 15, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 1.5rem 0;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.category-title .material-icons {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+/* Adjust details within categories */
+.category-section details {
+    margin-bottom: 1rem;
+    background: rgba(15, 15, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.category-section details:last-child {
+    margin-bottom: 0;
+}
+
+.category-section details summary {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+}
+
+.category-section details summary:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.category-section .details-content {
+    padding: 1.25rem;
+    background: rgba(10, 10, 25, 0.5);
+}
+
+/* Category-specific styling */
+.category-section:nth-child(1) .category-title {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(74, 158, 255, 0.08));
+    border-color: rgba(74, 158, 255, 0.2);
+}
+
+.category-section:nth-child(2) .category-title {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.08));
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.category-section:nth-child(3) .category-title {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.15), rgba(255, 152, 0, 0.08));
+    border-color: rgba(255, 152, 0, 0.2);
+}
+
+/* Responsive adjustments for categories */
+@media (max-width: 768px) {
+    .category-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-title {
+        font-size: 1.2rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .category-section details summary {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .category-section .details-content {
+        padding: 1rem;
+    }
+}
+
+/* Navigation Category Styles */
+.nav-category {
+    margin-bottom: 0.5rem;
+}
+
+.nav-category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    transition: background 0.2s ease;
+}
+
+.nav-category-header:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-category-header .material-icons {
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.nav-category-content {
+    padding-left: 1rem;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+    margin-left: 1rem;
+}
+
+.nav-category-content .tab-button {
+    width: 100%;
+    margin-bottom: 0.25rem;
+    justify-content: flex-start;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Category-specific colors for headers */
+.nav-category:nth-child(1) .nav-category-header {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(74, 158, 255, 0.08));
+    border-color: rgba(74, 158, 255, 0.2);
+}
+
+.nav-category:nth-child(1) .nav-category-content {
+    border-left-color: rgba(74, 158, 255, 0.3);
+}
+
+.nav-category:nth-child(2) .nav-category-header {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.08));
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.nav-category:nth-child(2) .nav-category-content {
+    border-left-color: rgba(76, 175, 80, 0.3);
+}
+
+.nav-category:nth-child(3) .nav-category-header {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.15), rgba(255, 152, 0, 0.08));
+    border-color: rgba(255, 152, 0, 0.2);
+}
+
+.nav-category:nth-child(3) .nav-category-content {
+    border-left-color: rgba(255, 152, 0, 0.3);
+}
+
+/* Responsive adjustments for navigation categories */
+@media (max-width: 768px) {
+    .nav-category-header {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .nav-category-content {
+        padding-left: 0.75rem;
+        margin-left: 0.75rem;
+    }
+    
+    .nav-category-content .tab-button {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Enhanced Navigation Category Styles with Expand Indicators */
+.nav-category-header {
+    position: relative;
+}
+
+.nav-category-header::after {
+    content: '▼';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-category:not([open]) .nav-category-header::after {
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.nav-category-header:hover::after {
+    opacity: 1;
+}
+
+/* Enhanced hover effects */
+.nav-category-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Category-specific hover enhancements */
+.nav-category:nth-child(1) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.25), rgba(74, 158, 255, 0.15));
+    border-color: rgba(74, 158, 255, 0.3);
+}
+
+.nav-category:nth-child(2) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(76, 175, 80, 0.15));
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.nav-category:nth-child(3) .nav-category-header:hover {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.25), rgba(255, 152, 0, 0.15));
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+/* Smooth transitions for all category interactions */
+.nav-category-header {
+    transition: all 0.2s ease;
+}
+
+.nav-category-content {
+    transition: all 0.2s ease;
+}
+
+/* Enhanced tab button hover within categories */
+.nav-category-content .tab-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(2px);
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Active state enhancements */
+.nav-category-content .tab-button.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 3px solid #4a9eff;
+    font-weight: 500;
+}
+
+.nav-category-content .tab-button.active:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+
+.publish-details summary {
+  list-style: none;
+}
+
+/* Remove webkit default arrow */
+.publish-details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Add custom arrow using ::before pseudo-element */
+.publish-details summary::before {
+  content: '▶';
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+/* Rotate arrow when expanded */
+.publish-details details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+
+
+/* Override all radio buttons globally */
+input[type="radio"] {
+  /* Remove default appearance */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Size and positioning */
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  
+  /* Dark theme styling */
+  background-color: #2a2a2a;
+  border: 2px solid #4a4a4a;
+  border-radius: 50%;
+  
+  /* Smooth transitions */
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  /* Positioning for the inner dot */
+  position: relative;
+  vertical-align: middle;
+}
+
+/* Hover state */
+input[type="radio"]:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Checked state */
+input[type="radio"]:checked {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+/* Inner dot when checked */
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* Focus state for accessibility */
+input[type="radio"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Disabled state */
+input[type="radio"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type="radio"]:disabled:hover {
+  border-color: #4a4a4a;
+  box-shadow: none;
+}
+
+
+

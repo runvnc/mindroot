@@ -1,0 +1,160 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Credit Management</h1>
+
+    <!-- Credit Allocation Section -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Allocate Credits</h2>
+        
+        <form id="allocationForm" class="space-y-4" onsubmit="allocateCredits(event)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Amount</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Source</label>
+                    <select id="source" name="source"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="admin_grant">Admin Grant</option>
+                        <option value="purchase">Purchase</option>
+                        <option value="bonus">Bonus</option>
+                        <option value="refund">Refund</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Reference ID</label>
+                    <input type="text" id="referenceId" name="reference_id" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Metadata (JSON)</label>
+                <textarea id="metadata" name="metadata" rows="3"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                          placeholder='{"reason": "signup bonus"}'></textarea>
+            </div>
+            <div>
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Allocate Credits
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Credit Report Section -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Credit Reports</h2>
+        
+        <form id="reportForm" class="space-y-4" onsubmit="generateReport(event)">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="reportUsername" name="username" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" id="startDate" name="start_date"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="endDate" name="end_date"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+            </div>
+            <div>
+                <button type="submit" 
+                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Generate Report
+                </button>
+            </div>
+        </form>
+
+        <!-- Report Results -->
+        <div id="reportResults" class="hidden mt-6">
+            <h3 class="text-lg font-medium mb-3">Report Results</h3>
+            <pre id="reportOutput" class="bg-gray-100 p-4 rounded overflow-x-auto"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+async function allocateCredits(event) {
+    event.preventDefault();
+    const form = event.target;
+    
+    let metadata = {};
+    try {
+        metadata = JSON.parse(form.metadata.value || '{}');
+    } catch (e) {
+        alert('Invalid metadata JSON');
+        return;
+    }
+    
+    const data = {
+        username: form.username.value,
+        amount: parseFloat(form.amount.value),
+        source: form.source.value,
+        reference_id: form.reference_id.value,
+        metadata: metadata
+    };
+
+    try {
+        const response = await fetch('/api/admin/credits/allocate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(`Credits allocated successfully. New balance: ${result.new_balance}`);
+            form.reset();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.detail}`);
+        }
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+async function generateReport(event) {
+    event.preventDefault();
+    const form = event.target;
+    const username = form.username.value;
+    const startDate = form.start_date.value;
+    const endDate = form.end_date.value;
+
+    let url = `/api/admin/credits/report/${username}`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    if (params.toString()) url += `?${params.toString()}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        document.getElementById('reportResults').classList.remove('hidden');
+        document.getElementById('reportOutput').textContent = 
+            JSON.stringify(data, null, 2);
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+</script>
+{% endblock %}

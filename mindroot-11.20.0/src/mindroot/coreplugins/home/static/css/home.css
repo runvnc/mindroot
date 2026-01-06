@@ -1,0 +1,191 @@
+/* Admin Custom Styles */
+
+body {
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: rgb(5, 5, 16);
+  color: #f0f0f0;
+}
+
+.admin-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+dialog, div, form {
+  background-color: #050510;
+  color: #f0f0f0;
+}
+
+dialog {
+  padding: 20px;
+}
+
+details {
+  background: rgb(10, 10, 25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+details[open] {
+  border-color: #4a90e2;
+}
+
+summary {
+  padding: 15px 20px;
+  background: rgb(15, 15, 30);
+  color: #f0f0f0;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+summary:hover {
+  background: rgb(20, 20, 40);
+}
+
+details[open] summary {
+  background: rgb(25, 25, 50);
+}
+
+.details-content {
+  padding: 20px;
+}
+
+/* Smooth opening/closing of details */
+.details-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+details:not([open]) .details-content {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+details[open] .details-content {
+  max-height: none;
+}
+
+/* Improve focus styles for accessibility */
+details:focus-within {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+/* Button styles */
+button,
+input[type="submit"],
+.btn {
+  background-color: rgb(25, 25, 50);
+  color: #f0f0f0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+button:hover,
+input[type="submit"]:hover,
+.btn:hover {
+  background-color: rgb(35, 35, 70);
+}
+
+/* File input styles */
+#faceref,
+#avatar {
+  display: none;
+}
+
+.file-upload-container {
+  margin-bottom: 10px;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: rgb(25, 25, 50);
+  color: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background-color: rgb(35, 35, 70);
+}
+
+.file-name {
+  margin-left: 10px;
+  font-style: italic;
+}
+
+/* Plugin manager styles */
+.plugin-manager {
+  padding: 20px;
+  background: rgb(10, 10, 25);
+  border-radius: 8px;
+}
+
+.scan-section {
+  margin-bottom: 20px;
+}
+
+.plugin-item {
+  background: rgb(15, 15, 30);
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.plugin-item span {
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+
+.plugin-item button {
+  margin-left: 5px;
+}
+
+.logo {
+  width: 64px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  summary {
+    padding: 10px 15px;
+  }
+
+  .details-content {
+    padding: 15px;
+  }
+
+  .plugin-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .plugin-item button {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+}

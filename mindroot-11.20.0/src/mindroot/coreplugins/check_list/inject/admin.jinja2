@@ -1,0 +1,14 @@
+{% block head %}
+<script type="module" src="/check_list/static/js/checklist-help.js"></script>
+{% endblock %}
+
+{% block content %}
+<details data-inject-category="advanced">
+  <summary><span class="material-icons">checklist</span>
+  <span>Checklist Helper</span>
+  </summary>
+  <div class="details-content">
+    <checklist-help theme="dark" scope="local"></checklist-help>
+  </div>
+</details>
+{% endblock %}

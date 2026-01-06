@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block head_meta %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Interface</title>
+  {% endblock %}
+  {% block head %}
+  <link rel="stylesheet" href="/admin/static/css/reset.css">
+  <link rel="stylesheet" href="/admin/static/css/default.css">
+  <link rel="stylesheet" href="/admin/static/css/admin-custom.css">
+  <link rel="stylesheet" href="/admin/static/css/detailstabs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
+  <script type="module" src="/admin/static/js/persona-editor.js"></script>
+  <script type="module" src="/admin/static/js/plugin-toggle.js"></script>
+  <script type="module" src="/admin/static/js/agent-editor.js"></script>
+  <script type="module" src="/admin/static/js/model-preferences-v2.js"></script>
+  <script type="module" src="/admin/static/js/plugin-manager.js"></script>
+  <script type="module" src="/admin/static/js/server-control.js"></script>
+  <script type="module" src="/admin/static/js/about-info.js"></script>
+  <script type="module" src="/admin/static/js/registry-manager.js"></script>
+  <script type="module" src="/admin/static/js/api-key-script.js"></script>
+  <script type="module" src="/admin/static/js/secure-widget-manager.js"></script>
+  <script type="module" src="/admin/static/js/mcp-registry-browser.js"></script>
+
+  {% block head_favicon %}
+  <link rel="apple-touch-icon" sizes="180x180" href="/imgs/logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/imgs/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/imgs/logo.png">
+
+  {% endblock %}
+
+  {% endblock %}
+  {% block head_end %}
+  {% endblock %}
+</head>
+<body>
+  {% block content_top %}
+  <header class="admin-header">
+    <a href="/" class="logo">
+      <img src="/imgs/logo.png" class="logo"/>
+    </a>
+  </header>
+  <script>window.theme = 'default';</script>
+  {% endblock %}
+
+  {% block content %}
+  <div class="admin-container">
+    <!-- Customize Category -->
+    <details data-category="customize">
+      <summary class="category-header">
+        <span class="material-icons">tune</span>
+        <span>Customize</span>
+      </summary>
+      
+      <details>
+        <summary>
+          <span class="material-icons">cloud</span>
+          <span>Install / Registry</span>
+        </summary>
+        <div class="details-content">
+          <registry-manager theme="dark" scope="local"></registry-manager>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="material-icons">smart_toy</span>
+          <span>Agents</span>
+        </summary>
+        <div class="details-content">
+          <agent-editor theme="dark" scope="local"></agent-editor>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="material-icons">person</span>
+          <span>Personas</span>
+        </summary>
+        <div class="details-content">
+          <persona-editor theme="dark" scope="local"></persona-editor>
+        </div>
+      </details>
+    </details>
+
+    <!-- Server Settings Category -->
+    <details data-category="server">
+      <summary class="category-header">
+        <span class="material-icons">dns</span>
+        <span>Server Settings</span>
+      </summary>
+      
+      <details>
+        <summary>
+          <span class="material-icons">power_settings_new</span>
+          <span>Server Control</span>
+        </summary>
+        <div class="details-content">
+          <server-control theme="dark"></server-control>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="material-icons">info</span>
+          <span>About</span>
+        </summary>
+        <div class="details-content">
+          <about-info theme="dark" scope="local"></about-info>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="material-icons">tune</span>
+          <span>Model Preferences</span>
+        </summary>
+        <div class="details-content">
+          <model-preferences-v2 theme="dark" scope="local"></model-preferences-v2>
+        </div>
+      </details>
+    </details>
+
+    <!-- Advanced Category -->
+    <details data-category="advanced">
+      <summary class="category-header">
+        <span class="material-icons">build</span>
+        <span>Advanced</span>
+      </summary>
+      
+      <details>
+        <summary>
+          <span class="material-icons">apps</span>
+          <span>Plugins</span>
+        </summary>
+        <div class="details-content">
+          <plugin-manager></plugin-manager>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="material-icons">code</span>
+          <span>Secure Chat Widgets</span>
+        </summary>
+        <div class="details-content">
+          <secure-widget-manager theme="dark" scope="local"></secure-widget-manager>
+        </div>
+      </details>
+    </details>
+
+  {% endblock %}
+
+  {% block content_end %}
+
+  {% endblock %}
+<script>
+
+let tabContainer = null;
+let tabNav = null;
+let tabContents = null;
+let observer = null;
+
+function moveInjectedDetailsToCategories() {
+    // Find any injected details elements that specify a category
+    const injectedDetails = document.querySelectorAll('details[data-inject-category]');
+    
+    injectedDetails.forEach(details => {
+        const targetCategory = details.dataset.injectCategory;
+        const categoryElement = document.querySelector(`details[data-category="${targetCategory}"]`);
+        
+        if (categoryElement) {
+            // Remove the data-inject-category attribute and move to category
+            details.removeAttribute('data-inject-category');
+            categoryElement.appendChild(details);
+        }
+    });
+    
+    // Also handle any standalone details without category (default to advanced)
+    const standaloneDetails = document.querySelectorAll('.admin-container > details:not([data-category])');
+    const advancedCategory = document.querySelector('details[data-category="advanced"]');
+    
+    if (advancedCategory) {
+        standaloneDetails.forEach(details => {
+            advancedCategory.appendChild(details);
+        });
+    }
+}
+
+function initializeTabs() {
+    // First, move any injected details to their proper categories
+    moveInjectedDetailsToCategories();
+    
+    const categoryDetails = document.querySelectorAll('details[data-category]');
+    
+    if (categoryDetails.length === 0) return;
+    
+    // Clear existing tab container if it exists
+    if (tabContainer) {
+        tabContainer.remove();
+    }
+    
+    tabContainer = document.createElement('div');
+    tabContainer.className = 'tab-container';
+    
+    tabNav = document.createElement('div');
+    tabNav.className = 'tab-nav';
+    tabContents = document.createElement('div');
+    tabContents.className = 'tab-contents';
+    
+    let firstActiveSet = false;
+    
+    // Create category sections in the tab nav
+    categoryDetails.forEach((categoryDetail, categoryIndex) => {
+        const categorySummary = categoryDetail.querySelector('.category-header');
+        const categoryItems = categoryDetail.querySelectorAll('details:not([data-category])');
+        
+        if (categoryItems.length === 0) return;
+        
+        // Create collapsible category section in nav
+        const categorySection = document.createElement('details');
+        categorySection.className = 'nav-category';
+        categorySection.open = categoryIndex === 0; // First category open by default
+        
+        const categoryNavSummary = document.createElement('summary');
+        categoryNavSummary.className = 'nav-category-header';
+        categoryNavSummary.innerHTML = categorySummary.innerHTML;
+        
+        categorySection.appendChild(categoryNavSummary);
+        
+        const categoryNavContent = document.createElement('div');
+        categoryNavContent.className = 'nav-category-content';
+        
+        // Process items within this category
+        categoryItems.forEach((details, itemIndex) => {
+            const summary = details.querySelector('summary');
+            const content = details.cloneNode(true);
+            content.removeChild(content.querySelector('summary'));
+            
+            // Create tab button
+            const tabButton = document.createElement('button');
+            tabButton.className = 'tab-button';
+            
+            const originalIcon = summary.querySelector('.material-icons');
+            const originalText = summary.querySelector('span:not(.material-icons)');
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'material-icons';
+            iconSpan.textContent = originalIcon ? originalIcon.textContent : '';
+            
+            const textSpan = document.createElement('span');
+            let textContent = originalText ? 
+                originalText.textContent.trim() : 
+                summary.textContent.replace('material-icons', '').trim();
+            textSpan.textContent = textContent;
+            
+            tabButton.appendChild(iconSpan);
+            tabButton.appendChild(textSpan);
+            
+            const tabId = `tab-${categoryDetail.dataset.category}-${itemIndex}`;
+            
+            tabButton.setAttribute('role', 'tab');
+            tabButton.setAttribute('aria-controls', tabId);
+            
+            // First item of first category is active by default
+            const isFirstActive = !firstActiveSet;
+            if (isFirstActive) {
+                firstActiveSet = true;
+                tabButton.setAttribute('aria-selected', 'true');
+                tabButton.classList.add('active');
+            } else {
+                tabButton.setAttribute('aria-selected', 'false');
+            }
+            
+            const tabContent = document.createElement('div');
+            tabContent.className = 'tab-content';
+            tabContent.id = tabId;
+            tabContent.setAttribute('role', 'tabpanel');
+            tabContent.innerHTML = content.innerHTML;
+            if (isFirstActive) tabContent.classList.add('active');
+            
+            tabButton.addEventListener('click', () => {
+                // Remove active from all buttons and contents
+                tabNav.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                tabContents.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Activate clicked tab
+                tabButton.classList.add('active');
+                tabButton.setAttribute('aria-selected', 'true');
+                tabContent.classList.add('active');
+            });
+            
+            categoryNavContent.appendChild(tabButton);
+            tabContents.appendChild(tabContent);
+        });
+        
+        categorySection.appendChild(categoryNavContent);
+        tabNav.appendChild(categorySection);
+    });
+    
+    tabContainer.appendChild(tabNav);
+    tabContainer.appendChild(tabContents);
+    
+    // Replace the first category with the tab container
+    const firstCategory = document.querySelector('details[data-category]');
+    if (firstCategory) {
+        firstCategory.parentNode.replaceChild(tabContainer, firstCategory);
+        
+        // Remove remaining category elements
+        const remainingCategories = document.querySelectorAll('details[data-category]');
+        remainingCategories.forEach(cat => cat.remove());
+    }
+}
+
+function setupMutationObserver() {
+    // Watch for new details elements being added
+    observer = new MutationObserver((mutations) => {
+        let shouldRebuild = false;
+        
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Check if a details element was added
+                    if (node.tagName === 'DETAILS' || node.querySelector('details')) {
+                        shouldRebuild = true;
+                    }
+                }
+            });
+        });
+        
+        if (shouldRebuild) {
+            // Debounce rebuilds
+            clearTimeout(window.tabRebuildTimeout);
+            window.tabRebuildTimeout = setTimeout(initializeTabs, 100);
+        }
+    });
+    
+    observer.observe(document.querySelector('.admin-container'), {
+        childList: true,
+        subtree: true
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial tab setup
+    setTimeout(() => {
+        initializeTabs();
+        setupMutationObserver();
+    }, 100);
+});
+
+</script>
+  </div>
+
+  {% block footer %}
+  {% endblock %}
+</body>
+</html>

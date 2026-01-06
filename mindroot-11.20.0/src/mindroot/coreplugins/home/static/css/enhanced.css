@@ -1,0 +1,196 @@
+/* Enhanced styles for MindRoot Agent Host */
+
+.agent-container {
+    width: 90%; /* Use percentage instead of fixed width */
+    max-width: 2000px; /* Increased from 1200px for wider screens */
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.logo {
+    transition: transform 0.3s ease;
+    margin-bottom: 2rem;
+    max-width: 120px; /* Control logo size */
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(45deg, #6e8efb, #a777e3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+.agent-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.agent-link {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
+.agent-link:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.agent-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4CAF50;
+    margin-bottom: 8px;
+}
+
+.agent-avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.agent-link:hover .agent-avatar {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.agent-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.agent-name {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    word-break: keep-all;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    line-height: 1.3;
+    white-space: normal;
+}
+
+.admin-link {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.admin-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.admin-link:visited {
+    color: #ddd;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+}
+
+/* Responsive breakpoints */
+
+/* Extra large screens */
+@media (min-width: 1800px) {
+    .agent-list {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    
+    .agent-container {
+        width: 85%;
+        max-width: 2400px;
+    }
+}
+
+/* Large screens */
+@media (min-width: 1200px) and (max-width: 1799px) {
+    .agent-list {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .agent-container {
+        width: 90%;
+    }
+}
+
+/* Medium screens */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .agent-list {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    
+    .agent-avatar {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .agent-container {
+        width: 95%;
+    }
+}
+
+/* Small screens */
+@media (max-width: 767px) {
+    .agent-list {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+    
+    .agent-avatar {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .agent-name {
+        font-size: 1rem;
+    }
+    
+    .agent-container {
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+}

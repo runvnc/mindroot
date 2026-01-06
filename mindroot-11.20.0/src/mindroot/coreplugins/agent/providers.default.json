@@ -1,0 +1,62 @@
+[
+  {
+    "name": "OpenAI (AH)",
+    "local": false,
+    "plugin": "ah_openai",
+    "models": [ 
+      {
+        "name": "gpt-4o",
+        "provider_model_name": "gpt-4o",
+        "meta": { "input_price_per_1M": 5.00, "output_price_per_1M": 15.00 },
+        "services": ["stream_chat"],
+        "commands": [],
+        "available": true
+      }
+    ]
+  },
+  {
+    "name": "Anthropic (AH)",
+    "local": false,
+    "plugin": "ah_anthropic",
+    "models": [ 
+      {
+        "name": "claude-3-5-sonnet-20240620",
+        "provider_model_name": "claude-3-5-sonnet-20240620",
+        "meta": { "input_price_per_1M": 3.00, "output_price_per_1M": 15.00 },
+        "services": ["stream_chat"],
+        "commands": [],
+        "available": true
+      }
+    ]
+  },
+  {
+    "name": "ollama (AH)",
+    "local": true,
+    "plugin": "ah_ollama",
+    "models": [ 
+      {
+        "name": "llama3-8b-instruct",
+        "provider_model_name": "llama3:8b",
+        "meta": { "input_price_per_1M": 0.00, "output_price_per_1M": 0.00 },
+        "services": ["stream_chat"],
+        "commands": [],
+        "available": false
+      }
+    ]
+  },
+  {
+    "name": "together.ai (AH)",
+    "local": false,
+    "plugin": "ah_togetherai",
+    "models": [ 
+      {
+        "name": "llama3-70b-instruct",
+        "provider_model_name": "meta-llama/Llama-3-70b-chat-hf",
+        "meta": { "input_price_per_1M": 0.90, "output_price_per_1M": 0.90 },
+        "services": ["stream_chat"],
+        "commands": [],
+        "available": true
+      }
+    ]
+  }
+]
