@@ -12,7 +12,7 @@ from mindroot.lib.utils.debug import debug_box
 
 # Import hook manager for message sync
 try:
-    from mindroot.lib.providers.hooks import hook_manager
+    from lib.providers.hooks import hook_manager
     HOOKS_AVAILABLE = True
 except ImportError:
     HOOKS_AVAILABLE = False
@@ -118,11 +118,19 @@ class ChatLog:
         message was added, enabling chat log synchronization.
         """
         if not HOOKS_AVAILABLE or hook_manager is None:
+            # print a large blue and yellow header for log visibility (temporary)
+            print("\033[94m" + "="*60)
+            # restore normal color
+            print("\033[93m" + "Warning: hooks not available for add message hook." + "\033[0m")
             return
         
         try:
             # Create a background task to fire the hook
             # This is non-blocking so it doesn't slow down message processing
+            # print header in cyan
+            print("\033[96m" + "="*60 + "\033[0m")
+            print("Firing message added hook asynchronously")
+
             asyncio.create_task(hook_manager.message_added(
                 log_id=self.log_id,
                 user=self.user,
@@ -130,17 +138,19 @@ class ChatLog:
                 message=message,
                 parent_log_id=self.parent_log_id
             ))
+            print("Fired message added hook")
         except Exception as e:
             # Don't let hook failures break message adding
             print(f"Warning: Failed to fire message_added hook: {e}")
 
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
+        print("Adding message synchronously")
         should_save = self._add_message_impl(message)
         self.last_modified = time.time()
+
         if should_save:
             self._save_log_sync()
-            self._fire_message_added_hook(message)
         else:
             # Handle the image case that returned False - save synchronously
             if (len(self.messages) > 0 and 
@@ -148,7 +158,6 @@ class ChatLog:
                 len(self.messages[-1]['content']) > 0 and 
                 self.messages[-1]['content'][0].get('type') == 'image'):
                 self._save_log_sync()
-                self._fire_message_added_hook(message)
 
     def _add_message_impl(self, message: Dict[str, str]) -> None:
         """Internal implementation shared by sync and async versions"""
@@ -216,13 +225,14 @@ class ChatLog:
             debug_box("5")
             self.messages.append(message)
         self._save_log_sync()
+        self._fire_message_added_hook(message)
 
     async def add_message_async(self, message: Dict[str, str]) -> None:
         """Async version for new code that needs non-blocking operations"""
+        print("Adding message asynchronously")
         should_save = self._add_message_impl(message)
         if should_save:
             await self.save_log()
-            self._fire_message_added_hook(message)
         else:
             # Handle the image case that returned False - save asynchronously
             if (len(self.messages) > 0 and 
@@ -230,8 +240,7 @@ class ChatLog:
                 len(self.messages[-1]['content']) > 0 and 
                 self.messages[-1]['content'][0].get('type') == 'image'):
                 await self.save_log()
-                self._fire_message_added_hook(message)
-    
+
     async def drop_last(self, role) -> None:
         if len(self.messages) == 0:
             return
