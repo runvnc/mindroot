@@ -669,16 +669,17 @@ async def cancel_active_response(log_id: str, context=None):
     # DEBUG TRACE
     print("\033[91;107m[DEBUG TRACE 5/6] Core cancel_active_response service executed.\033[0m")
     
-    # Cancel any active TTS streams (ElevenLabs)
+    # TTS stream cancellation is now handled via the on_interrupt hook
+    # This allows TTS plugins to manage their own cleanup without direct imports
+    
+    # Call on_interrupt hook for TTS providers (e.g., mr_csm_stream)
     try:
-        # Import here to avoid circular dependency
-        from mr_eleven_stream.mod import _active_tts_streams
-        for stream_id, stop_event in list(_active_tts_streams.items()):
-            stop_event.set()
-            logger.info(f"Cancelled TTS stream {stream_id}")
-            print("\033[91;107m[DEBUG TRACE 5.5/6] Cancelled active TTS stream.\033[0m")
-    except ImportError:
-        logger.debug("ElevenLabs TTS plugin not available for cancellation")
+        from lib.providers.hooks import hook_manager
+        await hook_manager.on_interrupt(context=context)
+        logger.info(f"Called on_interrupt hook for session {log_id}")
+        print(f"\033[91;107m[DEBUG TRACE 5.6/6] Called on_interrupt hook.\033[0m")
+    except Exception as e:
+        logger.debug(f"Error calling on_interrupt hook: {e}")
     
     # Also, cancel any active command task (like speak())
     if 'active_command_task' in context.data:
