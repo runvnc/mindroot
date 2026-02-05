@@ -449,8 +449,8 @@ class Agent:
         return results, full_cmds
 
     async def render_system_msg(self):
-        logger.debug("Docstrings:")
-        logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
+        #logger.debug("Docstrings:")
+        #logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
         now = datetime.now()
 
         formatted_time = now.strftime("~ %Y-%m-%d %I %p %Z%z")
@@ -536,8 +536,8 @@ class Agent:
             logger.info("Command stream parsing cancelled")
             raise  # Propagate cancellation
         
-        logger.debug("System message was:")
-        logger.debug(await self.render_system_msg())
+        #logger.debug("System message was:")
+        #logger.debug(await self.render_system_msg())
 
         # use green text
         print("\033[92m" + "Just after stream chat, last two messages in chat log:")

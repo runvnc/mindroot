@@ -149,21 +149,13 @@ async def scan_directory(request: DirectoryRequest):
             return {'success': False, 'message': 'Invalid directory path'}
         discovered_plugins = discover_plugins(directory)
         manifest = load_plugin_manifest()
-        addable_count = 0
-        for plugin_name, plugin_info in discovered_plugins.items():
-            has_github = plugin_info.get('github_url') or plugin_info.get('remote_source') or plugin_info.get('metadata', {}).get('github_url')
-            if has_github:
-                addable_count += 1
         for plugin_name, plugin_info in discovered_plugins.items():
             plugin_info['source'] = 'local'
             plugin_info['metadata'] = plugin_info.get('metadata', {}) or {'description': plugin_info.get('description', ''), 'install_date': plugin_info.get('install_date', ''), 'commands': plugin_info.get('commands', []), 'services': plugin_info.get('services', [])}
             manifest['plugins']['installed'][plugin_name] = plugin_info
         plugins_list = [{'name': name, 'description': info.get('metadata', {}).get('description', info.get('description', ''))} for name, info in discovered_plugins.items()]
         save_plugin_manifest(manifest)
-        response = {'success': True, 'message': f'Scanned {len(discovered_plugins)} plugins in {directory}', 'plugins': plugins_list, 'addable_to_index': addable_count}
-        if addable_count < len(discovered_plugins):
-            response['warning'] = f'{len(discovered_plugins) - addable_count} plugins missing GitHub info and cannot be added to indices'
-        return response
+        return {'success': True, 'message': f'Scanned {len(discovered_plugins)} plugins in {directory}', 'plugins': plugins_list}
     except Exception as e:
         trace = traceback.format_exc()
         return {'success': False, 'message': f'Error during scan: {str(e)}\n\n{trace}'}
@@ -244,6 +236,19 @@ async def toggle_plugin(request: TogglePluginRequest):
 
 def discover_plugins(directory):
     discovered = {}
+    
+    # First check if the directory itself is a plugin
+    plugin_info_path = os.path.join(directory, 'plugin_info.json')
+    if os.path.isfile(plugin_info_path):
+        try:
+            with open(plugin_info_path, 'r') as f:
+                plugin_info = json.load(f)
+            plugin_info['enabled'] = False
+            plugin_info['source_path'] = directory
+            discovered[plugin_info['name']] = plugin_info
+        except json.JSONDecodeError:
+            pass
+    
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
         plugin_info_path = os.path.join(item_path, 'plugin_info.json')
