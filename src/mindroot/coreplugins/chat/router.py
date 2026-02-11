@@ -11,6 +11,7 @@ from lib.plugins import list_enabled
 import nanoid
 from lib.providers.commands import *
 import asyncio
+import aiofiles
 from lib.chatcontext import get_context, ChatContext
 from typing import List
 from lib.providers.services import service, service_manager
@@ -29,6 +30,28 @@ router = APIRouter()
 
 # Global dictionary to store tasks
 tasks = {}
+
+
+async def get_agent_for_log_id(log_id: str, username: str) -> str:
+    """Look up the correct agent name for a given log_id by reading the context file.
+    
+    Returns the agent_name if found, or None if the context file doesn't exist.
+    """
+    context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
+    context_file = f"{context_dir}/{username}/context_{log_id}.json"
+    
+    if not os.path.exists(context_file):
+        return None
+    
+    try:
+        async with aiofiles.open(context_file, 'r') as f:
+            content = await f.read()
+            context_data = json.loads(content)
+            return context_data.get('agent_name')
+    except Exception as e:
+        print(f"Error reading context file for log_id {log_id}: {e}")
+        return None
+
 
 class CommandRequest(BaseModel):
     command: str
@@ -442,6 +465,16 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
 @router.get("/session/{agent_name}/{log_id}")
 async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
     """Redirect to trailing slash version for proper relative URL resolution."""
+    # Check if agent_name matches the actual agent for this session
+    if hasattr(request.state, "user"):
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username)
+        if actual_agent and actual_agent != agent_name:
+            query_string = str(request.query_params)
+            if query_string:
+                return RedirectResponse(f"/session/{actual_agent}/{log_id}/?{query_string}")
+            return RedirectResponse(f"/session/{actual_agent}/{log_id}/")
+    
+    # Normal redirect to add trailing slash
     # Check if there are query params to preserve
     query_string = str(request.query_params)
     if query_string:
@@ -452,6 +485,15 @@ async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
 async def chat_session(request: Request, agent_name: str, log_id: str, embed: bool = Query(False)):
     # Check authentication (API key or regular user)
     plugins = list_enabled()
+    
+    # Check if agent_name matches the actual agent for this session
+    if hasattr(request.state, "user"):
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username)
+        if actual_agent and actual_agent != agent_name:
+            query_string = str(request.query_params)
+            if query_string:
+                return RedirectResponse(f"/session/{actual_agent}/{log_id}/?{query_string}")
+            return RedirectResponse(f"/session/{actual_agent}/{log_id}/")
     if not hasattr(request.state, "user"):
         return RedirectResponse("/login")
 
