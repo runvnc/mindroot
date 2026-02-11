@@ -35,22 +35,31 @@ tasks = {}
 async def get_agent_for_log_id(log_id: str, username: str) -> str:
     """Look up the correct agent name for a given log_id by reading the context file.
     
-    Returns the agent_name if found, or None if the context file doesn't exist.
+    Checks under the given username first, then falls back to 'system' user.
+    Returns the agent_name if found, or None if no context file exists.
     """
     context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
-    context_file = f"{context_dir}/{username}/context_{log_id}.json"
     
-    if not os.path.exists(context_file):
-        return None
+    # Check under the given username first, then fall back to 'system'
+    candidates = [username]
+    if username != 'system':
+        candidates.append('system')
     
-    try:
-        async with aiofiles.open(context_file, 'r') as f:
-            content = await f.read()
-            context_data = json.loads(content)
-            return context_data.get('agent_name')
-    except Exception as e:
-        print(f"Error reading context file for log_id {log_id}: {e}")
-        return None
+    for user in candidates:
+        context_file = f"{context_dir}/{user}/context_{log_id}.json"
+        if not os.path.exists(context_file):
+            continue
+        try:
+            async with aiofiles.open(context_file, 'r') as f:
+                content = await f.read()
+                context_data = json.loads(content)
+                agent_name = context_data.get('agent_name')
+                if agent_name:
+                    return agent_name
+        except Exception as e:
+            print(f"Error reading context file for log_id {log_id}: {e}")
+    
+    return None
 
 
 class CommandRequest(BaseModel):
