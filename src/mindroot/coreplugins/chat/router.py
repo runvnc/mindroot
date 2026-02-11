@@ -32,11 +32,14 @@ router = APIRouter()
 tasks = {}
 
 
-async def get_agent_for_log_id(log_id: str, username: str) -> str:
+async def get_agent_for_log_id(log_id: str, username: str, url_agent: str = None) -> str:
     """Look up the correct agent name for a given log_id by reading the context file.
     
     Checks under the given username first, then falls back to 'system' user.
     Returns the agent_name if found, or None if no context file exists.
+    
+    If url_agent is provided and a chatlog exists for that agent, it won't
+    override with a different agent from the system fallback.
     """
     context_dir = os.environ.get('CHATCONTEXT_DIR', 'data/context')
     
@@ -54,6 +57,17 @@ async def get_agent_for_log_id(log_id: str, username: str) -> str:
                 content = await f.read()
                 context_data = json.loads(content)
                 agent_name = context_data.get('agent_name')
+                if not agent_name:
+                    continue
+                # If this is a fallback (not the original user) and the agent
+                # differs from what's in the URL, only redirect if there's no
+                # chatlog for the URL's agent with this log_id
+                if user != username and url_agent and agent_name != url_agent:
+                    chatlog_dir = os.environ.get('CHATLOG_DIR', 'data/chat')
+                    # Check if a chatlog exists for the URL's agent under any user
+                    for check_user in [username, 'system']:
+                        if os.path.exists(f"{chatlog_dir}/{check_user}/{url_agent}/chatlog_{log_id}.json"):
+                            return None  # URL agent has a valid chatlog, don't redirect
                 if agent_name:
                     return agent_name
         except Exception as e:
@@ -476,7 +490,8 @@ async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
     """Redirect to trailing slash version for proper relative URL resolution."""
     # Check if agent_name matches the actual agent for this session
     if hasattr(request.state, "user"):
-        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username)
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
         if actual_agent and actual_agent != agent_name:
             query_string = str(request.query_params)
             if query_string:
@@ -497,7 +512,8 @@ async def chat_session(request: Request, agent_name: str, log_id: str, embed: bo
     
     # Check if agent_name matches the actual agent for this session
     if hasattr(request.state, "user"):
-        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username)
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
+        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
         if actual_agent and actual_agent != agent_name:
             query_string = str(request.query_params)
             if query_string:
