@@ -4,6 +4,7 @@ import string
 from typing import Tuple, Optional
 from pathlib import Path
 import json
+import sys
 from datetime import datetime
 from lib.providers.hooks import hook
 from .models import UserAuth, UserCreate
@@ -62,6 +63,14 @@ async def initialize_admin(user_data_root: str, app) -> Tuple[Optional[str], Opt
     if args.admin_user:
         admin_user = args.admin_user
         admin_pass = args.admin_password
+        if admin_pass:
+            # Validate password length meets minimum requirement
+            if len(admin_pass) < 8:
+                console.print(f"ERROR: Admin password must be at least 8 characters long. Provided password has {len(admin_pass)} characters.", style='bold red')
+                sys.exit(1)
+        else:
+            console.print("ERROR: Admin password is required when admin username is specified. Use -pw or --admin-password.", style='bold red')
+            sys.exit(1)
     if admin_user and admin_pass:
         username = admin_user
         password = admin_pass
