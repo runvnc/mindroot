@@ -146,18 +146,10 @@ class ChatLog:
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
         print("Adding message synchronously")
-        should_save = self._add_message_impl(message)
+        self._add_message_impl(message)
         self.last_modified = time.time()
-
-        if should_save:
-            self._save_log_sync()
-        else:
-            # Handle the image case that returned False - save synchronously
-            if (len(self.messages) > 0 and 
-                isinstance(self.messages[-1].get('content'), list) and 
-                len(self.messages[-1]['content']) > 0 and 
-                self.messages[-1]['content'][0].get('type') == 'image'):
-                self._save_log_sync()
+        self._save_log_sync()
+        self._fire_message_added_hook(message)
 
     def _add_message_impl(self, message: Dict[str, str]) -> None:
         """Internal implementation shared by sync and async versions"""
@@ -224,22 +216,15 @@ class ChatLog:
                 print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
             debug_box("5")
             self.messages.append(message)
-        self._save_log_sync()
-        self._fire_message_added_hook(message)
+        return True
 
     async def add_message_async(self, message: Dict[str, str]) -> None:
         """Async version for new code that needs non-blocking operations"""
         print("Adding message asynchronously")
-        should_save = self._add_message_impl(message)
-        if should_save:
-            await self.save_log()
-        else:
-            # Handle the image case that returned False - save asynchronously
-            if (len(self.messages) > 0 and 
-                isinstance(self.messages[-1].get('content'), list) and 
-                len(self.messages[-1]['content']) > 0 and 
-                self.messages[-1]['content'][0].get('type') == 'image'):
-                await self.save_log()
+        self._add_message_impl(message)
+        self.last_modified = time.time()
+        await self._save_log_async()
+        self._fire_message_added_hook(message)
 
     async def drop_last(self, role) -> None:
         if len(self.messages) == 0:
