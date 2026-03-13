@@ -466,6 +466,8 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 trace = traceback.format_exc()
                 msg = str(e)
                 descr = msg + '\n\n' + trace
+                print('system error in send_message_to_agent')
+                print(descr)
                 try:
                     persona = agent_['persona']['name']
                 except Exception as e:
