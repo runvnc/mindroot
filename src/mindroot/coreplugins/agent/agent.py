@@ -25,10 +25,12 @@ from .cmd_start_example import *
 from lib.templates import render
 import nanoid
 
+
+import logging
 if os.environ.get('MR_DEBUG') == '1':
-    logger.setLevel("DEBUG")
+    logging.basicConfig(level=logging.DEBUG)
 else:
-    logger.setLevel("CRITICAL")
+    logger.basicConfig(level=logging.CRITICAL)
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.
