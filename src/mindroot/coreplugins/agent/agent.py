@@ -30,7 +30,7 @@ import logging
 if os.environ.get('MR_DEBUG') == '1':
     logging.basicConfig(level=logging.DEBUG)
 else:
-    logger.basicConfig(level=logging.CRITICAL)
+    logging.basicConfig(level=logging.CRITICAL)
 
 error_result = """
 [SYSTEM]: ERROR, invalid response format.

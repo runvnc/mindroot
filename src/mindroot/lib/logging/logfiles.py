@@ -6,7 +6,15 @@ from loguru import logger
 if not os.path.exists('logs'):
     os.makedirs('logs')
 logger.remove()
-logger.add(sys.stderr, format='{time} | {level} | {function} | {message}', level='DEBUG')
+
+
+if os.getenv('MR_DEBUG') == '1':
+    lvl = 'DEBUG'
+else:
+    lvl = 'CRITICAL'
+
+logger.add(sys.stderr, format='{time} | {level} | {function} | {message}', level=lvl)
+
 
 def json_sink(message):
     record = message.record

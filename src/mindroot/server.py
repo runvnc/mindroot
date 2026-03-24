@@ -9,7 +9,7 @@ if MR_DEBUG:
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 else:
     # Disable most logging to reduce overhead
-    logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles

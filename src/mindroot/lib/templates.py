@@ -16,7 +16,7 @@ try:
     L8N_AVAILABLE = True
 except ImportError as e:
     trace = traceback.format_exc()
-    print(f"L8n not available: {e} \n{trace}")
+    #print(f"L8n not available: {e} \n{trace}")
     L8N_AVAILABLE = False
     sys.exit(1)
 
@@ -35,7 +35,7 @@ def get_current_language():
         lang = get_request_language()
         return get_fallback_language(lang) if lang else 'en'
     except Exception as e:
-        print(f"Error getting current language: {e}")
+        #print(f"Error getting current language: {e}")
         return 'en'
 
 def apply_translations_to_content(content, template_path=None):
@@ -65,7 +65,7 @@ def apply_translations_to_content(content, template_path=None):
             # Fallback: try to replace without plugin context
             return replace_placeholders(content, current_language)
     except Exception as e:
-        print(f"Error applying translations: {e}")
+        #print(f"Error applying translations: {e}")
         return content
 
 def check_for_localized_template(template_path):
@@ -116,7 +116,7 @@ def load_template_with_translation(template_path):
             translated_content = apply_translations_to_content(content, localized_path)
             if translated_content is None:
                 # Fall back to original template
-                print(f"L8n: Falling back to original template due to missing translations: {template_path}")
+                #print(f"L8n: Falling back to original template due to missing translations: {template_path}")
                 with open(template_path, 'r', encoding='utf-8') as f:
                     return f.read()
             return translated_content
@@ -129,7 +129,7 @@ def load_template_with_translation(template_path):
             content = f.read()
         return content  # Don't apply translations to original templates
     except Exception as e:
-        print(f"Error loading template {template_path}: {e}")
+        #print(f"Error loading template {template_path}: {e}")
         return ""
 
 def setup_template_environment(plugins=None):
@@ -150,16 +150,16 @@ def setup_template_environment(plugins=None):
             template_dir = os.path.join(plugin_path, 'templates')
             if os.path.exists(template_dir):
                 template_paths.add(template_dir)
-                print(f"Added template path: {template_dir}")
+                #print(f"Added template path: {template_dir}")
             
             # Add inject directory
             inject_dir = os.path.join(plugin_path, 'inject')
             if os.path.exists(inject_dir):
                 template_paths.add(inject_dir)
                 # change color to green background, white text
-                print("\033[92m" + f"Added inject path: {inject_dir}")
+                #print("\033[92m" + f"Added inject path: {inject_dir}")
                 # reset color
-                print("\033[0m")
+                #print("\033[0m")
 
             # Add parent directories to handle absolute paths
             template_paths.add(os.path.dirname(plugin_path))
@@ -168,7 +168,7 @@ def setup_template_environment(plugins=None):
     # Create environment with multiple loaders
     loaders = [FileSystemLoader(path) for path in template_paths]
     env = Environment(loader=ChoiceLoader(loaders))
-    print(f"Initialized Jinja2 environment with paths: {template_paths}")
+    #print(f"Initialized Jinja2 environment with paths: {template_paths}")
     return env
 
 # Create a Jinja2 environment with multiple template paths
@@ -190,25 +190,25 @@ async def find_parent_template(page_name, plugins):
     for plugin in plugins:
         plugin_path = get_plugin_path(plugin)
         if not plugin_path:
-            print(f'Warning: Could not find path for plugin: {plugin}')
+            #print(f'Warning: Could not find path for plugin: {plugin}')
             continue
             
-        print(f'Checking plugin: {plugin}, path: {plugin_path}')
+        #print(f'Checking plugin: {plugin}, path: {plugin_path}')
         template_path = os.path.join(plugin_path, 'templates', f'{page_name}.jinja2')
         
         if os.path.exists(template_path):
-            print(f'Found parent template in plugin: {template_path}')
+            #print(f'Found parent template in plugin: {template_path}')
             # Convert to relative path from one of our template roots
             for loader in env.loader.loaders:
                 for template_dir in loader.searchpath:
                     rel_path = os.path.relpath(template_path, template_dir)
                     if not rel_path.startswith('..'):
-                        print(f'Using template path: {rel_path}')
+                        #print(f'Using template path: {rel_path}')
                         return rel_path
             # Fallback to absolute path if no relative path works
             return template_path
         else:
-            print(f'No parent template found in plugin: {plugin}, template path was {template_path}')
+            #print(f'No parent template found in plugin: {plugin}, template path was {template_path}')
             
             # Try alternate locations
             alt_paths = [
@@ -218,13 +218,13 @@ async def find_parent_template(page_name, plugins):
             
             for alt_path in alt_paths:
                 if os.path.exists(alt_path):
-                    print(f'Found parent template in alternate location: {alt_path}')
+                    #print(f'Found parent template in alternate location: {alt_path}')
                     # Convert to relative path
                     for loader in env.loader.loaders:
                         for template_dir in loader.searchpath:
                             rel_path = os.path.relpath(alt_path, template_dir)
                             if not rel_path.startswith('..'):
-                                print(f'Using template path: {rel_path}')
+                                #print(f'Using template path: {rel_path}')
                                 return rel_path
                     return alt_path
     return None
@@ -242,7 +242,7 @@ async def find_plugin_template(page_name, plugins):
     for plugin in plugins:
         plugin_path = get_plugin_path(plugin)
         if not plugin_path:
-            print(f'Warning: Could not find path for plugin: {plugin}')
+            #print(f'Warning: Could not find path for plugin: {plugin}')
             continue
             
         # Try to find the template in the plugin's templates directory
@@ -255,7 +255,7 @@ async def find_plugin_template(page_name, plugins):
         
         for path in template_paths:
             if os.path.exists(path):
-                print(f'Found template in plugin: {path}')
+                #print(f'Found template in plugin: {path}')
                 # Try to get the template from the environment
                 try:
                     # Convert to relative path from one of our template roots
@@ -284,10 +284,10 @@ async def load_plugin_templates(page_name, plugins):
         try:
             plugin_path = get_plugin_path(plugin)
             if not plugin_path:
-                print(f'Warning: Could not find path for plugin: {plugin}')
+                #print(f'Warning: Could not find path for plugin: {plugin}')
                 continue
  
-            #print(f"Loading templates from plugin: {plugin}, path: {plugin_path}")
+            ##print(f"Loading templates from plugin: {plugin}, path: {plugin_path}")
             # plugin might be name rather than directory
             # get the last part of the path to check also
             #
@@ -305,7 +305,7 @@ async def load_plugin_templates(page_name, plugins):
                     # Load template content with translation support
                     content = load_template_with_translation(path)
                     if content:
-                        #print(f"Found inject template at: {path}")
+                        ##print(f"Found inject template at: {path}")
                         templates.append({'type': 'inject', 'template': env.from_string(content)})
                         break
             
@@ -335,7 +335,7 @@ async def load_plugin_templates(page_name, plugins):
                         break
                         
         except Exception as e:
-            print(f'Error loading plugin template: {e}')
+            #print(f'Error loading plugin template: {e}')
             continue
     return templates
 
@@ -407,7 +407,7 @@ async def render_combined_template(page_name, plugins, context):
                     pragma_re = re.compile(r"^\s*\{#\s*(assume[-_]blank)(?:\s*true)?\s*#\}\s*", re.IGNORECASE | re.MULTILINE)
                     if pragma_re.search(head):
                         # Found assume-blank! Just render this template directly
-                        print(f"Found assume-blank pragma in {path}, rendering directly without parent")
+                        #print(f"Found assume-blank pragma in {path}, rendering directly without parent")
                         content = pragma_re.sub("", content, count=1)  # Remove pragma
                         template = env.from_string(content)
                         return template.render(**context)  # Return early!
@@ -444,10 +444,10 @@ async def render_combined_template(page_name, plugins, context):
         # Fallback to original method if we can't find the file path
         parent_template = parent_env.get_template(f"{page_name}.jinja2")
     
-    print(f"parent_template", parent_template)
+    #print(f"parent_template", parent_template)
     child_templates = await load_plugin_templates(page_name, plugins)
     parent_blocks = parent_template.blocks.keys()
-    print(f"parent_blocks", parent_blocks)
+    #print(f"parent_blocks", parent_blocks)
     all_content = {block: {'inject': [], 'override': None} for block in parent_blocks}
     
     # Ensure context is a dictionary
@@ -463,10 +463,10 @@ async def render_combined_template(page_name, plugins, context):
     
     context = {**context, **parent_block_content}
 
-    print("child_templates", child_templates)
+    #print("child_templates", child_templates)
 
     for child_template_info in child_templates:
-        print("calling collect_content")
+        #print("calling collect_content")
         # Pass assume_blank flag to collect_content
         child_content = await collect_content(
             child_template_info['template'],
@@ -495,12 +495,12 @@ async def render_combined_template(page_name, plugins, context):
 
     for block, content in all_content.items():
         if 'inject' in content and isinstance(content['inject'], list):
-            # print with a yellow background, black text
+            # #print with a yellow background, black text
             # report details including page name and content injected
-            print("\033[103m" + f"Injecting into block {block} on page {page_name} with content:")
-            print(content['inject'])
+            #print("\033[103m" + f"Injecting into block {block} on page {page_name} with content:")
+            #print(content['inject'])
             # reset color
-            print("\033[0m")
+            #print("\033[0m")
             combined_inject[f'combined_{block}_inject'] = ''.join(content['inject'])
         else:
             combined_inject[f'combined_{block}_inject'] = ''
@@ -508,7 +508,7 @@ async def render_combined_template(page_name, plugins, context):
         if 'override' in content and content['override'] is not None:
             combined_override[f'combined_{block}_override'] = content['override']
 
-    print("in render combined, context is", context)
+    ##print("in render combined, context is", context)
 
     rendered_html = combined_child_template.render(
         layout_template=parent_template,
@@ -570,11 +570,11 @@ async def render(page_name, context):
         str: Rendered HTML
     """
     plugins = list_enabled(False)
-    # print with white background red text
+    # #print with white background red text
     # report details including page name and plugins enabled
-    print("\033[101m" + f"Rendering page {page_name} with plugins enabled:")
-    print(plugins)
-    print("\033[0m")
+    #print("\033[101m" + f"Rendering page {page_name} with plugins enabled:")
+    #print(plugins)
+    #print("\033[0m")
     
     # Ensure context is a dictionary
     context = context or {}
@@ -584,8 +584,8 @@ async def render(page_name, context):
         parent_env.get_template(f"{page_name}.jinja2")
     except Exception as e:
         trace = traceback.format_exc()
-        print(f"Error finding parent template for {page_name}: {e}\n\n{trace}")
-        print(f"No parent template found for {page_name}, trying direct rendering: {e}")
+        #print(f"Error finding parent template for {page_name}: {e}\n\n{trace}")
+        #print(f"No parent template found for {page_name}, trying direct rendering: {e}")
         
         # Try to find and render a template directly from a plugin
         template_path, _ = await find_plugin_template(page_name, plugins)
@@ -598,5 +598,5 @@ async def render(page_name, context):
         return await render_combined_template(page_name, plugins, context)
     except Exception as e:
         trace = traceback.format_exc()
-        print(f"Error rendering {page_name}: {e}\n\n{trace}")
+        #print(f"Error rendering {page_name}: {e}\n\n{trace}")
         return f"<h1>Error Rendering Page</h1><p>{str(e)}</p><pre>{trace}</pre>"
