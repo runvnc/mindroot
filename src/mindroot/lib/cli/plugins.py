@@ -41,13 +41,13 @@ async def install_plugins_from_cli(plugin_sources: list, reinstall: bool = False
 
         try:
             if not reinstall:
-                import pkg_resources
+                import importlib.metadata
                 try:
-                    pkg_resources.get_distribution(plugin_name)
+                    importlib.metadata.distribution(plugin_name)
                     print(colored(f"{plugin_name} is already installed. Use --reinstall to update or force.", "green"))
                     results.append({"plugin": plugin_name, "status": "already_installed"})
                     continue
-                except pkg_resources.DistributionNotFound:
+                except importlib.metadata.PackageNotFoundError:
                     pass # Not installed, proceed
 
             if '/' in plugin_source:  # GitHub source

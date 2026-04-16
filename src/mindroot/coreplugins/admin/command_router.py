@@ -72,13 +72,13 @@ async def stream_install_recommended_plugins(agent_name: str):
                 
                 try:
                     # Check if already installed
-                    import pkg_resources
+                    import importlib.metadata as pkg_resources_compat
                     try:
-                        pkg_resources.get_distribution(plugin_name)
+                        pkg_resources_compat.distribution(plugin_name)
                         yield f"{plugin_name} is already installed\n"
                         results.append({"plugin": plugin_name, "status": "already_installed"})
                         continue
-                    except pkg_resources.DistributionNotFound:
+                    except pkg_resources_compat.PackageNotFoundError:
                         pass
                     
                     # Determine installation source
@@ -236,10 +236,10 @@ async def check_recommended_plugins(agent_name: str):
                 plugin_name = plugin_source.split('/')[-1]
                 # First check if plugin is already installed
                 try:
-                    import pkg_resources
-                    pkg_resources.get_distribution(plugin_name)
+                    import importlib.metadata as pkg_resources_compat
+                    pkg_resources_compat.distribution(plugin_name)
                     continue  # Plugin is installed, skip to next
-                except pkg_resources.DistributionNotFound:
+                except pkg_resources_compat.PackageNotFoundError:
                     # Plugin is not installed, look for it in indices
                     found = False
                     for index in available_indices:
@@ -327,13 +327,13 @@ async def stream_install_recommended_plugins(agent_name: str):
                 
                 try:
                     # Check if already installed
-                    import pkg_resources
+                    import importlib.metadata as pkg_resources_compat
                     try:
-                        pkg_resources.get_distribution(plugin_name)
+                        pkg_resources_compat.distribution(plugin_name)
                         yield f"{plugin_name} is already installed\n"
                         results.append({"plugin": plugin_name, "status": "already_installed"})
                         continue
-                    except pkg_resources.DistributionNotFound:
+                    except pkg_resources_compat.PackageNotFoundError:
                         pass
                     
                     # Determine installation source

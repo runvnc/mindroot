@@ -6,7 +6,13 @@ import tempfile
 import requests
 import zipfile
 import subprocess
-from pkg_resources import require as pkg_require
+try:
+    from pkg_resources import require as pkg_require
+except ImportError:
+    import importlib.metadata as _imeta
+    def pkg_require(req):
+        pkg_name = req.split('>=')[0].split('<=')[0].split('==')[0].split('!=')[0].split('[')[0].strip()
+        _imeta.distribution(pkg_name)
 from .manifest import update_plugin_manifest
 import traceback
 
@@ -309,13 +315,12 @@ async def install_recommended_plugins(agent_name, context=None):
                 plugin_name = plugin_source.split('/')[-1]
                 
                 try:
-                    # Use pkg_resources to check if package is installed
-                    import pkg_resources
-                    pkg_resources.get_distribution(plugin_name)
+                    import importlib.metadata
+                    importlib.metadata.distribution(plugin_name)
                     # Plugin is already installed
                     results.append({"plugin": plugin_name, "status": "already_installed"})
                     print("Plugin already installed:", plugin_name)
-                except pkg_resources.DistributionNotFound:
+                except importlib.metadata.PackageNotFoundError:
                     # Plugin is not installed, get source info and install it
                     try:
                         # Get the source information for this plugin
