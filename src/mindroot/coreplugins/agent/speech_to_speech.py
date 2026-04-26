@@ -20,6 +20,12 @@ class SpeechToSpeechAgent(Agent):
     async def on_audio_chunk_callback(self, audio_bytes: bytes, timestamp=None, context=None):
         """Route audio output to SIP if call is answered."""
         if self.on_sip_call and self.call_answered:
+            # S2S compatibility note: this path receives OpenAI realtime
+            # response.output_audio.delta chunks and intentionally calls only
+            # sip_audio_out_chunk().  mr_sip must keep sip_audio_out_chunk()
+            # backward-compatible with auto-start fallback unless this S2S path
+            # is also updated to call sip_start/end_audio_response on OpenAI's
+            # response.output_audio.started/done events.
             try:
                 await service_manager.sip_audio_out_chunk(audio_chunk=audio_bytes, timestamp=timestamp, context=self.context)
             except Exception as e:
