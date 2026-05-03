@@ -10,6 +10,7 @@ from lib.providers.commands import command_manager
 from .persona_handler import handle_persona_import, import_persona_from_index
 import traceback
 import hashlib
+import importlib
 import zipfile
 import io
 import tempfile
@@ -275,6 +276,12 @@ def update_agent(scope: str, name: str, agent: str=Form(...)):
             raise HTTPException(status_code=404, detail='Agent not found')
         with open(agent_path, 'w') as f:
             json.dump(agent, f, indent=2)
+        # Invalidate agent data cache so next get_agent_data() re-reads from disk
+        try:
+            from coreplugins.agent.agent import _agent_data_cache
+            _agent_data_cache.pop(name, None)
+        except Exception:
+            pass
         return {'status': 'success'}
     except Exception as e:
         raise HTTPException(status_code=500, detail='Internal server error ' + str(e))

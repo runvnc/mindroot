@@ -196,6 +196,12 @@ def update_persona(scope: str, name: str, persona: str=Form(...), faceref: Uploa
             persona['avatar'] = str(new_avatar_path)
         with open(persona_path, 'w') as f:
             json.dump(persona, f, indent=2)
+        # Invalidate agent data cache since persona data is embedded in it
+        try:
+            from coreplugins.agent.agent import _agent_data_cache
+            _agent_data_cache.clear()
+        except Exception:
+            pass
         return {'status': 'success'}
     except Exception as e:
         traceback.print_exc()

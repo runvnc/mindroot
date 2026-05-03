@@ -38,7 +38,7 @@ class SpeechToSpeechAgent(Agent):
     async def on_transcript_callback(self, role: str, transcript: str, context=None):
         """Handle transcripts from S2S conversation."""
         try:
-            self.context.chat_log.add_message({'role': role, 'content': [{'type': 'text', 'text': transcript}]})
+            await self.context.chat_log.add_message_async({'role': role, 'content': [{'type': 'text', 'text': transcript}]})
             if role == 'user':
                 await self.context.backend_user_message(transcript)
             elif role == 'assistant':

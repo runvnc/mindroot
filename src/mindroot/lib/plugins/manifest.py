@@ -12,6 +12,9 @@ MANIFEST_FILE = 'data/plugin_manifest.json'
 # Setup logging
 logger = logging.getLogger(__name__)
 
+# In-memory cache for the manifest to avoid repeated disk reads
+_manifest_cache = None
+
 def _get_absolute_paths():
     """Get absolute paths for all manifest-related files.
     
@@ -217,13 +220,19 @@ def load_plugin_manifest():
     Returns:
         dict: The manifest data structure
     """
+    global _manifest_cache
     manifest_abs_path, _, _ = _get_absolute_paths()
+    
+    # Return cached manifest if available (invalidated only by save_plugin_manifest)
+    if _manifest_cache is not None:
+        return _manifest_cache
     
     # Validate existing manifest
     is_valid, manifest_data = _validate_manifest(manifest_abs_path)
     
     if is_valid:
         logger.debug(f"Loaded valid manifest from: {manifest_abs_path}")
+        _manifest_cache = manifest_data
         return manifest_data
     
     # Manifest is missing or invalid, create default
@@ -233,6 +242,7 @@ def load_plugin_manifest():
     # Load the newly created manifest
     is_valid, manifest_data = _validate_manifest(manifest_abs_path)
     if is_valid:
+        _manifest_cache = manifest_data
         return manifest_data
     else:
         logger.error(f"Failed to create valid default manifest")
@@ -244,6 +254,10 @@ def save_plugin_manifest(manifest):
     Args:
         manifest (dict): The manifest data structure to save
     """
+    global _manifest_cache
+    # Invalidate cache before writing
+    _manifest_cache = None
+    
     manifest_abs_path, _, _ = _get_absolute_paths()
     
     # Backup existing manifest before saving

@@ -326,7 +326,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
         message = tmp_data['message']
         if type(message) is str:
-            context.chat_log.add_message({'role': 'user', 'content': message})
+            await context.chat_log.add_message_async({'role': 'user', 'content': message})
         else:
             new_parts = []
             has_image = False
@@ -347,7 +347,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 pass
             msg_to_add = {'role': 'user', 'content': new_parts}
             has_image = has_image or str(msg_to_add).find('image') > -1
-            context.chat_log.add_message(msg_to_add)
+            await context.chat_log.add_message_async(msg_to_add)
         await context.save_context()
         continue_processing = True
         iterations = 0
@@ -447,7 +447,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                         process_result(result, formatted_results)
                     else:
                         pass
-                    context.chat_log.add_message({'role': 'user', 'content': formatted_results})
+                    await context.chat_log.add_message_async({'role': 'user', 'content': formatted_results})
                     results.append(out_results)
                 else:
                     pass
@@ -474,7 +474,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                     persona = 'System error'
                 finally:
                     pass
-                context.chat_log.add_message({'role': 'user', 'content': msg})
+                await context.chat_log.add_message_async({'role': 'user', 'content': msg})
                 await context.agent_output('system_error', {'error': msg})
             finally:
                 pass
@@ -577,7 +577,7 @@ async def agent_output(event: str, data: dict, context=None):
 
 @service()
 async def append_message(role: str, content, context=None):
-    await context.chat_log.add_message({'role': role, 'content': content})
+    await context.chat_log.add_message_async({'role': role, 'content': content})
 
 @service()
 async def partial_command(command: str, chunk: str, params, cmd_id=None, context=None):

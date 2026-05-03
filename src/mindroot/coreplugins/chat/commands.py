@@ -351,7 +351,6 @@ Parameters:
     parent_log = context.data['parent_log_id']
     parent_context = ChatContext(service_manager, command_manager)
     await parent_context.load_context(parent_log)
-    chat_log.add_message({'role': 'assistant', 'content': message})
+    await parent_context.chat_log.add_message_async({'role': 'assistant', 'content': message})
     await agent_output('new_message', {'content': message, 'agent': context.agent['name']})
-    chat_log = parent_context.chat_log
     return None

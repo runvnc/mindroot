@@ -146,9 +146,12 @@ class ChatLog:
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
         print("Adding message synchronously")
+        t0 = time.time()
         self._add_message_impl(message)
         self.last_modified = time.time()
         self._save_log_sync()
+        save_ms = (time.time() - t0) * 1000
+        print(f'add_message total took {save_ms:.1f}ms')
         self._fire_message_added_hook(message)
 
     def _add_message_impl(self, message: Dict[str, str]) -> None:

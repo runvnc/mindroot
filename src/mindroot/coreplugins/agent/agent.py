@@ -3,6 +3,7 @@ import json
 import os
 import re
 import json
+import time
 from json import JSONDecodeError
 from jinja2 import Template
 from lib.providers.commands import command_manager, command
@@ -70,9 +71,16 @@ END_RAW
 Please adhere to the system JSON command list response format carefully.
 """
 
+# In-memory cache for agent data to avoid repeated disk reads
+_agent_data_cache = {}
+
 @service()
 async def get_agent_data(agent_name, context=None):
-    logger.info("Agent name: {agent_name}", agent_name=agent_name)
+    global _agent_data_cache
+    # Return cached agent data if available
+    if agent_name in _agent_data_cache:
+        return _agent_data_cache[agent_name]
+
 
     agent_path = os.path.join('data/agents', 'local', agent_name)
 
@@ -98,6 +106,8 @@ async def get_agent_data(agent_name, context=None):
 
     agent_data["flags"] = agent_data["flags"]
     agent_data["flags"] = list(dict.fromkeys(agent_data["flags"]))
+    # Cache the result
+    _agent_data_cache[agent_name] = agent_data
     return agent_data
 
 
@@ -167,8 +177,8 @@ class Agent:
             "arguments": cmd_args,
             "context": str(context)
         })
-        context.chat_log.add_message({"role": "assistant", "content": [{"type": "text", 
-                                                                       "text": '['+json_cmd+']' }]})
+        await context.chat_log.add_message_async({"role": "assistant", "content": [{"type": "text", 
+                                                                                      "text": '['+json_cmd+']' }]})
         command_manager.context = context
 
         if cmd_name == "reasoning":
@@ -282,7 +292,7 @@ class Agent:
        
             if invalid_start_format(buffer):
                 print("Found invalid start to buffer", buffer)
-                context.chat_log.add_message({"role": "assistant", "content": buffer})
+                await context.chat_log.add_message_async({"role": "assistant", "content": buffer})
                 started_with = f"Your invalid command started with: {buffer[0:20]}"
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result + "\n\n" + started_with})
                 return results, full_cmds 
@@ -313,16 +323,16 @@ class Agent:
             # Check for cancellation (either permanent or current turn)
             if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
                 logger.warning("Conversation is finished or halted, exiting stream parsing")
-                debug_box(f"""Conversation is finished or halted, exiting stream""")
+                debug_box("Conversation is finished or halted, exiting stream")
                 debug_box(str(context))
                 
                 # Add partial command to chat log if present
                 if partial_cmd is not None:
                     cmd_name = next(iter(partial_cmd))
                     if cmd_name in ["say", "json_encoded_md", "think"]:
-                        context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd[cmd_name])})
+                        await context.chat_log.add_message_async({"role": "assistant", "content": str(partial_cmd[cmd_name])})
                     else:
-                        context.chat_log.add_message({"role": "assistant", "content": str(partial_cmd) + "(Interrupted)"})
+                        await context.chat_log.add_message_async({"role": "assistant", "content": str(partial_cmd) + "(Interrupted)"})
                 
                 # Clear the temporary cancel flag so next turn can proceed
                 if 'cancel_current_turn' in context.data:
@@ -445,7 +455,7 @@ class Agent:
                 print("final parse fail")
                 print(buffer)
                 parse_fail_reason = str(e)
-                context.chat_log.add_message({"role": "assistant", "content": buffer})
+                await context.chat_log.add_message_async({"role": "assistant", "content": buffer})
                 print(parse_fail_reason)
                 await asyncio.sleep(1)
                 tried_to_parse = f"\n\nTried to parse the following input: {original_buffer}"
@@ -455,6 +465,7 @@ class Agent:
         return results, full_cmds
 
     async def render_system_msg(self):
+        t0 = time.time()
         #logger.debug("Docstrings:")
         #logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
         now = datetime.now()
@@ -476,6 +487,8 @@ class Agent:
 
         #self.system_message = self.sys_template.render(data)
         self.system_message = await render('system', data)
+        render_ms = (time.time() - t0) * 1000
+        logger.info(f'render_system_msg took {render_ms:.1f}ms')
  
         additional_instructions = await hook_manager.add_instructions(self.context)
 
@@ -563,4 +576,3 @@ async def run_command(cmd_name, cmd_args, context=None):
     agent = Agent(agent=context.agent)
     json_cmd = json.dumps({cmd_name: cmd_args})
     asyncio.create_task(agent.handle_cmds(cmd_name, cmd_args, json_cmd, context=context))
-

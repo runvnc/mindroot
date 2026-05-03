@@ -40,6 +40,10 @@ class ProviderManager:
             'send_s2s_audio_chunk',
             'send_s2s_message',
             'close_s2s_session',
+            'sip_start_audio_response',
+            'sip_end_audio_response',
+            'sip_is_audio_halted',
+            'sip_audio_out_chunk',
         }
         self._prefs_manager = None  # Cache for ModelPreferencesV2
 
