@@ -283,7 +283,11 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
     else:
         pass
     in_progress[session_id] = True
-    await asyncio.sleep(0.05)
+    # Only sleep if there is an actual previous task that may need time to cancel.
+    # This avoids burning 50ms on every normal turn when the previous task
+    # already finished (the common case in voice calls).
+    if existing_task and not existing_task.done():
+        await asyncio.sleep(0.05)
     if os.environ.get('MR_MAX_ITERATIONS') is not None:
         max_iterations = int(os.environ.get('MR_MAX_ITERATIONS'))
     else:
