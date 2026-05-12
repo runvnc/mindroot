@@ -6,21 +6,21 @@
 html, body {
   background-color: #101020;
   color: #f0f0f0;
-  padding: 5px 5px;
+  padding: 0;
+  margin: 0;
   font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 18px;
   display: flex;
   line-height: 1.5;
   flex-direction: column;
-  height: 100%;
-  padding: 2px;
-  margin: 2px;
+  height: 100vh;
+  overflow: hidden;
 }
 
 input, * {
   background-color: transparent;
   color: #f0f0f0;
-  margin: 2px 2px;
+  margin: 0;
   /*font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol";*/
 }
 
@@ -79,7 +79,7 @@ chat-ai {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding-top:50px;
+  padding-top: 0;
 }
 
 chat-form {
@@ -98,7 +98,7 @@ chat-form {
 chat-message {
   /* max-width: 69%; */
   width: 100%;
-  padding: 4px 8px;
+  padding: 2px 8px;
   margin: 2px 0;
   display: block;
   background-color: transparent;
@@ -129,7 +129,7 @@ chat-message .outer-msg.without-avatar {
 chat-message:first-of-type .outer-msg.without-avatar {
   margin-top: 0; /* Reset top margin for the first message */
 }.message {
-  padding: 5px 5px;
+  padding: 2px 5px;
   margin: 0;
   background-color:  transparent;
 }
@@ -173,7 +173,7 @@ chat-message:first-of-type .outer-msg.without-avatar {
 }
 
 .spacer {
-  height: 0.25em;
+  height: 1px;
   display: block;
   background-color: transparent;
 }
@@ -837,7 +837,7 @@ form.persona {
 
 chat-message {
   display: block;
-  margin-bottom: 2px; /* Default spacing between messages */
+  margin-bottom: 0px;
   margin-top: 0px;
 }
 

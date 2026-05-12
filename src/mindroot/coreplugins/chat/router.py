@@ -458,14 +458,30 @@ async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
 @router.get("/makesession/{agent_name}")
-async def make_session(request: Request, agent_name: str):
+async def make_session(request: Request, agent_name: str, api_key: str = Query(None)):
     """
     Create a new chat session for the specified agent.
     Returns a redirect to the chat session page.
+    Supports api_key query param for programmatic session creation.
     """
-    if not hasattr(request.state, "user"):
-        return RedirectResponse("/login")
-    user = request.state.user
+    # Handle API key authentication if provided
+    if api_key:
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            class MockUser:
+                def __init__(self, username):
+                    self.username = username
+            user = MockUser(user_data['username'])
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        if not hasattr(request.state, "user"):
+            return RedirectResponse("/login")
+        user = request.state.user
     log_id = nanoid.generate()
     
     await init_chat_session(user, agent_name, log_id)
@@ -486,7 +502,7 @@ async def chat_history(request: Request, agent_name: str, log_id: str):
     return history
 
 @router.get("/session/{agent_name}/{log_id}")
-async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
+async def chat_session_redirect(request: Request, agent_name: str, log_id: str, api_key: str = Query(None)):
     """Redirect to trailing slash version for proper relative URL resolution."""
     # Check if agent_name matches the actual agent for this session
     if hasattr(request.state, "user"):
@@ -501,14 +517,33 @@ async def chat_session_redirect(request: Request, agent_name: str, log_id: str):
     # Normal redirect to add trailing slash
     # Check if there are query params to preserve
     query_string = str(request.query_params)
+    # Remove api_key from redirect query string - it will be re-added by the final handler
+    query_params = dict(request.query_params)
     if query_string:
         return RedirectResponse(f"/session/{agent_name}/{log_id}/?{query_string}")
     return RedirectResponse(f"/session/{agent_name}/{log_id}/")
 
 @router.get("/session/{agent_name}/{log_id}/")
-async def chat_session(request: Request, agent_name: str, log_id: str, embed: bool = Query(False)):
+async def chat_session(request: Request, agent_name: str, log_id: str, embed: bool = Query(False), api_key: str = Query(None)):
     # Check authentication (API key or regular user)
     plugins = list_enabled()
+    
+    # Handle API key authentication if provided
+    if api_key:
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            class MockUser:
+                def __init__(self, username):
+                    self.username = username
+            user = MockUser(user_data['username'])
+            # Set request.state.user so downstream code works
+            request.state.user = user
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
     
     # Check if agent_name matches the actual agent for this session
     if hasattr(request.state, "user"):
@@ -535,6 +570,10 @@ async def chat_session(request: Request, agent_name: str, log_id: str, embed: bo
 
     if auth_token is not None:
         chat_data["access_token"] = auth_token
+    
+    # If authenticated via API key, pass it as access_token so chat JS uses it for Bearer auth
+    if api_key:
+        chat_data["access_token"] = api_key
     
     # Add embed mode flag
     if embed:

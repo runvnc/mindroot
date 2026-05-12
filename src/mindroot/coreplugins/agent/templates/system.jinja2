@@ -362,6 +362,9 @@ Instead, you should **only plan for the next few commands that you need to execu
 Then you can adjust based on the output of your commands which will be returned
 by the system.
 
+Also important: reasoning contents must be in a JSON parsable format. Do not
+use complex formatting or unescaped special characters etc. in reasoning!
+
 {% endblock %}
 
 {% block http_command_api %}

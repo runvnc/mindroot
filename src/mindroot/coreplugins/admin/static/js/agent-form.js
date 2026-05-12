@@ -346,6 +346,7 @@ class AgentForm extends BaseEl {
     textarea {
       width: 100%;
       padding: 8px 12px;
+      box-sizing: border-box;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 6px;
@@ -1939,39 +1940,33 @@ class AgentForm extends BaseEl {
 
           <div class="form-group commands-section">
             <details>
-              <summary>Preferred Providers</summary>
+              <summary>Recommended Plugins</summary>              <summary>Preferred Providers</summary>
               ${this.renderPreferredProviders()}
             </details>
           </div> 
 
           <div class="form-group commands-section">
-            <details>
-              <summary>Select Models</summary>
-              ${this.renderServiceModels()}
-            </details>
+            ${this.renderServiceModels()}
           </div> 
 
           <div class="form-group commands-section">
-            <details>
-              <summary>Max Tokens</summary>
-              <div class="commands-category">
-                <div class="form-group">
-                  <label>Maximum Tokens:</label>
-                  <input 
-                    type="number" 
-                    name="max_tokens" 
-                    .value=${agentForRender.max_tokens || ''}
-                    placeholder="Leave empty for model default"
-                    @input=${this.handleInputChange}
-                  >
-                </div>
+            <div class="commands-category">
+              <div class="form-group">
+                <label>Maximum Tokens:</label>
+                <input 
+                  type="number" 
+                  name="max_tokens" 
+                  .value=${agentForRender.max_tokens || ''}
+                  placeholder="Leave empty for model default"
+                  @input=${this.handleInputChange}
+                >
               </div>
-            </details>
+            </div>
           </div>
 
           <div class="form-group commands-section">
             <details>
-              <summary>Recommended Plugins</summary>
+              <summary>Recommended Plugins</summary>              <summary>Recommended Plugins</summary>
               ${this.renderRequiredPlugins()}
 
           <!-- UI section: components + pages -->

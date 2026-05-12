@@ -58,64 +58,109 @@ class ActionComponent extends BaseEl {
 
 .action-container {
   width: 100%;
-  border: 1px solid #333;
-  border-radius: 8px;
-  margin: 4px 0;
+  border-left: 2px solid #2a2a2a;
+  border-radius: 0;
+  margin: 2px 0;
   background-color: transparent;
 }
 
 .action-container.running {
-  border-color: #4a5eff;
-  animation: pulse-border 2s infinite;
+  border-left-color: #4a5eff;
 }
 
-@keyframes pulse-border {
-  0%, 100% {
-    border-color: #4a5eff;
-    box-shadow: 0 0 5px rgba(74, 94, 255, 0.3);
-  }
-  50% {
-    border-color: #6a7eff;
-    box-shadow: 0 0 10px rgba(74, 94, 255, 0.5);
-  }
+.action-container.running .fn_name {
+  color: #8a9aff;
 }
 
 .action-summary {
-  padding: 8px 12px;
+  padding: 3px 8px;
   cursor: pointer;
-  background: rgba(200, 200, 255, 0.1);
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 3px;
   width: 100%;
   box-sizing: border-box;
-  display: block;
-  color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  color: #888;
   user-select: none;
+  font-size: 1em;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.action-summary::before {
+  content: 'ᐳ';
+  font-size: 0.85em;
+  transition: transform 0.15s ease;
+  display: inline-block;
+  flex-shrink: 0;
+  color: #bbb;
+  margin-right: 2px;
+}
+
+.action-summary.expanded::before {
+  transform: rotate(90deg);
 }
 
 .action-summary:hover {
-  background: #444;
+  background: rgba(255, 255, 255, 0.03);
+  color: #aaa;
+}
+
+.action-summary:hover::before {
+  color: #ddd;
 }
 
 .action-content {
-  padding: 8px 12px;
-  border-top: 1px solid #333;
-  color: #f0f0f0;
-  display: none;
+  padding: 4px 8px 6px 22px;
+  border-top: none;
+  color: #ccc;
+  display: none !important;
+  overflow: hidden;
+  max-height: 0;
+  font-size: 0.85em;
 }
 
 .action-content.expanded {
-  display: block;
+  display: block !important;
+  max-height: none;
+  overflow: visible;
+}
+
+.action-content details {
+  margin: 4px 0;
+}
+
+.action-content .fn_result summary {
+  cursor: pointer;
+  color: #777;
+  padding: 2px 0;
+  font-size: 0.9em;
 }
 
 .param-preview {
-  color: #ddd;
+  color: #bbb;
   font-style: italic;
-  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
 }
 
 .fn_name {
-  color: #f0f0f0;
-  font-weight: normal;
+  color: #ccc;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.95em;
+}
+
+.param_name {
+  font-weight: 600;
+  color: #bbb;
+}
+
+.param_value {
+  color: #aaa;
 }
 
 @keyframes flash {
@@ -130,7 +175,7 @@ class ActionComponent extends BaseEl {
     super();
     this.funcName = '';
     this.result = '';
-    this.isExpanded = true;
+    this.isExpanded = false;
     this.isRunning = false;
   }
 
@@ -287,7 +332,7 @@ class ActionComponent extends BaseEl {
 
     return html`
     <div class="action-container ${this.isRunning ? 'running' : ''}">
-      <div class="action-summary" @click="${this._toggleExpanded}">
+      <div class="action-summary ${this.isExpanded ? 'expanded' : ''}" @click="${this._toggleExpanded}">
         <span class="fn_name">${funcName}</span>
         ${paramPreview ? html`<span class="param-preview">${paramPreview}</span>` : ''}
       </div>
