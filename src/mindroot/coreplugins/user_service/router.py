@@ -34,7 +34,6 @@ def _is_trusted_source(request: Request) -> bool:
     is_trusted = is_localhost or is_docker_gateway
     logger.info(f"User API request from {client_host} (trusted={is_trusted})")
     return is_trusted
-@public_route()
 
 @router.post("/api/users/create")
 async def api_create_user(request: Request):
