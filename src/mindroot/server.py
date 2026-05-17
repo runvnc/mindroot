@@ -64,6 +64,26 @@ def parse_args():
     install_parser.add_argument('plugins', nargs='+', help='List of plugins to install (e.g., runvnc/plugin-name)')
     install_parser.add_argument('--reinstall', action='store_true', help='Force reinstall of the plugin if it already exists.')
 
+    # User command group
+    user_parser = subparsers.add_parser('user', help='Manage users')
+    user_subparsers = user_parser.add_subparsers(dest='user_command', required=True)
+    create_user_parser = user_subparsers.add_parser('create', help='Create a new user')
+    create_user_parser.add_argument('username', type=str, help='Username')
+    create_user_parser.add_argument('email', type=str, help='Email address')
+    create_user_parser.add_argument('--password', type=str, default=None, help='Password (auto-generated if not provided)')
+    create_user_parser.add_argument('--roles', type=str, nargs='+', default=['user', 'verified'], help='Roles for the user')
+
+    # API key command group
+    apikey_parser = subparsers.add_parser('apikey', help='Manage API keys')
+    apikey_subparsers = apikey_parser.add_subparsers(dest='apikey_command', required=True)
+    create_apikey_parser = apikey_subparsers.add_parser('create', help='Create a new API key')
+    create_apikey_parser.add_argument('username', type=str, help='Username to associate the key with')
+    create_apikey_parser.add_argument('--description', type=str, default='', help='Description for the key')
+    delete_apikey_parser = apikey_subparsers.add_parser('delete', help='Delete an API key')
+    delete_apikey_parser.add_argument('key', type=str, help='API key to delete')
+    list_apikey_parser = apikey_subparsers.add_parser('list', help='List API keys')
+    list_apikey_parser.add_argument('--username', type=str, default=None, help='Optional username to filter by')
+
     return parser.parse_args()
 
 def get_project_root():
@@ -189,6 +209,50 @@ def main():
     run_migrations()
 
     args = parse_args()
+
+    # Handle CLI-only commands (no server startup needed)
+    if args.command == 'user':
+        from .coreplugins.user_service.mod import create_user  # noqa: lazy import
+        from .coreplugins.user_service.models import UserCreate  # noqa: lazy import
+        if args.user_command == 'create':
+            import secrets
+            password = args.password or secrets.token_urlsafe(16)
+            user_create = UserCreate(username=args.username, email=args.email, password=password)
+            asyncio.run(create_user(user_create, roles=args.roles, skip_verification=True))
+            print(f"Created user: {args.username}")
+            print(f"Email: {args.email}")
+            print(f"Password: {password}")
+            print(f"Roles: {args.roles}")
+        else:
+            print(f"Unknown user command: {args.user_command}")
+            sys.exit(1)
+        sys.exit(0)
+
+    if args.command == 'apikey':
+        from .coreplugins.api_keys.api_key_manager import api_key_manager  # noqa: lazy import
+        if args.apikey_command == 'create':
+            key_data = api_key_manager.create_key(args.username, description=args.description)
+            print(f"Created API key for user: {args.username}")
+            print(f"Key: {key_data['key']}")
+            print(f"Description: {args.description}")
+        elif args.apikey_command == 'delete':
+            if api_key_manager.delete_key(args.key):
+                print(f"Deleted API key: {args.key}")
+            else:
+                print(f"API key not found: {args.key}")
+                sys.exit(1)
+        elif args.apikey_command == 'list':
+            keys = api_key_manager.list_keys(username=args.username)
+            if keys:
+                print(f"API keys:")
+                for k in keys:
+                    print(f"  {k['key']} - user: {k['username']} ({k.get('description', '')})")
+            else:
+                print("No API keys found")
+        else:
+            print(f"Unknown apikey command: {args.apikey_command}")
+            sys.exit(1)
+        sys.exit(0)
 
     # If the command is 'plugin', handle it and exit.
     if args.command == 'plugin':
