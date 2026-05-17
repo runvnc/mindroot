@@ -34,10 +34,11 @@ def _is_trusted_source(request: Request) -> bool:
     is_trusted = is_localhost or is_docker_gateway
     logger.info(f"User API request from {client_host} (trusted={is_trusted})")
     return is_trusted
+@public_route()
 
 @router.post("/api/users/create")
 async def api_create_user(request: Request):
-    """Create a new user programmatically.
+    """Create a new user programmatically.    """Create a new user programmatically.
     
     Access control:
     - Requests from localhost or Docker bridge gateway are allowed without auth

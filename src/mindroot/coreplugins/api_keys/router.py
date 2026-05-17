@@ -7,6 +7,7 @@ from .mod import api_key_manager
 from lib.auth.api_key import verify_api_key
 
 router = APIRouter()
+from lib.route_decorators import public_route
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ def _is_trusted_source(request: Request) -> bool:
     )
     return is_trusted
 
+@public_route()
 @router.post("/api_keys/create")
 async def create_api_key(request: Request, key_request: APIKeyCreate):
     """Create a new API key.
@@ -106,6 +108,7 @@ async def list_api_keys(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@public_route()
 @router.delete("/api_keys/delete/{api_key}")
 async def delete_api_key(api_key: str, request: Request):
     """Delete an API key. Requires auth unless from localhost."""
