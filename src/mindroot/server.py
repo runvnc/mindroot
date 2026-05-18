@@ -212,24 +212,51 @@ def main():
 
     # Handle CLI-only commands (no server startup needed)
     if args.command == 'user':
-        from .coreplugins.user_service.mod import create_user  # noqa: lazy import
-        from .coreplugins.user_service.models import UserCreate  # noqa: lazy import
         if args.user_command == 'create':
+            import bcrypt
             import secrets
+            import json
+            from datetime import datetime
+            import os
             password = args.password or secrets.token_urlsafe(16)
-            user_create = UserCreate(username=args.username, email=args.email, password=password)
-            asyncio.run(create_user(user_create, roles=args.roles, skip_verification=True))
-            print(f"Created user: {args.username}")
-            print(f"Email: {args.email}")
-            print(f"Password: {password}")
-            print(f"Roles: {args.roles}")
+            user_dir = os.path.join('data/users', args.username)
+            os.makedirs('data/users', exist_ok=True)
+            if os.path.exists(user_dir):
+                print(f'Error: Username {args.username} already exists')
+                sys.exit(1)
+            os.makedirs(user_dir)
+            role_list = args.roles or ['user']
+            if 'user' not in role_list:
+                role_list.append('user')
+            now = datetime.utcnow().isoformat()
+            auth_data = {
+                'username': args.username,
+                'email': args.email,
+                'password_hash': bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+                'created_at': now,
+                'last_login': None,
+                'email_verified': True,
+                'verification_token': None,
+                'verification_expires': None,
+                'roles': role_list
+            }
+            with open(os.path.join(user_dir, 'auth.json'), 'w') as f:
+                json.dump(auth_data, f, indent=2)
+            with open(os.path.join(user_dir, 'settings.json'), 'w') as f:
+                json.dump({}, f)
+            with open(os.path.join(user_dir, 'workspace.json'), 'w') as f:
+                json.dump({}, f)
+            print(f'Created user: {args.username}')
+            print(f'Email: {args.email}')
+            print(f'Password: {password}')
+            print(f'Roles: {role_list}')
         else:
             print(f"Unknown user command: {args.user_command}")
             sys.exit(1)
         sys.exit(0)
 
     if args.command == 'apikey':
-        from .coreplugins.api_keys.api_key_manager import api_key_manager  # noqa: lazy import
+        from .coreplugins.api_keys.api_key_manager import api_key_manager
         if args.apikey_command == 'create':
             key_data = api_key_manager.create_key(args.username, description=args.description)
             print(f"Created API key for user: {args.username}")
