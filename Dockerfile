@@ -45,6 +45,9 @@ WORKDIR /app
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Make mindroot CLI accessible via docker exec without venv activation
+RUN ln -s /app/.venv/bin/mindroot /usr/local/bin/mindroot
+
 # Expose port
 EXPOSE 8010
 
