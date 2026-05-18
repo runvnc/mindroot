@@ -13,7 +13,6 @@ else:
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 import os
 from pathlib import Path
 from .lib import plugins
