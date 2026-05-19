@@ -457,7 +457,6 @@ async def get_chat_html(request: Request, agent_name: str, api_key: str = Query(
     # Regular redirect
     return RedirectResponse(f"/session/{agent_name}/{log_id}")
 
-@public_route()
 @router.get("/makesession/{agent_name}")
 async def make_session(request: Request, agent_name: str, api_key: str = Query(None)):
     """

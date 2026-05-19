@@ -35,56 +35,6 @@ def _is_trusted_source(request: Request) -> bool:
     logger.info(f"User API request from {client_host} (trusted={is_trusted})")
     return is_trusted
 
-@router.post("/api/users/create")
-async def api_create_user(request: Request):
-    """Create a new user programmatically.    """Create a new user programmatically.
-    
-    Access control:
-    - Requests from localhost or Docker bridge gateway are allowed without auth
-      (for container bootstrap by mragent)
-    - All other requests require Bearer auth
-    
-    Body: {"username": "...", "email": "...", "password": "...", "roles": ["user"]}
-    
-    If password is not provided or too short, a secure random one is generated.
-    """
-    if not _is_trusted_source(request):
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("Bearer "):
-            user_data = await verify_api_key(auth_header[7:])
-            if not user_data:
-                raise HTTPException(status_code=401, detail="Invalid API key")
-        else:
-            raise HTTPException(status_code=401, detail="Authentication required")
-    
-    try:
-        body = await request.json()
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON body")
-    
-    username = body.get("username")
-    email = body.get("email")
-    password = body.get("password")
-    roles = body.get("roles", ["user"])
-    
-    if not username or not email:
-        raise HTTPException(status_code=400, detail="username and email are required")
-    
-    # Generate a secure random password if none provided or too short
-    if not password or len(password) < 8:
-        password = secrets.token_urlsafe(16)
-    
-    try:
-        user_create = UserCreate(username=username, email=email, password=password)
-        user = await create_user(user_create, roles=roles, skip_verification=True)
-        logger.info(f"Created user {username} via API")
-        return {"success": True, "user": {"username": user.username, "email": user.email, "roles": user.roles}}
-    except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
-    except Exception as e:
-        logger.error(f"Failed to create user via API: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @public_route()
 @router.get('/reset-password/{filename}')
 async def get_reset_password_form_by_file(request: Request, filename: str):

@@ -13,7 +13,6 @@ else:
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
-import os
 from pathlib import Path
 from .lib import plugins
 from .lib.chatcontext import ChatContext
@@ -187,6 +186,7 @@ class PyInstrumentMiddleware(BaseHTTPMiddleware):
         
         profiler.stop()
         
+        import os
         # Save profile to file if enabled
         if os.environ.get('PYINSTRUMENT_SAVE', 'false').lower() == 'true':
             profile_dir = Path('data/profiles')
@@ -325,7 +325,8 @@ def main():
     )
 
     app.add_middleware(HeaderMiddleware)
-    
+   
+    import os 
     # Add profiling middleware
     if os.environ.get('PYINSTRUMENT_ENABLE', 'false').lower() == 'true':
         app.add_middleware(PyInstrumentMiddleware)
