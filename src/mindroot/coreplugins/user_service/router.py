@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.templates import render
+from pydantic import BaseModel
 import os
 import json
 import logging
@@ -8,6 +9,7 @@ import secrets
 from .password_reset_service import reset_password_with_token, initiate_password_reset
 from .mod import create_user
 from .models import UserCreate
+from typing import List, Optional
 from lib.auth.api_key import verify_api_key
 from lib.providers.services import service_manager
 from lib.providers import ProviderManager
@@ -34,6 +36,54 @@ def _is_trusted_source(request: Request) -> bool:
     is_trusted = is_localhost or is_docker_gateway
     logger.info(f"User API request from {client_host} (trusted={is_trusted})")
     return is_trusted
+
+class APIUserCreate(BaseModel):
+    """Request body for programmatic user creation (trusted sources only)."""
+    username: str
+    email: str
+    password: Optional[str] = None
+    roles: Optional[List[str]] = None
+
+@public_route()
+@router.post('/api/users/create')
+async def api_create_user(request: Request, user_data: APIUserCreate):
+    """Create a new user programmatically.
+
+    Access control:
+    - Requests from localhost or Docker bridge gateway are allowed without auth
+      (for container bootstrap by mragent on the same host)
+    - All other requests require authentication (Bearer token or session user)
+    """
+    if not _is_trusted_source(request):
+        # Require authentication for non-trusted requests
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            user_data_auth = await verify_api_key(auth_header[7:])
+            if not user_data_auth:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+        elif not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        # Generate password if not provided
+        import secrets as _secrets
+        password = user_data.password or _secrets.token_urlsafe(16)
+        roles = user_data.roles or ['user', 'verified']
+        if 'user' not in roles:
+            roles.append('user')
+
+        create_data = UserCreate(
+            username=user_data.username,
+            email=user_data.email,
+            password=password
+        )
+        result = await create_user(create_data, roles=roles, skip_verification=True)
+        return {"success": True, "data": {"username": result.username, "email": result.email, "roles": roles}}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating user via API: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @public_route()
 @router.get('/reset-password/{filename}')
