@@ -146,11 +146,14 @@ async def delegate_task(instructions: str, agent_name, log_id=None, retries=3, c
     return f'<a href="/session/{agent_name}/{log_id}" target="_blank">Task completed with log ID: {log_id}</a>\nResults:\n\n{text}'
 
 @command()
-async def task_result(output: str, context=None):
+async def task_result(output: str = None, result: str = None, context=None):
     """
     Return the result of a task to the user.
 
-    This should be the final output of a task that the user requested.
+    The primary parameter is `output`. However, `result` is also accepted
+    as an alias for backward compatibility. If only `result` is provided
+    (no `output`), it is used as the output. If both are provided, the
+    final output is `result` + newline + `output`.
 
     Note: if you have this command defined, you MUST use it at the end of a task.
     Be sure to include the full output of the task, unless they specified 
@@ -209,8 +212,16 @@ async def task_result(output: str, context=None):
         }
 
     """
+    # Handle result parameter: if output not given, use result; if both given, prepend result
+    if output is None and result is not None:
+        final_output = result
+    elif output is not None and result is not None:
+        final_output = result + '\n' + output
+    else:
+        final_output = output
+
     context.data['finished_conversation'] = True
-    context.data['task_result'] = output
+    context.data['task_result'] = final_output
     context.save_context()
     return None
 
