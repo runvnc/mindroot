@@ -192,6 +192,23 @@ async def middleware(request: Request, call_next):
             return await call_next(request)
         elif any([request.url.path.startswith(path) for path in public_static]):
             return await call_next(request)
+
+        # Bypass auth for trusted sources (localhost / Docker bridge gateway)
+        # This allows mragent on the same host to call API endpoints without auth
+        client_host = request.client.host if request.client else ""
+        is_trusted = client_host in ("127.0.0.1", "::1", "localhost")
+        if not is_trusted and client_host:
+            parts = client_host.split(".")
+            if len(parts) == 4 and parts[0] == "172" and parts[2] == "0" and parts[3] == "1":
+                is_trusted = True
+        if not is_trusted:
+            real_ip = request.headers.get("X-Real-IP", "")
+            if real_ip in ("127.0.0.1", "::1", "localhost"):
+                is_trusted = True
+        if is_trusted:
+            print(f'Trusted source bypass for {request.url.path} from {client_host}')
+            return await call_next(request)
+
         else:
             print('Not a public route: ', request.url.path)
             print("public routes:", public_routes)
