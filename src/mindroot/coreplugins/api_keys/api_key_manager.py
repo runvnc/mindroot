@@ -60,7 +60,18 @@ class APIKeyManager:
         """
         print(f"Validating key: {api_key}")
         print("My keys are", self.keys)
-        return self.keys.get(api_key)
+        result = self.keys.get(api_key)
+        if result:
+            return result
+
+        # Key not found in memory - reload from disk in case it was
+        # created by another process or before a uvicorn reload
+        print(f"Key {api_key} not found in memory, reloading from disk...")
+        self._load_keys()
+        result = self.keys.get(api_key)
+        if result:
+            print(f"Found key {api_key} after disk reload")
+        return result
 
     def delete_key(self, api_key: str) -> bool:
         """Delete an API key
