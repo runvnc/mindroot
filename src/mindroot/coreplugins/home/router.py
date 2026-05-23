@@ -84,6 +84,6 @@ async def home(request: Request):
             # Fallback if agent data can't be loaded
             agents_with_personas.append({'name': agent_name, 'persona': agent_name})
     
-    user = request.state.user
+    user = getattr(request.state, 'user', None)
     html = await render('home', {"user": user, "request": request, "agents": agents, "agents_with_personas": agents_with_personas })
     return HTMLResponse(html)
