@@ -151,8 +151,9 @@ async def middleware(request: Request, call_next):
                     # Create JWT token for persistent session
                     token = create_access_token({"sub": username})
                     request.state.access_token = token
-                    # Get response and set cookie
+                    # Get response and set JWT as cookie for persistent auth
                     response = await call_next(request)
+                    response.set_cookie(key="access_token", value=token, httponly=True, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60, samesite="lax")
                     return response
                 else:
                     print(f"User {username} for key {api_key} not found")
@@ -269,7 +270,9 @@ async def middleware(request: Request, call_next):
                     # Create JWT token for persistent session
                     jwt_token = create_access_token({"sub": username})
                     request.state.access_token = jwt_token
-                    return await call_next(request)
+                    response = await call_next(request)
+                    response.set_cookie(key="access_token", value=jwt_token, httponly=True, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60, samesite="lax")
+                    return response
                 else:
                     print(f"User {username} for API key not found")
                     return RedirectResponse(url="/login")
