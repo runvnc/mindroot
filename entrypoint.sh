@@ -20,8 +20,9 @@ else
 	echo "Using existing MindRoot installation"
 fi
 
-# Check if .venv exists, if not, copy it from template
-if [ ! -d "/app/.venv" ]; then
+# Always ensure .venv is fresh: copy from template if missing OR if mindroot binary is absent
+if [ ! -d "/app/.venv" ] || [ ! -f "/app/.venv/bin/mindroot" ]; then
+	echo "Virtual environment missing or stale, copying from template..."
 	echo "Virtual environment missing, copying from template..."
 	if [ -d "/app-template/.venv" ]; then
 		cp -r /app-template/.venv /app/
