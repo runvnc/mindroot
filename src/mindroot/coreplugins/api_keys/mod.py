@@ -1,4 +1,4 @@
-from lib.providers.hooks import hook
+from mindroot.lib.providers.hooks import hook
 from fastapi.staticfiles import StaticFiles
 import os
 from pathlib import Path

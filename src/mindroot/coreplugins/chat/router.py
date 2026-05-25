@@ -548,7 +548,6 @@ async def chat_session(request: Request, agent_name: str, log_id: str, embed: bo
     # Check if agent_name matches the actual agent for this session
     if hasattr(request.state, "user"):
         actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
-        actual_agent = await get_agent_for_log_id(log_id, request.state.user.username, url_agent=agent_name)
         if actual_agent and actual_agent != agent_name:
             query_string = str(request.query_params)
             if query_string:

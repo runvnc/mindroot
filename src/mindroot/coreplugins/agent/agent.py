@@ -472,6 +472,7 @@ class Agent:
 
         formatted_time = now.strftime("~ %Y-%m-%d %I %p %Z%z")
 
+        agent_json = json.dumps(self.agent)
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,

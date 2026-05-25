@@ -16,6 +16,8 @@ Current System Date: {{ formatted_datetime }}
 {% block agentid %}
 # Agent Name and Version
 
+--> this field is important - Agent: {{ agent_json }}
+
 Agent Name: {{ agent.name }}
 Agent Model: {{ agent['service_models']['stream_chat'] }}
 Agent Version: {{ agent.hashver }}
