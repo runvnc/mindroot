@@ -4,7 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 import logging
 from .mod import api_key_manager
-from lib.auth.api_key import verify_api_key
+from mindroot.lib.auth.api_key import verify_api_key
 
 router = APIRouter()
 
