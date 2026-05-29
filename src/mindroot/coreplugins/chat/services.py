@@ -241,6 +241,20 @@ async def cancel_and_wait(session_id: str, user: str, context=None):
             cmd_task = existing_context.data['active_command_task']
             if cmd_task and (not cmd_task.done()):
                 cmd_task.cancel()
+                # Wait (bounded) for the cancelled command's own teardown to
+                # finish before the next turn is allowed to start. This ensures
+                # the in-flight TTS command has fully unwound - e.g. mr_eleven_stream
+                # speak() releasing its per-log_id lock, or mr_kyutai cancelling /
+                # cleaning up its realtime streaming session - so the next turn's
+                # speak()/partial_command cannot race a not-yet-released lock or a
+                # not-yet-torn-down session. Bounded so a wedged teardown can never
+                # delay barge-in; normal teardown completes in a few ms.
+                try:
+                    await asyncio.wait_for(cmd_task, timeout=0.5)
+                except (asyncio.CancelledError, asyncio.TimeoutError):
+                    pass
+                except Exception:
+                    pass
             else:
                 pass
         else:
