@@ -127,12 +127,26 @@ async def run_task(instructions: str, agent_name: str=None, user: str=None, log_
         await context.save_context()
     else:
         debug_box('Context is not none')
+    # run_task may be used to continue an existing session. Clear per-turn
+    # completion state so a previous task_result cannot leak into this turn.
+    if context is not None:
+        context.data.pop('task_result', None)
+        context.data['finished_conversation'] = False
+        context.data['cancel_current_turn'] = False
+        try:
+            await context.save_context_data()
+        except Exception:
+            pass
     await init_chat_session(context.username, context.agent_name, context.log_id, context)
     retried = 0
     msg = '\n        # SYSTEM NOTE\n        \n        This task is being run via API and requires a textual or structured output.\n        If your instructions indicate multiple steps with multiple function calls,\n        wait for the system results as you process each step in turn, then\n        call task_result() with the final output after all steps are truly complete.\n        You MUST call task_result() with the final output if you are completing the task.\n        For multi-stage tasks, do not call task_result until the final step is complete.\n\n    '
     instructions = instructions + msg
     while retried < retries:
-        [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        try:
+            [results, full_results] = await send_message_to_agent(context.log_id, instructions, context=context)
+        except Exception as e:
+            instructions += f'\n\nError during task: {str(e)}, retry task or task output'
+            retried += 1
         text = results_output(full_results)
         if text == '':
             retried += 1

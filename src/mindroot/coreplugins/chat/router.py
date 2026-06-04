@@ -13,7 +13,7 @@ from lib.providers.commands import *
 import asyncio
 import aiofiles
 from lib.chatcontext import get_context, ChatContext
-from typing import List
+from typing import List, Optional
 from lib.providers.services import service, service_manager
 from lib.providers.commands import command_manager
 from lib.utils.debug import debug_box
@@ -586,6 +586,12 @@ async def chat_session(request: Request, agent_name: str, log_id: str, embed: bo
 
 class TaskRequest(BaseModel):
     instructions: str
+    # Optional existing session/log id. If provided and the route agent matches
+    # the session agent, /task continues that session. If the route agent differs,
+    # the session is copied into a new session for the requested agent, allowing
+    # clients to switch agents with continuity.
+    log_id: Optional[str] = None
+    parent_log_id: Optional[str] = None
 
 @router.post("/task/{agent_name}")
 async def run_task_route(request: Request, agent_name: str, task_request: TaskRequest = None, api_key: str = Query(None)):
@@ -629,9 +635,7 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
     
     if not instructions:
         return {"status": "error", "message": "No instructions provided"}
-    
-    task_result, full_results, log_id = await run_task(instructions=instructions, agent_name=agent_name, user=user)
-    
+
     # Initialize session data from query parameters after task creation
     # Skip standard parameters that are used for other purposes
     skip_params = {'api_key'}
@@ -653,11 +657,76 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
             print(f"Updated task session data from query params for {log_id}: {session_params}")
         except Exception as e:
             print(f"Error updating TUI session data: {e}")
-    
+ 
+
+    requested_log_id = task_request.log_id if task_request is not None else None
+    requested_parent_log_id = task_request.parent_log_id if task_request is not None else None
+    continued = False
+    copied_from_log_id = None
+    context = None
+
+    try:
+        if requested_log_id:
+            try:
+                existing_context = await get_context(requested_log_id, user)
+            except Exception as e:
+                return {"status": "error", "message": f"Could not load session {requested_log_id}: {str(e)}"}
+
+            existing_agent_name = existing_context.agent_name
+            if existing_agent_name == agent_name:
+                # Same agent: true continuation in the existing session.
+                context = existing_context
+                continued = True
+            else:
+                # Different agent: copy the session into a new log_id for the requested agent.
+                # This lets API clients switch agents, e.g. @CheapAgent or @SmartAgent,
+                # while preserving the conversation/tool-result history.
+                from lib.chatlog import ChatLog
+                copied_from_log_id = requested_log_id
+                new_log_id = nanoid.generate()
+                context = ChatContext(command_manager, service_manager, user)
+                context.agent_name = agent_name
+                context.username = user
+                context.name = agent_name
+                context.log_id = new_log_id
+                context.parent_log_id = requested_log_id
+                context.agent = await service_manager.get_agent_data(agent_name)
+                if 'env' in context.agent and isinstance(context.agent['env'], dict):
+                    context.env = context.agent['env']
+                context.data = dict(existing_context.data or {})
+                context.data['copied_from_log_id'] = requested_log_id
+                context.data['copied_from_agent'] = existing_agent_name
+                context.data.pop('llm', None)
+                context.current_model = None
+                context.chat_log = ChatLog(log_id=new_log_id, agent=agent_name, user=user, parent_log_id=requested_log_id)
+                context.chat_log.messages = existing_context.chat_log.get_recent()
+                await context.chat_log.save_log()
+                await context.save_context()
+                continued = True
+
+            # Critical for reused sessions: do not let stale task_result leak into this turn.
+            context.data.pop('task_result', None)
+            context.data['finished_conversation'] = False
+            context.data['cancel_current_turn'] = False
+            await context.save_context_data()
+
+            task_result, full_results, log_id = await run_task(instructions=instructions, context=context)
+        else:
+            task_result, full_results, log_id = await run_task(
+                instructions=instructions,
+                agent_name=agent_name,
+                user=user,
+                parent_log_id=requested_parent_log_id
+            )
+    except Exception as e:
+        task_result = "Error: "+str(e)
+        full_results = []
+        log_id = 'unknown_log_id' 
+   
     print(task_result)
     print(full_results)
     print(log_id)
-    return {"status": "ok", "results": task_result, "full_results": full_results, "log_id": log_id}
+    return {"status": "ok", "results": task_result, "full_results": full_results, "log_id": log_id, "continued": continued, "copied_from_log_id": copied_from_log_id, "agent_name": agent_name}
 
 
 @router.post("/chat/{log_id}/upload")
