@@ -468,11 +468,17 @@ class Agent:
         t0 = time.time()
         #logger.debug("Docstrings:")
         #logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
+        # Cache json-serialized agent since it doesn't change between renders
+        if not hasattr(self, '_agent_json_cache_key'):
+            self._agent_json_cache_key = None
+        if self._agent_json_cache_key != id(self.agent):
+            self._cached_agent_json = json.dumps(self.agent)
+            self._agent_json_cache_key = id(self.agent)
+        agent_json = self._cached_agent_json
         now = datetime.now()
 
         formatted_time = now.strftime("~ %Y-%m-%d %I %p %Z%z")
 
-        agent_json = json.dumps(self.agent)
         data = {
             "command_docs": command_manager.get_some_docstrings(self.agent["commands"]),
             "agent": self.agent,

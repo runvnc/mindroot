@@ -1,4 +1,6 @@
 import os
+import hashlib
+import copy
 import logging
 from jinja2 import Environment, FileSystemLoader, ChoiceLoader
 import re
@@ -279,6 +281,14 @@ async def load_plugin_templates(page_name, plugins):
     Returns:
         list: List of template info dictionaries
     """
+    # Check cache first - plugins list is stable during a session
+    cache_key = (page_name, tuple(plugins))
+    cached = _plugin_template_cache.get(cache_key)
+    if cached is not None:
+        # Return a deep copy since templates contain Jinja2 template objects
+        # that shouldn't be mutated by callers
+        return copy.deepcopy(cached)
+ 
     templates = []
     for plugin in plugins:
         try:
@@ -337,6 +347,10 @@ async def load_plugin_templates(page_name, plugins):
         except Exception as e:
             #print(f'Error loading plugin template: {e}')
             continue
+
+    # Cache the result for subsequent renders
+    _plugin_template_cache[cache_key] = copy.deepcopy(templates)
+ 
     return templates
 
 async def collect_content(template, blocks, template_type, data, assume_blank=False):
@@ -384,35 +398,42 @@ async def render_combined_template(page_name, plugins, context):
     Returns:
         str: Rendered HTML
     """
-    # Check for assume-blank pragma and render directly if found
-    for plugin in plugins:
-        plugin_path = get_plugin_path(plugin)
-        if not plugin_path:
-            continue
-            
-        last_part = plugin_path.split('/')[-1]
-        override_paths = [
-            os.path.join(plugin_path, 'override', f'{page_name}.jinja2'),
-            os.path.join(plugin_path, 'src', plugin, 'override', f'{page_name}.jinja2'),
-            os.path.join(plugin_path, 'src', 'override', f'{page_name}.jinja2'),
-            os.path.join(plugin_path, 'src', last_part, 'override', f'{page_name}.jinja2')
-        ]
-        
-        for path in override_paths:
-            if os.path.exists(path):
-                content = load_template_with_translation(path)
-                if content:
-                    # Check for assume-blank pragma
-                    head = content[:2048]
-                    pragma_re = re.compile(r"^\s*\{#\s*(assume[-_]blank)(?:\s*true)?\s*#\}\s*", re.IGNORECASE | re.MULTILINE)
-                    if pragma_re.search(head):
-                        # Found assume-blank! Just render this template directly
-                        #print(f"Found assume-blank pragma in {path}, rendering directly without parent")
-                        content = pragma_re.sub("", content, count=1)  # Remove pragma
-                        template = env.from_string(content)
-                        return template.render(**context)  # Return early!
-    
-    # If no assume-blank pragma found, continue with normal processing
+    # Cache the assume-blank check results.
+    # This loop does 4 os.path.exists() per plugin (e.g. 152 stat calls for 38 plugins).
+    # On subsequent renders we skip the entire loop.
+    cache_key = ('assume_blank', page_name, tuple(plugins))
+    cached_assume = _plugin_template_cache.get(cache_key)
+    if cached_assume is None:
+        # First render: scan all plugins for assume-blank pragma
+        for plugin in plugins:
+            plugin_path = get_plugin_path(plugin)
+            if not plugin_path:
+                continue
+
+            last_part = plugin_path.split('/')[-1]
+            override_paths = [
+                os.path.join(plugin_path, 'override', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', plugin, 'override', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', 'override', f'{page_name}.jinja2'),
+                os.path.join(plugin_path, 'src', last_part, 'override', f'{page_name}.jinja2')
+            ]
+
+            for path in override_paths:
+                if os.path.exists(path):
+                    content = load_template_with_translation(path)
+                    if content:
+                        head = content[:2048]
+                        pragma_re = re.compile(r"^\s*\{#\s*(assume[-_]blank)(?:\s*true)?\s*#\}\s*", re.IGNORECASE | re.MULTILINE)
+                        if pragma_re.search(head):
+                            # Found assume-blank! Render directly and return
+                            content = pragma_re.sub("", content, count=1)
+                            template = env.from_string(content)
+                            _plugin_template_cache[cache_key] = {'found': True}
+                            return template.render(**context)
+
+        # Cache: no assume-blank found among all plugins
+        _plugin_template_cache[cache_key] = {}
+
     # Load parent template with translation support
     parent_template = None
     parent_template_path = None
