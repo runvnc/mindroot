@@ -9,6 +9,9 @@ from .parent_templates import get_parent_templates_env
 import traceback
 import sys
 
+_plugin_template_cache = {}
+
+
 # Import l8n translation functions
 try:
     from mindroot.coreplugins.l8n.utils import replace_placeholders, get_localized_file_path, extract_plugin_root
@@ -287,7 +290,7 @@ async def load_plugin_templates(page_name, plugins):
     if cached is not None:
         # Return a deep copy since templates contain Jinja2 template objects
         # that shouldn't be mutated by callers
-        return copy.deepcopy(cached)
+        return cached # copy.deepcopy(cached)
  
     templates = []
     for plugin in plugins:
@@ -349,7 +352,7 @@ async def load_plugin_templates(page_name, plugins):
             continue
 
     # Cache the result for subsequent renders
-    _plugin_template_cache[cache_key] = copy.deepcopy(templates)
+    _plugin_template_cache[cache_key] = templates # copy.deepcopy(templates)
  
     return templates
 

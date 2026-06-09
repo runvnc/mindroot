@@ -281,12 +281,20 @@ class Agent:
         num_processed = 0
         parse_failed = False
         debug_box("Parsing command stream")
+        last_partial_emit_time = 0.0
+        last_partial_emit_len = 0
+        partial_min_interval = float(os.environ.get("MR_PARTIAL_COMMAND_MIN_INTERVAL", "0.05"))
+        partial_min_chars = int(os.environ.get("MR_PARTIAL_COMMAND_MIN_CHARS", "256"))
         debug_box(str(context))
         original_buffer = ""
 
         async for part in stream:
             buffer += part
             original_buffer += part
+
+            # Give the web server/SSE machinery a chance to run during long streams.
+            # The command parser below can be CPU-heavy on large partial JSON buffers.
+            await asyncio.sleep(0)
 
             logger.debug(f"Current buffer: ||{buffer}||")
        
@@ -424,8 +432,21 @@ class Agent:
                         cmd_id = command_ids.get(num_processed, nanoid.generate())
                         command_ids[num_processed] = cmd_id
                         
-                        logger.debug(f"Partial command detected: {partial_cmd}")
-                        await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args, cmd_id=cmd_id)
+                        # Long streamed markdown/write/task_result commands can otherwise
+                        # emit a full growing JSON payload on every provider token. That
+                        # monopolizes the event loop and makes ordinary page requests stall.
+                        now = time.monotonic()
+                        approx_len = len(buffer)
+                        should_emit = (
+                            partial_min_interval <= 0
+                            or (now - last_partial_emit_time) >= partial_min_interval
+                            or (approx_len - last_partial_emit_len) >= partial_min_chars
+                        )
+                        if should_emit:
+                            logger.debug(f"Partial command detected: {partial_cmd}")
+                            await context.partial_command(cmd_name, json.dumps(cmd_args), cmd_args, cmd_id=cmd_id)
+                            last_partial_emit_time = now
+                            last_partial_emit_len = approx_len
                     except Exception as de:
                         logger.error("Failed to parse partial command")
                         logger.error(str(de))

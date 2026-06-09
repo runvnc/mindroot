@@ -600,10 +600,13 @@ async def close_chat_session(session_id: str, context=None):
 async def agent_output(event: str, data: dict, context=None):
     log_id = context.log_id
     if log_id in sse_clients:
-        for queue in sse_clients[log_id]:
-            await queue.put({'event': event, 'data': json.dumps(data)})
-        else:
-            pass
+        payload = {'event': event, 'data': json.dumps(data)}
+        for queue in list(sse_clients[log_id]):
+            try:
+                queue.put_nowait(payload)
+            except asyncio.QueueFull:
+                await queue.put(payload)
+        await asyncio.sleep(0)
     else:
         pass
 

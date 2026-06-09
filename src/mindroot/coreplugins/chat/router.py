@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Response, Depends, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi import File, UploadFile, Form
+from starlette.requests import HTTPConnection
 from sse_starlette.sse import EventSourceResponse
 from .models import MessageParts
 from lib.providers.services import service, service_manager
@@ -237,21 +238,40 @@ async def execute_command_session_get(request: Request, agent_name: str, log_id:
 
 
 @router.post("/chat/{log_id}/{task_id}/cancel")
-async def cancel_chat(request: Request, log_id: str, task_id: str):
+async def cancel_chat(request: Request, log_id: str, task_id: str, api_key: str = Query(None)):
     debug_box("cancel_chat")
     print("Trying to cancel task", task_id)
-    user = request.state.user.username
-    context = await get_context(log_id, user)
+    
+    # Handle API key authentication
+    if api_key:
+        try:
+            user_data = await verify_api_key(api_key)
+            if not user_data:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            username = user_data['username']
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        if not hasattr(request.state, "user"):
+            raise HTTPException(status_code=401, detail="Authentication required")
+        username = request.state.user.username
+    
+    context = await get_context(log_id, username)
     debug_box(str(context))
-    context.data['finished_conversation'] = True
-    #if task_id in tasks:
-    #    task = tasks[task_id]
-    #    await asyncio.sleep(0.75)
-    #    task.cancel()
-    #    del tasks[task_id]
+    
+    # Cancel the current turn (not the whole conversation permanently)
+    context.data['cancel_current_turn'] = True
+    
+    # Also cancel any active command task if present
+    active_task = context.data.get('active_command_task')
+    if active_task and not active_task.done():
+        active_task.cancel()
+    
+    await context.save_context_data()
+    
     return {"status": "ok", "message": "Task cancelled successfully"}
-    #else:
-    #    raise HTTPException(status_code=404, detail="Task not found")
 
 @router.get("/context1/{log_id}")
 async def context1(request: Request, log_id: str):
