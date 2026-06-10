@@ -390,6 +390,31 @@ async def collect_content(template, blocks, template_type, data, assume_blank=Fa
     
     return content
 
+def _get_cached_parent_template(page_name, parent_template_path):
+    """Get a compiled parent template, cached by path, language and file mtime.
+
+    Compiling a large template with env.from_string() can take 30ms+,
+    so we cache the compiled Template object and only recompile when the
+    file changes (mtime) or the language changes.
+    """
+    try:
+        mtime = os.path.getmtime(parent_template_path)
+    except OSError:
+        mtime = 0
+    lang = get_current_language()
+    cache_key = ('parent_tpl', parent_template_path, lang, mtime)
+    cached = _plugin_template_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    parent_content = load_template_with_translation(parent_template_path)
+    if not parent_content:
+        return None
+    parent_template = env.from_string(parent_content)
+    parent_template.name = f"{page_name}.jinja2"
+    parent_template.filename = parent_template_path
+    _plugin_template_cache[cache_key] = parent_template
+    return parent_template
+
 async def render_combined_template(page_name, plugins, context):
     """Render combined template with injections and overrides, including translation support.
     
@@ -454,14 +479,9 @@ async def render_combined_template(page_name, plugins, context):
     
     if parent_template_path:
         # Load the parent template with translation support
-        parent_content = load_template_with_translation(parent_template_path)
-        if parent_content:
-            # Create a template object from the translated content
-            parent_template = env.from_string(parent_content)
-            # We need to preserve the original template name for Jinja2 inheritance
-            parent_template.name = f"{page_name}.jinja2"
-            parent_template.filename = parent_template_path
-        else:
+        # (cached: env.from_string on a large template costs 30ms+ per call)
+        parent_template = _get_cached_parent_template(page_name, parent_template_path)
+        if parent_template is None:
             # Fallback to loading without translation if something went wrong
             parent_template = parent_env.get_template(f"{page_name}.jinja2")
     else:
@@ -512,7 +532,13 @@ async def render_combined_template(page_name, plugins, context):
         else:
             combined_template_str += f'{{% block {block} %}}\n  {{{{ super() }}}}\n   {{{{ combined_{block}_inject|safe }}}}\n{{% endblock %}}\n'
 
-    combined_child_template = env.from_string(combined_template_str)
+    # Cache the compiled combined template - its source only depends on the
+    # block structure (which blocks exist / are overridden), not the content,
+    # so we can key the cache directly on the generated template string.
+    combined_child_template = _plugin_template_cache.get(('combined_tpl', combined_template_str))
+    if combined_child_template is None:
+        combined_child_template = env.from_string(combined_template_str)
+        _plugin_template_cache[('combined_tpl', combined_template_str)] = combined_child_template
 
     combined_inject = {}
     combined_override = {}
