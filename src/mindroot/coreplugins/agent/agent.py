@@ -522,16 +522,17 @@ class Agent:
                 print("Removing " + cmd + " from command_docs")
                 del data['command_docs'][cmd]
 
-        # Allow plugins to modify system message data (e.g. convert docstrings to XML)
-        try:
-            data = await pipeline_manager.process_system_data(data, context=context)
-        except Exception as e:
-            logger.error(f"Error in process_system_data pipe: {e}")
-
         #self.system_message = self.sys_template.render(data)
         self.system_message = await render('system', data)
         render_ms = (time.time() - t0) * 1000
         logger.info(f'render_system_msg took {render_ms:.1f}ms')
+
+        # Allow plugins to modify the final system message text (string -> string)
+        try:
+            tmp = await pipeline_manager.process_system_message({'text': self.system_message}, context=context)
+            self.system_message = tmp.get('text', self.system_message)
+        except Exception as e:
+            logger.error(f"Error in process_system_message pipe: {e}")
  
         additional_instructions = await hook_manager.add_instructions(self.context)
 
