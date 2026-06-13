@@ -42,6 +42,7 @@ class ProviderManager:
             'close_s2s_session',
             'sip_start_audio_response',
             'sip_end_audio_response',
+            'partial_command',
             'sip_is_audio_halted',
             'sip_audio_out_chunk',
         }

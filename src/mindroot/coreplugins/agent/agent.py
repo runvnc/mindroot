@@ -275,6 +275,8 @@ class Agent:
     async def parse_cmd_stream(self, stream, context):
         buffer = ""
         results = []
+        # Reset per-turn XML stream state so a new adapter is used each turn
+        context.data.pop('_xml_stream_state', None)
         full_cmds = []
         
         command_ids = {}  # Track command IDs: {command_index: command_id}
@@ -289,8 +291,13 @@ class Agent:
         original_buffer = ""
 
         async for part in stream:
-            buffer += part
             original_buffer += part
+
+            tmp_data = await pipeline_manager.process_stream({'chunk': part}, context=context)
+            part = tmp_data.get('chunk', '')
+            buffer += part
+
+            
 
             # Give the web server/SSE machinery a chance to run during long streams.
             # The command parser below can be CPU-heavy on large partial JSON buffers.
@@ -351,9 +358,6 @@ class Agent:
                     stream.close()
                 except Exception as e:
                     print("\033[91mError closing stream\033[0m")
-
-                return results, full_cmds
-
 
             if len(commands) > num_processed:
                 logger.debug("New command(s) found")
@@ -452,6 +456,11 @@ class Agent:
                         logger.error(str(de))
                         pass
 
+        # Flush any remaining XML-stream tool commands
+        tmp_data = await pipeline_manager.process_stream({'chunk': '', 'finish': True}, context=context)
+        if tmp_data.get('chunk'):
+            buffer += tmp_data['chunk']
+
         #print("\033[92m" + str(full_cmds) + "\033[0m")
         # getting false positive on this check
         reasonOnly = False
@@ -512,6 +521,12 @@ class Agent:
             if cmd not in command_manager.functions.keys():
                 print("Removing " + cmd + " from command_docs")
                 del data['command_docs'][cmd]
+
+        # Allow plugins to modify system message data (e.g. convert docstrings to XML)
+        try:
+            data = await pipeline_manager.process_system_data(data, context=context)
+        except Exception as e:
+            logger.error(f"Error in process_system_data pipe: {e}")
 
         #self.system_message = self.sys_template.render(data)
         self.system_message = await render('system', data)
