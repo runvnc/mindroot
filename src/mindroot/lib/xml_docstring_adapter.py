@@ -307,7 +307,127 @@ def _find_json_objects(text: str) -> Iterable[tuple[int, int, str]]:
             i = start + 1
 
 
+# ── System message conversion for XML streaming ──────────────────────────
+
+
+def _find_balanced_brackets(text: str, start: int) -> int:
+    """Find the closing ] matching the [ at position start.
+    Returns the index after the ], or -1 if not found."""
+    depth = 0
+    i = start
+    n = len(text)
+    in_str = False
+    escape = False
+    while i < n:
+        ch = text[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_str = False
+        else:
+            if ch == '"':
+                in_str = True
+            elif ch == '[':
+                depth += 1
+            elif ch == ']':
+                depth -= 1
+                if depth == 0:
+                    return i + 1
+        i += 1
+    return -1
+
+
+def convert_system_message_for_xml(text: str) -> str:
+    """Convert a system message for XML streaming mode.
+
+    Handles:
+    1. Strips [ ] brackets from hybrid format examples like [<tag .../>]
+    2. Converts JSON array examples like [{"cmd": {"arg": "val"}}] to <cmd arg="val"/>
+    3. Updates instruction text about format
+    """
+    if not text:
+        return text
+
+    # First, run the existing JSON object conversion
+    text = convert_docstring_json_examples_to_xml(text)
+
+    # Find and convert [ ... ] blocks that contain XML tags or JSON objects
+    result = []
+    i = 0
+    n = len(text)
+    while i < n:
+        # Look for [ that starts a tool-call array example
+        if text[i] == '[':
+            # Check if this is a tool-call array (not just a bracket in prose)
+            after = text[i+1:i+20].lstrip() if i+1 < n else ''
+            if after and (after[0] == '<' or after[0] == '{'):
+                # Find the matching ]
+                end = _find_balanced_brackets(text, i)
+                if end > i:
+                    bracket_content = text[i:end]
+                    # Strip the outer brackets
+                    inner = bracket_content[1:-1].strip()
+                    # Check if it's all XML tags (hybrid format)
+                    if '<' in inner and not inner.startswith('{'):
+                        # Remove commas between tags
+                        inner = re.sub(r'/>\s*,\s*</', '/>\n<', inner)
+                        # Remove trailing commas after tags
+                        inner = re.sub(r'(/>),\s*$', r'\1', inner, flags=re.MULTILINE)
+                        result.append(inner)
+                        i = end
+                        continue
+                    else:
+                        # It's a JSON array - convert each object
+                        try:
+                            items = json.loads(bracket_content)
+                            if isinstance(items, list):
+                                xml_items = []
+                                for item in items:
+                                    if isinstance(item, dict) and len(item) == 1:
+                                        name, args = next(iter(item.items()))
+                                        if isinstance(args, dict):
+                                            xml_items.append(_command_to_xml(
+                                                str(name), args,
+                                                prefer_attributes=True,
+                                                generic_tool_tag='tool'
+                                            ))
+                                            continue
+                                    xml_items.append(json.dumps(item))
+                                result.append('\n'.join(xml_items))
+                                i = end
+                                continue
+                        except (json.JSONDecodeError, ValueError):
+                            pass
+                    # If conversion failed, keep original
+                    result.append(bracket_content)
+                    i = end
+                    continue
+        result.append(text[i])
+        i += 1
+
+    text = ''.join(result)
+
+    # Update instruction text
+    text = re.sub(r'\btool-call array\b', 'tool calls', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bJSON\s+array\b', 'tool calls', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\s*\]\s*containing', 'containing', text, flags=re.IGNORECASE)
+    text = re.sub(r'ONE AND ONLY ONE tool-call array\s*\[\s*\]', 'tool calls as XML tags', text, flags=re.IGNORECASE)
+
+    return text
+
+
 if __name__ == "__main__":
+    # Test the conversion
+    test_msg = '''Your ENTIRE response must be ONE AND ONLY ONE tool-call array [ ] containing ALL commands.
+    Example: [ <image value="a photo"/> ]
+    Example: [ {"say": {"text": "Hello"}} ]
+    '''
+    print("Original:", test_msg)
+    print("Converted:", convert_system_message_for_xml(test_msg))
+
     def send_dtmf(digits: str):
         """
         Send DTMF digits.

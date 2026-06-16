@@ -53,6 +53,7 @@ _STRING_ATTR_KEYS = {
     # Values that should usually remain strings even if numeric-looking.
     # Tool implementations can convert these if they really want numeric values.
     "digits", "dtmf", "number", "phone", "phone_number", "extension",
+    "destination", "to", "from", "caller_id", "callee", "sip_uri",
     "id", "customer_id", "employee_id", "account_id", "zipcode", "zip",
 }
 

@@ -177,8 +177,17 @@ class Agent:
             "arguments": cmd_args,
             "context": str(context)
         })
-        await context.chat_log.add_message_async({"role": "assistant", "content": [{"type": "text", 
-                                                                                      "text": '['+json_cmd+']' }]})
+        # When xml_streaming is active, store original output (not pipe-transformed JSON)
+        # so the LLM sees its own XML format in future turns, not JSON
+        xml_state = context.data.get('_xml_stream_state', {}) if context is not None else {}
+        use_xml_original = (
+            xml_state.get('mode') == 'xml' and context.data.get('_xml_original_buffer')
+        )
+        if use_xml_original:
+            msg_content = context.data['_xml_original_buffer']
+        else:
+            msg_content = [{"type": "text", "text": '['+json_cmd+']' }]
+        await context.chat_log.add_message_async({"role": "assistant", "content": msg_content})
         command_manager.context = context
 
         if cmd_name == "reasoning":
@@ -277,6 +286,7 @@ class Agent:
         results = []
         # Reset per-turn XML stream state so a new adapter is used each turn
         context.data.pop('_xml_stream_state', None)
+        context.data.pop('_xml_original_buffer', None)
         full_cmds = []
         
         command_ids = {}  # Track command IDs: {command_index: command_id}
@@ -293,11 +303,12 @@ class Agent:
         async for part in stream:
             original_buffer += part
 
+            # Store original buffer for xml_streaming mode (used by handle_cmds)
+            context.data['_xml_original_buffer'] = original_buffer
+
             tmp_data = await pipeline_manager.process_stream({'chunk': part}, context=context)
             part = tmp_data.get('chunk', '')
             buffer += part
-
-            
 
             # Give the web server/SSE machinery a chance to run during long streams.
             # The command parser below can be CPU-heavy on large partial JSON buffers.
@@ -307,7 +318,10 @@ class Agent:
        
             if invalid_start_format(buffer):
                 print("Found invalid start to buffer", buffer)
-                await context.chat_log.add_message_async({"role": "assistant", "content": buffer})
+                # When xml_streaming is active, store original output (not pipe-transformed JSON)
+                xml_state = context.data.get('_xml_stream_state', {})
+                msg_content = original_buffer if xml_state.get('mode') == 'xml' else buffer
+                await context.chat_log.add_message_async({"role": "assistant", "content": msg_content})
                 started_with = f"Your invalid command started with: {buffer[0:20]}"
                 results.append({"cmd": "UNKNOWN", "args": { "invalid": "(" }, "result": error_result + "\n\n" + started_with})
                 return results, full_cmds 
@@ -485,7 +499,10 @@ class Agent:
                 print("final parse fail")
                 print(buffer)
                 parse_fail_reason = str(e)
-                await context.chat_log.add_message_async({"role": "assistant", "content": buffer})
+                # When xml_streaming is active, store original output (not pipe-transformed JSON)
+                xml_state = context.data.get('_xml_stream_state', {})
+                msg_content = original_buffer if xml_state.get('mode') == 'xml' else buffer
+                await context.chat_log.add_message_async({"role": "assistant", "content": msg_content})
                 print(parse_fail_reason)
                 await asyncio.sleep(1)
                 tried_to_parse = f"\n\nTried to parse the following input: {original_buffer}"
