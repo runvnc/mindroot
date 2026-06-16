@@ -494,7 +494,7 @@ class Agent:
  
         return results, full_cmds
 
-    async def render_system_msg(self):
+    async def render_system_msg(self, context):
         t0 = time.time()
         #logger.debug("Docstrings:")
         #logger.debug(command_manager.get_some_docstrings(self.agent["commands"]))
@@ -546,7 +546,7 @@ class Agent:
                             temperature=0, max_tokens=4000, messages=[]):
 
         self.context = context
-        content = [ { "type": "text", "text": await self.render_system_msg() } ]
+        content = [ { "type": "text", "text": await self.render_system_msg(context) } ]
         messages = [{"role": "system", "content": content }] + demo_boot_msgs() + messages
 
         #logger.info("Messages for chat", extra={"messages": messages})
