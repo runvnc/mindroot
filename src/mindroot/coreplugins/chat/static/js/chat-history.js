@@ -62,7 +62,7 @@ export class ChatHistory {
             if (msg.role === 'user') {
                 this._processUserMessage(part, msg.persona);
             } else {
-                this._processAssistantMessage(part, msg.persona);
+                this._processAssistantMessage(part, msg.persona, msg);
             }
         }
     }
@@ -115,11 +115,19 @@ export class ChatHistory {
         }
     }
 
-    _processAssistantMessage(part, persona) {
+    _processAssistantMessage(part, persona, msg) {
         if (part.type === 'image') return;
 
         try {
-            const cmds = JSON.parse(part.text);
+            // Prefer the pre-parsed command list when present (XML/raw-text
+            // mode stores raw text in content + parsed commands in msg.commands).
+            // Fall back to JSON-parsing the text (legacy JSON command logs).
+            let cmds = null;
+            if (msg && Array.isArray(msg.commands)) {
+                cmds = msg.commands;
+            } else {
+                cmds = JSON.parse(part.text);
+            }
             for (let cmd of cmds) {
                 let markdown = null;
                 if (cmd.wait_for_user_reply) {

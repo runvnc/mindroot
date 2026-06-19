@@ -14,7 +14,11 @@ class PipelineManager:
             'implementation': implementation,
             'docstring': docstring,
             'priority': priority,
-            'signature': signature
+            'signature': signature,
+            # Cache the coroutine-ness once at registration so the per-call
+            # hot path (e.g. partial_command/process_stream run once per token)
+            # doesn't pay inspect.iscoroutinefunction() on every invocation.
+            'is_async': asyncio.iscoroutinefunction(implementation),
         })
         print(termcolor.colored(f"Registering pipe '{name}' with priority {priority}", 'yellow'))
         self.pipes[name].sort(key=lambda x: x['priority'])
@@ -30,7 +34,7 @@ class PipelineManager:
             implementation = pipe_info['implementation']
             #print(termcolor.colored(f"Executing step with priority {pipe_info['priority']}", 'yellow'))
             try:
-                if asyncio.iscoroutinefunction(implementation):
+                if pipe_info['is_async']:
                     data = await implementation(data, context)
                 else:
                     data = implementation(data, context)

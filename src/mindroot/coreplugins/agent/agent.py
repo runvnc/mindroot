@@ -25,6 +25,46 @@ from lib.chatcontext import ChatContext
 from .cmd_start_example import *
 from lib.templates import render
 import nanoid
+from lib.xml_stream_events import XmlEventStream
+from lib.xml_docstring_adapter import convert_docstring_json_examples_to_xml
+
+
+def _truthy(val) -> bool:
+    return str(val).lower() in ('1', 'true', 'yes', 'on')
+
+
+def xml_streaming_enabled(context=None) -> bool:
+    """Whether XML/raw-text command streaming is active for THIS agent/turn.
+
+    Per-agent ONLY by default: the flag must be set in the agent's own env
+    overrides (context.env['MR_XML_STREAMING'], populated from agent.json
+    'env'). This deliberately does NOT honor a bare process-level
+    MR_XML_STREAMING, because that would silently switch EVERY agent (including
+    JSON/text agents and delegated mr_sip call children) into speak-everything
+    XML mode and break them.
+
+    Escape hatch for genuinely all-voice instances: set MR_XML_STREAMING_GLOBAL
+    (process env) truthy to allow the process-level MR_XML_STREAMING fallback.
+    """
+    # 1) Per-agent override (authoritative).
+    if context is not None:
+        env = getattr(context, 'env', None)
+        if isinstance(env, dict) and 'MR_XML_STREAMING' in env:
+            return _truthy(env.get('MR_XML_STREAMING'))
+
+    # 2) Opt-in process-wide fallback only when explicitly globalized.
+    #    Read the RAW environ to avoid the context-aware shim resolving these
+    #    from a nearby context.env (we already handled per-agent above).
+    raw_env = os.environ
+    try:
+        from lib.context_environ import _original_environ as _raw
+        if _raw is not None:
+            raw_env = _raw
+    except Exception:
+        pass
+    if _truthy(raw_env.get('MR_XML_STREAMING_GLOBAL', '')):
+        return _truthy(raw_env.get('MR_XML_STREAMING', ''))
+    return False
 
 
 import logging
@@ -511,6 +551,172 @@ class Agent:
  
         return results, full_cmds
 
+    async def execute_command(self, cmd_name, cmd_args, context=None, cmd_id=None):
+        """Execute a single command WITHOUT writing the assistant message.
+
+        This is the execution half of handle_cmds, used by the XML/raw-text
+        streaming path where the assistant message is persisted once per turn
+        (raw text + parsed commands) via chat_log.replace_last_assistant.
+        """
+        if context.data.get('cancel_current_turn'):
+            logger.warning("Turn cancelled, not executing command")
+            raise asyncio.CancelledError("Turn cancelled")
+        if context.data.get('finished_conversation'):
+            logger.warning("Conversation finished, not executing command")
+            return None
+
+        command_manager.context = context
+        if cmd_name == "reasoning":
+            return None
+        try:
+            if isinstance(cmd_args, list):
+                cmd_args = [x for x in cmd_args if x != '']
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
+                return await command_manager.execute(cmd_name, *cmd_args)
+            elif isinstance(cmd_args, dict):
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
+                return await command_manager.execute(cmd_name, **cmd_args)
+            else:
+                await context.running_command(cmd_name, cmd_args, cmd_id=cmd_id)
+                return await command_manager.execute(cmd_name, cmd_args)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            trace = traceback.format_exc()
+            print("\033[96mError in execute_command: " + str(e) + "\033[0m")
+            print("\033[96m" + trace + "\033[0m")
+            logger.error("Error in execute_command", extra={
+                "error": str(e), "command": cmd_name, "traceback": trace})
+            return {"error": str(e)}
+
+    async def _persist_xml_assistant(self, context, original_buffer, collected):
+        """Authoritatively (re)write the current turn's assistant message.
+
+        Stores raw model text (format='xml') plus the parsed command list so the
+        UI / cascade deletion / token tooling never have to parse XML.
+        """
+        content = [{"type": "text", "text": original_buffer, "format": "xml"}]
+        try:
+            await context.chat_log.replace_last_assistant(content, commands=list(collected))
+        except Exception as e:
+            logger.error(f"Error persisting xml assistant message: {e}")
+
+    async def parse_xml_cmd_stream(self, stream, context):
+        """First-class XML/raw-text command stream parser.
+
+        Text outside tags is spoken (speak command). Tags are commands. No
+        XML->JSON->reparse round trip, no JSON buffer surgery, no invalid-format
+        error path (the adapter speaks unknown/incomplete tags as literal text).
+        """
+        results = []
+        full_cmds = []
+        collected = []           # parsed commands for dual representation
+        original_buffer = ""
+
+        emit_chars = 8
+        try:
+            if context.agent and context.agent.get('xml_emit_partial_on_chars') is not None:
+                emit_chars = int(context.agent.get('xml_emit_partial_on_chars'))
+        except Exception:
+            pass
+
+        ev = XmlEventStream(emit_partial_on_chars=emit_chars)
+
+        # speak segment correlation: partials + the final speak share one cmd_id
+        seg_cmd_id = None
+        # XML/raw-text mode is primarily for low-latency voice agents. Do not
+        # apply the JSON partial throttling knobs here: those exist mainly to
+        # protect the UI/event loop during large JSON/code/file outputs. For
+        # voice, every speak_partial should reach the TTS partial_command pipe
+        # immediately so Kyutai can stream input as soon as text arrives.
+
+        debug_box("Parsing XML command stream")
+
+        async def process_events(events):
+            nonlocal seg_cmd_id
+            for evt in events:
+                kind = evt.get('kind')
+
+                if context.data.get('finished_conversation') or context.data.get('cancel_current_turn'):
+                    return True  # signal stop
+
+                if kind == 'speak_partial':
+                    text = evt['text']
+                    if seg_cmd_id is None:
+                        seg_cmd_id = nanoid.generate()
+                    await context.partial_command('speak', json.dumps({'text': text}), {'text': text}, cmd_id=seg_cmd_id)
+
+                elif kind == 'speak_final':
+                    text = evt['text']
+                    if seg_cmd_id is None:
+                        seg_cmd_id = nanoid.generate()
+                    args = {'text': text}
+                    await context.partial_command('speak', json.dumps(args), args, cmd_id=seg_cmd_id)
+                    result = await self.execute_command('speak', args, context=context, cmd_id=seg_cmd_id)
+                    await context.command_result('speak', result, cmd_id=seg_cmd_id)
+                    collected.append({'speak': args})
+                    full_cmds.append({"SYSTEM": "", "cmd": "speak", "args": args, "result": result})
+                    if result is not None:
+                        results.append({"SYSTEM": "", "cmd": "speak", "args": {"omitted": "(see command msg.)"}, "result": result})
+                    seg_cmd_id = None
+                    await self._persist_xml_assistant(context, original_buffer, collected)
+
+                elif kind == 'cmd':
+                    name = evt['name']
+                    props = evt['props']
+                    cmd_id = nanoid.generate()
+                    await context.partial_command(name, json.dumps(props), props, cmd_id=cmd_id)
+                    cmd_task = asyncio.create_task(
+                        self.execute_command(name, props, context=context, cmd_id=cmd_id)
+                    )
+                    context.data['active_command_task'] = cmd_task
+                    try:
+                        result = await cmd_task
+                    except asyncio.CancelledError:
+                        raise
+                    finally:
+                        if context.data.get('active_command_task') == cmd_task:
+                            del context.data['active_command_task']
+                    await context.command_result(name, result, cmd_id=cmd_id)
+                    collected.append({name: props})
+                    full_cmds.append({"SYSTEM": "", "cmd": name, "args": props, "result": result})
+
+                    if result == "SYSTEM: WARNING - Command interrupted!\n\n":
+                        logger.warning("Command was interrupted. Stopping processing.")
+                        await context.chat_log.drop_last('assistant')
+                        await asyncio.sleep(0.5)
+                        return True
+
+                    if result is not None:
+                        results.append({"SYSTEM": "", "cmd": name, "args": {"omitted": "(see command msg.)"}, "result": result})
+                    await self._persist_xml_assistant(context, original_buffer, collected)
+            return False
+
+        stopped = False
+        try:
+            async for part in stream:
+                original_buffer += part
+                context.data['_xml_original_buffer'] = original_buffer
+                await asyncio.sleep(0)
+                stopped = await process_events(ev.feed(part))
+                if stopped:
+                    try:
+                        stream.close()
+                    except Exception:
+                        pass
+                    break
+        except asyncio.CancelledError:
+            logger.info("XML command stream parsing cancelled")
+            raise
+
+        if not stopped:
+            await process_events(ev.finish())
+
+        # Final authoritative write (captures any trailing speech).
+        await self._persist_xml_assistant(context, original_buffer, collected)
+
+        return results, full_cmds
+
     async def render_system_msg(self, context):
         t0 = time.time()
         #logger.debug("Docstrings:")
@@ -539,14 +745,30 @@ class Agent:
                 print("Removing " + cmd + " from command_docs")
                 del data['command_docs'][cmd]
 
+        xml_mode = xml_streaming_enabled(context)
+        if xml_mode:
+            # Convert JSON-style command docstrings to compact XML-ish examples
+            # so a small voice model is primed to emit tags, not JSON.
+            converted = {}
+            for _cn, _doc in data['command_docs'].items():
+                try:
+                    converted[_cn] = convert_docstring_json_examples_to_xml(_doc or '')
+                except Exception:
+                    converted[_cn] = _doc
+            data['command_docs'] = converted
+
+        # Select a clean XML-output system template when XML streaming is on.
+        # No plugin defines 'system_xml', so there is no override-precedence
+        # ambiguity; the process_system_message pipe below still runs as a hook.
+        page = 'system_xml' if xml_mode else 'system'
         #self.system_message = self.sys_template.render(data)
-        self.system_message = await render('system', data)
+        self.system_message = await render(page, data)
         render_ms = (time.time() - t0) * 1000
         logger.info(f'render_system_msg took {render_ms:.1f}ms')
 
         # Allow plugins to modify the final system message text (string -> string)
         try:
-            tmp = await pipeline_manager.process_system_message({'text': self.system_message}, context=context)
+            tmp = await pipeline_manager.process_system_message({'text': self.system_message, 'data': data}, context=context)
             self.system_message = tmp.get('text', self.system_message)
         except Exception as e:
             logger.error(f"Error in process_system_message pipe: {e}")
@@ -611,7 +833,10 @@ class Agent:
                                         context=context)
         
         try:
-            ret, full_cmds = await self.parse_cmd_stream(stream, context)
+            if xml_streaming_enabled(context):
+                ret, full_cmds = await self.parse_xml_cmd_stream(stream, context)
+            else:
+                ret, full_cmds = await self.parse_cmd_stream(stream, context)
         except asyncio.CancelledError:
             logger.info("Command stream parsing cancelled")
             raise  # Propagate cancellation

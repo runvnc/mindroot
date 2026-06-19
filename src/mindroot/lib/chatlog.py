@@ -236,6 +236,33 @@ class ChatLog:
             self.messages = self.messages[:-1]
             await self.save_log()
 
+    async def replace_last_assistant(self, content, commands=None) -> None:
+        """Set the last assistant message authoritatively (one write per turn).
+
+        Used by the XML/raw-text streaming path so we don't rely on the
+        repeat-role JSON-merge heuristic in _add_message_impl. If the last
+        message is an assistant message, replace it in place; otherwise append
+        a new assistant message.
+
+        Args:
+            content: canonical content (list of {type,text,...} parts) or a str.
+            commands: optional pre-parsed command list [{name: args}, ...] stored
+                      alongside content as message['commands'] so the UI and
+                      cascade/token tooling never need to parse XML.
+        """
+        if isinstance(content, str):
+            content = [{'type': 'text', 'text': content}]
+        message = {'role': 'assistant', 'content': content}
+        if commands is not None:
+            message['commands'] = commands
+        if len(self.messages) > 0 and self.messages[-1]['role'] == 'assistant':
+            self.messages[-1] = message
+        else:
+            self.messages.append(message)
+        self.last_modified = time.time()
+        await self._save_log_async()
+        self._fire_message_added_hook(message)
+
     def get_history(self) -> List[Dict[str, str]]:
         return self.messages
 
@@ -244,6 +271,10 @@ class ChatLog:
         commands = []
         filtered = [m for m in self.messages if m['role'] == 'assistant']
         for message in filtered:
+            # XML/raw-text messages carry a pre-parsed command list.
+            if isinstance(message.get('commands'), list):
+                commands.extend(message['commands'])
+                continue
             content = message['content']
             if isinstance(content, list) and len(content) > 0 and 'text' in content[0]:
                 text = content[0]['text']
@@ -402,6 +433,19 @@ def extract_delegate_task_log_ids(messages: List[Dict]) -> List[str]:
     
     for message in messages:
         if message['role'] == 'assistant':
+            # XML/raw-text messages carry a pre-parsed command list; use it
+            # directly so cascade deletion finds delegated children.
+            if isinstance(message.get('commands'), list):
+                for cmd in message['commands']:
+                    try:
+                        for key, value in cmd.items():
+                            if key == 'delegate_task' and isinstance(value, dict) and 'log_id' in value:
+                                log_ids.append(value['log_id'])
+                            elif key == 'delegate_subtask' and isinstance(value, dict) and 'log_id' in value:
+                                log_ids.append(value['log_id'])
+                    except Exception:
+                        pass
+                continue
             content = message['content']
             # Handle both string and list content formats
             if isinstance(content, str):
