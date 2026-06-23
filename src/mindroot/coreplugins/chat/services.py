@@ -688,3 +688,172 @@ async def cancel_active_response(log_id: str, context=None):
         pass
     await context.save_context()
     return {'status': 'cancelled', 'log_id': log_id}
+
+
+# Commands whose 'text' argument is voiced aloud by TTS.
+_SPEAK_COMMAND_KEYS = ('speak', 'say')
+
+
+def _word_boundary_truncate(text: str, n: int) -> str:
+    """Truncate text to at most n chars, preferring the last word boundary."""
+    if n <= 0:
+        return ''
+    if n >= len(text):
+        return text
+    cut = text[:n]
+    sp = cut.rfind(' ')
+    if sp > 0:
+        return cut[:sp]
+    return cut
+
+
+@service()
+async def truncate_last_assistant_speech(spoken_seconds: float,
+                                         chars_per_second: float = None,
+                                         marker: str = ' ...[interrupted]',
+                                         context=None):
+    """Rewrite the last assistant message so its voiced ('speak'/'say') text
+    reflects roughly how much was ACTUALLY spoken before a barge-in.
+
+    On a phone call the LLM generates a whole sentence in a fraction of a
+    second, but TTS plays it out over real-time seconds. If the caller barges
+    in, only the audio is cut - the stored assistant message still contains the
+    full intended text, so the model thinks it finished and skips ahead. This
+    service truncates the persisted speak text to approximately
+    `spoken_seconds * chars_per_second` characters (word-boundary aligned) and
+    appends `marker`, so the next turn's context reflects what was really said.
+
+    `spoken_seconds` is normally obtained from a TTS/SIP backend (e.g.
+    mr_sip's sip_response_spoken_seconds). It is TTS-agnostic: any backend that
+    paces audio to real time works.
+
+    No-op if nothing was meaningfully cut (budget >= total voiced length).
+    """
+    if context is None or getattr(context, 'chat_log', None) is None:
+        return {'status': 'no_context'}
+    try:
+        cps = chars_per_second
+        if cps is None:
+            # Default tuned for ElevenLabs flash (eleven_flash_v2_5) English
+            # speech, which runs a touch faster than the generic ~14 cps.
+            # Override per-instance with MR_SPEECH_CHARS_PER_SEC.
+            cps = float(os.environ.get('MR_SPEECH_CHARS_PER_SEC', '16'))
+        budget = max(0, int(float(spoken_seconds) * cps))
+
+        messages = context.chat_log.messages
+        idx = None
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i].get('role') == 'assistant':
+                idx = i
+                break
+        if idx is None:
+            return {'status': 'no_assistant_message'}
+        msg = messages[idx]
+
+        # ---- Resolve the parsed command list + raw content text ----
+        commands = msg.get('commands') if isinstance(msg.get('commands'), list) else None
+        content = msg.get('content')
+        raw_text = None
+        if isinstance(content, list) and content and isinstance(content[0], dict) and 'text' in content[0]:
+            raw_text = content[0]['text']
+        elif isinstance(content, str):
+            raw_text = content
+
+        json_mode = False
+        if commands is None:
+            # JSON command-list agents: content text is the JSON list.
+            if raw_text is not None:
+                try:
+                    parsed = json.loads(raw_text)
+                    if isinstance(parsed, dict):
+                        parsed = [parsed]
+                    if isinstance(parsed, list):
+                        commands = parsed
+                        json_mode = True
+                except Exception:
+                    commands = None
+
+        # Gather voiced text in order.
+        def _is_speak(cmd):
+            if not isinstance(cmd, dict) or len(cmd) != 1:
+                return (None, None)
+            name = next(iter(cmd))
+            args = cmd[name]
+            if name in _SPEAK_COMMAND_KEYS and isinstance(args, dict) and isinstance(args.get('text'), str):
+                return (name, args)
+            return (None, None)
+
+        total_voiced = 0
+        if commands is not None:
+            for cmd in commands:
+                name, args = _is_speak(cmd)
+                if name is not None:
+                    total_voiced += len(args['text'])
+        elif raw_text is not None:
+            # Unstructured: treat whole content as voiced text.
+            total_voiced = len(raw_text)
+
+        if total_voiced == 0:
+            return {'status': 'no_voiced_text'}
+        if budget >= total_voiced:
+            # Not meaningfully interrupted (or barge-in after speech finished).
+            return {'status': 'noop', 'budget': budget, 'total_voiced': total_voiced}
+
+        # ---- Structured (XML or JSON) path ----
+        if commands is not None:
+            remaining = budget
+            new_commands = []
+            search_pos = 0
+            edited_raw = raw_text
+            for cmd in commands:
+                name, args = _is_speak(cmd)
+                if name is None:
+                    new_commands.append(cmd)
+                    continue
+                text = args['text']
+                if remaining >= len(text):
+                    remaining -= len(text)
+                    new_commands.append(cmd)
+                    if edited_raw is not None and not json_mode:
+                        found = edited_raw.find(text, search_pos)
+                        if found != -1:
+                            search_pos = found + len(text)
+                elif remaining > 0:
+                    kept = _word_boundary_truncate(text, remaining)
+                    new_text = kept + marker
+                    if edited_raw is not None and not json_mode:
+                        found = edited_raw.find(text, search_pos)
+                        if found != -1:
+                            edited_raw = edited_raw[:found] + new_text + edited_raw[found + len(text):]
+                            search_pos = found + len(new_text)
+                    new_args = dict(args)
+                    new_args['text'] = new_text
+                    new_commands.append({name: new_args})
+                    remaining = 0
+                else:
+                    # Budget exhausted: this speak was never voiced - drop it.
+                    if edited_raw is not None and not json_mode:
+                        found = edited_raw.find(text, search_pos)
+                        if found != -1:
+                            edited_raw = edited_raw[:found] + edited_raw[found + len(text):]
+                    # do not append (dropped)
+
+            if json_mode:
+                new_text_content = json.dumps(new_commands)
+                await context.chat_log.replace_last_assistant(
+                    [{'type': 'text', 'text': new_text_content}])
+            else:
+                new_content = [{'type': 'text', 'text': edited_raw if edited_raw is not None else '',
+                                'format': 'xml'}]
+                await context.chat_log.replace_last_assistant(new_content, commands=new_commands)
+            return {'status': 'truncated', 'budget': budget, 'total_voiced': total_voiced,
+                    'mode': 'json' if json_mode else 'xml'}
+
+        # ---- Unstructured fallback: truncate whole content as speech ----
+        kept = _word_boundary_truncate(raw_text, budget) + marker
+        await context.chat_log.replace_last_assistant([{'type': 'text', 'text': kept}])
+        return {'status': 'truncated', 'budget': budget, 'total_voiced': total_voiced, 'mode': 'raw'}
+    except Exception as e:
+        print(f'truncate_last_assistant_speech error: {e}')
+        print(traceback.format_exc())
+        return {'status': 'error', 'error': str(e)}

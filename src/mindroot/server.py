@@ -307,6 +307,33 @@ def main():
     @app.on_event("startup")
     async def setup_app():
         global app
+        # Install a verbose asyncio exception handler so exceptions that escape
+        # bare tasks/callbacks (e.g. a RecursionError that otherwise shows only
+        # as "Exception in callback Task.task_wakeup" with just the events.py
+        # frame) get logged with their FULL traceback. Set MR_ASYNCIO_DEBUG=1 to
+        # also enable asyncio debug mode, which attaches each task's creation
+        # (source) traceback -- usually naming the culprit immediately.
+        import asyncio as _asyncio, traceback as _tb, logging as _logging, os as _os
+        _alog = _logging.getLogger("mindroot.asyncio")
+        try:
+            _loop = _asyncio.get_running_loop()
+            if _os.environ.get("MR_ASYNCIO_DEBUG", "").lower() in ("1", "true", "yes", "on"):
+                _loop.set_debug(True)
+            def _mr_async_exc_handler(loop, ctx):
+                _alog.error("ASYNCIO unhandled exception: %s", ctx.get("message"))
+                _exc = ctx.get("exception")
+                if _exc is not None:
+                    _alog.error("".join(_tb.format_exception(type(_exc), _exc, _exc.__traceback__)))
+                _src = ctx.get("source_traceback")
+                if _src:
+                    _alog.error("Task created at:\n%s", "".join(_tb.format_list(_src)))
+                _extra = {k: v for k, v in ctx.items() if k not in ("message", "exception", "source_traceback")}
+                if _extra:
+                    _alog.error("asyncio ctx extra: %s", _extra)
+            _loop.set_exception_handler(_mr_async_exc_handler)
+            print(colored("Installed verbose asyncio exception handler", "green"))
+        except Exception as _e:
+            print(colored(f"Could not install asyncio exception handler: {_e}", "red"))
         await setup_app_internal(app)
         print(colored("Plugin setup complete", "green"))
 
