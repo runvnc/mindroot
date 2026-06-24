@@ -1,15 +1,41 @@
 import os
 import logging
 
-# Check MR_DEBUG env variable
-MR_DEBUG = os.environ.get('MR_DEBUG', '').lower() in ('1', 'true', 'yes')
+# Check MR_DEBUG env variable.
+#   MR_DEBUG=none           -> HARD-disable ALL logging process-wide via
+#                              logging.disable(logging.CRITICAL). This short-
+#                              circuits every logging call regardless of per-
+#                              logger config. Required for production / real-time
+#                              audio (e.g. mr_sip/PySIP) where even suppressed
+#                              INFO/DEBUG call overhead + journald can cause
+#                              event-loop stalls and audio glitches.
+#   MR_DEBUG=1|2|true|yes   -> full DEBUG logging.
+#   (anything else/unset)   -> root logger at CRITICAL (default, low overhead but
+#                              individual loggers can still emit).
+_MR_DEBUG_RAW = os.environ.get('MR_DEBUG', '').lower()
+MR_DEBUG = _MR_DEBUG_RAW in ('1', '2', 'true', 'yes', 'debug')
 
 # Set root logger level based on MR_DEBUG
 if MR_DEBUG:
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    _level = logging.DEBUG
+elif _MR_DEBUG_RAW in ('errors', 'error', 'err'):
+    _level = logging.ERROR
 else:
-    # Disable most logging to reduce overhead
-    logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    _level = logging.CRITICAL
+logging.basicConfig(level=_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Global floors via logging.disable(L): drops EVERY record with severity <= L on
+# ALL loggers, regardless of each logger's own level/handlers. This is the only
+# reliable way to actually silence library DEBUG/INFO spam.
+if _MR_DEBUG_RAW == 'none':
+    # Completely suppress all logging for production performance (incl. plugins
+    # like mr_sip). Use only when you do NOT need any diagnostics.
+    logging.disable(logging.CRITICAL)
+elif _MR_DEBUG_RAW in ('errors', 'error', 'err'):
+    # Errors-only: only ERROR and CRITICAL survive anywhere in the process.
+    # Real exceptions + stack traces (logger.exception / exc_info=True) still
+    # show; all DEBUG/INFO/WARNING spam is killed globally.
+    logging.disable(logging.WARNING)
 
 from fastapi import FastAPI, Response, Request
 from fastapi.staticfiles import StaticFiles
