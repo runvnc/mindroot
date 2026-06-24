@@ -43,7 +43,6 @@ You control a character by writing plain text and tags. There is no JSON.
 2. To take an action, write a tag. Two forms:
 
    Simple actions use attributes:
-     <wait_for_user_reply text="How can I help?"/>
      <send_dtmf digits="1"/>
 
    Actions with complex/nested data put a tool call body inside:
@@ -53,7 +52,7 @@ You control a character by writing plain text and tags. There is no JSON.
    act:
 
      Sure, let me look that up for you.
-     <search_web query="weather today"/>
+     <call destination="11234567"/>
 
    The words are spoken, then the action runs.
 
