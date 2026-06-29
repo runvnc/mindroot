@@ -23,6 +23,8 @@ from io import BytesIO
 import base64
 from pathlib import Path
 import nanoid
+import logging
+logger = logging.getLogger(__name__)
 sse_clients = {}
 from lib.chatcontext import get_context
 active_tasks = {}
@@ -250,7 +252,7 @@ async def cancel_and_wait(session_id: str, user: str, context=None):
         existing_context = await get_context(session_id, user)
         existing_context.data['cancel_current_turn'] = True
         existing_context.data['finished_conversation'] = True
-        existing_context.save_context()
+        await existing_context.save_context()
         if 'active_command_task' in existing_context.data:
             cmd_task = existing_context.data['active_command_task']
             if cmd_task and (not cmd_task.done()):

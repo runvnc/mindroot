@@ -10,6 +10,28 @@ from .chatlog import extract_delegate_task_log_ids, find_child_logs_by_parent_id
 from typing import TypeVar, Type, Protocol, runtime_checkable, Set
 from .utils.debug import debug_box
 
+
+def _json_safe_data(data):
+    """Shallow copy of `data` with non-JSON-serializable values removed.
+
+    Runtime-only objects (e.g. the asyncio.Task stored under
+    'active_command_task') must never be written to the context file: they
+    crash json.dumps and are meaningless on reload. Dropping them keeps
+    save_context() robust regardless of what transient objects callers stash
+    in context.data.
+    """
+    if not isinstance(data, dict):
+        return data
+    safe = {}
+    for k, v in data.items():
+        try:
+            json.dumps(v)
+        except (TypeError, ValueError):
+            continue
+        safe[k] = v
+    return safe
+
+
 contexts = {}
 
 async def get_context(log_id, user):
@@ -106,7 +128,7 @@ class ChatContext:
             context_data = {}
         finally:
             pass
-        context_data['data'] = self.data
+        context_data['data'] = _json_safe_data(self.data)
         async with aiofiles.open(context_file, 'w') as f:
             await f.write(json.dumps(context_data, indent=2))
 
@@ -119,7 +141,7 @@ class ChatContext:
         context_file = f'{context_dir}/{self.username}/context_{self.log_id}.json'
         await aiofiles.os.makedirs(os.path.dirname(context_file), exist_ok=True)
         self.data['log_id'] = self.log_id
-        context_data = {'data': self.data, 'chat_log': self.chat_log._get_log_data()}
+        context_data = {'data': _json_safe_data(self.data), 'chat_log': self.chat_log._get_log_data()}
         if 'name' in self.agent:
             context_data['agent_name'] = self.agent['name']
         elif 'agent_name' in self.data:

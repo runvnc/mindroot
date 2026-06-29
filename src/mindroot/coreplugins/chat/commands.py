@@ -222,7 +222,7 @@ async def task_result(output: str = None, result: str = None, context=None):
 
     context.data['finished_conversation'] = True
     context.data['task_result'] = final_output
-    context.save_context()
+    await context.save_context()
     return None
 
 @command()
