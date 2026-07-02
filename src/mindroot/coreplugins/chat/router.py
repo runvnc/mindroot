@@ -661,23 +661,6 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
     skip_params = {'api_key'}
     session_params = {k: v for k, v in request.query_params.items() if k not in skip_params}
     
-    if session_params and log_id:
-        try:
-            context = await get_context(log_id, user)
-            if 'session' not in context.data:
-                context.data['session'] = {}
-            
-            # Add all query parameters to session data
-            context.data['session'].update(session_params)
-            
-            # Always add server working directory
-            context.data['session']['server_working_directory'] = os.getcwd()
-            
-            await context.save_context_data()
-            print(f"Updated task session data from query params for {log_id}: {session_params}")
-        except Exception as e:
-            print(f"Error updating TUI session data: {e}")
- 
 
     requested_log_id = task_request.log_id if task_request is not None else None
     requested_parent_log_id = task_request.parent_log_id if task_request is not None else None
@@ -743,6 +726,25 @@ async def run_task_route(request: Request, agent_name: str, task_request: TaskRe
         full_results = []
         log_id = 'unknown_log_id' 
    
+    # Apply session params from query string now that log_id is known.
+    # This runs after task creation so log_id is always defined (new or continued).
+    if session_params and log_id and log_id != 'unknown_log_id':
+        try:
+            context = await get_context(log_id, user)
+            if 'session' not in context.data:
+                context.data['session'] = {}
+            
+            # Add all query parameters to session data
+            context.data['session'].update(session_params)
+            
+            # Always add server working directory
+            context.data['session']['server_working_directory'] = os.getcwd()
+            
+            await context.save_context_data()
+            print(f"Updated task session data from query params for {log_id}: {session_params}")
+        except Exception as e:
+            print(f"Error updating TUI session data: {e}")
+
     print(task_result)
     print(full_results)
     print(log_id)

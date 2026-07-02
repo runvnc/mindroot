@@ -470,7 +470,10 @@ class Chat extends BaseEl {
     let messageIndex = this.messagesByCmdId.get(data.cmd_id);
     
     if (handler) {
-      await handler(data);
+      const result = await handler(data);
+      if (result && messageIndex !== undefined) {
+        this.messages[messageIndex].content = result;
+      }
     } else {
       try {
         // Handle execute_command and run_python results

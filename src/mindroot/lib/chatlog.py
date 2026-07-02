@@ -65,18 +65,26 @@ class ChatLog:
         self.log_id = log_id
         log_file = os.path.join(self.log_dir, f'chatlog_{log_id}.json')
         if os.path.exists(log_file):
-            with open(log_file, 'r') as f:
-                log_data = json.load(f)
-                self.agent = log_data.get('agent')
-                self.messages = log_data.get('messages', [])
-                self.parent_log_id = log_data.get('parent_log_id', None)
-            # we need the last modification time of the file
+            # Set last_modified even if JSON parsing fails, so callers that
+            # read log.last_modified don't crash with AttributeError.
             self.last_modified = os.path.getmtime(log_file)
+            with open(log_file, 'r') as f:
+                try:
+                    log_data = json.load(f)
+                    self.agent = log_data.get('agent')
+                    self.messages = log_data.get('messages', [])
+                    self.parent_log_id = log_data.get('parent_log_id', None)
+                except json.JSONDecodeError:
+                    # File exists but is empty or has invalid JSON (write race).
+                    # Treat as empty log rather than crashing the caller.
+                    print(f"Warning: chatlog file {log_file} exists but is empty or invalid JSON; treating as empty")
+                    self.messages = []
             print("Loaded log file at ", log_file)
             print("Message length: ", len(self.messages))
         else:
             print("Could not find log file at ", log_file)
             self.messages = []
+            self.last_modified = time.time()
     
     def _load_log_sync(self, log_id=None) -> None:
         """Synchronous version - just calls implementation directly"""
@@ -320,10 +328,15 @@ class ChatLog:
         if await aiofiles.os.path.exists(log_file):
             async with aiofiles.open(log_file, 'r') as f:
                 content = await f.read()
-                log_data = json.loads(content)
-                self.agent = log_data.get('agent')
-                self.messages = log_data.get('messages', [])
-                self.parent_log_id = log_data.get('parent_log_id', None)
+                try:
+                    log_data = json.loads(content)
+                    self.agent = log_data.get('agent')
+                    self.messages = log_data.get('messages', [])
+                    self.parent_log_id = log_data.get('parent_log_id', None)
+                except json.JSONDecodeError:
+                    # File exists but is empty or has invalid JSON (write race).
+                    print(f"Warning: chatlog file {log_file} exists but is empty or invalid JSON; treating as empty")
+                    self.messages = []
             print("Loaded log file at ", log_file)
             print("Message length: ", len(self.messages))
         else:
