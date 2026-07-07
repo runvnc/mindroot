@@ -263,6 +263,7 @@ async def cancel_chat(request: Request, log_id: str, task_id: str, api_key: str 
     
     # Cancel the current turn (not the whole conversation permanently)
     context.data['cancel_current_turn'] = True
+    context.data['finished_conversation'] = True
     
     # Also cancel any active command task if present
     active_task = context.data.get('active_command_task')
