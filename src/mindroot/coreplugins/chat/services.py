@@ -294,7 +294,7 @@ async def cancel_and_wait(session_id: str, user: str, context=None):
         pass
 
 @service()
-async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None, assume_wait_for_task_result=False):
+async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None, assume_wait_for_task_result=False, add_user_message: bool = True):
     global in_progress, active_tasks
     existing_task = active_tasks.get(session_id)
     if not user:
@@ -327,7 +327,10 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
             message = [m.dict() for m in message]
         else:
             pass
-        if session_id is None or session_id == '' or message is None or (message == ''):
+        # An empty message is only invalid when we intend to ADD a user turn.
+        # With add_user_message=False the caller is re-running generation on the
+        # existing history (mr_sip dead-air backstop), so an empty message is OK.
+        if session_id is None or session_id == '' or (add_user_message and (message is None or message == '')):
             return []
         else:
             pass
@@ -359,7 +362,13 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
         tmp_data = {'message': message}
         tmp_data = await pipeline_manager.pre_process_msg(tmp_data, context=context)
         message = tmp_data['message']
-        if type(message) is str:
+        # add_user_message=False lets a caller RE-RUN the agent generation loop
+        # on the existing history without appending a new user turn (used by the
+        # mr_sip dead-air backstop to re-deliver an un-voiced reply without
+        # duplicating the caller's last utterance).
+        if not add_user_message:
+            pass
+        elif type(message) is str:
             await context.chat_log.add_message_async({'role': 'user', 'content': message})
         else:
             new_parts = []
@@ -807,6 +816,13 @@ async def truncate_last_assistant_speech(spoken_seconds: float,
             new_commands = []
             search_pos = 0
             edited_raw = raw_text
+            # Track whether ANY voiced text (full, partial, or a marker) has
+            # been kept. If a reply voiced 0 chars (budget==0, e.g. cancelled
+            # during TTS warm-up), we must still keep ONE [interrupted] marker
+            # rather than silently dropping every speak to an empty turn - that
+            # empty-turn case caused dead air / lost intent under multiple rapid
+            # interruptions.
+            any_speak_kept = False
             for cmd in commands:
                 name, args = _is_speak(cmd)
                 if name is None:
@@ -816,6 +832,7 @@ async def truncate_last_assistant_speech(spoken_seconds: float,
                 if remaining >= len(text):
                     remaining -= len(text)
                     new_commands.append(cmd)
+                    any_speak_kept = True
                     if edited_raw is not None and not json_mode:
                         found = edited_raw.find(text, search_pos)
                         if found != -1:
@@ -832,13 +849,34 @@ async def truncate_last_assistant_speech(spoken_seconds: float,
                     new_args['text'] = new_text
                     new_commands.append({name: new_args})
                     remaining = 0
+                    any_speak_kept = True
                 else:
-                    # Budget exhausted: this speak was never voiced - drop it.
-                    if edited_raw is not None and not json_mode:
-                        found = edited_raw.find(text, search_pos)
-                        if found != -1:
-                            edited_raw = edited_raw[:found] + edited_raw[found + len(text):]
-                    # do not append (dropped)
+                    # Budget exhausted: this speak was never voiced.
+                    if not any_speak_kept:
+                        # Nothing at all has been voiced/kept yet (the whole
+                        # reply was cut before any audio). Keep this FIRST speak
+                        # as a bare [interrupted] marker so the turn is not
+                        # silently emptied - the LLM then knows it intended to
+                        # speak but the caller heard nothing, and re-delivers it
+                        # instead of leaving dead air.
+                        marker_text = marker.strip() or '[interrupted]'
+                        if edited_raw is not None and not json_mode:
+                            found = edited_raw.find(text, search_pos)
+                            if found != -1:
+                                edited_raw = edited_raw[:found] + marker_text + edited_raw[found + len(text):]
+                                search_pos = found + len(marker_text)
+                        new_args = dict(args)
+                        new_args['text'] = marker_text
+                        new_commands.append({name: new_args})
+                        any_speak_kept = True
+                    else:
+                        # A later un-voiced speak after something was already
+                        # kept/marked - drop it (it was never voiced).
+                        if edited_raw is not None and not json_mode:
+                            found = edited_raw.find(text, search_pos)
+                            if found != -1:
+                                edited_raw = edited_raw[:found] + edited_raw[found + len(text):]
+                        # do not append (dropped)
 
             if json_mode:
                 new_text_content = json.dumps(new_commands)
@@ -859,3 +897,64 @@ async def truncate_last_assistant_speech(spoken_seconds: float,
         print(f'truncate_last_assistant_speech error: {e}')
         print(traceback.format_exc())
         return {'status': 'error', 'error': str(e)}
+
+
+@service()
+async def get_last_assistant_speech_text(context=None) -> str:
+    """Return the concatenated voiced ('speak'/'say') text of the last assistant
+    message, or '' if there is none.
+
+    Read-only helper used by the mr_sip dead-air backstop to tell whether the
+    most recent reply actually GENERATED speak content (so an un-voiced reply
+    can be distinguished from a deliberate silent turn / wait()). Mirrors the
+    speak-text extraction logic in truncate_last_assistant_speech.
+    """
+    if context is None or getattr(context, 'chat_log', None) is None:
+        return ''
+    try:
+        messages = context.chat_log.messages
+        idx = None
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i].get('role') == 'assistant':
+                idx = i
+                break
+        if idx is None:
+            return ''
+        msg = messages[idx]
+        commands = msg.get('commands') if isinstance(msg.get('commands'), list) else None
+        content = msg.get('content')
+        raw_text = None
+        if isinstance(content, list) and content and isinstance(content[0], dict) and 'text' in content[0]:
+            raw_text = content[0]['text']
+        elif isinstance(content, str):
+            raw_text = content
+
+        if commands is None and raw_text is not None:
+            try:
+                parsed = json.loads(raw_text)
+                if isinstance(parsed, dict):
+                    parsed = [parsed]
+                if isinstance(parsed, list):
+                    commands = parsed
+            except Exception:
+                commands = None
+
+        def _speak_text(cmd):
+            if not isinstance(cmd, dict) or len(cmd) != 1:
+                return None
+            name = next(iter(cmd))
+            args = cmd[name]
+            if name in _SPEAK_COMMAND_KEYS and isinstance(args, dict) and isinstance(args.get('text'), str):
+                return args['text']
+            return None
+
+        parts = []
+        if commands is not None:
+            for cmd in commands:
+                t = _speak_text(cmd)
+                if t:
+                    parts.append(t)
+        return ' '.join(parts).strip()
+    except Exception as e:
+        logger.debug(f'get_last_assistant_speech_text error: {e}')
+        return ''
