@@ -173,6 +173,8 @@ async def middleware(request: Request, call_next):
                     status_code=403,
                     content={"detail": "Invalid API key"}
                 )
+        if request.url.path == "/healthz":
+            return await call_next(request)
         if request.url.path.startswith("/imgs/") or request.url.path.startswith("/manual/"):
             return await call_next(request)
         try:

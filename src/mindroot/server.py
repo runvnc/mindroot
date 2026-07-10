@@ -322,6 +322,12 @@ def main():
 
     app = FastAPI()
 
+    @app.get("/healthz", include_in_schema=False)
+    async def healthz():
+        # Deliberately tiny and unauthenticated. Because this handler runs on
+        # the main event loop, an external timeout is a direct liveness test.
+        return {"status": "ok", "pid": os.getpid()}
+
     app.state.cmd_args = cmd_args
 
     debug_box("pre_load")
@@ -361,11 +367,23 @@ def main():
         except Exception as _e:
             print(colored(f"Could not install asyncio exception handler: {_e}", "red"))
         await setup_app_internal(app)
+        try:
+            from .lib.hang_watchdog import hang_watchdog
+            await hang_watchdog.start()
+            if hang_watchdog.enabled:
+                print(colored(f"Hang watchdog enabled: {hang_watchdog.log_path}", "green"))
+        except Exception as _e:
+            _alog.error("Could not start hang watchdog", exc_info=True)
         print(colored("Plugin setup complete", "green"))
 
     @app.on_event("shutdown")
     async def shutdown_event():
         print("Shutting down MindRoot")
+        try:
+            from .lib.hang_watchdog import hang_watchdog
+            await hang_watchdog.stop()
+        except Exception:
+            logging.getLogger("mindroot.hang_watchdog").exception("Could not stop hang watchdog")
         hook_manager.eject()
 
     app.add_middleware(
