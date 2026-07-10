@@ -844,13 +844,14 @@ class Agent:
         #logger.debug("System message was:")
         #logger.debug(await self.render_system_msg())
 
-        # use green text
-        print("\033[92m" + "Just after stream chat, last two messages in chat log:")
-        print("------------------------------------")
-        print(context.chat_log.messages[-1])
-        print(context.chat_log.messages[-2])
-        # switch back to normal text
-        print("\033[0m")
+        # Full chat messages may contain PII and can be very large. Keep this
+        # opt-in instead of printing every agent turn in production.
+        if os.environ.get('MR_AGENT_CHAT_DUMP', '0').lower() in ('1', 'true', 'yes', 'debug'):
+            print("\033[92m" + "Just after stream chat, last two messages in chat log:")
+            print("------------------------------------")
+            print(context.chat_log.messages[-1])
+            print(context.chat_log.messages[-2])
+            print("\033[0m")
 
         return ret, full_cmds
 

@@ -13,6 +13,12 @@ import secrets
 from pathlib import Path
 import re
 
+AUTH_DEBUG = os.environ.get('MR_AUTH_DEBUG', '0').lower() in ('1', 'true', 'yes', 'debug')
+
+def _auth_debug(*args, **kwargs):
+    if AUTH_DEBUG:
+        print(*args, **kwargs)
+
 def get_or_create_jwt_secret():
     secret_key = os.environ.get("JWT_SECRET_KEY", None)
     
@@ -130,20 +136,20 @@ def is_public_route(request_path: str) -> bool:
 
 async def middleware(request: Request, call_next):
     try:
-        print('-------------------------- auth middleware ----------------------------')
-        print('Request URL:', request.url.path)
+        _auth_debug('-------------------------- auth middleware ----------------------------')
+        _auth_debug('Request URL:', request.url.path)
         if request.url.path.endswith('events'):
             debug_box("events:" + request.url.path)
 
         # Check for API key in query parameters
         api_key = request.query_params.get('api_key')
         if api_key:
-            print('Found API key in query parameters')
+            _auth_debug('Found API key in query parameters')
             key_data = api_key_manager.validate_key(api_key)
             if key_data:
-                print("Validated API Key, key_data is", key_data)
+                _auth_debug("Validated API Key, key_data is", key_data)
                 username = key_data['username']
-                print("Trying to get user data")
+                _auth_debug("Trying to get user data")
                 user_data = await service_manager.get_user_data(username)
 
                 if user_data:
@@ -156,13 +162,13 @@ async def middleware(request: Request, call_next):
                     response.set_cookie(key="access_token", value=token, httponly=True, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60, samesite="lax")
                     return response
                 else:
-                    print(f"User {username} for key {api_key} not found")
+                    _auth_debug(f"User {username} for key {api_key} not found")
                     return JSONResponse(
                         status_code=403,
                         content={"detail": f"User '{username}' for API key {api_key} not found"}
                     )
             else:
-                print("Could not validate API key, key_data returned as", key_data)
+                _auth_debug("Could not validate API key, key_data returned as", key_data)
                 return JSONResponse(
                     status_code=403,
                     content={"detail": "Invalid API key"}
@@ -173,35 +179,35 @@ async def middleware(request: Request, call_next):
             path_parts = request.url.path.split('/')
             # filter empty "" strings
             path_parts = list(filter(None, path_parts))
-            print(f"Request path split is {path_parts}")
+            _auth_debug(f"Request path split is {path_parts}")
             plugin_name = path_parts[0]
             static_part = path_parts[1]
             filename = path_parts[-1]
-            print(f"Checking for static file: {plugin_name} {static_part} {filename}")
+            _auth_debug(f"Checking for static file: {plugin_name} {static_part} {filename}")
             if static_part == 'static':
                 if filename.endswith('.js') or filename.endswith('.css') or filename.endswith('.png') or filename.endswith('.mp4') or filename.endswith('.gif'):
-                    print('Static file requested:', filename)
+                    _auth_debug('Static file requested:', filename)
                     return await call_next(request)
         except Exception as e:
-            print("Error checking for static file", e)
+            _auth_debug("Error checking for static file", e)
             pass
-        print("Did not find static file")
+        _auth_debug("Did not find static file")
         
         # Use the improved public route checking
         if is_public_route(request.url.path):
-            print('Public route: ', request.url.path)
+            _auth_debug('Public route: ', request.url.path)
             return await call_next(request)
         elif any([request.url.path.startswith(path) for path in public_static]):
             return await call_next(request)
 
-        print('Not a public route: ', request.url.path)
-        print("public routes:", public_routes)
+        _auth_debug('Not a public route: ', request.url.path)
+        _auth_debug("public routes:", public_routes)
 
         # Check for token in cookies first
         token = request.cookies.get("access_token")
         #token = None
         if token:
-            print("Trying to decode token..")
+            _auth_debug("Trying to decode token..")
             payload = decode_token(token)
             if payload:
                 # Get username from token
@@ -212,30 +218,30 @@ async def middleware(request: Request, call_next):
                 if user_data:
                     return await call_next(request)
                 else:
-                    print("User data not found, redirecting to login..")
+                    _auth_debug("User data not found, redirecting to login..")
                     return RedirectResponse(url="/login")
             else:
-                print("Invalid or expired token, redirecting to login..")
+                _auth_debug("Invalid or expired token, redirecting to login..")
                 return RedirectResponse(url="/login")
         else:
-            print("..Did not find token in cookies..")
+            _auth_debug("..Did not find token in cookies..")
         try:
-            print("Trying bearer token..")
+            _auth_debug("Trying bearer token..")
             token = await security(request)
         except HTTPException as e:
-            print('Bearer header: No valid token found: ', e)
-            print("Trying session context..")
+            _auth_debug('Bearer header: No valid token found: ', e)
+            _auth_debug("Trying session context..")
             try:
                 session_id = request.url.path.split('/')[-1]
                 token = await load_session_data(session_id, "access_token")
                 if token:
-                    print("Retrieved token from session file")
-                    print(token)
+                    _auth_debug("Retrieved token from session file")
+                    _auth_debug(token)
                 else:
-                    print("No token found in session file")
+                    _auth_debug("No token found in session file")
             except Exception as e:
-                print("Error loading session data")
-                print(e)
+                _auth_debug("Error loading session data")
+                _auth_debug(e)
 
         if token:
             # First check if the bearer token is an API key (not a JWT)
@@ -244,7 +250,7 @@ async def middleware(request: Request, call_next):
             # Try to validate as API key first
             key_data = api_key_manager.validate_key(token_str)
             if key_data:
-                print("Bearer token is a valid API key")
+                _auth_debug("Bearer token is a valid API key")
                 username = key_data['username']
                 user_data = await service_manager.get_user_data(username)
                 
@@ -257,7 +263,7 @@ async def middleware(request: Request, call_next):
                     response.set_cookie(key="access_token", value=jwt_token, httponly=True, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60, samesite="lax")
                     return response
                 else:
-                    print(f"User {username} for API key not found")
+                    _auth_debug(f"User {username} for API key not found")
                     return RedirectResponse(url="/login")
             
             # If not an API key, try to decode as JWT token
@@ -273,21 +279,21 @@ async def middleware(request: Request, call_next):
                     request.state.user = user_data
                     return await call_next(request)
                 else:
-                    print("User data not found, redirecting to login..")
+                    _auth_debug("User data not found, redirecting to login..")
                     return RedirectResponse(url="/login")
             else:
-                print("Invalid or expired token, redirecting to login..")
+                _auth_debug("Invalid or expired token, redirecting to login..")
                 return RedirectResponse(url="/login")
 
-        print('No valid token found')
+        _auth_debug('No valid token found')
         return RedirectResponse(url="/login")
 
     except HTTPException as e:
-        print('HTTPException:', e)
+        _auth_debug('HTTPException:', e)
         return RedirectResponse(url="/login")
 
     except Exception as e:
-        print('Error:', e)
+        _auth_debug('Error:', e)
         if 'does not exist' in str(e).lower() or 'not found' in str(e).lower():
             return JSONResponse(
                 status_code=404,

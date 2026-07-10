@@ -8,6 +8,12 @@ import time
 import asyncio
 import aiofiles
 import aiofiles.os
+
+CHATLOG_DEBUG = os.environ.get('MR_CHATLOG_DEBUG', '0').lower() in ('1', 'true', 'yes', 'debug')
+
+def _chat_debug(*args, **kwargs):
+    if CHATLOG_DEBUG:
+        print(*args, **kwargs)
 from mindroot.lib.utils.debug import debug_box
 
 # Import hook manager for message sync
@@ -79,10 +85,10 @@ class ChatLog:
                     # Treat as empty log rather than crashing the caller.
                     print(f"Warning: chatlog file {log_file} exists but is empty or invalid JSON; treating as empty")
                     self.messages = []
-            print("Loaded log file at ", log_file)
-            print("Message length: ", len(self.messages))
+            _chat_debug("Loaded log file at ", log_file)
+            _chat_debug("Message length: ", len(self.messages))
         else:
-            print("Could not find log file at ", log_file)
+            _chat_debug("Could not find log file at ", log_file)
             self.messages = []
             self.last_modified = time.time()
     
@@ -136,8 +142,8 @@ class ChatLog:
             # Create a background task to fire the hook
             # This is non-blocking so it doesn't slow down message processing
             # print header in cyan
-            print("\033[96m" + "="*60 + "\033[0m")
-            print("Firing message added hook asynchronously")
+            _chat_debug("\033[96m" + "="*60 + "\033[0m")
+            _chat_debug("Firing message added hook asynchronously")
 
             asyncio.create_task(hook_manager.message_added(
                 log_id=self.log_id,
@@ -146,26 +152,26 @@ class ChatLog:
                 message=message,
                 parent_log_id=self.parent_log_id
             ))
-            print("Fired message added hook")
+            _chat_debug("Fired message added hook")
         except Exception as e:
             # Don't let hook failures break message adding
             print(f"Warning: Failed to fire message_added hook: {e}")
 
     def add_message(self, message: Dict[str, str]) -> None:
         """Synchronous version for backward compatibility"""
-        print("Adding message synchronously")
+        _chat_debug("Adding message synchronously")
         t0 = time.time()
         self._add_message_impl(message)
         self.last_modified = time.time()
         self._save_log_sync()
         save_ms = (time.time() - t0) * 1000
-        print(f'add_message total took {save_ms:.1f}ms')
+        _chat_debug(f'add_message total took {save_ms:.1f}ms')
         self._fire_message_added_hook(message)
 
     def _add_message_impl(self, message: Dict[str, str]) -> None:
         """Internal implementation shared by sync and async versions"""
         if len(self.messages)>0 and self.messages[-1]['role'] == message['role']:
-            print("found repeat role")
+            _chat_debug("found repeat role")
             # check if messasge is str
             # if so, convert to dict with type 'text':
             if type(message['content']) == str:
@@ -173,7 +179,7 @@ class ChatLog:
             elif type(message['content']) == list:
                 for part in message['content']:
                     if part['type'] == 'image':
-                        print("found image")
+                        _chat_debug("found image")
                         self.messages.append(message)
                         return False  # Indicate caller should NOT save (we'll handle it)
 
@@ -193,7 +199,7 @@ class ChatLog:
                 # assume previous mesage was not a command, was a string
                 debug_box("4")
                 
-                print("Could not combine commands, checking for eager end-of-turn overlap", e)
+                _chat_debug("Could not combine commands, checking for eager end-of-turn overlap", e)
                 
                 # Get the text from both messages
                 if type(self.messages[-1]['content']) == str:
@@ -213,7 +219,7 @@ class ChatLog:
                 # This happens when voice recognition sends partial then complete transcription
                 if new_text.startswith(old_text) or new_text.startswith(old_text_clean):
                     # New message is a continuation/correction - replace old with new
-                    print(f"Detected eager end-of-turn overlap, using newer complete message")
+                    _chat_debug(f"Detected eager end-of-turn overlap, using newer complete message")
                     self.messages[-1] = {'role': message['role'], 'content': [{'type': 'text', 'text': new_text}]}
                 else:
                     # Truly different messages - concatenate as before
@@ -224,14 +230,14 @@ class ChatLog:
                 #raise e
         else:
             if len(self.messages)>0:
-                print('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
+                _chat_debug('roles do not repeat, last message role is ', self.messages[-1]['role'], 'new message role is ', message['role'])
             debug_box("5")
             self.messages.append(message)
         return True
 
     async def add_message_async(self, message: Dict[str, str]) -> None:
         """Async version for new code that needs non-blocking operations"""
-        print("Adding message asynchronously")
+        _chat_debug("Adding message asynchronously")
         self._add_message_impl(message)
         self.last_modified = time.time()
         await self._save_log_async()
@@ -337,10 +343,10 @@ class ChatLog:
                     # File exists but is empty or has invalid JSON (write race).
                     print(f"Warning: chatlog file {log_file} exists but is empty or invalid JSON; treating as empty")
                     self.messages = []
-            print("Loaded log file at ", log_file)
-            print("Message length: ", len(self.messages))
+            _chat_debug("Loaded log file at ", log_file)
+            _chat_debug("Message length: ", len(self.messages))
         else:
-            print("Could not find log file at ", log_file)
+            _chat_debug("Could not find log file at ", log_file)
             self.messages = []
 
     def count_tokens(self) -> Dict[str, int]:
