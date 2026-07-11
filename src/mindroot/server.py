@@ -326,7 +326,21 @@ def main():
     async def healthz():
         # Deliberately tiny and unauthenticated. Because this handler runs on
         # the main event loop, an external timeout is a direct liveness test.
-        return {"status": "ok", "pid": os.getpid()}
+        import threading as _threading
+        from .lib.hang_watchdog import hang_watchdog
+
+        _running_loop = asyncio.get_running_loop()
+        snapshot = hang_watchdog.health_snapshot(
+            loop_id=id(_running_loop),
+            loop_thread_id=_threading.get_ident(),
+        )
+        if hang_watchdog.enabled and not snapshot["loop_matches"]:
+            hang_watchdog._write_event("HEALTHZ_LOOP_MISMATCH", **snapshot)
+        return {
+            "status": "ok",
+            "pid": os.getpid(),
+            **snapshot,
+        }
 
     app.state.cmd_args = cmd_args
 

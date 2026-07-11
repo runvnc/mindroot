@@ -31,6 +31,10 @@ class HangWatchdog:
         self.heartbeat_seconds = max(0.25, float(os.getenv("MR_HANG_WATCHDOG_HEARTBEAT_SECONDS", "1")))
         self.stall_seconds = max(self.heartbeat_seconds * 2, float(os.getenv("MR_HANG_WATCHDOG_STALL_SECONDS", "15")))
         self.repeat_seconds = max(5.0, float(os.getenv("MR_HANG_WATCHDOG_REPEAT_SECONDS", "60")))
+        self.executor_probe_seconds = max(
+            1.0, float(os.getenv("MR_HANG_WATCHDOG_EXECUTOR_PROBE_SECONDS", "5"))
+        )
+        self.executor_probe_timeout = max(0.1, float(os.getenv("MR_HANG_WATCHDOG_EXECUTOR_TIMEOUT_SECONDS", "2")))
         self.max_bytes = max(64 * 1024, int(os.getenv("MR_HANG_WATCHDOG_MAX_BYTES", "5242880")))
         self.backups = max(0, int(os.getenv("MR_HANG_WATCHDOG_BACKUPS", "3")))
         self._last_heartbeat = time.monotonic()
@@ -40,6 +44,10 @@ class HangWatchdog:
         self._thread: Optional[threading.Thread] = None
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._signal_file = None
+        self._loop_id: Optional[int] = None
+        self._loop_thread_id: Optional[int] = None
+        self._last_probe_elapsed_ms: Optional[float] = None
+        self._last_probe_status = "not_run"
 
     def _install_signal_dump(self) -> None:
         """Allow an external watchdog to request all-thread stacks via SIGUSR1."""
@@ -75,6 +83,9 @@ class HangWatchdog:
             return
         self._stop.clear()
         self._last_heartbeat = time.monotonic()
+        loop = asyncio.get_running_loop()
+        self._loop_id = id(loop)
+        self._loop_thread_id = threading.get_ident()
         self._install_signal_dump()
         self._thread = threading.Thread(
             target=self._watch_loop,
@@ -85,7 +96,13 @@ class HangWatchdog:
         self._heartbeat_task = asyncio.create_task(
             self._heartbeat_loop(), name="mindroot-hang-heartbeat"
         )
-        self._write_event("WATCHDOG_STARTED", stall_seconds=self.stall_seconds)
+        self._write_event(
+            "WATCHDOG_STARTED",
+            stall_seconds=self.stall_seconds,
+            loop_id=self._loop_id,
+            loop_thread_id=self._loop_thread_id,
+            executor_probe_seconds=self.executor_probe_seconds,
+        )
 
     async def stop(self) -> None:
         self._stop.set()
@@ -105,9 +122,68 @@ class HangWatchdog:
         self._write_event("WATCHDOG_STOPPED")
 
     async def _heartbeat_loop(self) -> None:
+        next_probe = 0.0
         while not self._stop.is_set():
             self._last_heartbeat = time.monotonic()
+            now = time.monotonic()
+            if now >= next_probe:
+                await self._probe_executor()
+                next_probe = time.monotonic() + self.executor_probe_seconds
             await asyncio.sleep(self.heartbeat_seconds)
+
+    async def _probe_executor(self) -> None:
+        started = time.perf_counter()
+        fields = {
+            "loop_id": id(asyncio.get_running_loop()),
+            "loop_thread_id": threading.get_ident(),
+            "thread_count": threading.active_count(),
+        }
+        try:
+            await asyncio.wait_for(
+                asyncio.to_thread(lambda: None),
+                timeout=self.executor_probe_timeout,
+            )
+        except asyncio.TimeoutError:
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
+            self._last_probe_elapsed_ms = elapsed_ms
+            self._last_probe_status = "timeout"
+            self._write_event(
+                "EXECUTOR_PROBE_TIMEOUT",
+                elapsed_ms=round(elapsed_ms, 3),
+                timeout_seconds=self.executor_probe_timeout,
+                **fields,
+            )
+        except Exception:
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
+            self._last_probe_elapsed_ms = elapsed_ms
+            self._last_probe_status = "error"
+            self._write_event(
+                "EXECUTOR_PROBE_ERROR",
+                elapsed_ms=round(elapsed_ms, 3),
+                error=traceback.format_exc(),
+                **fields,
+            )
+        else:
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
+            self._last_probe_elapsed_ms = elapsed_ms
+            self._last_probe_status = "ok"
+            if elapsed_ms > 250.0:
+                self._write_event(
+                    "EXECUTOR_PROBE_SLOW",
+                    elapsed_ms=round(elapsed_ms, 3),
+                    **fields,
+                )
+
+    def health_snapshot(self, loop_id: int, loop_thread_id: int) -> dict:
+        return {
+            "watchdog_loop_id": self._loop_id,
+            "watchdog_loop_thread_id": self._loop_thread_id,
+            "request_loop_id": loop_id,
+            "request_loop_thread_id": loop_thread_id,
+            "loop_matches": loop_id == self._loop_id and loop_thread_id == self._loop_thread_id,
+            "executor_probe_status": self._last_probe_status,
+            "executor_probe_elapsed_ms": self._last_probe_elapsed_ms,
+        }
 
     def _watch_loop(self) -> None:
         check_seconds = min(1.0, max(0.25, self.heartbeat_seconds))
