@@ -869,22 +869,28 @@ class AgentForm extends BaseEl {
   organizeCommands(commands) {
     const grouped = {};
     for (const [cmdName, cmdInfoArray] of Object.entries(commands)) {
-      const cmdInfo = cmdInfoArray[0];
-      const provider = cmdInfo.provider || 'Other';
-      if (!grouped[provider]) {
-        grouped[provider] = [];
-        this.plugins.push(provider)
+      // One command name can be implemented by several plugins.  The old UI
+      // considered only index 0, hiding every later provider (for example,
+      // mr_gpt_image when google_imageedit registered "image" first).
+      for (const cmdInfo of cmdInfoArray) {
+        const provider = cmdInfo.provider || 'Other';
+        if (!grouped[provider]) {
+          grouped[provider] = [];
+          if (!this.plugins.includes(provider)) {
+            this.plugins.push(provider);
+          }
+        }
+        grouped[provider].push({
+          name: cmdName,
+          provider,
+          providerName: provider,
+          docstring: cmdInfo.docstring,
+          flags: cmdInfo.flags,
+          uniqueId: `${cmdName}_${provider}`.replace(/[^a-zA-Z0-9]/g, '_')
+        });
+
+        this.providerMapping[provider] = provider;
       }
-      grouped[provider].push({
-        name: cmdName,
-        provider,
-        providerName: provider,
-        docstring: cmdInfo.docstring,
-        flags: cmdInfo.flags,
-        uniqueId: `${cmdName}_${provider}`.replace(/[^a-zA-Z0-9]/g, '_')
-      });
-      
-      this.providerMapping[provider] = provider;
     }
     return grouped;
   }
