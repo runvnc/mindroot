@@ -24,6 +24,10 @@ def _json_safe_data(data):
         return data
     safe = {}
     for k, v in data.items():
+        # Active-command coordination is process-local and must not survive a
+        # restart or context reload, even though name/policy are JSON-safe.
+        if k in ('active_command_task', 'active_command_name', 'active_command_cancel_policy'):
+            continue
         try:
             json.dumps(v)
         except (TypeError, ValueError):

@@ -267,8 +267,16 @@ async def cancel_chat(request: Request, log_id: str, task_id: str, api_key: str 
     
     # Also cancel any active command task if present
     active_task = context.data.get('active_command_task')
-    if active_task and not active_task.done():
+    if active_task and not active_task.done() and \
+            context.data.get('active_command_cancel_policy') != 'atomic':
         active_task.cancel()
+    elif active_task and not active_task.done():
+        try:
+            await asyncio.wait_for(asyncio.shield(active_task), timeout=1.0)
+        except (asyncio.CancelledError, asyncio.TimeoutError):
+            pass
+        except Exception:
+            pass
     
     await context.save_context_data()
     

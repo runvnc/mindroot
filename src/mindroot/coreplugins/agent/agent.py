@@ -558,10 +558,17 @@ class Agent:
         streaming path where the assistant message is persisted once per turn
         (raw text + parsed commands) via chat_log.replace_last_assistant.
         """
-        if context.data.get('cancel_current_turn'):
+        # A complete atomic XML control tag has already committed the action.
+        # Permit that task to enter even if inbound speech set cancellation in
+        # the small gap between parsing the tag and scheduling this coroutine.
+        atomic_active = (
+            context.data.get('active_command_cancel_policy') == 'atomic'
+            and context.data.get('active_command_name') == cmd_name
+        )
+        if context.data.get('cancel_current_turn') and not atomic_active:
             logger.warning("Turn cancelled, not executing command")
             raise asyncio.CancelledError("Turn cancelled")
-        if context.data.get('finished_conversation'):
+        if context.data.get('finished_conversation') and not atomic_active:
             logger.warning("Conversation finished, not executing command")
             return None
 
@@ -665,18 +672,39 @@ class Agent:
                     name = evt['name']
                     props = evt['props']
                     cmd_id = nanoid.generate()
+                    # DTMF is a short, already-decided control action. Once its
+                    # complete XML tag is parsed, incoming speech may cancel
+                    # speech/generation but must not cancel the tone itself.
+                    # Speak remains fully cancellable and is handled above.
+                    cancel_policy = 'atomic' if name == 'send_dtmf' else 'cancellable'
                     await context.partial_command(name, json.dumps(props), props, cmd_id=cmd_id)
+                    context.data['active_command_name'] = name
+                    context.data['active_command_cancel_policy'] = cancel_policy
                     cmd_task = asyncio.create_task(
                         self.execute_command(name, props, context=context, cmd_id=cmd_id)
                     )
                     context.data['active_command_task'] = cmd_task
                     try:
-                        result = await cmd_task
+                        result = await (asyncio.shield(cmd_task) if cancel_policy == 'atomic' else cmd_task)
                     except asyncio.CancelledError:
+                        if cancel_policy != 'atomic':
+                            raise
+                        # The enclosing agent turn may be cancelled while the
+                        # shielded DTMF task is finishing. Preserve sequential
+                        # semantics and do not lose the successfully sent tone.
+                        result = await cmd_task
+                        await context.command_result(name, result, cmd_id=cmd_id)
+                        collected.append({name: props})
+                        full_cmds.append({"SYSTEM": "", "cmd": name, "args": props, "result": result})
+                        if result is not None:
+                            results.append({"SYSTEM": "", "cmd": name, "args": {"omitted": "(see command msg.)"}, "result": result})
+                        await self._persist_xml_assistant(context, original_buffer, collected)
                         raise
                     finally:
                         if context.data.get('active_command_task') == cmd_task:
                             del context.data['active_command_task']
+                            context.data.pop('active_command_name', None)
+                            context.data.pop('active_command_cancel_policy', None)
                     await context.command_result(name, result, cmd_id=cmd_id)
                     collected.append({name: props})
                     full_cmds.append({"SYSTEM": "", "cmd": name, "args": props, "result": result})

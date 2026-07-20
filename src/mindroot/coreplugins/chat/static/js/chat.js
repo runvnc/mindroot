@@ -139,13 +139,20 @@ class Chat extends BaseEl {
  
     const thisPartial_ = this._partialCmd.bind(this) 
     const thisPartial = throttle(thisPartial_, 300)
+    // Growing text commands can be very chatty. Discrete controls such as
+    // send_dtmf emit only once and must render immediately rather than being
+    // delayed behind a throttled speech update.
+    const thisPartialDispatch = e => {
+      const data = JSON.parse(e.data);
+      return ['speak', 'say', 'json_encoded_md', 'markdown_await_user', 'think'].includes(data.command) ? thisPartial(e) : thisPartial_(e);
+    };
     const thisRunning = this._runningCmd.bind(this)
     const thisResult = this._cmdResult.bind(this)
     const thisFinished = this._finished.bind(this)
     const thisError = this._showError.bind(this)
 
     this.sse.addEventListener('image', this._imageMsg.bind(this));
-    this.sse.addEventListener('partial_command', e => thisPartial(e));
+    this.sse.addEventListener('partial_command', thisPartialDispatch);
     this.sse.addEventListener('running_command', e => thisRunning(e).catch(console.error));
     this.sse.addEventListener('command_result', e => thisResult(e).catch(console.error));
     this.sse.addEventListener('finished_chat', e => thisFinished(e).catch(console.error));

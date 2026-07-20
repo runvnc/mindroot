@@ -240,6 +240,24 @@ def process_result(result, formatted_results):
     return formatted_results
 in_progress = {}
 
+
+async def _cancel_or_finish_active_command(context, timeout=1.0):
+    """Cancel ordinary commands, but allow a parsed atomic control to finish."""
+    task = context.data.get('active_command_task')
+    if not task or task.done():
+        return
+    policy = context.data.get('active_command_cancel_policy', 'cancellable')
+    if policy == 'atomic':
+        try:
+            await asyncio.wait_for(asyncio.shield(task), timeout=timeout)
+        except (asyncio.CancelledError, asyncio.TimeoutError):
+            pass
+        except Exception:
+            pass
+        return
+    task.cancel()
+
+
 @service()
 async def cancel_and_wait(session_id: str, user: str, context=None):
     global in_progress, active_tasks
@@ -253,28 +271,18 @@ async def cancel_and_wait(session_id: str, user: str, context=None):
         existing_context.data['cancel_current_turn'] = True
         existing_context.data['finished_conversation'] = True
         await existing_context.save_context()
-        if 'active_command_task' in existing_context.data:
-            cmd_task = existing_context.data['active_command_task']
-            if cmd_task and (not cmd_task.done()):
-                cmd_task.cancel()
-                # Wait (bounded) for the cancelled command's own teardown to
-                # finish before the next turn is allowed to start. This ensures
-                # the in-flight TTS command has fully unwound - e.g. mr_eleven_stream
-                # speak() releasing its per-log_id lock, or mr_kyutai cancelling /
-                # cleaning up its realtime streaming session - so the next turn's
-                # speak()/partial_command cannot race a not-yet-released lock or a
-                # not-yet-torn-down session. Bounded so a wedged teardown can never
-                # delay barge-in; normal teardown completes in a few ms.
+        cmd_task = existing_context.data.get('active_command_task')
+        await _cancel_or_finish_active_command(existing_context)
+        if cmd_task and not cmd_task.done():
+            # Wait (bounded) for cancellable command teardown. Atomic commands
+            # were allowed to finish above.
+            if existing_context.data.get('active_command_cancel_policy') != 'atomic':
                 try:
                     await asyncio.wait_for(cmd_task, timeout=0.5)
                 except (asyncio.CancelledError, asyncio.TimeoutError):
                     pass
                 except Exception:
                     pass
-            else:
-                pass
-        else:
-            pass
         await existing_context.save_context()
     except Exception as e:
         pass
@@ -683,20 +691,14 @@ async def cancel_active_response(log_id: str, context=None):
         logger.debug(f'Error calling on_interrupt hook: {e}')
     finally:
         pass
-    if 'active_command_task' in context.data:
-        active_task = context.data['active_command_task']
-        if active_task and (not active_task.done()):
-            try:
-                active_task.cancel()
+    active_task = context.data.get('active_command_task')
+    if active_task and not active_task.done():
+        try:
+            if context.data.get('active_command_cancel_policy') != 'atomic':
+                await _cancel_or_finish_active_command(context)
                 await context.chat_log.drop_last('assistant')
-            except Exception as e:
-                pass
-            finally:
-                pass
-        else:
+        except Exception:
             pass
-    else:
-        pass
     await context.save_context()
     return {'status': 'cancelled', 'log_id': log_id}
 
