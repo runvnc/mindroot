@@ -301,6 +301,52 @@ async def cancel_and_wait(session_id: str, user: str, context=None):
     else:
         pass
 
+def _current_llm_provider(context):
+    """Which plugin will actually run stream_chat for this context, if known.
+
+    Image formatting MUST match the LLM that receives the message, because each
+    provider uses its own wire format (Anthropic 'image'/source vs. OpenAI-style
+    'image_url'). The formatted block is persisted in the chat log, so getting
+    this wrong poisons the whole conversation with 400s.
+    """
+    try:
+        if context is None:
+            return None
+        if hasattr(context, 'data') and isinstance(context.data, dict):
+            provider = context.data.get('PREFERRED_PROVIDER')
+            if provider:
+                return provider
+        agent = getattr(context, 'agent', None)
+        if isinstance(agent, dict):
+            service_models = agent.get('service_models') or {}
+            entry = service_models.get('stream_chat') or {}
+            provider = entry.get('provider')
+            if provider:
+                return provider
+            preferred = agent.get('preferred_providers')
+            if isinstance(preferred, dict):
+                provider = preferred.get('stream_chat')
+                if provider:
+                    return provider
+            elif isinstance(preferred, list) and preferred:
+                return preferred[0]
+    except Exception:
+        pass
+    return None
+
+async def _format_image_for_current_llm(img, context):
+    """Format an image using the SAME provider that will handle stream_chat."""
+    provider = _current_llm_provider(context)
+    if provider:
+        try:
+            return await service_manager.exec_with_provider('format_image_message',
+                                                           provider, img,
+                                                           context=context)
+        except Exception as e:
+            logger.warning(f"format_image_message via provider '{provider}' failed "
+                           f"({e}); falling back to default provider resolution")
+    return await context.format_image_message(img)
+
 @service()
 async def send_message_to_agent(session_id: str, message: str | List[MessageParts], max_iterations=35, context=None, user=None, assume_wait_for_task_result=False, add_user_message: bool = True):
     global in_progress, active_tasks
@@ -385,7 +431,7 @@ async def send_message_to_agent(session_id: str, message: str | List[MessagePart
                 if part['type'] == 'image':
                     has_image = True
                     img = dataurl_to_pil(part['data'])
-                    img_msg = await context.format_image_message(img)
+                    img_msg = await _format_image_for_current_llm(img, context)
                     new_parts.append(img_msg)
                 elif part['type'] == 'text' and '[UPLOADED FILE]' in part['text']:
                     if not any(('[UPLOADED FILE]' in p.get('text', '') for p in new_parts)):

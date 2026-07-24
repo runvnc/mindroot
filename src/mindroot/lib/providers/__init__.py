@@ -246,7 +246,15 @@ class ProviderManager:
                 if func_info['provider'] == preferred_provider:
                     function_info = func_info
                     break
-            function_info = self.functions[name][0]
+            if function_info is None:
+                # No implementation from the preferred provider: fall back to the
+                # first registered one. (Previously this assignment was
+                # unconditional, which silently DISCARDED the matched provider and
+                # always used registration order. That is how e.g. a pasted image
+                # could be formatted by mr_gemini's format_image_message while
+                # stream_chat ran on ah_anthropic, producing an OpenAI-style
+                # 'image_url' block that Anthropic rejects with a 400.)
+                function_info = self.functions[name][0]
 
         if function_info is None:
             raise ValueError(f"1. function '{name}' not found. preferred_provider is '{preferred_provider}'.")
