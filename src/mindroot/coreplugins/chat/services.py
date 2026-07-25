@@ -308,28 +308,24 @@ def _current_llm_provider(context):
     provider uses its own wire format (Anthropic 'image'/source vs. OpenAI-style
     'image_url'). The formatted block is persisted in the chat log, so getting
     this wrong poisons the whole conversation with 400s.
+
+    Only the agent's explicit per-service stream_chat provider is consulted.
+    The coarse per-plugin `preferred_providers` toggles and the transient
+    context.data['PREFERRED_PROVIDER'] are deliberately NOT used here: they are
+    not service-specific and could point at a plugin that has nothing to do with
+    the LLM actually running stream_chat.
     """
     try:
         if context is None:
             return None
-        if hasattr(context, 'data') and isinstance(context.data, dict):
-            provider = context.data.get('PREFERRED_PROVIDER')
-            if provider:
-                return provider
         agent = getattr(context, 'agent', None)
         if isinstance(agent, dict):
             service_models = agent.get('service_models') or {}
             entry = service_models.get('stream_chat') or {}
-            provider = entry.get('provider')
-            if provider:
-                return provider
-            preferred = agent.get('preferred_providers')
-            if isinstance(preferred, dict):
-                provider = preferred.get('stream_chat')
+            if isinstance(entry, dict):
+                provider = entry.get('provider')
                 if provider:
                     return provider
-            elif isinstance(preferred, list) and preferred:
-                return preferred[0]
     except Exception:
         pass
     return None
