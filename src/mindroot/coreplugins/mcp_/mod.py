@@ -23,7 +23,7 @@ from .oauth_storage import MCPTokenStorage
 try:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
-    from mcp.client.streamable_http import streamablehttp_client
+    from mcp.client.streamable_http import streamable_http_client
     from mcp.client.sse import sse_client
     from mcp.client.auth import OAuthClientProvider, TokenStorage
     from mcp.shared.auth import OAuthClientMetadata, OAuthToken, OAuthClientInformationFull
@@ -34,7 +34,7 @@ except ImportError:
     ClientSession = None
     StdioServerParameters = None
     stdio_client = None
-    streamablehttp_client = None
+    streamable_http_client = None
     sse_client = None
     OAuthClientProvider = None
     OAuthClientMetadata = None

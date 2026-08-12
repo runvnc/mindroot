@@ -1,7 +1,7 @@
 """OAuth token storage implementation for MCP servers."""
 
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 try:
@@ -39,17 +39,20 @@ class MCPTokenStorage(TokenStorage):
             return None
         
         # Parse token expiration
-        expires_at = None
+        expires_in = None
         if server.token_expires_at:
             try:
                 expires_at = datetime.fromisoformat(server.token_expires_at.replace('Z', '+00:00'))
+                now = datetime.now(expires_at.tzinfo) if expires_at.tzinfo else datetime.now()
+                delta = expires_at - now
+                expires_in = max(0, int(delta.total_seconds()))
             except ValueError:
                 pass
         
         return OAuthToken(
             access_token=server.access_token,
             refresh_token=server.refresh_token,
-            expires_at=expires_at,
+            expires_in=expires_in,
             scope=" ".join(server.scopes) if server.scopes else None
         )
     
@@ -64,11 +67,8 @@ class MCPTokenStorage(TokenStorage):
         server.access_token = tokens.access_token
         server.refresh_token = tokens.refresh_token
         
-        if hasattr(tokens, 'expires_at') and tokens.expires_at:
-            server.token_expires_at = tokens.expires_at.isoformat()
-        elif hasattr(tokens, 'expires_in') and tokens.expires_in:
+        if hasattr(tokens, 'expires_in') and tokens.expires_in:
             # Calculate expires_at from expires_in
-            from datetime import datetime, timedelta
             expires_at = datetime.now() + timedelta(seconds=tokens.expires_in)
             server.token_expires_at = expires_at.isoformat()
         else:

@@ -16,7 +16,7 @@ setup(
         ],
     },
     install_requires=[
-        "mcp>=1.9.0",
+        "mcp>=2.0.0",
         "httpx>=0.24.0",
         "pydantic>=2.0.0",
         "aiofiles>=23.0.0",

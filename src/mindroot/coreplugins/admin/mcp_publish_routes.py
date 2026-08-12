@@ -324,25 +324,90 @@ async def test_direct_connection(url: str):
         "Content-Type": "application/json"
     }
 
-    # Initialize connection
-    init_request = {
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "initialize",
-        "params": {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {
-                "tools": {}
-            },
-            "clientInfo": {
-                "name": "mindroot-tester",
-                "version": "1.0.0"
+    # Try modern (2026-07-28) stateless protocol first with server/discover
+    # Then fall back to legacy initialize handshake
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        # Try server/discover (modern stateless)
+        discover_request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "server/discover",
+            "params": {
+                "_meta": {
+                    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                    "io.modelcontextprotocol/clientInfo": {
+                        "name": "mindroot-tester",
+                        "version": "1.0.0"
+                    }
+                }
             }
         }
-    }
+        modern_headers = {
+            "Content-Type": "application/json",
+            "MCP-Protocol-Version": "2026-07-28",
+            "Mcp-Method": "server/discover",
+            "Mcp-Name": "discover"
+        }
+        
+        discover_response = await client.post(url, headers=modern_headers, json=discover_request)
+        
+        if discover_response.status_code == 401:
+            raise HTTPException(status_code=401, detail="Server requires authentication")
+        
+        if discover_response.status_code == 200:
+            try:
+                discover_data = discover_response.json()
+                if "result" in discover_data:
+                    # Modern server - use server/discover for tools
+                    tools_request = {
+                        "jsonrpc": "2.0",
+                        "id": 2,
+                        "method": "tools/list",
+                        "params": {
+                            "_meta": {
+                                "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                                "io.modelcontextprotocol/clientInfo": {
+                                    "name": "mindroot-tester",
+                                    "version": "1.0.0"
+                                }
+                            }
+                        }
+                    }
+                    tools_headers = {
+                        "Content-Type": "application/json",
+                        "MCP-Protocol-Version": "2026-07-28",
+                        "Mcp-Method": "tools/list",
+                        "Mcp-Name": "list"
+                    }
+                    tools_response = await client.post(url, headers=tools_headers, json=tools_request)
+                    if tools_response.status_code == 200:
+                        tools_data = tools_response.json()
+                        tools = tools_data.get("result", {}).get("tools", [])
+                        return tools
+            except Exception:
+                pass
+        
+        # Fall back to legacy initialize handshake
+        init_request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {}
+                },
+                "clientInfo": {
+                    "name": "mindroot-tester",
+                    "version": "1.0.0"
+                }
+            }
+        }
+        legacy_headers = {
+            "Content-Type": "application/json"
+        }
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        init_response = await client.post(url, headers=headers, json=init_request)
+        init_response = await client.post(url, headers=legacy_headers, json=init_request)
         
         if init_response.status_code == 401:
             raise HTTPException(status_code=401, detail="Server requires authentication")
@@ -361,7 +426,7 @@ async def test_direct_connection(url: str):
             "params": {}
         }
 
-        tools_response = await client.post(url, headers=headers, json=tools_request)
+        tools_response = await client.post(url, headers=legacy_headers, json=tools_request)
         
         if tools_response.status_code != 200:
             raise HTTPException(

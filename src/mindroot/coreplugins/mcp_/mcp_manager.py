@@ -20,10 +20,11 @@ from .oauth_storage import MCPTokenStorage
 try:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
-    from mcp.client.streamable_http import streamablehttp_client
+    from mcp.client.streamable_http import streamable_http_client
     from mcp.client.sse import sse_client
-    from mcp.client.auth import OAuthClientProvider
+    from mcp.client.auth import OAuthClientProvider, AuthorizationCodeResult
     from mcp.shared.auth import OAuthClientMetadata
+    from mcp.shared._httpx_utils import create_mcp_http_client
     from pydantic import AnyUrl
     MCP_AVAILABLE = True
 except ImportError:
@@ -31,13 +32,15 @@ except ImportError:
     ClientSession = None
     StdioServerParameters = None
     stdio_client = None
-    streamablehttp_client = None
+    streamable_http_client = None
     sse_client = None
     OAuthClientProvider = None
+    AuthorizationCodeResult = None
     OAuthClientMetadata = None
     OAuthToken = None
     OAuthClientInformationFull = None
     AnyUrl = None
+    create_mcp_http_client = None
     MCP_AVAILABLE = False
 
 def _substitute_secrets(config_item: Any, secrets: Dict[str, str]) -> Any:
@@ -327,7 +330,7 @@ class MCPManager:
                     async with ClientSession(read, write) as session:
                         print(f"DEBUG: Persistent session created for {name}")
                         
-                        # Initialize the session
+                        # Initialize the session (legacy mode; v2 SDK auto-negotiates)
                         print(f"DEBUG: About to initialize session for {name}")
                         await session.initialize()
                         print(f"DEBUG: Persistent session initialized for {name}")
@@ -388,12 +391,17 @@ class MCPManager:
                             print(f"DEBUG: Persistent connection task cancelled for {name}")
                             raise
             else:
-                async with streamablehttp_client(url=transport_url, auth=oauth_provider) as (read, write, _):
+                # Streamable HTTP - use v2 SDK with OAuth via http_client
+                print(f"DEBUG: About to create StreamableHTTP client for {transport_url}")
+                print(f"DEBUG: OAuth provider: {oauth_provider}")
+                # Create httpx2 client with OAuth auth
+                http_client = create_mcp_http_client(auth=oauth_provider)
+                async with streamable_http_client(url=transport_url, http_client=http_client) as (read, write):
                     print(f"DEBUG: Persistent StreamableHTTP transport created for {name}")
                     async with ClientSession(read, write) as session:
                         print(f"DEBUG: Persistent session created for {name}")
                         
-                        # Initialize the session
+                        # Initialize the session (legacy mode; v2 SDK auto-negotiates)
                         print(f"DEBUG: About to initialize session for {name}")
                         await session.initialize()
                         print(f"DEBUG: Persistent session initialized for {name}")
@@ -523,8 +531,11 @@ class MCPManager:
         print(f"DEBUG: OAuth flow created with ID: {flow_id}")
         print(f"OAuth flow started for {server_name}: {auth_url}")
     
-    async def _handle_oauth_callback(self, server_name: str) -> tuple[str, Optional[str]]:
-        """Handle OAuth callback - get code from pending flow."""
+    async def _handle_oauth_callback(self, server_name: str):
+        """Handle OAuth callback - get code from pending flow.
+        
+        Returns AuthorizationCodeResult for v2 SDK compatibility.
+        """
         if server_name not in self.pending_oauth_flows:
             print(f"DEBUG: No pending OAuth flow found for {server_name}")
             print(f"DEBUG: Available flows: {list(self.pending_oauth_flows.keys())}")
@@ -555,7 +566,10 @@ class MCPManager:
         # Clean up flow
         del self.pending_oauth_flows[server_name]
         
-        return code, state
+        # Return AuthorizationCodeResult for v2 SDK
+        if AuthorizationCodeResult is not None:
+            return AuthorizationCodeResult(code=code, state=state)
+        return (code, state)
 
     def start_oauth_flow(self, server_name: str) -> Optional[str]:
         """Start OAuth flow and return authorization URL."""
@@ -654,14 +668,14 @@ class MCPManager:
             else:  # streamable_http
                 print(f"Connecting via StreamableHTTP to: {transport_url}")
                 transport = await exit_stack.enter_async_context(
-                    streamablehttp_client(transport_url)
+                    streamable_http_client(transport_url)
                 )
-                # StreamableHTTP returns (read, write, get_session_id)
+                # StreamableHTTP returns (read, write)
                 session = await exit_stack.enter_async_context(
                     ClientSession(transport[0], transport[1])
                 )
             print("Session created:", session)
-            # Initialize the session
+            # Initialize the session (legacy mode; v2 SDK auto-negotiates)
             await session.initialize()
             
             # Store session
@@ -801,7 +815,7 @@ class MCPManager:
                     ClientSession(stdio_transport[0], stdio_transport[1])
                 )
                 
-                # Initialize the session
+                # Initialize the session (legacy mode; v2 SDK auto-negotiates)
                 await session.initialize()
                 
                 # Store session

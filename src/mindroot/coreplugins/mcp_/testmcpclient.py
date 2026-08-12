@@ -13,8 +13,9 @@ from urllib.parse import parse_qs, urlparse
 from pydantic import AnyUrl
 
 from mcp import ClientSession
-from mcp.client.auth import OAuthClientProvider, TokenStorage
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.auth import OAuthClientProvider, TokenStorage, AuthorizationCodeResult
+from mcp.client.streamable_http import streamable_http_client
+from mcp.shared._httpx_utils import create_mcp_http_client
 from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAuthToken
 
 
@@ -46,12 +47,15 @@ async def handle_redirect(auth_url: str) -> None:
     print(f"Visit: {auth_url}")
 
 
-async def handle_callback() -> tuple[str, str | None]:
+async def handle_callback() -> AuthorizationCodeResult:
     callback_url = input("Paste callback URL: ")
     params = parse_qs(urlparse(callback_url).query)
     print("Callback URL parameters:")
     print(params)
-    return params["code"][0], params.get("state", [None])[0]
+    return AuthorizationCodeResult(
+        code=params["code"][0],
+        state=params.get("state", [None])[0]
+    )
 
 
 async def main():
@@ -71,7 +75,8 @@ async def main():
     )
 
     print("Starting.")
-    async with streamablehttp_client("https://mcp.notion.com/sse", auth=oauth_auth) as (read, write, _):
+    http_client = create_mcp_http_client(auth=oauth_auth)
+    async with streamable_http_client("https://mcp.notion.com/sse", http_client=http_client) as (read, write):
         print("1")
         async with ClientSession(read, write) as session:
             print("2")
