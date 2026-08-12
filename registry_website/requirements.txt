@@ -5,7 +5,7 @@ pydantic
 passlib
 python-jose
 python-multipart
-bcrypt
+bcrypt==4.2.1
 requests
 click
 chromadb
