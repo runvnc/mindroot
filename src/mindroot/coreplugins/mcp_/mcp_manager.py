@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 import traceback
 
 import httpx
+import httpx2
 from pydantic import BaseModel
 
 from .server_installer import MCPServerInstaller
@@ -226,7 +227,7 @@ class MCPManager:
         except Exception:
             pass
 
-    def _build_oauth_provider(self, name: str, server: MCPServer, provider_url: str):
+    def _build_oauth_provider(self, name: str, server: MCPServer, provider_url: str, resource_url: str | None = None):
         """Create an OAuthClientProvider bound to this server using persistent storage."""
         base_url = os.getenv('BASE_URL', 'http://localhost:3000')
         callback_url = f"{base_url.rstrip('/')}/mcp_oauth_cb"
@@ -240,12 +241,14 @@ class MCPManager:
             response_types=["code"],
             scope=" ".join(server.scopes) if server.scopes else "user",
         )
+        # RFC 8707: PRM resource is the MCP endpoint (often .../mcp), not the origin.
+        oauth_server_url = (resource_url or provider_url).rstrip('/')
         print("DEBUG: -------------------------------------------------------")
-        print("DEBUG: OAuth provider server_url:", provider_url)
+        print("DEBUG: OAuth provider server_url:", oauth_server_url)
 
         print("DEBUG: OAuth provider metadata:", metadata.dict())
         oauth_provider = OAuthClientProvider(
-            server_url=provider_url,
+            server_url=oauth_server_url,
             client_metadata=metadata,
             storage=storage,
             redirect_handler=lambda auth_url: self._handle_oauth_redirect(name, auth_url),
@@ -315,7 +318,7 @@ class MCPManager:
             self._update_server_urls(name, provider_url, transport_url, transport_type)
 
             # Create OAuth client provider using persistent storage
-            oauth_provider = self._build_oauth_provider(name, server, provider_url)
+            oauth_provider = self._build_oauth_provider(name, server, provider_url, transport_url)
 
             print(f"DEBUG: Persistent task connecting to {transport_url} via {transport_type}")
 
@@ -391,62 +394,71 @@ class MCPManager:
                             print(f"DEBUG: Persistent connection task cancelled for {name}")
                             raise
             else:
-                # Streamable HTTP - use v2 SDK with OAuth via http_client
+                # Streamable HTTP - v2 SDK: OAuth is httpx Auth on the HTTP client.
+                # The client MUST be entered as a context manager; streamable_http_client
+                # will not enter a caller-provided client.
                 print(f"DEBUG: About to create StreamableHTTP client for {transport_url}")
                 print(f"DEBUG: OAuth provider: {oauth_provider}")
-                # Create httpx2 client with OAuth auth
-                http_client = create_mcp_http_client(auth=oauth_provider)
-                async with streamable_http_client(url=transport_url, http_client=http_client) as (read, write):
-                    print(f"DEBUG: Persistent StreamableHTTP transport created for {name}")
-                    async with ClientSession(read, write) as session:
-                        print(f"DEBUG: Persistent session created for {name}")
+                # MCP 2 streamable HTTP often requires HTTP/2 (httpx2 defaults http2=False).
+                # OAuthClientProvider is httpx2.Auth, not httpx.Auth.
+                http_client = httpx2.AsyncClient(
+                    auth=oauth_provider,
+                    follow_redirects=True,
+                    http2=True,
+                    timeout=httpx2.Timeout(30.0, read=300.0),
+                )
+                async with http_client:
+                    async with streamable_http_client(url=transport_url, http_client=http_client) as (read, write):
+                        print(f"DEBUG: Persistent StreamableHTTP transport created for {name}")
+                        async with ClientSession(read, write) as session:
+                            print(f"DEBUG: Persistent session created for {name}")
                         
-                        # Initialize the session (legacy mode; v2 SDK auto-negotiates)
-                        print(f"DEBUG: About to initialize session for {name}")
-                        await session.initialize()
-                        print(f"DEBUG: Persistent session initialized for {name}")
+                            # Initialize the session (legacy mode; v2 SDK auto-negotiates)
+                            print(f"DEBUG: About to initialize session for {name}")
+                            await session.initialize()
+                            print(f"DEBUG: Persistent session initialized for {name}")
                         
-                        # Store session globally
-                        self.sessions[name] = session
-                        server.status = "connected"
+                            # Store session globally
+                            self.sessions[name] = session
+                            server.status = "connected"
                         
-                        # Get server capabilities
-                        try:
-                            tools = await session.list_tools()
-                            resources = await session.list_resources()
-                            prompts = await session.list_prompts()
+                            # Get server capabilities
+                            try:
+                                tools = await session.list_tools()
+                                resources = await session.list_resources()
+                                prompts = await session.list_prompts()
                             
-                            server.capabilities = {
-                                "tools": [tool.dict() for tool in tools.tools],
-                                "resources": [res.dict() for res in resources.resources],
-                                "prompts": [prompt.dict() for prompt in prompts.prompts]
-                            }
-                            self.last_capabilities[name] = server.capabilities
-                            # Save to diagnostics cache
-                            self.last_capabilities[name] = server.capabilities
-                            print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
+                                server.capabilities = {
+                                    "tools": [tool.dict() for tool in tools.tools],
+                                    "resources": [res.dict() for res in resources.resources],
+                                    "prompts": [prompt.dict() for prompt in prompts.prompts]
+                                }
+                                self.last_capabilities[name] = server.capabilities
+                                # Save to diagnostics cache
+                                self.last_capabilities[name] = server.capabilities
+                                print(f"DEBUG: Retrieved capabilities for {name}: {len(tools.tools)} tools")
                             
-                            # Register dynamic commands
-                            print(f"DEBUG: Registering tools for {name}...")
-                            await self.dynamic_commands.register_tools(name, tools.tools)
-                            print(f"DEBUG: Successfully registered {len(tools.tools)} tools for {name}")
-                        except Exception as e:
-                            print(f"Error getting capabilities for {name}: {e}")
-                            # Don't set status to error if we got this far - keep it connected
-                            pass
+                                # Register dynamic commands
+                                print(f"DEBUG: Registering tools for {name}...")
+                                await self.dynamic_commands.register_tools(name, tools.tools)
+                                print(f"DEBUG: Successfully registered {len(tools.tools)} tools for {name}")
+                            except Exception as e:
+                                print(f"Error getting capabilities for {name}: {e}")
+                                # Don't set status to error if we got this far - keep it connected
+                                pass
                         
-                        #self.save_config()
-                        print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
-                        print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
-                        print(f"DEBUG: Persistent StreamableHTTP connection established for {name}")
+                            #self.save_config()
+                            print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
+                            print(f"DEBUG: Capabilities saved for {name}, tools={len(server.capabilities.get('tools', []))}")
+                            print(f"DEBUG: Persistent StreamableHTTP connection established for {name}")
                         
-                        # Keep the task alive until cancelled
-                        try:
-                            while True:
-                                await asyncio.sleep(60)  # Heartbeat every minute
-                        except asyncio.CancelledError:
-                            print(f"DEBUG: Persistent connection task cancelled for {name}")
-                            raise
+                            # Keep the task alive until cancelled
+                            try:
+                                while True:
+                                    await asyncio.sleep(60)  # Heartbeat every minute
+                            except asyncio.CancelledError:
+                                print(f"DEBUG: Persistent connection task cancelled for {name}")
+                                raise
                         
         except Exception as e:
             print(f"ERROR: Persistent OAuth connection failed for {name}: {e}")
@@ -487,27 +499,29 @@ class MCPManager:
             del self.background_tasks[name]
         
         try:
-            # Start background task for persistent connection
+            # Start background task for persistent connection.
+            # MCP 2 OAuth runs inside httpx Auth on the first HTTP request and may
+            # need several seconds for PRM / AS metadata / DCR before redirect_handler
+            # stores pending_oauth_flows. Poll instead of a single 2s sleep.
             task = asyncio.create_task(self._persistent_oauth_connection(name))
             self.background_tasks[name] = task
-            await asyncio.sleep(2)
-            
-            # Check if connection was successful or OAuth flow started
-            if name in self.sessions and server.status == "connected":
-                print(f"DEBUG: Background OAuth connection successful for {name}")
-                return True
-            elif False and server.status == "error":
-                print(f"DEBUG: Background OAuth connection failed for {name}")
-                # Check if the background task had an exception
-                if not task.done():
-                    task.cancel()
-                return False
-            elif name in self.pending_oauth_flows:
-                print(f"DEBUG: OAuth flow started for {name}, frontend should handle popup")
-                return False  # This will trigger the OAuth flow check in the calling code
-            else:
-                print(f"DEBUG: (X) Background OAuth connection failed for {name}, {server.status} {self.sessions}")
-                return False
+            deadline = asyncio.get_event_loop().time() + 20.0
+            while asyncio.get_event_loop().time() < deadline:
+                if name in self.sessions and server.status == "connected":
+                    print(f"DEBUG: Background OAuth connection successful for {name}")
+                    return True
+                if name in self.pending_oauth_flows:
+                    flow = self.pending_oauth_flows[name]
+                    if flow.get("status") == "awaiting_authorization" and flow.get("auth_url"):
+                        print(f"DEBUG: OAuth flow started for {name}, frontend should handle popup")
+                        return False
+                if task.done() and name not in self.pending_oauth_flows:
+                    exc = task.exception() if not task.cancelled() else None
+                    print(f"DEBUG: OAuth background task finished early for {name}: status={server.status} exc={exc}")
+                    return False
+                await asyncio.sleep(0.25)
+            print(f"DEBUG: (X) Timed out waiting for OAuth connect/flow for {name}, {server.status} {self.sessions}")
+            return False
                 
         except Exception as e:
             server.status = "error"
@@ -1003,9 +1017,16 @@ class MCPManager:
                 return False
         else:
             print(f"No active session found for {name}. Trying to disconnect with {name} as server name.")
+            if name in self.background_tasks:
+                print(f"DEBUG: Cancelling background OAuth task for {name} (no session yet)")
+                self.background_tasks[name].cancel()
+                try:
+                    await self.background_tasks[name]
+                except (asyncio.CancelledError, Exception):
+                    pass
+                del self.background_tasks[name]
             if name in self.servers:
                 await self.dynamic_commands.unregister_server_tools(name)
- 
                 self.servers[name].status = "disconnected"
                 self.save_config()
         return True

@@ -248,39 +248,48 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
             success = await mcp_manager.connect_server(server_name)
             print("Connection result: ", success)
             if not success:
-                # Check if OAuth flow is pending
+                # Check if OAuth flow is pending (MCP 2 may still be discovering AS)
                 oauth_status = mcp_manager.get_oauth_status(server_name)
-                
-                if "oauth_flow" in oauth_status and oauth_status["oauth_flow"]["status"] == "awaiting_authorization":
-                    # OAuth flow is pending - return the auth URL for frontend to handle
+                oauth_flow = oauth_status.get("oauth_flow") or {}
+                if oauth_flow.get("status") == "awaiting_authorization" and oauth_flow.get("auth_url"):
                     return {
                         "success": False,
                         "requires_oauth": True,
-                        "auth_url": oauth_status["oauth_flow"]["auth_url"],
-                        "flow_id": oauth_status["oauth_flow"]["flow_id"],
+                        "auth_url": oauth_flow["auth_url"],
+                        "flow_id": oauth_flow.get("flow_id"),
                         "server_name": server_name,
                         "message": "OAuth authorization required. Please complete the authorization flow."
                     }
-                else:
-                    # Try without OAuth first to see if it's a 401
-                    try:
-                        await test_direct_connection(request.url)
-                    except HTTPException as e:
-                        if e.status_code == 401:
-                            # Server requires auth - try OAuth connection
-                            oauth_success = await mcp_manager.connect_oauth_server(server_name)
-                            if not oauth_success:
+
+                # Probe without OAuth. A 401 means we must wait for the popup URL,
+                # not raise immediately (that skipped the frontend OAuth window).
+                try:
+                    await test_direct_connection(request.url)
+                except HTTPException as e:
+                    if e.status_code == 401:
+                        if server_to_test.auth_type != "oauth2":
+                            server_to_test.auth_type = "oauth2"
+                        oauth_success = await mcp_manager.connect_oauth_server(server_name)
+                        if not oauth_success:
+                            # Poll briefly for redirect_handler to publish auth_url
+                            for _ in range(40):
                                 oauth_status = mcp_manager.get_oauth_status(server_name)
-                                if "oauth_flow" in oauth_status:
+                                oauth_flow = oauth_status.get("oauth_flow") or {}
+                                if oauth_flow.get("status") == "awaiting_authorization" and oauth_flow.get("auth_url"):
                                     return {
                                         "success": False,
                                         "requires_oauth": True,
-                                        "auth_url": oauth_status["oauth_flow"]["auth_url"],
-                                        "flow_id": oauth_status["oauth_flow"]["flow_id"],
+                                        "auth_url": oauth_flow["auth_url"],
+                                        "flow_id": oauth_flow.get("flow_id"),
                                         "server_name": server_name,
                                         "message": "OAuth authorization required. Please complete the authorization flow."
                                     }
-                        raise e
+                                await asyncio.sleep(0.25)
+                            raise HTTPException(
+                                status_code=401,
+                                detail="Server requires authentication, but OAuth authorization URL was not ready. Retry test connection."
+                            )
+                    raise e
             
             # Get server capabilities (tools, resources, prompts)
             server = mcp_manager.servers[server_name]
@@ -298,13 +307,22 @@ async def test_remote_mcp_server(request: McpTestRemoteRequest):
             }
             
         finally:
-            # Clean up temporary server
+            # Do NOT tear down a temp server while OAuth is waiting for the popup.
+            # disconnect_server used to cancel the background task that holds the flow.
             try:
-                # Only clean up if we created a temporary server (not existing one)
-                if not existing_server:
+                pending = False
+                try:
+                    st = mcp_manager.get_oauth_status(server_name)
+                    flow = (st or {}).get("oauth_flow") or {}
+                    pending = flow.get("status") == "awaiting_authorization"
+                except Exception:
+                    pending = server_name in getattr(mcp_manager, "pending_oauth_flows", {})
+                if (not existing_server) and (not pending):
                     await mcp_manager.disconnect_server(server_name)
                     mcp_manager.remove_server(server_name)
                     print(f"Cleaned up temporary server {server_name}")
+                elif pending:
+                    print(f"Leaving temporary server {server_name} in place for OAuth popup")
             except Exception as cleanup_error:
                 print(f"Error cleaning up temporary server {server_name}: {cleanup_error}")
 
