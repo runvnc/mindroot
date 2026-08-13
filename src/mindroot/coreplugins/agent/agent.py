@@ -67,6 +67,44 @@ def xml_streaming_enabled(context=None) -> bool:
     return False
 
 
+
+
+def speak_cmd_name(context=None) -> str:
+    """Resolve the command name used for spoken text in XML mode.
+
+    Defaults to 'speak'. Override via MR_SPEAK_CMD in the agent's own env
+    overrides (context.env, populated from agent.json 'env'), or via the
+    process environment. Per-agent env takes precedence.
+    """
+    # 1) Per-agent override (authoritative).
+    if context is not None:
+        env = getattr(context, 'env', None)
+        if isinstance(env, dict):
+            val = env.get('MR_SPEAK_CMD')
+            if val:
+                return str(val).strip()
+
+    # 2) Process-level fallback.
+    val = os.environ.get('MR_SPEAK_CMD')
+    if val:
+        return str(val).strip()
+    return 'speak'
+
+
+
+def speak_cmd_text_arg(cmd_name: str) -> str:
+    """Map a speak-replacement command to the argument that receives the text.
+
+    Most commands take 'text', but some (markdown_await_user, task_result)
+    use a different parameter name. Returns the correct arg name for the
+    given command, defaulting to 'text'.
+    """
+    arg_map = {
+        'markdown_await_user': 'markdown',
+        'task_result': 'output',
+    }
+    return arg_map.get(cmd_name, 'text')
+
 import logging
 if os.environ.get('MR_DEBUG') == '1':
     logging.basicConfig(level=logging.DEBUG)
@@ -629,6 +667,11 @@ class Agent:
 
         ev = XmlEventStream(emit_partial_on_chars=emit_chars)
 
+        # Resolve the command name used for spoken text (default 'speak').
+        speak_cmd = speak_cmd_name(context)
+        # Resolve the argument name that receives the spoken text.
+        speak_text_arg = speak_cmd_text_arg(speak_cmd)
+
         # speak segment correlation: partials + the final speak share one cmd_id
         seg_cmd_id = None
         # XML/raw-text mode is primarily for low-latency voice agents. Do not
@@ -651,20 +694,20 @@ class Agent:
                     text = evt['text']
                     if seg_cmd_id is None:
                         seg_cmd_id = nanoid.generate()
-                    await context.partial_command('speak', json.dumps({'text': text}), {'text': text}, cmd_id=seg_cmd_id)
+                    await context.partial_command(speak_cmd, json.dumps({speak_text_arg: text}), {speak_text_arg: text}, cmd_id=seg_cmd_id)
 
                 elif kind == 'speak_final':
                     text = evt['text']
                     if seg_cmd_id is None:
                         seg_cmd_id = nanoid.generate()
-                    args = {'text': text}
-                    await context.partial_command('speak', json.dumps(args), args, cmd_id=seg_cmd_id)
-                    result = await self.execute_command('speak', args, context=context, cmd_id=seg_cmd_id)
-                    await context.command_result('speak', result, cmd_id=seg_cmd_id)
-                    collected.append({'speak': args})
-                    full_cmds.append({"SYSTEM": "", "cmd": "speak", "args": args, "result": result})
+                    args = {speak_text_arg: text}
+                    await context.partial_command(speak_cmd, json.dumps(args), args, cmd_id=seg_cmd_id)
+                    result = await self.execute_command(speak_cmd, args, context=context, cmd_id=seg_cmd_id)
+                    await context.command_result(speak_cmd, result, cmd_id=seg_cmd_id)
+                    collected.append({speak_cmd: args})
+                    full_cmds.append({"SYSTEM": "", "cmd": speak_cmd, "args": args, "result": result})
                     if result is not None:
-                        results.append({"SYSTEM": "", "cmd": "speak", "args": {"omitted": "(see command msg.)"}, "result": result})
+                        results.append({"SYSTEM": "", "cmd": speak_cmd, "args": {"omitted": "(see command msg.)"}, "result": result})
                     seg_cmd_id = None
                     await self._persist_xml_assistant(context, original_buffer, collected)
 
