@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 import os
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from lib.route_decorators import requires_role
 try:
     from mindroot.coreplugins.mcp_.mod import mcp_manager, MCPServer
@@ -130,3 +130,69 @@ async def disconnect_mcp_server(request: McpServerRequest):
             raise HTTPException(status_code=500, detail=f"Failed to disconnect from MCP server '{request.server_name}'.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+# Debug logging for MCP install route
+_MCP_INSTALL_DEBUG = True
+import traceback as _mcp_tb
+
+class McpRegistryInstallRequest(BaseModel):
+    """Request model for MCP server install from registry"""
+    registry_id: Union[int, str]
+    registry_url: Optional[str] = None
+    secrets: Optional[Dict[str, str]] = None
+
+@router.post('/mcp/install')
+async def mcp_install_registry(request: McpRegistryInstallRequest):
+    """Install an MCP server from the registry (frontend-facing endpoint).
+    
+    This is the route called by the frontend JS (registry-shared-services.js).
+    It delegates to the registry install logic.
+    """
+    # Normalize registry_id to string (frontend sends int)
+    registry_id_str = str(request.registry_id)
+    
+    print(f"[MCP_INSTALL_DEBUG] POST /admin/mcp/install called with registry_id={request.registry_id}, registry_url={request.registry_url}, secrets_keys={list(request.secrets.keys()) if request.secrets else None}")
+    
+    if not mcp_manager:
+        print("[MCP_INSTALL_DEBUG] mcp_manager is None - MCP plugin not loaded")
+        raise HTTPException(status_code=501, detail='MCP Plugin not available')
+    
+    try:
+        # Import and call the registry install logic
+        from .mcp_registry_routes import install_registry_server, RegistryServerInstallRequest
+        
+        # The mcp_registry_routes.install_registry_server expects a
+        # RegistryServerInstallRequest with registry_id and optional server_name.
+        # Our frontend sends registry_id, registry_url, and optional secrets.
+        # Build a compatible request.
+        inner_request = RegistryServerInstallRequest(
+            registry_id=registry_id_str,
+            server_name=None
+        )
+        
+        print(f"[MCP_INSTALL_DEBUG] Delegating to install_registry_server with registry_id={registry_id_str}")
+        
+        result = await install_registry_server(inner_request)
+        
+        # If secrets were provided and install succeeded, pass them to the server config
+        if request.secrets and result.get("success") and result.get("server_name"):
+            server_name = result["server_name"]
+            if server_name in mcp_manager.servers:
+                server = mcp_manager.servers[server_name]
+                if server.secrets is None:
+                    server.secrets = {}
+                server.secrets.update(request.secrets)
+                mcp_manager.save_config()
+                print(f"[MCP_INSTALL_DEBUG] Saved {len(request.secrets)} secrets for server '{server_name}'")
+        
+        print(f"[MCP_INSTALL_DEBUG] Install result: {result}")
+        return result
+        
+    except HTTPException as he:
+        print(f"[MCP_INSTALL_DEBUG] HTTPException during install: {he.status_code} {he.detail}")
+        _mcp_tb.print_exc()
+        raise
+    except Exception as e:
+        print(f"[MCP_INSTALL_DEBUG] Exception during install: {e}")
+        _mcp_tb.print_exc()
+        raise HTTPException(status_code=500, detail=f"MCP registry install failed: {str(e)}")
+

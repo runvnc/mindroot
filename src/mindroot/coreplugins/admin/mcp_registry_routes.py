@@ -149,7 +149,7 @@ async def get_registry_server_details(registry_id: str):
         # Get server details from registry
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(
-                f"{registry_url}/item/{registry_id}",
+                f"{registry_url}/content/{registry_id}",
                 headers=headers
             )
 
@@ -236,7 +236,7 @@ async def install_registry_server(request: RegistryServerInstallRequest):
                 command=None,  # Not used for remote servers
                 transport="http",
                 url=server_info["url"],
-                auth_type=server_info.get("auth_type", "oauth2"),
+                auth_type="oauth2" if server_info.get("auth_type") in ("oauth2", "auto") else server_info.get("auth_type", "oauth2"),
                 redirect_uri=f"{base_url}/mcp_oauth_cb"
             )
             

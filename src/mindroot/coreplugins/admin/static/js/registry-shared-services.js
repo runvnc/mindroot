@@ -297,7 +297,7 @@ class RegistrySharedServices {
     console.log(`[SharedServices] Installing MCP Server '${item.title}' (ID: ${item.id}) with secrets:`, secrets ? Object.keys(secrets) : 'None');
 
     try {
-      if (item.data && item.data.auth_type === 'oauth2') {
+      if (item.data && (item.data.auth_type === 'oauth2' || item.data.auth_type === 'auto')) {
         await this.installOAuthMcpServer(item);
       } else {
         // Use the new install endpoint that accepts secrets
