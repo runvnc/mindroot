@@ -211,6 +211,17 @@ async def task_result(output: str = None, result: str = None, context=None):
             }
         }
 
+
+  "properties": {
+    "output": {
+      "type": "string",
+      "description": "Full UTF-8 text content to write."
+    }
+
+    In normal JSON mode, text content MUST be properly escaped (e.g. for newlines or double quotes)
+    If requested, you may encode a JSON object or array in output. Remember, again, it must be properly escaped!
+
+
     """
     # Handle result parameter: if output not given, use result; if both given, prepend result
     if output is None and result is not None:
