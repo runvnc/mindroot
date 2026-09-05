@@ -409,6 +409,41 @@ class AgentForm extends BaseEl {
       padding-bottom: 8px;
     }
 
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .provider-name {
+      color: #f0f0f0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .provider-toggle-all {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-toggle-all {
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      color: #ccc;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-all:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
     .commands-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1389,11 +1424,34 @@ class AgentForm extends BaseEl {
     `;
   }
 
+  toggleAllCommands(commands, enable) {
+    if (!Array.isArray(this.agent.commands)) {
+      this.agent.commands = [];
+    }
+    const names = commands.map(command => command.name);
+    if (enable) {
+      const existing = new Set(this.agent.commands);
+      names.forEach(name => existing.add(name));
+      this.agent.commands = Array.from(existing);
+    } else {
+      const toRemove = new Set(names);
+      this.agent.commands = this.agent.commands.filter(name => !toRemove.has(name));
+    }
+    this.agent = { ...this.agent };
+  }
+
   renderCommands() {
     return Object.entries(this.commands).map(([provider, commands]) => html`
       <div class="commands-category">
+        <div class="provider-header">
+          <span class="provider-name">${provider}</span>
+          <div class="provider-toggle-all">
+            <button type="button" class="btn-toggle-all" @click=${() => this.toggleAllCommands(commands, true)}>All On</button>
+            <button type="button" class="btn-toggle-all" @click=${() => this.toggleAllCommands(commands, false)}>All Off</button>
+          </div>
+        </div>
         <details>
-          <summary>${provider}</summary>
+          <summary>${commands.length} command${commands.length === 1 ? '' : 's'}</summary>
           <div class="commands-grid">
             ${commands.map(command => html`
               <div class="command-item">
